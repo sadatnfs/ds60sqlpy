@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ds60sqlpy"
 version = "0.3.0"
-description = "Offline-capable tools for the DS60 Python, PostgreSQL, and engineering curriculum"
+description = "Offline-capable classroom for programming, data science and machine learning"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = "Apache-2.0"

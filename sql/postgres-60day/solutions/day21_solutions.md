@@ -1,4 +1,4 @@
-# Day 21 solutions — Distribution Functions: NTILE, PERCENT_RANK, CUME_DIST
+# Day 21 solutions: Distribution Functions: NTILE, PERCENT_RANK, CUME_DIST
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Assign customers to four stored-spend buckets.
 
@@ -115,7 +115,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-21 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker. Evaluate another form against the concrete expected result (One row per ordering customer with bucket 1–4) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate salary percent rank within each department.
 
@@ -156,7 +156,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-21 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition by department and rank on salary alone so tied salaries share rank. Evaluate another form against the concrete expected result (One row per employee with values from 0 to 1) and the verification above.
 - **Edge case:** Give two rows the same `e.department_id` value and different `e.employee_id` values; verify `e.department_id, e.salary, e.employee_id` produces the intended rank and display order.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Calculate cumulative distribution of product price within category.
 
@@ -197,7 +197,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-21 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by category and order on price. Evaluate another form against the concrete expected result (One row per product with cume_dist in (0, 1]) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
 
@@ -236,7 +236,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-21 Exercise 4, the chosen form is justified by this lesson-specific rationale: Tied values share rank and cumulative endpoint, but the two functions use different formulas. Evaluate another form against the concrete expected result (Three rows making tie behavior visible) and the verification above.
 - **Edge case:** Give two rows the same `row_id` value and different ``row_id`` values; verify `row_id` produces the intended rank and display order.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Audit the row count in each customer spend decile rather than assuming exact equality.
 
@@ -287,7 +287,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-21 Exercise 5, the chosen form is justified by this lesson-specific rationale: NTILE bucket sizes differ by at most one when row count is not divisible by ten. Evaluate another form against the concrete expected result (Up to 10 bucket rows with counts) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `customers` for the existing `decile` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Return customers in the top stored-spend decile with their spend and population share.
 

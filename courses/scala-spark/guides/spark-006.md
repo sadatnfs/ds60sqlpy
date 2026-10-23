@@ -151,7 +151,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2 pattern matching](https://docs.scala-lang.org/tour/pattern-matching.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-006: Case classes, pattern matching, and domain states.

@@ -20,7 +20,8 @@ Each learner creates local state on their own computer.
 | `mlruns/` | Optional | No | Local MLflow experiments created by Python Day 53; inspect or back up before deleting |
 | `uv.lock` | Yes for reproducible validation | Yes | Maintained source artifact, not a cache; do not delete or hand-edit it |
 | `.python-version` | Yes for version-manager defaults | Yes | Declares the canonical Python version |
-| `.serena/project.yml`, `.serena/memories/` | Useful for Codex/Serena | Yes | Shared repository navigation and handoff guidance |
+| `.serena/project.yml` | Optional repository navigation tooling | Yes | Portable tool configuration; the maintained instructions remain in `AGENTS.md` and `docs/` |
+| `.serena/memories/` | Optional local session notes | No | Machine-local assistant context; review privately and do not package it as course content |
 | `.serena/cache/`, `.serena/logs/`, `.serena/project.local.yml` | No | No | Machine-local Serena index, diagnostics, and overrides |
 | `.DS_Store` | No | No | macOS Finder metadata |
 | Docker `postgres-data` volume | Yes only for the container SQL environment | No | Local database state; `docker compose down` preserves it |
@@ -58,7 +59,7 @@ VS Code should then select the interpreter inside that clone's `.venv`.
 Double-clicking `START_HERE.html` stores completion in that browser's
 `localStorage`. Running `python scripts/learning_portal.py` instead
 synchronizes lesson completion with `.learning/progress.json`, which the
-course CLI and Codex can also read. Both modes offer JSON export/import from the
+course CLI and the AI tutor can also read. Both modes offer JSON export/import from the
 portal, so progress can be deliberately moved without copying caches.
 
 The `.learning/` directory is ignored because progress is personal and can
@@ -106,8 +107,8 @@ online before returning to the spaCy lesson.
 
 DuckDB, Arrow, and packaging labs create their measured outputs in a temporary
 directory or under ignored `artifacts/`. Built wheels, Parquet files, local
-DuckDB databases, and extracted test installs are results—not maintained
-course source—unless a fixture is explicitly checked in.
+DuckDB databases, and extracted test installs are results, not maintained
+course source, unless a fixture is explicitly checked in.
 
 See [Offline use](setup/offline.md) for preparation and typical locations.
 
@@ -143,9 +144,9 @@ Before copying the repository to removable storage:
    learner work.
 3. Remove only confirmed generated directories such as `.venv/`,
    `__pycache__/`, `.playwright-cli/`, tool caches, notebook checkpoints, build
-   output, and machine-local `.serena/cache/`.
+   output, and machine-local `.serena/cache/` and `.serena/memories/`.
 4. Keep `uv.lock`, `.python-version`, `.serena/project.yml`,
-   `.serena/memories/`, `START_HERE.html`, `lesson-pages/`,
+   `START_HERE.html`, `lesson-pages/`,
    `reference-pages/`, source fixtures, and all hidden Git/configuration files.
 5. Run:
 

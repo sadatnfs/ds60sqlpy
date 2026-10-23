@@ -1,4 +1,4 @@
-# Day 49 — Solutions: NLP Basics with Hugging Face and spaCy
+# Day 49: Solutions: NLP Basics with Hugging Face and spaCy
 
 We build a sentiment classifier with Transformers, handle class imbalance with weights, and create a spaCy rule‑based matcher. Detailed explanations follow each block.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Fine‑tune DistilBERT for sentiment
+Worked reference for Exercise 1; Fine‑tune DistilBERT for sentiment
 ```python
 import os
 
@@ -89,7 +89,7 @@ Line‑by‑line
 
 ---
 
-Worked reference for Exercise 2 — Class weights for imbalance
+Worked reference for Exercise 2; Class weights for imbalance
 ```python
 import os
 
@@ -159,7 +159,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3 — spaCy matcher
+Worked reference for Exercise 3; spaCy matcher
 ```python
 import spacy
 from spacy.matcher import Matcher
@@ -243,7 +243,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Try a zero-shot-classification pipeline with your own candidate labels.
 
@@ -253,9 +253,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — tokenization contracts, cached NLP models, and sensitive-text evaluation — when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
+**Verify:** Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Compare tokenization from spaCy with a Hugging Face tokenizer.
 
@@ -265,9 +265,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — tokenization contracts, cached NLP models, and sensitive-text evaluation — for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
+**Verify:** Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
-### Exercise 3 — Truncation debugging
+### Exercise 3: Truncation debugging
 
 **Prompt:** Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.
 
@@ -285,9 +285,9 @@ and attention memory cost grows rapidly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Truncation debugging — print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
+**Verify:** Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
 
-### Exercise 4 — Model-provenance contract
+### Exercise 4: Model-provenance contract
 
 **Prompt:** Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.
 
@@ -305,17 +305,17 @@ network disabled.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Model-provenance contract — write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
+**Verify:** Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
 
-### Exercise 5 — Evaluation leakage
+### Exercise 5: Evaluation leakage
 
 **Prompt:** Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.
 
 **Reasoning before implementation:** Group by source/document/entity and use normalized hashes or similarity checks before splitting.
 
 Random row splits over fragments can make validation measure memorization of
-source wording. Define the deployment unit—new document, author, customer, or
-future period—and keep that group disjoint.
+source wording. Define the deployment unit, new document, author, customer, or
+future period, and keep that group disjoint.
 
 Run exact normalized-hash checks first, then bounded near-duplicate detection.
 Keep deduplication rules inside the data-version manifest so results can be
@@ -325,9 +325,9 @@ reconstructed.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Evaluation leakage — group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
+**Verify:** Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
 
-### Exercise 6 — Sensitive-text boundary
+### Exercise 6: Sensitive-text boundary
 
 **Prompt:** Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.
 
@@ -345,4 +345,4 @@ incidents through the project's security process.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Sensitive-text boundary — run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.
+**Verify:** Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.

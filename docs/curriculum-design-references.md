@@ -135,17 +135,15 @@ DS60 therefore requires:
 - human review for alignment, because word, example, and exercise counts
   cannot prove that an assessment measures the intended skill.
 
-### Official Codex guidance: goal, context, boundaries, and done
+### Reusable tutoring context and boundaries
 
-The [Codex prompting guide](https://learn.chatgpt.com/docs/prompting) recommends
-giving a clear goal, relevant context, desired output, and important
-boundaries. The
-[Codex `AGENTS.md` guide](https://learn.chatgpt.com/docs/agent-configuration/agents-md)
-explains that repository and nested instruction files provide durable,
-scope-specific guidance. Repeated workflows belong in a skill rather than in
-an ever-longer one-off prompt.
+A tutoring prompt should state the learner's goal, the exact local lesson,
+what the learner has attempted, the kind of help requested and the boundaries
+around solutions and execution. Repository instruction files keep those rules
+close to the content. The checked-in tutoring skill makes the same learning
+sequence reusable across compatible AI coding assistants.
 
-Every DS60 lesson therefore includes an optional **Ask Codex about this
+Every DS60 lesson therefore includes an optional **Ask an AI tutor about this
 lesson** prompt that:
 
 - identifies the stable lesson ID and exact guide and learner-artifact paths;
@@ -158,23 +156,23 @@ lesson** prompt that:
   own words.
 
 The prompt is a convenience, not missing curriculum. A learner must be able to
-complete the lesson without Codex or an internet connection.
+complete the lesson without the AI tutor or an internet connection.
 
 ## DS60 lesson sequence
 
 Each Python and SQL lesson now follows this default sequence:
 
-1. **Orient** — outcome, motivation, prerequisites, and run location.
-2. **Model** — vocabulary, mental model, syntax or query anatomy.
-3. **Observe** — first runnable example and expected output/result shape.
-4. **Contrast** — second example, boundary, common mistake, or alternative.
-5. **Predict** — state what will happen before execution.
-6. **Practice** — guided change, independent construction, debugging, edge
+1. **Orient**: outcome, motivation, prerequisites, and run location.
+2. **Model**: vocabulary, mental model, syntax or query anatomy.
+3. **Observe**: first runnable example and expected output/result shape.
+4. **Contrast**: second example, boundary, common mistake, or alternative.
+5. **Predict**: state what will happen before execution.
+6. **Practice**: guided change, independent construction, debugging, edge
    case, and transfer.
-7. **Verify** — assertions, test cases, row-grain/count checks, or bounded
+7. **Verify**: assertions, test cases, row-grain/count checks, or bounded
    expected output.
-8. **Explain** — retrieval questions and a short learner explanation.
-9. **Extend** — next lesson, optional reference, or Codex coaching prompt.
+8. **Explain**: retrieval questions and a short learner explanation.
+9. **Extend**: next lesson, optional reference, or AI coaching prompt.
 
 This sequence is enforced partly by `scripts/audit_lesson_depth.py`. The audit
 is deliberately only a floor. It cannot determine whether an analogy is

@@ -214,7 +214,7 @@ API and mechanism reference: [NumPy reference](https://numpy.org/doc/stable/refe
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-013, Paired reliability studies and family-aware uncertainty.

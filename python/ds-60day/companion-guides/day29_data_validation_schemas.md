@@ -1,4 +1,4 @@
-# Day 29 — Data Validation with Schemas
+# Day 29: Data Validation with Schemas
 
 **Level:** Intermediate
 
@@ -66,12 +66,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 29 — data validation with schemas to practice turning data contracts into executable schemas and informative failures
+**Lesson outcome:** use day 29; data validation with schemas to practice turning data contracts into executable schemas and informative failures
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -104,7 +104,7 @@ states representation, a non-negative constraint, and missing policy.
 raising a `SchemaErrors` report. Coercion, if enabled, occurs before
 checks and must not be mistaken for silently repairing invalid meaning.
 
-### Worked example 1 — Validate a small table against explicit rules
+### Worked example 1: Validate a small table against explicit rules
 
 A good fixture makes the accepted contract easy to see. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -136,7 +136,7 @@ The two records are returned after successful validation; `price` follows the de
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Show that validation guards persistence
+### Worked example 2: Show that validation guards persistence
 
 Only data returned from validation should continue to a write boundary. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -291,11 +291,11 @@ fails for the intended rule, and invalid output is not written.
 
 - [Open the learner notebook](../notebooks/day29_data_validation_schemas.ipynb)
 - [Check the separate solution](../solutions/day29_data_validation_schemas/day29_solutions.md)
-- [Next: Day 30 — EDA and preprocessing project](day30_project_eda_preprocessing.md)
+- [Next: Day 30; EDA and preprocessing project](day30_project_eda_preprocessing.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

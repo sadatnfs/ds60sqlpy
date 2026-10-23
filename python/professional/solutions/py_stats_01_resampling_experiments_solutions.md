@@ -85,7 +85,7 @@ Use this map after an honest attempt. The executable implementation remains
 [`py_stats_01_resampling_experiments_solution.py`](py_stats_01_resampling_experiments_solution.py); this section explains the
 contract, evidence, alternatives, and edge cases behind every numbered task.
 
-### Exercise 1 — Define the experiment before analysis
+### Exercise 1: Define the experiment before analysis
 
 **Prompt recap:** Write an `ExperimentPlan` containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling. Do this before computing outcomes.
 
@@ -99,9 +99,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Define the experiment before analysis — write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
+**Verify:** Define the experiment before analysis; write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
 
-### Exercise 2 — Complete standardized effect
+### Exercise 2: Complete standardized effect
 
 **Prompt recap:** Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.
 
@@ -115,9 +115,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Complete standardized effect — assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
+**Verify:** Complete standardized effect; assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
 
-### Exercise 3 — Bootstrap the difference
+### Exercise 3: Bootstrap the difference
 
 **Prompt recap:** Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
 
@@ -131,9 +131,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Bootstrap the difference — resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
+**Verify:** Bootstrap the difference; resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
 
-### Exercise 4 — Permute assignments
+### Exercise 4: Permute assignments
 
 **Prompt recap:** Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction. State why permuting individual rows is invalid if assignment occurred by account or site.
 
@@ -147,9 +147,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Permute assignments — pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
+**Verify:** Permute assignments; pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
 
-### Exercise 5 — Plan sample size
+### Exercise 5: Plan sample size
 
 **Prompt recap:** Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
 
@@ -163,9 +163,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Plan sample size — use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
+**Verify:** Plan sample size; use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
 
-### Exercise 6 — Control a comparison family
+### Exercise 6: Control a comparison family
 
 **Prompt recap:** Complete `holm_adjust` for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.
 
@@ -179,9 +179,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Control a comparison family — for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
+**Verify:** Control a comparison family; for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
 
-### Exercise 7 — Check assignment and attrition
+### Exercise 7: Check assignment and attrition
 
 **Prompt recap:** Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
 
@@ -195,9 +195,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Check assignment and attrition — compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
+**Verify:** Check assignment and attrition; compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
 
-### Exercise 8 — Simulate peeking policy
+### Exercise 8: Simulate peeking policy
 
 **Prompt recap:** Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson's simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.
 
@@ -211,9 +211,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Simulate peeking policy — with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
+**Verify:** Simulate peeking policy; with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
 
-### Exercise 9 — Bound the claim
+### Exercise 9: Bound the claim
 
 **Prompt recap:** Complete `claim_scope`. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
 
@@ -227,11 +227,11 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Bound the claim — complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
+**Verify:** Bound the claim; complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
 
-### Exercise 10 — bootstrap clustered assignments
+### Exercise 10: bootstrap clustered assignments
 
-**Prompt recap:** Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
+**Prompt recap:** Extend the experiment fixture with multiple rows per account. Bootstrap accounts, not rows, within each arm and compare interval width with the incorrect row bootstrap.
 
 **Reasoning path:** Sample independent assignment units with replacement and carry all of each selected account's observations into the resample.
 
@@ -249,9 +249,9 @@ clusters needs specialized methods and candid limitations.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** bootstrap clustered assignments — extend the experiment fixture with multiple rows per account; bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
+**Verify:** bootstrap clustered assignments; extend the experiment fixture with multiple rows per account; bootstrap accounts, not rows, within each arm and compare interval width with the incorrect row bootstrap.
 
-### Exercise 11 — bootstrap a ratio metric
+### Exercise 11: bootstrap a ratio metric
 
 **Prompt recap:** Estimate treatment lift for revenue per active user, preserving each user's numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
@@ -270,9 +270,9 @@ a different question. Report the exact formula and support with the interval.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** bootstrap a ratio metric — estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
+**Verify:** bootstrap a ratio metric; estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
-### Exercise 12 — apply covariate adjustment without leakage
+### Exercise 12: apply covariate adjustment without leakage
 
 **Prompt recap:** Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
@@ -292,9 +292,9 @@ freedom.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** apply covariate adjustment without leakage — use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
+**Verify:** apply covariate adjustment without leakage; use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
-### Exercise 13 — separate intention-to-treat from treatment-on-treated
+### Exercise 13: separate intention-to-treat from treatment-on-treated
 
 **Prompt recap:** Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
@@ -314,9 +314,9 @@ extension.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** separate intention-to-treat from treatment-on-treated — simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
+**Verify:** separate intention-to-treat from treatment-on-treated; simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
-### Exercise 14 — perform missing-outcome sensitivity
+### Exercise 14: perform missing-outcome sensitivity
 
 **Prompt recap:** Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
@@ -336,9 +336,9 @@ p-values remain small.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** perform missing-outcome sensitivity — create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
+**Verify:** perform missing-outcome sensitivity; create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
-### Exercise 15 — simulate sequential false positives
+### Exercise 15: simulate sequential false positives
 
 **Prompt recap:** Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
@@ -358,9 +358,9 @@ requires a reviewed sequential design and operational stopping rules.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** simulate sequential false positives — under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
+**Verify:** simulate sequential false positives; under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
-### Exercise 16 — pre-specify heterogeneous effects
+### Exercise 16: pre-specify heterogeneous effects
 
 **Prompt recap:** Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.
 
@@ -379,9 +379,9 @@ observed lift was largest.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** pre-specify heterogeneous effects — choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
+**Verify:** pre-specify heterogeneous effects; choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
 
-### Exercise 17 — run clustered randomization inference
+### Exercise 17: run clustered randomization inference
 
 **Prompt recap:** For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.
 
@@ -400,9 +400,9 @@ independent information. Few sites limit resolution and power.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** run clustered randomization inference — for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
+**Verify:** run clustered randomization inference; for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
 
-### Exercise 18 — produce an auditable analysis packet
+### Exercise 18: produce an auditable analysis packet
 
 **Prompt recap:** Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
 
@@ -421,4 +421,4 @@ review ownership and any deviations from the pre-analysis plan.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** produce an auditable analysis packet — write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
+**Verify:** produce an auditable analysis packet; write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.

@@ -464,7 +464,7 @@ $retention_fixture_invariant$;
 -- 9. Calculate median and 90th-percentile session duration with percentile_cont.
 --    State input/output grain, interpolation behavior, NULL handling, and why
 --    an average cannot answer the same distribution question.
---    Inputs: For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations—not raw events—to ordered-set percentile aggregates.
+--    Inputs: For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations, not raw events, to ordered-set percentile aggregates.
 --    Expected result/shape: For sql-analytics-01 Exercise 9, expected output: one aggregate row with `session_count` and a two-element interval array `median_and_p90` from continuous percentiles 0.5 and 0.9.
 --    Verify: For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.
 --    Hint ladder, rung 1: Percentiles consume session rows, not event rows;

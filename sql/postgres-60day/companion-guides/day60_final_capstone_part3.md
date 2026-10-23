@@ -1,9 +1,9 @@
-# Day 60 — Final Capstone, Part 3: End-to-End Sign-off
+# Day 60: Final Capstone, Part 3: End-to-End Sign-off
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 59 — stakeholder analytics](day59_final_capstone_part2.md)
+- **Prerequisites:** [Day 59; stakeholder analytics](day59_final_capstone_part2.md)
   and completed evidence from the full SQL track
 - **Artifacts:** [learner SQL](../day60_final_capstone_part3.sql) ·
   [solution reasoning](../solutions/day60_solutions.md) ·
@@ -37,7 +37,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-60 — Final Capstone Part3** and choose
+2. Open **SQL-60; Final Capstone Part3** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -71,7 +71,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -219,13 +219,13 @@ Day 60 defines acceptance criteria rather than discrete exercises. The final
 submission connects reusable DQ checks, business views, stakeholder outputs,
 performance evidence, and a written handoff.
 
-## Deliverable 1 — Data quality
+## Deliverable 1: Data quality
 
 - `v_dq_customers`: total rows plus invalid email, country, and name counts.
 - `v_dq_orders`: total rows plus negative totals and missing customers.
 - Document every nonzero result with remediation, owner, and severity.
 
-## Deliverable 2 — Core business views
+## Deliverable 2: Core business views
 
 - Customer LTV at one row per customer, retaining zero-order customers with a
   `LEFT JOIN` from `customers` to `orders` and `COALESCE(..., 0)`.
@@ -237,7 +237,7 @@ performance evidence, and a written handoff.
 - Reconcile summed customer LTV to summed `orders.total_amount`; expected
   difference on the seed is zero.
 
-## Deliverable 3 — Stakeholder outputs
+## Deliverable 3: Stakeholder outputs
 
 - Finance: current-year budget versus actual by month/category.
 - Marketing: active customers by signup cohort and lifecycle month 0–6. Select
@@ -248,14 +248,14 @@ performance evidence, and a written handoff.
   numerator and denominator visible makes the percentage auditable.
 - Operations: an actual plan for recent units by product category.
 
-## Deliverable 4 — Performance sign-off
+## Deliverable 4: Performance sign-off
 
 Capture before/after `EXPLAIN (ANALYZE, BUFFERS)` for critical queries and record
 dataset size, PostgreSQL version, indexes, timing, buffers, correctness check,
 and decision. The requested under-10-second goal applies to the measured learner
 machine/dataset; the compact seed does not prove production-scale performance.
 
-## Deliverable 5 — Written handoff
+## Deliverable 5: Written handoff
 
 Document DQ exceptions, model grain, join rationale, KPI definitions,
 reconciliation, freshness-versus-speed tradeoffs, known limitations, and next
@@ -268,11 +268,11 @@ Replace it with `COMMIT` only as a deliberate reviewed migration. Days 59–60 a
 capstone criteria/checkpoints, so measured evidence and documentation are part
 of the deliverable, not optional stretch work.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-60 — Final Capstone Part3.

@@ -1,4 +1,4 @@
-# Day 12 solutions — String Functions and Text Processing
+# Day 12 solutions: String Functions and Text Processing
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Return normalized customer names and lowercase emails.
 
@@ -105,7 +105,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-12 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use `btrim` for outer whitespace and `lower` for a declared case-normalized display value. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Extract the email domain and count customers by domain, preserving missing emails.
 
@@ -146,7 +146,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-12 Exercise 2, the chosen form is justified by this lesson-specific rationale: `split_part` parses the second component; CASE keeps NULL distinct. Evaluate another form against the concrete expected result (One row per domain label) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `email_domain` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Create an ordered comma-separated list of department employee names.
 
@@ -187,7 +187,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-12 Exercise 3, the chosen form is justified by this lesson-specific rationale: Put `ORDER BY` inside `string_agg` so concatenation order is deliberate. Evaluate another form against the concrete expected result (One row per department) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `employees` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.
 
@@ -225,7 +225,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-12 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a POSIX whitespace class and the global regex flag. Evaluate another form against the concrete expected result (Three input/output rows) and the verification above.
 - **Edge case:** Add one source row with a new `source_text`; verify the result gains exactly one row carrying that `source_text` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.
 
@@ -264,7 +264,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-12 Exercise 5, the chosen form is justified by this lesson-specific rationale: Escape wildcard characters and declare the escape character. Evaluate another form against the concrete expected result (Rows only when the literal character occurs) and the verification above.
 - **Edge case:** Add one row for which `(c.full_name LIKE '%\%%' ESCAPE '\' OR c.full_name LIKE '%\_%' ESCAPE '\')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.
 

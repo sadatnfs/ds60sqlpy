@@ -1,25 +1,28 @@
-# Language authoring contract
+# Java authoring rules
 
-Read the root AGENTS.md, docs/content-authoring.md and docs/implementation/ADDING_A_MODULE.md.
-Edit the main checkout. No em dashes, no generated filler and no learner-state writes.
+Read [root guidance](../../AGENTS.md), the [content contract](../../docs/content-authoring.md)
+and [module integration](../../docs/implementation/ADDING_A_MODULE.md).
+Preserve stable IDs and prerequisites. Keep guides, learner source, executable
+references and explanations aligned. Each practice guide defines vocabulary,
+explains syntax, gives at least two bounded worked examples, and includes six
+inspectable exercises, progressive hints, retrieval and a lesson-specific
+`Ask an AI tutor about this lesson` prompt. A reference run is not proof of
+learner understanding.
 
-track.json defines the learning route; lessons.json registers only complete authored sets.
-Each lesson needs a standalone guide with prerequisites, vocabulary, syntax anatomy,
-at least two distinct worked examples with expected output, misconceptions, six inspectable
-exercises, progressive hints and a lesson-specific Codex coaching prompt. Keep learner source,
-executable reference and explained solutions separate. Explain every exercise's mechanism
-and validate the answer against boundary/invalid inputs. Advanced lessons must explain
-tradeoffs and failure diagnosis, not only introduce an API. Check official documentation.
+Register complete bundles through `lessons.json`. Keep `verification_id` null
+unless its trusted typed verifier is registered and tested. Content metadata
+cannot install tools or execute arbitrary commands. Preserve learner state,
+reviewed fixtures and private runtime credentials. Update durable authoring
+sources where present, then regenerate and run focused content/runtime checks.
+Do not use em dashes.
 
-Java sources run as Main.java with public class Main, no package declaration, Java 21,
-and assertions enabled. Helper classes may share that file. Multi-file builds and external
-libraries need explicit separate setup and cannot be assumed in the pad. Node uses main.mjs.
-TypeScript uses main.mts, strict NodeNext checking then Node24 execution. Only prepared
-built-ins and Node typings are available. Do not run npm install from an example.
-Browser DOM APIs do not exist in Node. DOM lessons currently use reading mode with separate
-browser files/instructions; do not register fake Node execution for document/window examples.
-Runtime operations and profiles are controlled by backend code, never by manifests.
+Explain source, bytecode, the JVM, compilation and runtime errors separately.
+The `java21` worker stages `Main.java`, uses public class `Main` without a package
+declaration, and enables assertions. Helper classes may share that file.
+Multi-file projects and external dependencies need their own documented build
+path; do not assume Maven or extra libraries in a single coding pad.
 
-Use deterministic offline examples and honest expected results. Run references in the
-corresponding prepared Docker worker before calling the lesson execution-verified.
-Preserve stable IDs and prerequisites; coordinate changes to shared loaders with root.
+Teach value/reference behavior, generics, collection contracts, exceptions,
+resource ownership, concurrency and memory visibility with observable examples.
+Advanced lessons should compare alternatives and diagnose failures, not only
+introduce APIs. Test invalid and boundary inputs in the prepared Java runtime.

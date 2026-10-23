@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,7 +429,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-analytics-01-reusable-analytical-query-patterns">SQL-ANALYTICS-01 — Reusable Analytical Query Patterns<a class="heading-anchor" href="#guide--sql-analytics-01-reusable-analytical-query-patterns" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-analytics-01-reusable-analytical-query-patterns">SQL-ANALYTICS-01: Reusable Analytical Query Patterns<a class="heading-anchor" href="#guide--sql-analytics-01-reusable-analytical-query-patterns" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
@@ -451,7 +451,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-ANALYTICS-01 — Reusable Analytical Query Patterns</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-ANALYTICS-01; Reusable Analytical Query Patterns</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-analytics-01/lesson/workspace/sql/professional/lessons/sql_analytics_01_query_patterns.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -462,7 +462,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_analytics_01_query_patterns.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked SQL reads or creates <code>pro_analytics_lab.users</code>, <code>pro_analytics_lab.events</code>, <code>pro_analytics_lab.daily_activity</code>, <code>pro_analytics_lab.campaign_touches</code>, <code>pro_analytics_lab.tier_history</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -527,7 +527,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Retention:</strong> independently verify cohort size, retained numerator, and division. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 6, define cohort month from each user&#x27;s earliest canonical event, reduce activity to distinct user/month rows, and LEFT JOIN activity so nonretained cohort members remain in the denominator. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 6, expected output: one row per <code>cohort_month</code> with <code>cohort_users</code>, <code>month_1_users</code>, and four-decimal <code>month_1_rate</code>, ordered by cohort; zero denominators are protected with <code>NULLIF</code>. <strong>Verify:</strong> For sql-analytics-01 Exercise 6, independently list cohort and month-one member IDs, compare both distinct counts, and add one nonretained member to prove only the denominator and rate change.</li>
 <li><strong>As-of join:</strong> test an event at an upper boundary and require one successor. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 7, join <code>pro_analytics_lab.event_probes</code> to adjacent half-open rows in <code>pro_analytics_lab.user_tiers</code> using <code>valid_from &lt;= event_at</code> and <code>event_at &lt; COALESCE(valid_to, infinity)</code>, retaining probe grain. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 7, expected output: one row per probe with <code>probe_id</code>, <code>event_at</code>, <code>tier_name</code>, validity bounds, and <code>matching_tiers</code>, ordered by probe; the shared-boundary probe matches the successor exactly once. <strong>Verify:</strong> For sql-analytics-01 Exercise 7, require no probe to match more than one tier, test just before/at/after the shared boundary, and inject an overlap to prove the assertion fails instead of hiding ambiguity with a row limit.</li>
 <li><strong>Trailing window:</strong> use a dense date spine and compare <code>ROWS</code> with <code>RANGE</code>. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 8, generate every UTC report date from 2026-01-01 through 2026-01-08 and count distinct users in the inclusive seven-calendar-day window ending on each date. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 8, expected output: exactly eight ordered rows with <code>report_date</code> and <code>trailing_7d_active_users</code>; dates without events remain because the dense date spine is the preserved side. <strong>Verify:</strong> For sql-analytics-01 Exercise 8, independently list distinct users for two half-open seven-day windows and add the same user on another day to prove weekly distinct count rises by at most one.</li>
-<li><strong>Percentiles:</strong> calculate median/P90 session duration and document interpolation and NULL behavior. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations—not raw events—to ordered-set percentile aggregates. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 9, expected output: one aggregate row with <code>session_count</code> and a two-element interval array <code>median_and_p90</code> from continuous percentiles 0.5 and 0.9. <strong>Verify:</strong> For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.</li>
+<li><strong>Percentiles:</strong> calculate median/P90 session duration and document interpolation and NULL behavior. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations, not raw events, to ordered-set percentile aggregates. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 9, expected output: one aggregate row with <code>session_count</code> and a two-element interval array <code>median_and_p90</code> from continuous percentiles 0.5 and 0.9. <strong>Verify:</strong> For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.</li>
 <li><strong>Top-N:</strong> compare <code>row_number</code>, <code>rank</code>, and <code>dense_rank</code> under ties. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 10, aggregate canonical events to <code>(user_id, event_name)</code> counts and calculate <code>row_number</code>, <code>rank</code>, and <code>dense_rank</code> side by side within each user. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 10, expected output: one row per user/event type with <code>event_count</code> and all three rank positions, ordered by user and deterministic row-number position; only row number breaks count ties by event name. <strong>Verify:</strong> For sql-analytics-01 Exercise 10, create tied counts and prove <code>row_number &lt;= 2</code> returns exactly two rows while tie-preserving rank filters can return more, then state the report&#x27;s chosen meaning of top two.</li>
 <li><strong>Hierarchy:</strong> traverse recursively with depth, path, and cycle protection. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 11, traverse <code>pro_analytics_lab.campaign_nodes</code> from roots with a recursive CTE carrying depth and an integer-array path, refusing any child already present in that path. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 11, expected output: one ordered hierarchy row per root-reachable node/path with <code>campaign_id</code>, <code>parent_campaign_id</code>, <code>depth</code>, and <code>path</code>, plus a diagnostic result listing unreachable IDs from the rootless cycle. <strong>Verify:</strong> For sql-analytics-01 Exercise 11, require no repeated ID in any returned path, prove recursion terminates, and reconcile reachable plus unreachable campaign IDs with every fixture ID.</li>
 <li><strong>Zero-activity funnel:</strong> retain empty dates and make denominators explicit. <strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 12, start from a four-day spine and LEFT JOIN canonical events with half-open UTC day bounds, applying signup and purchase conditions inside aggregate filters. <strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 12, expected output: exactly four rows with <code>report_date</code>, <code>signups</code>, and <code>purchasers</code>, ordered by date; dates with no activity remain and show numeric zero. <strong>Verify:</strong> For sql-analytics-01 Exercise 12, compare each day with direct control queries and move an event condition to WHERE in a disposable copy to demonstrate why NULL-extended dates would disappear.</li>
@@ -558,9 +558,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Integer division truncates unless one side is numeric.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-ops-02.html#guide">SQL-OPS-02 — backup, restore, and recovery rehearsals</a>. Use the contract-test module to freeze each analytical definition and add edge-case fixtures before turning a pattern into a metric.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<p>Continue to <a href="sql-ops-02.html#guide">SQL-OPS-02; backup, restore, and recovery rehearsals</a>. Use the contract-test module to freeze each analytical definition and add edge-case fixtures before turning a pattern into a metric.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.
 
 I have completed the direct catalog prerequisites: `sql-30`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -1085,7 +1085,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">-- 9. Calculate median and 90th-percentile session duration with percentile_cont.</span></span>
 <span class="source-line"><span class="syntax-comment">--    State input/output grain, interpolation behavior, NULL handling, and why</span></span>
 <span class="source-line"><span class="syntax-comment">--    an average cannot answer the same distribution question.</span></span>
-<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations—not raw events—to ordered-set percentile aggregates.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Inputs: For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations, not raw events, to ordered-set percentile aggregates.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-analytics-01 Exercise 9, expected output: one aggregate row with `session_count` and a two-element interval array `median_and_p90` from continuous percentiles 0.5 and 0.9.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: Percentiles consume session rows, not event rows;</span></span>
@@ -1187,7 +1187,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-analytics-01-solutions-analytical-patterns">SQL-ANALYTICS-01 Solutions — Analytical Patterns<a class="heading-anchor" href="#solution-1--sql-analytics-01-solutions-analytical-patterns" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-analytics-01-solutions-analytical-patterns">SQL-ANALYTICS-01 Solutions: Analytical Patterns<a class="heading-anchor" href="#solution-1--sql-analytics-01-solutions-analytical-patterns" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -1210,7 +1210,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql</code></pre>
 <p>The executable solution demonstrates safe, deterministic versions of all fourteen prompts; the reasoning below explains the definitions and trade-offs that query output alone cannot establish.</p>
-<h4 id="solution-1--exercise-1-deduplication-proof">Exercise 1 — Deduplication proof<a class="heading-anchor" href="#solution-1--exercise-1-deduplication-proof" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-deduplication-proof">Exercise 1: Deduplication proof<a class="heading-anchor" href="#solution-1--exercise-1-deduplication-proof" aria-label="Link to this section">#</a></h4>
 <p>Group the canonical view by <code>source_event_id</code> and fail on any count other than one. Latest <code>ingested_at</code> wins because the source may retry/correct delivery; <code>ingestion_id DESC</code> is the deterministic final tie-break. A real producer contract must say whether later delivery is actually authoritative.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1218,7 +1218,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 1, expected output: one row per source event with <code>source_event_id</code>, <code>canonical_rows</code>, <code>winner_ingested_at</code>, and <code>winner_ingestion_id</code>, ordered by source ID; every canonical count is 1, and the conflicting-payload diagnostic is empty.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 1, independently rank raw deliveries, test an equal-timestamp tie, require the greater ingestion ID to win, and separately flag one source ID whose retries disagree on business payload.</li>
 </ul>
-<h4 id="solution-1--exercise-2-sixty-minute-sessions">Exercise 2 — Sixty-minute sessions<a class="heading-anchor" href="#solution-1--exercise-2-sixty-minute-sessions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-sixty-minute-sessions">Exercise 2: Sixty-minute sessions<a class="heading-anchor" href="#solution-1--exercise-2-sixty-minute-sessions" aria-label="Link to this section">#</a></h4>
 <p>The solution uses <code>gap &gt; interval &#x27;60 minutes&#x27;</code>, so an event exactly 60 minutes later remains in the session. Change to <code>&gt;=</code> if the definition says 60 minutes starts a new session. Duration is <code>max(event_at)-min(event_at)</code>; a one-event session has zero observed duration, not an estimate of user attention.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1226,7 +1226,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 2, expected output: one row per <code>(user_id, session_number)</code> with <code>started_at</code>, <code>ended_at</code>, <code>duration</code>, and <code>events</code>, ordered by user and session; a one-event session has zero duration.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 2, prove an exact 60-minute gap stays in the session while 60 minutes and one second starts another, and reconcile the sum of session event counts with the canonical event count.</li>
 </ul>
-<h4 id="solution-1--exercise-3-ordered-funnel">Exercise 3 — Ordered funnel<a class="heading-anchor" href="#solution-1--exercise-3-ordered-funnel" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-ordered-funnel">Exercise 3: Ordered funnel<a class="heading-anchor" href="#solution-1--exercise-3-ordered-funnel" aria-label="Link to this section">#</a></h4>
 <p>Each correlated step selects its first event no earlier than the prior timestamp. NULL propagates: a missing view means no add or purchase can qualify. Validate <code>signup &lt;= view &lt;= add &lt;= purchase</code> for non-NULL steps and retain non-converters.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1234,7 +1234,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 3, expected output: one row per signed-up user with <code>user_id</code>, <code>signup_at</code>, <code>viewed_at</code>, <code>added_at</code>, and <code>purchased_at</code>, ordered by user; an absent predecessor leaves all later steps NULL.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 3, assert every non-NULL timestamp chain is nondecreasing, prove a view-only user is excluded, and prove a signup-only user remains once with NULL later timestamps.</li>
 </ul>
-<h4 id="solution-1--exercise-4-multi-day-islands">Exercise 4 — Multi-day islands<a class="heading-anchor" href="#solution-1--exercise-4-multi-day-islands" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-multi-day-islands">Exercise 4: Multi-day islands<a class="heading-anchor" href="#solution-1--exercise-4-multi-day-islands" aria-label="Link to this section">#</a></h4>
 <p>After deriving <code>activity_date - row_number()</code>, group by user/island key and use <code>HAVING COUNT(*) &gt;= 2</code>. Input must first have one row per user-date. The output grain is one consecutive run.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1242,7 +1242,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 4, expected output: one row per consecutive-day island lasting at least two days, with <code>user_id</code>, <code>island_start</code>, <code>island_end</code>, and <code>active_days</code>, ordered by user and start date.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 4, test a two-day run, a one-day run, a gap, and duplicate same-day events; require only qualifying consecutive runs and prove duplicates do not inflate active-day counts.</li>
 </ul>
-<h4 id="solution-1--exercise-5-attribution-ties-and-missing-touches">Exercise 5 — Attribution ties and missing touches<a class="heading-anchor" href="#solution-1--exercise-5-attribution-ties-and-missing-touches" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-attribution-ties-and-missing-touches">Exercise 5: Attribution ties and missing touches<a class="heading-anchor" href="#solution-1--exercise-5-attribution-ties-and-missing-touches" aria-label="Link to this section">#</a></h4>
 <p>Use a LEFT LATERAL join ordered by <code>touched_at DESC, touch_id DESC</code>. The identity defines the same-timestamp winner. A purchase with no qualifying seven-day touch remains with NULL campaign. Never turn the join inner unless the metric excludes unattributed purchases by definition.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1250,7 +1250,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 5, expected output: one row per purchase with <code>source_event_id</code>, <code>user_id</code>, <code>purchased_at</code>, <code>touch_id</code>, <code>campaign</code>, and <code>touched_at</code>, ordered by source ID; unmatched purchases retain NULL attribution and the greater touch ID wins an equal-time tie.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 5, reconcile output count and unique source IDs with all purchases, test one unattributed purchase, and remove the ID tie-breaker in a disposable copy to expose nondeterministic attribution.</li>
 </ul>
-<h4 id="solution-1--exercise-6-retention">Exercise 6 — Retention<a class="heading-anchor" href="#solution-1--exercise-6-retention" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-retention">Exercise 6: Retention<a class="heading-anchor" href="#solution-1--exercise-6-retention" aria-label="Link to this section">#</a></h4>
 <p>Calculate and expose three fields separately: original cohort size, distinct returning users in month N, and numeric division. Add a user with no later activity to prove the denominator does not shrink. Decide whether signup itself counts as month-zero activity.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1258,7 +1258,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 6, expected output: one row per <code>cohort_month</code> with <code>cohort_users</code>, <code>month_1_users</code>, and four-decimal <code>month_1_rate</code>, ordered by cohort; zero denominators are protected with <code>NULLIF</code>.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 6, independently list cohort and month-one member IDs, compare both distinct counts, and add one nonretained member to prove only the denominator and rate change.</li>
 </ul>
-<h4 id="solution-1--exercise-7-as-of-boundary">Exercise 7 — As-of boundary<a class="heading-anchor" href="#solution-1--exercise-7-as-of-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-as-of-boundary">Exercise 7: As-of boundary<a class="heading-anchor" href="#solution-1--exercise-7-as-of-boundary" aria-label="Link to this section">#</a></h4>
 <p>Use <code>valid_from &lt;= event_at AND event_at &lt; valid_to</code>, treating NULL <code>valid_to</code> as open-ended. At the boundary the old row is excluded and the successor included. Also assert that every fact matches at most one history row; <code>LIMIT 1</code> alone can hide overlap corruption.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1266,7 +1266,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 7, expected output: one row per probe with <code>probe_id</code>, <code>event_at</code>, <code>tier_name</code>, validity bounds, and <code>matching_tiers</code>, ordered by probe; the shared-boundary probe matches the successor exactly once.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 7, require no probe to match more than one tier, test just before/at/after the shared boundary, and inject an overlap to prove the assertion fails instead of hiding ambiguity with a row limit.</li>
 </ul>
-<h4 id="solution-1--exercise-8-dense-trailing-seven-day-activity">Exercise 8 — Dense trailing seven-day activity<a class="heading-anchor" href="#solution-1--exercise-8-dense-trailing-seven-day-activity" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-dense-trailing-seven-day-activity">Exercise 8: Dense trailing seven-day activity<a class="heading-anchor" href="#solution-1--exercise-8-dense-trailing-seven-day-activity" aria-label="Link to this section">#</a></h4>
 <p>Generate one row per calendar date in the requested business zone and LEFT JOIN deduplicated activity by local date. For each spine date, count distinct users whose activity date is between that date minus six days and the date, inclusive.</p>
 <p><code>ROWS 6 PRECEDING</code> means six prior <em>rows</em>, so missing dates shorten the calendar window. Daily distinct counts also cannot be summed for weekly uniques because one user can appear on several days; retain user/date grain until the window.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1275,16 +1275,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 8, expected output: exactly eight ordered rows with <code>report_date</code> and <code>trailing_7d_active_users</code>; dates without events remain because the dense date spine is the preserved side.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 8, independently list distinct users for two half-open seven-day windows and add the same user on another day to prove weekly distinct count rises by at most one.</li>
 </ul>
-<h4 id="solution-1--exercise-9-session-percentiles">Exercise 9 — Session percentiles<a class="heading-anchor" href="#solution-1--exercise-9-session-percentiles" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-session-percentiles">Exercise 9: Session percentiles<a class="heading-anchor" href="#solution-1--exercise-9-session-percentiles" aria-label="Link to this section">#</a></h4>
 <p>First derive one row per session with duration. Then use <code>percentile_cont(ARRAY[0.5,0.9]) WITHIN GROUP (ORDER BY duration)</code> over non-NULL durations. Continuous percentile can interpolate; <code>percentile_disc</code> chooses an observed value.</p>
 <p>Expose session and NULL counts beside percentiles. Average answers a different question and can hide a long tail; tiny cohorts need explicit caution.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
 <ul>
-<li><strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations—not raw events—to ordered-set percentile aggregates.</li>
+<li><strong>Inputs/evidence:</strong> For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations, not raw events, to ordered-set percentile aggregates.</li>
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 9, expected output: one aggregate row with <code>session_count</code> and a two-element interval array <code>median_and_p90</code> from continuous percentiles 0.5 and 0.9.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.</li>
 </ul>
-<h4 id="solution-1--exercise-10-ranking-ties">Exercise 10 — Ranking ties<a class="heading-anchor" href="#solution-1--exercise-10-ranking-ties" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-ranking-ties">Exercise 10: Ranking ties<a class="heading-anchor" href="#solution-1--exercise-10-ranking-ties" aria-label="Link to this section">#</a></h4>
 <p>Aggregate to one row per <code>(user_id,event_name)</code>, then calculate all three functions ordered by count descending. <code>row_number</code> chooses exactly N rows; <code>rank</code> gives ties one rank and leaves gaps; <code>dense_rank</code> leaves no gaps and can return more than N rows.</p>
 <p>Decide whether “top two” means exactly two categories or every category tied in the top two score levels. Use a stable final display order without accidentally destroying intentional score ties.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1293,7 +1293,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 10, expected output: one row per user/event type with <code>event_count</code> and all three rank positions, ordered by user and deterministic row-number position; only row number breaks count ties by event name.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 10, create tied counts and prove <code>row_number &lt;= 2</code> returns exactly two rows while tie-preserving rank filters can return more, then state the report&#x27;s chosen meaning of top two.</li>
 </ul>
-<h4 id="solution-1--exercise-11-cycle-safe-recursive-hierarchy">Exercise 11 — Cycle-safe recursive hierarchy<a class="heading-anchor" href="#solution-1--exercise-11-cycle-safe-recursive-hierarchy" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-11-cycle-safe-recursive-hierarchy">Exercise 11: Cycle-safe recursive hierarchy<a class="heading-anchor" href="#solution-1--exercise-11-cycle-safe-recursive-hierarchy" aria-label="Link to this section">#</a></h4>
 <p>Seed roots in a recursive CTE and carry <code>depth</code> plus an array path of visited IDs. Recurse only when the next ID is absent from the path; emit or quarantine a cycle flag so malformed data is visible rather than silently ignored.</p>
 <p>The output grain is one reachable path/node relationship, not necessarily one row per node in a multi-parent graph. Add operational depth/row guards, but enforce the intended parent/cycle policy on writes when possible.</p>
 <h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
@@ -1302,7 +1302,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 11, expected output: one ordered hierarchy row per root-reachable node/path with <code>campaign_id</code>, <code>parent_campaign_id</code>, <code>depth</code>, and <code>path</code>, plus a diagnostic result listing unreachable IDs from the rootless cycle.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 11, require no repeated ID in any returned path, prove recursion terminates, and reconcile reachable plus unreachable campaign IDs with every fixture ID.</li>
 </ul>
-<h4 id="solution-1--exercise-12-keep-zero-activity-dates">Exercise 12 — Keep zero-activity dates<a class="heading-anchor" href="#solution-1--exercise-12-keep-zero-activity-dates" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-12-keep-zero-activity-dates">Exercise 12: Keep zero-activity dates<a class="heading-anchor" href="#solution-1--exercise-12-keep-zero-activity-dates" aria-label="Link to this section">#</a></h4>
 <p>Start from a date spine and LEFT JOIN events with event predicates in <code>ON</code>. Conditional aggregate each step without filtering away the preserved date. Name each denominator and use <code>NULLIF(denominator,0)</code>.</p>
 <p>Return numerators and denominators beside rates. Zero means an observed date with no events; NULL can mean undefined rate or unavailable source.</p>
 <h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
@@ -1311,7 +1311,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 12, expected output: exactly four rows with <code>report_date</code>, <code>signups</code>, and <code>purchasers</code>, ordered by date; dates with no activity remain and show numeric zero.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 12, compare each day with direct control queries and move an event condition to WHERE in a disposable copy to demonstrate why NULL-extended dates would disappear.</li>
 </ul>
-<h4 id="solution-1--exercise-13-approximate-distinct-counts">Exercise 13 — Approximate distinct counts<a class="heading-anchor" href="#solution-1--exercise-13-approximate-distinct-counts" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-13-approximate-distinct-counts">Exercise 13: Approximate distinct counts<a class="heading-anchor" href="#solution-1--exercise-13-approximate-distinct-counts" aria-label="Link to this section">#</a></h4>
 <p>PostgreSQL core provides exact <code>count(DISTINCT user_id)</code>; approximation commonly uses an approved sketch such as HyperLogLog outside this base lesson. Specify error at expected cardinalities, memory, serialization, merge compatibility, version ownership, privacy, and rebuild behavior before adoption.</p>
 <p>Continuously compare sampled periods with exact counts. Daily estimates cannot be summed for weekly uniques unless the sketch itself is mergeable.</p>
 <h5 id="solution-1--reasoning-and-verification-13">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-13" aria-label="Link to this section">#</a></h5>
@@ -1320,7 +1320,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-analytics-01 Exercise 13, expected output: one scalar <code>exact_distinct_users</code> row plus an ordered review matrix with <code>criterion_number</code>, <code>criterion</code>, and <code>required_evidence</code>, covering implementation/version, error budget, mergeability, fallback, and ownership; no unavailable extension is presented as executed.</li>
 <li><strong>Independent verification:</strong> For sql-analytics-01 Exercise 13, compare the scalar result with a distinct-user subquery and, for any approved sketch, measure relative error across representative cardinalities; unavailable capability or excess error must select the exact fallback.</li>
 </ul>
-<h4 id="solution-1--exercise-14-parameterized-analytical-contract">Exercise 14 — Parameterized analytical contract<a class="heading-anchor" href="#solution-1--exercise-14-parameterized-analytical-contract" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-14-parameterized-analytical-contract">Exercise 14: Parameterized analytical contract<a class="heading-anchor" href="#solution-1--exercise-14-parameterized-analytical-contract" aria-label="Link to this section">#</a></h4>
 <p>Use typed start/end instants, zone, cohort, and threshold. Reject unknown zones, nonpositive intervals, and <code>end &lt;= start</code>; use half-open time filtering and convert to local calendar labels only after defining instants.</p>
 <p>Document result grain and stable order. Test duplicate sources, output-key uniqueness, NULLs, empty windows, exact endpoints, timestamp ties, and a daylight-saving transition.</p>
 <h5 id="solution-1--reasoning-and-verification-14">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-14" aria-label="Link to this section">#</a></h5>
@@ -1997,16 +1997,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.
 
 I have completed the direct catalog prerequisites: `sql-30`, `sql-test-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_analytics_01_query_patterns.md
@@ -2033,7 +2033,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -2144,18 +2144,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

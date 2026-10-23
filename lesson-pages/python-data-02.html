@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -478,7 +478,7 @@ end <span class="syntax-operator">=</span> datetime<span class="syntax-operator"
 <p>If a cent total drifts, inspect where floats entered the pipeline. If a label unexpectedly merges, compare raw code points, NFC output, and casefold output as separate stages. If a timestamp shifts by hours, compare conversion with timezone replacement. If a record appears twice across windows, inspect the two endpoint comparisons. If an invalid amount disappears, check whether filtering happened before the validation boundary.</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Use these explicit instants in leakage-resistant evaluation. Bring the same currency, identity, and time policies to dataframe and SQL boundaries rather than assuming a library default matches your intended meaning.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-data-02.
 Read python/professional/companion-guides/py_data_02_exact_values_time_text.md and python/professional/lessons/py_data_02_exact_values_time_text.py.
 Check my direct prerequisites: python-21, python-29.
@@ -812,16 +812,16 @@ explain a failure case, and transfer the policy to a changed input.</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning for python-data-02.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning for python-data-02.
 Read python/professional/companion-guides/py_data_02_exact_values_time_text.md and python/professional/lessons/py_data_02_exact_values_time_text.py.
 Check my direct prerequisites: python-21, python-29.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -830,7 +830,7 @@ give one hint at a time, inspect my evidence, and ask a retrieval question.
 Done when I can independently reproduce the numbered acceptance checks,
 explain a failure case, and transfer the policy to a changed input.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -941,18 +941,18 @@ explain a failure case, and transfer the policy to a changed input.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

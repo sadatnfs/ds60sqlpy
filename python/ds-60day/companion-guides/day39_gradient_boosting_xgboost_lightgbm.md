@@ -1,4 +1,4 @@
-# Day 39 — Gradient Boosting, XGBoost, and LightGBM
+# Day 39: Gradient Boosting, XGBoost, and LightGBM
 
 **Lesson ID:** `python-39` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
 
@@ -109,7 +109,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — sequential boosting, learning-rate budgets, and validation control
+## Concept deep dive: sequential boosting, learning-rate budgets, and validation control
 
 ### The mental model
 
@@ -137,7 +137,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — watch staged predictions reduce residual error
+### Focused example A: watch staged predictions reduce residual error
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -165,7 +165,7 @@ assert staged_mse[-1] < staged_mse[0]
 
 **Assumption to name:** The squared-error loss and shallow trees are suitable for this smooth synthetic relationship.
 
-### Focused example B — compare two learning-rate and round-count budgets
+### Focused example B: compare two learning-rate and round-count budgets
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -217,18 +217,18 @@ for rate, rounds in ((0.2, 30), (0.03, 200)):
 
 1. Tune `learning_rate` and `n_estimators` with a simple loop.
 
-**Verify:** Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
+**Verify:** Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
 2. Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
-**Verify:** Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
+**Verify:** Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
 ### Progressive hints
 
 1. Use a small grid, hold `max_depth` constant, and evaluate all combinations
    with identical folds or an explicit validation set. Record runtime too.
 2. Match the split, metric, approximate capacity, and random seed. For LightGBM,
-   `num_leaves` plays a related—but not identical—complexity role to depth.
+   `num_leaves` plays a related, but not identical, complexity role to depth.
 
 ### Additional mastery practice
 
@@ -240,22 +240,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Early-stopping design:** Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.
    **Progressive hint:** The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.
 
-**Verify:** Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
+**Verify:** Early-stopping design; record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
 
 4. **Calibration check:** Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident.
    **Progressive hint:** AUC depends on ordering; log loss and calibration depend on the numeric probabilities. Use a separate calibration boundary.
 
-**Verify:** Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
+**Verify:** Calibration check; print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
 
 5. **Portable backend contract:** Design a comparison helper that uses scikit-learn's HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly.
    **Progressive hint:** Detect availability with importlib, keep the baseline unconditional, and never convert a missing optional package into a silent pass.
 
-**Verify:** Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
+**Verify:** Portable backend contract; return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
 
 6. **Overfitting diagnosis:** Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising.
    **Progressive hint:** The iteration at minimum validation loss is the candidate stopping point. Also test depth, minimum leaf support, subsampling, and learning rate.
 
-**Verify:** Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.
+**Verify:** Overfitting diagnosis; save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -290,12 +290,12 @@ matter alongside a validation score.
 - Work in the [Day 39 learner notebook](../notebooks/day39_gradient_boosting_xgboost_lightgbm.ipynb).
 - Then review the
   [Day 39 solution](../solutions/day39_gradient_boosting_xgboost_lightgbm/day39_solutions.md).
-- Continue to [Day 40 — SearchCV](day40_model_tuning_searchcv.md).
+- Continue to [Day 40; SearchCV](day40_model_tuning_searchcv.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-39` — Day 39 — Gradient Boosting, XGBoost, and LightGBM.

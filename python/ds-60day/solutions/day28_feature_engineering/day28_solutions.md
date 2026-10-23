@@ -1,4 +1,4 @@
-# Day 28 — Solutions: Feature Engineering
+# Day 28: Solutions: Feature Engineering
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -10,7 +10,7 @@ A feature is a model input available at the moment a prediction would be
 made. Feature engineering changes representation to expose useful
 structure: scaling numbers, encoding categories, extracting dates,
 binning, or combining fields. It must preserve the time/knowledge
-boundary—post-outcome data and target-derived values are leakage.
+boundary, post-outcome data and target-derived values are leakage.
 
 A transformer learns parameters during `fit` and applies them during
 `transform`. Split evaluation data before fitting learned means, scales,
@@ -32,9 +32,9 @@ missing, unseen-category, and zero-variance behavior.
 For this lesson's **reproducible feature transformations without information leakage** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Add a fare-bin feature using a transformer inside the preprocessing pipeline. **Contract:** thresholds are learned or fixed without evaluation data, bin closure/labels are documented, and missing/out-of-range behavior is defined. **Verify:** inspect fitted thresholds/feature names and test exact boundaries plus one missing value.
 
@@ -84,7 +84,7 @@ remain missing instead of being silently assigned a misleading band.
 
 **Verification evidence:** inspect fitted thresholds/feature names and test exact boundaries plus one missing value.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Compare one model pipeline with scaling against the same model pipeline without scaling. **Constraints:** keep split/folds, random state, features, model, and all other transforms identical; fit both only on training data. **Expected behavior:** report held-out or cross-validated scores with uncertainty, not training score. **Verify:** report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family's sensitivity to feature scale.
 
@@ -127,9 +127,9 @@ that a tiny score change is universally important.
 
 **Verification evidence:** report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family's sensitivity to feature scale.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict how fitting a scaler or category encoder before the train/test split leaks information from evaluation data. **Progressive hint:** Learned means, scales, and categories become evaluation-derived parameters. **Verify:** Fit both ways on a fixture with an extreme held-out value; record differing learned parameters and assert the pipeline fit uses training rows only.
 
@@ -137,7 +137,7 @@ that a tiny score change is universally important.
 
 **Evidence to locate in the grouped implementation:** Fit both ways on a fixture with an extreme held-out value; record differing learned parameters and assert the pipeline fit uses training rows only.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace numeric and categorical columns through a `ColumnTransformer` and state the output order/shape. **Progressive hint:** Each branch selects columns, transforms them, then outputs are concatenated. **Verify:** Inspect `get_feature_names_out()` and transformed shape; map every output column back to its numeric or categorical branch in the declared order.
 
@@ -145,7 +145,7 @@ that a tiny score change is universally important.
 
 **Evidence to locate in the grouped implementation:** Inspect `get_feature_names_out()` and transformed shape; map every output column back to its numeric or categorical branch in the declared order.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Add deterministic date features (weekday and month) without retaining the original target or post-outcome timestamp. **Progressive hint:** Validate timezone and the moment at which a feature becomes known. **Verify:** Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names.
 
@@ -153,7 +153,7 @@ that a tiny score change is universally important.
 
 **Evidence to locate in the grouped implementation:** Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a pipeline that scales one-hot indicator columns unnecessarily and fails on an unseen category. **Progressive hint:** Use separate branches and `handle_unknown='ignore'`. **Verify:** Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.
 
@@ -161,25 +161,25 @@ that a tiny score change is universally important.
 
 **Evidence to locate in the grouped implementation:** Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
-**Learner contract:** **Edge case and explanation:** Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. **Progressive hint:** The fitted pipeline—not ad hoc notebook code—owns these policies. **Verify:** Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.
+**Learner contract:** **Edge case and explanation:** Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. **Progressive hint:** The fitted pipeline, not ad hoc notebook code, owns these policies. **Verify:** Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. Progressive hint: The fitted pipeline—not ad hoc notebook code—owns these policies. Values below, at, and above the named boundary must produce the evidence Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result. Those cases show how reproducible feature transformations without information leakage behaves at its edge.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. Progressive hint: The fitted pipeline, not ad hoc notebook code, owns these policies. Values below, at, and above the named boundary must produce the evidence Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result. Those cases show how reproducible feature transformations without information leakage behaves at its edge.
 
-**Evidence to locate in the grouped implementation:** Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.
+**Evidence to locate in the grouped implementation:** Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.
 
 ## Expanded mastery lab solutions
 
 Fit learned transformations only on training data and keep every feature inside a reproducible pipeline with explicit unknown/missing behavior.
 
-### Shared implementation for Exercises 3–4 — Fit only on training data
+### Shared implementation for Exercises 3–4: Fit only on training data
 
 Scaling and encoding learn parameters. Fitting before the split lets evaluation
 rows influence those parameters. `ColumnTransformer` runs branches in declared
 order and concatenates their feature matrices.
 
-### Shared implementation for Exercises 5–7 — Deterministic date features and robust preprocessing
+### Shared implementation for Exercises 5–7: Deterministic date features and robust preprocessing
 
 ```python
 import pandas as pd

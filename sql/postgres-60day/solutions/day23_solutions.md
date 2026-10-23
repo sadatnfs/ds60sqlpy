@@ -1,4 +1,4 @@
-# Day 23 solutions — Common Table Expressions (CTEs) Introduction
+# Day 23 solutions: Common Table Expressions (CTEs) Introduction
 
 
 <!-- beginner-solution-enrichment -->
@@ -62,13 +62,13 @@ executable companion when you want a self-contained check.
 
 ## Reading contract
 
-- **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
+- **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
 - **Assumptions:** Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
 - **Primary pitfall:** A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Build order-level net value in one CTE and summarize it by customer in the outer query.
 
@@ -117,7 +117,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-23 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name the one-row-per-order grain before changing to customer grain. Evaluate another form against the concrete expected result (One row per ordering customer) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `net_revenue` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Use one category-revenue CTE twice to return the highest category and total revenue.
 
@@ -167,7 +167,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-23 Exercise 2, the chosen form is justified by this lesson-specific rationale: A named aggregate can support multiple scalar reads without repeating the business formula. Evaluate another form against the concrete expected result (One summary row) and the verification above.
 - **Edge case:** Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Create staged payment reconciliation CTEs at order grain.
 
@@ -221,7 +221,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-23 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate payment detail before joining to orders and preserve unpaid orders with a left join. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare `MATERIALIZED` and `NOT MATERIALIZED` syntax on a side-effect-free filtered order CTE without claiming one is universally faster.
 
@@ -270,7 +270,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-23 Exercise 4, the chosen form is justified by this lesson-specific rationale: Both return the same rows; planning effects require `EXPLAIN` evidence in a representative environment. Evaluate another form against the concrete expected result (Two count rows with equal values) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a multi-stage query whose repeated `total` column names are ambiguous by assigning grain-specific aliases.
 
@@ -325,7 +325,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-23 Exercise 5, the chosen form is justified by this lesson-specific rationale: Name measures `order_value`, `customer_revenue`, and similar rather than carrying generic `total`. Evaluate another form against the concrete expected result (One row per country) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Use a data-modifying CTE to demonstrate an update and inspect its returned rows without persistence.
 

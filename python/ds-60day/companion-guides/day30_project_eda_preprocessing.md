@@ -1,4 +1,4 @@
-# Day 30 — Project: Reproducible EDA and Preprocessing
+# Day 30: Project: Reproducible EDA and Preprocessing
 
 **Level:** Intermediate checkpoint
 
@@ -65,12 +65,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 30 — project: reproducible eda and preprocessing to practice a restartable EDA and preprocessing project with an auditable evidence chain
+**Lesson outcome:** use day 30; project: reproducible eda and preprocessing to practice a restartable EDA and preprocessing project with an auditable evidence chain
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -105,7 +105,7 @@ overwriting one `df`. A decision-log record can contain `issue`,
 Assertions at each transition turn narrative expectations into
 executable gates.
 
-### Worked example 1 — Reconcile a cleaning boundary
+### Worked example 1: Reconcile a cleaning boundary
 
 Make every row removal visible and explainable. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -137,7 +137,7 @@ The reconciliation reports four raw rows, two clean rows, two removed rows, and 
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Represent a decision as data
+### Worked example 2: Represent a decision as data
 
 A structured entry is easier to audit than a scattered comment. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -300,11 +300,11 @@ figures, concise findings, decision log, and explicit limitations.
 
 - [Open the learner notebook](../notebooks/day30_project_eda_preprocessing.ipynb)
 - [Review the separate project solution](../solutions/day30_project_eda_preprocessing/day30_solutions.md)
-- [Next: Day 31 — Probability basics](day31_probability_basics.md)
+- [Next: Day 31; Probability basics](day31_probability_basics.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

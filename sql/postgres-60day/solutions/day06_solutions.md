@@ -1,4 +1,4 @@
-# Day 06 solutions — Set Operations: UNION, INTERSECT, EXCEPT
+# Day 06 solutions: Set Operations: UNION, INTERSECT, EXCEPT
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Return customer IDs that have either an order or a support event.
 
@@ -108,7 +108,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-06 Exercise 1, the chosen form is justified by this lesson-specific rationale: `UNION` expresses set membership and removes duplicates across both sources. Evaluate another form against the concrete expected result (One distinct customer ID per qualifying customer) and the verification above.
 - **Edge case:** Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Return customer IDs that have both an order and a support event.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-06 Exercise 2, the chosen form is justified by this lesson-specific rationale: `INTERSECT` keeps keys present in both compatible sets. Evaluate another form against the concrete expected result (One distinct customer ID in both sets) and the verification above.
 - **Edge case:** Add one row for which `(e.event_type = 'support')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Return customers who have no orders.
 
@@ -186,7 +186,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-06 Exercise 3, the chosen form is justified by this lesson-specific rationale: `EXCEPT` subtracts the order-customer set from all customers. Evaluate another form against the concrete expected result (One row per customer absent from orders) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare row counts produced by `UNION` and `UNION ALL` for two overlapping status lists.
 
@@ -245,7 +245,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-06 Exercise 4, the chosen form is justified by this lesson-specific rationale: `UNION ALL` preserves every input row; `UNION` returns distinct rows. Evaluate another form against the concrete expected result (Two labeled summary rows showing all-count >= distinct-count) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a set operation whose branches return incompatible meanings or types by aligning aliases and casts.
 
@@ -285,7 +285,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-06 Exercise 5, the chosen form is justified by this lesson-specific rationale: Each branch below returns one text label and one numeric amount at the same report grain. Evaluate another form against the concrete expected result (Rows identify revenue and expense measures with compatible types) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Return the symmetric difference between customers with orders and customers with support events.
 

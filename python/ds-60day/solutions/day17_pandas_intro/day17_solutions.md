@@ -1,4 +1,4 @@
-# Day 17 — Solutions: Pandas Intro (Series, DataFrame, Index)
+# Day 17: Solutions: Pandas Intro (Series, DataFrame, Index)
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -8,7 +8,7 @@ result before comparing your attempt with its matching assertions.
 
 A Series is a one-dimensional labeled array; a DataFrame is a table of
 labeled columns sharing an index. Before manipulating a DataFrame,
-state its **row grain**—what one row represents—and what makes a row
+state its **row grain**, what one row represents, and what makes a row
 unique. Column names carry variable meaning; the index carries row
 labels, which may or may not be a business key.
 
@@ -32,9 +32,9 @@ a small sample before trusting a calculation.
 For this lesson's **labeled tabular data, row grain, indexes, selection, and vectorized columns** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Using the lesson DataFrame, select rows where `time == 'Dinner'`, then compute the mean of the selected `tip` values. **Before code:** state the row grain and write the mask separately. **Expected behavior:** the result is one scalar equal to `dinner_rows['tip'].mean()`. **Constraints:** use `.loc` and do not loop. **Verify:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
 
@@ -70,7 +70,7 @@ each shape transition inspectable.
 
 **Verification evidence:** assert every selected row is Dinner and the selection is non-empty before reporting the mean.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add a Boolean `is_big_party` column that is `True` exactly when `size >= 5`. **Constraints:** use one vectorized comparison and explicit assignment; do not use row-wise `apply`. **Verify:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
 
@@ -89,7 +89,7 @@ Vectorized comparison preserves index alignment and avoids row loops.
 
 **Verification evidence:** compare the new column with `df['size'].ge(5)`, inspect both True and False rows, and confirm row count/index are unchanged.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Create a safe `tip_rate = tip / total_bill`, treating a zero bill as missing rather than infinity, then sort descending by `tip_rate`. **Constraints:** preserve the unsorted source in a separate name and choose where missing rates appear. **Verify:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
 
@@ -107,9 +107,9 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 **Verification evidence:** assert there are no infinite values and that non-missing rates are monotonically decreasing.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the difference between `.loc[labels]` and `.iloc[positions]` after an integer index has been reordered. **Progressive hint:** Labels are not automatically row positions. **Verify:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
 
@@ -117,7 +117,7 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 **Evidence to locate in the grouped implementation:** After reordering integer labels, assert `.loc` returns the requested labels and `.iloc` returns the requested positions; list both resulting indexes.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? **Progressive hint:** Pandas aligns many labeled objects by index. **Verify:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
 
@@ -125,7 +125,7 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 **Evidence to locate in the grouped implementation:** Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Create a safe `tip_rate` column that yields missing values rather than infinity when `total_bill` is zero. **Progressive hint:** Mask or replace the zero denominator before division. **Verify:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
 
@@ -133,7 +133,7 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 **Evidence to locate in the grouped implementation:** Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair chained assignment on a filtered DataFrame and explain when to use `.loc` or an explicit `.copy()`. **Progressive hint:** Make ownership and target rows explicit. **Verify:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
 
@@ -141,7 +141,7 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 **Evidence to locate in the grouped implementation:** Turn chained-assignment warnings into explicit `.loc` or `.copy()` ownership; assert the intended frame changes and the unintended frame does not.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Compute a statistic for a possibly empty selection and return `None` instead of silently presenting `NaN` as a real result. **Progressive hint:** Check `.empty` before aggregating when absence has business meaning. **Verify:** Test nonempty and empty selections; assert the former returns the statistic and the latter returns `None`, not a value presented as meaningful.
 
@@ -153,13 +153,13 @@ assert ordered["tip_rate"].dropna().is_monotonic_decreasing
 
 State a DataFrame's row grain, column meanings, and index role before selecting or deriving data. Prefer vectorized, explicit assignments.
 
-### Shared implementation for Exercises 4–5 — Labels, positions, and alignment
+### Shared implementation for Exercises 4–5: Labels, positions, and alignment
 
 `.loc` selects index labels; `.iloc` selects zero-based positions. A boolean
 Series is aligned by labels, so a mismatched index can raise or select
 unexpected rows. Build masks from the frame being filtered.
 
-### Shared implementation for Exercises 6–8 — Safe derivation and explicit ownership
+### Shared implementation for Exercises 6–8: Safe derivation and explicit ownership
 
 ```python
 import numpy as np

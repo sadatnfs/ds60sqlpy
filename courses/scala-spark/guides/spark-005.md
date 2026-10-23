@@ -146,7 +146,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2.13 Option API](https://www.scala-lang.org/api/2.13.16/scala/Option.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-005: Option, missing values, and total functions.

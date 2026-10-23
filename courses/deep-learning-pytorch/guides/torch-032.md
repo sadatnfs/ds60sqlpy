@@ -178,7 +178,7 @@ The export may specialize to the example input. Declare and validate dynamic dim
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-032, state_dict, torch.export and inference parity.

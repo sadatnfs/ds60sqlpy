@@ -1,4 +1,4 @@
-# Day 23 — Streaming Data Pipelines and Generators
+# Day 23: Streaming Data Pipelines and Generators
 
 **Level:** Intermediate
 
@@ -64,18 +64,18 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 23 — streaming data pipelines and generators to practice lazy, composable data-pipeline stages with explicit resource and error policy
+**Lesson outcome:** use day 23; streaming data pipelines and generators to practice lazy, composable data-pipeline stages with explicit resource and error policy
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
 A pipeline is a sequence of stages that turn input into output. Give each
-stage one responsibility—read, parse, validate, normalize, filter,
-batch, or write—and define the shape it accepts and yields. Small stages
+stage one responsibility, read, parse, validate, normalize, filter,
+batch, or write, and define the shape it accepts and yields. Small stages
 are easier to test and recombine than one function mixing files, rules,
 logging, and output.
 
@@ -102,7 +102,7 @@ A consumer such as `for batch in batches(rows, 100):` drives the whole
 upstream chain; without consumption, no generator body or file read
 occurs.
 
-### Worked example 1 — Compose lazy normalization and filtering
+### Worked example 1: Compose lazy normalization and filtering
 
 Each stage consumes and yields one record at a time. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -132,7 +132,7 @@ list(active_only(normalize(source)))
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Preserve a final partial batch
+### Worked example 2: Preserve a final partial batch
 
 Batch boundaries are part of the contract. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -248,7 +248,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
 4. **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see.
    **Progressive hint:** Consumption is stateful and does not rewind automatically.
-   **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.
+   **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.
 5. **Implementation:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch.
    **Progressive hint:** Validate positive size and reset the accumulator after each yield.
    **Verify:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
@@ -289,11 +289,11 @@ produces no batches, and malformed input follows the documented policy.
 
 - [Open the learner notebook](../notebooks/day23_data_pipelines_generators.ipynb)
 - [Check the separate solution](../solutions/day23_data_pipelines_generators/day23_solutions.md)
-- [Next: Day 24 — Exploratory data analysis](day24_eda_best_practices.md)
+- [Next: Day 24; Exploratory data analysis](day24_eda_best_practices.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

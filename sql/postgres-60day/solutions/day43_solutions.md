@@ -1,4 +1,4 @@
-# Day 43 Solutions — Logical Backup and Recovery
+# Day 43 Solutions: Logical Backup and Recovery
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ answer uses `COPY ... TO STDOUT` so it works through the current connection and
 models a restore with a temporary staging table. See
 [`day43_solutions.sql`](day43_solutions.sql).
 
-## Exercise 1 — Export and stage a subset
+## Exercise 1: Export and stage a subset
 
 In interactive `psql`, `\copy` writes on the client machine:
 
@@ -106,7 +106,7 @@ table and run `\copy customers_restore_stage FROM ...`.
 - **Alternative/trade-off:** For sql-43 Exercise 1, the chosen form is justified by this lesson-specific rationale: In interactive `psql`, `\copy` writes on the client machine: Replace that filename with a path the learner owns. Evaluate another form against the concrete expected result (CSV rows are streamed to the client, and `staged_rows` equals the number of US customers. A real import would create an explicit staging table and run `\copy customers_restore_stage FROM) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 2 — Idempotent restore with conflict handling
+## Exercise 2: Idempotent restore with conflict handling
 
 Email is the current schema's unique business key for this exercise.
 
@@ -159,7 +159,7 @@ data unchanged.
 - Logical export is not point-in-time recovery. Production PITR requires base
   backups plus WAL archiving, which is outside this SQL-only exercise.
 
-## Exercise 3 — Choose COPY or backslash-copy
+## Exercise 3: Choose COPY or backslash-copy
 
 Server-side `COPY` accesses the database server's filesystem. psql `\copy`
 streams through the client, which is usually the appropriate learner-machine
@@ -175,7 +175,7 @@ workflow.
 - **Alternative/trade-off:** For sql-43 Exercise 3, the chosen form is justified by this lesson-specific rationale: Server-side `COPY` accesses the database server's filesystem. Evaluate another form against the concrete expected result (a completed the explain server-side copy versus client-side copy written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
 - **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
-## Exercise 4 — Build a manifest
+## Exercise 4: Build a manifest
 
 The manifest records table, count, key range, and observation time. Production
 automation should also hash the exported file outside SQL.
@@ -190,7 +190,7 @@ automation should also hash the exported file outside SQL.
 - **Alternative/trade-off:** For sql-43 Exercise 4, the chosen form is justified by this lesson-specific rationale: The manifest records table, count, key range, and observation time. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 5 — Deduplicate deterministically
+## Exercise 5: Deduplicate deterministically
 
 `ROW_NUMBER` partitions by normalized email and orders by an explicit newest/
 tie-break policy. Upsert never receives arbitrary duplicate winners.
@@ -205,7 +205,7 @@ tie-break policy. Upsert never receives arbitrary duplicate winners.
 - **Alternative/trade-off:** For sql-43 Exercise 5, the chosen form is justified by this lesson-specific rationale: `ROW_NUMBER` partitions by normalized email and orders by an explicit newest/ tie-break policy. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `country`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 6 — Compare NULL safely
+## Exercise 6: Compare NULL safely
 
 `IS DISTINCT FROM` treats two NULLs as equal and one NULL as different. It
 therefore reports real source/restore differences without UNKNOWN results.

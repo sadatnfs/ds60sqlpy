@@ -111,7 +111,7 @@ The focused test command is shown in **Self-check** below. The learner
 module is intentionally answer-free, so `TODO` output is the expected
 starting state rather than a setup failure.
 
-## Mechanism lab — two small examples before the full system
+## Mechanism lab: two small examples before the full system
 
 ### Boundary and mental model
 
@@ -131,7 +131,7 @@ Observational adjustment does not recreate randomization automatically.
 - **seeded bootstrap/permutation loop:** produces a reproducible distribution of a declared statistic with Monte Carlo error.
 - **estimand + assignment mechanism:** defines which causal contrast is identified and which assumptions support it.
 
-### Micro-example A — bootstrap a mean difference with a seeded generator
+### Micro-example A: bootstrap a mean difference with a seeded generator
 
 ```python
 import numpy as np
@@ -152,7 +152,7 @@ print({"estimate": treatment.mean() - control.mean(), "interval": interval})
 
 **Why it matters:** Rows are independent units and each group's empirical distribution is a useful population proxy.
 
-### Micro-example B — build a randomization-style null distribution
+### Micro-example B: build a randomization-style null distribution
 
 ```python
 import numpy as np
@@ -199,14 +199,14 @@ Write an `ExperimentPlan` containing:
 
 Do this before computing outcomes.
 
-**Verify:** Define the experiment before analysis — write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
+**Verify:** Define the experiment before analysis; write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
 
 ### 2. Complete standardized effect
 
 Use the pooled sample standard deviation. Reject groups smaller than two and
 zero pooled variance. Explain raw units and standardized units side by side.
 
-**Verify:** Complete standardized effect — assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
+**Verify:** Complete standardized effect; assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
 
 ### 3. Bootstrap the difference
 
@@ -215,7 +215,7 @@ sort them, and select percentile endpoints. Repeat with the same seed and
 verify equality. Change the seed and expect small endpoint variation, not a
 different conclusion guaranteed by design.
 
-**Verify:** Bootstrap the difference — resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
+**Verify:** Bootstrap the difference; resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
 
 ### 4. Permute assignments
 
@@ -226,7 +226,7 @@ seeded Monte Carlo assignments and the plus-one p-value correction.
 State why permuting individual rows is invalid if assignment occurred by
 account or site.
 
-**Verify:** Permute assignments — pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
+**Verify:** Permute assignments; pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
 
 ### 5. Plan sample size
 
@@ -234,7 +234,7 @@ Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8.
 Explain why variance uncertainty, clustering, attrition, noncompliance, and a
 binary metric require a more specific planner.
 
-**Verify:** Plan sample size — use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
+**Verify:** Plan sample size; use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
 
 ### 6. Control a comparison family
 
@@ -242,7 +242,7 @@ Complete `holm_adjust` for three p-values. Preserve original order and enforce
 monotonic adjusted values after sorting. Identify the family before viewing
 results; splitting an inconvenient family after analysis defeats control.
 
-**Verify:** Control a comparison family — for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
+**Verify:** Control a comparison family; for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
 
 ### 7. Check assignment and attrition
 
@@ -250,7 +250,7 @@ Compute baseline standardized difference by arm. Then remove outcomes
 selectively from one arm and explain how that affects causal credibility even
 if the remaining p-value is small.
 
-**Verify:** Check assignment and attrition — compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
+**Verify:** Check assignment and attrition; compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
 
 ### 8. Simulate peeking policy
 
@@ -258,7 +258,7 @@ Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson's
 simple Bonferroni per-look split illustrates the budget. Compare it with a
 single final look and research group-sequential designs before production use.
 
-**Verify:** Simulate peeking policy — with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
+**Verify:** Simulate peeking policy; with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
 
 ### 9. Bound the claim
 
@@ -267,7 +267,7 @@ attrition permit a causal interpretation under additional assumptions.
 Observational grouping, compromised randomization, or severe differential
 attrition returns an associational scope.
 
-**Verify:** Bound the claim — complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
+**Verify:** Bound the claim; complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
 
 ### Extended professional practice
 
@@ -275,77 +275,77 @@ These exercises move from prediction and implementation through debugging,
 operational trade-offs, and review. Keep the default path deterministic and
 offline; optional connected behavior must remain explicit.
 
-### Exercise 10 — bootstrap clustered assignments
+### Exercise 10: bootstrap clustered assignments
 
-Extend the experiment fixture with multiple rows per account. Bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
+Extend the experiment fixture with multiple rows per account. Bootstrap accounts, not rows, within each arm and compare interval width with the incorrect row bootstrap.
 
 **Progressive hint:** Sample independent assignment units with replacement and carry all of each selected account's observations into the resample.
 
-**Verify:** bootstrap clustered assignments — extend the experiment fixture with multiple rows per account; bootstrap accounts—not rows—within each arm and compare interval width with the incorrect row bootstrap.
+**Verify:** bootstrap clustered assignments; extend the experiment fixture with multiple rows per account; bootstrap accounts, not rows, within each arm and compare interval width with the incorrect row bootstrap.
 
-### Exercise 11 — bootstrap a ratio metric
+### Exercise 11: bootstrap a ratio metric
 
 Estimate treatment lift for revenue per active user, preserving each user's numerator and denominator. Handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
 **Progressive hint:** Define the estimand first; the two ratio formulas answer different questions. Resample complete user records.
 
-**Verify:** bootstrap a ratio metric — estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
+**Verify:** bootstrap a ratio metric; estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
-### Exercise 12 — apply covariate adjustment without leakage
+### Exercise 12: apply covariate adjustment without leakage
 
 Use a pre-experiment outcome as a CUPED-style covariate. Estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
 **Progressive hint:** The covariate must be measured before assignment and not affected by treatment. Center it with a documented analysis-sample mean.
 
-**Verify:** apply covariate adjustment without leakage — use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
+**Verify:** apply covariate adjustment without leakage; use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
-### Exercise 13 — separate intention-to-treat from treatment-on-treated
+### Exercise 13: separate intention-to-treat from treatment-on-treated
 
 Simulate assigned treatment with imperfect compliance. Compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
 **Progressive hint:** Random assignment protects the assignment groups, not the self-selected compliance groups.
 
-**Verify:** separate intention-to-treat from treatment-on-treated — simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
+**Verify:** separate intention-to-treat from treatment-on-treated; simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
-### Exercise 14 — perform missing-outcome sensitivity
+### Exercise 14: perform missing-outcome sensitivity
 
 Create differential attrition by arm. Report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
 **Progressive hint:** Missing outcomes are not automatically zero or missing completely at random. Show how strong an assumption is needed to reverse the conclusion.
 
-**Verify:** perform missing-outcome sensitivity — create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
+**Verify:** perform missing-outcome sensitivity; create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
-### Exercise 15 — simulate sequential false positives
+### Exercise 15: simulate sequential false positives
 
 Under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability. Compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
 **Progressive hint:** Use a seeded outer simulation and record the first crossing. The simple split illustrates budgeting; it is not an optimized group-sequential design.
 
-**Verify:** simulate sequential false positives — under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
+**Verify:** simulate sequential false positives; under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
-### Exercise 16 — pre-specify heterogeneous effects
+### Exercise 16: pre-specify heterogeneous effects
 
 Choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family. Contrast this with mining many cuts for the largest lift.
 
 **Progressive hint:** An interaction test addresses whether effects differ; significance in one subgroup and not another is not itself evidence of difference.
 
-**Verify:** pre-specify heterogeneous effects — choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
+**Verify:** pre-specify heterogeneous effects; choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
 
-### Exercise 17 — run clustered randomization inference
+### Exercise 17: run clustered randomization inference
 
 For a site-randomized experiment, permute site assignments while keeping all rows within a site together. Compare with invalid row-level permutation and state the sharp-null interpretation.
 
 **Progressive hint:** Enumerate or sample assignments consistent with the original design, including treated-site count and any stratification.
 
-**Verify:** run clustered randomization inference — for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
+**Verify:** run clustered randomization inference; for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
 
-### Exercise 18 — produce an auditable analysis packet
+### Exercise 18: produce an auditable analysis packet
 
 Write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
 
 **Progressive hint:** Generate machine-readable values and prose from one result object. Keep random seeds and units visible; exclude raw sensitive rows.
 
-**Verify:** produce an auditable analysis packet — write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
+**Verify:** produce an auditable analysis packet; write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.
 
 ## Self-check
 
@@ -395,10 +395,10 @@ Carry the experiment plan into Python Days 35 and 45. Use `python-ml-01` to bind
 the resulting data snapshot, feature schema, evaluation evidence, and promoted
 artifact into a reproducible delivery record.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-stats-01` — Resampling, experiments, and causal boundaries.

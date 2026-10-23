@@ -1,4 +1,4 @@
-# Day 51 — Solutions: Advanced Feature Engineering (Target Encoding, Hashing, Groups)
+# Day 51: Solutions: Advanced Feature Engineering (Target Encoding, Hashing, Groups)
 
 We implement K‑fold target encoding without leakage, feature hashing for high‑cardinality categories, and rolling group statistics in time order.
 
@@ -40,7 +40,7 @@ train_df = train_df.reset_index(drop=True)
 test_df = test_df.reset_index(drop=True)
 ```
 
-Worked reference for Exercise 1 — K‑fold target encoding
+Worked reference for Exercise 1; K‑fold target encoding
 ```python
 kf = KFold(n_splits=5, shuffle=True, random_state=0)
 train_target_encoded = pd.Series(index=train_df.index, dtype=float)
@@ -108,7 +108,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2 — Feature hashing
+Worked reference for Exercise 2; Feature hashing
 ```python
 from sklearn.feature_extraction import FeatureHasher
 
@@ -141,7 +141,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Rolling group means in time without leakage
+Worked reference for Exercise 3; Rolling group means in time without leakage
 ```python
 # Add a time column and group id
 T = len(df)
@@ -201,7 +201,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or `FunctionTransformer`.
 
@@ -211,9 +211,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
+**Verify:** Practice 1; out-of-fold target encoding, smoothing, and transform-time unknowns; produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Add an appropriate prior and smoothing; experiment with `n_splits`.
 
@@ -223,9 +223,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
+**Verify:** Practice 2; out-of-fold target encoding, smoothing, and transform-time unknowns; print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.
 
@@ -235,9 +235,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
+**Verify:** Practice 3; out-of-fold target encoding, smoothing, and transform-time unknowns; over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
-### Exercise 4 — Out-of-fold invariant
+### Exercise 4: Out-of-fold invariant
 
 **Prompt:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
 
@@ -256,9 +256,9 @@ training column with that full mapping.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
+**Verify:** Out-of-fold invariant; on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
 
-### Exercise 5 — Unknown and missing categories
+### Exercise 5: Unknown and missing categories
 
 **Prompt:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
 
@@ -277,9 +277,9 @@ fitted transformer.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
+**Verify:** Unknown and missing categories; assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
 
-### Exercise 6 — Temporal leakage
+### Exercise 6: Temporal leakage
 
 **Prompt:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
 
@@ -298,4 +298,4 @@ event time and label-arrival time may differ.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.
+**Verify:** Temporal leakage; print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.

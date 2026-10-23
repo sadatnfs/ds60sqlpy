@@ -128,7 +128,7 @@ ORDER BY sr.request_key;
 --    Distinguish missing, unexpected, and changed objects deterministically.
 --
 --    Inputs: For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all `service_requests` columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details.
---    Expected result/shape: For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
+--    Expected result/shape: For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
 --    Verify: For sql-found-02 Exercise 7, prove the clean fixture reports only `matches`; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.
 --    Hint ladder, rung 1: For sql-found-02 Exercise 7, run `observed` one at a time. Record each CTE's row count and `column_name` uniqueness before the next stage uses it.
 -- 8. Draft a failed-deployment recovery plan for each expand/contract phase.

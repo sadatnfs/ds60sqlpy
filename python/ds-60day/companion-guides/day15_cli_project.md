@@ -1,4 +1,4 @@
-# Day 15 — Project: A Testable CLI Data Tool
+# Day 15: Project: A Testable CLI Data Tool
 
 **Level:** Beginner checkpoint
 
@@ -64,12 +64,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 15 — project: a testable cli data tool to practice a small command-line application with separated boundaries
+**Lesson outcome:** use day 15; project: a testable cli data tool to practice a small command-line application with separated boundaries
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -100,7 +100,7 @@ spelling, conversion, and fallback. `parser.parse_args(argv)` returns a
 namespace of parsed values. Supplying `argv` makes tests deterministic;
 `None` tells argparse to read the real process command line.
 
-### Worked example 1 — Parse an explicit argument list
+### Worked example 1: Parse an explicit argument list
 
 Exercise the CLI contract without touching the notebook process arguments. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -127,7 +127,7 @@ args = build_parser().parse_args(["--limit", "2", "Ada", "Lin", "Grace"])
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Keep core work independent of printing
+### Worked example 2: Keep core work independent of printing
 
 A plain function can be tested and reused by the CLI. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -305,11 +305,11 @@ invalid input fails clearly, and all quality gates pass.
 
 - [Open the learner notebook](../notebooks/day15_cli_project.ipynb)
 - [Check the separate project solution](../solutions/day15_cli_project/day15_solutions.md)
-- [Next: Day 16 — NumPy fundamentals](day16_numpy_fundamentals.md)
+- [Next: Day 16; NumPy fundamentals](day16_numpy_fundamentals.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

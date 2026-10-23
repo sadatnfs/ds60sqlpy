@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,12 +429,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-sec-01-roles-privileges-and-row-level-security">SQL-SEC-01 — Roles, Privileges, and Row-Level Security<a class="heading-anchor" href="#guide--sql-sec-01-roles-privileges-and-row-level-security" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-sec-01-roles-privileges-and-row-level-security">SQL-SEC-01: Roles, Privileges, and Row-Level Security<a class="heading-anchor" href="#guide--sql-sec-01-roles-privileges-and-row-level-security" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
 <li><strong>Catalog prerequisites:</strong> <code>sql-found-02</code> and <code>sql-39</code></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01 — relational design</a>, <a href="sql-found-02.html#guide">SQL-FOUND-02 — migrations</a>, SQL Day 38 transactions, <a href="sql-39.html#guide">SQL Day 39 locks and deadlocks</a>, and the disposable <code>advanced_sql_training</code> database.</li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, <a href="sql-found-02.html#guide">SQL-FOUND-02; migrations</a>, SQL Day 38 transactions, <a href="sql-39.html#guide">SQL Day 39 locks and deadlocks</a>, and the disposable <code>advanced_sql_training</code> database.</li>
 <li><strong>Optional capability:</strong> hands-on role tests require the connected PostgreSQL role to have <code>CREATEROLE</code> or superuser status. The default script checks first and safely skips without creating anything when that capability is absent.</li>
 <li><strong>Artifacts:</strong> <a href="sql-sec-01.html#learner">learner SQL</a> · <a href="sql-sec-01.html#solution-1">solution reasoning</a> · <a href="sql-sec-01.html#solution-2">executable solution</a></li>
 </ul>
@@ -452,7 +452,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-SEC-01 — Schemas, Roles, Privileges, and Row-Level Security</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-SEC-01; Schemas, Roles, Privileges, and Row-Level Security</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-sec-01/lesson/workspace/sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -464,7 +464,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates <code>pg_catalog.pg_roles</code>, <code>pro_security_lab.documents</code>, <code>pro_security_lab.announcements</code>, <code>pro_security_lab.owner_context_documents</code>, <code>pro_security_lab.visible_documents</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -547,7 +547,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <ol>
 <li><strong>Two-layer reads:</strong> show schema <code>USAGE</code> and table <code>SELECT</code> independently. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 1, test schema USAGE and table SELECT as separate privilege layers, first before schema grants and then after temporarily removing one table grant. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 1, expected output: evidence for table SELECT without schema USAGE, schema USAGE without table SELECT, and a final three-role matrix with USAGE/SELECT true and INSERT false. <strong>Verify:</strong> For sql-sec-01 Exercise 1, assert the two observed boolean rows equal <code>(USAGE=false, SELECT=true)</code> and <code>(USAGE=true, SELECT=false)</code>, attempt the corresponding qualified SELECTs, and restore only the intended least-privilege state before later exercises.</li>
 <li><strong>Auditor:</strong> create a NOLOGIN read-only role, explicit policy, positive read test, and negative write tests. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 2, grant the auditor table SELECT via owner defaults, schema USAGE explicitly, and an RLS SELECT policy with <code>USING (true)</code>; grant no table writes. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 2, expected output: two tenant rows when SET ROLE auditor, correct north/south definer counts, and an expected insufficient-privilege notice for INSERT. <strong>Verify:</strong> For sql-sec-01 Exercise 2, assert the auditor sees exactly both seeded IDs, has no INSERT/UPDATE/DELETE privilege, and cannot execute routines except those explicitly granted.</li>
-<li><strong>Default privileges:</strong> prove which object owner’s future table receives the grant and which different owner does not. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on <code>audit_notes</code> created by <code>ds60_sec_owner</code> but not on <code>other_owner_notes</code> created by <code>ds60_sec_other_owner</code>. <strong>Verify:</strong> For sql-sec-01 Exercise 3, compare <code>has_table_privilege</code> for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role—not inherited membership defaults.</li>
+<li><strong>Default privileges:</strong> prove which object owner’s future table receives the grant and which different owner does not. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on <code>audit_notes</code> created by <code>ds60_sec_owner</code> but not on <code>other_owner_notes</code> created by <code>ds60_sec_other_owner</code>. <strong>Verify:</strong> For sql-sec-01 Exercise 3, compare <code>has_table_privilege</code> for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role, not inherited membership defaults.</li>
 <li><strong>Definer boundary:</strong> inventory owner, search path, qualification, parameter, PUBLIC, grant, and RLS risks around the routine. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 4, create a validated, fixed-search-path SECURITY DEFINER tenant-count function owned by the NOLOGIN owner, revoke PUBLIC, grant only the auditor, and inspect <code>pg_proc</code>. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 4, expected output: valid north/south counts, an invalid-parameter rejection for unknown tenant, and catalog rows with owner, <code>prosecdef</code>, <code>proconfig</code>, and <code>proacl</code>. <strong>Verify:</strong> For sql-sec-01 Exercise 4, test allowed and NULL/unknown inputs under SET ROLE auditor, assert PUBLIC lacks EXECUTE, confirm the owner cannot login, and trace every referenced object as schema-qualified.</li>
 <li><strong>RLS bypass:</strong> compare ordinary caller, owner, forced owner, BYPASSRLS, and superuser semantics without granting bypass attributes. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 5, SET LOCAL ROLE north and south separately, query the RLS table, then FORCE RLS and test the table owner; inventory superuser/BYPASSRLS separately. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 5, expected output: north sees only north, south sees only south, the forced owner sees zero without a matching policy, and bypass-capable roles are clearly labeled unsuitable tenant-test identities. <strong>Verify:</strong> For sql-sec-01 Exercise 5, assert one own-tenant row and zero cross-tenant rows for each low-privilege role, distinguish owner bypass before FORCE from forced-owner behavior, and never grant or rely on BYPASSRLS for tenants.</li>
 <li><strong>Effective access:</strong> reconcile schema, relation, column, sequence, routine, membership, inheritance, and PUBLIC access. <strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 6, use PostgreSQL <code>has_*_privilege</code> functions to report schema, table, column, sequence, and function access for north, south, and auditor roles. <strong>Expected result/shape:</strong> For sql-sec-01 Exercise 6, expected output: one row per role with five distinct privilege booleans and an <code>effective_source</code> explanation distinguishing owner-default table grants from direct function grants. <strong>Verify:</strong> For sql-sec-01 Exercise 6, compare every effective-access boolean row with object ACLs, role membership, ownership, and PUBLIC and record the matching source evidence; do not infer the grant source from a true boolean alone.</li>
@@ -581,8 +581,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Revisit SQL Days 38–44 with separate owner, migration, application, and read-only operational roles in mind. Then continue to the future professional modules on routines/triggers, SQL contract tests, index operations, and recovery rehearsals; use the <a href="../reference-pages/docs/curriculum-gap-backlog.md.html">curriculum gap backlog</a> to see their planned order.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
 
 I have completed the direct catalog prerequisites: `sql-found-02`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -1009,7 +1009,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line">        <span class="syntax-comment">--    a table created by a different owner would not inherit that rule.</span></span>
 <span class="source-line">        <span class="syntax-comment">--    Inputs: For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.</span></span>
 <span class="source-line">        <span class="syntax-comment">--    Expected result/shape: For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on `audit_notes` created by `ds60_sec_owner` but not on `other_owner_notes` created by `ds60_sec_other_owner`.</span></span>
-<span class="source-line">        <span class="syntax-comment">--    Verify: For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role—not inherited membership defaults.</span></span>
+<span class="source-line">        <span class="syntax-comment">--    Verify: For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role, not inherited membership defaults.</span></span>
 <span class="source-line">        <span class="syntax-comment">--    Hint ladder, rung 1: For sql-sec-01 Exercise 3, select `ds60_sec_auditor` from `ds60_sec_owner` before adding derived columns.</span></span>
 <span class="source-line">        <span class="syntax-comment">--</span></span>
 <span class="source-line">        <span class="syntax-comment">-- 4. Review owner_document_count(text). List the controls that make a</span></span>
@@ -1127,7 +1127,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-sec-01-solutions-roles-privileges-and-rls">SQL-SEC-01 Solutions — Roles, Privileges, and RLS<a class="heading-anchor" href="#solution-1--sql-sec-01-solutions-roles-privileges-and-rls" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-sec-01-solutions-roles-privileges-and-rls">SQL-SEC-01 Solutions: Roles, Privileges, and RLS<a class="heading-anchor" href="#solution-1--sql-sec-01-solutions-roles-privileges-and-rls" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -1150,7 +1150,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run the optional hands-on solution with:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql</code></pre>
 <p>It performs the same capability check as the learner file. With role-admin capability it creates NOLOGIN course roles inside one transaction; without that capability it prints a read-only skip. Normal completion leaves no roles, memberships, grants, or schema.</p>
-<h4 id="solution-1--exercise-1-prove-both-privilege-layers">Exercise 1 — Prove both privilege layers<a class="heading-anchor" href="#solution-1--exercise-1-prove-both-privilege-layers" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-prove-both-privilege-layers">Exercise 1: Prove both privilege layers<a class="heading-anchor" href="#solution-1--exercise-1-prove-both-privilege-layers" aria-label="Link to this section">#</a></h4>
 <p><code>has_schema_privilege(role, schema, &#x27;USAGE&#x27;)</code> and <code>has_table_privilege(role, table, &#x27;SELECT&#x27;)</code> answer different questions. Schema <code>USAGE</code> permits object lookup but no table operation. Table <code>SELECT</code> permits the operation but cannot make a hidden schema path accessible.</p>
 <p>The executable solution reports both columns plus <code>INSERT</code> for north, south, and auditor roles. The expected auditor shape is <code>USAGE=true</code>, <code>SELECT=true</code>, and <code>INSERT=false</code>.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -1159,7 +1159,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 1, expected output: evidence for table SELECT without schema USAGE, schema USAGE without table SELECT, and a final three-role matrix with USAGE/SELECT true and INSERT false.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 1, assert the two observed boolean rows equal <code>(USAGE=false, SELECT=true)</code> and <code>(USAGE=true, SELECT=false)</code>, attempt the corresponding qualified SELECTs, and restore only the intended least-privilege state before later exercises.</li>
 </ul>
-<h4 id="solution-1--exercise-2-read-only-auditor">Exercise 2 — Read-only auditor<a class="heading-anchor" href="#solution-1--exercise-2-read-only-auditor" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-read-only-auditor">Exercise 2: Read-only auditor<a class="heading-anchor" href="#solution-1--exercise-2-read-only-auditor" aria-label="Link to this section">#</a></h4>
 <p>The solution creates a NOLOGIN <code>ds60_sec_auditor</code>, grants schema <code>USAGE</code>, lets the owner&#x27;s default privileges grant future table <code>SELECT</code>, and adds:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> POLICY auditor_read
 <span class="syntax-keyword">ON</span> pro_security_lab<span class="syntax-punctuation">.</span>documents
@@ -1174,7 +1174,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 2, expected output: two tenant rows when SET ROLE auditor, correct north/south definer counts, and an expected insufficient-privilege notice for INSERT.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 2, assert the auditor sees exactly both seeded IDs, has no INSERT/UPDATE/DELETE privilege, and cannot execute routines except those explicitly granted.</li>
 </ul>
-<h4 id="solution-1--exercise-3-owner-specific-default-privileges">Exercise 3 — Owner-specific default privileges<a class="heading-anchor" href="#solution-1--exercise-3-owner-specific-default-privileges" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-owner-specific-default-privileges">Exercise 3: Owner-specific default privileges<a class="heading-anchor" href="#solution-1--exercise-3-owner-specific-default-privileges" aria-label="Link to this section">#</a></h4>
 <p><code>audit_notes</code> is created by <code>ds60_sec_owner</code> after:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">ALTER</span> <span class="syntax-keyword">DEFAULT</span> <span class="syntax-keyword">PRIVILEGES</span> <span class="syntax-keyword">IN</span> <span class="syntax-keyword">SCHEMA</span> pro_security_lab
     <span class="syntax-keyword">GRANT</span> <span class="syntax-keyword">SELECT</span> <span class="syntax-keyword">ON</span> TABLES <span class="syntax-keyword">TO</span> ds60_sec_auditor<span class="syntax-punctuation">;</span></code></pre>
@@ -1183,9 +1183,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.</li>
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on <code>audit_notes</code> created by <code>ds60_sec_owner</code> but not on <code>other_owner_notes</code> created by <code>ds60_sec_other_owner</code>.</li>
-<li><strong>Independent verification:</strong> For sql-sec-01 Exercise 3, compare <code>has_table_privilege</code> for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role—not inherited membership defaults.</li>
+<li><strong>Independent verification:</strong> For sql-sec-01 Exercise 3, compare <code>has_table_privilege</code> for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object&#x27;s creating role, not inherited membership defaults.</li>
 </ul>
-<h4 id="solution-1--exercise-4-review-the-definer-boundary">Exercise 4 — Review the definer boundary<a class="heading-anchor" href="#solution-1--exercise-4-review-the-definer-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-review-the-definer-boundary">Exercise 4: Review the definer boundary<a class="heading-anchor" href="#solution-1--exercise-4-review-the-definer-boundary" aria-label="Link to this section">#</a></h4>
 <p>The solution&#x27;s <code>document_count_for_tenant(text)</code> demonstrates minimum controls:</p>
 <ul>
 <li>a NOLOGIN owner with narrowly managed membership;</li>
@@ -1204,7 +1204,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 4, expected output: valid north/south counts, an invalid-parameter rejection for unknown tenant, and catalog rows with owner, <code>prosecdef</code>, <code>proconfig</code>, and <code>proacl</code>.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 4, test allowed and NULL/unknown inputs under SET ROLE auditor, assert PUBLIC lacks EXECUTE, confirm the owner cannot login, and trace every referenced object as schema-qualified.</li>
 </ul>
-<h4 id="solution-1--exercise-5-rls-bypass-cases">Exercise 5 — RLS bypass cases<a class="heading-anchor" href="#solution-1--exercise-5-rls-bypass-cases" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-rls-bypass-cases">Exercise 5: RLS bypass cases<a class="heading-anchor" href="#solution-1--exercise-5-rls-bypass-cases" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>An ordinary table owner normally bypasses RLS.</li>
 <li><code>ALTER TABLE ... FORCE ROW LEVEL SECURITY</code> makes an ordinary owner subject to policies in normal operation.</li>
@@ -1218,7 +1218,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 5, expected output: north sees only north, south sees only south, the forced owner sees zero without a matching policy, and bypass-capable roles are clearly labeled unsuitable tenant-test identities.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 5, assert one own-tenant row and zero cross-tenant rows for each low-privilege role, distinguish owner bypass before FORCE from forced-owner behavior, and never grant or rely on BYPASSRLS for tenants.</li>
 </ul>
-<h4 id="solution-1--exercise-6-effective-access-inventory">Exercise 6 — Effective-access inventory<a class="heading-anchor" href="#solution-1--exercise-6-effective-access-inventory" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-effective-access-inventory">Exercise 6: Effective-access inventory<a class="heading-anchor" href="#solution-1--exercise-6-effective-access-inventory" aria-label="Link to this section">#</a></h4>
 <p>Use <code>has_*_privilege</code> functions for the final yes/no matrix because they account for ownership, membership inheritance, and PUBLIC grants. Pair that with <code>aclexplode</code>/catalog ACLs and <code>pg_auth_members</code> to explain <em>why</em> access exists. Report schema, table, column, sequence, and routine privileges separately; table <code>INSERT</code> and sequence <code>USAGE</code> are independent.</p>
 <p>Evaluate both the login role and every reachable <code>SET ROLE</code> target. ACL text alone misses ownership and inherited capability, while role attributes such as SUPERUSER or BYPASSRLS can dominate ordinary grants.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1227,7 +1227,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 6, expected output: one row per role with five distinct privilege booleans and an <code>effective_source</code> explanation distinguishing owner-default table grants from direct function grants.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 6, compare every effective-access boolean row with object ACLs, role membership, ownership, and PUBLIC and record the matching source evidence; do not infer the grant source from a true boolean alone.</li>
 </ul>
-<h4 id="solution-1--exercise-7-session-and-execution-identity">Exercise 7 — Session and execution identity<a class="heading-anchor" href="#solution-1--exercise-7-session-and-execution-identity" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-session-and-execution-identity">Exercise 7: Session and execution identity<a class="heading-anchor" href="#solution-1--exercise-7-session-and-execution-identity" aria-label="Link to this section">#</a></h4>
 <p><code>SESSION_USER</code> is the authenticated session identity. <code>CURRENT_USER</code> changes during <code>SET ROLE</code> and becomes the routine owner during SECURITY DEFINER execution. After <code>RESET ROLE</code>, current identity returns to the session&#x27;s active identity.</p>
 <p>An audit commonly records both authenticated actor and effective authorization identity, plus an application/request identity established through a trusted channel. Recording only <code>CURRENT_USER</code> inside a definer function can make every action appear to come from its owner.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1236,7 +1236,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 7, expected output: authenticated identity remains SESSION_USER; effective identity changes to auditor under SET ROLE and to the function owner inside SECURITY DEFINER.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 7, compare all three evidence rows and design audit fields that preserve both identities plus the called routine and tenant context.</li>
 </ul>
-<h4 id="solution-1--exercise-8-fail-closed-tenant-context">Exercise 8 — Fail-closed tenant context<a class="heading-anchor" href="#solution-1--exercise-8-fail-closed-tenant-context" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-fail-closed-tenant-context">Exercise 8: Fail-closed tenant context<a class="heading-anchor" href="#solution-1--exercise-8-fail-closed-tenant-context" aria-label="Link to this section">#</a></h4>
 <p>The safe policy maps only exact allowed identities/context values and returns NULL/false for everything else. Test NULL, empty, case variants, unknown values, and a reused pooled connection. If a custom setting is used, read it with the missing-ok form, validate it through a trusted entry point, and reset it on checkout/check-in.</p>
 <p>Never treat a client-writable session variable as authorization by itself. Bind the tenant to authenticated server-side state and preserve negative tests for cross-tenant SELECT, INSERT, UPDATE, and DELETE.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1245,7 +1245,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 8, expected output: four rows with <code>candidate_role</code>, <code>derived_tenant</code>, and <code>accepted_identity</code>; only exact north/south role names are accepted.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 8, assert unknown, case-changed, and NULL identities derive NULL and <code>accepted_identity = false</code>; if a pooled custom setting is adopted instead, validate and transaction-locally reset it.</li>
 </ul>
-<h4 id="solution-1--exercise-9-a-narrow-writer">Exercise 9 — A narrow writer<a class="heading-anchor" href="#solution-1--exercise-9-a-narrow-writer" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-a-narrow-writer">Exercise 9: A narrow writer<a class="heading-anchor" href="#solution-1--exercise-9-a-narrow-writer" aria-label="Link to this section">#</a></h4>
 <p>Use one coherent API-only design: the writer receives schema <code>USAGE</code> and <code>EXECUTE</code> on a fixed-path SECURITY DEFINER insert function, but no table or identity-sequence grants. The function owner is NOLOGIN, its PUBLIC execution is revoked, its inputs are validated, and FORCE RLS plus owner-scoped policies limit it to north rows. <code>RETURNING</code> exposes only the inserted ID, tenant, and title.</p>
 <p>Prove that API call, then attempt a direct cross-tenant INSERT, UPDATE, DELETE, and table SELECT under <code>SET ROLE ds60_sec_writer</code>; all must fail. Mixing direct table grants with this API would add an unused second write path and would no longer be the minimum model.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
@@ -1254,7 +1254,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-sec-01 Exercise 9, expected output: one returned north document from the insert API; cross-tenant INSERT, direct UPDATE, DELETE, and table SELECT each produce an expected denial.</li>
 <li><strong>Independent verification:</strong> For sql-sec-01 Exercise 9, SET LOCAL ROLE writer for every probe, assert the API owner/path/ACL and owner-scoped RLS policies in catalogs, confirm no direct table or sequence privilege, and prove the failed operations leave no rows changed.</li>
 </ul>
-<h4 id="solution-1--exercise-10-offboarding-and-emergency-revocation">Exercise 10 — Offboarding and emergency revocation<a class="heading-anchor" href="#solution-1--exercise-10-offboarding-and-emergency-revocation" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-offboarding-and-emergency-revocation">Exercise 10: Offboarding and emergency revocation<a class="heading-anchor" href="#solution-1--exercise-10-offboarding-and-emergency-revocation" aria-label="Link to this section">#</a></h4>
 <p>First disable login/rotate the external credential and terminate or drain approved sessions according to incident authority. Revoke memberships and direct grants, reassign or explicitly handle owned objects, update the relevant creator&#x27;s default privileges, and inspect dependent grants/routines/policies.</p>
 <p>Use a preserved admin path to avoid locking out recovery. Verify effective access as the real principal, record exact objects and approvals, keep audit records, and distinguish reversible access removal from destructive ownership changes. Cluster-wide commands remain reviewed runbook steps, not lesson SQL.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1923,16 +1923,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.
 
 I have completed the direct catalog prerequisites: `sql-found-02`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_sec_01_roles_privileges_rls.md
@@ -1959,7 +1959,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -2070,18 +2070,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

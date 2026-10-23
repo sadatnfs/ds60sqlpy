@@ -28,8 +28,10 @@ journey-preview:
 	$(PYTHON) scripts/build_journey_preview.py
 
 check:
+	$(PYTHON) scripts/check_public_release.py
 	$(PYTHON) scripts/normalize_lesson_prose.py
 	$(PYTHON) scripts/check_content_rendering.py
+	$(PYTHON) scripts/check_published_links.py
 	$(PYTHON) scripts/course.py validate
 	$(MAKE) test
 

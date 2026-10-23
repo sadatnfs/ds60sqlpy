@@ -1,4 +1,4 @@
-# Day 19 — GroupBy, Aggregation, Pivoting, and Melting
+# Day 19: GroupBy, Aggregation, Pivoting, and Melting
 
 **Level:** Intermediate
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 19 — groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping
+**Lesson outcome:** use day 19; groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -101,7 +101,7 @@ names. In `pivot_table`, `index` defines output rows, `columns` defines
 output columns, `values` supplies measurements, and `aggfunc` resolves
 duplicate combinations.
 
-### Worked example 1 — Aggregate to one row per group
+### Worked example 1: Aggregate to one row per group
 
 Write the output grain before reading the result. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -130,7 +130,7 @@ summary.to_dict("records")
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Align a group total back to every source row
+### Worked example 2: Align a group total back to every source row
 
 Transform preserves the original index and row count. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -285,11 +285,11 @@ labels, and a round-trip validation reconciles totals.
 
 - [Open the learner notebook](../notebooks/day19_pandas_groupby_pivot.ipynb)
 - [Check the separate solution](../solutions/day19_pandas_groupby_pivot/day19_solutions.md)
-- [Next: Day 20 — Merging and joins](day20_pandas_merging_joins.md)
+- [Next: Day 20; Merging and joins](day20_pandas_merging_joins.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

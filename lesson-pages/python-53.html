@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-53-experiment-tracking-with-mlflow">Day 53 — Experiment Tracking with MLflow<a class="heading-anchor" href="#guide--day-53-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-53-experiment-tracking-with-mlflow">Day 53: Experiment Tracking with MLflow<a class="heading-anchor" href="#guide--day-53-experiment-tracking-with-mlflow" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-53</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>production</code> · <strong>Network:</strong> offline</p>
 <p>Experiment tracking connects a result to its parameters, metrics, code context, and artifacts. MLflow can run entirely on the local machine for this lesson; no hosted service or account is required.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -459,7 +459,7 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept deep dive — MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Experiment tracking records evidence about a run; it does not make the run reproducible by itself. An experiment groups comparable runs. A run represents one execution. Parameters describe configuration, metrics are numeric observations (possibly by step), tags add searchable context, and artifacts preserve files or models.</p>
 <p>Comparability requires the same data/split/metric definitions. A model artifact should carry an input example/signature and provenance. Local file tracking is useful for study but is not a shared registry, access control system, or backup.</p>
@@ -470,7 +470,7 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <li><strong><code>log_artifact</code> / model logging:</strong> copies output into the run&#x27;s artifact store; verify reload and input contract rather than trusting existence.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-separate-comparable-configuration-from-results">Focused example A — separate comparable configuration from results<a class="heading-anchor" href="#guide--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-separate-comparable-configuration-from-results">Focused example A: separate comparable configuration from results<a class="heading-anchor" href="#guide--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
@@ -492,7 +492,7 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>run_record<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Configuration, measured outcomes, and contextual labels are distinct, making search and comparison less ambiguous.</p>
 <p><strong>Assumption to name:</strong> The data snapshot and metric definition are stable enough that two records are actually comparable.</p>
-<h5 id="guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B — create and inspect a fully local temporary run<a class="heading-anchor" href="#guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run">Focused example B: create and inspect a fully local temporary run<a class="heading-anchor" href="#guide--focused-example-b-create-and-inspect-a-fully-local-temporary-run" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 <span class="syntax-keyword">from</span> tempfile <span class="syntax-keyword">import</span> TemporaryDirectory
@@ -552,15 +552,15 @@ mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-
 <ol>
 <li>Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<p><strong>Verify:</strong> Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <ol>
 <li>Save a confusion-matrix PNG and log it as an artifact.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<p><strong>Verify:</strong> Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <ol>
 <li>Try a different classifier, such as Random Forest, and compare ROC AUC.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<p><strong>Verify:</strong> Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Make one run per configuration and include split seed, metric name, and model type. Avoid changing several uncontrolled factors at once.</li>
@@ -574,15 +574,15 @@ mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-
 <ol>
 <li><strong>Failure-state handling:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets. <strong>Progressive hint:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</li>
 </ol>
-<p><strong>Verify:</strong> Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
+<p><strong>Verify:</strong> Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
 <ol>
 <li><strong>Provenance manifest:</strong> Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions. <strong>Progressive hint:</strong> Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.</li>
 </ol>
-<p><strong>Verify:</strong> Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
+<p><strong>Verify:</strong> Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
 <ol>
 <li><strong>Reload and signature check:</strong> Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture. <strong>Progressive hint:</strong> The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.</li>
 </ol>
-<p><strong>Verify:</strong> Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p>
+<p><strong>Verify:</strong> Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -629,10 +629,10 @@ mlflow<span class="syntax-operator">.</span>set_tracking_uri<span class="syntax-
 <ul>
 <li>Work in the <a href="python-53.html#learner">Day 53 learner notebook</a>.</li>
 <li>Then consult the <a href="python-53.html#solution-1">Day 53 solution</a>.</li>
-<li>Continue to <a href="python-54.html#guide">Day 54 — Monitoring and Governance</a>.</li>
+<li>Continue to <a href="python-54.html#guide">Day 54; Monitoring and Governance</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -911,7 +911,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking">Day 53 — Solutions: MLOps with MLflow Experiment Tracking<a class="heading-anchor" href="#solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking">Day 53: Solutions: MLOps with MLflow Experiment Tracking<a class="heading-anchor" href="#solution-1--day-53-solutions-mlops-with-mlflow-experiment-tracking" aria-label="Link to this section">#</a></h3>
 <p>We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.</p>
 <p>Contents</p>
 <ul>
@@ -932,7 +932,7 @@ X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</sp
 Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> test_size<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">)</span>
 
 mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf-breast-cancer</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — Grid search with autologging</p>
+<p>Worked reference for Exercise 1; Grid search with autologging</p>
 <pre class="highlighted-code"><code class="language-python">mlflow<span class="syntax-operator">.</span>sklearn<span class="syntax-operator">.</span>autolog<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
 param_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&#x27;</span><span class="syntax-string">n_estimators</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span><span class="syntax-number">300</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;</span><span class="syntax-string">max_depth</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">[</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span><span class="syntax-number">5</span><span class="syntax-punctuation">,</span><span class="syntax-number">10</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
@@ -952,7 +952,7 @@ cv <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-punctu
 <li>Start a run context so logs are grouped</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Log and load best model</p>
+<p>Worked reference for Exercise 2; Log and load best model</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">with</span> mlflow<span class="syntax-operator">.</span>start_run<span class="syntax-punctuation">(</span>run_name<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">rf_best_model</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> run<span class="syntax-punctuation">:</span>
     best <span class="syntax-operator">=</span> RandomForestClassifier<span class="syntax-punctuation">(</span>random_state<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span>cv<span class="syntax-operator">.</span>best_params_<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
     proba <span class="syntax-operator">=</span> best<span class="syntax-operator">.</span>predict_proba<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span><span class="syntax-punctuation">,</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
@@ -972,7 +972,7 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Use mlflow ui to compare runs: <code>mlflow ui --port 5000</code></li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Model Registry (concepts)</p>
+<p>Worked reference for Exercise 3; Model Registry (concepts)</p>
 <ul>
 <li>Register models for stages: Staging → Production</li>
 <li>Transition approvals and CI checks gate promotions</li>
@@ -996,42 +996,42 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</p>
 <p><strong>How to reason about it:</strong> Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save a confusion-matrix PNG and log it as an artifact.</p>
 <p><strong>How to reason about it:</strong> Create the confusion matrix under ignored <code>artifacts/</code>, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run&#x27;s numeric metrics.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a different classifier, such as Random Forest, and compare ROC AUC.</p>
 <p><strong>How to reason about it:</strong> Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
-<h5 id="solution-1--exercise-4-failure-state-handling">Exercise 4 — Failure-state handling<a class="heading-anchor" href="#solution-1--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
+<h5 id="solution-1--exercise-4-failure-state-handling">Exercise 4: Failure-state handling<a class="heading-anchor" href="#solution-1--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.</p>
 <p><strong>Reasoning before implementation:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</p>
 <p>Do not catch every exception and end the run as successful. If cleanup is needed, catch narrowly, log a redacted diagnostic or tag, and re-raise so the tracking status remains honest.</p>
 <p>Never put credentials, full environment variables, or sensitive records in tags/artifacts. Link to an approved local diagnostic ID when deeper incident evidence is restricted.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
-<h5 id="solution-1--exercise-5-provenance-manifest">Exercise 5 — Provenance manifest<a class="heading-anchor" href="#solution-1--exercise-5-provenance-manifest" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
+<h5 id="solution-1--exercise-5-provenance-manifest">Exercise 5: Provenance manifest<a class="heading-anchor" href="#solution-1--exercise-5-provenance-manifest" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.</p>
 <p><strong>Reasoning before implementation:</strong> Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.</p>
 <p>The manifest should make two similar-looking runs distinguishable. Include target/positive-label semantics and units/denominators for metrics. Record a dirty-worktree flag when applicable rather than falsely claiming the Git revision alone captures code state.</p>
 <p>A hash proves identity relative to the hashed bytes, not trust or data quality. Keep the source snapshot governed and reproducible.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
-<h5 id="solution-1--exercise-6-reload-and-signature-check">Exercise 6 — Reload and signature check<a class="heading-anchor" href="#solution-1--exercise-6-reload-and-signature-check" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
+<h5 id="solution-1--exercise-6-reload-and-signature-check">Exercise 6: Reload and signature check<a class="heading-anchor" href="#solution-1--exercise-6-reload-and-signature-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.</p>
 <p><strong>Reasoning before implementation:</strong> The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.</p>
 <p>Test missing/extra columns and dtypes as well as a valid prediction. The signature catches many integration errors but does not replace domain validation such as allowed ranges or category policy.</p>
 <p>Use the local file-backed tracking URI for the offline lesson. A production registry adds authentication and promotion policy, which should be documented as an extension rather than required for the portable course.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p></div>
+<p><strong>Verify:</strong> Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p></div>
       </section>
 
 
@@ -1198,16 +1198,16 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize MLflow run identity, params, metrics, artifacts, and reproducible evidence. Use exactly these maintained learner materials:
@@ -1235,7 +1235,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1346,18 +1346,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

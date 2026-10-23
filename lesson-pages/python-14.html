@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-14-code-quality-with-ruff-mypy-and-pytest">Day 14 — Code Quality with Ruff, mypy, and pytest<a class="heading-anchor" href="#guide--day-14-code-quality-with-ruff-mypy-and-pytest" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-14-code-quality-with-ruff-mypy-and-pytest">Day 14: Code Quality with Ruff, mypy, and pytest<a class="heading-anchor" href="#guide--day-14-code-quality-with-ruff-mypy-and-pytest" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Formatting, linting, static typing, and tests answer different questions. A project needs all four signals, and this repository configures them in <code>pyproject.toml</code>.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -404,8 +404,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 14 — code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 14; code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Code-quality tools answer different questions. A formatter applies one consistent layout. A linter detects selected suspicious or inconsistent patterns. A static type checker compares annotated contracts without executing the program. Tests still check runtime behavior; no one tool replaces the others.</p>
 <p>Treat tool output as a precise diagnostic: file, line, rule, and message. Understand a warning before suppressing it, make the smallest change, then rerun the narrow command. Configuration belongs in <code>pyproject.toml</code> so developers and continuous integration use the same rules.</p>
@@ -420,7 +420,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>python -m ruff check path</code> chooses the repository interpreter, runs the Ruff module, performs checks, and scopes them to <code>path</code>. <code>ruff format --check</code> reports formatting drift without rewriting. A function annotation such as <code>def total(values: list[float]) -&gt; float:</code> gives mypy a contract to compare with callers and return statements.</p>
-<h5 id="guide--worked-example-1-inspect-annotations-as-documentation">Worked example 1 — Inspect annotations as documentation<a class="heading-anchor" href="#guide--worked-example-1-inspect-annotations-as-documentation" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-inspect-annotations-as-documentation">Worked example 1: Inspect annotations as documentation<a class="heading-anchor" href="#guide--worked-example-1-inspect-annotations-as-documentation" aria-label="Link to this section">#</a></h5>
 <p>Hints are stored but do not enforce runtime arguments by themselves. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> get_type_hints
 
@@ -431,7 +431,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`({&#x27;values&#x27;: list[float], &#x27;return&#x27;: float}, 3.5)` (representation may vary slightly). A type checker uses the hints before execution.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-refactor-a-long-expression-into-named-facts">Worked example 2 — Refactor a long expression into named facts<a class="heading-anchor" href="#guide--worked-example-2-refactor-a-long-expression-into-named-facts" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-refactor-a-long-expression-into-named-facts">Worked example 2: Refactor a long expression into named facts<a class="heading-anchor" href="#guide--worked-example-2-refactor-a-long-expression-into-named-facts" aria-label="Link to this section">#</a></h5>
 <p>Formatting cannot choose meaningful names; design still belongs to the author. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">prices <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">12.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span>
 subtotal <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>prices<span class="syntax-punctuation">)</span>
@@ -525,10 +525,10 @@ discounted_total <span class="syntax-operator">=</span> subtotal <span class="sy
 <ul>
 <li><a href="python-14.html#learner">Open the learner notebook</a></li>
 <li><a href="python-14.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-15.html#guide">Next: Day 15 — CLI data tool project</a></li>
+<li><a href="python-15.html#guide">Next: Day 15; CLI data tool project</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-14`
 (Day 14 — Code Quality with Ruff, mypy, and pytest). Direct catalog prerequisites: `python-13`.
 I have completed the direct prerequisites: `python-13`. Emphasize automated formatting, linting, and static type feedback.
@@ -784,7 +784,7 @@ python -m mypy .</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-14-solutions-code-quality-with-ruff-and-mypy">Day 14 — Solutions: Code Quality with Ruff and mypy<a class="heading-anchor" href="#solution-1--day-14-solutions-code-quality-with-ruff-and-mypy" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-14-solutions-code-quality-with-ruff-and-mypy">Day 14: Solutions: Code Quality with Ruff and mypy<a class="heading-anchor" href="#solution-1--day-14-solutions-code-quality-with-ruff-and-mypy" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>automated formatting, linting, and static type feedback</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Code-quality tools answer different questions. A formatter applies one consistent layout. A linter detects selected suspicious or inconsistent patterns. A static type checker compares annotated contracts without executing the program. Tests still check runtime behavior; no one tool replaces the others.</p>
@@ -800,8 +800,8 @@ python -m mypy .</code></pre>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>automated formatting, linting, and static type feedback</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Run Ruff formatting and lint checks on a small intentionally messy Python file. <strong>Evidence:</strong> record at least one formatter change and one lint diagnostic with its rule code. <strong>Constraints:</strong> understand each automatic fix, do not run broad fixes over unrelated repository files, and delete only the scratch file you created. <strong>Verify:</strong> both <code>ruff format --check</code> and <code>ruff check</code> pass afterward.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Run Ruff formatting and lint checks on a small intentionally messy Python file. Evidence: record at least one formatter change and one lint diagnostic with its rule code. Constraints: understand each automatic fix, do not run broad fixes over unrelated repository files, and delete only the scratch file you created. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: both <code>ruff format --check</code> and <code>ruff check</code> pass afterward. That connects the answer to automated formatting, linting, and static type feedback.</p>
 <p>Use a small scratch file and run the repository tools independently:</p>
@@ -811,7 +811,7 @@ python -m mypy scratch_quality.py
 python -m pytest path/to/test_scratch_quality.py</code></pre>
 <p>Ruff formatting owns layout; Ruff checks selected static patterns; mypy checks annotated type consistency; pytest checks runtime contracts. Save one diagnostic from each deliberate defect, repair it, then rerun.</p>
 <p><strong>Verification evidence:</strong> both <code>ruff format --check</code> and <code>ruff check</code> pass afterward.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add useful type hints to a function that accepts records and returns a numeric total, then run mypy on the file. <strong>Introduce:</strong> one wrong caller argument and one wrong return in scratch code so you can read both diagnostics. <strong>Expected behavior:</strong> mypy rejects both; after repair it reports success while runtime tests still pass. <strong>Verify:</strong> Save the two expected mypy diagnostics, repair both defects, and show mypy plus the runtime test command pass.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Add useful type hints to a function that accepts records and returns a numeric total, then run mypy on the file. Introduce: one wrong caller argument and one wrong return in scratch code so you can read both diagnostics. Expected behavior: mypy rejects both; after repair it reports success while runtime tests still pass. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Save the two expected mypy diagnostics, repair both defects, and show mypy plus the runtime test command pass. The diagnosis depends on automated formatting, linting, and static type feedback.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterable
@@ -829,30 +829,30 @@ python -m pytest path/to/test_scratch_quality.py</code></pre>
 <span class="syntax-keyword">assert</span> total_amount<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2.5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">4.0</span></code></pre>
 <p>Mypy rejects <code>{&quot;amount&quot;: &quot;2.5&quot;}</code> and a string return before runtime; the assertion still proves the valid runtime calculation.</p>
 <p><strong>Verification evidence:</strong> Save the two expected mypy diagnostics, repair both defects, and show mypy plus the runtime test command pass.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Given an unused import, inconsistent spacing, a possible <code>None</code> value, and a wrong result, predict which quality tool can detect each. <strong>Progressive hint:</strong> No single tool proves all four properties. <strong>Verify:</strong> Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Given an unused import, inconsistent spacing, a possible <code>None</code> value, and a wrong result, predict which quality tool can detect each. Progressive hint: No single tool proves all four properties. Then compare the prediction with this proof target: Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed. This makes automated formatting, linting, and static type feedback observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace type narrowing for <code>str | None</code> through an explicit <code>is None</code> branch and state the type in each path. <strong>Progressive hint:</strong> A type checker follows control-flow evidence. <strong>Verify:</strong> Capture <code>reveal_type</code> or equivalent type-checker output in both branches; assert the non-None branch reports <code>str</code> and the absence branch reports an error for a string-method call.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace type narrowing for <code>str | None</code> through an explicit <code>is None</code> branch and state the type in each path. Progressive hint: A type checker follows control-flow evidence. Record the named value, shape, label, or iterator position needed to establish: Capture <code>reveal_type</code> or equivalent type-checker output in both branches; assert the non-None branch reports <code>str</code> and the absence branch reports an error for a string-method call. The trace exposes automated formatting, linting, and static type feedback directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Capture <code>reveal_type</code> or equivalent type-checker output in both branches; assert the non-None branch reports <code>str</code> and the absence branch reports an error for a string-method call.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Refactor an untyped file loader into a typed function using <code>Path</code>, a context manager, UTF-8, and a validated return shape. <strong>Progressive hint:</strong> Boundary validation can replace an unhelpfully broad <code>Any</code>. <strong>Verify:</strong> Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Implementation: Refactor an untyped file loader into a typed function using <code>Path</code>, a context manager, UTF-8, and a validated return shape. Progressive hint: Boundary validation can replace an unhelpfully broad <code>Any</code>. Values below, at, and above the named boundary must produce the evidence Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries. Those cases show how automated formatting, linting, and static type feedback behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Replace an unexplained <code># type: ignore</code> with a real narrowing or a narrow error-code ignore plus justification. <strong>Progressive hint:</strong> Do not suppress diagnostics before understanding the contract. <strong>Verify:</strong> Show the original diagnostic, replace suppression with narrowing where possible, and confirm any remaining ignore names one error code and rationale.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Replace an unexplained <code># type: ignore</code> with a real narrowing or a narrow error-code ignore plus justification. Progressive hint: Do not suppress diagnostics before understanding the contract. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the original diagnostic, replace suppression with narrowing where possible, and confirm any remaining ignore names one error code and rationale. The diagnosis depends on automated formatting, linting, and static type feedback.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show the original diagnostic, replace suppression with narrowing where possible, and confirm any remaining ignore names one error code and rationale.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design a local/CI gate order and explain why formatter success should not prevent tests from running during diagnosis. <strong>Progressive hint:</strong> Fast static checks give feedback, but each signal remains independent. <strong>Verify:</strong> Run each gate independently on a deliberately broken scratch file and record its signal; confirm one early failure does not erase later diagnostic evidence.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design a local/CI gate order and explain why formatter success should not prevent tests from running during diagnosis. Progressive hint: Fast static checks give feedback, but each signal remains independent. Values below, at, and above the named boundary must produce the evidence Run each gate independently on a deliberately broken scratch file and record its signal; confirm one early failure does not erase later diagnostic evidence. Those cases show how automated formatting, linting, and static type feedback behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Run each gate independently on a deliberately broken scratch file and record its signal; confirm one early failure does not erase later diagnostic evidence.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use formatter, linter, type checker, and tests as complementary evidence. Read and fix one diagnostic at a time, then review behavior.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-match-evidence-to-the-question">Shared implementation for Exercises 3–4 — Match evidence to the question<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-match-evidence-to-the-question" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-match-evidence-to-the-question">Shared implementation for Exercises 3–4: Match evidence to the question<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-match-evidence-to-the-question" aria-label="Link to this section">#</a></h5>
 <ul>
 <li>Ruff reports unused imports and configured lint rules.</li>
 <li>Ruff format checks layout.</li>
@@ -863,7 +863,7 @@ python -m pytest path/to/test_scratch_quality.py</code></pre>
     <span class="syntax-keyword">if</span> value <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span>      <span class="syntax-comment"># Here value is None.</span>
     <span class="syntax-keyword">return</span> value<span class="syntax-operator">.</span>upper<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>      <span class="syntax-comment"># Here mypy narrows value to str.</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-boundaries-instead-of-silencing-them">Shared implementation for Exercises 5–7 — Validate boundaries instead of silencing them<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-boundaries-instead-of-silencing-them" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-boundaries-instead-of-silencing-them">Shared implementation for Exercises 5–7: Validate boundaries instead of silencing them<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-boundaries-instead-of-silencing-them" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> json
@@ -999,16 +999,16 @@ python -m pytest path/to/test_scratch_quality.py</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-14`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-14`
 (Day 14 — Code Quality with Ruff, mypy, and pytest). Direct catalog prerequisites: `python-13`.
 I have completed the direct prerequisites: `python-13`. Emphasize automated formatting, linting, and static type feedback.
 Read `python/ds-60day/companion-guides/day14_code_quality_tooling.md` and use the learner notebook
@@ -1023,7 +1023,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1134,18 +1134,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

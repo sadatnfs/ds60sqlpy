@@ -1,4 +1,4 @@
-# Day 38 — Decision Trees and Random Forests
+# Day 38: Decision Trees and Random Forests
 
 **Lesson ID:** `python-38` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -99,7 +99,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — tree splits, ensemble variance reduction, and held-out importance
+## Concept deep dive: tree splits, ensemble variance reduction, and held-out importance
 
 ### The mental model
 
@@ -126,7 +126,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — make the depth-versus-generalization gap visible
+### Focused example A: make the depth-versus-generalization gap visible
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -152,7 +152,7 @@ for depth in (1, 3, 8, None):
 
 **Assumption to name:** The validation split represents future cases and was not used to choose unlimited alternatives.
 
-### Focused example B — test a deliberately useless noise feature
+### Focused example B: test a deliberately useless noise feature
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -207,11 +207,11 @@ print({"noise_importance": importance.importances_mean[-1],
 
 1. Plot tree depth versus accuracy.
 
-**Verify:** Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
+**Verify:** Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
 2. Inspect feature importances and discuss their reliability.
 
-**Verify:** Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
+**Verify:** Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
 ### Progressive hints
 
@@ -231,22 +231,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Pruning implementation:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
    **Progressive hint:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
 
-**Verify:** Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
+**Verify:** Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
 
 4. **Out-of-bag reasoning:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
    **Progressive hint:** Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.
 
-**Verify:** Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
+**Verify:** Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
 
 5. **Imbalance debugging:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
    **Progressive hint:** A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.
 
-**Verify:** Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
+**Verify:** Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
 
 6. **Correlated-importance edge case:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
    **Progressive hint:** The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.
 
-**Verify:** Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.
+**Verify:** Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -281,12 +281,12 @@ alone.
 - Work in the [Day 38 learner notebook](../notebooks/day38_tree_models_random_forest.ipynb).
 - Then consult the
   [Day 38 solution](../solutions/day38_tree_models_random_forest/day38_solutions.md).
-- Continue to [Day 39 — Gradient Boosting](day39_gradient_boosting_xgboost_lightgbm.md).
+- Continue to [Day 39; Gradient Boosting](day39_gradient_boosting_xgboost_lightgbm.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.

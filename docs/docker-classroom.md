@@ -67,8 +67,8 @@ It selects [Google's Docker Hub mirror](https://cloud.google.com/artifact-regist
 for the compiler/JVM/Node/Spark bases and
 [Astral's pinned Python image](https://docs.astral.sh/uv/guides/integration/docker/)
 on GitHub Container Registry for the Python base. It does not contain credentials, modify the engine, or publish images.
-These alternatives were used for local Linux arm64 qualification on a machine
-whose Docker Hub CDN certificate chain could not be verified.
+Use the mirror configuration only when it fits your network and trust policy.
+Registry availability is separate from whether a built lesson runtime works.
 
 To build every ordinary profile with that configuration and visible logs, run
 this single line from the extracted course folder on any OS:
@@ -92,9 +92,9 @@ docker compose -f compose.classroom.yaml --profile python-core up -d --no-build 
 docker compose -f compose.classroom.yaml --profile "*" ps
 ```
 
-Wait for readiness, then open [the module classroom](http://127.0.0.1:8765/classroom)
-yourself. [The original Python/SQL lab](http://127.0.0.1:8765/classroom) is also
-available. No website account is needed. The initializer prepares private worker
+Wait for readiness, then open [the unified classroom](http://127.0.0.1:8765/classroom)
+yourself. Python, SQL and every subject share that entrypoint. No website
+account is needed. The initializer prepares private worker
 credentials and writable learner storage inside Docker volumes.
 
 Start with a reading lesson or a `python-core` lesson such as `llm-002`.

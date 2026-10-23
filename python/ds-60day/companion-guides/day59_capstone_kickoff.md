@@ -1,9 +1,9 @@
-# Day 59 — Capstone Kickoff
+# Day 59: Capstone Kickoff
 
 **Lesson ID:** `python-59` · **Level:** advanced · **Dependencies:** `advanced` · **Network:** offline
 
 Today you freeze a feasible problem, evaluation plan, and reproducible project
-skeleton. A strong capstone is a defensible, runnable argument—not a large pile
+skeleton. A strong capstone is a defensible, runnable argument, not a large pile
 of techniques.
 
 ## Learning objectives
@@ -124,7 +124,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — capstone scope, decision framing, data contracts, and early stop rules
+## Concept deep dive: capstone scope, decision framing, data contracts, and early stop rules
 
 ### The mental model
 
@@ -152,7 +152,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — validate a project charter as data
+### Focused example A: validate a project charter as data
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -181,7 +181,7 @@ assert not missing
 
 **Assumption to name:** The stakeholder confirms the metric and capacity actually reflect the intended action.
 
-### Focused example B — turn a claim into predeclared acceptance checks
+### Focused example B: turn a claim into predeclared acceptance checks
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -233,15 +233,15 @@ assert all(results.values())
 
 1. Write the problem statement and success metric in the notebook.
 
-**Verify:** Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
+**Verify:** Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
 2. Create the project skeleton.
 
-**Verify:** Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
+**Verify:** Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
 3. Build a baseline and record metrics.
 
-**Verify:** Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
+**Verify:** Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
 ### Progressive hints
 
@@ -265,17 +265,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Scope and stop rules:** Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.
    **Progressive hint:** Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.
 
-**Verify:** Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
+**Verify:** Scope and stop rules; deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
 
 5. **Capstone data contract:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
    **Progressive hint:** Use a tiny valid fixture and deliberately invalid fixture to test the validator.
 
-**Verify:** Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
+**Verify:** Capstone data contract; validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
 
 6. **Decision log:** Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.
    **Progressive hint:** Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.
 
-**Verify:** Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.
+**Verify:** Decision log; record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -305,12 +305,12 @@ failure mode, and validation check for every answer.
 - Build in the [Day 59 learner notebook](../notebooks/day59_capstone_kickoff.ipynb).
 - Then review the
   [Day 59 solution](../solutions/day59_capstone_kickoff/day59_solutions.md).
-- Continue to [Day 60 — Completion and Presentation](day60_capstone_completion_presentation.md).
+- Continue to [Day 60; Completion and Presentation](day60_capstone_completion_presentation.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-59` — Day 59 — Capstone Kickoff.

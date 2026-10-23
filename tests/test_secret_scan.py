@@ -161,3 +161,11 @@ def test_git_history_scan_finds_deleted_secret_without_echoing_it(tmp_path: Path
         (Path("deleted.txt"), 1, "AWS access key")
     ]
     assert fake_key not in repr(findings[0])
+
+
+def test_named_environment_overrides_are_sensitive_but_example_is_public() -> None:
+    from ds60sqlpy.secret_scan import sensitive_filename
+
+    assert sensitive_filename(Path("nested/.env.production"))
+    assert sensitive_filename(Path("nested/.env.local"))
+    assert not sensitive_filename(Path("nested/.env.example"))

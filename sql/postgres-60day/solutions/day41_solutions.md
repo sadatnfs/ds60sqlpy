@@ -1,4 +1,4 @@
-# Day 41 Solutions — Complex Aggregations
+# Day 41 Solutions: Complex Aggregations
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ The learner script introduces `FILTER`, conditional aggregation, and
 and a country-level top-product label. The canonical runnable answer is also in
 [`day41_solutions.sql`](day41_solutions.sql).
 
-## Exercise 1 — Six category dashboard metrics
+## Exercise 1: Six category dashboard metrics
 
 Build one row per product category containing:
 
@@ -131,7 +131,7 @@ division-by-zero error.
 - **Alternative/trade-off:** For sql-41 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build one row per product category containing: 1. Evaluate another form against the concrete expected result (one row for each category in `training.products`, with six metric columns) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Top five product names per country
+## Exercise 2: Top five product names per country
 
 Rank at `(country, product)` grain before aggregating names. This avoids the
 common mistake of applying `LIMIT 5` to the entire result instead of five
@@ -186,7 +186,7 @@ ordered from highest to lowest product revenue.
 - Add a deterministic tie-breaker (`product_id`) to `ROW_NUMBER`.
 - Both answers are read-only and safe to run repeatedly.
 
-## Exercise 3 — Compare grouping sets and CUBE
+## Exercise 3: Compare grouping sets and CUBE
 
 The `CUBE(country, category)` answer emits detail, both one-dimensional
 subtotals, and the grand total. `GROUPING(country, category)` identifies each
@@ -244,7 +244,7 @@ Read this in three stages:
 - **Alternative/trade-off:** Spell out `GROUPING SETS ((country, category), (country), (category), ())` when the requested levels should be especially visible. Use `CUBE` when all combinations are intended. Omitting `(country, category)` would omit detail.
 - **Edge case:** A stored `NULL` in a dimension and a generated subtotal marker can print the same dimension value. Use `grouping_mask`, not `country IS NULL` or `category IS NULL`, to identify the row's grain.
 
-## Exercise 4 — State metric populations with FILTER
+## Exercise 4: State metric populations with FILTER
 
 Each status/time population appears beside its aggregate, making several
 country metrics readable without repeating the whole grouped relation.
@@ -259,7 +259,7 @@ country metrics readable without repeating the whole grouped relation.
 - **Alternative/trade-off:** For sql-41 Exercise 4, the chosen form is justified by this lesson-specific rationale: Each status/time population appears beside its aggregate, making several country metrics readable without repeating the whole grouped relation. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Distinguish stored and generated NULLs
+## Exercise 5: Distinguish stored and generated NULLs
 
 `GROUPING(country)` is one only for the generated subtotal. A stored NULL, if
 allowed by the model, keeps grouping flag zero and receives a different label.
@@ -297,7 +297,7 @@ receives `1`. The labels branch on that flag before using `COALESCE`.
 - **Alternative/trade-off:** On a production table that already permits and contains stored NULL countries, omit the fixture row. Keep the `GROUPING`-first label logic unchanged.
 - **Edge case:** Never write `GROUPING(NULL)` to simulate data. `GROUPING` must refer to an expression in the current grouping specification; put a NULL in the input relation to test stored-NULL behavior.
 
-## Exercise 6 — Return a typed empty collection
+## Exercise 6: Return a typed empty collection
 
 `array_agg` over no qualifying inputs is NULL. The answer uses
 `COALESCE(..., '{}'::text[])`; the explicit type must match the aggregate type.

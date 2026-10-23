@@ -1,4 +1,4 @@
-# Day 18 solutions — LAG/LEAD and Intra-Row Comparisons
+# Day 18 solutions: LAG/LEAD and Intra-Row Comparisons
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Show each order with the previous order timestamp for that customer.
 
@@ -110,7 +110,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-18 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer and order by timestamp plus ID. Evaluate another form against the concrete expected result (One row per order; first customer order has NULL previous timestamp) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate days since each customer's previous order.
 
@@ -159,7 +159,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-18 Exercise 2, the chosen form is justified by this lesson-specific rationale: Compute lag in a CTE, subtract timestamps, and preserve NULL for first orders. Evaluate another form against the concrete expected result (One row per order with nullable interval/days) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Show each promotion with the next promotion start date for the same product.
 
@@ -201,7 +201,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-18 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by product and define a stable chronological order. Evaluate another form against the concrete expected result (One row per promotion; last product promotion has NULL next date) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Identify first rows in each customer partition using a NULL lag without replacing it with a fake date.
 
@@ -250,7 +250,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-18 Exercise 4, the chosen form is justified by this lesson-specific rationale: NULL means there is no prior observation; preserve that semantic state. Evaluate another form against the concrete expected result (One row per customer's first order) and the verification above.
 - **Edge case:** Repeat with `NULL` in `order_id`, and `customer_id` and state whether the row is kept, rejected, or classified.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Compute month-over-month stored-revenue change after aggregating to month grain.
 
@@ -302,7 +302,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-18 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate first; applying lag to raw orders would compare adjacent orders rather than months. Evaluate another form against the concrete expected result (One row per month with nullable first change) and the verification above.
 - **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Compare each product price with the next higher price in its category.
 

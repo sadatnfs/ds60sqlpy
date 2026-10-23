@@ -1,9 +1,9 @@
-# Day 13 — Date/Time Functions and Time Zones (Companion Guide)
+# Day 13: Date/Time Functions and Time Zones (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 12 — string functions](day12_string_functions.md)
+- **Prerequisites:** [Day 12; string functions](day12_string_functions.md)
 - **Artifacts:** [learner SQL](../day13_date_time_functions.sql) ·
   [solution reasoning](../solutions/day13_solutions.md) ·
   [executable solution](../solutions/day13_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-13 — Date Time Functions** and choose
+2. Open **SQL-13; Date Time Functions** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -228,7 +228,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 14 — numeric types and casting](day14_numeric_and_casting.md).
+Continue to [Day 14; numeric types and casting](day14_numeric_and_casting.md).
 
 ## Deep dive and reference
 
@@ -261,11 +261,11 @@ Further reading
 - Date/time: https://www.postgresql.org/docs/current/functions-datetime.html
 - generate_series: https://www.postgresql.org/docs/current/functions-srf.html
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-13 — Date Time Functions.

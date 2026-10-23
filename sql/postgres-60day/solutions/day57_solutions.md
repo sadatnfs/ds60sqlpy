@@ -1,4 +1,4 @@
-# Day 57 Solutions — Forecast Accuracy and Anomalies
+# Day 57 Solutions: Forecast Accuracy and Anomalies
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ The exercises compare a seven-day moving average with a weekly seasonal naive,
 then rank recent positive and negative anomalies using standard-deviation and
 MAD scores. See [`day57_solutions.sql`](day57_solutions.sql).
 
-## Exercise 1 — Compare MA(7) and lag-7 MAPE
+## Exercise 1: Compare MA(7) and lag-7 MAPE
 
 The calendar spine makes “seven days ago” mean seven calendar days, including
 days with no orders as zero revenue.
@@ -117,7 +117,7 @@ Expected shape: two model rows. Zero-revenue days are excluded from MAPE by
 - **Alternative/trade-off:** For sql-57 Exercise 1, the chosen form is justified by this lesson-specific rationale: The calendar spine makes “seven days ago” mean seven calendar days, including days with no orders as zero revenue. Evaluate another form against the concrete expected result (two model rows. Zero-revenue days are excluded from MAPE by `NULLIF`; disclose that choice) and the verification above.
 - **Edge case:** If every eligible actual is zero, MAPE is NULL because its denominator is empty after `NULLIF`; report that state rather than replacing it with zero.
 
-## Exercise 2 — Top ten positive and negative anomalies
+## Exercise 2: Top ten positive and negative anomalies
 
 ```sql
 SET search_path TO training, public;
@@ -205,7 +205,7 @@ The exact runnable answers are in
 [`day57_solutions.sql`](day57_solutions.sql). The notes below explain why every
 stage exists, so the query can be rebuilt rather than memorized.
 
-### Clause map for Exercise 1 — Compare two forecasts without leakage
+### Clause map for Exercise 1: Compare two forecasts without leakage
 
 - `bounds` finds the observed date extent; it avoids assuming that course data
   ends today.
@@ -224,7 +224,7 @@ stage exists, so the query can be rebuilt rather than memorized.
 `UNION ALL` retains one row per model. `ORDER BY model` makes the small result
 stable but has no analytical effect.
 
-### Clause map for Exercise 2 — Rank robust anomaly candidates
+### Clause map for Exercise 2: Rank robust anomaly candidates
 
 - `daily` establishes one observation per represented order date.
 - `moments` calculates the mean and sample standard deviation used by the
@@ -241,7 +241,7 @@ stable but has no analytical effect.
 The final filter keeps ten per direction *after* ranking. Ordering direction
 then rank makes review reproducible.
 
-## Exercise 3 — Prove what seven means
+## Exercise 3: Prove what seven means
 
 The answer calculates `observed_row_lag7` before building a spine and
 `calendar_day_lag7` after it. Joining the outputs by date makes any gaps visible.
@@ -257,7 +257,7 @@ Neither population is automatically correct; the metric contract decides.
 - **Alternative/trade-off:** For sql-57 Exercise 3, the chosen form is justified by this lesson-specific rationale: The answer calculates `observed_row_lag7` before building a spine and `calendar_day_lag7` after it. Evaluate another form against the concrete expected result (at most 30 rows keyed by `day`) and the verification above.
 - **Edge case:** Run with 30 minus one and 30 plus one eligible rows; require the output cap of 30 while retaining `c.day DESC`.
 
-## Exercise 4 — Compare MAE, RMSE, and MAPE fairly
+## Exercise 4: Compare MAE, RMSE, and MAPE fairly
 
 `calendar_daily` and `forecasts` repeat the leakage-free foundation.
 `common_scoring_rows` uses LATERAL `VALUES` to reshape model columns into
@@ -279,7 +279,7 @@ both models one evaluation population.
 - **Alternative/trade-off:** For sql-57 Exercise 4, the chosen form is justified by this lesson-specific rationale: `calendar_daily` and `forecasts` repeat the leakage-free foundation. Evaluate another form against the concrete expected result (one row per `model_name`) and the verification above.
 - **Edge case:** A zero-revenue day remains in `scored_rows` and `zero_actual_rows`, contributes to MAE and RMSE, and contributes no percentage term to MAPE.
 
-## Exercise 5 — Detect a leaky frame
+## Exercise 5: Detect a leaky frame
 
 The leaky window ends at `CURRENT ROW`, so the day's actual helps predict itself.
 The corrected frame ends at `1 PRECEDING`. Displaying both columns is a direct
@@ -295,7 +295,7 @@ proof of the semantic difference.
 - **Alternative/trade-off:** For sql-57 Exercise 5, the chosen form is justified by this lesson-specific rationale: The leaky window ends at `CURRENT ROW`, so the day's actual helps predict itself. Evaluate another form against the concrete expected result (at most 20 rows keyed by `day`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
 
-## Exercise 6 — Preserve undefined zero-dispersion scores
+## Exercise 6: Preserve undefined zero-dispersion scores
 
 The constant three-day fixture has standard deviation and MAD equal to zero.
 Both score formulas divide by `NULLIF(dispersion, 0)`, yielding NULL. That means

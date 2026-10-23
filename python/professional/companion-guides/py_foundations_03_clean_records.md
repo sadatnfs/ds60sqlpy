@@ -225,7 +225,7 @@ Use these boundaries in the first independent data investigation, then carry
 the same reasoning into pandas cleaning and schema validation. A library may
 make conversion faster; it cannot choose your missing-value or identity policy.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-foundations-03.

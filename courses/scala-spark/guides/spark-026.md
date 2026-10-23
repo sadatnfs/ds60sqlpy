@@ -188,7 +188,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 Arrow and pandas guide](https://spark.apache.org/docs/4.0.1/api/python/tutorial/sql/arrow_pandas.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-026: Built-ins, UDFs and Python-JVM columnar boundaries.

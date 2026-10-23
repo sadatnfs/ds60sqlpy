@@ -180,7 +180,7 @@ No. It establishes those observations under this fixture. Representative indepen
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-024, Capstone: a small classifier with honest evaluation.

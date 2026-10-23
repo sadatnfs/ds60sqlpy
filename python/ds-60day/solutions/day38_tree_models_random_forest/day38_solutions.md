@@ -1,4 +1,4 @@
-# Day 38 — Solutions: Decision Trees and Random Forests
+# Day 38: Solutions: Decision Trees and Random Forests
 
 We train a shallow decision tree and a random forest, control overfitting with depth/leaf parameters, and compare feature importances (impurity vs permutation).
 
@@ -21,7 +21,7 @@ X, y = load_breast_cancer(return_X_y=True)
 Xtr, Xte, ytr, yte = train_test_split(X, y, random_state=42)
 ```
 
-Worked reference for Exercise 1 — Depth vs accuracy
+Worked reference for Exercise 1; Depth vs accuracy
 ```python
 depths = [1, 2, 3, 4, 6, 8, None]
 accs = []
@@ -42,7 +42,7 @@ rf_acc = rf.score(Xte, yte)
 rf_acc
 ```
 
-Worked reference for Exercise 2 — Feature importances (impurity vs permutation)
+Worked reference for Exercise 2; Feature importances (impurity vs permutation)
 ```python
 # Impurity-based (built-in)
 impurity_imp = rf.feature_importances_
@@ -106,7 +106,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Plot tree depth versus accuracy.
 
@@ -116,9 +116,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
+**Verify:** Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Inspect feature importances and discuss their reliability.
 
@@ -128,9 +128,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
+**Verify:** Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.
 
-### Exercise 3 — Pruning implementation
+### Exercise 3: Pruning implementation
 
 **Prompt:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
 
@@ -149,9 +149,9 @@ alpha grid provides the cleanest evaluation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
+**Verify:** Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.
 
-### Exercise 4 — Out-of-bag reasoning
+### Exercise 4: Out-of-bag reasoning
 
 **Prompt:** Enable `oob_score=True` in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.
 
@@ -169,9 +169,9 @@ average them into one reassuring number; investigate the boundary mismatch.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
+**Verify:** Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.
 
-### Exercise 5 — Imbalance debugging
+### Exercise 5: Imbalance debugging
 
 **Prompt:** Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test `class_weight='balanced'`.
 
@@ -188,9 +188,9 @@ oversample or compute weights using the final holdout labels.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
+**Verify:** Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.
 
-### Exercise 6 — Correlated-importance edge case
+### Exercise 6: Correlated-importance edge case
 
 **Prompt:** Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.
 
@@ -202,11 +202,11 @@ correlation cluster together. SHAP and impurity scores also require careful
 interpretation under dependence.
 
 An importance score answers how this fitted model used available inputs under
-a particular perturbation—not what would happen if the real-world feature were
+a particular perturbation, not what would happen if the real-world feature were
 intervened upon.
 
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.
+**Verify:** Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.

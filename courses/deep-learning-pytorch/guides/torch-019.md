@@ -176,7 +176,7 @@ No. Convolution is locally translation-equivariant under appropriate boundary co
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-019, Convolutions, channel layouts and shared computation.

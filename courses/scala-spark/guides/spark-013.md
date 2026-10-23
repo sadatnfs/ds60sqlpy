@@ -499,7 +499,7 @@ reasoning only after an attempt or an explicit request.
 
 The Scala attempt is [spark-013.scala](../lessons/spark-013.scala); the paired Python attempt is [spark-013.py](../lessons/spark-013.py). The worker stages them as Main.scala/object Main or main.py. Both expose paidEvents/paid_events and summarize functions for independent typed checks. The [standard-library oracle](../fixtures/spark013_oracle.py) and [seven-row JSON fixture](../fixtures/spark013.json) are local and require no download. The worker may finish execution without grading when verification_id is null. A registered typed verifier must check identities, schema, NULLs and a changed fixture, not stdout keywords. Prerequisite spark012 is not assumed published.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning. I am studying authored beta spark-013 from

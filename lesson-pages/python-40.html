@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-40-hyperparameter-tuning-with-searchcv">Day 40 — Hyperparameter Tuning with SearchCV<a class="heading-anchor" href="#guide--day-40-hyperparameter-tuning-with-searchcv" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-40-hyperparameter-tuning-with-searchcv">Day 40: Hyperparameter Tuning with SearchCV<a class="heading-anchor" href="#guide--day-40-hyperparameter-tuning-with-searchcv" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-40</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Hyperparameter search automates a controlled set of model comparisons. It does not eliminate the need to define a defensible search space, metric, resampling strategy, or final evaluation boundary.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -460,7 +460,7 @@ search<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-hyperparameter-search-spaces-fit-budgets-and-nested-evaluation">Concept deep dive — hyperparameter search spaces, fit budgets, and nested evaluation<a class="heading-anchor" href="#guide--concept-deep-dive-hyperparameter-search-spaces-fit-budgets-and-nested-evaluation" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-hyperparameter-search-spaces-fit-budgets-and-nested-evaluation">Concept deep dive: hyperparameter search spaces, fit budgets, and nested evaluation<a class="heading-anchor" href="#guide--concept-deep-dive-hyperparameter-search-spaces-fit-budgets-and-nested-evaluation" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Hyperparameters configure how an estimator learns; a search procedure chooses among candidate configurations using validation data. A grid is a Cartesian product of listed values. Randomized search samples a fixed number of configurations from distributions, which is often more efficient when only a few dimensions matter.</p>
 <p>Search results are themselves fitted to data. <code>best_score_</code> estimates the best candidate on the inner validation folds and is optimistically selected from many alternatives. A separate holdout or outer cross-validation loop evaluates the entire selection procedure.</p>
@@ -471,7 +471,7 @@ search<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">
 <li><strong><code>GridSearchCV(..., scoring=..., refit=...)</code>:</strong> scores candidates in inner folds and refits the selected configuration on all supplied rows.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-calculate-the-search-budget-before-fitting">Focused example A — calculate the search budget before fitting<a class="heading-anchor" href="#guide--focused-example-a-calculate-the-search-budget-before-fitting" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-calculate-the-search-budget-before-fitting">Focused example A: calculate the search budget before fitting<a class="heading-anchor" href="#guide--focused-example-a-calculate-the-search-budget-before-fitting" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> ParameterGrid
 
@@ -487,7 +487,7 @@ expected_fits <span class="syntax-operator">=</span> <span class="syntax-builtin
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>candidates<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">16</span></code></pre>
 <p><strong>Expected observation:</strong> Three modest lists already create 16 candidates and 81 model fits with five folds and refit.</p>
 <p><strong>Assumption to name:</strong> Every listed combination is valid for the estimator and receives the same fold assignments.</p>
-<h5 id="guide--focused-example-b-make-the-refit-metric-explicit-in-multi-metric-search">Focused example B — make the refit metric explicit in multi-metric search<a class="heading-anchor" href="#guide--focused-example-b-make-the-refit-metric-explicit-in-multi-metric-search" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-make-the-refit-metric-explicit-in-multi-metric-search">Focused example B: make the refit metric explicit in multi-metric search<a class="heading-anchor" href="#guide--focused-example-b-make-the-refit-metric-explicit-in-multi-metric-search" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris
 <span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
@@ -551,15 +551,15 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <ol>
 <li>Use <code>RandomizedSearchCV</code> with a wider parameter space.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
+<p><strong>Verify:</strong> Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
 <ol>
 <li>Implement nested cross-validation and compare its result with the non-nested search score.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
+<p><strong>Verify:</strong> Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Sample <code>C</code> over orders of magnitude (for example with SciPy&#x27;s <code>loguniform</code>) and set <code>random_state</code>. Start with about 20 iterations on a laptop.</li>
-<li>Build separate inner and outer <code>StratifiedKFold</code> objects. Pass the entire search object—not its already-selected best estimator—to <code>cross_val_score</code> with the outer splitter.</li>
+<li>Build separate inner and outer <code>StratifiedKFold</code> objects. Pass the entire search object, not its already-selected best estimator, to <code>cross_val_score</code> with the outer splitter.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tuning as a finite experimental budget with a declared search space, selection metric, resampling design, and reproducible result table.</p>
@@ -567,19 +567,19 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <ol>
 <li><strong>Search-budget calculation:</strong> For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running. <strong>Progressive hint:</strong> Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.</li>
 </ol>
-<p><strong>Verify:</strong> Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
+<p><strong>Verify:</strong> Search-budget calculation; show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
 <ol>
 <li><strong>Multi-metric selection:</strong> Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan. <strong>Progressive hint:</strong> Pass a scoring dictionary and set <code>refit</code> to a metric name. Selection changes when metrics rank candidates differently.</li>
 </ol>
-<p><strong>Verify:</strong> Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
+<p><strong>Verify:</strong> Multi-metric selection; configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
 <ol>
 <li><strong>Results-table diagnosis:</strong> Turn <code>cv_results_</code> into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates. <strong>Progressive hint:</strong> Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.</li>
 </ol>
-<p><strong>Verify:</strong> Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
+<p><strong>Verify:</strong> Results-table diagnosis; emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
 <ol>
 <li><strong>Reproducibility debugging:</strong> A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison. <strong>Progressive hint:</strong> Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.</li>
 </ol>
-<p><strong>Verify:</strong> Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p>
+<p><strong>Verify:</strong> Reproducibility debugging; run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -626,10 +626,10 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <ul>
 <li>Work in the <a href="python-40.html#learner">Day 40 learner notebook</a>.</li>
 <li>Then consult the <a href="python-40.html#solution-1">Day 40 solution</a>.</li>
-<li>Continue to <a href="python-41.html#guide">Day 41 — Class Imbalance</a>.</li>
+<li>Continue to <a href="python-41.html#guide">Day 41; Class Imbalance</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-40` — Day 40 — Hyperparameter Tuning with SearchCV.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -885,7 +885,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-40-solutions-hyperparameter-tuning-with-searchcv">Day 40 — Solutions: Hyperparameter Tuning with SearchCV<a class="heading-anchor" href="#solution-1--day-40-solutions-hyperparameter-tuning-with-searchcv" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-40-solutions-hyperparameter-tuning-with-searchcv">Day 40: Solutions: Hyperparameter Tuning with SearchCV<a class="heading-anchor" href="#solution-1--day-40-solutions-hyperparameter-tuning-with-searchcv" aria-label="Link to this section">#</a></h3>
 <p>We build a Pipeline, perform parameter search with GridSearchCV/RandomizedSearchCV, and discuss nested CV for unbiased estimates.</p>
 <p>Contents</p>
 <ul>
@@ -894,7 +894,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Exercise 3: Nested CV (concept + code sketch)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — GridSearchCV + Pipeline (SVC)</p>
+<p>Worked reference for Exercise 1; GridSearchCV + Pipeline (SVC)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> GridSearchCV<span class="syntax-punctuation">,</span> StratifiedKFold
 <span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
 <span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
@@ -925,7 +925,7 @@ search<span class="syntax-operator">.</span>best_params_<span class="syntax-punc
 <li>scoring=&#x27;roc_auc&#x27; is often better than accuracy for imbalanced data</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — RandomizedSearchCV</p>
+<p>Worked reference for Exercise 2; RandomizedSearchCV</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> RandomizedSearchCV
 <span class="syntax-keyword">from</span> scipy.stats <span class="syntax-keyword">import</span> loguniform
 
@@ -945,7 +945,7 @@ rand<span class="syntax-operator">.</span>best_params_<span class="syntax-punctu
 <li>Prefer bounded priors (e.g., loguniform for C) for sensible sampling</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Nested CV (sketch)</p>
+<p>Worked reference for Exercise 3; Nested CV (sketch)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> cross_val_score
 
 <span class="syntax-comment"># inner search for model selection; outer CV for unbiased performance estimate</span>
@@ -979,24 +979,24 @@ outer_scores <span class="syntax-operator">=</span> cross_val_score<span class="
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use <code>RandomizedSearchCV</code> with a wider parameter space.</p>
 <p><strong>How to reason about it:</strong> Randomized search samples a bounded number of candidates, so state the distributions and seed. Log-scaled parameters should be sampled over orders of magnitude rather than uniformly on the raw scale.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement nested cross-validation and compare its result with the non-nested search score.</p>
 <p><strong>How to reason about it:</strong> Nested CV evaluates the complete search procedure. Use distinct inner and outer splitters, and pass the unfitted search object into the outer evaluation so selection repeats independently.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
-<h5 id="solution-1--exercise-3-search-budget-calculation">Exercise 3 — Search-budget calculation<a class="heading-anchor" href="#solution-1--exercise-3-search-budget-calculation" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.</p>
+<h5 id="solution-1--exercise-3-search-budget-calculation">Exercise 3: Search-budget calculation<a class="heading-anchor" href="#solution-1--exercise-3-search-budget-calculation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.</p>
 <p><strong>Reasoning before implementation:</strong> Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.</p>
 <p>The naive grid has <code>5*4*3 = 60</code> candidates and <code>60*5 = 300</code> validation fits, plus one refit of the selected configuration. Invalid combinations waste time and can fill results with errors.</p>
-<p>Represent compatible spaces as a list of dictionaries—one dictionary per solver family—or use a constrained sampler. Estimate runtime from a small pilot before launching the full budget, especially on Windows laptops.</p>
+<p>Represent compatible spaces as a list of dictionaries, one dictionary per solver family, or use a constrained sampler. Estimate runtime from a small pilot before launching the full budget, especially on Windows laptops.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
-<h5 id="solution-1--exercise-4-multi-metric-selection">Exercise 4 — Multi-metric selection<a class="heading-anchor" href="#solution-1--exercise-4-multi-metric-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Search-budget calculation; show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.</p>
+<h5 id="solution-1--exercise-4-multi-metric-selection">Exercise 4: Multi-metric selection<a class="heading-anchor" href="#solution-1--exercise-4-multi-metric-selection" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.</p>
 <p><strong>Reasoning before implementation:</strong> Pass a scoring dictionary and set <code>refit</code> to a metric name. Selection changes when metrics rank candidates differently.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
@@ -1023,21 +1023,21 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 <span class="syntax-punctuation">)</span></code></pre>
 <p>The refitted estimator is selected by average precision here. Other metrics remain diagnostics, not additional opportunities to choose whichever winner looks best after the run.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
-<h5 id="solution-1--exercise-5-results-table-diagnosis">Exercise 5 — Results-table diagnosis<a class="heading-anchor" href="#solution-1--exercise-5-results-table-diagnosis" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Multi-metric selection; configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.</p>
+<h5 id="solution-1--exercise-5-results-table-diagnosis">Exercise 5: Results-table diagnosis<a class="heading-anchor" href="#solution-1--exercise-5-results-table-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Turn <code>cv_results_</code> into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.</p>
 <p><strong>Reasoning before implementation:</strong> Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.</p>
 <p>Use a DataFrame and select only columns relevant to the decision. Compute a generalization gap as <code>mean_train_score - mean_test_score</code>, but interpret it relative to metric scale and fold spread.</p>
 <p>A candidate with a trivial score improvement, double the fit time, and much higher variability may be a poor operational choice. Preserve the full table as evidence instead of retaining only <code>best_params_</code>.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
-<h5 id="solution-1--exercise-6-reproducibility-debugging">Exercise 6 — Reproducibility debugging<a class="heading-anchor" href="#solution-1--exercise-6-reproducibility-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Results-table diagnosis; emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.</p>
+<h5 id="solution-1--exercise-6-reproducibility-debugging">Exercise 6: Reproducibility debugging<a class="heading-anchor" href="#solution-1--exercise-6-reproducibility-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.</p>
 <p><strong>Reasoning before implementation:</strong> Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.</p>
 <p>Record random states for <code>RandomizedSearchCV</code>, shuffled CV, data generation, and every stochastic estimator. Pin the data snapshot and dependency versions. For strict debugging, reduce parallelism and compare full score tables with a tolerance rather than requiring bitwise-identical floats.</p>
 <p>Determinism improves diagnosis, but robustness is stronger evidence: repeat a small set of seeds and prefer conclusions that do not depend on one lucky partition.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p></div>
+<p><strong>Verify:</strong> Reproducibility debugging; run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.</p></div>
       </section>
 
 
@@ -1164,16 +1164,16 @@ search <span class="syntax-operator">=</span> GridSearchCV<span class="syntax-pu
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-40` — Day 40 — Hyperparameter Tuning with SearchCV.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-40` — Day 40 — Hyperparameter Tuning with SearchCV.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize hyperparameter search spaces, fit budgets, and nested evaluation. Use exactly these maintained learner materials:
@@ -1201,7 +1201,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1312,18 +1312,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

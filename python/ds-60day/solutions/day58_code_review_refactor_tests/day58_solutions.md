@@ -1,4 +1,4 @@
-# Day 58 — Solutions: Code Review, Refactoring, and Tests
+# Day 58: Solutions: Code Review, Refactoring, and Tests
 
 We refactor notebook logic into a module, write unit tests, configure pre‑commit hooks, and add a CI workflow.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Extract and test
+Worked reference for Exercise 1; Extract and test
 ```python
 # src/myproj/fe.py
 from __future__ import annotations
@@ -47,7 +47,7 @@ Run tests
 
 ---
 
-Worked reference for Exercise 2 — pre‑commit
+Worked reference for Exercise 2; pre‑commit
 ```yaml
 # .pre-commit-config.yaml
 repos:
@@ -80,7 +80,7 @@ Core setup already installs pre-commit. Install the local hook and run it:
 
 ---
 
-Worked reference for Exercise 3 — CI workflow
+Worked reference for Exercise 3; CI workflow
 ```yaml
 # .github/workflows/ci.yml
 name: CI
@@ -140,7 +140,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Move at least two notebook functions into a `src/` package and add tests.
 
@@ -150,9 +150,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
+**Verify:** Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Add type hints and docstrings, then run mypy.
 
@@ -162,9 +162,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
+**Verify:** Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Write a short maintainer guide in the project root.
 
@@ -174,9 +174,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
+**Verify:** Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
-### Exercise 4 — Characterization testing
+### Exercise 4: Characterization testing
 
 **Prompt:** Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.
 
@@ -194,9 +194,9 @@ whatever the refactor produced.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
+**Verify:** Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
 
-### Exercise 5 — Risk-based review
+### Exercise 5: Risk-based review
 
 **Prompt:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
 
@@ -214,9 +214,9 @@ the author can act on the most important issues first.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
+**Verify:** Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
 
-### Exercise 6 — Compatibility change
+### Exercise 6: Compatibility change
 
 **Prompt:** Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.
 
@@ -235,4 +235,4 @@ window.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.
+**Verify:** Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.

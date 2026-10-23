@@ -1,4 +1,4 @@
-# Day 55 — Containerizing a FastAPI Service
+# Day 55: Containerizing a FastAPI Service
 
 **Lesson ID:** `python-55` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
@@ -128,7 +128,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — container build boundaries, minimal images, and health semantics
+## Concept deep dive: container build boundaries, minimal images, and health semantics
 
 ### The mental model
 
@@ -155,7 +155,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — audit build-context inclusion before Docker runs
+### Focused example A: audit build-context inclusion before Docker runs
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -184,7 +184,7 @@ assert ".env" not in included and not any(p.startswith(".venv/") for p in includ
 
 **Assumption to name:** This simplified matcher demonstrates review logic; Docker's complete ignore semantics and the real context still need inspection.
 
-### Focused example B — distinguish process health from traffic readiness
+### Focused example B: distinguish process health from traffic readiness
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -239,16 +239,16 @@ assert during_dependency_outage == {"healthy": True, "ready": False}
 
 1. Create a slim dependency file containing only direct API runtime needs.
 
-**Verify:** Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
+**Verify:** Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
 2. Add `GET /health` returning `{"status": "ok"}`.
 
-**Verify:** Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
+**Verify:** Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
 3. Optionally push the image to a registry if you intentionally use a connected
    account.
 
-**Verify:** Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
+**Verify:** Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
 ### Progressive hints
 
@@ -270,17 +270,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Layer and secret audit:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
    **Progressive hint:** The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.
 
-**Verify:** Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
+**Verify:** Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
 
 5. **Least-privilege runtime:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
    **Progressive hint:** Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.
 
-**Verify:** Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
+**Verify:** Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
 
 6. **Health semantics:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
    **Progressive hint:** Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.
 
-**Verify:** Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.
+**Verify:** Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -314,12 +314,12 @@ adding complexity.
 - Work in the [Day 55 learner notebook](../notebooks/day55_apis_containerization_docker.ipynb).
 - Then consult the
   [Day 55 solution](../solutions/day55_apis_containerization_docker/day55_solutions.md).
-- Continue to [Day 56 — Prefect](day56_orchestration_prefect_intro.md).
+- Continue to [Day 56; Prefect](day56_orchestration_prefect_intro.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.

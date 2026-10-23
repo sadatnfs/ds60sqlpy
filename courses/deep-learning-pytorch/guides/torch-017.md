@@ -176,7 +176,7 @@ No. Equivalence depends on the optimizer and implementation. For adaptive optimi
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-017, Dropout, regularization, train and eval modes.

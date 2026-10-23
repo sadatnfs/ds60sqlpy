@@ -1,4 +1,4 @@
-# Day 48 — Transfer Learning with CNNs
+# Day 48: Transfer Learning with CNNs
 
 **Lesson ID:** `python-48` · **Level:** advanced · **Dependencies:** `deep-learning` · **Network:** optional model download
 
@@ -104,7 +104,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — offline-safe transfer learning, frozen parameters, and cautious fine-tuning
+## Concept deep dive: offline-safe transfer learning, frozen parameters, and cautious fine-tuning
 
 ### The mental model
 
@@ -132,7 +132,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — build and verify a no-download frozen backbone
+### Focused example A: build and verify a no-download frozen backbone
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -156,7 +156,7 @@ assert trainable == ["fc.weight", "fc.bias"]
 
 **Assumption to name:** Random backbone features are a mechanics fallback, not equivalent to pretrained transfer performance.
 
-### Focused example B — apply the matching tensor normalization contract
+### Focused example B: apply the matching tensor normalization contract
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -204,15 +204,15 @@ assert transformed.shape == image.shape
 
 1. Load a small image folder with `ImageFolder` and `DataLoader`.
 
-**Verify:** Practice 1 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
+**Verify:** Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
 2. Train only the classifier head for a few epochs.
 
-**Verify:** Practice 2 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
+**Verify:** Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
 3. Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
-**Verify:** Practice 3 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
+**Verify:** Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
 ### Progressive hints
 
@@ -237,17 +237,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Transform mismatch diagnosis:** Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.
    **Progressive hint:** Augmentation belongs to training. Validation should apply deterministic resize/crop and the normalization expected by the selected weights.
 
-**Verify:** Transform mismatch diagnosis — evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
+**Verify:** Transform mismatch diagnosis; evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
 
 5. **Frozen-state edge case:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
    **Progressive hint:** requires_grad controls parameter gradients; train/eval controls BatchNorm running statistics and Dropout behavior.
 
-**Verify:** Frozen-state edge case — print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
+**Verify:** Frozen-state edge case; print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
 
 6. **Offline fallback design:** Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path.
    **Progressive hint:** Never trigger an undocumented download. Report whether results use pretrained or random weights because their learning goals differ.
 
-**Verify:** Offline fallback design — print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.
+**Verify:** Offline fallback design; print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -281,12 +281,12 @@ class.
 - Work in the [Day 48 learner notebook](../notebooks/day48_transfer_learning_cnn.ipynb).
 - Then review the
   [Day 48 solution](../solutions/day48_transfer_learning_cnn/day48_solutions.md).
-- Continue to [Day 49 — NLP](day49_nlp_basics_hf_spacy.md).
+- Continue to [Day 49; NLP](day49_nlp_basics_hf_spacy.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-48` — Day 48 — Transfer Learning with CNNs.

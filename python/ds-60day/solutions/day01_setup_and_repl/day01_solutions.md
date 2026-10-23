@@ -1,4 +1,4 @@
-# Day 01 — Solutions: Setup, REPL, Virtual Envs, Package Management
+# Day 01: Solutions: Setup, REPL, Virtual Envs, Package Management
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ mismatch harder to see.
 For this lesson's **execution contexts and a trustworthy course environment** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–5 — Worked answers
+## Exercises 1–5: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Run the repository setup, then run `scripts/course.py doctor` with the repository interpreter. **Required evidence:** copy the Python version and interpreter path from the report. **Success:** the version is 3.11 or 3.12, the path belongs to this repository's `.venv`, and the doctor does not report a blocking core failure. **Constraint:** do not install or delete anything while diagnosing. **Verify:** Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository's `.venv`; record that no blocking core check failed.
 
@@ -59,7 +59,7 @@ command from an unrelated global Python.
 
 **Verification evidence:** Save the doctor output showing Python 3.11/3.12 and an interpreter path inside this repository's `.venv`; record that no blocking core check failed.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Open the course Python REPL and evaluate `7 * 6`, `' Python '.strip().lower()`, and `type(3.5)`. **Before running:** predict each value and type. **Success:** record the three results and exit cleanly with `exit()`; explain why the string method does not modify the original literal. **Verify:** Record `42`, `'python'`, and `<class 'float'>` beside your predictions, then confirm the REPL exits without terminating the terminal.
 
@@ -82,7 +82,7 @@ mutated.
 
 **Verification evidence:** Record `42`, `'python'`, and `<class 'float'>` beside your predictions, then confirm the REPL exits without terminating the terminal.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Open this notebook with the `Python (ds60sqlpy)` kernel. Run `import sys; print(sys.executable)` and compare it with the doctor report. **Success:** both point to the same `.venv` layout. **If they differ:** stop and diagnose the kernel rather than reinstalling packages. **Verify:** Resolve both paths and confirm the doctor interpreter and notebook `sys.executable` identify the same `.venv` environment.
 
@@ -107,7 +107,7 @@ interpreter exists without hard-coding a Windows or POSIX layout.
 
 **Verification evidence:** Resolve both paths and confirm the doctor interpreter and notebook `sys.executable` identify the same `.venv` environment.
 
-### Exercise 4 — worked answer
+### Exercise 4: worked answer
 
 **Learner contract:** Create `calc.py` so `python calc.py 12.5 7.25` prints exactly `19.75`. **Inputs:** exactly two numeric command-line arguments. **Constraints:** convert the strings from `sys.argv`, print a friendly usage message for the wrong count, and keep the arithmetic in a small function. **Verify:** test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with `argparse`.
 
@@ -147,7 +147,7 @@ text returns status 2 without hiding unrelated programming errors.
 
 **Verification evidence:** test integers, decimals, and one invalid numeric value. Day 15 later replaces this bounded interface with `argparse`.
 
-### Exercise 5 — worked answer
+### Exercise 5: worked answer
 
 **Learner contract:** Create two temporary virtual environments outside the repository and install NumPy in only one. **Evidence:** use each environment's `python -m pip show numpy` and interpreter path to prove isolation. **Constraint:** do not alter or delete the course `.venv`; remove only the two temporary environments you created after recording the result. **Verify:** Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.
 
@@ -177,9 +177,9 @@ the course `.venv`.
 
 **Verification evidence:** Show NumPy succeeds under exactly one temporary interpreter and fails under the other, while the course interpreter/path remains unchanged.
 
-## Exercises 6–10 — Expanded mastery answers
+## Exercises 6–10: Expanded mastery answers
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Prediction:** Predict what `sys.executable` should contain when the correct course kernel is active, then verify it in both the REPL and this notebook. **Progressive hint:** The important fact is the interpreter path, not merely the word Python. **Verify:** Resolve the REPL and notebook `sys.executable` values and assert both identify the same course `.venv`; record the exact shared path component.
 
@@ -187,7 +187,7 @@ the course `.venv`.
 
 **Evidence to locate in the grouped implementation:** Resolve the REPL and notebook `sys.executable` values and assert both identify the same course `.venv`; record the exact shared path component.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Tracing:** Trace the difference between `python -m pip --version` and a bare `pip --version`: which interpreter owns each command? **Progressive hint:** Read the Python and site-packages paths printed by pip. **Verify:** Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.
 
@@ -195,7 +195,7 @@ the course `.venv`.
 
 **Evidence to locate in the grouped implementation:** Capture both pip-version outputs, underline the Python executable/site-packages owner in each, and assert whether the two paths identify the same environment; explain any mismatch.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Implementation:** Write `environment_report()` returning the Python version, executable, platform, and current working directory without shell commands. **Progressive hint:** Use `sys`, `platform`, and `pathlib.Path`. **Verify:** Assert `environment_report()` has exactly the four required fields with string values and that its executable/cwd agree with direct `sys`/`Path` inspection.
 
@@ -203,7 +203,7 @@ the course `.venv`.
 
 **Evidence to locate in the grouped implementation:** Assert `environment_report()` has exactly the four required fields with string values and that its executable/cwd agree with direct `sys`/`Path` inspection.
 
-### Exercise 9 — answer contract
+### Exercise 9: answer contract
 
 **Learner contract:** **Debugging:** A package imports in PowerShell but is missing in Jupyter. Write a three-step diagnosis that proves whether their interpreters differ. **Progressive hint:** Compare executable paths before reinstalling anything. **Verify:** Record `sys.executable`, `python -m pip --version`, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.
 
@@ -211,7 +211,7 @@ the course `.venv`.
 
 **Evidence to locate in the grouped implementation:** Record `sys.executable`, `python -m pip --version`, and the notebook kernel interpreter; identify the first evidence that differs before changing anything.
 
-### Exercise 10 — answer contract
+### Exercise 10: answer contract
 
 **Learner contract:** **Edge case and explanation:** Explain how to recover when the `ds60sqlpy` kernel is absent even though `.venv` exists, and state what remains possible offline. **Progressive hint:** Kernel registration and package download are separate operations. **Verify:** After local kernel registration, assert the `jupyter kernelspec list` output contains `ds60sqlpy`, then run one already-installed offline import and record its successful output without downloading a package.
 
@@ -223,20 +223,20 @@ the course `.venv`.
 
 Treat the interpreter, package installer, and notebook kernel as one connected system. Record evidence before changing an environment.
 
-### Shared implementation for Exercise 6 — Prediction
+### Shared implementation for Exercise 6: Prediction
 
 The correct result is an executable inside this repository's `.venv`
 (`.venv\Scripts\python.exe` on Windows or `.venv/bin/python` on POSIX). The
 exact prefix varies by clone location, so inspect the path rather than comparing
 it with a developer-specific absolute string.
 
-### Shared implementation for Exercise 7 — Trace
+### Shared implementation for Exercise 7: Trace
 
 `python -m pip` asks a known interpreter to import its installed `pip` module.
 A bare `pip` is whichever executable the shell finds first on `PATH`; it can
 belong to Anaconda, the Windows launcher, or another environment.
 
-### Shared implementation for Exercises 8–10 — Evidence-first environment diagnosis
+### Shared implementation for Exercises 8–10: Evidence-first environment diagnosis
 
 ```python
 from __future__ import annotations

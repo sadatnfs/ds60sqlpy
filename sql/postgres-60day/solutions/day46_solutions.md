@@ -1,4 +1,4 @@
-# Day 46 Solutions — E-commerce Analytics, Part 1
+# Day 46 Solutions: E-commerce Analytics, Part 1
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ This project begins with explicit lifetime-value segments and signup-cohort
 revenue. The canonical executable answer is
 [`day46_solutions.sql`](day46_solutions.sql).
 
-## Exercise 1 — Gold, silver, and bronze LTV by country
+## Exercise 1: Gold, silver, and bronze LTV by country
 
 The thresholds below are example business policy. Confirm or tune them for a
 real organization rather than presenting them as statistically derived.
@@ -104,7 +104,7 @@ customers with no orders and assigns them zero LTV.
 - **Alternative/trade-off:** For sql-46 Exercise 1, the chosen form is justified by this lesson-specific rationale: The thresholds below are example business policy. Evaluate another form against the concrete expected result (one row per `(country, ltv_segment)`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `customers`, `avg_ltv`, and `total_ltv` for the existing `country`, and `ltv_segment` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Cohort revenue at month offsets 0 through 12
+## Exercise 2: Cohort revenue at month offsets 0 through 12
 
 ```sql
 SET search_path TO training, public;
@@ -163,7 +163,7 @@ equivalent to a stored zero.
   history.
 - These answers are read-only and repeatable.
 
-## Exercise 3 — Compare relative and fixed segments
+## Exercise 3: Compare relative and fixed segments
 
 `NTILE(4)` is recalculated over the current population, so another customer's
 arrival can move a boundary. Fixed monetary thresholds are stable but require a
@@ -179,7 +179,7 @@ reviewed business policy. The executable answer displays both.
 - **Alternative/trade-off:** For sql-46 Exercise 3, the chosen form is justified by this lesson-specific rationale: `NTILE(4)` is recalculated over the current population, so another customer's arrival can move a boundary. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Build a customer-grain feature row
+## Exercise 4: Build a customer-grain feature row
 
 The `behavior` CTE aggregates orders once per customer. Its outer join preserves
 no-order customers and supports LTV, frequency, average order value, and recency
@@ -195,7 +195,7 @@ without mixing grains.
 - **Alternative/trade-off:** For sql-46 Exercise 4, the chosen form is justified by this lesson-specific rationale: The `behavior` CTE aggregates orders once per customer. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 5 — Prevent LTV fanout
+## Exercise 5: Prevent LTV fanout
 
 Line revenue is reduced to one row per order before it becomes customer LTV.
 Payments would need their own order-grain aggregation; joining both raw sources
@@ -211,7 +211,7 @@ would multiply values.
 - **Alternative/trade-off:** For sql-46 Exercise 5, the chosen form is justified by this lesson-specific rationale: Line revenue is reduced to one row per order before it becomes customer LTV. Evaluate another form against the concrete expected result (one row per order before it becomes customer LTV) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `line_ltv` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Retain no-order customers
+## Exercise 6: Retain no-order customers
 
 The answer keeps the LEFT JOIN outer and applies `COALESCE` only after grouping.
 A WHERE predicate on order columns would accidentally remove the intended

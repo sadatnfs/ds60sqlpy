@@ -67,3 +67,17 @@ id_rsa
 
 # Local launcher ports, URL and transient per-project lock.
 .classroom/
+
+# Private tool state and learner work are excluded at every context depth.
+**/.serena
+**/.codex
+**/.aws
+**/.oci
+**/.ssh
+**/.learning
+**/.classroom
+**/.venv
+**/.app-build
+**/.module-runtime
+**/.module-runtime-not-prepared
+**/classroom-runs

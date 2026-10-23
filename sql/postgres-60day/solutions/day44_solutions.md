@@ -1,4 +1,4 @@
-# Day 44 Solutions — Monitoring and Diagnostics
+# Day 44 Solutions: Monitoring and Diagnostics
 
 
 <!-- beginner-solution-enrichment -->
@@ -59,7 +59,7 @@ installation where that optional extension is absent or installed without its
 shared-memory module being loaded at server startup. See
 [`day44_solutions.sql`](day44_solutions.sql).
 
-## Exercise 1 — Longest-running active statements
+## Exercise 1: Longest-running active statements
 
 ```sql
 SET search_path TO training, public;
@@ -92,7 +92,7 @@ locks, and the operation's purpose before intervening.
 - **Alternative/trade-off:** For sql-44 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: zero or more currently active sessions, excluding the monitoring query itself. Evaluate another form against the concrete expected result (zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation's purpose before intervening) and the verification above.
 - **Edge case:** A quiet local database can correctly return zero rows. Use a controlled `pg_sleep` session when you need a positive observation, and never manufacture a row in a system view.
 
-## Exercise 2 — Optional top statement statistics
+## Exercise 2: Optional top statement statistics
 
 ```sql
 BEGIN;
@@ -173,7 +173,7 @@ ROLLBACK;
 ```
 
 Expected shape: up to twenty rows when `pg_stat_statements` is installed and
-loaded—at most ten for each ranking label. Otherwise the block emits an
+loaded, at most ten for each ranking label. Otherwise the block emits an
 explanatory notice and the final query returns an empty result.
 
 An existence check is necessary but not sufficient. PostgreSQL can install the
@@ -204,7 +204,7 @@ contract explicit. Any unrelated error still propagates.
 - These are diagnostic reads. Do not cancel or terminate sessions without
   confirming ownership and operational impact.
 
-## Exercise 3 — Separate query and transaction age
+## Exercise 3: Separate query and transaction age
 
 `query_start` belongs to the current statement; `xact_start` belongs to its
 transaction. The latter can reveal long-lived snapshots hidden behind a short
@@ -220,7 +220,7 @@ or currently idle statement.
 - **Alternative/trade-off:** For sql-44 Exercise 3, the chosen form is justified by this lesson-specific rationale: `query_start` belongs to the current statement; `xact_start` belongs to its transaction. Evaluate another form against the concrete expected result (one row per `pid`) and the verification above.
 - **Edge case:** A backend outside an explicit transaction can have a NULL `xact_start`; preserve that NULL rather than converting it to a misleading zero duration.
 
-## Exercise 4 — Summarize connections safely
+## Exercise 4: Summarize connections safely
 
 Grouping by database, user, and state supports capacity triage without exposing
 complete SQL text in a broadly shared report.
@@ -235,7 +235,7 @@ complete SQL text in a broadly shared report.
 - **Alternative/trade-off:** For sql-44 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report. Evaluate another form against the concrete expected result (one row per `datname`, `usename`, and `state`) and the verification above.
 - **Edge case:** Background workers can expose NULL database or user values; grouped NULLs are legitimate categories and must survive verification.
 
-## Exercise 5 — Retain mean and total workload views
+## Exercise 5: Retain mean and total workload views
 
 Mean duration highlights individually expensive calls; total execution time
 highlights cumulative cost. The answer keeps both rather than declaring one
@@ -251,7 +251,7 @@ universal “slow query” ranking.
 - **Alternative/trade-off:** For sql-44 Exercise 5, the chosen form is justified by this lesson-specific rationale: Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. Evaluate another form against the concrete statement-within-ranking grain and the verification above.
 - **Edge case:** The same statement can appear once in each ranking. That is expected because `ranking` is part of the identity; it is not a duplicate to remove.
 
-## Exercise 6 — Identify idle-in-transaction sessions
+## Exercise 6: Identify idle-in-transaction sessions
 
 The read-only diagnostic returns age and wait fields. It does not cancel a
 backend; ownership and operational impact must be confirmed first.

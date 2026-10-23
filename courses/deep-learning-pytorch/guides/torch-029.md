@@ -178,7 +178,7 @@ A perfectly finite loss can still use leaked data, wrong targets or an unintende
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-029, Stable objectives, precision and mixed-precision boundaries.

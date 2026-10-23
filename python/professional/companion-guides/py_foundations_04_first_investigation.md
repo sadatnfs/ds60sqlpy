@@ -230,7 +230,7 @@ Keep this small project as a reference for the CLI project and the later pandas
 EDA project. Add packages only when they solve a named limitation; preserve
 the plain-data tests and policy explanations when changing the implementation.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-foundations-04.

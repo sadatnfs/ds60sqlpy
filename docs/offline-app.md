@@ -17,7 +17,7 @@ DS60 now has a working local coding environment in addition to its static course
 | Source checkout | Supported Python and the course Core profile; PostgreSQL for SQL | The same browser app using your repository environment | Learners who want to inspect the source and use notebooks too |
 | Native executable | A build for your operating system; a supported Python backend for pads; PostgreSQL for SQL | Bundled UI, catalog, lessons, and local server | A downloadable offline course with a separate native backend |
 | Static library | A browser | Readable generated lessons and solutions | Reading without starting a server or running code |
-| Codex MCP tutor | Codex plus the optional MCP dependency | Catalog-bound tutoring tools over stdio | Coaching with your own Codex connection |
+| MCP tutor | Compatible MCP client plus the optional MCP dependency | Catalog-bound tutoring tools over stdio | Coaching with your chosen AI client |
 
 The native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.
 
@@ -197,7 +197,7 @@ The equivalent Make target is `make app PYTHON=.app-build/bin/python`. Windows u
 
 Run the executable. Its first launch copies the bundled course into `~/DS60 Learning Lab/0.3/`, then opens the browser lab. A valid existing workspace is reused without overwriting learner edits. A nonempty unrelated directory is rejected. Use `--workspace` to select an empty directory or an existing DS60 course, or `--repo` to use a checkout. For a new course release, use a new workspace and copy evidence deliberately instead of silently replacing edited artifacts.
 
-Point `--python` or `DS60_PYTHON` at the backend environment's Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate Codex settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.
+Point `--python` or `DS60_PYTHON` at the backend environment's Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate the AI tutor settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.
 
 The manual **Application builds** GitHub Actions workflow defines Windows, macOS, and Linux builds, bundle self-checks, and uploaded artifacts. A configured workflow is not a completed platform test; consult its actual run before distributing that platform's executable.
 
@@ -216,7 +216,7 @@ The manual **Application builds** GitHub Actions workflow defines Windows, macOS
 | Route says a prerequisite is missing | Saved evidence for that stable ID | Demonstrate or review the prerequisite before recording completion |
 | Old workspace lacks a new lesson | Workspace/catalog release | Start the new release in a new workspace and preserve old work |
 
-See [MCP tutoring](mcp-tutor.md) for the optional Codex experience and [validation](validation.md) for the exact tested surfaces and remaining evidence boundaries.
+See [MCP tutoring](mcp-tutor.md) for the optional AI tutoring experience and [validation](validation.md) for the exact tested surfaces and remaining evidence boundaries.
 
 ## Limited database logins and existing Docker volumes
 
@@ -532,7 +532,7 @@ its entry point. A learner extracts it and double-clicks that file; Git and
 host Python are not required. The first-run Windows wizard checks the engine
 and prerequisites before handing over to the normal Docker launcher. Windows
 installation consent, UAC, or a required restart remain visible steps. See the
-[beginner Windows walkthrough](docker-beginners.md#windows-start-with-the-first-run-wizard).
+[optional Windows installation wizard](docker-beginners.md#optional-legacy-windows-first-run-wizard).
 
 Maintainers can build the ZIP on any supported development OS:
 

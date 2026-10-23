@@ -1,4 +1,4 @@
-# Day 39 — Solutions: Gradient Boosting (sklearn, XGBoost, LightGBM)
+# Day 39: Solutions: Gradient Boosting (sklearn, XGBoost, LightGBM)
 
 We train gradient-boosted tree models, tune key hyperparameters, and use early stopping when supported.
 
@@ -32,7 +32,7 @@ X_train, X_valid, y_train, y_valid = train_test_split(
 )
 ```
 
-Worked reference for Exercise 1 — Sweep learning_rate and n_estimators (sklearn)
+Worked reference for Exercise 1; Sweep learning_rate and n_estimators (sklearn)
 ```python
 learning_rates = [0.03, 0.05, 0.1]
 n_estimators_grid = [100, 250, 500]
@@ -101,7 +101,7 @@ else:
     }
 ```
 
-Worked reference for Exercise 2 — LightGBM comparison (if installed)
+Worked reference for Exercise 2; LightGBM comparison (if installed)
 ```python
 try:
     import lightgbm as lgb
@@ -175,7 +175,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Tune `learning_rate` and `n_estimators` with a simple loop.
 
@@ -185,9 +185,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
+**Verify:** Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
@@ -197,9 +197,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
+**Verify:** Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
-### Exercise 3 — Early-stopping design
+### Exercise 3: Early-stopping design
 
 **Prompt:** Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.
 
@@ -217,9 +217,9 @@ a fixed iteration count selected during development. Calling the test set
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
+**Verify:** Early-stopping design; record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
 
-### Exercise 4 — Calibration check
+### Exercise 4: Calibration check
 
 **Prompt:** Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident.
 
@@ -237,9 +237,9 @@ the calibrated result on data used for neither fitting nor calibration.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
+**Verify:** Calibration check; print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
 
-### Exercise 5 — Portable backend contract
+### Exercise 5: Portable backend contract
 
 **Prompt:** Design a comparison helper that uses scikit-learn's HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly.
 
@@ -258,9 +258,9 @@ but document parameters that do not map exactly between libraries.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
+**Verify:** Portable backend contract; return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
 
-### Exercise 6 — Overfitting diagnosis
+### Exercise 6: Overfitting diagnosis
 
 **Prompt:** Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising.
 
@@ -278,4 +278,4 @@ as training evidence.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.
+**Verify:** Overfitting diagnosis; save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.

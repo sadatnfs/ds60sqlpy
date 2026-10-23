@@ -1,4 +1,4 @@
-# SQL-OPS-02 Solutions — Backup and Recovery
+# SQL-OPS-02 Solutions: Backup and Recovery
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 It creates no files or databases and rolls back `pro_recovery_lab`.
 
-## Exercise 1 — Structural fingerprint
+## Exercise 1: Structural fingerprint
 
 The solution orders information-schema column position/name/type/nullability and
 catalog constraint type/definition before hashing. Deterministic ordering is
@@ -77,7 +77,7 @@ or sequence. Structure and behavior require separate evidence.
 - **Expected result/shape:** For sql-ops-02 Exercise 1, expected output: ordered semantic rows with contract side, relation role, object kind, item order/name, and JSON definition, followed by one fingerprint row where source and restored hashes match and `mismatch_rows = 0`.
 - **Independent verification:** For sql-ops-02 Exercise 1, compare visible canonical rows before hashes, then alter a default, constraint, and index separately and require each change to produce diagnosable mismatch rows while an OID change remains outside the contract.
 
-## Exercise 2 — Corruption negative control
+## Exercise 2: Corruption negative control
 
 The source/restored ordered digests initially match. A savepoint update changes
 one restored amount; the test requires a mismatch. Rolling back to the
@@ -94,7 +94,7 @@ key management outside this fixture.
 - **Expected result/shape:** For sql-ops-02 Exercise 2, expected output: baseline, corrupted, and after-savepoint-rollback observations; equality is true, false, then true, with row counts unchanged and the intentional mismatch explicitly observed.
 - **Independent verification:** For sql-ops-02 Exercise 2, supplement digests with row counts and key-level detail, corrupt a second chosen key to prove the detail query identifies it, and require the post-rollback comparison to return to the reviewed baseline.
 
-## Exercise 3 — RPO/RTO strategy
+## Exercise 3: RPO/RTO strategy
 
 The example's five-minute RPO cannot be met by a daily logical dump alone. It
 chooses verified base backups plus continuous WAL for recoverability and a
@@ -102,7 +102,7 @@ separate replica for availability. The replica does not replace backup because
 it can replay the same accidental write.
 
 Measure RTO through timed end-to-end restore, replay, verification, application
-startup, and controlled cutover—not file copy alone.
+startup, and controlled cutover, not file copy alone.
 
 ### Reasoning and verification
 
@@ -110,7 +110,7 @@ startup, and controlled cutover—not file copy alone.
 - **Expected result/shape:** For sql-ops-02 Exercise 3, expected output: one row per service with `service_name`, `rpo`, `rto`, `backup_strategy`, and `availability_strategy`, ordered by service; the example targets five-minute RPO and thirty-minute RTO.
 - **Independent verification:** For sql-ops-02 Exercise 3, map RPO to recoverable data age and RTO to restore-through-application-readiness time, then remove replicas and backups in separate thought experiments to prove neither substitutes for the other.
 
-## Exercise 4 — Logical restore rehearsal
+## Exercise 4: Logical restore rehearsal
 
 Use the exact OS-specific commands in the guide only after peer review. Verify
 tool versions, artifact exit/checksum/size, target emptiness, restore exit,
@@ -128,7 +128,7 @@ must define their restoration.
 - **Expected result/shape:** For sql-ops-02 Exercise 4, expected output: seven ordered rows with `phase_number`, `phase_name`, and `required_evidence`, covering dump, target creation, restore, catalogs/security, data, application checks, and cleanup; no external command runs here.
 - **Independent verification:** For sql-ops-02 Exercise 4, execute only in a separately created disposable database after peer review, reconcile rows and semantic objects including owners/grants and sequence state, and block completion on any failed phase.
 
-## Exercise 5 — PITR and retention
+## Exercise 5: PITR and retention
 
 PITR needs a compatible base backup and an unbroken sequence of WAL through the
 target, plus timeline history after recovery branches. Retain the base backup
@@ -142,7 +142,7 @@ good target, verify, then decide promotion/cutover.
 - **Expected result/shape:** For sql-ops-02 Exercise 5, expected output: six ordered rows with `component_number`, `component`, and `required_evidence`; the lesson records a recovery plan and does not configure archiving.
 - **Independent verification:** For sql-ops-02 Exercise 5, remove one required WAL segment and then the usable base backup as separate negative controls, and assert both scenario results mark the target unrecoverable before application validation.
 
-## Exercise 6 — Evidence standard
+## Exercise 6: Evidence standard
 
 A zero backup exit code proves only that one command reported success. It does
 not prove artifact retention, readability, decryption, version compatibility,
@@ -156,7 +156,7 @@ recorded verification support a recoverability claim.
 - **Expected result/shape:** For sql-ops-02 Exercise 6, expected output: five ordered rows with `layer_number`, `evidence_layer`, `what_it_proves`, and `what_it_does_not_prove`; exit zero proves only that the backup program reported success.
 - **Independent verification:** For sql-ops-02 Exercise 6, inject a valid-looking but incomplete artifact or omit one critical restored object, and prove early command evidence can pass while later reconciliation blocks a recoverable decision.
 
-## Exercise 7 — Encryption, authenticity, and custody
+## Exercise 7: Encryption, authenticity, and custody
 
 Encrypt artifacts in transit and at rest with approved rotated keys held
 separately from the backup. Restrict backup/WAL/manifests to recovery roles,
@@ -174,7 +174,7 @@ logs, or repository files.
 - **Expected result/shape:** For sql-ops-02 Exercise 7, expected output: three ordered rows with `artifact_kind`, `encrypted`, `integrity_manifest`, `key_owner`, and `restore_role`; every restorable artifact is encrypted and has integrity evidence.
 - **Independent verification:** For sql-ops-02 Exercise 7, verify key custody is distinct from restore authorization, extend the review to manifest/key records, and rehearse rotation and deletion without making retained backups permanently unrestorable.
 
-## Exercise 8 — Restore the whole contract
+## Exercise 8: Restore the whole contract
 
 Set sequence/identity state beyond current maxima and test the next insert.
 Inventory large objects, extension versions, owners, memberships, object/default
@@ -191,7 +191,7 @@ that a low-privilege caller has intended access.
 - **Expected result/shape:** For sql-ops-02 Exercise 8, expected output: five ordered baseline rows with `component` and `expected_source`; the accompanying checklist extends coverage to large objects, default privileges, and security labels when required.
 - **Independent verification:** For sql-ops-02 Exercise 8, mark each required component as artifact-contained, separately captured, or rebuilt for the chosen backup format, and fail the checklist when any component lacks both a source and validation query.
 
-## Exercise 9 — Recover across a major version
+## Exercise 9: Recover across a major version
 
 Logical dump/restore rebuilds objects through SQL and supports transformation
 but can be slow. `pg_upgrade` is faster under strict source/target binary and
@@ -208,7 +208,7 @@ incompatible new writes.
 - **Expected result/shape:** For sql-ops-02 Exercise 9, expected output: exactly one local capability row with `server_version`, `server_version_num`, `datcollate`, and `datctype`; the broader major-version plan remains explicitly review-only.
 - **Independent verification:** For sql-ops-02 Exercise 9, capture the same capability row in the isolated target and block cutover on extension incompatibility, collation drift, missing ANALYZE evidence, or failed driver/application tests even when upgrade tooling exits zero.
 
-## Exercise 10 — Selective restore dependency boundary
+## Exercise 10: Selective restore dependency boundary
 
 Traverse types, sequences, functions, extensions, foreign keys in both
 directions, views, triggers, policies, owners/ACLs, and downstream consumers.
@@ -224,7 +224,7 @@ successful but semantically incomplete.
 - **Expected result/shape:** For sql-ops-02 Exercise 10, expected output: one row per semantic constraint dependency with `relation_name`, `constraint_type`, and `dependency_contract`, ordered by all three fields.
 - **Independent verification:** For sql-ops-02 Exercise 10, prove every referenced and referencing object is restored or deliberately remapped, remove one required dependency in an isolated target, and choose a full isolated restore when closure cannot be established.
 
-## Exercise 11 — Capacity and RTO test
+## Exercise 11: Capacity and RTO test
 
 Measure discovery/transfer, decrypt/decompress, CPU, I/O, parallel jobs, WAL,
 constraint/index creation, statistics, verification, application startup, and
@@ -240,7 +240,7 @@ one restore command exits.
 - **Expected result/shape:** For sql-ops-02 Exercise 11, expected output: four ordered rows with `phase`, `measured_seconds`, `peak_bytes`, and `evidence_note`; NULL measurements in the starter matrix are explicit work still to complete, not passing evidence.
 - **Independent verification:** For sql-ops-02 Exercise 11, sum the measured critical path plus named safety margin against RTO and separately record throughput, CPU, I/O, parallelism, WAL, and free-space headroom instead of linearly extrapolating a tiny fixture.
 
-## Exercise 12 — Recovery game-day record
+## Exercise 12: Recovery game-day record
 
 Preassign incident commander, operators, owners, observers, and stop authority.
 Timestamp detection, decisions, commands, artifacts, injected failures,

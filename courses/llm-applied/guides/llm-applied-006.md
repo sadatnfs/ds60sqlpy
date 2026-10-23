@@ -212,7 +212,7 @@ API and mechanism reference: [BM25 and probabilistic relevance](https://www.staf
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-006, Lexical retrieval and BM25 from first principles.

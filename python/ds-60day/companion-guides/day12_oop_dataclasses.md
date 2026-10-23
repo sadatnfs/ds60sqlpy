@@ -1,4 +1,4 @@
-# Day 12 — OOP Basics and Dataclasses
+# Day 12: OOP Basics and Dataclasses
 
 **Level:** Beginner
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 12 — oop basics and dataclasses to practice objects that keep related state and behavior together
+**Lesson outcome:** use day 12; oop basics and dataclasses to practice objects that keep related state and behavior together
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ annotation declares a field and generated constructor parameter.
 returns a calculation without mutation is easier to reason about than
 one that silently changes several attributes.
 
-### Worked example 1 — Model a validated record with a computed method
+### Worked example 1: Model a validated record with a computed method
 
 Keep line-item state and its subtotal behavior together. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -136,7 +136,7 @@ item = LineItem("notebook", 4.5, 3)
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Show that fields belong to each instance
+### Worked example 2: Show that fields belong to each instance
 
 Mutating one instance should not alter another independent record. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -284,11 +284,11 @@ totals, equal orders compare equal, and the display string is informative.
 
 - [Open the learner notebook](../notebooks/day12_oop_dataclasses.ipynb)
 - [Check the separate solution](../solutions/day12_oop_dataclasses/day12_solutions.md)
-- [Next: Day 13 — Functional tools](day13_functional_tools.md)
+- [Next: Day 13; Functional tools](day13_functional_tools.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

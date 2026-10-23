@@ -1,4 +1,4 @@
-# Day 01 solutions — SELECT, WHERE, ORDER BY, LIMIT/OFFSET
+# Day 01 solutions: SELECT, WHERE, ORDER BY, LIMIT/OFFSET
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List the 20 newest orders with customer ID and total amount.
 
@@ -107,7 +107,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: Sort by `order_date DESC` and add `order_id DESC` as a unique tie-breaker before applying `LIMIT`. Evaluate another form against the concrete expected result (At most 20 rows; one row per order, newest first) and the verification above.
 - **Edge case:** Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Find the 10 most expensive products created in the last 90 days.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: Filter the timestamp directly, then sort by price and a stable product key. Evaluate another form against the concrete expected result (At most 10 product rows; every row is in the 90-day window) and the verification above.
 - **Edge case:** Tie two rows on `p.price DESC` and give them different `p.product_id` values; verify `p.price DESC, p.product_id` chooses a stable first/last row.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Show customers from GB or DE created in the last year, newest first.
 
@@ -188,7 +188,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `IN` for the country set, combine the time condition with `AND`, and break timestamp ties. Evaluate another form against the concrete expected result (Only GB/DE customers from the declared window) and the verification above.
 - **Edge case:** Give two rows the same `c.created_at DESC` value and different `c.customer_id` values; verify `c.created_at DESC, c.customer_id` produces the intended rank and display order.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
 
@@ -223,7 +223,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: Comparisons with `NULL` are unknown; use `IS NULL` and `IS NOT NULL`. Evaluate another form against the concrete expected result (Exactly one summary row with counts whose sum equals all customers) and the verification above.
 - **Edge case:** Repeat with `NULL` in `email` and state whether the row is kept, rejected, or classified.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
 
@@ -261,7 +261,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Define the business ranking first; use a unique final key for tied prices. Evaluate another form against the concrete expected result (At most 10 rows, highest prices first, stable across repeated runs on unchanged data) and the verification above.
 - **Edge case:** Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than `OFFSET`.
 

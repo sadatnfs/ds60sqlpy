@@ -240,7 +240,7 @@ Continue to historical `sql-01` with a deliberate input, filter, projection, and
 
 Concrete next target: [SQL Day 1](../../postgres-60day/companion-guides/day01_select_where_orderby.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson and expected observations are sufficient offline. For optional coaching, copy:
 

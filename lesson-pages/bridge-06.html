@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--bridge-day-6-bulk-etl-and-data-validation">Bridge Day 6 — Bulk ETL and data validation<a class="heading-anchor" href="#guide--bridge-day-6-bulk-etl-and-data-validation" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--bridge-day-6-bulk-etl-and-data-validation">Bridge Day 6: Bulk ETL and data validation<a class="heading-anchor" href="#guide--bridge-day-6-bulk-etl-and-data-validation" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Advanced <strong>Prerequisite:</strong> <a href="bridge-05.html#guide">Bridge Day 5</a></p>
 <h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
 <p>Extract-transform-load (ETL) code crosses a trust boundary. Source strings may be malformed, duplicated, too large, or semantically invalid. A sound pipeline converts raw rows into a typed record before loading, keeps rejection diagnostics minimal, and writes batches with parameter binding. Performance comes after the data contract is explicit.</p>
@@ -602,8 +602,8 @@ T <span class="syntax-operator">=</span> TypeVar<span class="syntax-punctuation"
 <li><strong>Reporting submitted rows as inserted rows:</strong> upserts and conflicts make those different metrics.</li>
 <li><strong>One enormous transaction:</strong> it increases lock time, rollback cost, and recovery work.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-05</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-05</code>. The prompt below deliberately names exact paths so a new AI tutoring session can orient itself without guessing.</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through stable lesson ID bridge-06: Bulk ETL Validation.
 Direct catalog prerequisites: bridge-05. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
@@ -866,7 +866,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--bridge-day-6-solution-notes">Bridge Day 6 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-6-solution-notes" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-6-solution-notes">Bridge Day 6: Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-6-solution-notes" aria-label="Link to this section">#</a></h3>
 <p>Work through the <a href="bridge-06.html#learner">learner file</a> before opening <a href="bridge-06.html#solution-2">day06_solution.py</a>.</p>
 <h4 id="solution-1--validation-pipeline">Validation pipeline<a class="heading-anchor" href="#solution-1--validation-pipeline" aria-label="Link to this section">#</a></h4>
 <p><code>parse_sale()</code> validates one raw mapping and produces an immutable <code>Sale</code>. Money stays as <code>Decimal</code>, non-finite or non-positive values fail, and ISO dates become <code>date</code> objects. The two-decimal quantization is an explicit course policy, not an accidental database conversion.</p>
@@ -900,72 +900,72 @@ sale <span class="syntax-operator">=</span> parse_sale<span class="syntax-punctu
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day06_solution.py</code>; use it only after an honest attempt.</p>
 <p><strong>Shared failure rule:</strong> Bulk speed does not excuse weak validation, unbounded materialization, or diagnostics that copy entire rejected records.</p>
-<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-validation">Exercise 1: Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>parse_sale()</code> for non-blank source ID, positive integer customer ID, finite positive amount, and ISO date without mutating input.</p>
 <p><strong>Approach:</strong> Read values into locals, validate every invariant, parse with <code>Decimal</code> and <code>date.fromisoformat</code>, and return a new frozen <code>Sale</code>. Raise <code>RowValidationError</code> with a safe field-level reason.</p>
 <p><strong>Why this boundary matters:</strong> Convert each field explicitly and translate only expected conversion failures.</p>
 <p><strong>Verification evidence:</strong> Parse one valid mapping and compare exact typed fields; assert blank source ID, non-positive/non-integer customer ID, non-finite/non-positive amount, and bad ISO date raise <code>RowValidationError</code>, and the input mapping is unchanged.</p>
-<h5 id="solution-1--exercise-2-money">Exercise 2 — Money<a class="heading-anchor" href="#solution-1--exercise-2-money" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-money">Exercise 2: Money<a class="heading-anchor" href="#solution-1--exercise-2-money" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Quantize accepted amounts to two decimals and document the chosen rounding rule.</p>
 <p><strong>Approach:</strong> Use <code>Decimal.quantize(Decimal(&#x27;0.01&#x27;), rounding=ROUND_HALF_EVEN)</code> as the reference teaching policy and test boundary values. Another policy is valid only when explicitly required and tested.</p>
 <p><strong>Why this boundary matters:</strong> Quantization is a domain decision, not merely display formatting.</p>
 <p><strong>Verification evidence:</strong> Check amounts with more than two places and a halfway value; assert the exact two-place <code>Decimal</code> results under the documented rounding mode, not merely formatted strings.</p>
-<h5 id="solution-1--exercise-3-partitioning">Exercise 3 — Partitioning<a class="heading-anchor" href="#solution-1--exercise-3-partitioning" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-partitioning">Exercise 3: Partitioning<a class="heading-anchor" href="#solution-1--exercise-3-partitioning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>partition_rows()</code> so accepted sales and rejected source IDs/reasons retain input order without storing full raw rows.</p>
 <p><strong>Approach:</strong> Iterate once, append parsed sales on success, and append <code>RejectedRow(safe_source_id, reason)</code> on expected validation failure. Do not include the original mapping or unrelated exceptions.</p>
 <p><strong>Why this boundary matters:</strong> Catch only <code>RowValidationError</code> from the conversion boundary.</p>
 <p><strong>Verification evidence:</strong> Feed valid-invalid-valid rows; assert accepted sales and rejection <code>(source_id, reason)</code> records preserve input order and no rejected object stores the complete raw mapping.</p>
-<h5 id="solution-1--exercise-4-batching">Exercise 4 — Batching<a class="heading-anchor" href="#solution-1--exercise-4-batching" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-batching">Exercise 4: Batching<a class="heading-anchor" href="#solution-1--exercise-4-batching" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>batches()</code> with positive-size validation and tests for empty, exact, and remainder cases.</p>
 <p><strong>Approach:</strong> Raise for <code>size &lt; 1</code>; step over indexes by <code>size</code>; convert each non-empty slice to a tuple. Empty input returns an empty list and input order is unchanged.</p>
 <p><strong>Why this boundary matters:</strong> Slice deterministic tuples from the original sequence.</p>
 <p><strong>Verification evidence:</strong> Assert <code>batches([], 2) == []</code>, exact division has no empty tail, a remainder becomes the last tuple, and sizes <code>0</code>/negative raise <code>ValueError</code>.</p>
-<h5 id="solution-1--exercise-5-bulk-sql">Exercise 5 — Bulk SQL<a class="heading-anchor" href="#solution-1--exercise-5-bulk-sql" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-bulk-sql">Exercise 5: Bulk SQL<a class="heading-anchor" href="#solution-1--exercise-5-bulk-sql" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a parameterized <code>executemany()</code> upsert into <code>pg_temp.bridge_sales</code> with no values in SQL text.</p>
 <p><strong>Approach:</strong> Use a static <code>INSERT ... VALUES (%s, ...) ON CONFLICT (source_id) DO UPDATE</code> and pass an iterable of <code>(source_id, customer_id, amount, occurred_on)</code> tuples to <code>executemany</code>.</p>
 <p><strong>Why this boundary matters:</strong> Convert typed sales to one parameter tuple per row.</p>
 <p><strong>Verification evidence:</strong> Inspect one <code>executemany</code> call: SQL contains placeholders and the upsert clause, every sale value exists only in parameter rows, and empty input makes no driver call.</p>
-<h5 id="solution-1--exercise-6-accounting">Exercise 6 — Accounting<a class="heading-anchor" href="#solution-1--exercise-6-accounting" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-accounting">Exercise 6: Accounting<a class="heading-anchor" href="#solution-1--exercise-6-accounting" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Track accepted, rejected, submitted, inserted, and updated counts separately and state what <code>executemany()</code> cannot cheaply distinguish.</p>
 <p><strong>Approach:</strong> Validation provides accepted/rejected/submitted counts. Ordinary <code>executemany</code> does not cheaply classify each upsert as insert versus update; use staging plus set-based comparison/<code>RETURNING</code> if that distinction is required.</p>
 <p><strong>Why this boundary matters:</strong> Do not infer business outcomes from submitted row count.</p>
 <p><strong>Verification evidence:</strong> For a mixed fixture, report separate accepted, rejected, and submitted counts; label inserted/updated as unknown unless returned/reconciled database evidence distinguishes them.</p>
-<h5 id="solution-1--exercise-7-extension">Exercise 7 — Extension<a class="heading-anchor" href="#solution-1--exercise-7-extension" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-extension">Exercise 7: Extension<a class="heading-anchor" href="#solution-1--exercise-7-extension" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design the Psycopg COPY variant using typed <code>write_row()</code> calls and a staging table instead of hand-built delimited text.</p>
 <p><strong>Approach:</strong> Open a COPY context for typed columns, call <code>write_row</code> per validated <code>Sale</code>, then merge staging rows into the target in the same transaction. Never concatenate tab/newline-delimited source strings.</p>
 <p><strong>Why this boundary matters:</strong> COPY handles transport; a later set-based statement owns merge semantics.</p>
 <p><strong>Verification evidence:</strong> Provide a COPY design that calls typed <code>write_row</code> into a staging table, validates staging rows, and performs one set-based merge without constructing delimited text.</p>
-<h5 id="solution-1--exercise-8-edge-cases">Exercise 8 — Edge cases<a class="heading-anchor" href="#solution-1--exercise-8-edge-cases" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-edge-cases">Exercise 8: Edge cases<a class="heading-anchor" href="#solution-1--exercise-8-edge-cases" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer IDs, and invalid dates.</p>
 <p><strong>Approach:</strong> Reject non-finite or non-positive Decimal values and blank IDs; define whether <code>&#x27;007&#x27;</code> is a valid integer representation; reject invalid calendar dates. None of the full raw inputs should appear in reasons.</p>
 <p><strong>Why this boundary matters:</strong> Classify each rejection at the field boundary and keep its reason safe.</p>
 <p><strong>Verification evidence:</strong> Parameterize <code>NaN</code>, both infinities, zero, negative amount, blank ID, leading-zero customer ID, and invalid dates; compare exact acceptance or <code>RowValidationError</code> outcome.</p>
-<h5 id="solution-1--exercise-9-idempotency">Exercise 9 — Idempotency<a class="heading-anchor" href="#solution-1--exercise-9-idempotency" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-9-idempotency">Exercise 9: Idempotency<a class="heading-anchor" href="#solution-1--exercise-9-idempotency" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Choose a policy for duplicate <code>source_id</code> values within one input batch and test it before database submission.</p>
 <p><strong>Approach:</strong> The safer teaching policy rejects duplicate source IDs during planning, because last-write-wins would depend on input order. Track seen IDs and reject before opening the transaction.</p>
 <p><strong>Why this boundary matters:</strong> Database upsert resolves persisted conflicts but may hide contradictory source rows.</p>
 <p><strong>Verification evidence:</strong> Choose reject-first, reject-all, or deterministic-last-wins for duplicate <code>source_id</code>; assert the chosen result is decided before <code>executemany</code> and documented in counts.</p>
-<h5 id="solution-1--exercise-10-scale-design">Exercise 10 — Scale design<a class="heading-anchor" href="#solution-1--exercise-10-scale-design" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-10-scale-design">Exercise 10: Scale design<a class="heading-anchor" href="#solution-1--exercise-10-scale-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare materializing all accepted rows with a streaming validator and identify where bounded memory changes APIs.</p>
 <p><strong>Approach:</strong> For large inputs, yield accepted/rejected events or bounded batches from an iterator and aggregate counters incrementally. Preserve source order and avoid keeping raw rows after validation.</p>
 <p><strong>Why this boundary matters:</strong> A tuple return is convenient for lessons but not for unlimited sources.</p>
 <p><strong>Verification evidence:</strong> Compare peak retained rows for materialized and streaming designs; the streaming API must emit bounded batches/rejections without requiring the entire input sequence.</p>
-<h5 id="solution-1--exercise-11-capacity">Exercise 11 — Capacity<a class="heading-anchor" href="#solution-1--exercise-11-capacity" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-11-capacity">Exercise 11: Capacity<a class="heading-anchor" href="#solution-1--exercise-11-capacity" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Select batch size from parameter count, row width, memory, and transaction duration rather than a universal constant.</p>
 <p><strong>Approach:</strong> Bound rows so parameters and memory remain reasonable, then benchmark throughput/latency. Validate a positive configured size and expose submitted batch counts for tuning.</p>
 <p><strong>Why this boundary matters:</strong> Measure the real adapter and keep a safe configurable default.</p>
 <p><strong>Verification evidence:</strong> Show a batch-size calculation using parameter count, row width, memory budget, and transaction-duration target; assert the selected size stays below every stated limit.</p>
-<h5 id="solution-1--exercise-12-transaction-failure">Exercise 12 — Transaction failure<a class="heading-anchor" href="#solution-1--exercise-12-transaction-failure" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-12-transaction-failure">Exercise 12: Transaction failure<a class="heading-anchor" href="#solution-1--exercise-12-transaction-failure" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Specify behavior when <code>executemany()</code> fails halfway and identify which layer owns rollback and retry.</p>
 <p><strong>Approach:</strong> Let the caller&#x27;s transaction boundary roll back the entire batch and classify the exception there. Retry the same stable source IDs in a fresh transaction; never report partial rows as committed without database evidence.</p>
 <p><strong>Why this boundary matters:</strong> Submission count is not committed count.</p>
 <p><strong>Verification evidence:</strong> Inject a mid-load driver failure; assert the transaction owner rolls back the complete unit, the loader does not claim partial success, and retry starts from a defined boundary.</p>
-<h5 id="solution-1--exercise-13-observability">Exercise 13 — Observability<a class="heading-anchor" href="#solution-1--exercise-13-observability" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-13-observability">Exercise 13: Observability<a class="heading-anchor" href="#solution-1--exercise-13-observability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a bounded rejection taxonomy and metrics that do not use source IDs or raw reasons as tags.</p>
 <p><strong>Approach:</strong> Map failures to codes such as <code>missing_source_id</code>, <code>invalid_customer_id</code>, <code>invalid_amount</code>, and <code>invalid_date</code>; count by code while retaining minimal per-row diagnostics in a protected bounded sink.</p>
 <p><strong>Why this boundary matters:</strong> Metric labels must come from a fixed vocabulary.</p>
 <p><strong>Verification evidence:</strong> Inspect metrics for a fixed rejection-reason enum and bounded outcome tags; assert no source ID, raw reason text, or complete rejected row appears as a tag.</p>
-<h5 id="solution-1--exercise-14-reconciliation">Exercise 14 — Reconciliation<a class="heading-anchor" href="#solution-1--exercise-14-reconciliation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-14-reconciliation">Exercise 14: Reconciliation<a class="heading-anchor" href="#solution-1--exercise-14-reconciliation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a replay test that loads the same accepted sales twice and reconciles source IDs and total amount.</p>
 <p><strong>Approach:</strong> After two upserts, query one row per source ID and compare exact counts/sums with the deduplicated accepted plan. The second run may update but must not duplicate logical rows.</p>
 <p><strong>Why this boundary matters:</strong> Idempotency is proven by stable final state, not by absence of exceptions.</p>
@@ -1129,16 +1129,16 @@ sale <span class="syntax-operator">=</span> parse_sale<span class="syntax-punctu
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-06: Bulk ETL Validation.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through stable lesson ID bridge-06: Bulk ETL Validation.
 Direct catalog prerequisites: bridge-05. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -1166,7 +1166,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1277,18 +1277,18 @@ solve the final transfer problem without opening solutions/.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -1,4 +1,4 @@
-# Day 43 — Solutions: Model Interpretation (SHAP, PDP, LIME)
+# Day 43: Solutions: Model Interpretation (SHAP, PDP, LIME)
 
 We introduce global vs local interpretability, compute SHAP values for a tree model, draw Partial Dependence Plots (PDP), and briefly show how to apply LIME (optional).
 
@@ -48,7 +48,7 @@ print(
 )
 ```
 
-Worked reference for Exercise 1 — SHAP summary (tree model)
+Worked reference for Exercise 1; SHAP summary (tree model)
 ```python
 # Missing SHAP is a disclosed capability boundary. Any failure after a
 # successful import is a real defect and must remain visible.
@@ -95,7 +95,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2 — Partial Dependence Plots (PDP)
+Worked reference for Exercise 2; Partial Dependence Plots (PDP)
 ```python
 from sklearn.inspection import PartialDependenceDisplay
 import matplotlib.pyplot as plt
@@ -121,7 +121,7 @@ Interpretation
 
 ---
 
-Worked reference for Exercise 3 (optional) — LIME on a single prediction
+Worked reference for Exercise 3 (optional); LIME on a single prediction
 ```python
 try:
     from lime.lime_tabular import LimeTabularExplainer
@@ -190,7 +190,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.
 
@@ -200,9 +200,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
+**Verify:** Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.
 
@@ -212,9 +212,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
+**Verify:** Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare signs, top-five overlap, and instability; skip only when importing `lime` raises `ModuleNotFoundError`.
 
@@ -224,9 +224,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
+**Verify:** Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
-### Exercise 4 — Local-versus-global diagnosis
+### Exercise 4: Local-versus-global diagnosis
 
 **Prompt:** Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.
 
@@ -244,9 +244,9 @@ population. Sample representative correct cases, errors, and important slices.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Local-versus-global diagnosis — record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
+**Verify:** Local-versus-global diagnosis; record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
 
-### Exercise 5 — Explanation leakage
+### Exercise 5: Explanation leakage
 
 **Prompt:** Explain why selecting the 'most important' features with the final test set and then retraining a smaller model contaminates evaluation.
 
@@ -265,9 +265,9 @@ made from a retrained model.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
+**Verify:** Explanation leakage; draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
 
-### Exercise 6 — Correlated-feature and causality check
+### Exercise 6: Correlated-feature and causality check
 
 **Prompt:** Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.
 
@@ -285,4 +285,4 @@ assumptions not supplied by SHAP, PDP, LIME, or permutation importance.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.
+**Verify:** Correlated-feature and causality check; report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.

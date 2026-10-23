@@ -1,4 +1,4 @@
-# Bridge Day 2 — Solution notes
+# Bridge Day 2: Solution notes
 
 Attempt the [learner file](../lessons/day02_protocols_context_decorators.py)
 before reading [day02_solution.py](day02_solution.py).
@@ -64,7 +64,7 @@ reference is `bridge/solutions/day02_solution.py`; use it only after an honest a
 
 **Shared failure rule:** Logging arguments or allowing cleanup to suppress the original failure can violate both security and debugging contracts.
 
-### Exercise 1 — Design
+### Exercise 1: Design
 
 **Prompt:** Review the starter `Cursor` and `Connection` Protocols; minimize each boundary or
 justify every retained method.
@@ -78,7 +78,7 @@ an entire driver object.
 
 **Verification evidence:** List the exact members each consumer calls: the managed connection boundary needs only `commit`, `rollback`, and `close`; any retained cursor member must have a named caller.
 
-### Exercise 2 — Implementation
+### Exercise 2: Implementation
 
 **Prompt:** Implement `managed_connection(factory)` with acquire-once, yield-once,
 commit-on-success, rollback-on-failure, re-raise, and close-in-finally behavior.
@@ -92,7 +92,7 @@ returns.
 
 **Verification evidence:** Assert success events are `acquire, body, commit, close`; failure events are `acquire, body, rollback, close`; and the original body exception reaches the caller.
 
-### Exercise 3 — Testing
+### Exercise 3: Testing
 
 **Prompt:** Build a fake connection that records exact event order and test success, body
 failure, rollback, and close.
@@ -106,7 +106,7 @@ list.
 
 **Verification evidence:** Configure a recording fake for one success and one body failure; compare the complete event lists and assert commit and rollback are mutually exclusive.
 
-### Exercise 4 — Implementation
+### Exercise 4: Implementation
 
 **Prompt:** Implement `logged()` with `ParamSpec`, `TypeVar`, `functools.wraps`, and an injected
 or module logger.
@@ -120,7 +120,7 @@ original `R`.
 
 **Verification evidence:** Decorate a typed two-argument function; assert its result is unchanged, its name and docstring survive, and logs contain qualified function name plus success/failure only.
 
-### Exercise 5 — Security
+### Exercise 5: Security
 
 **Prompt:** Restrict decorator logs to function identity and outcome; prove arguments, keyword
 values, return values, and connection representations are absent.
@@ -133,7 +133,7 @@ records.
 
 **Verification evidence:** Pass sentinel positional/keyword values and a secret-bearing connection repr; assert none of them, nor the return value, appears in captured log records.
 
-### Exercise 6 — Typing
+### Exercise 6: Typing
 
 **Prompt:** Verify that decoration preserves name, docstring, return behavior, exception
 identity, and a statically visible signature.
@@ -147,7 +147,7 @@ type-level call shape.
 
 **Verification evidence:** Compare `__name__`, `__doc__`, `inspect.signature`, returned value, and the identity of a raised exception before and after decoration; run the configured static type checker.
 
-### Exercise 7 — Prediction
+### Exercise 7: Prediction
 
 **Prompt:** Predict cleanup when the managed body raises `KeyboardInterrupt` or
 cancellation-like `BaseException`; state whether your boundary catches it.
@@ -161,20 +161,20 @@ be guaranteed.
 
 **Verification evidence:** Raise `KeyboardInterrupt` inside the managed body; assert rollback and close occur and the same interruption escapes rather than being converted to an ordinary error.
 
-### Exercise 8 — Debugging
+### Exercise 8: Debugging
 
 **Prompt:** Analyze what happens if rollback or close raises while a body exception is active,
 and design a test that exposes exception masking.
 
 **Approach:** A new exception from rollback/close normally becomes the visible exception and
 chains the body failure in `__context__`. Record both events and choose an application
-policy—often log cleanup failure safely while preserving the primary exception.
+policy, often log cleanup failure safely while preserving the primary exception.
 
 **Why this boundary matters:** Cleanup failures can replace the error that caused cleanup.
 
 **Verification evidence:** Make the body and rollback fail with different exception types, then make close fail in a separate case; inspect `__context__`/grouping so no cleanup failure is silently lost.
 
-### Exercise 9 — Design
+### Exercise 9: Design
 
 **Prompt:** Compose two nested managed resources and decide which layer owns commit, rollback,
 and close.
@@ -187,7 +187,7 @@ outer commit or rollback.
 
 **Verification evidence:** Record two nested resources and assert LIFO ownership: inner commit/rollback and close finish before the outer resource commits/rolls back and closes.
 
-### Exercise 10 — Comparison
+### Exercise 10: Comparison
 
 **Prompt:** Sketch the async equivalent and identify which operations require `await` and which
 typing primitives change.
@@ -201,7 +201,7 @@ execution protocol.
 
 **Verification evidence:** Show an `asynccontextmanager` sketch where factory, commit, rollback, and close are awaited; identify `AsyncIterator` and async callable return types in the signature.
 
-### Exercise 11 — Typing
+### Exercise 11: Typing
 
 **Prompt:** Define a callable Protocol for the connection factory and compare it with
 `Callable[[], Connection]` in tests and adapters.
@@ -215,7 +215,7 @@ beyond a bare call.
 
 **Verification evidence:** Run a type-checking example where both a named factory fake and a real adapter satisfy the callable Protocol; note the Protocol gives the boundary a reusable semantic name.
 
-### Exercise 12 — Extension
+### Exercise 12: Extension
 
 **Prompt:** Design a timing decorator with an injected monotonic clock while retaining the
 no-argument/no-result logging policy.

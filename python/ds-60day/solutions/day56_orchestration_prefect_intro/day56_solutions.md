@@ -1,4 +1,4 @@
-# Day 56 — Solutions: Orchestration with Prefect 3
+# Day 56: Solutions: Orchestration with Prefect 3
 
 We convert a small offline ETL job into a Prefect 3 flow, add retries and a local
 failure hook, and serve it from a self-hosted local scheduler.
@@ -10,7 +10,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Flow and tasks
+Worked reference for Exercise 1; Flow and tasks
 ```python
 from datetime import date
 from typing import TypedDict
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 This one-off run is local and deterministic. It needs no Prefect Cloud account,
 API key, external API, or network download after the dependency is installed.
 
-Worked reference for Exercise 2 — Retries and a local failure hook
+Worked reference for Exercise 2; Retries and a local failure hook
 ```python
 from prefect.logging.loggers import flow_run_logger
 
@@ -81,7 +81,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Parameters and a local daily schedule
+Worked reference for Exercise 3; Parameters and a local daily schedule
 ```python
 def serve_daily() -> None:
     # serve() creates a deployment and then blocks while listening for work.
@@ -158,7 +158,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Add `test_size` and `random_state` parameters to the training flow.
 
@@ -168,9 +168,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — observable task boundaries, retries, caching, and idempotent orchestration — run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
+**Verify:** Practice 1; observable task boundaries, retries, caching, and idempotent orchestration; run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Split the training task into separate train and evaluate tasks with explicit outputs.
 
@@ -180,9 +180,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — observable task boundaries, retries, caching, and idempotent orchestration — make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
+**Verify:** Practice 2; observable task boundaries, retries, caching, and idempotent orchestration; make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Explore the optional local Prefect UI and scheduling basics.
 
@@ -192,9 +192,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — observable task boundaries, retries, caching, and idempotent orchestration — either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
+**Verify:** Practice 3; observable task boundaries, retries, caching, and idempotent orchestration; either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
-### Exercise 4 — Retry and idempotence
+### Exercise 4: Retry and idempotence
 
 **Prompt:** Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.
 
@@ -211,9 +211,9 @@ errors. Classify the exception and preserve the original cause in task state.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Retry and idempotence — inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
+**Verify:** Retry and idempotence; inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
 
-### Exercise 5 — Cache-key design
+### Exercise 5: Cache-key design
 
 **Prompt:** Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.
 
@@ -232,9 +232,9 @@ contract or disable caching.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Cache-key design — print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
+**Verify:** Cache-key design; print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
 
-### Exercise 6 — Failure observability
+### Exercise 6: Failure observability
 
 **Prompt:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
 
@@ -252,4 +252,4 @@ diagnosis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Failure observability — capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.
+**Verify:** Failure observability; capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.

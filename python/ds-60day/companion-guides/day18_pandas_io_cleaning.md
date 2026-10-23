@@ -1,4 +1,4 @@
-# Day 18 — pandas I/O and Data Cleaning
+# Day 18: pandas I/O and Data Cleaning
 
 **Level:** Intermediate
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 18 — pandas i/o and data cleaning to practice pandas input boundaries, explicit cleaning, and reproducible output
+**Lesson outcome:** use day 18; pandas i/o and data cleaning to practice pandas input boundaries, explicit cleaning, and reproducible output
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -101,7 +101,7 @@ reviewed. `.assign(...)` returns a new frame with derived/replaced
 columns. `.pipe(clean_step)` passes a DataFrame into a named function,
 making a sequence of transformations readable.
 
-### Worked example 1 — Normalize text and numeric representations
+### Worked example 1: Normalize text and numeric representations
 
 Count conversion failures instead of silently losing them. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -130,7 +130,7 @@ The names are trimmed, numeric text is converted, and one conversion failure is 
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Write a cleaning function that preserves raw input
+### Worked example 2: Write a cleaning function that preserves raw input
 
 Copy at the boundary and make repeated application stable. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -261,7 +261,7 @@ code; these extend rather than replace the original practice above.
 7. **Debugging:** Repair an in-place operation performed on a chained selection.
    **Progressive hint:** Use assignment on the owned copy and avoid `inplace=True` on a temporary object.
    **Verify:** Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation.
-8. **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing—and justify.
+8. **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing, and justify.
    **Progressive hint:** A statistical fallback cannot be computed from zero observations.
    **Verify:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
 
@@ -295,11 +295,11 @@ missing values, and the input frame remains unchanged.
 
 - [Open the learner notebook](../notebooks/day18_pandas_io_cleaning.ipynb)
 - [Check the separate solution](../solutions/day18_pandas_io_cleaning/day18_solutions.md)
-- [Next: Day 19 — Grouping and reshaping](day19_pandas_groupby_pivot.md)
+- [Next: Day 19; Grouping and reshaping](day19_pandas_groupby_pivot.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

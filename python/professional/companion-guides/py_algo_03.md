@@ -142,7 +142,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [Python deque](https://docs.python.org/3/library/collections.html#collections.deque).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-algo-03: Graph Traversal, Priority Queues, and Shortest-Path Evidence.

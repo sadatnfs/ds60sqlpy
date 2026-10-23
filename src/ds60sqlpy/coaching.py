@@ -11,7 +11,7 @@ from typing import Any
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import RUNNERS
-from ds60sqlpy.lesson_reader import codex_coaching_prompt
+from ds60sqlpy.lesson_reader import tutor_coaching_prompt
 from ds60sqlpy.progress import ProgressStore
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 from ds60sqlpy.study_plan import build_study_plan, learning_paths
@@ -85,7 +85,7 @@ class CoachingService:
             "learner": learner,
             "learner_code": learner_code,
             "notebook_cells": notebook_cells,
-            "coaching_prompt": codex_coaching_prompt(self.catalog, lesson),
+            "coaching_prompt": tutor_coaching_prompt(self.catalog, lesson),
             "missing_prerequisites": [p for p in lesson.prerequisites if p not in completed],
             "session": self.session(lesson_id),
         }

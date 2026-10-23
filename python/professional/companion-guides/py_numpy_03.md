@@ -141,7 +141,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [NumPy ufunc.at repeated-index accumulation](https://numpy.org/doc/stable/reference/generated/numpy.ufunc.at.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-numpy-03: Gather, Scatter, Masks, and Deterministic Selection.

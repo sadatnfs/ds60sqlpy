@@ -366,7 +366,7 @@ SELECT COALESCE(
         --    a table created by a different owner would not inherit that rule.
         --    Inputs: For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.
         --    Expected result/shape: For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on `audit_notes` created by `ds60_sec_owner` but not on `other_owner_notes` created by `ds60_sec_other_owner`.
-        --    Verify: For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role—not inherited membership defaults.
+        --    Verify: For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role, not inherited membership defaults.
         --    Hint ladder, rung 1: For sql-sec-01 Exercise 3, select `ds60_sec_auditor` from `ds60_sec_owner` before adding derived columns.
         --
         -- 4. Review owner_document_count(text). List the controls that make a

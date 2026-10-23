@@ -1,4 +1,4 @@
-# Day 6 — Lists, Tuples, Sets, and Dictionaries
+# Day 6: Lists, Tuples, Sets, and Dictionaries
 
 **Level:** Beginner
 
@@ -61,12 +61,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 6 — lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics
+**Lesson outcome:** use day 6; lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -100,7 +100,7 @@ writes the new total back. `value in seen` is a membership expression;
 for a set or dictionary it is normally much cheaper than scanning a
 long list.
 
-### Worked example 1 — Preserve order while removing repeats
+### Worked example 1: Preserve order while removing repeats
 
 Use one structure for fast membership and another for ordered output. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -125,7 +125,7 @@ unique_in_order
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Aggregate pairs into a dictionary
+### Worked example 2: Aggregate pairs into a dictionary
 
 Make the missing-key starting value explicit. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -222,7 +222,7 @@ assertion or inspection and explain what it proves.
 
 ### Additional mastery practice
 
-Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.
+Choose structures by semantics, ordering, uniqueness, lookup, and mutability, not by habit. State what duplicates and missing keys mean.
 
 Continue with five new exercises. Record each prediction before running
 code; these extend rather than replace the original practice above.
@@ -275,11 +275,11 @@ aggregation uses an appropriate empty starting value.
 
 - [Open the learner notebook](../notebooks/day06_data_structures.ipynb)
 - [Check the separate solution](../solutions/day06_data_structures/day06_solutions.md)
-- [Next: Day 7 — Strings, regex, and paths](day07_strings_regex_pathlib.md)
+- [Next: Day 7; Strings, regex, and paths](day07_strings_regex_pathlib.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

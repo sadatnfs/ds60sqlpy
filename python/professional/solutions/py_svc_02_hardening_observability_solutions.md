@@ -89,7 +89,7 @@ Use this map after an honest attempt. The executable implementation remains
 [`py_svc_02_hardening_observability_solution.py`](py_svc_02_hardening_observability_solution.py); this section explains the
 contract, evidence, alternatives, and edge cases behind every numbered task.
 
-### Exercise 1 — Validate startup configuration
+### Exercise 1: Validate startup configuration
 
 **Prompt recap:** Parse maximum concurrency, rate capacity, and refill rate. Reject zero, negative, blank, or nonnumeric values before constructing the service. Keep credential retrieval outside dataclass representations and logs.
 
@@ -103,9 +103,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Validate startup configuration — parse maximum concurrency, rate capacity, and refill rate; reject zero, negative, blank, or nonnumeric values before constructing the service; keep credential retrieval outside dataclass representations and logs.
+**Verify:** Validate startup configuration; parse maximum concurrency, rate capacity, and refill rate; reject zero, negative, blank, or nonnumeric values before constructing the service; keep credential retrieval outside dataclass representations and logs.
 
-### Exercise 2 — Complete health/readiness policy
+### Exercise 2: Complete health/readiness policy
 
 **Prompt recap:** Health remains true for a running process. Readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state. Return named reasons so an operator can diagnose 503 without exposing secrets. Do not make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an external outage.
 
@@ -119,9 +119,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Complete health/readiness policy — health remains true for a running process; readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state; return named reasons so an operator can diagnose 503 without exposing secrets.
+**Verify:** Complete health/readiness policy; health remains true for a running process; readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state; return named reasons so an operator can diagnose 503 without exposing secrets.
 
-### Exercise 3 — Design structured events
+### Exercise 3: Design structured events
 
 **Prompt recap:** Emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type. Redact token, authorization, password, secret, and API key fields case-insensitively. Do not log request bodies by default.
 
@@ -135,9 +135,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Design structured events — emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type; redact token, authorization, password, secret, and API key fields case-insensitively; do not log request bodies by default.
+**Verify:** Design structured events; emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type; redact token, authorization, password, secret, and API key fields case-insensitively; do not log request bodies by default.
 
-### Exercise 4 — Design metrics
+### Exercise 4: Design metrics
 
 **Prompt recap:** Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.
 
@@ -151,9 +151,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Design metrics — count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes; observe duration values; do not put user, token, request ID, or arbitrary URL into metric labels.
+**Verify:** Design metrics; count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes; observe duration values; do not put user, token, request ID, or arbitrary URL into metric labels.
 
-### Exercise 5 — Bound concurrency
+### Exercise 5: Bound concurrency
 
 **Prompt recap:** Acquire a `BoundedSemaphore` without blocking. Return a lease that always releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.
 
@@ -167,9 +167,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Bound concurrency — acquire a BoundedSemaphore without blocking; return a lease that always releases in exit , including exceptions; with capacity one, hold a lease and verify a second attempt returns busy immediately.
+**Verify:** Bound concurrency; acquire a BoundedSemaphore without blocking; return a lease that always releases in exit , including exceptions; with capacity one, hold a lease and verify a second attempt returns busy immediately.
 
-### Exercise 6 — Rate limit with injected time
+### Exercise 6: Rate limit with injected time
 
 **Prompt recap:** Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.
 
@@ -183,9 +183,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Rate limit with injected time — consume two tokens, reject the third request, advance a fake clock one second, and accept one refill; state that this in-process bucket is not sufficient across multiple service instances.
+**Verify:** Rate limit with injected time; consume two tokens, reject the third request, advance a fake clock one second, and accept one refill; state that this in-process bucket is not sufficient across multiple service instances.
 
-### Exercise 7 — Separate authentication and authorization
+### Exercise 7: Separate authentication and authorization
 
 **Prompt recap:** The local static authenticator maps placeholder test tokens to principals. Readers may predict; operators may predict and reload. Prove unknown identity returns 401 while an authenticated but unauthorized action returns 403. Production identity requires a reviewed provider, token verification/expiry, key rotation, transport security, and audit policy.
 
@@ -199,9 +199,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Separate authentication and authorization — the local static authenticator maps placeholder test tokens to principals; readers may predict; operators may predict and reload; prove unknown identity returns 401 while an authenticated but unauthorized action returns 403.
+**Verify:** Separate authentication and authorization; the local static authenticator maps placeholder test tokens to principals; readers may predict; operators may predict and reload; prove unknown identity returns 401 while an authenticated but unauthorized action returns 403.
 
-### Exercise 8 — Trust an artifact narrowly
+### Exercise 8: Trust an artifact narrowly
 
 **Prompt recap:** Compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object. Tamper with the file and confirm verification fails. Do not use pickle for untrusted service artifacts.
 
@@ -215,9 +215,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Trust an artifact narrowly — compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object; tamper with the file and confirm verification fails; do not use pickle for untrusted service artifacts.
+**Verify:** Trust an artifact narrowly; compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object; tamper with the file and confirm verification fails; do not use pickle for untrusted service artifacts.
 
-### Exercise 9 — Run the incident drill
+### Exercise 9: Run the incident drill
 
 **Prompt recap:** Set a dependency probe false: 1. readiness reports its name, 2. health remains true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-rejected log carries the request ID and bounded reason. Then restore the dependency and confirm readiness recovers.
 
@@ -231,9 +231,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Run the incident drill — set a dependency probe false: - readiness reports its name, - health remains true, - new work receives 503, - the not-ready metric increments, and - a request-rejected log carries the request ID and bounded reason; then restore the dependency and confirm readiness recovers.
+**Verify:** Run the incident drill; set a dependency probe false: - readiness reports its name, - health remains true, - new work receives 503, - the not-ready metric increments, and - a request-rejected log carries the request ID and bounded reason; then restore the dependency and confirm readiness recovers.
 
-### Exercise 10 — Draw the Internet-facing boundary
+### Exercise 10: Draw the Internet-facing boundary
 
 **Prompt recap:** List what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
 
@@ -247,9 +247,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Draw the Internet-facing boundary — list what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
+**Verify:** Draw the Internet-facing boundary; list what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
 
-### Exercise 11 — drain and shut down gracefully
+### Exercise 11: drain and shut down gracefully
 
 **Prompt recap:** Add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown. Make repeated drain calls idempotent.
 
@@ -268,9 +268,9 @@ completion explicitly and assert telemetry contains request counts, not bodies.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** drain and shut down gracefully — add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown; make repeated drain calls idempotent.
+**Verify:** drain and shut down gracefully; add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown; make repeated drain calls idempotent.
 
-### Exercise 12 — add a dependency circuit breaker
+### Exercise 12: add a dependency circuit breaker
 
 **Prompt recap:** Wrap one dependency probe/call in a closed/open/half-open breaker with injected time. Define which failures count, one bounded probe, readiness interaction, and recovery metrics.
 
@@ -289,9 +289,9 @@ explicitly rather than coupling it to breaker implementation.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** add a dependency circuit breaker — wrap one dependency probe/call in a closed/open/half-open breaker with injected time; define which failures count, one bounded probe, readiness interaction, and recovery metrics.
+**Verify:** add a dependency circuit breaker; wrap one dependency probe/call in a closed/open/half-open breaker with injected time; define which failures count, one bounded probe, readiness interaction, and recovery metrics.
 
-### Exercise 13 — define distributed limiting semantics
+### Exercise 13: define distributed limiting semantics
 
 **Prompt recap:** Explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.
 
@@ -310,9 +310,9 @@ concurrency limits still protect each process even with a shared rate policy.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** define distributed limiting semantics — explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.
+**Verify:** define distributed limiting semantics; explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.
 
-### Exercise 14 — bound telemetry backpressure
+### Exercise 14: bound telemetry backpressure
 
 **Prompt recap:** Make the log/metric exporter slow or unavailable. Define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
 
@@ -331,9 +331,9 @@ reports unsent counts rather than hanging forever.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** bound telemetry backpressure — make the log/metric exporter slow or unavailable; define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
+**Verify:** bound telemetry backpressure; make the log/metric exporter slow or unavailable; define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
 
-### Exercise 15 — propagate trace context safely
+### Exercise 15: propagate trace context safely
 
 **Prompt recap:** Accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.
 
@@ -352,9 +352,9 @@ must escape values so an ID cannot inject fake lines or fields.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** propagate trace context safely — accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.
+**Verify:** propagate trace context safely; accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.
 
-### Exercise 16 — rehearse credential rotation
+### Exercise 16: rehearse credential rotation
 
 **Prompt recap:** Model a credential provider accepting active and previous key versions during a bounded overlap. Rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
 
@@ -363,7 +363,7 @@ and which input would make the policy reject or choose a different path.
 The service obtains current material at use time or through an explicitly
 refreshable cache. During overlap, verification can accept both versions while
 issuance uses only active. After deadline, old verification fails and the
-event trail records version IDs and actor—not secret bytes.
+event trail records version IDs and actor, not secret bytes.
 
 Rotation failure has a rollback/escalation policy. Tests use placeholder
 tokens and scan captured diagnostics for their absence.
@@ -373,9 +373,9 @@ tokens and scan captured diagnostics for their absence.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** rehearse credential rotation — model a credential provider accepting active and previous key versions during a bounded overlap; rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
+**Verify:** rehearse credential rotation; model a credential provider accepting active and previous key versions during a bounded overlap; rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
 
-### Exercise 17 — compose dependency timeout budgets
+### Exercise 17: compose dependency timeout budgets
 
 **Prompt recap:** For a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets. Propagate a monotonic deadline and stop work when useful completion is impossible.
 
@@ -394,9 +394,9 @@ without logging payloads. Fixed clocks make the policy deterministic in tests.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** compose dependency timeout budgets — for a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets; propagate a monotonic deadline and stop work when useful completion is impossible.
+**Verify:** compose dependency timeout budgets; for a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets; propagate a monotonic deadline and stop work when useful completion is impossible.
 
-### Exercise 18 — run a fault-injection matrix
+### Exercise 18: run a fault-injection matrix
 
 **Prompt recap:** Inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain. For each, predict status, readiness/health, cleanup, log, and metric evidence.
 
@@ -415,9 +415,9 @@ claim production chaos readiness without deployed-system validation.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** run a fault-injection matrix — inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain; for each, predict status, readiness/health, cleanup, log, and metric evidence.
+**Verify:** run a fault-injection matrix; inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain; for each, predict status, readiness/health, cleanup, log, and metric evidence.
 
-### Exercise 19 — define an SLO and error budget
+### Exercise 19: define an SLO and error budget
 
 **Prompt recap:** Define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action. Use generated local events to compute a small example.
 
@@ -436,9 +436,9 @@ low volume are reported, not silently treated as success.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** define an SLO and error budget — define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action; use generated local events to compute a small example.
+**Verify:** define an SLO and error budget; define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action; use generated local events to compute a small example.
 
-### Exercise 20 — audit privacy, retention, and cardinality
+### Exercise 20: audit privacy, retention, and cardinality
 
 **Prompt recap:** Inventory every log field, metric label, trace attribute, and local artifact. Classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.
 
@@ -457,4 +457,4 @@ Remove fields without a justified operational purpose.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** audit privacy, retention, and cardinality — inventory every log field, metric label, trace attribute, and local artifact; classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.
+**Verify:** audit privacy, retention, and cardinality; inventory every log field, metric label, trace attribute, and local artifact; classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.

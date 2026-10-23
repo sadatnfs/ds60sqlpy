@@ -162,8 +162,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/mcp-tutor.md</code></p>
     </header>
     <article class="document"><h2 id="use-the-local-course-tutor-through-mcp">Use the local course tutor through MCP<a class="heading-anchor" href="#use-the-local-course-tutor-through-mcp" aria-label="Link to this section">#</a></h2>
-<p>The optional DS60 MCP server lets Codex read the local curriculum, plan a path, open the exact lesson, and provide progressive hints. MCP is the connection protocol between Codex and this local Python process. You can also learn without it using the course application, JupyterLab, and checked-in guides.</p>
-<p>The adapter uses standard input/output pipes. It opens no listening port, connects to no remote service, and does not execute Python, SQL, or shell commands. All teaching content comes from the selected repository. The adapter works offline after installation; the AI model used by Codex has its own runtime and connectivity requirements. This repository does not bundle an AI model.</p>
+<p>The optional DS60 MCP server lets the AI tutor read the local curriculum, plan a path, open the exact lesson, and provide progressive hints. MCP is the connection protocol between the AI tutor and this local Python process. You can also learn without it using the course application, JupyterLab, and checked-in guides.</p>
+<p>The adapter uses standard input/output pipes. It opens no listening port, connects to no remote service, and does not execute Python, SQL, or shell commands. All teaching content comes from the selected repository. The adapter works offline after installation; the AI model used by the AI tutor has its own runtime and connectivity requirements. This repository does not bundle an AI model.</p>
 <h3 id="install-the-optional-adapter">Install the optional adapter<a class="heading-anchor" href="#install-the-optional-adapter" aria-label="Link to this section">#</a></h3>
 <p>Run normal OS setup first. Install the extra into the same course interpreter while connected. It uses the official Python MCP SDK v2; old <code>FastMCP</code> examples from SDK v1 are not this adapter&#x27;s interface.</p>
 <p>Windows PowerShell, from the repository root:</p>
@@ -182,18 +182,44 @@ $McpScript <span class="syntax-punctuation">=</span> <span class="syntax-builtin
 <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/.venv/bin/python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/scripts/mcp_server.py</span><span class="syntax-string">&quot;</span> --help</code></pre>
 <p>Expect help showing the required <code>--repo</code> argument and the optional <code>--allow-progress-writes</code> flag. The installed <code>ds60-mcp</code> entry point provides the same server, but an absolute Python path is easier to diagnose in a client configuration and works with both Windows environment layouts.</p>
 <p>If you use exact locked synchronization later, remember to retain <code>--extra mcp</code> in that synchronization. Standard Core setup intentionally does not require this optional integration.</p>
-<h3 id="add-it-to-codex">Add it to Codex<a class="heading-anchor" href="#add-it-to-codex" aria-label="Link to this section">#</a></h3>
-<p>The commands below register a local server in your Codex MCP configuration. Run them yourself when you want that integration. They use absolute paths so the server starts correctly even if Codex&#x27;s working folder differs.</p>
-<p>Windows PowerShell, using the variables above:</p>
-<pre class="highlighted-code"><code class="language-powershell">codex mcp add ds60-tutor <span class="syntax-punctuation">-</span><span class="syntax-punctuation">-</span> $CoursePython $McpScript <span class="syntax-punctuation">-</span>-repo $CourseRoot
-codex mcp get ds60-tutor</code></pre>
-<p>macOS/Linux:</p>
-<pre class="highlighted-code"><code class="language-bash">codex mcp add ds60-tutor -- <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/.venv/bin/python</span><span class="syntax-string">&quot;</span> <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>CourseRoot<span class="syntax-string">}</span><span class="syntax-string">/scripts/mcp_server.py</span><span class="syntax-string">&quot;</span> --repo <span class="syntax-string">&quot;</span>$CourseRoot<span class="syntax-string">&quot;</span>
-codex mcp get ds60-tutor</code></pre>
-<p>The installed Codex CLI&#x27;s <code>codex mcp add --help</code> documents the <code>NAME -- COMMAND</code> stdio form used here. <code>codex mcp list</code> shows configured servers. Restart or refresh the Codex client if it does not immediately discover a new server. The CLI must be installed and on PATH to use these commands. No configuration file is changed by merely installing the Python extra or reading this guide.</p>
-<p>You can inspect the equivalent local configuration with <code>codex mcp get ds60-tutor</code>. The executable must be a real absolute interpreter path; <code>~</code>, an activated shell assumption, or a Python name found only in one terminal can fail when a desktop client starts the process. If you move the repository, recreate its environment and update this registration.</p>
+<h3 id="connect-any-compatible-mcp-client">Connect any compatible MCP client<a class="heading-anchor" href="#connect-any-compatible-mcp-client" aria-label="Link to this section">#</a></h3>
+<p>Choose a client that supports local <strong>stdio</strong> servers. In that client&#x27;s MCP settings, add a server named <code>ds60-tutor</code> with these values:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Setting</th>
+<th>Value</th>
+</tr></thead><tbody>
+<tr>
+<td>Transport</td>
+<td><code>stdio</code></td>
+</tr>
+<tr>
+<td>Command</td>
+<td>The absolute path to the course Python interpreter printed during setup</td>
+</tr>
+<tr>
+<td>Arguments</td>
+<td>The absolute path to <code>scripts/mcp_server.py</code>, then <code>--repo</code>, then the absolute repository directory</td>
+</tr>
+<tr>
+<td>Working directory, if requested</td>
+<td>The repository root</td>
+</tr>
+</tbody></table></div>
+<p>Enter arguments as separate values, not as one shell command. The client must start the interpreter on the same machine or execution environment that holds the repository. A Windows client cannot directly launch a Linux executable inside WSL without an explicit WSL launch configuration. Keep the interpreter, script and repository paths in the same environment.</p>
+<p>A JSON representation of the server values is shown below. This is an illustration of the command and argument fields, not a universal client configuration file. Use the wrapper and settings location documented by your chosen client, and replace every placeholder with a real absolute path.</p>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;command&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;ABSOLUTE_PATH_TO_COURSE_PYTHON&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;args&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;ABSOLUTE_PATH_TO_REPOSITORY/scripts/mcp_server.py&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;--repo&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;ABSOLUTE_PATH_TO_REPOSITORY&quot;</span>
+  <span class="syntax-punctuation">]</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>Do not include shell quote characters inside a JSON argument. A path containing spaces remains a single argument. In JSON, Windows backslashes need escaping; forward slashes are accepted in ordinary Python file paths on Windows.</p>
+<p>Refresh the client&#x27;s server list after saving its settings. The server should advertise the course tools described below. Installing the Python extra does not change any client configuration. If the checkout moves, recreate its virtual environment and update the interpreter, script and repository paths.</p>
+<p>The <a href="https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio">MCP stdio transport specification</a> defines the process and pipe boundary. It does not require a specific client brand, settings filename or command-line registration tool.</p>
 <h3 id="begin-a-learning-conversation">Begin a learning conversation<a class="heading-anchor" href="#begin-a-learning-conversation" aria-label="Link to this section">#</a></h3>
-<p>For example, tell Codex:</p>
+<p>For example, tell the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Use the ds60-tutor MCP server. List the learning paths, then help me plan
 Python foundations for five hours each week. Start with the first pending
 lesson. Explain the guide, ask me to predict a result, and wait for my attempt.
@@ -244,8 +270,8 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 <p>Follow-up requests add <code>&quot;cursor&quot;: &quot;THE_RETURNED_CURSOR&quot;</code> to those same filters. No results is a valid response. Changing filters requires starting a new search.</p>
 <p>Resources expose <code>ds60://course/paths</code> and <code>ds60://course/lesson/LESSON_ID</code>. The latter contains only the checked-in guide. Resource enumeration is paginated too. The <code>coach_lesson</code> prompt accepts a stable <code>lesson_id</code> and optional <code>request</code> and starts the same guide-first coaching loop. Solutions have no resource URI; they require the gated tool.</p>
 <p>The solution flag is an explicit protocol acknowledgement. The AI host must still respect the learner&#x27;s actual request; it should never set the flag just to bypass a request for hints.</p>
-<h3 id="read-authored-beta-modules">Read authored beta modules<a class="heading-anchor" href="#read-authored-beta-modules" aria-label="Link to this section">#</a></h3>
-<p>When this checkout contains the expansion plans, four additional read-only operations expose the authored Kubernetes, TensorFlow, LLM, C++, and Scala/Spark modules. Their counts come from the curated module manifests. Canonical lesson counts exclude language variants. <code>planned_count</code> covers the full design, including the authored subset; <code>unwritten_count</code> identifies the remaining planned lessons.</p>
+<h3 id="read-the-authored-subject-library">Read the authored subject library<a class="heading-anchor" href="#read-the-authored-subject-library" aria-label="Link to this section">#</a></h3>
+<p>Four additional read-only operations expose the authored subject library, including languages, systems, deep learning, NLP, LLMs and statistics. Their counts come from the curated module manifests. Canonical lesson counts exclude language variants. <code>planned_count</code> covers the full design, including the authored subset; <code>unwritten_count</code> identifies the remaining planned lessons.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Tool</th>
 <th>Purpose</th>
@@ -267,27 +293,27 @@ it works. Keep official solutions closed unless I ask for a comparison.</code></
 <td>Curated solution documents after explicit <code>reveal: true</code></td>
 </tr>
 </tbody></table></div>
-<p>For example, ask Codex:</p>
+<p>For example, ask the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Use ds60-tutor module_subjects, then module_lessons with subject scala-spark
 and status authored. Read spark-013@pyspark through module_lesson for the
 PySpark variant. Explain the guide, ask me to predict the NULL behavior, and
 wait for my attempt. Give one progressive hint from the guide. Keep official
 solutions closed until I explicitly request a comparison.</code></pre>
 <p><code>module_lessons</code> defaults to twenty results and accepts at most fifty. Keep subject, status, query and limit unchanged when following <code>next_cursor</code>. An explicit <code>status: &quot;planned&quot;</code> or <code>status: &quot;all&quot;</code> returns labelled design metadata. Planned placeholders have no authored guide/source read through <code>module_lesson</code>. A canonical lesson can list a curated variant ID, such as <code>spark-013@pyspark</code>, without counting that variant as another lesson.</p>
-<p>The module tools read checked-in content. They do not read saved beta pads, construct job services, probe runtime availability, start a worker, execute source, or record mastery. Their <code>runtime_status</code> is always <code>not_probed</code>; a runtime profile name describes the lesson&#x27;s intended backend. Use the local application and its host preparation instructions for experiments, then share your own attempt and observations with the tutor.</p>
+<p>The module tools read checked-in content. They do not read saved classroom pads, construct job services, probe runtime availability, start a worker, execute source, or record mastery. Their <code>runtime_status</code> is always <code>not_probed</code>; a runtime profile name describes the lesson&#x27;s intended backend. Use the local application and its host preparation instructions for experiments, then share your own attempt and observations with the tutor.</p>
 <p>Guide and solution documents have a 96000-byte tutor read limit; learner source has a 48000-byte limit, and a response has a 384000-byte bound. Oversized content is rejected explicitly instead of silently truncating a lesson. Only curated relative content paths can be read, and each read repeats the content-path check. Solutions have a separate reveal-gated response and are never read by normal module guide, index or search calls.</p>
-<p>All four module tools remain read-only when <code>--allow-progress-writes</code> enables the separate legacy evidence tools. An older checkout without expansion plans keeps its original course tools; beta module tools are not advertised there, and a direct request reports their unavailability. No worker, network service, engine session or module progress file is needed to read a beta guide.</p>
+<p>All four module tools remain read-only when <code>--allow-progress-writes</code> enables the separate legacy evidence tools. An older checkout without expansion plans keeps its original course tools; module tools are not advertised there, and a direct request reports their unavailability. No worker, network service, engine session or module progress file is needed to read an authored guide.</p>
 <h3 id="optional-local-evidence-and-progress-writes">Optional local evidence and progress writes<a class="heading-anchor" href="#optional-local-evidence-and-progress-writes" aria-label="Link to this section">#</a></h3>
-<p>By default the adapter advertises no mutation tools and creates no progress files. If you want Codex to save your own evidence, add <code>--allow-progress-writes</code> to the server command when registering it. For an existing registration, inspect it with <code>codex mcp get ds60-tutor</code>, then replace it deliberately with <code>codex mcp remove ds60-tutor</code> and the matching <code>add</code> command ending in <code>--allow-progress-writes</code>.</p>
+<p>By default the adapter advertises no mutation tools and creates no progress files. If you want the AI tutor to save your own evidence, add <code>--allow-progress-writes</code> to the server command when registering it. For an existing registration, inspect the saved command and arguments in your client settings, then add <code>--allow-progress-writes</code> as one final argument only when you want that behavior.</p>
 <p>With that flag, two additional tools are available:</p>
 <ul>
 <li><code>course_save_evidence</code>: save learner-authored notes for <code>read</code>, <code>predict</code>, <code>attempt</code>, <code>compare</code>, or <code>explain</code> in <code>.learning/coaching.json</code>.</li>
 <li><code>course_complete</code>: require <code>confirmed: true</code>, nonempty saved prediction, attempt, and explanation, plus recorded prerequisites, before writing <code>.learning/progress.json</code>.</li>
 </ul>
-<p>These are the course application&#x27;s local evidence and progress files. Existing notes in other phases are preserved. Completion is explicitly labelled learner-confirmed self-report, not automatic grading. Ask Codex to save only your actual attempt and explanation, with your consent. Keep credentials and private workplace data out of course notes. Neither tool edits a lesson, starts a process, resets a database, or executes the learner&#x27;s code.</p>
+<p>These are the course application&#x27;s local evidence and progress files. Existing notes in other phases are preserved. Completion is explicitly labelled learner-confirmed self-report, not automatic grading. Ask an AI tutor to save only your actual attempt and explanation, with your consent. Keep credentials and private workplace data out of course notes. Neither tool edits a lesson, starts a process, resets a database, or executes the learner&#x27;s code.</p>
 <h3 id="diagnose-a-connection-failure">Diagnose a connection failure<a class="heading-anchor" href="#diagnose-a-connection-failure" aria-label="Link to this section">#</a></h3>
 <ol>
-<li>Run <code>codex mcp get ds60-tutor</code> and inspect the executable, script, and absolute repository path.</li>
+<li>Inspect your client&#x27;s saved server configuration: executable, script, arguments and absolute repository path must all point to this checkout.</li>
 <li>Run that interpreter with <code>-m pip show mcp</code> and check it reports SDK v2.</li>
 <li>Run the script with <code>--help</code>. A missing SDK message means the package was installed into a different interpreter or removed by an exact sync.</li>
 <li>Launching the script with <code>--repo</code> in a terminal normally appears to wait: it is waiting for protocol messages from a client. Press <code>Ctrl+C</code> to stop.</li>
@@ -300,12 +326,12 @@ solutions closed until I explicitly request a comparison.</code></pre>
 <span class="syntax-punctuation">&amp;</span> $CoursePython -m pytest tests<span class="syntax-punctuation">\</span>test_mcp_server<span class="syntax-punctuation">.</span>py tests<span class="syntax-punctuation">\</span>test_module_mcp<span class="syntax-punctuation">.</span>py -q</code></pre>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux</span>
 .venv/bin/python -m pytest tests/test_mcp_server.py tests/test_module_mcp.py -q</code></pre>
-<p>Tests cover a client/server stdio handshake, legacy and beta discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, bounded beta reads, variants, and clean protocol stdout. Beta module tests additionally forbid worker/service construction, source subprocesses, and progress-file access during a real stdio exchange. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific Codex installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
-<p>The implementation follows the official <a href="https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/">SDK v2 low-level server API</a> for explicit schemas, structured tool results, and caller validation. The <a href="https://py.sdk.modelcontextprotocol.io/advanced/pagination/">SDK pagination guide</a> describes protocol list cursors. The current local Codex CLI help was checked for the registration commands above.</p>
+<p>Tests cover a client/server stdio handshake, legacy and module discovery, lesson/guide reads, prompts, solution gating, pagination, opt-in writes, evidence prerequisites, invalid requests, bounded module reads, variants, and clean protocol stdout. Module tests additionally forbid worker/service construction, source subprocesses, and progress-file access during a real stdio exchange. The client session runs with network connect/bind calls forbidden in the POSIX server process. Windows runs the same stdio exchange without that audit guard because its event loop may use an internal socket pair. This proves the adapter protocol in the tested environment; it does not prove that a specific MCP client installation is configured, that an AI taught well, or that a learner mastered the material. No user configuration is modified by these tests.</p>
+<p>The implementation follows the official <a href="https://py.sdk.modelcontextprotocol.io/advanced/low-level-server/">SDK v2 low-level server API</a> for explicit schemas, structured tool results, and caller validation. The <a href="https://py.sdk.modelcontextprotocol.io/advanced/pagination/">SDK pagination guide</a> describes protocol list cursors. Client configuration is separate from the server protocol; verify it with the documentation for your chosen client.</p>
 <h3 id="maintainer-evaluation">Maintainer evaluation<a class="heading-anchor" href="#maintainer-evaluation" aria-label="Link to this section">#</a></h3>
 <p><code>docs/mcp-tutor-evaluation.xml</code> contains ten independent read-only tutoring questions with verified stable answers. The matching <code>tests/test_mcp_tutor_evaluation.py</code> exercises real adapter searches, prerequisite plans, lesson resources and prompts, and checks that these operations create no learner-state files. This checks the adapter&#x27;s evidence and interface. It is separate from evaluating an AI model&#x27;s teaching quality with actual learners.</p>
 <h3 id="expanded-library-protocol-acceptance">Expanded-library protocol acceptance<a class="heading-anchor" href="#expanded-library-protocol-acceptance" aria-label="Link to this section">#</a></h3>
-<p>The final local stdio smoke used the installed MCP SDK 2.3.0 and Python 3.12.13 with the current documented source entrypoint and isolated read-only learning state. It discovered all 11 subjects and 412 unique canonical lessons across nine result pages, then read the exact current Java036 and statistics011 files. The statistics response retained tutorial mode without exams or solution gates. The 11 advertised tools include no code-execution or default mutation tool. False solution reveals and disabled progress calls were rejected. The audit recorded no network, child-process, official-solution, real-state or write attempts; the isolated state remained empty and stderr was empty. This proves the exercised local protocol/content boundary, not execution inside a different Codex installation or a guarantee of learner mastery.</p></article>
+<p>The real stdio tests enumerate the current subject and canonical lesson manifests, page through discovery, and read representative language and statistics guides. Tutorial content retains its learning mode without exams or solution gates. Default tools provide neither code execution nor progress mutation. The tests reject false solution reveals and disabled write calls, and audit unexpected network access, child processes and learner-state writes. Run these tests against the exact checkout being released. Passing protocol tests does not establish that an individual client is configured correctly or that a learner has mastered the material.</p></article>
   </main>
 </body>
 </html>

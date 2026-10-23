@@ -1,4 +1,4 @@
-# Day 46 — Solutions: Deep Learning Overview
+# Day 46: Solutions: Deep Learning Overview
 
 In these solutions we implement a tiny MLP, compare optimizers, and deeply explain vanishing/exploding gradients and mitigations. Each code block is followed by a line‑by‑line walkthrough.
 
@@ -46,7 +46,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 1 — Tiny MLP and capacity exploration
+Worked reference for Exercise 1; Tiny MLP and capacity exploration
 ```python
 class MLP(nn.Module):
     def __init__(self, width=32, depth=2):
@@ -105,7 +105,7 @@ Walkthrough
 
 ---
 
-Worked reference for Exercise 2 — SGD vs Adam convergence
+Worked reference for Exercise 2; SGD vs Adam convergence
 ```python
 def fit_with_opt(model, opt_ctor, lr=1e-2, epochs=400):
     model = model.to(device)
@@ -138,7 +138,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3 — Vanishing/exploding gradients and mitigation
+Worked reference for Exercise 3; Vanishing/exploding gradients and mitigation
 
 Concepts
 - Vanishing: gradients shrink through depth (e.g., sigmoids/tanh saturate); early layers update slowly
@@ -226,7 +226,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Plot the loss over epochs.
 
@@ -236,9 +236,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — tensors, computation graphs, gradients, and the optimizer cycle — save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
+**Verify:** Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Replace SGD with Adam and compare convergence.
 
@@ -248,9 +248,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — tensors, computation graphs, gradients, and the optimizer cycle — from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
+**Verify:** Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Add one hidden layer and a ReLU activation.
 
@@ -260,9 +260,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — tensors, computation graphs, gradients, and the optimizer cycle — assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
+**Verify:** Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
-### Exercise 4 — Autograd tracing
+### Exercise 4: Autograd tracing
 
 **Prompt:** For one scalar regression batch, annotate every line from `zero_grad()` through `step()`: which tensors receive gradients, when are they accumulated, and when do parameters change?
 
@@ -282,9 +282,9 @@ finite before the update.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Autograd tracing — print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
+**Verify:** Autograd tracing; print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
 
-### Exercise 5 — Mode debugging
+### Exercise 5: Mode debugging
 
 **Prompt:** Build a model with Dropout and BatchNorm, then compare repeated predictions in `train()` and `eval()` modes. Explain why `torch.no_grad()` is related but not interchangeable.
 
@@ -303,9 +303,9 @@ is still in evaluation mode.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Mode debugging — for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
+**Verify:** Mode debugging; for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
 
-### Exercise 6 — Loss-aggregation edge case
+### Exercise 6: Loss-aggregation edge case
 
 **Prompt:** Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.
 
@@ -348,4 +348,4 @@ the loss function returns a sum and the denominator is handled accordingly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Loss-aggregation edge case — with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.
+**Verify:** Loss-aggregation edge case; with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.

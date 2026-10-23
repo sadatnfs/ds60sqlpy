@@ -1,4 +1,4 @@
-# Day 04 — Solutions: Loops, Comprehensions, and Generators
+# Day 04: Solutions: Loops, Comprehensions, and Generators
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ normally exhausted after one pass.
 For this lesson's **iteration, eager collection building, and lazy generators** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Start with `numbers = [-3, -1, 0, 2, 5]`. Write an ordinary loop that appends the **squares of strictly positive values** to `positive_squares`, then write an equivalent list comprehension named `compact_squares`. **Expected result:** both are `[4, 25]`. **Constraints:** do not mutate `numbers`, and keep the filter (`> 0`) distinct from the transformation (`value ** 2`). **Verify:** assert the two results are equal and the input is unchanged.
 
@@ -58,7 +58,7 @@ the comprehension.
 
 **Verification evidence:** assert the two results are equal and the input is unchanged.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Implement `evens_through(limit)` as a generator that yields even integers from `0` through `limit` **inclusive**. **Inputs to verify:** `-1`, `0`, `1`, `2`, and `7`. **Expected results:** `[]`, `[0]`, `[0]`, `[0, 2]`, and `[0, 2, 4, 6]`. **Constraints:** use `yield`, return no stored list, and document the inclusive endpoint. **Verify:** Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true.
 
@@ -92,7 +92,7 @@ nothing instead of raising an unrelated error.
 
 **Verification evidence:** Assert the exact five expected lists for limits `-1`, `0`, `1`, `2`, and `7`; also confirm `inspect.isgenerator(evens_through(2))` is true.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** For `items = ['red', 'blue', 'red', 'green', 'blue', 'red']`, build a frequency mapping whose expected value is `{'red': 3, 'blue': 2, 'green': 1}`. **First:** implement an explicit one-pass loop with `dict.get`. **Then:** compare it with `collections.Counter`. **Constraint:** do not repeatedly call `items.count` in production code. **Verify:** assert both mappings agree and explain their time-cost difference.
 
@@ -116,9 +116,9 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 **Verification evidence:** assert both mappings agree and explain their time-cost difference.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Create a generator expression, consume one item with `next`, then convert the rest to a list. Predict what remains and why. **Progressive hint:** Iterators remember their current position and are usually one-shot. **Verify:** Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position.
 
@@ -126,7 +126,7 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 **Evidence to locate in the grouped implementation:** Assert the first consumed square is `0`, the remaining list is `[1, 4, 9]`, and a third pass is empty; explain the saved iterator position.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace `[n * 10 for n in range(6) if n % 2]` one input at a time. **Progressive hint:** Evaluate the filter before the output expression. **Verify:** Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`.
 
@@ -134,7 +134,7 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 **Evidence to locate in the grouped implementation:** Build a six-row trace for inputs `0..5` containing filter result and optional output; confirm the final list is `[10, 30, 50]`.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement `batched(items, size)` yielding lists of at most `size`, including a final partial batch. **Progressive hint:** Accumulate, yield when full, then handle leftovers after the loop. **Verify:** Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises.
 
@@ -142,7 +142,7 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 **Evidence to locate in the grouped implementation:** Assert `list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]`, empty input yields no batches, and size `0` raises.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Explain and repair a loop that removes negative values from the same list it is iterating over. **Progressive hint:** Build a new list or iterate over a copy. **Verify:** Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.
 
@@ -150,7 +150,7 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 **Evidence to locate in the grouped implementation:** Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Define whether an even-number generator 'up to N' includes N and test N values -1, 0, 1, 2, and 3. **Progressive hint:** Boundary examples turn ambiguous English into a contract. **Verify:** Assert exact output for `N` values `-1, 0, 1, 2, 3`; identify which tests prove the endpoint is inclusive and how negative input behaves.
 
@@ -162,7 +162,7 @@ The explicit loop and `Counter` are both one-pass approaches; repeated
 
 Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.
 
-### Shared implementation for Exercises 4–5 — Iteration traces
+### Shared implementation for Exercises 4–5: Iteration traces
 
 ```python
 stream = (n * n for n in range(4))
@@ -175,7 +175,7 @@ assert remaining == [1, 4, 9]
 assert [n * 10 for n in range(6) if n % 2] == [10, 30, 50]
 ```
 
-### Shared implementation for Exercises 6–8 — Batches, safe filtering, and explicit endpoints
+### Shared implementation for Exercises 6–8: Batches, safe filtering, and explicit endpoints
 
 ```python
 from collections.abc import Iterable, Iterator

@@ -1,4 +1,4 @@
-# SQL-EXT-01 — Extensions, Spatial Data, and Vectors
+# SQL-EXT-01: Extensions, Spatial Data, and Vectors
 
 ## Level and prerequisites
 
@@ -49,7 +49,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-EXT-01 — PostgreSQL Extensions, Spatial Data, and Vectors** and choose
+2. Open **SQL-EXT-01; PostgreSQL Extensions, Spatial Data, and Vectors** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -85,7 +85,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -262,7 +262,7 @@ capability evidence and reviewed designs:
    versions without treating availability as permission.
    **Inputs/evidence:** For sql-ext-01 Exercise 1, LEFT JOIN the requested extension-name fixture (citext, pg_trgm, pgcrypto, postgis, postgres_fdw, and vector) to `pg_available_extensions` and `pg_extension`. This is read-only discovery.
    **Expected result/shape:** For sql-ext-01 Exercise 1, One row per requested `extension_name`, with `extension_name`, `default_version`, `installed_version`, `installed_owner`, and `capability_state`, ordered by `extension_name`. State is `unavailable`, `available_not_installed`, or `installed`.
-   **Verify:** For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with `pg_extension`. Record CREATE privilege/approval as unknown unless separately proven—availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.
+   **Verify:** For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with `pg_extension`. Record CREATE privilege/approval as unknown unless separately proven, availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.
 2. **Case folding:** compare generated lowercase storage with `citext` across
    collation, operators, joins, and writers.
    **Inputs/evidence:** For sql-ext-01 Exercise 2, Inspect generated column `pro_extensions_lab.items.normalized_name` and its unique-index catalog row; compare that narrow `lower(item_name)` rule with optional `citext`.
@@ -272,7 +272,7 @@ capability evidence and reviewed designs:
    geometry/geography, SRID, and earth units.
    **Inputs/evidence:** For sql-ext-01 Exercise 3, Calculate `<->` from each `pro_extensions_lab.items.location` to the built-in point `(1,1)`, and write a comparison matrix for built-in `point`, PostGIS `geometry`, and PostGIS `geography`.
    **Expected result/shape:** For sql-ext-01 Exercise 3, One row per `item_id`, with `item_id`, `item_name`, and `planar_distance`, ordered by `planar_distance, item_id`. The matrix names coordinate model, SRID support, distance units, index/operator, and appropriate use for each type.
-   **Verify:** For sql-ext-01 Exercise 3, Distances may tie, so `item_id`—not distance—is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.
+   **Verify:** For sql-ext-01 Exercise 3, Distances may tie, so `item_id`, not distance, is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.
 4. **Vector safety:** validate dimensions and compare exact scan with ANN
    accuracy and lifecycle costs.
    **Inputs/evidence:** For sql-ext-01 Exercise 4, Strengthen `pro_extensions_lab.checked_l2(left,right)` to reject NULL arrays, zero dimensions, unequal dimensions, NULL elements, and non-finite elements before calculating exact L2 distance.
@@ -357,15 +357,15 @@ capability evidence and reviewed designs:
 
 ## Next step
 
-Continue to [SQL-REPL-01 — replication, CDC, and high availability](sql_repl_01_cdc_high_availability.md).
+Continue to [SQL-REPL-01; replication, CDC, and high availability](sql_repl_01_cdc_high_availability.md).
 Carry extension binaries/versions, owners, grants, indexes, backup scope, replica
 compatibility, and disaster-recovery evidence into every adoption decision.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-ext-01 — PostgreSQL Extensions, Spatial Data, and Vectors.

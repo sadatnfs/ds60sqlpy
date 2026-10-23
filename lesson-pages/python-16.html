@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-16-numpy-arrays-vectorization-and-broadcasting">Day 16 — NumPy Arrays, Vectorization, and Broadcasting<a class="heading-anchor" href="#guide--day-16-numpy-arrays-vectorization-and-broadcasting" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-16-numpy-arrays-vectorization-and-broadcasting">Day 16: NumPy Arrays, Vectorization, and Broadcasting<a class="heading-anchor" href="#guide--day-16-numpy-arrays-vectorization-and-broadcasting" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>NumPy stores homogeneous values in an <code>ndarray</code> and applies compiled operations across whole arrays. Shape and dtype are part of every array&#x27;s contract.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 16 — numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 16; numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A NumPy array is a rectangular, usually homogeneous block of values. Its <code>shape</code> states the length of each dimension, its <code>ndim</code> counts dimensions, and its <code>dtype</code> controls representation and supported numeric behavior. Unlike a nested Python list, an array supports elementwise operations and axis-aware reductions.</p>
 <p>Vectorization expresses work as array operations implemented in optimized compiled loops. Broadcasting compares shapes from the right and virtually expands dimensions of length one or missing leading dimensions. It avoids manual loops, but a broadcastable expression can still be semantically wrong; always state what each axis represents.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>For a shape <code>(rows, columns)</code> array, <code>values.mean(axis=0)</code> collapses the row axis and returns one mean per column; <code>axis=1</code> collapses columns and returns one mean per row. In <code>matrix - column_means</code>, shapes <code>(r, c)</code> and <code>(c,)</code> align from the right, so the one-dimensional vector is used across every row.</p>
-<h5 id="guide--worked-example-1-inspect-shape-before-calculating">Worked example 1 — Inspect shape before calculating<a class="heading-anchor" href="#guide--worked-example-1-inspect-shape-before-calculating" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-inspect-shape-before-calculating">Worked example 1: Inspect shape before calculating<a class="heading-anchor" href="#guide--worked-example-1-inspect-shape-before-calculating" aria-label="Link to this section">#</a></h5>
 <p>Give each dimension a meaning and compare axis reductions. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
@@ -434,7 +434,7 @@ scores <span class="syntax-operator">=</span> np<span class="syntax-operator">.<
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`{&#x27;shape&#x27;: (2, 3), &#x27;per_column&#x27;: [6.0, 7.5, 9.0], &#x27;per_row&#x27;: [8.0, 7.0]}`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-center-every-column-through-broadcasting">Worked example 2 — Center every column through broadcasting<a class="heading-anchor" href="#guide--worked-example-2-center-every-column-through-broadcasting" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-center-every-column-through-broadcasting">Worked example 2: Center every column through broadcasting<a class="heading-anchor" href="#guide--worked-example-2-center-every-column-through-broadcasting" aria-label="Link to this section">#</a></h5>
 <p>A length-three vector applies to the three columns of every row. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">column_means <span class="syntax-operator">=</span> scores<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 centered <span class="syntax-operator">=</span> scores <span class="syntax-operator">-</span> column_means
@@ -524,10 +524,10 @@ centered <span class="syntax-operator">=</span> scores <span class="syntax-opera
 <ul>
 <li><a href="python-16.html#learner">Open the learner notebook</a></li>
 <li><a href="python-16.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-17.html#guide">Next: Day 17 — pandas fundamentals</a></li>
+<li><a href="python-17.html#guide">Next: Day 17; pandas fundamentals</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-16`
 (Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
 I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
@@ -805,7 +805,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-16-solutions-numpy-fundamentals">Day 16 — Solutions: NumPy Fundamentals<a class="heading-anchor" href="#solution-1--day-16-solutions-numpy-fundamentals" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-16-solutions-numpy-fundamentals">Day 16: Solutions: NumPy Fundamentals<a class="heading-anchor" href="#solution-1--day-16-solutions-numpy-fundamentals" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A NumPy array is a rectangular, usually homogeneous block of values. Its <code>shape</code> states the length of each dimension, its <code>ndim</code> counts dimensions, and its <code>dtype</code> controls representation and supported numeric behavior. Unlike a nested Python list, an array supports elementwise operations and axis-aware reductions.</p>
@@ -821,8 +821,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. <strong>Expected behavior:</strong> shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. <strong>Constraint:</strong> use vectorized reductions with explicit axes, not Python loops. <strong>Verify:</strong> assert both shapes and exact values.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. Expected behavior: shapes are <code>(3, 4)</code>, <code>(3,)</code>, <code>(4,)</code>, and <code>(3,)</code> for the original and three results. Constraint: use vectorized reductions with explicit axes, not Python loops. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert both shapes and exact values. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -837,7 +837,7 @@ row_maximums <span class="syntax-operator">=</span> array<span class="syntax-ope
 <span class="syntax-keyword">assert</span> column_means<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> row_maximums<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Verification evidence:</strong> assert both shapes and exact values.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. <strong>Constraints:</strong> write the shape equation before <code>@</code> and do not use the legacy global random state. <strong>Verify:</strong> rerunning from a fresh kernel produces identical arrays and results.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Generate two deterministic arrays with <code>np.random.default_rng(42)</code>, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. Constraints: write the shape equation before <code>@</code> and do not use the legacy global random state. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: rerunning from a fresh kernel produces identical arrays and results. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -854,7 +854,7 @@ selected <span class="syntax-operator">=</span> left<span class="syntax-punctuat
 <span class="syntax-keyword">assert</span> selected<span class="syntax-operator">.</span>ndim <span class="syntax-operator">==</span> <span class="syntax-number">1</span></code></pre>
 <p>Recreating the generator with seed 42 reproduces the fixture.</p>
 <p><strong>Verification evidence:</strong> rerunning from a fresh kernel produces identical arrays and results.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Demonstrate broadcasting by standardizing each column of a small 2-D array. <strong>Expected behavior:</strong> each standardized column has mean approximately 0 and standard deviation approximately 1. <strong>Constraints:</strong> keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. <strong>Verify:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Demonstrate broadcasting by standardizing each column of a small 2-D array. Expected behavior: each standardized column has mean approximately 0 and standard deviation approximately 1. Constraints: keep means/stds as <code>(columns,)</code>, reject zero-standard-deviation columns, and assert the final shape equals the input shape. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -874,30 +874,30 @@ standardized <span class="syntax-operator">=</span> standardize_columns<span cla
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>standardized<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>standardized<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Verification evidence:</strong> Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. <strong>Progressive hint:</strong> Broadcasting compares dimensions from the right. <strong>Verify:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the shape and values of a <code>(2, 3)</code> array plus a <code>(3,)</code> array, then explain broadcasting alignment. Progressive hint: Broadcasting compares dimensions from the right. Then compare the prediction with this proof target: Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid. This makes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the <code>(2, 3) + (3,)</code> result shape and exact values; write which right-aligned dimension proves the broadcast is valid.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. <strong>Progressive hint:</strong> The named axis is the dimension reduced. <strong>Verify:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>array.sum(axis=0)</code> and <code>array.sum(axis=1)</code> by naming which dimension is removed and what each output element represents. Progressive hint: The named axis is the dimension reduced. Record the named value, shape, label, or iterator position needed to establish: Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row. The trace exposes NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Calculate both reductions by hand and assert <code>axis=0</code> removes rows into one value per column while <code>axis=1</code> removes columns into one per row.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. <strong>Progressive hint:</strong> Replace a zero standard deviation with a safe denominator. <strong>Verify:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. Progressive hint: Replace a zero standard deviation with a safe denominator. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved. That connects the answer to NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair code that mutates an original array through a slice when an independent working array was intended. <strong>Progressive hint:</strong> Use <code>.copy()</code> at the ownership boundary. <strong>Verify:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair code that mutates an original array through a slice when an independent working array was intended. Progressive hint: Use <code>.copy()</code> at the ownership boundary. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged. The diagnosis depends on NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>np.shares_memory</code> before repair, mutate the working slice, and assert <code>.copy()</code> keeps the original array unchanged.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. <strong>Progressive hint:</strong> The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. <strong>Verify:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. Progressive hint: The array dtype, not Python&#x27;s unbounded integer behavior, controls storage. Values below, at, and above the named boundary must produce the evidence Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer. Those cases show how NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python&#x27;s expected integer.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-4-5-shape-and-axes">Shared implementation for Exercises 4–5 — Shape and axes<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-shape-and-axes" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-shape-and-axes">Shared implementation for Exercises 4–5: Shape and axes<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-shape-and-axes" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
 matrix <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
@@ -905,7 +905,7 @@ offset <span class="syntax-operator">=</span> np<span class="syntax-operator">.<
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>matrix <span class="syntax-operator">+</span> offset<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">101</span><span class="syntax-punctuation">,</span> <span class="syntax-number">202</span><span class="syntax-punctuation">,</span> <span class="syntax-number">303</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">110</span><span class="syntax-punctuation">,</span> <span class="syntax-number">220</span><span class="syntax-punctuation">,</span> <span class="syntax-number">330</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> matrix<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">22</span><span class="syntax-punctuation">,</span> <span class="syntax-number">33</span><span class="syntax-punctuation">]</span>  <span class="syntax-comment"># Reduce rows.</span>
 <span class="syntax-keyword">assert</span> matrix<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span>axis<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">60</span><span class="syntax-punctuation">]</span>       <span class="syntax-comment"># Reduce columns.</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice">Shared implementation for Exercises 6–8 — Stable standardization, copies, and dtype choice<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice">Shared implementation for Exercises 6–8: Stable standardization, copies, and dtype choice<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-stable-standardization-copies-and-dtype-choice" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">standardize_columns</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> np<span class="syntax-operator">.</span>ndarray<span class="syntax-punctuation">:</span>
     <span class="syntax-string">&quot;&quot;&quot;Return float z-scores; constant columns become all zeros.&quot;&quot;&quot;</span>
 
@@ -1051,16 +1051,16 @@ wide <span class="syntax-operator">=</span> small<span class="syntax-operator">.
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-16`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-16`
 (Day 16 — NumPy Arrays, Vectorization, and Broadcasting). Direct catalog prerequisites: `python-15`.
 I have completed the direct prerequisites: `python-15`. Emphasize NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting.
 Read `python/ds-60day/companion-guides/day16_numpy_fundamentals.md` and use the learner notebook
@@ -1075,7 +1075,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1186,18 +1186,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

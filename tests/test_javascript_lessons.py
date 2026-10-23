@@ -35,7 +35,7 @@ def test_registered_bundles_have_real_host_contracts_and_separate_solutions() ->
         assert all(f"### Example {label}:" in guide for label in "AB")
         assert len(re.findall(r"^\s*[1-6]\. \*\*", guide, re.MULTILINE)) == 6
         assert len(re.findall(r"\b[\w'-]+\b", guide)) >= 1050
-        assert "## Ask Codex about this lesson" in guide
+        assert "## Ask an AI tutor about this lesson" in guide
         assert entry["guide_path"] in guide and entry["source_path"] in guide
         for prerequisite in PLAN[entry["id"]]["prerequisites"]:
             assert f"`{prerequisite}`" in guide

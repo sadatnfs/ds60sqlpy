@@ -144,16 +144,16 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_
 
 VS Code query-editor execution does not automatically reproduce every `psql` behavior. Use the terminal command when validating an entire lesson file.
 
-## Working with Codex
+## Working with the AI tutor
 
-Open Codex from the repository root so it discovers:
+Open the AI tutor from the repository root so it discovers:
 
 - Root and nested `AGENTS.md` files
 - The `$guide-ds60sqlpy-learning` repo skill
 - The curriculum catalog
 - The checked-in validation commands
 
-Ask Codex to inspect the learner’s current file before suggesting a fix. See [Learning with Codex](learning-with-codex.md).
+Ask an AI tutor to inspect the learner’s current file before suggesting a fix. See [Learning with an AI tutor](learning-with-an-ai-tutor.md).
 
 ## Files generated while learning
 

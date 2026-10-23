@@ -1,4 +1,4 @@
-# Day 49 — NLP Basics with Hugging Face and spaCy
+# Day 49: NLP Basics with Hugging Face and spaCy
 
 **Lesson ID:** `python-49` · **Level:** advanced · **Dependencies:** `nlp` · **Network:** optional model download
 
@@ -118,7 +118,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — tokenization contracts, cached NLP models, and sensitive-text evaluation
+## Concept deep dive: tokenization contracts, cached NLP models, and sensitive-text evaluation
 
 ### The mental model
 
@@ -145,7 +145,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — inspect an offline spaCy token boundary
+### Focused example A: inspect an offline spaCy token boundary
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -165,7 +165,7 @@ assert "".join(token.text_with_ws for token in doc) == doc.text
 
 **Assumption to name:** The blank English tokenizer supplies lexical boundaries only; it has no trained part-of-speech or entity component.
 
-### Focused example B — make vocabulary and unknown-token behavior visible
+### Focused example B: make vocabulary and unknown-token behavior visible
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -207,11 +207,11 @@ assert token_ids[-1] == vocabulary["[UNK]"]
 
 1. Try a zero-shot-classification pipeline with your own candidate labels.
 
-**Verify:** Practice 1 — tokenization contracts, cached NLP models, and sensitive-text evaluation — when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
+**Verify:** Practice 1; tokenization contracts, cached NLP models, and sensitive-text evaluation; when cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
 2. Compare tokenization from spaCy with a Hugging Face tokenizer.
 
-**Verify:** Practice 2 — tokenization contracts, cached NLP models, and sensitive-text evaluation — for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
+**Verify:** Practice 2; tokenization contracts, cached NLP models, and sensitive-text evaluation; for one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
 ### Progressive hints
 
@@ -234,22 +234,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Truncation debugging:** Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.
    **Progressive hint:** Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.
 
-**Verify:** Truncation debugging — print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
+**Verify:** Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
 
 4. **Model-provenance contract:** Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.
    **Progressive hint:** Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.
 
-**Verify:** Model-provenance contract — write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
+**Verify:** Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
 
 5. **Evaluation leakage:** Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.
    **Progressive hint:** Group by source/document/entity and use normalized hashes or similarity checks before splitting.
 
-**Verify:** Evaluation leakage — group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
+**Verify:** Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
 
 6. **Sensitive-text boundary:** Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.
    **Progressive hint:** Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.
 
-**Verify:** Sensitive-text boundary — run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.
+**Verify:** Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -284,12 +284,12 @@ often easier to audit.
 - Work in the [Day 49 learner notebook](../notebooks/day49_nlp_basics_hf_spacy.ipynb).
 - Then consult the
   [Day 49 solution](../solutions/day49_nlp_basics_hf_spacy/day49_solutions.md).
-- Continue to [Day 50 — Time-Series Modeling](day50_time_series_modeling.md).
+- Continue to [Day 50; Time-Series Modeling](day50_time_series_modeling.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-49` — Day 49 — NLP Basics with Hugging Face and spaCy.

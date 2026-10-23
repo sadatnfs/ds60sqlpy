@@ -243,10 +243,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Declares the canonical Python version</td>
 </tr>
 <tr>
-<td><code>.serena/project.yml</code>, <code>.serena/memories/</code></td>
-<td>Useful for Codex/Serena</td>
+<td><code>.serena/project.yml</code></td>
+<td>Optional repository navigation tooling</td>
 <td>Yes</td>
-<td>Shared repository navigation and handoff guidance</td>
+<td>Portable tool configuration; the maintained instructions remain in <code>AGENTS.md</code> and <code>docs/</code></td>
+</tr>
+<tr>
+<td><code>.serena/memories/</code></td>
+<td>Optional local session notes</td>
+<td>No</td>
+<td>Machine-local assistant context; review privately and do not package it as course content</td>
 </tr>
 <tr>
 <td><code>.serena/cache/</code>, <code>.serena/logs/</code>, <code>.serena/project.local.yml</code></td>
@@ -282,7 +288,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">bash scripts/setup.sh</code></pre>
 <p>VS Code should then select the interpreter inside that clone&#x27;s <code>.venv</code>.</p>
 <h3 id="portal-progress-is-local-learner-data">Portal progress is local learner data<a class="heading-anchor" href="#portal-progress-is-local-learner-data" aria-label="Link to this section">#</a></h3>
-<p>Double-clicking <code>START_HERE.html</code> stores completion in that browser&#x27;s <code>localStorage</code>. Running <code>python scripts/learning_portal.py</code> instead synchronizes lesson completion with <code>.learning/progress.json</code>, which the course CLI and Codex can also read. Both modes offer JSON export/import from the portal, so progress can be deliberately moved without copying caches.</p>
+<p>Double-clicking <code>START_HERE.html</code> stores completion in that browser&#x27;s <code>localStorage</code>. Running <code>python scripts/learning_portal.py</code> instead synchronizes lesson completion with <code>.learning/progress.json</code>, which the course CLI and the AI tutor can also read. Both modes offer JSON export/import from the portal, so progress can be deliberately moved without copying caches.</p>
 <p>The <code>.learning/</code> directory is ignored because progress is personal and can include learner notes. It is not a dependency and is not required for another person to run the course. Preserve it separately before a source-only USB transfer if you want to resume the same learner&#x27;s history.</p>
 <p>The localhost portal itself creates no committed web cache. Its server binds to <code>127.0.0.1</code>, keeps a session token only in memory, and stops when its terminal closes or receives <code>Ctrl+C</code>.</p>
 <h3 id="guided-sql-notebooks-are-learner-work">Guided SQL notebooks are learner work<a class="heading-anchor" href="#guided-sql-notebooks-are-learner-work" aria-label="Link to this section">#</a></h3>
@@ -294,7 +300,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="user-level-data-and-model-caches">User-level data and model caches<a class="heading-anchor" href="#user-level-data-and-model-caches" aria-label="Link to this section">#</a></h3>
 <p>Seaborn sample data, Hugging Face models, and PyTorch weights are normally cached outside the Git repository under the user&#x27;s profile. These caches are not required for source control, but they may be required to repeat a disclosed first-download lesson offline. Keep them until offline study is complete.</p>
 <p>A spaCy pipeline installed with <code>python -m spacy download en_core_web_sm</code> is a package inside the selected <code>.venv</code>, not merely a durable user-profile cache. Recreating <code>.venv</code> removes that installed pipeline, so reinstall it while online before returning to the spaCy lesson.</p>
-<p>DuckDB, Arrow, and packaging labs create their measured outputs in a temporary directory or under ignored <code>artifacts/</code>. Built wheels, Parquet files, local DuckDB databases, and extracted test installs are results—not maintained course source—unless a fixture is explicitly checked in.</p>
+<p>DuckDB, Arrow, and packaging labs create their measured outputs in a temporary directory or under ignored <code>artifacts/</code>. Built wheels, Parquet files, local DuckDB databases, and extracted test installs are results, not maintained course source, unless a fixture is explicitly checked in.</p>
 <p>See <a href="setup/offline.md.html">Offline use</a> for preparation and typical locations.</p>
 <h3 id="check-before-cleanup">Check before cleanup<a class="heading-anchor" href="#check-before-cleanup" aria-label="Link to this section">#</a></h3>
 <p>From the repository root:</p>
@@ -309,8 +315,8 @@ git status --ignored --short</code></pre>
 <ol>
 <li>Close VS Code, Jupyter, Python, and database clients.</li>
 <li>Preserve <code>.learning/</code>, <code>artifacts/</code>, or <code>mlruns/</code> separately if they contain learner work.</li>
-<li>Remove only confirmed generated directories such as <code>.venv/</code>, <code>__pycache__/</code>, <code>.playwright-cli/</code>, tool caches, notebook checkpoints, build output, and machine-local <code>.serena/cache/</code>.</li>
-<li>Keep <code>uv.lock</code>, <code>.python-version</code>, <code>.serena/project.yml</code>, <code>.serena/memories/</code>, <code>START_HERE.html</code>, <code>lesson-pages/</code>, <code>reference-pages/</code>, source fixtures, and all hidden Git/configuration files.</li>
+<li>Remove only confirmed generated directories such as <code>.venv/</code>, <code>__pycache__/</code>, <code>.playwright-cli/</code>, tool caches, notebook checkpoints, build output, and machine-local <code>.serena/cache/</code> and <code>.serena/memories/</code>.</li>
+<li>Keep <code>uv.lock</code>, <code>.python-version</code>, <code>.serena/project.yml</code>, <code>START_HERE.html</code>, <code>lesson-pages/</code>, <code>reference-pages/</code>, source fixtures, and all hidden Git/configuration files.</li>
 <li>Run:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-text">   git status --short --untracked-files=all

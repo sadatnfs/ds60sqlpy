@@ -175,7 +175,7 @@ A tiny fixture makes every operation independently checkable. It is strong evide
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-001, A bounded PyTorch investigation and framework comparison.

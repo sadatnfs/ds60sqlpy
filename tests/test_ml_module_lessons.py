@@ -66,7 +66,7 @@ def test_authored_inventory_has_real_paths_and_planned_identity() -> None:
         assert guide.count("**Expected:**") >= 8
         assert guide.count("**Verify:**") >= 6
         assert entry["guide_path"] in guide and entry["source_path"] in guide
-        assert "## Ask Codex about this lesson" in guide
+        assert "## Ask an AI tutor about this lesson" in guide
         for relative in entry["solution_paths"]:
             if relative.endswith(".md"):
                 solution = (ROOT / relative).read_text()

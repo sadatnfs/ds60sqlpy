@@ -1,4 +1,4 @@
-# Day 09 solutions — Correlated Subqueries and EXISTS
+# Day 09 solutions: Correlated Subqueries and EXISTS
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Return customers who have at least one delivered order.
 
@@ -110,7 +110,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-09 Exercise 1, the chosen form is justified by this lesson-specific rationale: `EXISTS` expresses the yes/no question without multiplying customer rows. Evaluate another form against the concrete expected result (One row per qualifying customer) and the verification above.
 - **Edge case:** Add one row for which `(EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Return products that have never been sold.
 
@@ -152,7 +152,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-09 Exercise 2, the chosen form is justified by this lesson-specific rationale: `NOT EXISTS` correlates on product ID and is not confused by NULL membership. Evaluate another form against the concrete expected result (One row per unsold product) and the verification above.
 - **Edge case:** Add one row for which `(NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))` is true and one for which it is false; verify only the matching `product_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Return each customer's orders that are above that customer's average order total.
 
@@ -194,7 +194,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-09 Exercise 3, the chosen form is justified by this lesson-specific rationale: Correlate the average to the current order's customer, not to the current order ID. Evaluate another form against the concrete expected result (Order rows above their own customer average) and the verification above.
 - **Edge case:** Add one row for which `(o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Explain and avoid the `NOT IN` plus NULL trap by finding customers without orders using `NOT EXISTS`.
 
@@ -235,7 +235,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-09 Exercise 4, the chosen form is justified by this lesson-specific rationale: Correlate on the customer key; a matching row alone determines exclusion. Evaluate another form against the concrete expected result (One row per customer with no order) and the verification above.
 - **Edge case:** Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Return only each customer's most recent order without an arbitrary `LIMIT 1`.
 
@@ -280,7 +280,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-09 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compare to the correlated `MAX(order_date)` and break timestamp ties with the maximum ID at that timestamp. Evaluate another form against the concrete expected result (At most one deterministic order per customer) and the verification above.
 - **Edge case:** Add one row for which `(o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Return customers for whom every order has at least one payment, excluding customers with no orders.
 

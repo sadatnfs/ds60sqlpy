@@ -276,7 +276,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <p>No. It stops recording new operations, but a mutation can still invalidate values saved by an earlier graph. Update only at a deliberate boundary and recompute the forward pass.</p>
 <p><strong>Why avoid.data as a workaround?</strong></p>
 <p>It can bypass useful autograd safeguards and create silently incorrect derivatives. Understand the graph and use documented no_grad, detach and clone semantics instead.</p>
-<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for torch-006, Autograd graphs, the chain rule and in-place hazards.
 Read courses/deep-learning-pytorch/guides/torch-006.md and courses/deep-learning-pytorch/lessons/torch-006.py. Direct prerequisites: `torch-005`.
 Explain the mental model, ask me to predict the worked example, review my attempt,

@@ -190,7 +190,7 @@ REQUIRED_GUIDE_SECTIONS: dict[str, re.Pattern[str]] = {
         r"diagnos(?:is|ing)|troubleshooting)\b",
         re.IGNORECASE,
     ),
-    "Ask Codex": re.compile(r"\bask\s+codex\b", re.IGNORECASE),
+    "Ask an AI tutor": re.compile(r"\bask\s+an\s+AI\s+tutor\b", re.IGNORECASE),
 }
 
 
@@ -569,35 +569,37 @@ def _guide_issues(
         if not any(pattern.search(title) for title in headings):
             issues.append(f"guide is missing a {label} section")
 
-    ask_codex = _heading_section(source, REQUIRED_GUIDE_SECTIONS["Ask Codex"])
-    codex_markers = {
+    ask_tutor = _heading_section(source, REQUIRED_GUIDE_SECTIONS["Ask an AI tutor"])
+    tutor_markers = {
         lesson.id: "the stable lesson ID",
         lesson.guide_path: "the exact companion-guide path",
         lesson.lesson_path: "the exact learner-artifact path",
         "guide-ds60sqlpy-learning": "the repository tutoring skill",
         "solutions/": "the no-solution boundary",
     }
-    for marker, label in codex_markers.items():
-        if marker.casefold() not in ask_codex.casefold():
-            issues.append(f"Ask Codex prompt does not name {label}")
+    for marker, label in tutor_markers.items():
+        if marker.casefold() not in ask_tutor.casefold():
+            issues.append(f"Ask an AI tutor prompt does not name {label}")
     for prerequisite in lesson.prerequisites:
-        if prerequisite.casefold() not in ask_codex.casefold():
-            issues.append(f"Ask Codex prompt does not name catalog prerequisite {prerequisite}")
-    if "```text" not in ask_codex.casefold():
-        issues.append("Ask Codex section does not contain a fenced text prompt")
+        if prerequisite.casefold() not in ask_tutor.casefold():
+            issues.append(
+                f"Ask an AI tutor prompt does not name catalog prerequisite {prerequisite}"
+            )
+    if "```text" not in ask_tutor.casefold():
+        issues.append("Ask an AI tutor section does not contain a fenced text prompt")
     for marker in ("predict", "attempt", "hint", "evidence", "retrieval"):
-        if marker not in ask_codex.casefold():
-            issues.append(f"Ask Codex prompt does not include the {marker} coaching phase")
+        if marker not in ask_tutor.casefold():
+            issues.append(f"Ask an AI tutor prompt does not include the {marker} coaching phase")
     if (
         re.search(
             r"\b(?:done\s+when|finish\s+only\s+when|"
             r"consider\s+the\s+lesson\s+complete\s+when)\b",
-            ask_codex,
+            ask_tutor,
             re.IGNORECASE,
         )
         is None
     ):
-        issues.append("Ask Codex prompt does not define an evidence-based done condition")
+        issues.append("Ask an AI tutor prompt does not define an evidence-based done condition")
 
     if practice_blocks and explicit_checks != len(practice_blocks):
         issues.append(

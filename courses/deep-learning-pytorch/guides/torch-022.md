@@ -186,7 +186,7 @@ Uniform scores can hide a missing scale factor or incorrect query-key arithmetic
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-022, Attention, transformer masks and information boundaries.

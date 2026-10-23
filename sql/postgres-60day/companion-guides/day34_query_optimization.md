@@ -1,9 +1,9 @@
-# Day 34 — Query Optimization Techniques
+# Day 34: Query Optimization Techniques
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 33 — composite, covering, and partial indexes](day33_index_optimization_strategies.md)
+- **Prerequisites:** [Day 33; composite, covering, and partial indexes](day33_index_optimization_strategies.md)
 - **Artifacts:** [learner SQL](../day34_query_optimization.sql) ·
   [solution reasoning](../solutions/day34_solutions.md) ·
   [executable solution](../solutions/day34_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-34 — Query Optimization** and choose
+2. Open **SQL-34; Query Optimization** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -184,7 +184,7 @@ Change one thing per experiment and reconcile results before timing.
 
 ## Next step
 
-Continue to [Day 35 — performance pitfalls](day35_avoiding_pitfalls.md).
+Continue to [Day 35; performance pitfalls](day35_avoiding_pitfalls.md).
 
 ## Deep dive and reference
 
@@ -236,11 +236,11 @@ When payments and line items are both many-to-one with orders, aggregate each
 to order grain before combining them. Use `NOT EXISTS` for a NULL-safe anti-join;
 `NOT IN` becomes unknown for every candidate if its subquery can return NULL.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-34 — Query Optimization.

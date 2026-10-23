@@ -176,7 +176,7 @@ No. It controls gradient behavior for that embedding row. The loss still needs i
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-021, Embeddings, padded sequences and recurrent models.

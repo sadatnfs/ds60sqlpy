@@ -1,4 +1,4 @@
-# Day 20 — Solutions: Pandas Merging and Joins
+# Day 20: Solutions: Pandas Merging and Joins
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ has the intended meaning.
 For this lesson's **relational keys, join types, cardinality, and reconciliation** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Join product, order-item, and customer tables to compute revenue per customer. **Before code:** write each table's row grain and key uniqueness. **Sequence:** many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. **Expected behavior:** one output row per customer with orders. **Verify:** assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.
 
@@ -77,7 +77,7 @@ assert revenue["revenue"].sum() == items["revenue"].sum()
 
 **Verification evidence:** assert both merges pass their declared `validate` relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. **Expected behavior:** the unmatched right row survives with missing order fields. **Then:** swap table order and reproduce the result with a left join. **Verify:** compare sorted keys and explain why left joins are often easier to read from a chosen primary table.
 
@@ -104,7 +104,7 @@ customer table appears first.
 
 **Verification evidence:** compare sorted keys and explain why left joins are often easier to read from a chosen primary table.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Create data where a supposedly unique dimension key is duplicated, then use the correct `validate` relationship to raise `MergeError`. **Constraints:** state which side should be one and which may be many; do not de-duplicate merely to silence the error. **Verify:** repair the fixture or data contract and show the validated merge succeeds without row multiplication.
 
@@ -136,9 +136,9 @@ assert len(repaired) == len(order_items)
 
 **Verification evidence:** repair the fixture or data contract and show the validated merge succeeds without row multiplication.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. **Progressive hint:** A many-to-many match forms every pair: left count × right count. **Verify:** Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship.
 
@@ -146,7 +146,7 @@ assert len(repaired) == len(order_items)
 
 **Evidence to locate in the grouped implementation:** Build the 2-by-3 fixture and assert exactly six rows for that key; compare with `validate` rejecting the unintended many-to-many relationship.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace an outer merge with `indicator=True` and classify `left_only`, `right_only`, and `both` rows. **Progressive hint:** The indicator is a compact reconciliation tool. **Verify:** Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.
 
@@ -154,7 +154,7 @@ assert len(repaired) == len(order_items)
 
 **Evidence to locate in the grouped implementation:** Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement an anti-join returning left rows whose key has no right match. **Progressive hint:** Use a left merge with indicator, then filter `left_only`. **Verify:** Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.
 
@@ -162,7 +162,7 @@ assert len(repaired) == len(order_items)
 
 **Evidence to locate in the grouped implementation:** Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair a merge whose `validate='one_to_many'` is reversed relative to the actual product-to-order-item relationship. **Progressive hint:** Say which side must have unique keys before choosing `1:m` or `m:1`. **Verify:** Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key.
 
@@ -170,7 +170,7 @@ assert len(repaired) == len(order_items)
 
 **Evidence to locate in the grouped implementation:** Assert key uniqueness on each side, choose `many_to_one` for item-to-product data, and show the reversed validation fails on the duplicate item key.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join. **Progressive hint:** Do not assume pandas null-key behavior matches SQL. **Verify:** Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.
 
@@ -182,12 +182,12 @@ assert len(repaired) == len(order_items)
 
 Declare each table's grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.
 
-### Shared implementation for Exercises 4–5 — Cardinality and reconciliation
+### Shared implementation for Exercises 4–5: Cardinality and reconciliation
 
 Two matching left rows times three matching right rows produce six output rows.
 An outer merge indicator shows orphans from each side as well as matches.
 
-### Shared implementation for Exercises 6–8 — Anti-join and an explicit null-key policy
+### Shared implementation for Exercises 6–8: Anti-join and an explicit null-key policy
 
 ```python
 import pandas as pd

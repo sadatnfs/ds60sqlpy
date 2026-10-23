@@ -2,7 +2,7 @@
 """Build the portable, dependency-free DS60 learning guide.
 
 The generated ``START_HERE.html`` embeds the checked-in catalog and each
-guide-authored Codex tutoring prompt so it works from a clone or USB drive
+guide-authored tutoring prompt so it works from a clone or USB drive
 without a web server or network connection.
 """
 
@@ -24,8 +24,8 @@ if str(SRC) not in sys.path:
 from ds60sqlpy.catalog import Catalog  # noqa: E402
 from ds60sqlpy.lesson_reader import (  # noqa: E402
     COURSE_GUIDE_REFERENCE_PATHS,
-    codex_coaching_prompt,
     reference_relative_path,
+    tutor_coaching_prompt,
 )
 
 
@@ -43,7 +43,7 @@ def _catalog_payload() -> dict[str, Any]:
         ):
             raise ValueError("curriculum/catalog.json contains an invalid lesson")
         lesson = catalog.get(lesson_payload["id"])
-        lesson_payload["codex_prompt"] = codex_coaching_prompt(catalog, lesson)
+        lesson_payload["tutor_prompt"] = tutor_coaching_prompt(catalog, lesson)
     return payload
 
 
@@ -743,7 +743,7 @@ def build_html(payload: dict[str, Any]) -> str:
         <a href="#paths">Choose a path</a>
         <a href="#workflow">Study loop</a>
         <a href="#catalog">Lessons</a>
-        <a href="#codex">Codex coach</a>
+        <a href="#tutor">AI tutoring</a>
       </nav>
     </div>
   </header>
@@ -755,7 +755,7 @@ def build_html(payload: dict[str, Any]) -> str:
       <p class="hero-copy">
         This is the portable front door to the DS60 repository. Set up a new
         machine, choose a route, open the right artifacts, track local progress,
-        and ask Codex for coaching without giving away the solution.
+        and ask an AI tutor for coaching without giving away the solution.
       </p>
       <div class="hero-actions">
         <a class="button" href="#windows-quick-start">Windows: start here</a>
@@ -1132,8 +1132,8 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             <p>Build a route from the real prerequisites and your available time. Beginner practice and advanced projects belong at different checkpoints.</p>
             <a href="docs/learning-paths.md">Placement and goal-based learning paths</a></article>
           <article class="panel"><h3>Bring a coach</h3>
-            <p>The optional local MCP tutor gives Codex the same course context, with one hint at a time and separate solution requests.</p>
-            <a href="docs/mcp-tutor.md">Connect the Codex tutor</a></article>
+            <p>The optional local MCP server shares the same course context with compatible assistants, with one hint at a time and separate solution requests.</p>
+            <a href="docs/mcp-tutor.md">Connect an MCP tutor</a></article>
         </div>
         <p><a href="docs/docker-beginners.md">Build and start Docker, step by step</a> ·
           <a href="docs/setup/first-success.md">Get your first successful run</a> ·
@@ -1254,9 +1254,9 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
             </p>
           </article>
           <article class="panel">
-            <h3>When Codex adds value</h3>
+            <h3>When an AI tutor adds value</h3>
             <p>
-              Codex can adapt the explanation, ask you to predict, inspect your
+              An AI tutor can adapt the explanation, ask you to predict, inspect your
               real output, and reveal one hint at a time. It should not replace
               missing course material or open the solution before your attempt.
             </p>
@@ -1265,7 +1265,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
               stable lesson ID, exact files, prerequisites, safety boundary,
               tutoring loop, and evidence-based done condition.
             </p>
-            <a href="#codex">Choose a lesson prompt</a>
+            <a href="#tutor">Choose a lesson prompt</a>
           </article>
         </div>
       </div>
@@ -1334,28 +1334,28 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       </div>
     </section>
 
-    <section id="codex">
+    <section id="tutor">
       <div class="shell">
         <div class="section-head">
           <div>
             <p class="eyebrow">Optional coach</p>
-            <h2>Give Codex a disciplined tutoring brief.</h2>
+            <h2>Give your tutor a clear learning brief.</h2>
           </div>
           <p>
-            Open this repository root in Codex. Its <code>AGENTS.md</code>,
+            Open this repository root in an AI coding assistant. Its <code>AGENTS.md</code>,
             catalog, and repo-local tutor skill explain the course. The prompt
             below keeps the session active rather than answer-first.
           </p>
         </div>
         <div class="grid two">
           <div class="panel prompt-box">
-            <label for="codex-lesson"><strong>Lesson to coach</strong></label>
-            <select id="codex-lesson" style="width: 100%; margin: 0.5rem 0 0.8rem"></select>
-            <label for="codex-prompt"><strong>Copy-ready prompt</strong></label>
-            <textarea id="codex-prompt" readonly></textarea>
+            <label for="tutor-lesson"><strong>Lesson to coach</strong></label>
+            <select id="tutor-lesson" style="width: 100%; margin: 0.5rem 0 0.8rem"></select>
+            <label for="tutor-prompt"><strong>Copy-ready prompt</strong></label>
+            <textarea id="tutor-prompt" readonly></textarea>
             <div class="prompt-actions">
               <button type="button" id="copy-prompt">Copy prompt</button>
-              <a class="button secondary" href="docs/learning-with-codex.md">Full Codex guide</a>
+              <a class="button secondary" href="docs/learning-with-an-ai-tutor.md">Full AI tutor guide</a>
             </div>
             <p class="microcopy" id="copy-status" aria-live="polite"></p>
           </div>
@@ -1370,7 +1370,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
               <li>Open official solutions only when requested or after the attempt.</li>
             </ul>
             <div class="callout warning">
-              Codex can be online while the course runs offline. Never paste a
+              An AI assistant can be online while the course runs offline. Never paste a
               password, private database URL, token, or production data into a
               prompt, notebook, progress note, or source file.
             </div>
@@ -1863,18 +1863,18 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
       renderProgress();
     });
 
-    const codexLesson = document.querySelector("#codex-lesson");
+    const tutorLesson = document.querySelector("#tutor-lesson");
     lessons.forEach((lesson) => {
       const option = document.createElement("option");
       option.value = lesson.id;
       option.textContent = `${lesson.id}: ${lesson.title}`;
-      codexLesson.append(option);
+      tutorLesson.append(option);
     });
 
     function renderPrompt() {
-      const lesson = lessonById.get(codexLesson.value) || lessons[0];
-      if (lesson.codex_prompt) {
-        document.querySelector("#codex-prompt").value = lesson.codex_prompt;
+      const lesson = lessonById.get(tutorLesson.value) || lessons[0];
+      if (lesson.tutor_prompt) {
+        document.querySelector("#tutor-prompt").value = lesson.tutor_prompt;
         return;
       }
       const prerequisites = lesson.prerequisites.length
@@ -1889,7 +1889,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
         : String(lesson.lesson_path).toLowerCase().endsWith(".ipynb")
           ? `For runnable work, use the repository environment and select the Python (ds60sqlpy) kernel. Have me restart the kernel, run the notebook from the first cell downward, and show my actual output, assertion, or traceback.`
           : `For runnable work, use the repository environment and run the cataloged learner artifact from the repository root. Inspect my actual output, assertion, test result, or traceback.`;
-      document.querySelector("#codex-prompt").value =
+      document.querySelector("#tutor-prompt").value =
 `Use $guide-ds60sqlpy-learning to coach me through ${lesson.id}: ${lesson.title}.
 
 Goal:
@@ -1920,9 +1920,9 @@ Done when:
 I can produce a working result, explain why it works in my own words, identify one common failure mode, justify the verification evidence, and answer the retrieval questions without copying an official solution.`;
     }
 
-    codexLesson.addEventListener("change", renderPrompt);
+    tutorLesson.addEventListener("change", renderPrompt);
     document.querySelector("#copy-prompt").addEventListener("click", async () => {
-      const prompt = document.querySelector("#codex-prompt");
+      const prompt = document.querySelector("#tutor-prompt");
       try {
         await navigator.clipboard.writeText(prompt.value);
         document.querySelector("#copy-status").textContent = "Prompt copied.";

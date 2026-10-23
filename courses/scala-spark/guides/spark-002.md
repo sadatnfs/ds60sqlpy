@@ -167,7 +167,7 @@ A printed number can hide a String/Long mismatch. Int overflow is not repaired b
 
 Continue with [spark-003](spark-003.md), which puts these expression rules behind explicit function contracts.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-002.

@@ -143,7 +143,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [pandas time-window rolling](https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.rolling.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-pandas-03: Grouped Transforms, Temporal Windows, and Session Boundaries.

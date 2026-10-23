@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-6-lists-tuples-sets-and-dictionaries">Day 6 — Lists, Tuples, Sets, and Dictionaries<a class="heading-anchor" href="#guide--day-6-lists-tuples-sets-and-dictionaries" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-6-lists-tuples-sets-and-dictionaries">Day 6: Lists, Tuples, Sets, and Dictionaries<a class="heading-anchor" href="#guide--day-6-lists-tuples-sets-and-dictionaries" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Choose a data structure from the operations you need, not from habit.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -404,8 +404,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 6 — lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 6; lists, tuples, sets, and dictionaries to practice choosing lists, tuples, sets, and dictionaries by semantics and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
 <p>“Mutable” means an object can change in place; “hashable” means it has a stable hash suitable for a set member or dictionary key. Copying a collection is also about reference depth: a shallow copy creates a new outer container but still points to the same nested objects. Choose a structure from the meaning of order, duplicates, lookup, and mutation, not simply from familiar syntax.</p>
@@ -420,7 +420,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>counts[key] = counts.get(key, 0) + amount</code> first asks the dictionary for <code>key</code>, substitutes <code>0</code> only when it is absent, adds <code>amount</code>, and writes the new total back. <code>value in seen</code> is a membership expression; for a set or dictionary it is normally much cheaper than scanning a long list.</p>
-<h5 id="guide--worked-example-1-preserve-order-while-removing-repeats">Worked example 1 — Preserve order while removing repeats<a class="heading-anchor" href="#guide--worked-example-1-preserve-order-while-removing-repeats" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-preserve-order-while-removing-repeats">Worked example 1: Preserve order while removing repeats<a class="heading-anchor" href="#guide--worked-example-1-preserve-order-while-removing-repeats" aria-label="Link to this section">#</a></h5>
 <p>Use one structure for fast membership and another for ordered output. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 seen <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -433,7 +433,7 @@ unique_in_order</code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[&#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;]`. Converting straight to a set would represent uniqueness but would not express first-seen order.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-aggregate-pairs-into-a-dictionary">Worked example 2 — Aggregate pairs into a dictionary<a class="heading-anchor" href="#guide--worked-example-2-aggregate-pairs-into-a-dictionary" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-aggregate-pairs-into-a-dictionary">Worked example 2: Aggregate pairs into a dictionary<a class="heading-anchor" href="#guide--worked-example-2-aggregate-pairs-into-a-dictionary" aria-label="Link to this section">#</a></h5>
 <p>Make the missing-key starting value explicit. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">purchases <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tea</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">coffee</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">tea</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 totals <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
@@ -491,7 +491,7 @@ user_name <span class="syntax-operator">=</span> user_by_id<span class="syntax-p
 <li>Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
-<p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
+<p>Choose structures by semantics, ordering, uniqueness, lookup, and mutability, not by habit. State what duplicates and missing keys mean.</p>
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
 <li><strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</li>
@@ -521,10 +521,10 @@ user_name <span class="syntax-operator">=</span> user_by_id<span class="syntax-p
 <ul>
 <li><a href="python-06.html#learner">Open the learner notebook</a></li>
 <li><a href="python-06.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-07.html#guide">Next: Day 7 — Strings, regex, and paths</a></li>
+<li><a href="python-07.html#guide">Next: Day 7; Strings, regex, and paths</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-06`
 (Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
 I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
@@ -780,7 +780,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-06-solutions-lists-tuples-sets-dicts">Day 06 — Solutions: Lists, Tuples, Sets, Dicts<a class="heading-anchor" href="#solution-1--day-06-solutions-lists-tuples-sets-dicts" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-06-solutions-lists-tuples-sets-dicts">Day 06: Solutions: Lists, Tuples, Sets, Dicts<a class="heading-anchor" href="#solution-1--day-06-solutions-lists-tuples-sets-dicts" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Python&#x27;s core collections answer different questions. A list keeps ordered, possibly repeated values and can change. A tuple is an ordered fixed record-like sequence. A set represents unique hashable members and makes membership tests fast. A dictionary maps unique hashable keys to values.</p>
@@ -796,8 +796,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>choosing lists, tuples, sets, and dictionaries by semantics</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. <strong>Expected result:</strong> <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. <strong>Constraints:</strong> preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. <strong>Verify:</strong> test the example, an empty list, and a list with no duplicates.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>stable_unique(values)</code> for <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;b&#x27;, &#x27;c&#x27;, &#x27;a&#x27;]</code>. Expected result: <code>[&#x27;b&#x27;, &#x27;a&#x27;, &#x27;c&#x27;]</code>. Constraints: preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test the example, an empty list, and a list with no duplicates. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Hashable<span class="syntax-punctuation">,</span> Iterable
@@ -821,7 +821,7 @@ source <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <span class="syntax-keyword">assert</span> source <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">c</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> stable_unique<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Verification evidence:</strong> test the example, an empty list, and a list with no duplicates.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. <strong>Expected totals:</strong> <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. <strong>Constraints:</strong> make the missing-key initial value explicit and preserve encounter order in the list version. <strong>Verify:</strong> assert all three outputs.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Given <code>[(&#x27;east&#x27;, 4), (&#x27;west&#x27;, 2), (&#x27;east&#x27;, 3)]</code>, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. Expected totals: <code>{&#x27;east&#x27;: 7, &#x27;west&#x27;: 2}</code>. Constraints: make the missing-key initial value explicit and preserve encounter order in the list version. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert all three outputs. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
 <pre class="highlighted-code"><code class="language-python">pairs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
@@ -837,37 +837,37 @@ totals<span class="syntax-punctuation">:</span> <span class="syntax-builtin">dic
 <span class="syntax-keyword">assert</span> unique_values <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> totals <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Verification evidence:</strong> assert all three outputs.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? <strong>Progressive hint:</strong> Sets enforce uniqueness and optimize membership, not presentation order. <strong>Verify:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the length and membership behavior of <code>{3, 1, 3, 2}</code>. Why must display order not be treated as a sorting guarantee? Progressive hint: Sets enforce uniqueness and optimize membership, not presentation order. Then compare the prediction with this proof target: Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order. This makes choosing lists, tuples, sets, and dictionaries by semantics observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the set has length <code>3</code> and contains <code>1</code>, <code>2</code>, and <code>3</code>; compare values as a set rather than asserting display iteration order.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. <strong>Progressive hint:</strong> The outer lists differ but still refer to the same inner lists. <strong>Verify:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace shallow copying for <code>original = [[1], [2]]; copied = original.copy(); copied[0].append(9)</code>. Progressive hint: The outer lists differ but still refer to the same inner lists. Record the named value, shape, label, or iterator position needed to establish: Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists. The trace exposes choosing lists, tuples, sets, and dictionaries by semantics directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert <code>original is not copied</code> but <code>original[0] is copied[0]</code>, then confirm appending through the copy appears in both nested lists.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. <strong>Progressive hint:</strong> Use <code>setdefault</code> or <code>defaultdict(list)</code>. <strong>Verify:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>invert_multimap(mapping)</code> so values become keys and each new key maps to a list of original keys in encounter order. Progressive hint: Use <code>setdefault</code> or <code>defaultdict(list)</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping. That connects the answer to choosing lists, tuples, sets, and dictionaries by semantics.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. <strong>Progressive hint:</strong> Dictionary keys must have a stable hash while stored. <strong>Verify:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. Progressive hint: Dictionary keys must have a stable hash while stored. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified. The diagnosis depends on choosing lists, tuples, sets, and dictionaries by semantics.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show the list-key version raises <code>TypeError</code>, then assert the tuple-key replacement retrieves the intended value and remains unmodified.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. <strong>Progressive hint:</strong> Store hashable derived keys while returning original records. <strong>Verify:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Extend stable de-duplication to records using a <code>key</code> function, then test repeated dictionaries whose IDs match but other fields differ. Progressive hint: Store hashable derived keys while returning original records. Values below, at, and above the named boundary must produce the evidence Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged. Those cases show how choosing lists, tuples, sets, and dictionaries by semantics behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
-<p>Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics">Shared implementation for Exercises 3–4 — Set and copy semantics<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics" aria-label="Link to this section">#</a></h5>
+<p>Choose structures by semantics, ordering, uniqueness, lookup, and mutability, not by habit. State what duplicates and missing keys mean.</p>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics">Shared implementation for Exercises 3–4: Set and copy semantics<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-set-and-copy-semantics" aria-label="Link to this section">#</a></h5>
 <p><code>{3, 1, 3, 2}</code> contains three unique integers. Membership is the contract; iteration order is not a portable sorting rule. A shallow list copy duplicates only the outer container, so both versions still share the nested lists.</p>
 <pre class="highlighted-code"><code class="language-python">original <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 copied <span class="syntax-operator">=</span> original<span class="syntax-operator">.</span>copy<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 copied<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span><span class="syntax-number">9</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> original <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> copied <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> original <span class="syntax-operator">and</span> copied<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> original<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication">Shared implementation for Exercises 5–7 — Multimaps, hashable identities, and keyed de-duplication<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication">Shared implementation for Exercises 5–7: Multimaps, hashable identities, and keyed de-duplication<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-multimaps-hashable-identities-and-keyed-de-duplication" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> defaultdict
 <span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable<span class="syntax-punctuation">,</span> Hashable<span class="syntax-punctuation">,</span> Iterable<span class="syntax-punctuation">,</span> Mapping
 <span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> TypeVar
@@ -1072,16 +1072,16 @@ records <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-06`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-06`
 (Day 6 — Lists, Tuples, Sets, and Dictionaries). Direct catalog prerequisites: `python-05`.
 I have completed the direct prerequisites: `python-05`. Emphasize choosing lists, tuples, sets, and dictionaries by semantics.
 Read `python/ds-60day/companion-guides/day06_data_structures.md` and use the learner notebook
@@ -1096,7 +1096,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1207,18 +1207,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -1,4 +1,4 @@
-# Day 27 — Geospatial or Domain-Specific Visualization
+# Day 27: Geospatial or Domain-Specific Visualization
 
 **Level:** Intermediate
 
@@ -78,18 +78,18 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 27 — geospatial or domain-specific visualization to practice geospatial semantics, coordinate reference systems, valid geometry, and offline fallback
+**Lesson outcome:** use day 27; geospatial or domain-specific visualization to practice geospatial semantics, coordinate reference systems, valid geometry, and offline fallback
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
 Geospatial data combines ordinary attributes with geometry and a
 coordinate reference system (CRS). A coordinate pair is conventionally
-`(x, y)`—longitude then latitude for geographic coordinates. Values can
+`(x, y)`, longitude then latitude for geographic coordinates. Values can
 look numerically valid while being semantically swapped, so record
 source order and bounds.
 
@@ -116,7 +116,7 @@ supplied longitude/latitude coordinates already use WGS 84.
 contrast, `.set_crs(...)` labels coordinates without moving them and
 should be used only when the original CRS is known but missing.
 
-### Worked example 1 — Create known geographic points and inspect bounds
+### Worked example 1: Create known geographic points and inspect bounds
 
 Constructed geometry avoids any network or external file. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -142,7 +142,7 @@ The CRS is WGS 84/EPSG:4326 and bounds are approximately `[-122.4, 37.8, -73.9, 
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Reproject rather than relabel
+### Worked example 2: Reproject rather than relabel
 
 Projected coordinates use different units while representing the same places. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -265,7 +265,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 4. **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location.
    **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters.
-   **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
+   **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location.
 5. **Implementation:** Implement a longitude/latitude bounding-box validator with clear ordering and range checks.
    **Progressive hint:** Require west ≤ east, south ≤ north, and geographic bounds.
    **Verify:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
@@ -306,11 +306,11 @@ repeatable, and offline/network requirements are explicit.
 
 - [Open the learner notebook](../notebooks/day27_geospatial_or_domain_viz.ipynb)
 - [Check the separate solution](../solutions/day27_geospatial_or_domain_viz/day27_solutions.md)
-- [Next: Day 28 — Feature engineering](day28_feature_engineering.md)
+- [Next: Day 28; Feature engineering](day28_feature_engineering.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

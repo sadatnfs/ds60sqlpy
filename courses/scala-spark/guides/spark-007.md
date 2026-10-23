@@ -152,7 +152,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2 for comprehensions](https://docs.scala-lang.org/tour/for-comprehensions.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-007: Either and validation without hidden data loss.

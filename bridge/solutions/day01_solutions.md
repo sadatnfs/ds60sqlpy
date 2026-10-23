@@ -1,4 +1,4 @@
-# Bridge Day 1 — Solution notes
+# Bridge Day 1: Solution notes
 
 Use these notes after attempting the
 [learner file](../lessons/day01_config_logging_cli.py). The executable reference
@@ -75,7 +75,7 @@ reference is `bridge/solutions/day01_solution.py`; use it only after an honest a
 
 **Shared failure rule:** Configuration objects and exception text can expose passwords just as easily as an explicit print statement.
 
-### Exercise 1 — Implementation
+### Exercise 1: Implementation
 
 **Prompt:** Implement `load_settings()` with CLI-over-environment precedence, uppercase
 log-level normalization, and `None` for a missing URL.
@@ -89,7 +89,7 @@ at the boundary.
 
 **Verification evidence:** Assert that CLI `debug` overrides environment `WARNING`, an absent URL remains `None`, `INF0` raises `ValueError`, and the supplied environment mapping is unchanged.
 
-### Exercise 2 — Security
+### Exercise 2: Security
 
 **Prompt:** Implement `redact_database_url()` so diagnostics retain scheme, user, host, port,
 and database but remove password, query, and fragment.
@@ -103,7 +103,7 @@ opaque secret.
 
 **Verification evidence:** Use a URL containing sentinel password, query token, and fragment; assert all three sentinels are absent while scheme, username, host, port, and database remain visible.
 
-### Exercise 3 — Implementation
+### Exercise 3: Implementation
 
 **Prompt:** Implement `build_parser()` with `--database-url`, `--log-level`, and `--dry-run`
 without reading global process state during parser construction.
@@ -116,7 +116,7 @@ responsibilities.
 
 **Verification evidence:** Assert `parse_args([])` leaves URL and log-level overrides unset with `dry_run=False`; then parse all three flags and compare the exact namespace without reading `sys.argv`.
 
-### Exercise 4 — Integration
+### Exercise 4: Integration
 
 **Prompt:** Implement `main(argv)` so it parses the supplied sequence, loads settings,
 configures logging, and emits only a safe summary.
@@ -130,7 +130,7 @@ log `Settings` directly.
 
 **Verification evidence:** Call `main()` with an injected argument list and captured logs; assert exit status `0`, the selected level, one redacted database label, and no full URL or password.
 
-### Exercise 5 — Testing
+### Exercise 5: Testing
 
 **Prompt:** Create a table-driven test matrix for defaults, CLI precedence, mixed-case levels,
 invalid levels, malformed URLs, credentials, and a missing URL.
@@ -144,7 +144,7 @@ secrets are absent from all diagnostics.
 
 **Verification evidence:** Parameterize defaults, each CLI override, mixed-case valid levels, `INF0`, missing URL, malformed URL, and sentinel credentials; compare exact `Settings` or exception types.
 
-### Exercise 6 — Prediction
+### Exercise 6: Prediction
 
 **Prompt:** Predict the result when the environment says `WARNING`, the CLI supplies `debug`,
 `dry_run=True`, and no database URL exists; then verify it.
@@ -157,7 +157,7 @@ one source as an all-or-nothing bundle.
 
 **Verification evidence:** Write `Settings(database_url=None, log_level='DEBUG', dry_run=True)` before running the case, then assert the returned dataclass equals that prediction.
 
-### Exercise 7 — Debugging
+### Exercise 7: Debugging
 
 **Prompt:** Repair a redactor that catches parse errors but returns `f'invalid: {database_url}'`
 and explain why the exception path is still a leak.
@@ -171,7 +171,7 @@ rule as normal logs.
 
 **Verification evidence:** Feed malformed text containing `secret-marker`; assert the repaired branch returns a fixed marker such as `<invalid-database-url>` and never includes `secret-marker`.
 
-### Exercise 8 — Design
+### Exercise 8: Design
 
 **Prompt:** Add configuration provenance such as `cli`, `environment`, or `default` without
 storing or logging the selected secret value twice.
@@ -185,7 +185,7 @@ not.
 
 **Verification evidence:** Show provenance labels `cli`, `environment`, and `default` beside resolved fields while the complete database URL exists in only one field and never appears in the safe summary.
 
-### Exercise 9 — Security testing
+### Exercise 9: Security testing
 
 **Prompt:** Use a recording logger or `caplog` to prove that startup, success, and
 validation-failure paths contain no password, query token, or full URL.
@@ -199,7 +199,7 @@ redaction helper.
 
 **Verification evidence:** Capture startup, success, and validation-failure logs with password/query sentinels; assert every sentinel and the full URL are absent and the safe host/database label remains.
 
-### Exercise 10 — Portability
+### Exercise 10: Portability
 
 **Prompt:** Write equivalent Windows PowerShell and POSIX invocations that set environment
 values outside Python and pass CLI overrides through `argv`; identify what remains

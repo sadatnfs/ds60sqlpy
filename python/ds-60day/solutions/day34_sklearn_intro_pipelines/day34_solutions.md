@@ -1,4 +1,4 @@
-# Day 34 — Solutions: scikit-learn Intro and Pipelines
+# Day 34: Solutions: scikit-learn Intro and Pipelines
 
 We build a basic preprocessing + model pipeline, then swap models (Ridge) and inspect coefficients, emphasizing reproducibility and leak-free evaluation.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Pipeline with scaler + LinearRegression
+Worked reference for Exercise 1; Pipeline with scaler + LinearRegression
 ```python
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -34,7 +34,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — Swap to Ridge and compare
+Worked reference for Exercise 2; Swap to Ridge and compare
 ```python
 from sklearn.linear_model import Ridge
 
@@ -52,7 +52,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Inspect coefficients with and without scaling
+Worked reference for Exercise 3; Inspect coefficients with and without scaling
 ```python
 # With scaling
 pipe.fit(Xtr, ytr)
@@ -112,7 +112,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Swap `LinearRegression` for `Ridge` and compare test scores.
 
@@ -122,9 +122,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — the scikit-learn estimator contract and leakage-safe pipelines — use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
+**Verify:** Practice 1; the scikit-learn estimator contract and leakage-safe pipelines; use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.
 
@@ -134,9 +134,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — the scikit-learn estimator contract and leakage-safe pipelines — print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
+**Verify:** Practice 2; the scikit-learn estimator contract and leakage-safe pipelines; print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
-### Exercise 3 — Leakage prediction
+### Exercise 3: Leakage prediction
 
 **Prompt:** Predict how cross-validation scores can change when a scaler is fit on the complete dataset before `cross_val_score`, then explain why the code still runs without warning.
 
@@ -155,9 +155,9 @@ target encoding, and learned dimensionality reduction.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Leakage prediction — on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
+**Verify:** Leakage prediction; on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
 
-### Exercise 4 — Mixed-type implementation
+### Exercise 4: Mixed-type implementation
 
 **Prompt:** Build a `ColumnTransformer` for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value.
 
@@ -206,9 +206,9 @@ learned state, not harmless cleanup constants.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Mixed-type implementation — fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
+**Verify:** Mixed-type implementation; fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
 
-### Exercise 5 — Unknown-category debugging
+### Exercise 5: Unknown-category debugging
 
 **Prompt:** Fit on regions `north` and `south`, then predict a row with region `west`. Compare `OneHotEncoder` default behavior with `handle_unknown='ignore'` and explain the resulting representation.
 
@@ -226,9 +226,9 @@ that would change the feature schema and invalidate fitted coefficients.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Unknown-category debugging — capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
+**Verify:** Unknown-category debugging; capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
 
-### Exercise 6 — Inspection and schema contract
+### Exercise 6: Inspection and schema contract
 
 **Prompt:** After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order.
 
@@ -257,4 +257,4 @@ serving code cannot silently invent another column order.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Inspection and schema contract — print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.
+**Verify:** Inspection and schema contract; print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.

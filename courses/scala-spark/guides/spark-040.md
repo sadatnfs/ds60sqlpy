@@ -185,7 +185,7 @@ Continue through the [course route](../README.md). Preserve the written assumpti
 
 - [PostgreSQL17 date/time semantics](https://www.postgresql.org/docs/17/datatype-datetime.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-040: SQL bridge, JDBC boundaries and data handling.

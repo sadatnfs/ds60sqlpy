@@ -1,4 +1,4 @@
-# Day 14 — Solutions: Code Quality with Ruff and mypy
+# Day 14: Solutions: Code Quality with Ruff and mypy
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ rules.
 For this lesson's **automated formatting, linting, and static type feedback** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Run Ruff formatting and lint checks on a small intentionally messy Python file. **Evidence:** record at least one formatter change and one lint diagnostic with its rule code. **Constraints:** understand each automatic fix, do not run broad fixes over unrelated repository files, and delete only the scratch file you created. **Verify:** both `ruff format --check` and `ruff check` pass afterward.
 
@@ -55,7 +55,7 @@ Save one diagnostic from each deliberate defect, repair it, then rerun.
 
 **Verification evidence:** both `ruff format --check` and `ruff check` pass afterward.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add useful type hints to a function that accepts records and returns a numeric total, then run mypy on the file. **Introduce:** one wrong caller argument and one wrong return in scratch code so you can read both diagnostics. **Expected behavior:** mypy rejects both; after repair it reports success while runtime tests still pass. **Verify:** Save the two expected mypy diagnostics, repair both defects, and show mypy plus the runtime test command pass.
 
@@ -82,9 +82,9 @@ the assertion still proves the valid runtime calculation.
 
 **Verification evidence:** Save the two expected mypy diagnostics, repair both defects, and show mypy plus the runtime test command pass.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Given an unused import, inconsistent spacing, a possible `None` value, and a wrong result, predict which quality tool can detect each. **Progressive hint:** No single tool proves all four properties. **Verify:** Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed.
 
@@ -92,7 +92,7 @@ the assertion still proves the valid runtime calculation.
 
 **Evidence to locate in the grouped implementation:** Create a four-row matrix mapping each defect to formatter, linter, type checker, or test; run the tools and record which predictions were confirmed.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace type narrowing for `str | None` through an explicit `is None` branch and state the type in each path. **Progressive hint:** A type checker follows control-flow evidence. **Verify:** Capture `reveal_type` or equivalent type-checker output in both branches; assert the non-None branch reports `str` and the absence branch reports an error for a string-method call.
 
@@ -100,7 +100,7 @@ the assertion still proves the valid runtime calculation.
 
 **Evidence to locate in the grouped implementation:** Capture `reveal_type` or equivalent type-checker output in both branches; assert the non-None branch reports `str` and the absence branch reports an error for a string-method call.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Refactor an untyped file loader into a typed function using `Path`, a context manager, UTF-8, and a validated return shape. **Progressive hint:** Boundary validation can replace an unhelpfully broad `Any`. **Verify:** Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries.
 
@@ -108,7 +108,7 @@ the assertion still proves the valid runtime calculation.
 
 **Evidence to locate in the grouped implementation:** Type-check the loader, then test valid UTF-8 input plus missing column, invalid field type, and missing path boundaries.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Replace an unexplained `# type: ignore` with a real narrowing or a narrow error-code ignore plus justification. **Progressive hint:** Do not suppress diagnostics before understanding the contract. **Verify:** Show the original diagnostic, replace suppression with narrowing where possible, and confirm any remaining ignore names one error code and rationale.
 
@@ -116,7 +116,7 @@ the assertion still proves the valid runtime calculation.
 
 **Evidence to locate in the grouped implementation:** Show the original diagnostic, replace suppression with narrowing where possible, and confirm any remaining ignore names one error code and rationale.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design a local/CI gate order and explain why formatter success should not prevent tests from running during diagnosis. **Progressive hint:** Fast static checks give feedback, but each signal remains independent. **Verify:** Run each gate independently on a deliberately broken scratch file and record its signal; confirm one early failure does not erase later diagnostic evidence.
 
@@ -128,7 +128,7 @@ the assertion still proves the valid runtime calculation.
 
 Use formatter, linter, type checker, and tests as complementary evidence. Read and fix one diagnostic at a time, then review behavior.
 
-### Shared implementation for Exercises 3–4 — Match evidence to the question
+### Shared implementation for Exercises 3–4: Match evidence to the question
 
 - Ruff reports unused imports and configured lint rules.
 - Ruff format checks layout.
@@ -142,7 +142,7 @@ def display(value: str | None) -> str:
     return value.upper()      # Here mypy narrows value to str.
 ```
 
-### Shared implementation for Exercises 5–7 — Validate boundaries instead of silencing them
+### Shared implementation for Exercises 5–7: Validate boundaries instead of silencing them
 
 ```python
 from __future__ import annotations

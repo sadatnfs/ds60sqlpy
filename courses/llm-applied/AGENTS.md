@@ -1,6 +1,6 @@
 # Applied LLM authoring
 
-Follow root AGENTS.md and the full teaching-depth contract. Keep every module self-contained with three worked examples, six concrete exercises, expected observations, progressive hints and separate reference/explanatory solutions. Preserve stable IDs and prerequistes. Never call a count, lexical, extractive or toy decoder baseline a production LLM.
+Follow root AGENTS.md and the full teaching-depth contract. Keep every module self-contained with three worked examples, six concrete exercises, expected observations, progressive hints and separate reference/explanatory solutions. Preserve stable IDs and prerequisites. Never call a count, lexical, extractive or toy decoder baseline a production LLM.
 
 Default execution is offline after deliberately prepared NumPy/PyTorch dependencies. No model or dataset download and no paid API call belongs in default code. The optional pretrained recipe separates dependency setup, human-initiated pinned artifact acquisition, local verification, training and evaluation. It must fail clearly if required local assets are absent.
 

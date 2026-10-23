@@ -1,4 +1,4 @@
-# Day 08 solutions — Scalar and Inline Subqueries
+# Day 08 solutions: Scalar and Inline Subqueries
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Return orders whose total exceeds the overall average order total.
 
@@ -109,7 +109,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-08 Exercise 1, the chosen form is justified by this lesson-specific rationale: The aggregate subquery is guaranteed to return exactly one value. Evaluate another form against the concrete expected result (Order rows above the global average) and the verification above.
 - **Edge case:** Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Add the total customer count as a scalar column beside each country-level customer count.
 
@@ -147,7 +147,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-08 Exercise 2, the chosen form is justified by this lesson-specific rationale: An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row. Evaluate another form against the concrete expected result (One row per country with a common global total) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Show each customer with their latest order timestamp using a scalar correlated subquery.
 
@@ -188,7 +188,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-08 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `MAX` to guarantee one result and let customers without orders receive NULL. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
 - **Edge case:** Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Demonstrate that a scalar subquery with no matching rows returns NULL.
 
@@ -224,7 +224,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-08 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deliberately impossible product key and test the scalar result with `IS NULL`. Evaluate another form against the concrete expected result (One row whose boolean result is true) and the verification above.
 - **Edge case:** Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a scalar subquery that returns many product prices by aggregating to the intended single value.
 
@@ -262,7 +262,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-08 Exercise 5, the chosen form is justified by this lesson-specific rationale: Choose the business reduction explicitly; this answer uses maximum price. Evaluate another form against the concrete expected result (One row per category with a scalar global maximum for comparison) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Rewrite a repeated scalar aggregate as a one-row CTE crossed into a customer-country report.
 

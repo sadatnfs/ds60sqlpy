@@ -136,7 +136,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [NumPy ndarray.strides](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.strides.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-numpy-01: NumPy Memory Ownership, Strides, and Safe Mutation.

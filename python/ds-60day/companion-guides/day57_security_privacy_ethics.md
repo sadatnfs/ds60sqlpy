@@ -1,4 +1,4 @@
-# Day 57 — Security, Privacy, and Ethics
+# Day 57: Security, Privacy, and Ethics
 
 **Lesson ID:** `python-57` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
 
@@ -21,7 +21,7 @@ By the end of the lesson, you can:
 
 - Complete `python-56` (orchestration).
 - Recall regex, hashing, pandas, and classification metrics.
-- Use only the synthetic records in the notebook—never paste real sensitive
+- Use only the synthetic records in the notebook, never paste real sensitive
   information into an exercise or external assistant.
 
 ## Vocabulary and mental models
@@ -67,7 +67,7 @@ certify that undetected text is safe.
 
 The notebook uses a hard-coded salt only to make a deterministic demo. A real
 pseudonymization key belongs in an approved secret manager, must be rotated
-under policy, and should use a keyed construction such as HMAC—not a public,
+under policy, and should use a keyed construction such as HMAC, not a public,
 reused repository constant.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
@@ -110,7 +110,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — data minimization, privacy boundaries, fairness evidence, and accountable controls
+## Concept deep dive: data minimization, privacy boundaries, fairness evidence, and accountable controls
 
 ### The mental model
 
@@ -123,7 +123,7 @@ Direct identifiers can name a person; quasi-identifiers can re-identify
 in combination. Redaction removes visibility, while pseudonymization
 retains linkability and is therefore still personal data. Fairness
 metrics require a relevant decision, group definitions, denominators,
-uncertainty, and harm analysis—not a single parity number.
+uncertainty, and harm analysis, not a single parity number.
 
 ### Worked examples and syntax anatomy
 
@@ -137,7 +137,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — minimize a record through an allowlist
+### Focused example A: minimize a record through an allowlist
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -161,7 +161,7 @@ assert "email" not in minimized and "free_text" not in minimized
 
 **Assumption to name:** The purpose and access model justify each allowed field, including the opaque record ID.
 
-### Focused example B — attach sample support to group error rates
+### Focused example B: attach sample support to group error rates
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -210,23 +210,23 @@ assert report["group_b"]["support"] == 5
 
 1. Build a DataFrame PII scanner covering column names and free text.
 
-**Verify:** Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
+**Verify:** Practice 1; data minimization, privacy boundaries, fairness evidence, and accountable controls; run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
 2. Add a function that masks email addresses and phone numbers in text.
 
-**Verify:** Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
+**Verify:** Practice 2; data minimization, privacy boundaries, fairness evidence, and accountable controls; assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
 3. Simulate subgroup precision and recall for a classifier and compare groups.
 
-**Verify:** Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
+**Verify:** Practice 3; data minimization, privacy boundaries, fairness evidence, and accountable controls; for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
 4. Draft a one-page data-ethics checklist for your project.
 
-**Verify:** Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
+**Verify:** Practice 4; data minimization, privacy boundaries, fairness evidence, and accountable controls; save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
 ### Progressive hints
 
-1. Return finding type, row identifier, column, and a safe count—do not log the
+1. Return finding type, row identifier, column, and a safe count, do not log the
    raw matched value. Test false-positive and missed-format cases.
 2. Preserve only the minimum structure needed for debugging and ensure repeated
    substitutions do not reveal the original.
@@ -245,22 +245,22 @@ attempt, and record the evidence that would prove your result correct.
 5. **Threat modeling:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
    **Progressive hint:** Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.
 
-**Verify:** Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
+**Verify:** Threat modeling; save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
 
 6. **Re-identification reasoning:** Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.
    **Progressive hint:** Group quasi-identifiers, inspect equivalence-class sizes and sensitive value diversity, and measure utility loss.
 
-**Verify:** Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
+**Verify:** Re-identification reasoning; print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
 
 7. **Fairness uncertainty:** Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group's denominator is nearly zero.
    **Progressive hint:** Resample at the independent entity level when rows repeat. Undefined metrics should remain undefined rather than being forced to zero.
 
-**Verify:** Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
+**Verify:** Fairness uncertainty; with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
 
 8. **Incident response:** Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.
    **Progressive hint:** Preserve a restricted incident record, stop further sharing, and assume copied history may exist. Redaction from the latest commit alone is insufficient.
 
-**Verify:** Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.
+**Verify:** Incident response; produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -297,12 +297,12 @@ appropriate experts rather than maximizing collection.
 - Work in the [Day 57 learner notebook](../notebooks/day57_security_privacy_ethics.ipynb).
 - Then review the
   [Day 57 solution](../solutions/day57_security_privacy_ethics/day57_solutions.md).
-- Continue to [Day 58 — Review and Refactoring](day58_code_review_refactor_tests.md).
+- Continue to [Day 58; Review and Refactoring](day58_code_review_refactor_tests.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-57` — Day 57 — Security, Privacy, and Ethics.

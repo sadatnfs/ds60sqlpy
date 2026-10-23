@@ -1,4 +1,4 @@
-# Day 47 Solutions — E-commerce Analytics, Part 2
+# Day 47 Solutions: E-commerce Analytics, Part 2
 
 
 <!-- beginner-solution-enrichment -->
@@ -56,7 +56,7 @@ correctness is established with evidence.
 The deliverables are a true retention rate and a tidy six-cohort result suitable
 for a line chart. See [`day47_solutions.sql`](day47_solutions.sql).
 
-## Exercises 1 and 2 — Retention rate and chart-ready curves
+## Exercises 1 and 2: Retention rate and chart-ready curves
 
 ```sql
 SET search_path TO training, public;
@@ -129,7 +129,7 @@ to export or pass to a notebook/BI tool.
 - The seed is synthetic, so chart shape demonstrates technique rather than a
   business retention benchmark.
 
-## Exercise 1 — Calculate retention rates
+## Exercise 1: Calculate retention rates
 
 `cohort_sizes` supplies the denominator and active distinct customers supply the
 numerator. Numeric casting prevents integer truncation.
@@ -144,7 +144,7 @@ numerator. Numeric casting prevents integer truncation.
 - **Alternative/trade-off:** For sql-47 Exercise 1, the chosen form is justified by this lesson-specific rationale: `cohort_sizes` supplies the denominator and active distinct customers supply the numerator. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Return six tidy curves
+## Exercise 2: Return six tidy curves
 
 The final rows retain cohort month, offset, size, active count, and rate. “Chart
 it” is downstream presentation; SQL should preserve the auditable components.
@@ -159,7 +159,7 @@ it” is downstream presentation; SQL should preserve the auditable components.
 - **Alternative/trade-off:** For sql-47 Exercise 2, the chosen form is justified by this lesson-specific rationale: The final rows retain cohort month, offset, size, active count, and rate. Evaluate another form against the concrete expected result (one row per `cohort_month`) and the verification above.
 - **Edge case:** Tie two rows on `cohort_month DESC` and give them different `month_offset` values; verify `cohort_month DESC, month_offset` chooses a stable first/last row.
 
-## Exercise 3 — Choose a cohort anchor
+## Exercise 3: Choose a cohort anchor
 
 Signup month measures post-registration behavior; first-order month measures
 repeat purchasing. The answer displays both per customer so the semantic choice
@@ -175,7 +175,7 @@ is visible.
 - **Alternative/trade-off:** For sql-47 Exercise 3, the chosen form is justified by this lesson-specific rationale: Signup month measures post-registration behavior; first-order month measures repeat purchasing. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Use one key absent from `orders`; then tie two candidates on `c.customer_id` and verify `c.customer_id` selects the same row on every run.
 
-## Exercise 4 — Complete the cohort grid
+## Exercise 4: Complete the cohort grid
 
 Cross joining cohorts with offsets creates every expected cell. A left join
 then turns missing observed activity into zero without losing cohort size.
@@ -190,7 +190,7 @@ then turns missing observed activity into zero without losing cohort size.
 - **Alternative/trade-off:** For sql-47 Exercise 4, the chosen form is justified by this lesson-specific rationale: Cross joining cohorts with offsets creates every expected cell. Evaluate another form against the concrete expected result (one row per `cohort_month`) and the verification above.
 - **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 
-## Exercise 5 — Reject negative chronology
+## Exercise 5: Reject negative chronology
 
 The diagnostic returns customers whose first order precedes recorded signup.
 Such rows should be corrected or explicitly excluded before retention math.
@@ -205,7 +205,7 @@ Such rows should be corrected or explicitly excluded before retention math.
 - **Alternative/trade-off:** For sql-47 Exercise 5, the chosen form is justified by this lesson-specific rationale: The diagnostic returns customers whose first order precedes recorded signup. Evaluate another form against the concrete expected result (one row per `customer_id`, and `created_at`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `first_order_at` for the existing `customer_id`, and `created_at` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Preserve future unknowns
+## Exercise 6: Preserve future unknowns
 
 An offset beyond the latest observed month is not a measured zero. The
 `is_observable` flag keeps not-yet-available periods distinct.

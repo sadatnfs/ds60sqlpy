@@ -171,7 +171,7 @@ Before moving from a phase:
 - Review failed exercises after a delay.
 - Run the relevant local validation.
 
-Use Codex for a diagnostic quiz with [Learning with Codex](learning-with-codex.md), or create your own retrieval questions.
+Use the AI tutor for a diagnostic quiz with [Learning with an AI tutor](learning-with-an-ai-tutor.md), or create your own retrieval questions.
 
 ## Adding lessons beyond 60
 

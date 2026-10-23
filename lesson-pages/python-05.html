@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-5-functions-docstrings-and-type-hints">Day 5 — Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#guide--day-5-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-5-functions-docstrings-and-type-hints">Day 5: Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#guide--day-5-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>A function is a named contract: given valid inputs, it returns a documented result or raises a documented exception.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 5 — functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 5; functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A function gives a name to a reusable behavior. Its contract says which inputs are accepted, what it returns, which failures it raises, and whether it changes anything outside itself. Parameters are names in the definition; arguments are actual values supplied by a caller.</p>
 <p>A call creates a local scope. Names assigned there normally disappear when the call returns. A <code>return</code> sends one value to the caller and stops that call. Type hints document intended types and support static tools, but Python does not enforce them automatically at runtime. Defaults are evaluated once when <code>def</code> runs, so mutable defaults should normally be replaced by <code>None</code> plus a fresh object inside the function.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>def clamp(value: float, *, low: float, high: float) -&gt; float:</code> begins with <code>def</code>, gives the function a name, annotates three parameters, uses <code>*</code> to make <code>low</code> and <code>high</code> keyword-only, and annotates the return. The colon starts the indented body. A docstring is the first string in that body and should state behavior that the signature cannot fully express, especially errors and edge cases.</p>
-<h5 id="guide--worked-example-1-make-validation-part-of-the-contract">Worked example 1 — Make validation part of the contract<a class="heading-anchor" href="#guide--worked-example-1-make-validation-part-of-the-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-make-validation-part-of-the-contract">Worked example 1: Make validation part of the contract<a class="heading-anchor" href="#guide--worked-example-1-make-validation-part-of-the-contract" aria-label="Link to this section">#</a></h5>
 <p>Reject an invalid domain before doing the calculation. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">mean</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
     <span class="syntax-string">&quot;&quot;&quot;Return the arithmetic mean of a non-empty list.&quot;&quot;&quot;</span>
@@ -433,7 +433,7 @@ mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[<
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`5.0`. Empty input follows a deliberate exception path instead of dividing by zero accidentally.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable">Worked example 2 — Use keyword-only parameters to make calls readable<a class="heading-anchor" href="#guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable">Worked example 2: Use keyword-only parameters to make calls readable<a class="heading-anchor" href="#guide--worked-example-2-use-keyword-only-parameters-to-make-calls-readable" aria-label="Link to this section">#</a></h5>
 <p>A signature can prevent ambiguous positional calls. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">discounted</span><span class="syntax-punctuation">(</span>price<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> rate<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span> <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> rate <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">:</span>
@@ -489,7 +489,7 @@ discounted<span class="syntax-punctuation">(</span><span class="syntax-number">8
 <li>Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</li>
 </ol>
 <ol>
-<li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
+<li>Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior, this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</li>
 </ol>
 <ol>
 <li>Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</li>
@@ -525,10 +525,10 @@ discounted<span class="syntax-punctuation">(</span><span class="syntax-number">8
 <ul>
 <li><a href="python-05.html#learner">Open the learner notebook</a></li>
 <li><a href="python-05.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-06.html#guide">Next: Day 6 — Core data structures</a></li>
+<li><a href="python-06.html#guide">Next: Day 6; Core data structures</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-05`
 (Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
 I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
@@ -801,7 +801,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-05-solutions-functions-docstrings-and-type-hints">Day 05 — Solutions: Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#solution-1--day-05-solutions-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-05-solutions-functions-docstrings-and-type-hints">Day 05: Solutions: Functions, Docstrings, and Type Hints<a class="heading-anchor" href="#solution-1--day-05-solutions-functions-docstrings-and-type-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>function contracts, parameters, return values, scope, and type hints</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A function gives a name to a reusable behavior. Its contract says which inputs are accepted, what it returns, which failures it raises, and whether it changes anything outside itself. Parameters are names in the definition; arguments are actual values supplied by a caller.</p>
@@ -817,8 +817,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>function contracts, parameters, return values, scope, and type hints</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and <strong>population</strong> standard deviation. <strong>Input:</strong> <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. <strong>Expected result:</strong> <code>(5.0, 2.0)</code>. <strong>Constraints:</strong> compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. <strong>Verify:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>describe(values: list[float]) -&gt; tuple[float, float]</code> returning the arithmetic mean and population standard deviation. Input: <code>[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]</code>. Expected result: <code>(5.0, 2.0)</code>. Constraints: compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
@@ -843,15 +843,15 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 result <span class="syntax-operator">=</span> describe<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">5.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Verification evidence:</strong> Use <code>math.isclose</code> to confirm mean <code>5.0</code> and population standard deviation <code>2.0</code>, then show empty input follows the documented failure path.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
-<p><strong>Reasoning:</strong> Implement this exact contract as written: Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. Constraint: choose and document one explicit behavior—this lesson&#x27;s reference raises <code>ValueError</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. <strong>Constraint:</strong> choose and document one explicit behavior, this lesson&#x27;s reference raises <code>ValueError</code>. <strong>Verify:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
+<p><strong>Reasoning:</strong> Implement this exact contract as written: Add a docstring to <code>describe</code> that states accepted input, the two tuple fields in order, and the empty-input policy. Constraint: choose and document one explicit behavior, this lesson&#x27;s reference raises <code>ValueError</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
 <p>The docstring belongs directly below the signature and names tuple order plus failure behavior. The Exercise 1 implementation already includes the complete docstring.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">assert</span> describe<span class="syntax-operator">.</span>__doc__ <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">population standard deviation</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> describe<span class="syntax-operator">.</span>__doc__
 <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">ValueError</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> describe<span class="syntax-operator">.</span>__doc__</code></pre>
 <p><strong>Verification evidence:</strong> capture <code>help(describe)</code> output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input <code>ValueError</code> without reading the body.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. <strong>Verify:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Validate <code>describe</code> near its boundary: reject an empty list and any non-finite value such as <code>float(&#x27;nan&#x27;)</code> with a useful <code>ValueError</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair. The diagnosis depends on function contracts, parameters, return values, scope, and type hints.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">for</span> invalid <span class="syntax-operator">in</span> <span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nan</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -863,32 +863,32 @@ result <span class="syntax-operator">=</span> describe<span class="syntax-punctu
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected ValueError for </span><span class="syntax-string">{</span>invalid<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Validation occurs before arithmetic so the error states the real contract instead of surfacing a later divide-by-zero or NaN.</p>
 <p><strong>Verification evidence:</strong> show the normal result and use two separate <code>try</code>/<code>except ValueError</code> checks for the invalid cases; do not catch errors inside the function that it cannot repair.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. <strong>Progressive hint:</strong> Default objects are created once when <code>def</code> executes. <strong>Verify:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the result of calling a function with <code>items=[]</code> as a default three times when it appends on each call. Explain shared defaults. Progressive hint: Default objects are created once when <code>def</code> executes. Then compare the prediction with this proof target: Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call. This makes function contracts, parameters, return values, scope, and type hints observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Call the faulty function three times and record cumulative state, then assert the <code>None</code>-sentinel repair returns independent one-item lists on every call.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? <strong>Progressive hint:</strong> Assignment makes a name local unless explicitly declared otherwise. <strong>Verify:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a local variable that shadows a global of the same name. Which binding changes, and when would <code>global</code> be required? Progressive hint: Assignment makes a name local unless explicitly declared otherwise. Record the named value, shape, label, or iterator position needed to establish: Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged. The trace exposes function contracts, parameters, return values, scope, and type hints directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. <strong>Progressive hint:</strong> State every invalid condition before calculating. <strong>Verify:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement typed <code>weighted_mean(values, weights)</code> with length, empty, and zero-total-weight validation. Progressive hint: State every invalid condition before calculating. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors. That connects the answer to function contracts, parameters, return values, scope, and type hints.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. <strong>Progressive hint:</strong> Compare <code>f(values)</code> with <code>f(*values)</code>. <strong>Verify:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a function whose <code>*items</code> argument is accidentally passed as one list instead of unpacked individual items. Progressive hint: Compare <code>f(values)</code> with <code>f(*values)</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list. The diagnosis depends on function contracts, parameters, return values, scope, and type hints.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Capture arguments received by <code>f(values)</code> and <code>f(*values)</code>; assert the repaired call presents individual items rather than one nested list.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. <strong>Progressive hint:</strong> Document whether empty normalized output is valid or an error. <strong>Verify:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. Progressive hint: Document whether empty normalized output is valid or an error. Values below, at, and above the named boundary must produce the evidence Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation. Those cases show how function contracts, parameters, return values, scope, and type hints behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test ordinary, empty, whitespace-only, and Unicode names against the docstring&#x27;s stated contract; every behavior must match the documentation.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.</p>
-<h5 id="solution-1--shared-implementation-for-exercise-4-mutable-defaults">Shared implementation for Exercise 4 — Mutable defaults<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-4-mutable-defaults" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercise-4-mutable-defaults">Shared implementation for Exercise 4: Mutable defaults<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-4-mutable-defaults" aria-label="Link to this section">#</a></h5>
 <p>A list default is shared across calls. Use <code>None</code> as a sentinel and create a new list inside the function when the caller supplied no collection.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable">Shared implementation for Exercises 5–8 — Contracts make functions predictable<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable">Shared implementation for Exercises 5–8: Contracts make functions predictable<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-8-contracts-make-functions-predictable" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence
 
 
@@ -1110,16 +1110,16 @@ words <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-05`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-05`
 (Day 5 — Functions, Docstrings, and Type Hints). Direct catalog prerequisites: `python-04`.
 I have completed the direct prerequisites: `python-04`. Emphasize function contracts, parameters, return values, scope, and type hints.
 Read `python/ds-60day/companion-guides/day05_functions_type_hints.md` and use the learner notebook
@@ -1134,7 +1134,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1245,18 +1245,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

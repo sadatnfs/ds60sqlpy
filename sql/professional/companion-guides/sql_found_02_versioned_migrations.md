@@ -1,11 +1,11 @@
-# SQL-FOUND-02 — Versioned Schema Migrations and Safe Evolution
+# SQL-FOUND-02: Versioned Schema Migrations and Safe Evolution
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Catalog prerequisites:** `sql-found-01` — [SQL-FOUND-01 — relational design](sql_found_01_relational_design.md);
-  `sql-39` — [SQL Day 39 — locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md)
-- **Prerequisites:** [SQL-FOUND-01 — relational design](sql_found_01_relational_design.md),
+- **Catalog prerequisites:** `sql-found-01`; [SQL-FOUND-01; relational design](sql_found_01_relational_design.md);
+  `sql-39`; [SQL Day 39; locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md)
+- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
   the transaction/locking sequence through SQL Day 39, constraints, and
   permission to create/drop an isolated schema in `advanced_sql_training`.
 - **Artifacts:** [learner SQL](../lessons/sql_found_02_versioned_migrations.sql) ·
@@ -53,7 +53,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-FOUND-02 — Versioned Schema Migrations and Safe Evolution** and choose
+2. Open **SQL-FOUND-02; Versioned Schema Migrations and Safe Evolution** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -89,7 +89,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -272,7 +272,7 @@ window, recovery action, and cleanup:
 7. **Drift report:** compare expected and observed columns, constraints, and
    indexes; label missing, unexpected, and changed objects deterministically.
    **Inputs/evidence:** For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all `service_requests` columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details.
-   **Expected result/shape:** For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
+   **Expected result/shape:** For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
    **Verify:** For sql-found-02 Exercise 7, prove the clean fixture reports only `matches`; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.
 8. **Failed deployment:** write phase-specific compatibility, pause, restore,
    reconciliation, and decision evidence for recovery.
@@ -311,16 +311,16 @@ window, recovery action, and cleanup:
 ## Next step
 
 Continue directly to
-[SQL-40 — advanced analytic functions](../../postgres-60day/companion-guides/day40_analytic_functions_advanced.md).
+[SQL-40; advanced analytic functions](../../postgres-60day/companion-guides/day40_analytic_functions_advanced.md).
 The later professional modules then add security, migration regression tests,
 routine deployment, operational rehearsal, and application-coordinated release
 evidence.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-found-02 — Versioned Schema Migrations and Safe Evolution.

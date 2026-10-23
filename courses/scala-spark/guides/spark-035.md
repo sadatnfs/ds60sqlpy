@@ -211,7 +211,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark4.0.1 query identity and lifecycle](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#managing-streaming-queries)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-035: Checkpoints, restart and delivery guarantees.

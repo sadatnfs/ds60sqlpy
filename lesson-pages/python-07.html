@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-7-strings-regular-expressions-and-pathlib">Day 7 — Strings, Regular Expressions, and <code>pathlib</code><a class="heading-anchor" href="#guide--day-7-strings-regular-expressions-and-pathlib" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-7-strings-regular-expressions-and-pathlib">Day 7: Strings, Regular Expressions, and <code>pathlib</code><a class="heading-anchor" href="#guide--day-7-strings-regular-expressions-and-pathlib" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Text and paths are boundary data. Normalize deliberately, validate narrowly, and let <code>pathlib</code> handle operating-system path rules.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -404,8 +404,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 7 — strings, regular expressions, and <code>pathlib</code> to practice text normalization, bounded pattern matching, and portable paths and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 7; strings, regular expressions, and <code>pathlib</code> to practice text normalization, bounded pattern matching, and portable paths and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Strings are immutable sequences of Unicode characters. Ordinary string methods are the clearest tool for fixed separators and normalization. A regular expression describes a family of text shapes; it should be used when the format truly varies according to a pattern, not as a default replacement for simple string operations.</p>
 <p>A filesystem path is structured data, not just a string with slashes. <code>pathlib.Path</code> joins components and exposes names, stems, suffixes, and parent folders using the host operating system&#x27;s rules. Plan and validate a rename before mutating files, preserve suffixes, and detect collisions.</p>
@@ -420,7 +420,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>pattern.fullmatch(text)</code> requires the entire input to match, while <code>search</code> can find a match inside longer text. Raw string syntax such as <code>r&quot;\d{4}&quot;</code> preserves backslashes for the regex engine. In <code>folder / &quot;report.csv&quot;</code>, <code>/</code> is <code>Path</code> joining syntax, not division.</p>
-<h5 id="guide--worked-example-1-extract-named-fields-from-a-bounded-filename">Worked example 1 — Extract named fields from a bounded filename<a class="heading-anchor" href="#guide--worked-example-1-extract-named-fields-from-a-bounded-filename" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-extract-named-fields-from-a-bounded-filename">Worked example 1: Extract named fields from a bounded filename<a class="heading-anchor" href="#guide--worked-example-1-extract-named-fields-from-a-bounded-filename" aria-label="Link to this section">#</a></h5>
 <p>Use <code>fullmatch</code> when extra text must be rejected. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
 
@@ -432,7 +432,7 @@ match <span class="syntax-operator">=</span> pattern<span class="syntax-operator
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`{&#x27;date&#x27;: &#x27;2025-07-01&#x27;, &#x27;region&#x27;: &#x27;west&#x27;}`. A filename with extra trailing text returns `None`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-build-a-path-without-platform-specific-separators">Worked example 2 — Build a path without platform-specific separators<a class="heading-anchor" href="#guide--worked-example-2-build-a-path-without-platform-specific-separators" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-build-a-path-without-platform-specific-separators">Worked example 2: Build a path without platform-specific separators<a class="heading-anchor" href="#guide--worked-example-2-build-a-path-without-platform-specific-separators" aria-label="Link to this section">#</a></h5>
 <p>Let <code>Path</code> own path joining and filename fields. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
@@ -521,10 +521,10 @@ report <span class="syntax-operator">=</span> Path<span class="syntax-punctuatio
 <ul>
 <li><a href="python-07.html#learner">Open the learner notebook</a></li>
 <li><a href="python-07.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-08.html#guide">Next: Day 8 — Files, JSON, and CSV</a></li>
+<li><a href="python-08.html#guide">Next: Day 8; Files, JSON, and CSV</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-07`
 (Day 7 — Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
 I have completed the direct prerequisites: `python-06`. Emphasize text normalization, bounded pattern matching, and portable paths.
@@ -779,7 +779,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-07-solutions-strings-regex-pathlib">Day 07 — Solutions: Strings, Regex, Pathlib<a class="heading-anchor" href="#solution-1--day-07-solutions-strings-regex-pathlib" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-07-solutions-strings-regex-pathlib">Day 07: Solutions: Strings, Regex, Pathlib<a class="heading-anchor" href="#solution-1--day-07-solutions-strings-regex-pathlib" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>text normalization, bounded pattern matching, and portable paths</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Strings are immutable sequences of Unicode characters. Ordinary string methods are the clearest tool for fixed separators and normalization. A regular expression describes a family of text shapes; it should be used when the format truly varies according to a pattern, not as a default replacement for simple string operations.</p>
@@ -795,8 +795,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>text normalization, bounded pattern matching, and portable paths</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. <strong>Constraints:</strong> use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. <strong>Verify:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. Constraints: use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>. That connects the answer to text normalization, bounded pattern matching, and portable paths.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
@@ -822,7 +822,7 @@ addresses <span class="syntax-operator">=</span> extract_emails<span class="synt
 <span class="syntax-keyword">assert</span> extract_emails<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">There is no address in this sentence.</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <p>The bounded pattern extracts a useful email <em>shape</em> only. Normalization and first-seen de-duplication are separate steps, and no claim is made that the domain or mailbox exists.</p>
 <p><strong>Verification evidence:</strong> assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns <code>[]</code>.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. <strong>Rules:</strong> normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. <strong>Verify:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Write <code>plan_kebab_renames(folder: Path)</code> that returns source/destination pairs for regular files such as <code>Quarterly Report.CSV</code> without renaming them. Rules: normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: use a temporary directory and inspect the complete plan before implementing a separate apply step. That connects the answer to text normalization, bounded pattern matching, and portable paths.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> re
@@ -881,32 +881,32 @@ addresses <span class="syntax-operator">=</span> extract_emails<span class="synt
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">case-normalized collision should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Applying <code>Path.rename</code> is a separate, deliberate mutation after this complete plan passes collision checks.</p>
 <p><strong>Verification evidence:</strong> use a temporary directory and inspect the complete plan before implementing a separate apply step.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Compare <code>&quot;\n&quot;</code> with <code>r&quot;\n&quot;</code> and predict their lengths and printed representations. <strong>Progressive hint:</strong> A raw string preserves the backslash needed by many regex patterns. <strong>Verify:</strong> Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Compare <code>&quot;\n&quot;</code> with <code>r&quot;\n&quot;</code> and predict their lengths and printed representations. Progressive hint: A raw string preserves the backslash needed by many regex patterns. Then compare the prediction with this proof target: Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2. This makes text normalization, bounded pattern matching, and portable paths observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>len</code>, <code>repr</code>, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace named regex groups while parsing <code>order-2048.csv</code>; distinguish <code>group(0)</code> from the named capture. <strong>Progressive hint:</strong> The whole match and captured subparts are different values. <strong>Verify:</strong> Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace named regex groups while parsing <code>order-2048.csv</code>; distinguish <code>group(0)</code> from the named capture. Progressive hint: The whole match and captured subparts are different values. Record the named value, shape, label, or iterator position needed to establish: Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match. The trace exposes text normalization, bounded pattern matching, and portable paths directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert <code>group(0)</code> is <code>&#x27;order-2048.csv&#x27;</code> while the named ID capture is <code>&#x27;2048&#x27;</code>; add a nonmatching filename returning no match.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>parse_report_name(Path)</code> returning a date and region for names like <code>sales_2025-07-01_west.csv</code>, rejecting mismatches. <strong>Progressive hint:</strong> Use <code>fullmatch</code> so extra suffix text cannot pass silently. <strong>Verify:</strong> Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>parse_report_name(Path)</code> returning a date and region for names like <code>sales_2025-07-01_west.csv</code>, rejecting mismatches. Progressive hint: Use <code>fullmatch</code> so extra suffix text cannot pass silently. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected. That connects the answer to text normalization, bounded pattern matching, and portable paths.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a greedy <code>&lt;.*&gt;</code> pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. <strong>Progressive hint:</strong> Use a constrained or non-greedy pattern only for a bounded format. <strong>Verify:</strong> Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a greedy <code>&lt;.*&gt;</code> pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. Progressive hint: Use a constrained or non-greedy pattern only for a bounded format. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser. The diagnosis depends on text normalization, bounded pattern matching, and portable paths.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Build a rename plan to kebab-case that detects collisions before changing any files, including <code>A B.txt</code> and <code>a-b.txt</code>. <strong>Progressive hint:</strong> Separate planning/validation from filesystem mutation. <strong>Verify:</strong> Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Build a rename plan to kebab-case that detects collisions before changing any files, including <code>A B.txt</code> and <code>a-b.txt</code>. Progressive hint: Separate planning/validation from filesystem mutation. Values below, at, and above the named boundary must produce the evidence Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed. Those cases show how text normalization, bounded pattern matching, and portable paths behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use ordinary string operations for fixed syntax, regular expressions for patterns, and <code>pathlib</code> for portable path semantics.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups">Shared implementation for Exercises 3–4 — Escapes and groups<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups">Shared implementation for Exercises 3–4: Escapes and groups<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-escapes-and-groups" aria-label="Link to this section">#</a></h5>
 <p>An ordinary <code>&quot;\n&quot;</code> is one newline character. The raw <code>r&quot;\n&quot;</code> is two characters: a backslash and <code>n</code>. <code>group(0)</code> is the full match; a named group returns only its captured portion.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths">Shared implementation for Exercises 5–7 — Parse and plan before mutating paths<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths">Shared implementation for Exercises 5–7: Parse and plan before mutating paths<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-parse-and-plan-before-mutating-paths" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> re
@@ -1134,16 +1134,16 @@ bounded_tags <span class="syntax-operator">=</span> re<span class="syntax-operat
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-07`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-07`
 (Day 7 — Strings, Regular Expressions, and `pathlib`). Direct catalog prerequisites: `python-06`.
 I have completed the direct prerequisites: `python-06`. Emphasize text normalization, bounded pattern matching, and portable paths.
 Read `python/ds-60day/companion-guides/day07_strings_regex_pathlib.md` and use the learner notebook
@@ -1158,7 +1158,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1269,18 +1269,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

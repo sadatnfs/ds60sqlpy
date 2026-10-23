@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-3-control-flow-truthiness-and-exceptions">Day 3 — Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#guide--day-3-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-3-control-flow-truthiness-and-exceptions">Day 3: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#guide--day-3-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Control flow chooses which statements run. Exceptions separate an expected failure path from the successful path.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -404,8 +404,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 3 — control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 3; control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
 <p>Exceptions separate a normal return path from a failure path. A <code>try</code> block should contain only the operation expected to fail, while <code>except</code> names the failure the current layer can interpret. Catching every exception hides programming bugs. <code>else</code> runs after a successful <code>try</code>; <code>finally</code> runs whether success or failure occurred.</p>
@@ -420,7 +420,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>In <code>if score &gt;= 90:</code>, the colon ends the condition and starts an indented suite. Only code indented under that branch belongs to it. In <code>except ValueError as exc:</code>, <code>ValueError</code> is the narrow failure type and <code>exc</code> is the actual exception object. An exception handler is not a substitute for an ordinary condition that can be checked directly.</p>
-<h5 id="guide--worked-example-1-order-specific-branches-before-general-branches">Worked example 1 — Order specific branches before general branches<a class="heading-anchor" href="#guide--worked-example-1-order-specific-branches-before-general-branches" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-order-specific-branches-before-general-branches">Worked example 1: Order specific branches before general branches<a class="heading-anchor" href="#guide--worked-example-1-order-specific-branches-before-general-branches" aria-label="Link to this section">#</a></h5>
 <p>Classify a value after validating its domain. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> <span class="syntax-number">0</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> score <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">100</span><span class="syntax-punctuation">:</span>
@@ -435,7 +435,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[&#x27;fail&#x27;, &#x27;pass&#x27;, &#x27;distinction&#x27;]`. The guard rejects out-of-domain values before classification.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-protect-only-the-fallible-conversion">Worked example 2 — Protect only the fallible conversion<a class="heading-anchor" href="#guide--worked-example-2-protect-only-the-fallible-conversion" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-protect-only-the-fallible-conversion">Worked example 2: Protect only the fallible conversion<a class="heading-anchor" href="#guide--worked-example-2-protect-only-the-fallible-conversion" aria-label="Link to this section">#</a></h5>
 <p>Let unrelated programming errors remain visible. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_count</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
@@ -531,10 +531,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ul>
 <li><a href="python-03.html#learner">Open the learner notebook</a></li>
 <li><a href="python-03.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-04.html#guide">Next: Day 4 — Loops, comprehensions, and generators</a></li>
+<li><a href="python-04.html#guide">Next: Day 4; Loops, comprehensions, and generators</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-03`
 (Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
 I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
@@ -824,7 +824,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-03-solutions-control-flow-truthiness-and-exceptions">Day 03 — Solutions: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#solution-1--day-03-solutions-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-03-solutions-control-flow-truthiness-and-exceptions">Day 03: Solutions: Control Flow, Truthiness, and Exceptions<a class="heading-anchor" href="#solution-1--day-03-solutions-control-flow-truthiness-and-exceptions" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>branch selection, loop decisions, and narrow exception boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Control flow is the route execution takes through a program. An <code>if</code>/<code>elif</code>/<code>else</code> chain chooses exactly one branch: Python tests from top to bottom and stops at the first true condition. Put narrow or more specific rules before broader ones, and validate impossible inputs before classifying valid ones.</p>
@@ -840,8 +840,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>branch selection, loop decisions, and narrow exception boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Print FizzBuzz for every integer from 1 through 30 inclusive. <strong>Rules:</strong> multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. <strong>Constraints:</strong> use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. <strong>Verify:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Print FizzBuzz for every integer from 1 through 30 inclusive. Rules: multiples of both 3 and 5 print <code>FizzBuzz</code>; only 3 prints <code>Fizz</code>; only 5 prints <code>Buzz</code>; all others print the number. Constraints: use one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
 <pre class="highlighted-code"><code class="language-python">output <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
@@ -861,7 +861,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="syntax-punctuation">]</span></code></pre>
 <p>The combined rule comes first because an <code>elif</code> chain stops at the first true condition.</p>
 <p><strong>Verification evidence:</strong> capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal <code>Fizz</code>, <code>Buzz</code>, <code>FizzBuzz</code>, <code>16</code>, and <code>FizzBuzz</code>.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. <strong>Constraints:</strong> put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. <strong>Verify:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Write <code>parse_age(text)</code> that returns an integer for valid integer text and returns <code>None</code> only when conversion raises <code>ValueError</code>. Constraints: put only <code>int(text)</code> inside <code>try</code>; do not use a bare <code>except</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">parse_age</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">int</span> <span class="syntax-operator">|</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span>
@@ -878,7 +878,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="syntax-keyword">assert</span> parse_age<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">seven</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
 <p>Only conversion is protected; a later programming defect is not mislabeled as invalid user input.</p>
 <p><strong>Verification evidence:</strong> test <code>&#x27;42&#x27;</code>, <code>&#x27; 7 &#x27;</code>, and <code>&#x27;seven&#x27;</code>, then explain which path uses <code>else</code>.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. <strong>Verify:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Define <code>NegativeMeasurementError</code> as a subclass of <code>ValueError</code>, then write <code>validate_measurement(value)</code> that returns non-negative values unchanged and raises your exception for <code>-0.1</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">NegativeMeasurementError</span><span class="syntax-punctuation">(</span>ValueError<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
@@ -899,32 +899,32 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">negative input should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Verification evidence:</strong> show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. <strong>Progressive hint:</strong> Only the first true branch runs; test the most specific rule first. <strong>Verify:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict which branch handles 0, 9, and 12 when checks are ordered as <code>x % 2 == 0</code>, <code>x % 3 == 0</code>, then both. Explain the bug. Progressive hint: Only the first true branch runs; test the most specific rule first. Then compare the prediction with this proof target: Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule. This makes branch selection, loop decisions, and narrow exception boundaries observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record the branch selected for <code>0</code>, <code>9</code>, and <code>12</code> before/after reordering; confirm the repaired <code>12</code> reaches the combined rule.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? <strong>Progressive hint:</strong> <code>else</code> follows success; <code>finally</code> runs in both cases. <strong>Verify:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>try/except/else/finally</code> for a successful integer parse and for invalid text. Which clauses run in each path? Progressive hint: <code>else</code> follows success; <code>finally</code> runs in both cases. Record the named value, shape, label, or iterator position needed to establish: Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules. The trace exposes branch selection, loop decisions, and narrow exception boundaries directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use a four-column trace for <code>try</code>, <code>except</code>, <code>else</code>, and <code>finally</code> on valid/invalid text; each clause&#x27;s executed flag must match the language rules.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. <strong>Progressive hint:</strong> Validate the domain before choosing a result branch. <strong>Verify:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>classify_score(score)</code> returning fail/pass/distinction and reject scores outside 0–100 with <code>ValueError</code>. Progressive hint: Validate the domain before choosing a result branch. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>. That connects the answer to branch selection, loop decisions, and narrow exception boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert representative scores return <code>fail</code>, <code>pass</code>, and <code>distinction</code>, then assert <code>-1</code> and <code>101</code> each raise <code>ValueError</code>.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. <strong>Progressive hint:</strong> Keep only the conversion inside the protected block. <strong>Verify:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Replace a bare <code>except:</code> around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. Progressive hint: Keep only the conversion inside the protected block. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>. The diagnosis depends on branch selection, loop decisions, and narrow exception boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show invalid integer text is handled while a deliberate unrelated <code>TypeError</code> still reaches the test; keep only conversion inside <code>try</code>.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. <strong>Progressive hint:</strong> A reusable library function usually should not invent a numeric result. <strong>Verify:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design <code>safe_ratio(numerator, denominator)</code> for a zero denominator. Choose between raising, returning <code>None</code>, or a default and justify it. Progressive hint: A reusable library function usually should not invent a numeric result. Values below, at, and above the named boundary must produce the evidence Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through. Those cases show how branch selection, loop decisions, and narrow exception boundaries behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces">Shared implementation for Exercises 4–5 — Branch and exception traces<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces">Shared implementation for Exercises 4–5: Branch and exception traces<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-branch-and-exception-traces" aria-label="Link to this section">#</a></h5>
 <p>The combined-divisibility check must come first; otherwise values such as 12 are consumed by the even branch. On successful parsing, <code>else</code> and <code>finally</code> run. On <code>ValueError</code>, <code>except</code> and <code>finally</code> run.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-6-8-explicit-contracts">Shared implementation for Exercises 6–8 — Explicit contracts<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-explicit-contracts" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-explicit-contracts">Shared implementation for Exercises 6–8: Explicit contracts<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-explicit-contracts" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">classify_score</span><span class="syntax-punctuation">(</span>score<span class="syntax-punctuation">:</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
     <span class="syntax-string">&quot;&quot;&quot;Classify a score whose valid domain is the closed interval 0..100.&quot;&quot;&quot;</span>
 
@@ -1139,16 +1139,16 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-03`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-03`
 (Day 3 — Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
 I have completed the direct prerequisites: `python-02`. Emphasize branch selection, loop decisions, and narrow exception boundaries.
 Read `python/ds-60day/companion-guides/day03_control_flow_exceptions.md` and use the learner notebook
@@ -1163,7 +1163,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1274,18 +1274,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

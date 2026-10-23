@@ -1,4 +1,4 @@
-# Day 17 solutions — Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK
+# Day 17 solutions: Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Number each customer's orders from newest to oldest.
 
@@ -110,7 +110,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-17 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer and use order date plus order ID as a unique descending order. Evaluate another form against the concrete expected result (One row per order with sequence starting at one per customer) and the verification above.
 - **Edge case:** Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Rank products by price within category using both `RANK` and `DENSE_RANK`.
 
@@ -154,7 +154,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-17 Exercise 2, the chosen form is justified by this lesson-specific rationale: Rank only on price so equal prices tie; order the final display by product ID. Evaluate another form against the concrete expected result (One row per product with two rank semantics) and the verification above.
 - **Edge case:** Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Return the three highest-priced products per category, including price ties.
 
@@ -204,7 +204,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-17 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute `DENSE_RANK` in a CTE and filter outside. Evaluate another form against the concrete expected result (At least three price levels per category where available) and the verification above.
 - **Edge case:** Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare row number, rank, and dense rank on values 100, 100, and 90.
 
@@ -244,7 +244,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-17 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie. Evaluate another form against the concrete expected result (Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2) and the verification above.
 - **Edge case:** Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Return exactly one latest order per customer even when timestamps tie.
 
@@ -294,7 +294,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-17 Exercise 5, the chosen form is justified by this lesson-specific rationale: Use row number with the unique order ID as final tie-breaker. Evaluate another form against the concrete expected result (At most one row per customer) and the verification above.
 - **Edge case:** Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Rank employee salaries within department and show only the top two distinct salary levels.
 

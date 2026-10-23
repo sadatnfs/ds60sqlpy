@@ -1,4 +1,4 @@
-# Day 40 — Solutions: Hyperparameter Tuning with SearchCV
+# Day 40: Solutions: Hyperparameter Tuning with SearchCV
 
 We build a Pipeline, perform parameter search with GridSearchCV/RandomizedSearchCV, and discuss nested CV for unbiased estimates.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — GridSearchCV + Pipeline (SVC)
+Worked reference for Exercise 1; GridSearchCV + Pipeline (SVC)
 ```python
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.pipeline import Pipeline
@@ -42,7 +42,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — RandomizedSearchCV
+Worked reference for Exercise 2; RandomizedSearchCV
 ```python
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import loguniform
@@ -64,7 +64,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Nested CV (sketch)
+Worked reference for Exercise 3; Nested CV (sketch)
 ```python
 from sklearn.model_selection import cross_val_score
 
@@ -122,7 +122,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Use `RandomizedSearchCV` with a wider parameter space.
 
@@ -132,9 +132,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
+**Verify:** Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Implement nested cross-validation and compare its result with the non-nested search score.
 
@@ -144,9 +144,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
+**Verify:** Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
-### Exercise 3 — Search-budget calculation
+### Exercise 3: Search-budget calculation
 
 **Prompt:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
 
@@ -156,17 +156,17 @@ The naive grid has `5*4*3 = 60` candidates and `60*5 = 300` validation fits,
 plus one refit of the selected configuration. Invalid combinations waste time
 and can fill results with errors.
 
-Represent compatible spaces as a list of dictionaries—one dictionary per
-solver family—or use a constrained sampler. Estimate runtime from a small
+Represent compatible spaces as a list of dictionaries, one dictionary per
+solver family, or use a constrained sampler. Estimate runtime from a small
 pilot before launching the full budget, especially on Windows laptops.
 
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
+**Verify:** Search-budget calculation; show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
 
-### Exercise 4 — Multi-metric selection
+### Exercise 4: Multi-metric selection
 
 **Prompt:** Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.
 
@@ -205,9 +205,9 @@ looks best after the run.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
+**Verify:** Multi-metric selection; configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
 
-### Exercise 5 — Results-table diagnosis
+### Exercise 5: Results-table diagnosis
 
 **Prompt:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
 
@@ -225,9 +225,9 @@ as evidence instead of retaining only `best_params_`.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
+**Verify:** Results-table diagnosis; emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
 
-### Exercise 6 — Reproducibility debugging
+### Exercise 6: Reproducibility debugging
 
 **Prompt:** A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.
 
@@ -246,4 +246,4 @@ partition.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.
+**Verify:** Reproducibility debugging; run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.

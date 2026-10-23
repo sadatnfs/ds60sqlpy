@@ -1,4 +1,4 @@
-# Day 06 — Solutions: Lists, Tuples, Sets, Dicts
+# Day 06: Solutions: Lists, Tuples, Sets, Dicts
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ not simply from familiar syntax.
 For this lesson's **choosing lists, tuples, sets, and dictionaries by semantics** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Implement `stable_unique(values)` for `['b', 'a', 'b', 'c', 'a']`. **Expected result:** `['b', 'a', 'c']`. **Constraints:** preserve the first occurrence, leave the input unchanged, use a set for membership and a list for output, and state that items must be hashable. **Verify:** test the example, an empty list, and a list with no duplicates.
 
@@ -66,7 +66,7 @@ assert stable_unique([]) == []
 
 **Verification evidence:** test the example, an empty list, and a list with no duplicates.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Given `[('east', 4), ('west', 2), ('east', 3)]`, build three mappings: region to list of all values, region to set of unique values, and region to numeric total. **Expected totals:** `{'east': 7, 'west': 2}`. **Constraints:** make the missing-key initial value explicit and preserve encounter order in the list version. **Verify:** assert all three outputs.
 
@@ -89,9 +89,9 @@ assert totals == {"east": 7, "west": 2}
 
 **Verification evidence:** assert all three outputs.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict the length and membership behavior of `{3, 1, 3, 2}`. Why must display order not be treated as a sorting guarantee? **Progressive hint:** Sets enforce uniqueness and optimize membership, not presentation order. **Verify:** Assert the set has length `3` and contains `1`, `2`, and `3`; compare values as a set rather than asserting display iteration order.
 
@@ -99,7 +99,7 @@ assert totals == {"east": 7, "west": 2}
 
 **Evidence to locate in the grouped implementation:** Assert the set has length `3` and contains `1`, `2`, and `3`; compare values as a set rather than asserting display iteration order.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace shallow copying for `original = [[1], [2]]; copied = original.copy(); copied[0].append(9)`. **Progressive hint:** The outer lists differ but still refer to the same inner lists. **Verify:** Assert `original is not copied` but `original[0] is copied[0]`, then confirm appending through the copy appears in both nested lists.
 
@@ -107,7 +107,7 @@ assert totals == {"east": 7, "west": 2}
 
 **Evidence to locate in the grouped implementation:** Assert `original is not copied` but `original[0] is copied[0]`, then confirm appending through the copy appears in both nested lists.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `invert_multimap(mapping)` so values become keys and each new key maps to a list of original keys in encounter order. **Progressive hint:** Use `setdefault` or `defaultdict(list)`. **Verify:** Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.
 
@@ -115,7 +115,7 @@ assert totals == {"east": 7, "west": 2}
 
 **Evidence to locate in the grouped implementation:** Assert exact output lists and encounter order for a mapping where two original keys share a value; also test an empty mapping.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair code that attempts to use a list as a dictionary key. Explain hashability and choose a tuple when the sequence is an identity. **Progressive hint:** Dictionary keys must have a stable hash while stored. **Verify:** Show the list-key version raises `TypeError`, then assert the tuple-key replacement retrieves the intended value and remains unmodified.
 
@@ -123,7 +123,7 @@ assert totals == {"east": 7, "west": 2}
 
 **Evidence to locate in the grouped implementation:** Show the list-key version raises `TypeError`, then assert the tuple-key replacement retrieves the intended value and remains unmodified.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Extend stable de-duplication to records using a `key` function, then test repeated dictionaries whose IDs match but other fields differ. **Progressive hint:** Store hashable derived keys while returning original records. **Verify:** Use repeated record dictionaries with the same ID; assert the first complete record is returned once, input order is preserved, and the input remains unchanged.
 
@@ -133,9 +133,9 @@ assert totals == {"east": 7, "west": 2}
 
 ## Expanded mastery lab solutions
 
-Choose structures by semantics—ordering, uniqueness, lookup, and mutability—not by habit. State what duplicates and missing keys mean.
+Choose structures by semantics, ordering, uniqueness, lookup, and mutability, not by habit. State what duplicates and missing keys mean.
 
-### Shared implementation for Exercises 3–4 — Set and copy semantics
+### Shared implementation for Exercises 3–4: Set and copy semantics
 
 `{3, 1, 3, 2}` contains three unique integers. Membership is the contract;
 iteration order is not a portable sorting rule. A shallow list copy duplicates
@@ -149,7 +149,7 @@ assert original == [[1, 9], [2]]
 assert copied is not original and copied[0] is original[0]
 ```
 
-### Shared implementation for Exercises 5–7 — Multimaps, hashable identities, and keyed de-duplication
+### Shared implementation for Exercises 5–7: Multimaps, hashable identities, and keyed de-duplication
 
 ```python
 from collections import defaultdict

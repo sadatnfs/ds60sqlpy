@@ -244,7 +244,7 @@ merges <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <p><strong>Why freeze a tokenizer during an experiment?</strong> Its vocabulary, normalization and merge rules define the feature representation and loss units. Changing them mid-comparison changes more than the model weights. Record the version and evaluate deliberate changes under a clear protocol.</p>
 <h3 id="references-and-continuation">References and continuation<a class="heading-anchor" href="#references-and-continuation" aria-label="Link to this section">#</a></h3>
 <p>See the original <a href="https://aclanthology.org/P16-1162/">subword BPE paper</a> and <a href="https://huggingface.co/docs/tokenizers/">Hugging Face tokenizer documentation</a>. The implementation here is deliberately small and character-based, with a declared ASCII word contract. Continue to <code>nlp-005</code> to distinguish learned subword units from linguistic morphology and syntax.</p>
-<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for nlp-004 after nlp-003.
 Read courses/nlp/guides/nlp-004.md and courses/nlp/learners/nlp-004.py.
 Explain segmentation, vocabulary IDs and the toy BPE contract separately.

@@ -1,4 +1,4 @@
-# Day 27 solutions — Pivoting/Unpivoting: Crosstabs and Conditional Aggregation
+# Day 27 solutions: Pivoting/Unpivoting: Crosstabs and Conditional Aggregation
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Pivot order counts by status into one summary row.
 
@@ -106,7 +106,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-27 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one filtered count per known status and keep an all-orders denominator. Evaluate another form against the concrete expected result (Exactly one row) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Pivot customer counts for US, CA, GB, and DE by segment.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-27 Exercise 2, the chosen form is justified by this lesson-specific rationale: Group at segment grain and use filtered counts for known country columns. Evaluate another form against the concrete expected result (One row per segment) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Unpivot a wide quarterly sample into quarter/amount rows.
 
@@ -199,7 +199,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-27 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use a lateral `VALUES` relation with one output row per source column. Evaluate another form against the concrete expected result (Eight rows from two source rows and four quarters) and the verification above.
 - **Edge case:** Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare a missing pivot combination with a real zero and preserve the distinction.
 
@@ -247,7 +247,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-27 Exercise 4, the chosen form is justified by this lesson-specific rationale: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero. Evaluate another form against the concrete expected result (One row per expense category with nullable/zero-aware columns) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
 
@@ -296,7 +296,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-27 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate category/value pairs into data values so the result schema remains stable. Evaluate another form against the concrete expected result (One row per UTC month with a JSON object of category revenue) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Round-trip a wide sample to long form and back, verifying values and NULLs.
 

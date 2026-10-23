@@ -1,4 +1,4 @@
-# Day 09 — Solutions: Modules, Packages, Imports, __main__
+# Day 09: Solutions: Modules, Packages, Imports, __main__
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ executing a nested file often does not. The `if __name__ ==
 For this lesson's **modules, package namespaces, imports, and safe entry points** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Create a `textutils` package containing `slug.py` with `slugify(text: str) -> str`, and expose `slugify` from `textutils/__init__.py`. **Expected behavior:** `textutils.slugify(' Data Science ') == 'data-science'`. **Constraints:** keep implementation out of `__init__.py`, use no `sys.path` modification, and test the import from the package's parent directory. **Verify:** From the package parent, import `textutils`, assert the slug result, and print `textutils.slugify.__module__` to prove the public name reaches `slug.py`.
 
@@ -68,7 +68,7 @@ public name without moving implementation into `__init__.py`.
 
 **Verification evidence:** From the package parent, import `textutils`, assert the slug result, and print `textutils.slugify.__module__` to prove the public name reaches `slug.py`.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add `textutils/cli.py` that uses an absolute import when called from outside and a package-relative import for an internal sibling example. **Run:** `python -m textutils.cli 'Hello World'`. **Expected output:** `hello-world`. **Constraints:** protect CLI execution with `if __name__ == '__main__':` and demonstrate that `import textutils.cli` produces no CLI output. **Verify:** Capture `hello-world` from module execution and capture no output from ordinary import in a fresh interpreter.
 
@@ -101,9 +101,9 @@ Importing the module does not call `main`.
 
 **Verification evidence:** Capture `hello-world` from module execution and capture no output from ordinary import in a fresh interpreter.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict `__name__` when a file is executed directly versus imported. Which path should run CLI behavior? **Progressive hint:** Direct execution uses `__main__`; imports use the module's name. **Verify:** Capture `__name__` from direct module execution and import; assert CLI output occurs only in the `__main__` case.
 
@@ -111,7 +111,7 @@ Importing the module does not call `main`.
 
 **Evidence to locate in the grouped implementation:** Capture `__name__` from direct module execution and import; assert CLI output occurs only in the `__main__` case.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace two ordinary imports of the same module and explain the role of `sys.modules` in avoiding repeated top-level execution. **Progressive hint:** The module object is cached after its first successful import. **Verify:** Use a top-level counter or identity check to prove two imports return the same module object and top-level initialization runs once.
 
@@ -119,7 +119,7 @@ Importing the module does not call `main`.
 
 **Evidence to locate in the grouped implementation:** Use a top-level counter or identity check to prove two imports return the same module object and top-level initialization runs once.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Sketch a `textutils` package exposing `slugify` from `__init__.py` while keeping implementation in `slug.py`. **Progressive hint:** The public import surface can be smaller than the package tree. **Verify:** From a clean interpreter, assert both `from textutils import slugify` and the internal module call resolve to the same implementation.
 
@@ -127,7 +127,7 @@ Importing the module does not call `main`.
 
 **Evidence to locate in the grouped implementation:** From a clean interpreter, assert both `from textutils import slugify` and the internal module call resolve to the same implementation.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Explain why `python textutils/cli.py` can break a relative import and repair the invocation without modifying `sys.path`. **Progressive hint:** Run the module from its package parent with `python -m textutils.cli`. **Verify:** Show direct nested-file execution fails for the expected package-context reason, then assert `python -m textutils.cli` succeeds without modifying `sys.path`.
 
@@ -135,7 +135,7 @@ Importing the module does not call `main`.
 
 **Evidence to locate in the grouped implementation:** Show direct nested-file execution fails for the expected package-context reason, then assert `python -m textutils.cli` succeeds without modifying `sys.path`.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Break a two-module circular import by moving shared types/constants or by passing dependencies explicitly. **Progressive hint:** Do not hide the cycle with an unexplained import inside every function. **Verify:** Import both modules from a clean process after refactoring; assert neither exposes a partially initialized attribute and describe the removed dependency cycle.
 
@@ -147,13 +147,13 @@ Importing the module does not call `main`.
 
 A module is executed once per interpreter process and then cached. Package layout and invocation style determine whether imports resolve.
 
-### Shared implementation for Exercises 3–4 — Import execution
+### Shared implementation for Exercises 3–4: Import execution
 
 The guard `if __name__ == "__main__":` runs only for direct/module execution,
 not for import. Successful imports are cached in `sys.modules`; repeated
 ordinary imports reuse the same module object.
 
-### Shared implementation for Exercises 5–7 — A small, intentional package surface
+### Shared implementation for Exercises 5–7: A small, intentional package surface
 
 ```text
 textutils/

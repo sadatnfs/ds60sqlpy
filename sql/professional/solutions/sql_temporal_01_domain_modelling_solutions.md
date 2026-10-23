@@ -1,4 +1,4 @@
-# SQL-TEMPORAL-01 Solutions — Temporal and Domain Modelling
+# SQL-TEMPORAL-01 Solutions: Temporal and Domain Modelling
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 The solution is fixed-time and rolls back.
 
-## Exercise 1 — Retroactive correction
+## Exercise 1: Retroactive correction
 
 Close the prior system period at April 1 and append a new version whose valid
 period still begins January 1. Valid February 15 as known March 15 returns the
@@ -74,7 +74,7 @@ This answers “what did we know then?” without rewriting knowledge history.
 - **Expected result/shape:** For sql-temporal-01 Exercise 1, One row per `(valid_on, system_as_of)` probe, with `valid_on`, `system_as_of`, `term_version_id`, `monthly_rate`, and `recorded_reason`, ordered by `system_as_of`; March 15 returns the prior rate and April 2 returns the retroactive correction.
 - **Independent verification:** For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for `CUS-100`.
 
-## Exercise 2 — Boundaries
+## Exercise 2: Boundaries
 
 Test `lower`, just before upper, and exactly upper for both date and timestamp
 ranges. `[lower,upper)` includes lower and excludes upper, so adjacent versions
@@ -87,7 +87,7 @@ not merely choose one with ORDER/LIMIT.
 - **Expected result/shape:** For sql-temporal-01 Exercise 2, One row per `probe_id`, with `valid_on`, `known_at`, `matching_versions`, and `expected_matches`, ordered by `probe_id`; no `matching_versions` value is greater than one.
 - **Independent verification:** For sql-temporal-01 Exercise 2, Independently count matching `term_version_id` values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.
 
-## Exercise 3 — Exclusion versus fallback
+## Exercise 3: Exclusion versus fallback
 
 With approved `btree_gist`, a partial GiST exclusion combines
 `customer_key WITH =` and `valid_period WITH &&` for current system rows.
@@ -102,7 +102,7 @@ remain controlled.
 - **Expected result/shape:** For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with `approach`, `enforcement_mechanism`, `assumption_or_limit`, and `concurrent_failure_behavior`.
 - **Independent verification:** For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.
 
-## Exercise 4 — Reversal chain
+## Exercise 4: Reversal chain
 
 Entries L-1 (+5), L-2 (-5 reversing L-1), and L-3 (+5 correcting/reversing L-2)
 sum to +5 without UPDATE. Unique idempotency keys prevent duplicate append and
@@ -115,7 +115,7 @@ multiple unauthorized reversals of one entry if that is invalid.
 - **Expected result/shape:** For sql-temporal-01 Exercise 4, One row per `ledger_entry_id`, with `idempotency_key`, `event_kind`, signed amount, `reverses_entry_id`, and a scalar reconciled amount, ordered by `ledger_entry_id`.
 - **Independent verification:** For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of `5.00`. Prove an UPDATE, DELETE, duplicate `LEDGER-102` retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.
 
-## Exercise 5 — Hold decisions
+## Exercise 5: Hold decisions
 
 The decision log appends who, reason, action, and time. Current hold state is
 derived from the latest authorized decision. Deletion still requires retention
@@ -128,7 +128,7 @@ execution audit. The course solution records decisions but deletes nothing.
 - **Expected result/shape:** For sql-temporal-01 Exercise 5, One row per retained `record_key`, with the latest decision event/key, approver, reason, decision time, and `eligible_for_deletion_review`, ordered by `record_key`.
 - **Independent verification:** For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no `retained_records` row is actually deleted.
 
-## Exercise 6 — Domain assumptions
+## Exercise 6: Domain assumptions
 
 Record business time zone and clock authority; valid/system boundary convention;
 late-arrival/correction authority; allowed gaps/overlaps; customer identity;
@@ -142,7 +142,7 @@ honor erasure and audit duties.
 - **Expected result/shape:** For sql-temporal-01 Exercise 6, One row per assumption topic, with `topic`, `decision_or_assumption`, `evidence`, `owner`, and `failure_response`.
 - **Independent verification:** For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.
 
-## Exercise 7 — Civil time and daylight saving
+## Exercise 7: Civil time and daylight saving
 
 Store the authoritative instant as `timestamptz` and retain the IANA zone name
 used to interpret/display civil time. A fixed offset has no DST rules; a bare
@@ -158,7 +158,7 @@ supported zone database/version.
 - **Expected result/shape:** For sql-temporal-01 Exercise 7, One row per `case_id`, with `local_time`, `zone_name`, `civil_time_status`, candidate instants, PostgreSQL's default interpreted instant, and `resolution_policy`, ordered by `case_id`.
 - **Independent verification:** For sql-temporal-01 Exercise 7, The result contains exactly one `nonexistent`, one `ambiguous`, and one `ordinary` case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.
 
-## Exercise 8 — Event, ingestion, and processing clocks
+## Exercise 8: Event, ingestion, and processing clocks
 
 Event time is source occurrence, ingestion time is arrival, and processing time
 is computation. A watermark such as maximum observed event time minus allowed
@@ -174,7 +174,7 @@ downstream recomputation/notification evidence.
 - **Expected result/shape:** For sql-temporal-01 Exercise 8, Exactly one summary row with `event_count`, `maximum_event_time`, `example_watermark`, `maximum_arrival_delay`, `maximum_processing_delay`, `events_behind_watermark`, and the correction policy.
 - **Independent verification:** For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.
 
-## Exercise 9 — Type-2 as-of dimension join
+## Exercise 9: Type-2 as-of dimension join
 
 Give each version a surrogate key, stable business key, half-open effective
 range, and correction metadata. Join a fact where business keys match and the
@@ -191,7 +191,7 @@ state.
 - **Expected result/shape:** For sql-temporal-01 Exercise 9, One row per `order_key`, with `ordered_on`, `customer_version_id`, segment, effective period, current marker, and correction metadata, ordered by `order_key`.
 - **Independent verification:** For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by `order_key` with `HAVING count(customer_version_id) > 1` returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.
 
-## Exercise 10 — Temporal referential integrity
+## Exercise 10: Temporal referential integrity
 
 The child period must be contained by an allowed parent period, not merely share
 a key. A trigger can lock a stable business-key namespace, query containment,
@@ -207,7 +207,7 @@ test parent shrink/delete and concurrent changes.
 - **Expected result/shape:** For sql-temporal-01 Exercise 10, One row per write path, with `write_path`, `concurrency_or_validation_control`, and `failure_response`.
 - **Independent verification:** For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.
 
-## Exercise 11 — Gap and overlap report
+## Exercise 11: Gap and overlap report
 
 Order nonempty periods by lower bound, upper bound, stable ID and compare each
 lower bound with the running maximum prior upper. Lower means overlap, greater
@@ -223,7 +223,7 @@ duplicates/empty/inverted periods separately and define adjacency policy.
 - **Expected result/shape:** For sql-temporal-01 Exercise 11, One row per `period_id`, with `business_key`, `valid_period`, `has_unbounded_upper`, duplicate count, prior maximum upper bound, and `relationship_to_prior_coverage`, ordered by bounds and `period_id`.
 - **Independent verification:** For sql-temporal-01 Exercise 11, Require explicit `duplicate`, `empty`, `gap`, `adjacent`, and `overlap` outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.
 
-## Exercise 12 — Partition archive under hold
+## Exercise 12: Partition archive under hold
 
 Inventory retention and holds before detach. If one held row blocks an expirable
 partition, move/repartition only through audited review. Verify counts/checksums,

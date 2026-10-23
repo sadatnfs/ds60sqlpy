@@ -1,4 +1,4 @@
-# Day 14 solutions — Numeric Types, Casting, and Precision
+# Day 14 solutions: Numeric Types, Casting, and Precision
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Calculate product gross margin amount and percentage, returning NULL percentage for zero price.
 
@@ -107,7 +107,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-14 Exercise 1, the chosen form is justified by this lesson-specific rationale: Keep exact numeric arithmetic and guard the denominator with `NULLIF`. Evaluate another form against the concrete expected result (One row per product) and the verification above.
 - **Edge case:** Repeat with `NULL` in `product_id`, and `price` and state whether the row is kept, rejected, or classified.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Safely cast a set of text values to numeric only when they match a numeric grammar.
 
@@ -147,7 +147,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-14 Exercise 2, the chosen form is justified by this lesson-specific rationale: Validate with a regex before casting; otherwise return NULL. Evaluate another form against the concrete expected result (One row per sample text) and the verification above.
 - **Edge case:** Add one source row with a new `parsed_numeric`; verify the result gains exactly one row carrying that `parsed_numeric` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Show order-item net revenue rounded only after summing.
 
@@ -184,7 +184,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-14 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate exact line expressions first; round the final display value. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `net_order_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare integer division with numeric division for 1 divided by 4.
 
@@ -215,7 +215,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-14 Exercise 4, the chosen form is justified by this lesson-specific rationale: At least one operand must be numeric to preserve the fraction. Evaluate another form against the concrete expected result (One row showing 0 and 0.25) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Calculate average payment amount per paid order without dividing by zero or counting payment rows as orders.
 
@@ -251,7 +251,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-14 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate payment amount and count distinct order IDs at one common scope. Evaluate another form against the concrete expected result (Exactly one summary row) and the verification above.
 - **Edge case:** Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Compare sum-of-rounded line values with rounded exact total and quantify the rounding difference.
 

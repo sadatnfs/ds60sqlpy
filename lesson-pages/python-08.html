@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-8-files-json-csv-and-context-managers">Day 8 — Files, JSON, CSV, and Context Managers<a class="heading-anchor" href="#guide--day-8-files-json-csv-and-context-managers" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-8-files-json-csv-and-context-managers">Day 8: Files, JSON, CSV, and Context Managers<a class="heading-anchor" href="#guide--day-8-files-json-csv-and-context-managers" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>File I/O crosses a boundary where paths, encodings, permissions, and data shape can all fail. Make those assumptions visible.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 8 — files, json, csv, and context managers to practice resource ownership, text encodings, and structured file boundaries and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 8; files, json, csv, and context managers to practice resource ownership, text encodings, and structured file boundaries and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A file handle is a stateful resource with a current cursor and an open or closed lifetime. A context manager (<code>with</code>) makes ownership visible: acquire the resource, use it inside the block, and release it on both success and failure. Text files also have an encoding and newline policy; make both explicit at boundaries.</p>
 <p>JSON and CSV are representations, not automatically trusted schemas. JSON preserves nested object/list structure but has a small type system. CSV is a table of text fields and requires column-name and conversion policy. Parse and validate rows near the boundary, keep writes recoverable, and report expected read/decode failures without hiding programming errors.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>with path.open(&quot;r&quot;, encoding=&quot;utf-8&quot;) as handle:</code> creates a context, binds the open handle, and guarantees <code>close</code> at block exit. <code>json.load(handle)</code> reads JSON from a file object; <code>json.loads(text)</code> parses an already-loaded string. For CSV output, <code>newline=&quot;&quot;</code> lets the <code>csv</code> module manage platform newline rules correctly.</p>
-<h5 id="guide--worked-example-1-round-trip-json-through-an-in-memory-stream">Worked example 1 — Round-trip JSON through an in-memory stream<a class="heading-anchor" href="#guide--worked-example-1-round-trip-json-through-an-in-memory-stream" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-round-trip-json-through-an-in-memory-stream">Worked example 1: Round-trip JSON through an in-memory stream<a class="heading-anchor" href="#guide--worked-example-1-round-trip-json-through-an-in-memory-stream" aria-label="Link to this section">#</a></h5>
 <p>Observe serialization without creating learner files. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> io
 <span class="syntax-keyword">import</span> json
@@ -435,7 +435,7 @@ decoded <span class="syntax-operator">=</span> json<span class="syntax-operator"
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The JSON text and `True` are displayed. Serialization creates text; parsing reconstructs equivalent Python data.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-read-csv-rows-as-dictionaries">Worked example 2 — Read CSV rows as dictionaries<a class="heading-anchor" href="#guide--worked-example-2-read-csv-rows-as-dictionaries" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-read-csv-rows-as-dictionaries">Worked example 2: Read CSV rows as dictionaries<a class="heading-anchor" href="#guide--worked-example-2-read-csv-rows-as-dictionaries" aria-label="Link to this section">#</a></h5>
 <p>Column headers become keys while every field initially remains text. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
 <span class="syntax-keyword">import</span> io
@@ -530,10 +530,10 @@ path<span class="syntax-operator">.</span>parent<span class="syntax-operator">.<
 <ul>
 <li><a href="python-08.html#learner">Open the learner notebook</a></li>
 <li><a href="python-08.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-09.html#guide">Next: Day 9 — Modules and packages</a></li>
+<li><a href="python-09.html#guide">Next: Day 9; Modules and packages</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-08`
 (Day 8 — Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
 I have completed the direct prerequisites: `python-07`. Emphasize resource ownership, text encodings, and structured file boundaries.
@@ -800,7 +800,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-08-solutions-files-json-csv-and-context-managers">Day 08 — Solutions: Files, JSON/CSV, and Context Managers<a class="heading-anchor" href="#solution-1--day-08-solutions-files-json-csv-and-context-managers" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-08-solutions-files-json-csv-and-context-managers">Day 08: Solutions: Files, JSON/CSV, and Context Managers<a class="heading-anchor" href="#solution-1--day-08-solutions-files-json-csv-and-context-managers" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>resource ownership, text encodings, and structured file boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A file handle is a stateful resource with a current cursor and an open or closed lifetime. A context manager (<code>with</code>) makes ownership visible: acquire the resource, use it inside the block, and release it on both success and failure. Text files also have an encoding and newline policy; make both explicit at boundaries.</p>
@@ -816,8 +816,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>resource ownership, text encodings, and structured file boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>safe_load_json(path)</code> that returns parsed data on success and <code>None</code> only for a missing file or malformed JSON, logging which expected failure occurred. <strong>Constraints:</strong> open with UTF-8, catch <code>FileNotFoundError</code> and <code>json.JSONDecodeError</code> explicitly, and let unrelated errors surface. <strong>Verify:</strong> test a valid file, a missing path, and an invalid JSON file inside a temporary directory.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>safe_load_json(path)</code> that returns parsed data on success and <code>None</code> only for a missing file or malformed JSON, logging which expected failure occurred. Constraints: open with UTF-8, catch <code>FileNotFoundError</code> and <code>json.JSONDecodeError</code> explicitly, and let unrelated errors surface. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test a valid file, a missing path, and an invalid JSON file inside a temporary directory. That connects the answer to resource ownership, text encodings, and structured file boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
@@ -853,7 +853,7 @@ logger <span class="syntax-operator">=</span> logging<span class="syntax-operato
     <span class="syntax-keyword">assert</span> safe_load_json<span class="syntax-punctuation">(</span>missing_path<span class="syntax-punctuation">)</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">None</span></code></pre>
 <p>The two expected boundary failures are distinguished; unrelated permission or programming failures remain visible.</p>
 <p><strong>Verification evidence:</strong> test a valid file, a missing path, and an invalid JSON file inside a temporary directory.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>csv_to_records(path)</code> and <code>records_to_csv(records, path)</code> using <code>csv.DictReader</code> and <code>csv.DictWriter</code>. <strong>Contract:</strong> headers define keys, output field order is explicit, and numeric conversion policy is documented. <strong>Constraints:</strong> use UTF-8 and <code>newline=&#x27;&#x27;</code>; do not hand-split comma-delimited text. <strong>Verify:</strong> round-trip two records including a non-ASCII name and compare the normalized records.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>csv_to_records(path)</code> and <code>records_to_csv(records, path)</code> using <code>csv.DictReader</code> and <code>csv.DictWriter</code>. Contract: headers define keys, output field order is explicit, and numeric conversion policy is documented. Constraints: use UTF-8 and <code>newline=&#x27;&#x27;</code>; do not hand-split comma-delimited text. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: round-trip two records including a non-ASCII name and compare the normalized records. That connects the answer to resource ownership, text encodings, and structured file boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
@@ -889,32 +889,32 @@ records <span class="syntax-operator">=</span> <span class="syntax-punctuation">
     <span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>reloaded<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>CSV_FIELDS<span class="syntax-punctuation">)</span></code></pre>
 <p><code>DictReader</code> returns text, so this contract deliberately preserves <code>&quot;10&quot;</code> and <code>&quot;8&quot;</code> as strings. A later domain-specific parsing stage may convert them; the CSV transport layer does not guess numeric meaning.</p>
 <p><strong>Verification evidence:</strong> round-trip two records including a non-ASCII name and compare the normalized records.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> After <code>handle.read(2)</code> on a text file containing <code>abcd</code>, predict what a second <code>handle.read()</code> returns and explain the cursor. <strong>Progressive hint:</strong> Reads advance the file object&#x27;s current position. <strong>Verify:</strong> Assert the first read is <code>&#x27;ab&#x27;</code>, the second is <code>&#x27;cd&#x27;</code>, and a third is empty; record cursor positions <code>2</code> and <code>4</code>.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: After <code>handle.read(2)</code> on a text file containing <code>abcd</code>, predict what a second <code>handle.read()</code> returns and explain the cursor. Progressive hint: Reads advance the file object&#x27;s current position. Then compare the prediction with this proof target: Assert the first read is <code>&#x27;ab&#x27;</code>, the second is <code>&#x27;cd&#x27;</code>, and a third is empty; record cursor positions <code>2</code> and <code>4</code>. This makes resource ownership, text encodings, and structured file boundaries observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the first read is <code>&#x27;ab&#x27;</code>, the second is <code>&#x27;cd&#x27;</code>, and a third is empty; record cursor positions <code>2</code> and <code>4</code>.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace when a file is open and closed through a <code>with</code> block, including when JSON decoding raises inside the block. <strong>Progressive hint:</strong> Context-manager cleanup runs on both normal and exceptional exit. <strong>Verify:</strong> Record <code>handle.closed</code> inside and after both successful and failing <code>with</code> blocks; assert it is true after either exit.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace when a file is open and closed through a <code>with</code> block, including when JSON decoding raises inside the block. Progressive hint: Context-manager cleanup runs on both normal and exceptional exit. Record the named value, shape, label, or iterator position needed to establish: Record <code>handle.closed</code> inside and after both successful and failing <code>with</code> blocks; assert it is true after either exit. The trace exposes resource ownership, text encodings, and structured file boundaries directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>handle.closed</code> inside and after both successful and failing <code>with</code> blocks; assert it is true after either exit.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. <strong>Progressive hint:</strong> Use explicit UTF-8, <code>json.dump</code>, and <code>Path.replace</code>. <strong>Verify:</strong> Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. Progressive hint: Use explicit UTF-8, <code>json.dump</code>, and <code>Path.replace</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact. That connects the answer to resource ownership, text encodings, and structured file boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. <strong>Progressive hint:</strong> Open with <code>newline=&#x27;&#x27;</code> and <code>encoding=&#x27;utf-8&#x27;</code>. <strong>Verify:</strong> Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. Progressive hint: Open with <code>newline=&#x27;&#x27;</code> and <code>encoding=&#x27;utf-8&#x27;</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters. The diagnosis depends on resource ownership, text encodings, and structured file boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. <strong>Progressive hint:</strong> Validate each row at the boundary rather than failing much later. <strong>Verify:</strong> Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. Progressive hint: Validate each row at the boundary rather than failing much later. Values below, at, and above the named boundary must produce the evidence Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule. Those cases show how resource ownership, text encodings, and structured file boundaries behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Treat files as fallible boundaries. Specify encoding, newline behavior, schema, and failure policy, and keep writes recoverable.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior">Shared implementation for Exercises 3–4 — Cursor and context-manager behavior<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior">Shared implementation for Exercises 3–4: Cursor and context-manager behavior<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-cursor-and-context-manager-behavior" aria-label="Link to this section">#</a></h5>
 <p>The second read returns <code>&quot;cd&quot;</code> because the cursor is already after <code>&quot;ab&quot;</code>. Leaving a <code>with</code> block closes the handle even when decoding raises.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation">Shared implementation for Exercises 5–7 — Recoverable writes and explicit row validation<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation">Shared implementation for Exercises 5–7: Recoverable writes and explicit row validation<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-recoverable-writes-and-explicit-row-validation" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> csv
@@ -1135,16 +1135,16 @@ accepted<span class="syntax-punctuation">,</span> rejected <span class="syntax-o
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-08`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-08`
 (Day 8 — Files, JSON, CSV, and Context Managers). Direct catalog prerequisites: `python-07`.
 I have completed the direct prerequisites: `python-07`. Emphasize resource ownership, text encodings, and structured file boundaries.
 Read `python/ds-60day/companion-guides/day08_files_json_csv_context.md` and use the learner notebook
@@ -1159,7 +1159,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1270,18 +1270,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

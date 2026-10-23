@@ -173,7 +173,7 @@ No. It can record a privacy mechanism and its analysis, but documentation does n
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-034, Robustness, privacy and evidence beyond a score.

@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,9 +369,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-21-time-series-with-pandas">Day 21 — Time Series with pandas<a class="heading-anchor" href="#guide--day-21-time-series-with-pandas" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-21-time-series-with-pandas">Day 21: Time Series with pandas<a class="heading-anchor" href="#guide--day-21-time-series-with-pandas" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
-<p>Time-series correctness depends on timestamp meaning, time zones, ordering, and window boundaries—not just the numeric calculation.</p>
+<p>Time-series correctness depends on timestamp meaning, time zones, ordering, and window boundaries, not just the numeric calculation.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of this lesson, you can:</p>
 <ul>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 21 — time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 21; time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A timestamp represents a point or label in time; a duration represents an elapsed amount. Parsing text is only the first step: decide whether timestamps are timezone-naive or timezone-aware and what business zone controls calendar boundaries. Localizing assigns a zone to wall-clock values; converting changes the representation of an already-known instant.</p>
 <p>Resampling groups a time index into calendar bins and aggregates each bin. Rolling windows calculate over neighboring observations or elapsed time. <code>shift</code> aligns earlier values with later rows and is central to lag features. Sort the time index, make duplicate timestamps and missing intervals explicit, and document boundary/label rules.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>series.resample(&quot;W-FRI&quot;).sum()</code> requires a datetime-like index, groups into weeks labeled/ending Friday, and sums each bin. <code>rolling(3, min_periods=1).mean()</code> uses up to three consecutive rows and permits a result at the beginning. <code>shift(1)</code> moves values one row later without changing the index.</p>
-<h5 id="guide--worked-example-1-parse-index-and-resample-deterministic-daily-values">Worked example 1 — Parse, index, and resample deterministic daily values<a class="heading-anchor" href="#guide--worked-example-1-parse-index-and-resample-deterministic-daily-values" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-parse-index-and-resample-deterministic-daily-values">Worked example 1: Parse, index, and resample deterministic daily values<a class="heading-anchor" href="#guide--worked-example-1-parse-index-and-resample-deterministic-daily-values" aria-label="Link to this section">#</a></h5>
 <p>Choose and name the calendar boundary. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -435,7 +435,7 @@ weekly <span class="syntax-operator">=</span> daily<span class="syntax-operator"
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">Both weekly bins together sum to `28`, preserving the additive total. The keys are Sunday-labeled timestamps.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-compare-rolling-and-lagged-values">Worked example 2 — Compare rolling and lagged values<a class="heading-anchor" href="#guide--worked-example-2-compare-rolling-and-lagged-values" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-compare-rolling-and-lagged-values">Worked example 2: Compare rolling and lagged values<a class="heading-anchor" href="#guide--worked-example-2-compare-rolling-and-lagged-values" aria-label="Link to this section">#</a></h5>
 <p>A rolling statistic includes nearby history; a lag exposes a prior observation. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">time_features <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">sales</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> daily<span class="syntax-punctuation">,</span>
@@ -463,7 +463,7 @@ time_features<span class="syntax-operator">.</span>round<span class="syntax-punc
 <li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
 <li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
 </ol>
-<p><strong>Useful alternative:</strong> Use row-count windows for evenly sampled observations and time-offset windows when elapsed time—not row count—defines the question.</p>
+<p><strong>Useful alternative:</strong> Use row-count windows for evenly sampled observations and time-offset windows when elapsed time, not row count, defines the question.</p>
 <p><strong>Boundary to remember:</strong> Daylight-saving ambiguity/nonexistence, duplicate times, irregular gaps, empty bins, and partial boundary windows need policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -525,10 +525,10 @@ trailing_7d <span class="syntax-operator">=</span> values<span class="syntax-ope
 <ul>
 <li><a href="python-21.html#learner">Open the learner notebook</a></li>
 <li><a href="python-21.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-22.html#guide">Next: Day 22 — Advanced pandas</a></li>
+<li><a href="python-22.html#guide">Next: Day 22; Advanced pandas</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-21`
 (Day 21 — Time Series with pandas). Direct catalog prerequisites: `python-20`.
 I have completed the direct prerequisites: `python-20`. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.
@@ -782,7 +782,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-21-solutions-time-series-with-pandas">Day 21 — Solutions: Time Series with Pandas<a class="heading-anchor" href="#solution-1--day-21-solutions-time-series-with-pandas" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-21-solutions-time-series-with-pandas">Day 21: Solutions: Time Series with Pandas<a class="heading-anchor" href="#solution-1--day-21-solutions-time-series-with-pandas" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>time-aware indexes, timezone policy, resampling, rolling windows, and lag features</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A timestamp represents a point or label in time; a duration represents an elapsed amount. Parsing text is only the first step: decide whether timestamps are timezone-naive or timezone-aware and what business zone controls calendar boundaries. Localizing assigns a zone to wall-clock values; converting changes the representation of an already-known instant.</p>
@@ -798,8 +798,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>time-aware indexes, timezone policy, resampling, rolling windows, and lag features</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. <strong>Expected behavior:</strong> the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. <strong>Verify:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. Expected behavior: the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: inspect the earliest/latest instant and demonstrate that conversion preserves the instant. That connects the answer to time-aware indexes, timezone policy, resampling, rolling windows, and lag features.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -835,7 +835,7 @@ utc_times <span class="syntax-operator">=</span> parse_source_times<span class="
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">unparseable input should remain visible</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The written source policy treats naive strings as Los Angeles wall times. Localization assigns that meaning; conversion then represents the same instants in UTC. Ambiguous/nonexistent daylight-saving times raise instead of being guessed.</p>
 <p><strong>Verification evidence:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Using deterministic daily sales, compute a three-observation rolling mean and weekly <code>W-FRI</code> sums. <strong>Constraints:</strong> sort the index, choose <code>min_periods</code>, and document weekly labels/boundaries. <strong>Verify:</strong> trace the first three rolling windows by hand and assert weekly sums preserve the grand total.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Using deterministic daily sales, compute a three-observation rolling mean and weekly <code>W-FRI</code> sums. Constraints: sort the index, choose <code>min_periods</code>, and document weekly labels/boundaries. Record the named value, shape, label, or iterator position needed to establish: trace the first three rolling windows by hand and assert weekly sums preserve the grand total. The trace exposes time-aware indexes, timezone policy, resampling, rolling windows, and lag features directly.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -855,32 +855,32 @@ weekly <span class="syntax-operator">=</span> daily<span class="syntax-operator"
 <span class="syntax-keyword">assert</span> weekly<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> daily<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><code>min_periods=1</code> permits partial windows in the first two rows. <code>W-FRI</code> closes each weekly bin on Friday; sum is valid because sales is additive, and the reconciliation proves no daily value was lost.</p>
 <p><strong>Verification evidence:</strong> trace the first three rolling windows by hand and assert weekly sums preserve the grand total.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the difference between <code>tz_localize</code> and <code>tz_convert</code>, and which one applies to a naive timestamp. <strong>Progressive hint:</strong> Localization assigns meaning; conversion changes representation of an instant. <strong>Verify:</strong> Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the difference between <code>tz_localize</code> and <code>tz_convert</code>, and which one applies to a naive timestamp. Progressive hint: Localization assigns meaning; conversion changes representation of an instant. Then compare the prediction with this proof target: Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises. This makes time-aware indexes, timezone policy, resampling, rolling windows, and lag features observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a three-day rolling mean with <code>min_periods=1</code> and identify which observations contribute at the beginning. <strong>Progressive hint:</strong> Early windows contain fewer rows when the minimum allows it. <strong>Verify:</strong> List source dates contributing to the first three outputs and assert their means for <code>min_periods=1</code> exactly.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a three-day rolling mean with <code>min_periods=1</code> and identify which observations contribute at the beginning. Progressive hint: Early windows contain fewer rows when the minimum allows it. Record the named value, shape, label, or iterator position needed to establish: List source dates contributing to the first three outputs and assert their means for <code>min_periods=1</code> exactly. The trace exposes time-aware indexes, timezone policy, resampling, rolling windows, and lag features directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> List source dates contributing to the first three outputs and assert their means for <code>min_periods=1</code> exactly.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Resample deterministic daily sales to <code>W-FRI</code>, then assert the grand total is preserved. <strong>Progressive hint:</strong> Document the weekly label/boundary and use sums for additive measures. <strong>Verify:</strong> Assert weekly bin labels follow <code>W-FRI</code>, every source date belongs to one bin, and weekly sums equal the daily grand total.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Implementation: Resample deterministic daily sales to <code>W-FRI</code>, then assert the grand total is preserved. Progressive hint: Document the weekly label/boundary and use sums for additive measures. Values below, at, and above the named boundary must produce the evidence Assert weekly bin labels follow <code>W-FRI</code>, every source date belongs to one bin, and weekly sums equal the daily grand total. Those cases show how time-aware indexes, timezone policy, resampling, rolling windows, and lag features behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert weekly bin labels follow <code>W-FRI</code>, every source date belongs to one bin, and weekly sums equal the daily grand total.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a comparison between naive and timezone-aware timestamps. <strong>Progressive hint:</strong> Normalize both sides to an aware UTC contract. <strong>Verify:</strong> Show the naive/aware comparison failure, normalize both to aware UTC, and assert chronological comparison now reflects the intended instants.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a comparison between naive and timezone-aware timestamps. Progressive hint: Normalize both sides to an aware UTC contract. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the naive/aware comparison failure, normalize both to aware UTC, and assert chronological comparison now reflects the intended instants. The diagnosis depends on time-aware indexes, timezone policy, resampling, rolling windows, and lag features.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show the naive/aware comparison failure, normalize both to aware UTC, and assert chronological comparison now reflects the intended instants.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle an ambiguous or nonexistent daylight-saving local time and explain why silently guessing may corrupt event order. <strong>Progressive hint:</strong> Use explicit <code>ambiguous</code>/<code>nonexistent</code> policy or reject the input. <strong>Verify:</strong> Use explicit ambiguous/nonexistent policies on documented DST fixtures and assert the chosen raise/resolve outcome without silently reordering events.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle an ambiguous or nonexistent daylight-saving local time and explain why silently guessing may corrupt event order. Progressive hint: Use explicit <code>ambiguous</code>/<code>nonexistent</code> policy or reject the input. Values below, at, and above the named boundary must produce the evidence Use explicit ambiguous/nonexistent policies on documented DST fixtures and assert the chosen raise/resolve outcome without silently reordering events. Those cases show how time-aware indexes, timezone policy, resampling, rolling windows, and lag features behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use explicit ambiguous/nonexistent policies on documented DST fixtures and assert the chosen raise/resolve outcome without silently reordering events.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-timezone-and-rolling-window-semantics">Shared implementation for Exercises 3–4 — Timezone and rolling-window semantics<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-timezone-and-rolling-window-semantics" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-timezone-and-rolling-window-semantics">Shared implementation for Exercises 3–4: Timezone and rolling-window semantics<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-timezone-and-rolling-window-semantics" aria-label="Link to this section">#</a></h5>
 <p><code>tz_localize</code> assigns a timezone to naive wall-clock values. <code>tz_convert</code> represents already-aware instants in another timezone. With <code>min_periods=1</code>, the first rolling mean uses one row, the second uses two, and later values use up to three.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-reconciled-resampling-and-explicit-dst-policy">Shared implementation for Exercises 5–7 — Reconciled resampling and explicit DST policy<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-reconciled-resampling-and-explicit-dst-policy" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-reconciled-resampling-and-explicit-dst-policy">Shared implementation for Exercises 5–7: Reconciled resampling and explicit DST policy<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-reconciled-resampling-and-explicit-dst-policy" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 daily <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span>
@@ -1012,16 +1012,16 @@ nonexistent <span class="syntax-operator">=</span> pd<span class="syntax-operato
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-21`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-21`
 (Day 21 — Time Series with pandas). Direct catalog prerequisites: `python-20`.
 I have completed the direct prerequisites: `python-20`. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.
 Read `python/ds-60day/companion-guides/day21_time_series_pandas.md` and use the learner notebook
@@ -1036,7 +1036,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1147,18 +1147,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

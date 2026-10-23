@@ -152,7 +152,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [pandas merge_asof API](https://pandas.pydata.org/docs/reference/api/pandas.merge_asof.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-pandas-02: Join Contracts and Point-in-Time Feature Lookup.

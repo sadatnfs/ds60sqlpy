@@ -1,4 +1,4 @@
-# Day 24 — Exploratory Data Analysis Best Practices
+# Day 24: Exploratory Data Analysis Best Practices
 
 **Level:** Intermediate
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 24 — exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks
+**Lesson outcome:** use day 24; exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ you but is not a conclusion. A correlation matrix measures selected
 pairwise associations under assumptions; it does not explain cause,
 handle every nonlinear relationship, or protect against leakage.
 
-### Worked example 1 — Create a bounded quality profile
+### Worked example 1: Create a bounded quality profile
 
 Make basic risks visible before plotting relationships. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -133,7 +133,7 @@ The profile reports four rows, one duplicate row, and a 0.25 missing rate for `a
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Compare robust and non-robust center
+### Worked example 2: Compare robust and non-robust center
 
 One extreme value affects the mean more than the median. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -293,11 +293,11 @@ figures/tables, and distinguish findings from unresolved hypotheses.
 
 - [Open the learner notebook](../notebooks/day24_eda_best_practices.ipynb)
 - [Check the separate solution](../solutions/day24_eda_best_practices/day24_solutions.md)
-- [Next: Day 25 — Matplotlib and Seaborn](day25_viz_matplotlib_seaborn.md)
+- [Next: Day 25; Matplotlib and Seaborn](day25_viz_matplotlib_seaborn.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

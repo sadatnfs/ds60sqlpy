@@ -1,4 +1,4 @@
-# Day 45 — Solutions: End-to-End Modeling Project
+# Day 45: Solutions: End-to-End Modeling Project
 
 We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Problem framing and Pipeline
+Worked reference for Exercise 1; Problem framing and Pipeline
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
@@ -32,7 +32,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2 — CV/tuning and holdout evaluation
+Worked reference for Exercise 2; CV/tuning and holdout evaluation
 ```python
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.metrics import roc_auc_score, precision_recall_curve, average_precision_score
@@ -62,7 +62,7 @@ Interpretation
 
 ---
 
-Worked reference for Exercise 3 — Save artifacts and serve via FastAPI
+Worked reference for Exercise 3; Save artifacts and serve via FastAPI
 ```python
 import json
 from pathlib import Path
@@ -161,7 +161,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Load the dataset and create train/validation/test boundaries.
 
@@ -171,9 +171,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — an end-to-end evidence chain from decision to reproducible artifact — record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
+**Verify:** Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Preprocess with `ColumnTransformer`.
 
@@ -183,9 +183,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — an end-to-end evidence chain from decision to reproducible artifact — fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
+**Verify:** Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Train a baseline model.
 
@@ -195,9 +195,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — an end-to-end evidence chain from decision to reproducible artifact — fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
+**Verify:** Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
 
-### Exercise 4 — Original lesson practice
+### Exercise 4: Original lesson practice
 
 **Prompt:** Evaluate with appropriate metrics and cross-validation.
 
@@ -207,9 +207,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4 — an end-to-end evidence chain from decision to reproducible artifact — print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
+**Verify:** Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
 
-### Exercise 5 — Original lesson practice
+### Exercise 5: Original lesson practice
 
 **Prompt:** Save the model and preprocessing together with `joblib`.
 
@@ -219,9 +219,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 5 — an end-to-end evidence chain from decision to reproducible artifact — save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
+**Verify:** Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
 
-### Exercise 6 — Original lesson practice
+### Exercise 6: Original lesson practice
 
 **Prompt:** Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.
 
@@ -231,9 +231,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 6 — an end-to-end evidence chain from decision to reproducible artifact — include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
+**Verify:** Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
 
-### Exercise 7 — Original lesson practice
+### Exercise 7: Original lesson practice
 
 **Prompt:** Optionally adapt the Day 44 FastAPI service.
 
@@ -243,9 +243,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 7 — an end-to-end evidence chain from decision to reproducible artifact — if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
+**Verify:** Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
 
-### Exercise 8 — Data-contract gate
+### Exercise 8: Data-contract gate
 
 **Prompt:** Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.
 
@@ -263,9 +263,9 @@ training population and can make later metrics impossible to reproduce.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Data-contract gate — run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.
+**Verify:** Data-contract gate; run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.
 
-### Exercise 9 — Leakage audit
+### Exercise 9: Leakage audit
 
 **Prompt:** Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.
 
@@ -283,9 +283,9 @@ fit scope even when the raw field is available.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Leakage audit — save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.
+**Verify:** Leakage audit; save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.
 
-### Exercise 10 — Baseline ladder
+### Exercise 10: Baseline ladder
 
 **Prompt:** Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.
 
@@ -302,9 +302,9 @@ finding rather than optimizing the acceptance criterion after the fact.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Baseline ladder — print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.
+**Verify:** Baseline ladder; print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.
 
-### Exercise 11 — Operating-policy selection
+### Exercise 11: Operating-policy selection
 
 **Prompt:** Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.
 
@@ -322,9 +322,9 @@ Ranking metrics alone cannot define the operating point.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Operating-policy selection — print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.
+**Verify:** Operating-policy selection; print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.
 
-### Exercise 12 — Error-slice analysis
+### Exercise 12: Error-slice analysis
 
 **Prompt:** Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.
 
@@ -341,9 +341,9 @@ development and require a new untouched evaluation set.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Error-slice analysis — for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.
+**Verify:** Error-slice analysis; for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.
 
-### Exercise 13 — Artifact manifest
+### Exercise 13: Artifact manifest
 
 **Prompt:** Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.
 
@@ -360,9 +360,9 @@ untrusted sources. Provenance and access control remain required.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Artifact manifest — validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.
+**Verify:** Artifact manifest; validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.
 
-### Exercise 14 — Fresh-process acceptance
+### Exercise 14: Fresh-process acceptance
 
 **Prompt:** Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.
 
@@ -374,10 +374,10 @@ threshold behavior, and model/schema version.
 
 Reload parity catches missing custom classes, accidental preprocessing outside
 the pipeline, path assumptions, and serialization drift. Delete and rebuild
-the ignored test artifact to prove the workflow—not a stale file—creates it.
+the ignored test artifact to prove the workflow, not a stale file, creates it.
 
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Fresh-process acceptance — run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.
+**Verify:** Fresh-process acceptance; run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.

@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Repository guidance for agents · DS60 reference</title>
+  <title>Repository guidance for coding agents · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,193 +158,108 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Repository guidance for agents</h1>
+      <h1>Repository guidance for coding agents</h1>
       <p class="source-path">Generated from <code>AGENTS.md</code></p>
     </header>
-    <article class="document"><h2 id="repository-guidance-for-agents">Repository guidance for agents<a class="heading-anchor" href="#repository-guidance-for-agents" aria-label="Link to this section">#</a></h2>
-<h3 id="mission">Mission<a class="heading-anchor" href="#mission" aria-label="Link to this section">#</a></h3>
-<p>Maintain a beginner-friendly, offline-after-setup curriculum spanning data science, statistics, machine learning, languages and systems. The primary application is one Docker browser classroom at <code>/classroom</code> on Windows, macOS and Linux. Python, PostgreSQL, bridge, languages, systems and the tutorial books share its subject chooser and workspace. Accuracy and reproducibility matter more than preserving the historical “60-day” shape.</p>
-<h3 id="start-here">Start here<a class="heading-anchor" href="#start-here" aria-label="Link to this section">#</a></h3>
-<ol>
-<li>Run <code>git status --short --branch</code>; preserve unrelated work.</li>
-<li>Read <a href="README.md.html">README.md</a> and <code>curriculum/catalog.json</code>.</li>
-<li>Read the closest nested <code>AGENTS.md</code> for files under <code>python/</code>, <code>sql/</code>, or <code>bridge/</code>.</li>
-<li>Run commands from the repository root.</li>
-<li>Diagnose the selected route: Docker engine/Compose and the app profile readiness for the classroom; <code>python scripts/course.py doctor</code> only for an explicitly prepared native Python environment. Host Python is not a classroom prerequisite.</li>
-<li>Use parallel agents for independent work with clear file ownership. Keep image builds sequential and use grouped four-worker tests. Preserve human Git actions and unrelated workloads. Do not use em dashes in authored prose.</li>
-</ol>
-<h3 id="sources-of-truth">Sources of truth<a class="heading-anchor" href="#sources-of-truth" aria-label="Link to this section">#</a></h3>
+    <article class="document"><h2 id="repository-guidance-for-coding-agents">Repository guidance for coding agents<a class="heading-anchor" href="#repository-guidance-for-coding-agents" aria-label="Link to this section">#</a></h2>
+<h3 id="mission-and-scope">Mission and scope<a class="heading-anchor" href="#mission-and-scope" aria-label="Link to this section">#</a></h3>
+<p>Maintain a self-contained, beginner-friendly learning library and one local Docker classroom at <code>/classroom</code>. Teach programming, data science, statistics, machine learning and systems through accurate explanations and reproducible examples. Historical day numbers are stable labels, not a curriculum limit.</p>
+<p>Read <a href="README.md.html">README.md</a>, <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> and the closest nested <code>AGENTS.md</code> before editing. Run <code>git status --short --branch</code> and preserve unrelated changes. Work in the requested checkout. Do not stage, commit, push, create another checkout or publish images unless that is part of the request. Use parallel agents for independent work with explicit file ownership. Do not use em dashes in authored prose.</p>
+<h3 id="find-the-maintained-source">Find the maintained source<a class="heading-anchor" href="#find-the-maintained-source" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Concern</th>
+<th>Source</th>
+</tr></thead><tbody>
+<tr>
+<td>Learner setup and persistence</td>
+<td><code>classroom</code>, <code>scripts/classroom.sh</code>, <code>compose.classroom.yaml</code>, <code>docs/one-command-classroom.md</code></td>
+</tr>
+<tr>
+<td>Unified UI and subject directory</td>
+<td><code>src/ds60sqlpy/classroom.py</code>, <code>src/ds60sqlpy/assets/classroom.html</code>, <code>.css</code>, <code>.js</code></td>
+</tr>
+<tr>
+<td>Legacy Python, SQL and bridge identity</td>
+<td><code>catalog_builder.py</code>, lesson artifacts, <code>curriculum/extensions/</code>, generated <code>curriculum/catalog.json</code></td>
+</tr>
+<tr>
+<td>Module route and prerequisites</td>
+<td>Original five plans in <code>docs/expansion/plans/</code>; additive subjects in <code>courses/&lt;subject&gt;/track.json</code></td>
+</tr>
+<tr>
+<td>Authored module admission</td>
+<td><code>courses/&lt;subject&gt;/lessons.json</code>, <code>modules.py</code>, <code>module_extensions.py</code></td>
+</tr>
+<tr>
+<td>Statistics tutorial book</td>
+<td><code>courses/statistics-ml/manifest.json</code>, <code>coverage.json</code>, chapters and examples</td>
+</tr>
+<tr>
+<td>Saved work and execution</td>
+<td><code>lab.py</code>, <code>classroom_runs.py</code>, <code>module_service.py</code>, <code>module_jobs.py</code>, <code>worker_operations.py</code></td>
+</tr>
+<tr>
+<td>Static and live document rendering</td>
+<td><code>lesson_reader.py</code>, <code>reader_math.py</code>, <code>reader_content.py</code></td>
+</tr>
+<tr>
+<td>Read-only tutoring context</td>
+<td><code>mcp_server.py</code>, <code>coaching.py</code>, <code>study_plan.py</code></td>
+</tr>
+<tr>
+<td>Content rules and expansion</td>
+<td><code>docs/content-authoring.md</code>, <code>docs/implementation/ADDING_A_MODULE.md</code></td>
+</tr>
+<tr>
+<td>Architecture and current limits</td>
+<td><code>docs/implementation/CHECKPOINT.md</code></td>
+</tr>
+<tr>
+<td>Verification and CI</td>
+<td><code>docs/validation.md</code>, <code>.github/workflows/</code>, focused tests</td>
+</tr>
+</tbody></table></div>
+<p>Python module filenames in this table are beneath <code>src/ds60sqlpy/</code> unless a full path is given. Derive inventories from the loaders. Do not maintain a second lesson list in UI code or documentation that could be generated.</p>
+<p>Two repository skills are available:</p>
 <ul>
-<li>Lesson artifacts and <code>src/ds60sqlpy/catalog_builder.py</code>: inputs for lesson identity, ordering, prerequisites, dependency groups, network behavior, and artifact availability</li>
-<li><code>src/ds60sqlpy/catalog.py</code>: catalog loading and learner-facing ordering; named modules can use an explicit order override to appear at their prerequisite milestone without renumbering the historical day tracks</li>
-<li><code>curriculum/catalog.json</code>: checked-in generated index consumed by tools; regenerate it rather than editing it by hand</li>
-<li><code>curriculum/extensions/*.json</code> and <code>src/ds60sqlpy/curriculum_framework.py</code>: additive track, lesson, and goal registration plus explicit runner capabilities. Use <a href="docs/curriculum-extension-playbook.md.html">the extension playbook</a> before adding a language, operations topic, or reading-only track.</li>
-<li><code>README.md</code>: learner entry point</li>
-<li><code>docs/setup/</code>: operating-system setup</li>
-<li><code>docs/content-authoring.md</code>: lesson contract</li>
-<li><code>docs/curriculum-design-references.md</code>: source-backed teaching patterns and the rationale for the repository&#x27;s lesson sequence</li>
-<li><code>docs/validation.md</code>: verification policy</li>
-<li><code>curriculum/practice_baseline.json</code> and <code>scripts/audit_practice.py</code>: immutable pre-enrichment counts and the per-surface exercise-doubling gate</li>
-<li><code>scripts/audit_lesson_depth.py</code> and <code>docs/lesson-depth-report.md</code>: structural minimums for self-contained beginner explanations, runnable examples, exercise contracts, explanatory solutions, Python notebook depth, and per-lesson Codex prompts across all three tracks</li>
-<li><code>scripts/build_course_guide.py</code>: source for generated <code>START_HERE.html</code>; never hand-edit the HTML</li>
-<li><code>src/ds60sqlpy/lesson_reader.py</code> and <code>scripts/build_lesson_readers.py</code>: sources for generated <code>lesson-pages/&lt;lesson-id&gt;.html</code> and linked <code>reference-pages/&lt;source&gt;.html</code>; never hand-edit those readers</li>
-<li><code>src/ds60sqlpy/sql_notebook.py</code> and <code>scripts/build_sql_lesson_notebook.py</code>: catalog-restricted generator and runner for learner-local SQL notebooks under <code>.learning/sql/</code>; never check generated workspaces into Git</li>
-<li><code>classroom</code> and <code>scripts/classroom.sh</code>: shared build/start/health/browser entrypoint for macOS, Linux and Windows through WSL 2. It defaults to all ordinary profiles and automatic loopback host ports. Preserve explicit overrides and named data.</li>
-<li><code>START_DOCKER_CLASSROOM.cmd</code>, <code>START_DOCKER_CLASSROOM.command</code> and <code>compose.classroom.yaml</code>: primary Docker-only classroom and named-volume persistence. See <code>docs/docker-classroom.md</code>; compiler/framework profiles run inside images, and the thin launchers discover the actual published port.</li>
-<li><code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>: optional older Windows installation wizard, including consented prerequisite setup. Re-detect after a manual reboot; preserve existing engines and learner work.</li>
-<li><code>START_DS60.cmd</code> and <code>scripts/start_ds60.ps1</code>: optional Windows native entry point; keep it path-safe, PowerShell 5.1-compatible, and aligned with <code>scripts/bootstrap_windows.ps1</code></li>
-<li><code>src/ds60sqlpy/portal.py</code>: optional loopback launcher and shared <code>.learning/progress.json</code> boundary</li>
-<li><code>docs/curriculum-gap-backlog.md</code>: implemented gap record and maintenance rules</li>
-<li><code>.agents/skills/guide-ds60sqlpy-learning/</code>: Codex tutoring workflow</li>
-<li><code>bridge/README.md</code> and <code>bridge/AGENTS.md</code>: the integration track&#x27;s learning and engineering contracts</li>
-<li><code>python/professional/</code>, <code>sql/professional/</code>, and <code>bridge/professional/</code>: named modules that extend the stable Days 1–60 without renumbering them</li>
+<li>Guide learning for tutoring, placement, explanation and learner-directed progress.</li>
+<li>Add a learning path for adding or extending a subject, language or tutorial sequence.</li>
 </ul>
-<p>Do not hand-maintain a second lesson inventory when it can be derived from the generated catalog.</p>
-<h3 id="supported-baseline">Supported baseline<a class="heading-anchor" href="#supported-baseline" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Python 3.11-3.12; 3.12 is the canonical and recommended version</li>
-<li>PostgreSQL 16+; canonical automation uses PostgreSQL 17</li>
-<li>VS Code as the documented editor</li>
-<li>JupySQL with SQLAlchemy&#x27;s explicit Psycopg 3 dialect for the optional PostgreSQL-in-Jupyter lesson</li>
-<li>One connected bootstrap, then offline study</li>
-</ul>
-<p>Use <code>python -m pip</code>, repository-relative paths, and <code>pathlib</code>. Never add a developer-specific absolute path.</p>
-<h3 id="explicit-tutorial-book-exception">Explicit tutorial-book exception<a class="heading-anchor" href="#explicit-tutorial-book-exception" aria-label="Link to this section">#</a></h3>
-<p>The statistics/ML book is a tutorial, as explicitly requested by the user. Its <code>learning_mode: tutorial</code> content must include detailed theory, worked examples and answered interview discussions, with no exams, problem sets, prediction gate or withheld solutions. Its manual read marker is not mastery. Use the book&#x27;s coverage and executable-example tests instead of applying the practice exercise-count rules below. Ordinary programming and systems lessons retain their full practice contracts. New subjects use the module extension contract in <code>docs/implementation/ADDING_A_MODULE.md</code>; do not hardcode five subjects.</p>
-<h3 id="learner-experience">Learner experience<a class="heading-anchor" href="#learner-experience" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Assume no prior programming or database experience unless the learner says otherwise.</li>
-<li>Explain new terms before relying on them.</li>
-<li>Make the checked-in lesson sufficient on its own. Codex coaching is an optional practice aid, never a substitute for definitions, syntax anatomy, examples, expected observations, or troubleshooting in the lesson.</li>
-<li>Ask the learner to predict behavior and attempt exercises.</li>
-<li>Give progressive hints before opening or reproducing official solutions.</li>
-<li>Use the sequence <strong>guide → prediction → learner attempt → progressive hints → solution comparison</strong>. Opening a file or checking a box is not evidence of mastery.</li>
-<li>Treat every rendered lesson page as a readable, read-only preview. In the coding lab, use the lesson&#x27;s capability notice and saved pad/evidence route. Native editor/Jupyter and generated <code>.learning/sql/</code> working copies remain alternatives. A reading lesson needs written reasoning, not an invented run command or an automatic completion.</li>
-<li>Do not overwrite learner work.</li>
-<li>Keep solutions separate from learner artifacts.</li>
-<li>Do not silently skip failures or hide exceptions that teach an important concept.</li>
-</ul>
-<h3 id="cross-platform-and-offline-rules">Cross-platform and offline rules<a class="heading-anchor" href="#cross-platform-and-offline-rules" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Shared prose must include valid Windows PowerShell and POSIX variants when commands differ.</li>
-<li>Do not use Bash syntax in a PowerShell block.</li>
-<li>On Windows, use the interpreter printed by <code>bootstrap_windows.ps1</code> so activation policy is not a blocker. A standard environment uses <code>.\.venv\Scripts\python.exe</code>; the conda-prefix fallback uses <code>.\.venv\python.exe</code>. When the layout is not known, test those two paths in that order rather than assuming one.</li>
-<li>Windows startup must keep <code>-DiagnosticsOnly -NonInteractive</code> read-only and require explicit acknowledgement before a noninteractive connected setup. It may rediscover tools and change only its process-local <code>PATH</code>; never add credentials or an automatic database reset.</li>
-<li>PostgreSQL notebooks read only <code>DS60_DATABASE_URL</code>, pass an engine object to <code>%sql</code>, hide connection display, bind values, and tag live/non-Python magic cells for notebook-aware validation. Never put <code>%pip</code> or a password in a lesson notebook.</li>
-<li>Default lesson execution must work offline after setup.</li>
-<li>First-run Seaborn downloads are accepted but must be disclosed and cacheable.</li>
-<li>Pretrained model downloads and optional web resources must be explicit, tagged, and accompanied by a local fallback where practical.</li>
-<li>Never add an undocumented network dependency.</li>
-<li>A static <code>file://</code> page may render course content and offer a best-effort registered VS Code URL, but it cannot safely start local programs. Keep native actions in the authenticated private launcher and never regress to opening raw Markdown, notebooks, Python, or SQL as the browser lesson view.</li>
-<li>User-facing local Markdown and SQL links from the dashboard, lesson readers, and rendered references must resolve to generated HTML rather than raw browser source. In static mode, record completion on <code>START_HERE.html</code>; only authenticated loopback readers expose their own completion checkbox.</li>
-<li>Guided SQL notebooks must be derived from a stable catalog ID, write only beneath ignored <code>.learning/sql/</code>, preserve an existing learner notebook and SQL copy, run complete course scripts through fixed non-shell <code>psql -f</code> commands, reject line-start or inline changes to cataloged <code>psql</code> meta-commands, and require an explicit reset confirmation before preparing the disposable course schema.</li>
-<li>Every automated course SQL path, including doctor and <code>SqlRunner</code>, must validate the exact local disposable <code>advanced_sql_training</code> target, reject remote/multi-host and routing/service URL or environment overrides, and pass a password-bearing target through the child environment rather than the process argument list.</li>
-</ul>
-<h3 id="content-changes">Content changes<a class="heading-anchor" href="#content-changes" aria-label="Link to this section">#</a></h3>
-<p>For each lesson change:</p>
-<ol>
-<li>Confirm prerequisites and level.</li>
-<li>Keep guide, learner artifact, solution, catalog inputs, generated index, and navigation aligned. Named professional guides must spell out every direct catalog prerequisite with its exact backticked stable ID.</li>
-<li>Use deterministic examples unless randomness is the topic.</li>
-<li>Declare every direct dependency.</li>
-<li>Include a self-check or expected behavior.</li>
-<li>Update documentation when commands or behavior change.</li>
-<li>Meet the audited practice target on the learner, guide, and every explanatory-solution artifact: at least <code>max(6, 2 × baseline)</code>, using distinct prompts rather than relabeled answer steps.</li>
-<li>Regenerate both navigation layers after artifact or catalog changes: <code>START_HERE.html</code> and every affected <code>lesson-pages/&lt;lesson-id&gt;.html</code>.</li>
-<li>Meet <code>docs/content-authoring.md</code> and <code>scripts/audit_lesson_depth.py</code>: define the mental model, explain syntax or query anatomy, include at least two topic-specific runnable examples, label the expected result or verification for every numbered exercise, explain common mistakes, and end every guide with <code>## Ask Codex about this lesson</code>.</li>
-<li>Make that Codex prompt copy-ready and lesson-specific. It must name the stable lesson ID, exact guide and learner paths, the <code>guide-ds60sqlpy-learning</code> skill, the <code>solutions/</code> boundary, and the explain → predict → attempt → one hint → evidence → retrieval loop. The guide&#x27;s fenced prompt is the source used by both the lesson reader and <code>START_HERE.html</code>; do not maintain separate prompt prose in generated HTML.</li>
-<li>Make each <code>Expected</code>/<code>Verify</code> contract independently inspectable. It may not merely restate the exercise or apply a generic checklist unrelated to that exercise&#x27;s mechanism.</li>
-</ol>
-<p>Do not expand the curriculum merely to increase lesson count. Add content only when it closes a documented learning gap.</p>
-<p>For future tracks, keep these extension boundaries:</p>
-<ol>
-<li>Author content under <code>courses/&lt;track&gt;/</code> with a plan and a local <code>AGENTS.md</code>. Register it through an additive manifest; keep historical IDs, day values, and the immutable practice baseline intact.</li>
-<li>Separate a subject from its execution tool. Deep learning can use the Python runner; LLM theory can use <code>none</code>. C++, Scala/Spark, and Kubernetes descriptors do not by themselves implement execution.</li>
-<li>Add every new lesson to <code>curriculum/practice_expansion.json</code> with baseline zero and target six. The guide, learner, and every explanatory solution still need six distinct, inspectable exercises and the full depth contract.</li>
-<li>A <code>none</code> lesson requires a separate explanatory solution and worked reasoning with expected observations. Other runners require two solution artifacts, including an explanation. Do not generate filler to pass counts.</li>
-<li>Do not place shell text, image commands, cluster targets, or credentials in a manifest. Actual adapters belong in reviewed backend code and require bounded execution, truthful capability reporting, and failure/cleanup tests.</li>
-<li>Regenerate the catalog, dashboard, lesson readers, and reference pages. Prove search, prerequisite plans, the app, and MCP discover the new IDs in an isolated fixture before claiming a track is integrated.</li>
-</ol>
-<h3 id="validation">Validation<a class="heading-anchor" href="#validation" aria-label="Link to this section">#</a></h3>
-<p>Use the narrowest relevant check during iteration, then run:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/course.py doctor
-python scripts/course.py catalog
+<h3 id="teaching-and-authoring">Teaching and authoring<a class="heading-anchor" href="#teaching-and-authoring" aria-label="Link to this section">#</a></h3>
+<p>Keep lessons useful without an AI tutor. Define vocabulary before use, explain syntax and mechanisms, show at least two focused worked examples and their expected observations, diagnose common mistakes, and provide concrete next steps. Practice lessons progress from prediction to guided change, independent work, debugging and transfer. Keep learner artifacts, executable references and explanatory solutions separate. Give progressive hints before revealing answers, unless the learner explicitly requests the solution.</p>
+<p>The statistics/ML book has <code>learning_mode: tutorial</code>. It teaches theory, assumptions, worked code, use cases and answered interview discussion without exams, problem sets, prediction gates or hidden solutions. Its read marker is not a mastery assessment. Use coverage and numerical-example checks for this book, not practice exercise-count rules.</p>
+<p>Preserve stable lesson IDs, prerequisite graph, variant IDs and saved-state namespaces. The legacy practice baseline is immutable. New legacy catalog lessons use <code>curriculum/practice_expansion.json</code>; module subjects use their own content gates. Do not apply the legacy registry to every module or tutorial. Every practice guide has a lesson-specific <code>## Ask an AI tutor about this lesson</code> block; the source prompt must match its actual ID and artifact paths.</p>
+<p>Find an existing subject&#x27;s <code>authoring/README.md</code> before editing generated content. Edit the durable authoring source as well as its published artifact, then run only the relevant subject generator. <code>make generate</code> refreshes shared catalogs, reports and readers; it does not regenerate every subject&#x27;s prose. Never hand-edit <code>START_HERE.html</code>, <code>lesson-pages/</code> or <code>reference-pages/</code>.</p>
+<p>Use explicit <code>\(...\)</code> or <code>\[...\]</code> LaTeX for mathematics and tagged code fences. Keep literal program syntax in code. Rendering must preserve copied characters, escape source, and work without a CDN. After authoring generation, run the reviewed prose normalization before building HTML. A typography edit must not change executable reference behavior or manufacture new runtime evidence.</p>
+<h3 id="execution-and-learner-state">Execution and learner state<a class="heading-anchor" href="#execution-and-learner-state" aria-label="Link to this section">#</a></h3>
+<p>Docker with Linux containers and Compose is the primary learner route. Windows uses WSL 2; macOS and Linux use the same Bash launcher. No host language compiler is required for ordinary classroom profiles. Native tools are optional developer or compatibility routes. Supply OS-specific commands only when their syntax differs; never label Bash commands as PowerShell.</p>
+<p>The classroom executes trusted local learner code. It is not a hosted security sandbox for arbitrary users. Preserve exact Host, origin, token, request-size, output-size and filesystem checks. Native servers bind loopback; container ports publish to loopback. Manifests cannot supply shell commands, endpoints, compiler flags, cluster identities or host paths. Reviewed backend code owns runtime profiles and bounded execution.</p>
+<p>A profile name, installed compiler, successful parse and executed lesson are different evidence. Report the actual capability and never enable Run based only on metadata. Kubernetes needs an explicitly owned disposable target, no ambient kubeconfig, and bounded UID-aware cleanup. Model downloads and external services need deliberate setup; opening a lesson must not fetch them.</p>
+<p>Preserve learner pads, source history, notes, progress, saved runs and named Docker volumes. Save or retain recoverable drafts before changing context. Keep results scoped by lesson, language and SQL mode. Reading a past result must not replace current source or run it again. If execution succeeds but saving its receipt fails, return the actual result and a storage warning.</p>
+<p>SQL automation must validate the exact local disposable <code>advanced_sql_training</code> database, reject remote or routing overrides, pass credentials through a private child environment, and use <code>psql -X -v ON_ERROR_STOP=1</code>. Resetting <code>training</code> is destructive even in a teaching project. Never reset a shared database or erase learner state as a repair step. Preserve declared multi-lesson transaction and fixture contracts.</p>
+<p>The optional stdio MCP adapter has a read-only default and no code execution. Practice solutions require explicit reveal. Progress writes require the adapter&#x27;s opt-in and the learner&#x27;s instruction. Tutorial worked answers are available directly. Native portal actions remain a fixed catalog-derived allowlist; a static page cannot start arbitrary programs.</p>
+<h3 id="check-the-work">Check the work<a class="heading-anchor" href="#check-the-work" aria-label="Link to this section">#</a></h3>
+<p>Use focused checks while iterating, then the relevant integration gates in <a href="docs/validation.md.html">validation</a>. Typical commands from a prepared environment:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/check_modules.py
+python scripts/normalize_lesson_prose.py
+python scripts/check_content_rendering.py
 python scripts/course.py validate
 python scripts/audit_practice.py
 python scripts/audit_lesson_depth.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check
+python scripts/check_published_links.py
+node scripts/check_classroom_ui.mjs
+python -m pytest -n <span class="syntax-number">4</span> --dist loadgroup
 python scripts/scan_secrets.py --history
-python -m pytest tests/test_course_guide.py tests/test_lesson_depth_audit.py tests/test_lesson_reader.py tests/test_portal.py tests/test_sql_notebook.py tests/test_windows_startup.py</code></pre>
-<p>SQL commands must use:</p>
-<pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 ...</code></pre>
-<p>Definition of done:</p>
-<ul>
-<li>A regenerated catalog has no drift and its paths agree.</li>
-<li>Notebook and JSON structure is valid.</li>
-<li>SQL-magic notebooks receive structural validation offline and an explicitly reported live execution check against only the disposable course database.</li>
-<li>Relevant runnable examples execute.</li>
-<li>SQL is tested against a clean disposable database.</li>
-<li>Bridge modules pass fake-backed tests; optional live checks use only the disposable course database.</li>
-<li>Internal links resolve.</li>
-<li>Offline behavior is preserved.</li>
-<li>Windows and POSIX instructions remain valid.</li>
-<li>Generated artifacts, caches, credentials, and unrelated diffs are absent.</li>
-<li><code>docs/practice-coverage.md</code> and <code>docs/lesson-depth-report.md</code> match their generators, and all cataloged Python and SQL lessons pass both gates.</li>
-</ul>
-<p>Portal changes must retain both delivery modes. <code>START_HERE.html</code> remains self-contained and useful over <code>file://</code>; launcher mode binds only to <code>127.0.0.1</code>, authenticates mutations with an in-memory session token, permits no cross-origin writes, requires the exact Host on every request, serves only generated guide/lesson/reference HTML, and maps explicit clicks to a fixed VS Code/Jupyter action allowlist. Never add arbitrary shell text, arbitrary path launch, remote binding, CORS, or a credential to the portal. <code>--no-launches</code> must continue to provide file-backed progress without native process actions.</p>
-<p>If a heavy or external prerequisite prevents a check, report the exact unverified surface.</p>
-<h3 id="safety">Safety<a class="heading-anchor" href="#safety" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Treat <code>sql/postgres-60day/00_setup.sql</code> as a destructive reset of the disposable <code>training</code> schema.</li>
-<li>Never point course reset commands at a production or shared database.</li>
-<li>Do not commit secrets, <code>.env</code> files, model caches, notebook checkpoints, or learner-local progress.</li>
-<li>Treat ignored learner state as private, not disposable. Do not remove <code>.learning/progress.json</code>, <code>.learning/sql/</code>, <code>artifacts/</code>, or <code>mlruns/</code> without confirming what the learner wants to preserve.</li>
-<li>Avoid destructive Git commands and broad cleanup.</li>
-</ul>
-<h3 id="serena-and-repository-tools">Serena and repository tools<a class="heading-anchor" href="#serena-and-repository-tools" aria-label="Link to this section">#</a></h3>
-<p>Activate the Serena project and check onboarding when Serena is available. Use semantic tools for importable Python code, but remember:</p>
-<ul>
-<li>Notebooks are JSON documents; validate them with notebook-aware tools.</li>
-<li>SQL is not covered by the configured language servers; search with <code>rg</code> and prove behavior with PostgreSQL.</li>
-<li>Markdown/YAML indexing helps navigation but does not replace link or schema validation.</li>
-</ul>
-<p>Keep durable truth in checked-in artifacts, authoring metadata, docs, and the regenerated catalog - not only in generated Serena memories.</p>
-<h3 id="scope-boundaries">Scope boundaries<a class="heading-anchor" href="#scope-boundaries" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><code>python/AGENTS.md</code> governs Python, notebooks, companion guides, and Python solutions.</li>
-<li><code>sql/AGENTS.md</code> governs PostgreSQL scripts, guides, and SQL solutions.</li>
-<li><code>bridge/AGENTS.md</code> governs Python/PostgreSQL integration lessons and tests.</li>
-<li><a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a> contains the human contribution workflow.</li>
-</ul>
-<h3 id="expansion-implementation-checkpoint">Expansion implementation checkpoint<a class="heading-anchor" href="#expansion-implementation-checkpoint" aria-label="Link to this section">#</a></h3>
-<p>Read <a href="docs/implementation/CHECKPOINT.md.html">the implementation checkpoint</a> before continuing the expanded module and tutorial-book library. Read <a href="docs/implementation/ADDING_A_MODULE.md.html">the module authoring contract</a> when extending a subject or adding a language. Authored lesson files live in <code>courses/</code> and are loaded by <code>modules.py</code>; they do not silently replace the published catalog. <code>module_jobs.py</code> owns persisted jobs, <code>module_service.py</code> authenticated app actions, and the optional <code>module_worker.py</code> / <code>worker_operations.py</code> pair owns bounded private-worker execution. Every claimed runtime needs an actual Docker receipt. Preserve private runtime session files outside <code>.learning</code>, and never print their credentials. Keep image builds sequential under the measured disk budget. Do not start unrelated containers or change the engine configuration.</p>
-<h3 id="guided-application-and-codex-adapter">Guided application and Codex adapter<a class="heading-anchor" href="#guided-application-and-codex-adapter" aria-label="Link to this section">#</a></h3>
-<ul>
-<li>Read <a href="docs/expansion/README.md.html">the expansion design hub</a> before adding Kubernetes, TensorFlow, LLM, C++, or Scala/Spark content. Subject plans, pilot lessons, typed job boundaries, profile qualification, and publication gates live there.</li>
-<li>Planning JSON under <code>docs/expansion/plans/</code> is design-only. Validate it with <code>scripts/build_journey_preview.py --check</code>. Never copy it into active extensions or advertise runtime support until the lesson and profile pass the documented gates.</li>
-<li>The journey preview generator and templates are developer-only design archives. <code>/journey-preview</code>, <code>/learn</code> and <code>/journeys</code> are compatibility aliases for the same <code>/classroom</code> shell. Do not restore separate learner interfaces.</li>
-</ul>
-<ul>
-<li><code>scripts/learning_lab.py</code> and <code>src/ds60sqlpy/lab.py</code> are the explicit trusted-code coding application. The original portal retains its fixed action allowlist.</li>
-<li>The coding lab executes learner-submitted Python and SQL through bounded backend processes. Preserve exact Host, origin, token, request-size, output-size, and target-database checks. Do not describe this personal environment as a security sandbox for untrusted code.</li>
-<li>Only explicit container mode binds the coding app inside its container namespace; Compose publishes only loopback host ports. Native mode stays loopback-only.</li>
-<li><code>src/ds60sqlpy/coaching.py</code> and <code>study_plan.py</code> provide shared lesson/evidence and prerequisite planning for the app and MCP adapter.</li>
-<li>The MCP server uses the official optional SDK over stdio, exposes no code execution, and is read-only unless its progress-write flag is explicitly enabled. Official solutions require a separate explicit reveal.</li>
-<li><code>scripts/build_app.py</code> bundles only an allowlisted course payload. Never package learner pads, progress, credentials, Git history, caches, or a developer environment. Existing workspaces are preserved.</li>
-<li>New lessons use the separate <code>curriculum/practice_expansion.json</code>; the July historical baseline stays unchanged. Both structural and depth audits apply.</li>
-<li>Run the app, backend, and MCP tests after changes. A native build validates only its actual OS and architecture. Docker configuration or CI definitions do not prove that an image was built or started.</li>
-</ul>
-<h3 id="unified-presentation-and-saved-work">Unified presentation and saved work<a class="heading-anchor" href="#unified-presentation-and-saved-work" aria-label="Link to this section">#</a></h3>
-<ul>
-<li><code>src/ds60sqlpy/classroom.py</code> derives the combined subject directory from both canonical catalogs. Add metadata through the existing catalog or module contract; never maintain a second hand-written lesson list in the UI.</li>
-<li><code>assets/classroom.html</code>, <code>classroom.css</code> and <code>classroom.js</code> own the single learner interface. Subject themes, keyboard navigation, save barriers and language/mode-specific drafts must remain coherent. The two superseded UI templates are removed. Run <code>node scripts/check_classroom_ui.mjs</code> after changes.</li>
-<li><code>lesson_reader.py</code>, <code>reader_math.py</code> and <code>reader_content.py</code> provide shared offline math and syntax rendering for the app and static readers. Use explicit LaTeX delimiters and tagged code fences. Never reinterpret code as equations, enable raw active HTML, load a CDN, or edit executable examples to fix typography.</li>
-<li>Run <code>python scripts/normalize_lesson_prose.py --write</code> after subject authoring generators and before HTML generation. Its reviewed registries are durable inputs; ambiguous words require editorial review, never automatic splitting. <code>python scripts/check_content_rendering.py</code> rejects unsupported published math.</li>
-<li><code>ClassroomRunStore</code> retains immutable Python/SQL run receipts beneath the learning-state directory. It complements saved source versions and the module job store. A completed execution and a failed receipt write are distinct outcomes. Never replay code automatically to repair storage or reconnect.</li>
-<li>Preserve existing lesson IDs, old saved pads, coaching phases, module drafts, job receipts and all named Docker learning volumes. Code/result history is scoped by lesson, language and SQL mode. Viewing past results must not replace the current editor or claim automatic mastery.</li>
-<li><code>make classroom</code>, <code>classroom-build</code>, <code>classroom-start</code> and <code>classroom-stop</code> delegate to the shared <code>./classroom</code> entrypoint. Keep build, readiness and published-port logic in that single implementation.</li>
-</ul></article>
+python scripts/check_public_release.py
+git diff --check</code></pre>
+<p>Keep <code>--dist loadgroup</code> with parallel tests so shared PostgreSQL fixtures stay serialized. Bound worker count to available resources; keep Docker builds sequential on constrained machines. Do not suppress failures, relax assertions or replace expected behavior to obtain a green run.</p>
+<p>Report source validation, unit tests, live runtime execution, browser delivery, and target-platform CI separately. A local pass does not prove hosted CI or a different architecture. Record skipped or unavailable surfaces. Never describe a scan as proof that the repository is bug free. Keep machine-specific logs, image IDs, ports and temporary paths out of maintained onboarding documents.</p>
+<h3 id="publication-and-cleanup">Publication and cleanup<a class="heading-anchor" href="#publication-and-cleanup" aria-label="Link to this section">#</a></h3>
+<p>Portable payloads must exclude <code>.learning/</code>, runtime session credentials, <code>.classroom/</code>, model caches, environment files, local logs and Git history. Preserve public source licenses and required third-party notices. Use neutral examples without workplace identifiers or private infrastructure references.</p>
+<p>Before authorized commits, review the intended public Git identity without copying private identity values into reports. See the repository-local setup in <a href="CONTRIBUTING.md.html">CONTRIBUTING.md</a>. Source and ZIP sanitation do not rewrite existing author/committer metadata or Git history. Do not change global Git configuration, rewrite history or publish rewritten branches without a separate explicit instruction from the repository owner.</p>
+<p>Cleanup must be scoped to resources created for this project. Remove containers and images only when authorized, and inspect ownership first. Keep progress volumes unless their deletion is explicitly requested. Do not stop unrelated services, reconfigure an engine or run broad pruning as an incidental cleanup.</p></article>
   </main>
 </body>
 </html>

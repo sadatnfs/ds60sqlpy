@@ -227,9 +227,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>debugging tasks that expose likely misconceptions; and</li>
 <li>human review for alignment, because word, example, and exercise counts cannot prove that an assessment measures the intended skill.</li>
 </ul>
-<h4 id="official-codex-guidance-goal-context-boundaries-and-done">Official Codex guidance: goal, context, boundaries, and done<a class="heading-anchor" href="#official-codex-guidance-goal-context-boundaries-and-done" aria-label="Link to this section">#</a></h4>
-<p>The <a href="https://learn.chatgpt.com/docs/prompting">Codex prompting guide</a> recommends giving a clear goal, relevant context, desired output, and important boundaries. The <a href="https://learn.chatgpt.com/docs/agent-configuration/agents-md">Codex <code>AGENTS.md</code> guide</a> explains that repository and nested instruction files provide durable, scope-specific guidance. Repeated workflows belong in a skill rather than in an ever-longer one-off prompt.</p>
-<p>Every DS60 lesson therefore includes an optional <strong>Ask Codex about this lesson</strong> prompt that:</p>
+<h4 id="reusable-tutoring-context-and-boundaries">Reusable tutoring context and boundaries<a class="heading-anchor" href="#reusable-tutoring-context-and-boundaries" aria-label="Link to this section">#</a></h4>
+<p>A tutoring prompt should state the learner&#x27;s goal, the exact local lesson, what the learner has attempted, the kind of help requested and the boundaries around solutions and execution. Repository instruction files keep those rules close to the content. The checked-in tutoring skill makes the same learning sequence reusable across compatible AI coding assistants.</p>
+<p>Every DS60 lesson therefore includes an optional <strong>Ask an AI tutor about this lesson</strong> prompt that:</p>
 <ul>
 <li>identifies the stable lesson ID and exact guide and learner-artifact paths;</li>
 <li>invokes the checked-in <code>guide-ds60sqlpy-learning</code> tutoring skill;</li>
@@ -238,19 +238,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>requests explanation, prediction, learner evidence, progressive hints, and retrieval practice; and</li>
 <li>defines success as a runnable attempt plus an explanation in the learner&#x27;s own words.</li>
 </ul>
-<p>The prompt is a convenience, not missing curriculum. A learner must be able to complete the lesson without Codex or an internet connection.</p>
+<p>The prompt is a convenience, not missing curriculum. A learner must be able to complete the lesson without the AI tutor or an internet connection.</p>
 <h3 id="ds60-lesson-sequence">DS60 lesson sequence<a class="heading-anchor" href="#ds60-lesson-sequence" aria-label="Link to this section">#</a></h3>
 <p>Each Python and SQL lesson now follows this default sequence:</p>
 <ol>
-<li><strong>Orient</strong> — outcome, motivation, prerequisites, and run location.</li>
-<li><strong>Model</strong> — vocabulary, mental model, syntax or query anatomy.</li>
-<li><strong>Observe</strong> — first runnable example and expected output/result shape.</li>
-<li><strong>Contrast</strong> — second example, boundary, common mistake, or alternative.</li>
-<li><strong>Predict</strong> — state what will happen before execution.</li>
-<li><strong>Practice</strong> — guided change, independent construction, debugging, edge case, and transfer.</li>
-<li><strong>Verify</strong> — assertions, test cases, row-grain/count checks, or bounded expected output.</li>
-<li><strong>Explain</strong> — retrieval questions and a short learner explanation.</li>
-<li><strong>Extend</strong> — next lesson, optional reference, or Codex coaching prompt.</li>
+<li><strong>Orient</strong>: outcome, motivation, prerequisites, and run location.</li>
+<li><strong>Model</strong>: vocabulary, mental model, syntax or query anatomy.</li>
+<li><strong>Observe</strong>: first runnable example and expected output/result shape.</li>
+<li><strong>Contrast</strong>: second example, boundary, common mistake, or alternative.</li>
+<li><strong>Predict</strong>: state what will happen before execution.</li>
+<li><strong>Practice</strong>: guided change, independent construction, debugging, edge case, and transfer.</li>
+<li><strong>Verify</strong>: assertions, test cases, row-grain/count checks, or bounded expected output.</li>
+<li><strong>Explain</strong>: retrieval questions and a short learner explanation.</li>
+<li><strong>Extend</strong>: next lesson, optional reference, or AI coaching prompt.</li>
 </ol>
 <p>This sequence is enforced partly by <code>scripts/audit_lesson_depth.py</code>. The audit is deliberately only a floor. It cannot determine whether an analogy is accurate, an example is illuminating, or six exercises are genuinely distinct; human review and execution remain required.</p></article>
   </main>

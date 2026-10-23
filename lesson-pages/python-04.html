@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -525,8 +525,8 @@ valid_squares <span class="syntax-operator">=</span> <span class="syntax-punctua
 <li><a href="python-04.html#solution-1">Check the separate solution</a></li>
 <li><a href="python-05.html#guide">Next: Day 5 - Functions and type hints</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-04`
 (Day 4: Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-foundations-02`.
 I have completed the direct prerequisites: `python-foundations-02`. Emphasize iteration, eager collection building, and lazy generators.
@@ -802,7 +802,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-04-solutions-loops-comprehensions-and-generators">Day 04 — Solutions: Loops, Comprehensions, and Generators<a class="heading-anchor" href="#solution-1--day-04-solutions-loops-comprehensions-and-generators" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-04-solutions-loops-comprehensions-and-generators">Day 04: Solutions: Loops, Comprehensions, and Generators<a class="heading-anchor" href="#solution-1--day-04-solutions-loops-comprehensions-and-generators" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>iteration, eager collection building, and lazy generators</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>An iterable is a source that can provide values one at a time. A <code>for</code> loop asks for each next value, binds it to a loop name, and runs the indented body. Direct iteration communicates “use each value”; use <code>enumerate</code> when both position and value matter, and <code>range</code> when you truly need a sequence of integers.</p>
@@ -818,8 +818,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>iteration, eager collection building, and lazy generators</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Start with <code>numbers = [-3, -1, 0, 2, 5]</code>. Write an ordinary loop that appends the <strong>squares of strictly positive values</strong> to <code>positive_squares</code>, then write an equivalent list comprehension named <code>compact_squares</code>. <strong>Expected result:</strong> both are <code>[4, 25]</code>. <strong>Constraints:</strong> do not mutate <code>numbers</code>, and keep the filter (<code>&gt; 0</code>) distinct from the transformation (<code>value ** 2</code>). <strong>Verify:</strong> assert the two results are equal and the input is unchanged.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Start with <code>numbers = [-3, -1, 0, 2, 5]</code>. Write an ordinary loop that appends the squares of strictly positive values to <code>positive_squares</code>, then write an equivalent list comprehension named <code>compact_squares</code>. Expected result: both are <code>[4, 25]</code>. Constraints: do not mutate <code>numbers</code>, and keep the filter (<code>&gt; 0</code>) distinct from the transformation (<code>value ** 2</code>). Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the two results are equal and the input is unchanged. That connects the answer to iteration, eager collection building, and lazy generators.</p>
 <pre class="highlighted-code"><code class="language-python">numbers <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
@@ -833,7 +833,7 @@ compact_squares <span class="syntax-operator">=</span> <span class="syntax-punct
 <span class="syntax-keyword">assert</span> numbers <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span></code></pre>
 <p>The output expression, source, and filter map directly from the loop to the comprehension.</p>
 <p><strong>Verification evidence:</strong> assert the two results are equal and the input is unchanged.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Implement <code>evens_through(limit)</code> as a generator that yields even integers from <code>0</code> through <code>limit</code> <strong>inclusive</strong>. <strong>Inputs to verify:</strong> <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>. <strong>Expected results:</strong> <code>[]</code>, <code>[0]</code>, <code>[0]</code>, <code>[0, 2]</code>, and <code>[0, 2, 4, 6]</code>. <strong>Constraints:</strong> use <code>yield</code>, return no stored list, and document the inclusive endpoint. <strong>Verify:</strong> Assert the exact five expected lists for limits <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>; also confirm <code>inspect.isgenerator(evens_through(2))</code> is true.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implement <code>evens_through(limit)</code> as a generator that yields even integers from <code>0</code> through <code>limit</code> inclusive. Inputs to verify: <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>. Expected results: <code>[]</code>, <code>[0]</code>, <code>[0]</code>, <code>[0, 2]</code>, and <code>[0, 2, 4, 6]</code>. Constraints: use <code>yield</code>, return no stored list, and document the inclusive endpoint. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert the exact five expected lists for limits <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>; also confirm <code>inspect.isgenerator(evens_through(2))</code> is true. That connects the answer to iteration, eager collection building, and lazy generators.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterator
@@ -857,7 +857,7 @@ expected <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> inspect<span class="syntax-operator">.</span>isgenerator<span class="syntax-punctuation">(</span>evens_through<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><code>range(0, limit + 1, 2)</code> makes the inclusive endpoint explicit. When <code>limit</code> is negative, the range is empty, so the generator yields nothing instead of raising an unrelated error.</p>
 <p><strong>Verification evidence:</strong> Assert the exact five expected lists for limits <code>-1</code>, <code>0</code>, <code>1</code>, <code>2</code>, and <code>7</code>; also confirm <code>inspect.isgenerator(evens_through(2))</code> is true.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> For <code>items = [&#x27;red&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;]</code>, build a frequency mapping whose expected value is <code>{&#x27;red&#x27;: 3, &#x27;blue&#x27;: 2, &#x27;green&#x27;: 1}</code>. <strong>First:</strong> implement an explicit one-pass loop with <code>dict.get</code>. <strong>Then:</strong> compare it with <code>collections.Counter</code>. <strong>Constraint:</strong> do not repeatedly call <code>items.count</code> in production code. <strong>Verify:</strong> assert both mappings agree and explain their time-cost difference.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: For <code>items = [&#x27;red&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;, &#x27;green&#x27;, &#x27;blue&#x27;, &#x27;red&#x27;]</code>, build a frequency mapping whose expected value is <code>{&#x27;red&#x27;: 3, &#x27;blue&#x27;: 2, &#x27;green&#x27;: 1}</code>. First: implement an explicit one-pass loop with <code>dict.get</code>. Then: compare it with <code>collections.Counter</code>. Constraint: do not repeatedly call <code>items.count</code> in production code. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert both mappings agree and explain their time-cost difference. That connects the answer to iteration, eager collection building, and lazy generators.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections <span class="syntax-keyword">import</span> Counter
@@ -872,30 +872,30 @@ expected <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> frequencies <span class="syntax-operator">==</span> counter_frequencies <span class="syntax-operator">==</span> expected</code></pre>
 <p>The explicit loop and <code>Counter</code> are both one-pass approaches; repeated <code>items.count(item)</code> would rescan the list for each distinct value.</p>
 <p><strong>Verification evidence:</strong> assert both mappings agree and explain their time-cost difference.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Create a generator expression, consume one item with <code>next</code>, then convert the rest to a list. Predict what remains and why. <strong>Progressive hint:</strong> Iterators remember their current position and are usually one-shot. <strong>Verify:</strong> Assert the first consumed square is <code>0</code>, the remaining list is <code>[1, 4, 9]</code>, and a third pass is empty; explain the saved iterator position.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Create a generator expression, consume one item with <code>next</code>, then convert the rest to a list. Predict what remains and why. Progressive hint: Iterators remember their current position and are usually one-shot. Then compare the prediction with this proof target: Assert the first consumed square is <code>0</code>, the remaining list is <code>[1, 4, 9]</code>, and a third pass is empty; explain the saved iterator position. This makes iteration, eager collection building, and lazy generators observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the first consumed square is <code>0</code>, the remaining list is <code>[1, 4, 9]</code>, and a third pass is empty; explain the saved iterator position.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>[n * 10 for n in range(6) if n % 2]</code> one input at a time. <strong>Progressive hint:</strong> Evaluate the filter before the output expression. <strong>Verify:</strong> Build a six-row trace for inputs <code>0..5</code> containing filter result and optional output; confirm the final list is <code>[10, 30, 50]</code>.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>[n * 10 for n in range(6) if n % 2]</code> one input at a time. Progressive hint: Evaluate the filter before the output expression. Record the named value, shape, label, or iterator position needed to establish: Build a six-row trace for inputs <code>0..5</code> containing filter result and optional output; confirm the final list is <code>[10, 30, 50]</code>. The trace exposes iteration, eager collection building, and lazy generators directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Build a six-row trace for inputs <code>0..5</code> containing filter result and optional output; confirm the final list is <code>[10, 30, 50]</code>.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>batched(items, size)</code> yielding lists of at most <code>size</code>, including a final partial batch. <strong>Progressive hint:</strong> Accumulate, yield when full, then handle leftovers after the loop. <strong>Verify:</strong> Assert <code>list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]</code>, empty input yields no batches, and size <code>0</code> raises.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>batched(items, size)</code> yielding lists of at most <code>size</code>, including a final partial batch. Progressive hint: Accumulate, yield when full, then handle leftovers after the loop. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert <code>list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]</code>, empty input yields no batches, and size <code>0</code> raises. That connects the answer to iteration, eager collection building, and lazy generators.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert <code>list(batched(range(5), 2)) == [[0, 1], [2, 3], [4]]</code>, empty input yields no batches, and size <code>0</code> raises.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Explain and repair a loop that removes negative values from the same list it is iterating over. <strong>Progressive hint:</strong> Build a new list or iterate over a copy. <strong>Verify:</strong> Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Explain and repair a loop that removes negative values from the same list it is iterating over. Progressive hint: Build a new list or iterate over a copy. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly. The diagnosis depends on iteration, eager collection building, and lazy generators.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Keep the original failing list as evidence, then assert the repaired result removes every negative without skipping adjacent negatives or mutating the source unexpectedly.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Define whether an even-number generator &#x27;up to N&#x27; includes N and test N values -1, 0, 1, 2, and 3. <strong>Progressive hint:</strong> Boundary examples turn ambiguous English into a contract. <strong>Verify:</strong> Assert exact output for <code>N</code> values <code>-1, 0, 1, 2, 3</code>; identify which tests prove the endpoint is inclusive and how negative input behaves.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Define whether an even-number generator &#x27;up to N&#x27; includes N and test N values -1, 0, 1, 2, and 3. Progressive hint: Boundary examples turn ambiguous English into a contract. Values below, at, and above the named boundary must produce the evidence Assert exact output for <code>N</code> values <code>-1, 0, 1, 2, 3</code>; identify which tests prove the endpoint is inclusive and how negative input behaves. Those cases show how iteration, eager collection building, and lazy generators behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert exact output for <code>N</code> values <code>-1, 0, 1, 2, 3</code>; identify which tests prove the endpoint is inclusive and how negative input behaves.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Trace iteration boundaries and laziness. Prefer a clear loop when a comprehension would hide state changes or several decisions.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-4-5-iteration-traces">Shared implementation for Exercises 4–5 — Iteration traces<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-iteration-traces" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-iteration-traces">Shared implementation for Exercises 4–5: Iteration traces<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-iteration-traces" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">stream <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>n <span class="syntax-operator">*</span> n <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 first <span class="syntax-operator">=</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>stream<span class="syntax-punctuation">)</span>        <span class="syntax-comment"># Consumes 0 ** 2.</span>
 remaining <span class="syntax-operator">=</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>stream<span class="syntax-punctuation">)</span>    <span class="syntax-comment"># Continues at 1; it does not restart.</span>
@@ -904,7 +904,7 @@ remaining <span class="syntax-operator">=</span> <span class="syntax-builtin">li
 
 <span class="syntax-comment"># The filter runs first. Only odd n values reach n * 10.</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>n <span class="syntax-operator">*</span> <span class="syntax-number">10</span> <span class="syntax-keyword">for</span> n <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">6</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> n <span class="syntax-operator">%</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50</span><span class="syntax-punctuation">]</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-6-8-batches-safe-filtering-and-explicit-endpoints">Shared implementation for Exercises 6–8 — Batches, safe filtering, and explicit endpoints<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-batches-safe-filtering-and-explicit-endpoints" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-batches-safe-filtering-and-explicit-endpoints">Shared implementation for Exercises 6–8: Batches, safe filtering, and explicit endpoints<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-batches-safe-filtering-and-explicit-endpoints" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Iterable<span class="syntax-punctuation">,</span> Iterator
 <span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> TypeVar
 
@@ -1092,16 +1092,16 @@ non_negative <span class="syntax-operator">=</span> <span class="syntax-punctuat
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-04`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-04`
 (Day 4: Loops, Comprehensions, and Generators). Direct catalog prerequisites: `python-foundations-02`.
 I have completed the direct prerequisites: `python-foundations-02`. Emphasize iteration, eager collection building, and lazy generators.
 Read `python/ds-60day/companion-guides/day04_loops_comprehensions_generators.md` and use the learner notebook
@@ -1116,7 +1116,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1227,18 +1227,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

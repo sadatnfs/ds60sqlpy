@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,12 +429,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-found-02-versioned-schema-migrations-and-safe-evolution">SQL-FOUND-02 — Versioned Schema Migrations and Safe Evolution<a class="heading-anchor" href="#guide--sql-found-02-versioned-schema-migrations-and-safe-evolution" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-found-02-versioned-schema-migrations-and-safe-evolution">SQL-FOUND-02: Versioned Schema Migrations and Safe Evolution<a class="heading-anchor" href="#guide--sql-found-02-versioned-schema-migrations-and-safe-evolution" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Intermediate</li>
-<li><strong>Catalog prerequisites:</strong> <code>sql-found-01</code> — <a href="sql-found-01.html#guide">SQL-FOUND-01 — relational design</a>; <code>sql-39</code> — <a href="sql-39.html#guide">SQL Day 39 — locks and deadlocks</a></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01 — relational design</a>, the transaction/locking sequence through SQL Day 39, constraints, and permission to create/drop an isolated schema in <code>advanced_sql_training</code>.</li>
+<li><strong>Catalog prerequisites:</strong> <code>sql-found-01</code>; <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>; <code>sql-39</code>; <a href="sql-39.html#guide">SQL Day 39; locks and deadlocks</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-01.html#guide">SQL-FOUND-01; relational design</a>, the transaction/locking sequence through SQL Day 39, constraints, and permission to create/drop an isolated schema in <code>advanced_sql_training</code>.</li>
 <li><strong>Artifacts:</strong> <a href="sql-found-02.html#learner">learner SQL</a> · <a href="../reference-pages/sql/professional/fixtures/migrations/README.md.html">fixture migrations</a> · <a href="sql-found-02.html#solution-1">solution reasoning</a> · <a href="sql-found-02.html#solution-2">executable solution</a></li>
 </ul>
 <p>Run from the repository root in Windows PowerShell, macOS, or Linux:</p>
@@ -451,7 +451,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-FOUND-02 — Versioned Schema Migrations and Safe Evolution</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-FOUND-02; Versioned Schema Migrations and Safe Evolution</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-found-02/lesson/workspace/sql/professional/lessons/sql_found_02_versioned_migrations.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -463,7 +463,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_found_02_versioned_migrations.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand–migrate–contract. Its worked SQL reads or creates <code>pro_migration_lab.schema_migrations</code>, <code>pro_migration_lab.service_requests</code>, <code>pro_migration_lab.service_requests_api</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -537,7 +537,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Runner boundaries:</strong> identify nontransactional operations and explain why lossy changes do not have universal “down” migrations. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 4, build an inspectable decision matrix for <code>CREATE DATABASE</code>, <code>VACUUM</code>, <code>CREATE INDEX CONCURRENTLY</code>, and a lossy data change; do not pretend those operations ran inside the disposable lesson. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 4, expected output: four rows ordered by <code>step_number</code> with columns <code>operation</code>, <code>transaction_requirement</code>, <code>reason</code>, and <code>recovery_policy</code>. <strong>Verify:</strong> For sql-found-02 Exercise 4, cross-check each PostgreSQL transaction restriction in a disposable environment, distinguish retry/forward-fix from destructive rollback, and require backup plus reconciliation evidence before any recovery from a lossy change.</li>
 <li><strong>Interrupted retry:</strong> make version 6 recoverable after an uncertain client disconnect, while detecting rather than concealing incompatible drift. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 5, independently test the version-006 manifest identity and the observed <code>assigned_team</code> schema contract, returning two labeled booleans in one row. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 5, expected output: exactly one row with <code>manifest_matches</code> and <code>schema_matches</code>; only <code>(true, true)</code> is the already-applied state, <code>(false, false)</code> is eligible to apply, and either mixed state must stop. <strong>Verify:</strong> For sql-found-02 Exercise 5, probe all four manifest/schema truth combinations, verify name and content identity as well as column type/nullability/default, serialize deployers, and prove incompatible same-named state fails instead of being hidden by <code>IF NOT EXISTS</code>.</li>
 <li><strong>Low-lock rollout:</strong> mark boundaries and evidence for concurrent index creation and <code>NOT VALID</code>/<code>VALIDATE CONSTRAINT</code>. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 6, return an eight-step low-lock rollout plan for concurrent index creation and <code>CHECK ... NOT VALID</code>/remediation/<code>VALIDATE CONSTRAINT</code>, with explicit transaction boundaries, evidence, and abort conditions. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 6, expected output: eight rows ordered by <code>step_number</code> with <code>rollout_step</code>, <code>transaction_boundary</code>, <code>required_evidence</code>, and <code>abort_condition</code>; the SQL templates remain deliberately unexecuted. <strong>Verify:</strong> For sql-found-02 Exercise 6, require pre/post catalog checks for index readiness/validity and constraint validation, bounded lock/lag/WAL/disk thresholds, restartable backfill reconciliation, and an explicit policy for a known invalid index artifact.</li>
-<li><strong>Drift report:</strong> compare expected and observed columns, constraints, and indexes; label missing, unexpected, and changed objects deterministically. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all <code>service_requests</code> columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and <code>drift_status</code> equal to <code>matches</code>, <code>missing</code>, <code>unexpected</code>, or <code>changed</code>. <strong>Verify:</strong> For sql-found-02 Exercise 7, prove the clean fixture reports only <code>matches</code>; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.</li>
+<li><strong>Drift report:</strong> compare expected and observed columns, constraints, and indexes; label missing, unexpected, and changed objects deterministically. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all <code>service_requests</code> columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and <code>drift_status</code> equal to <code>matches</code>, <code>missing</code>, <code>unexpected</code>, or <code>changed</code>. <strong>Verify:</strong> For sql-found-02 Exercise 7, prove the clean fixture reports only <code>matches</code>; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.</li>
 <li><strong>Failed deployment:</strong> write phase-specific compatibility, pause, restore, reconciliation, and decision evidence for recovery. <strong>Inputs/evidence:</strong> For sql-found-02 Exercise 8, model expand, backfill, and contract recovery as an ordered inline matrix with compatible versions, write state, reversible action, required evidence, and primary action. <strong>Expected result/shape:</strong> For sql-found-02 Exercise 8, expected output: exactly three rows ordered by numeric <code>step_number</code> from expand through contract, retaining every recovery field rather than sorting phases lexically. <strong>Verify:</strong> For sql-found-02 Exercise 8, walk one failure injected at each phase, prove promotion stops when its evidence is absent, and record that schema reversal cannot reconstruct discarded values or undo externally observed writes.</li>
 </ol>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -562,9 +562,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Arbitrary migrations are not safely reversible merely because a <code>down</code> filename exists.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue directly to <a href="sql-40.html#guide">SQL-40 — advanced analytic functions</a>. The later professional modules then add security, migration regression tests, routine deployment, operational rehearsal, and application-coordinated release evidence.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<p>Continue directly to <a href="sql-40.html#guide">SQL-40; advanced analytic functions</a>. The later professional modules then add security, migration regression tests, routine deployment, operational rehearsal, and application-coordinated release evidence.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-found-02 — Versioned Schema Migrations and Safe Evolution.
 
 I have completed the direct catalog prerequisites: `sql-found-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -753,7 +753,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
 <span class="source-line"><span class="syntax-comment">--    Distinguish missing, unexpected, and changed objects deterministically.</span></span>
 <span class="source-line"><span class="syntax-comment">--</span></span>
 <span class="source-line"><span class="syntax-comment">--    Inputs: For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all `service_requests` columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details.</span></span>
-<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.</span></span>
+<span class="source-line"><span class="syntax-comment">--    Expected result/shape: For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Verify: For sql-found-02 Exercise 7, prove the clean fixture reports only `matches`; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.</span></span>
 <span class="source-line"><span class="syntax-comment">--    Hint ladder, rung 1: For sql-found-02 Exercise 7, run `observed` one at a time. Record each CTE&#x27;s row count and `column_name` uniqueness before the next stage uses it.</span></span>
 <span class="source-line"><span class="syntax-comment">-- 8. Draft a failed-deployment recovery plan for each expand/contract phase.</span></span>
@@ -800,7 +800,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-found-02-solutions-versioned-migrations">SQL-FOUND-02 Solutions — Versioned Migrations<a class="heading-anchor" href="#solution-1--sql-found-02-solutions-versioned-migrations" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-found-02-solutions-versioned-migrations">SQL-FOUND-02 Solutions: Versioned Migrations<a class="heading-anchor" href="#solution-1--sql-found-02-solutions-versioned-migrations" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -823,7 +823,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run the complete solution from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql</code></pre>
 <p>It resets the isolated fixture, verifies versions 1–5, implements exercise versions 6–8, checks them, and removes <code>pro_migration_lab</code>.</p>
-<h4 id="solution-1--exercise-1-deterministic-manifest">Exercise 1 — Deterministic manifest<a class="heading-anchor" href="#solution-1--exercise-1-deterministic-manifest" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-deterministic-manifest">Exercise 1: Deterministic manifest<a class="heading-anchor" href="#solution-1--exercise-1-deterministic-manifest" aria-label="Link to this section">#</a></h4>
 <p>The manifest must order by version explicitly:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SELECT</span>
     sm<span class="syntax-punctuation">.</span>migration_id<span class="syntax-punctuation">,</span>
@@ -840,7 +840,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 1, expected output: exactly five rows at one-row-per-migration grain, columns <code>migration_id</code>, <code>migration_name</code>, and <code>content_tag</code>, ordered by <code>migration_id</code>; the independent invariant is the exact array <code>[1, 2, 3, 4, 5]</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 1, assert the exact ordered ID array, count five distinct IDs, compare each name/tag with the reviewed fixture manifest, and prove that a missing, duplicate, reordered, or altered identity fails rather than being silently accepted.</li>
 </ul>
-<h4 id="solution-1--exercise-2-compatibility-and-deployment-order">Exercise 2 — Compatibility and deployment order<a class="heading-anchor" href="#solution-1--exercise-2-compatibility-and-deployment-order" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-compatibility-and-deployment-order">Exercise 2: Compatibility and deployment order<a class="heading-anchor" href="#solution-1--exercise-2-compatibility-and-deployment-order" aria-label="Link to this section">#</a></h4>
 <p>At version 2, old storage remains in <code>urgency_label</code>, the new <code>priority_code</code> is nullable, and the view returns <code>COALESCE(priority_code, urgency_label)</code>. Existing rows therefore retain a priority before backfill, while new application code can begin writing the new column.</p>
 <p>A safe high-level order is:</p>
 <ol>
@@ -857,7 +857,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 2, expected output: three request rows showing NULL <code>expanded_storage</code> but unchanged <code>stable_api_value</code>, followed by five ordered rollout rows with <code>step_number</code>, compatibility, write policy, and promotion gate.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 2, assert every stable API value equals <code>COALESCE(expanded_storage, legacy_storage)</code>, the API keeps its five-column interface, and the contract step is gated on zero old-writer traffic plus a complete backfill.</li>
 </ul>
-<h4 id="solution-1--exercise-3-versions-6-8">Exercise 3 — Versions 6–8<a class="heading-anchor" href="#solution-1--exercise-3-versions-6-8" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-versions-6-8">Exercise 3: Versions 6–8<a class="heading-anchor" href="#solution-1--exercise-3-versions-6-8" aria-label="Link to this section">#</a></h4>
 <p>The solution uses three separate transactions:</p>
 <ul>
 <li>Version 6 adds nullable <code>assigned_team</code>.</li>
@@ -872,7 +872,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 3, expected output: command tags for migrations 6–8; one row per request with <code>assigned_team</code>; three manifest rows; one column-catalog row proving text, NOT NULL, and <code>&#x27;general&#x27;</code> default; and one validated CHECK definition.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 3, assert manifest IDs are exactly <code>[1..8]</code>, every high/critical request is <code>response</code>, every other request is <code>general</code>, no NULL or disallowed value remains, the stable API projection is unchanged, and the catalog matches the promised contract.</li>
 </ul>
-<h4 id="solution-1--exercise-4-boundaries-and-recovery">Exercise 4 — Boundaries and recovery<a class="heading-anchor" href="#solution-1--exercise-4-boundaries-and-recovery" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-boundaries-and-recovery">Exercise 4: Boundaries and recovery<a class="heading-anchor" href="#solution-1--exercise-4-boundaries-and-recovery" aria-label="Link to this section">#</a></h4>
 <p>Examples that require an explicit nontransactional boundary include:</p>
 <ul>
 <li><code>CREATE DATABASE</code></li>
@@ -887,7 +887,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 4, expected output: four rows ordered by <code>step_number</code> with columns <code>operation</code>, <code>transaction_requirement</code>, <code>reason</code>, and <code>recovery_policy</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 4, cross-check each PostgreSQL transaction restriction in a disposable environment, distinguish retry/forward-fix from destructive rollback, and require backup plus reconciliation evidence before any recovery from a lossy change.</li>
 </ul>
-<h4 id="solution-1--exercise-5-retry-after-uncertain-completion">Exercise 5 — Retry after uncertain completion<a class="heading-anchor" href="#solution-1--exercise-5-retry-after-uncertain-completion" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-retry-after-uncertain-completion">Exercise 5: Retry after uncertain completion<a class="heading-anchor" href="#solution-1--exercise-5-retry-after-uncertain-completion" aria-label="Link to this section">#</a></h4>
 <p>Serialize the runner, begin a transaction, lock/read the manifest row, and compare both recorded checksum and observed schema precondition. If neither version nor column exists, apply DDL, verify its exact properties, then insert metadata and commit. If both match, report “already applied.” If only one exists or properties differ, stop for investigation.</p>
 <p><code>IF NOT EXISTS</code> is not a drift detector: it accepts any same-named object even when its type, default, nullability, or ownership is wrong. Idempotency means repeating the operation reaches the same verified state, not suppressing every error.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -896,7 +896,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 5, expected output: exactly one row with <code>manifest_matches</code> and <code>schema_matches</code>; only <code>(true, true)</code> is the already-applied state, <code>(false, false)</code> is eligible to apply, and either mixed state must stop.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 5, probe all four manifest/schema truth combinations, verify name and content identity as well as column type/nullability/default, serialize deployers, and prove incompatible same-named state fails instead of being hidden by <code>IF NOT EXISTS</code>.</li>
 </ul>
-<h4 id="solution-1--exercise-6-low-lock-index-and-constraint-rollout">Exercise 6 — Low-lock index and constraint rollout<a class="heading-anchor" href="#solution-1--exercise-6-low-lock-index-and-constraint-rollout" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-low-lock-index-and-constraint-rollout">Exercise 6: Low-lock index and constraint rollout<a class="heading-anchor" href="#solution-1--exercise-6-low-lock-index-and-constraint-rollout" aria-label="Link to this section">#</a></h4>
 <p><code>CREATE INDEX CONCURRENTLY</code> must run outside a transaction block and can leave an invalid index after interruption. Record progress, validity, locks, lag, and disk before retrying or explicitly dropping only the known invalid artifact. Attach it as a constraint in a later reviewed transaction when appropriate.</p>
 <p>Add a CHECK as <code>NOT VALID</code> in a short transaction, observe that new writes are still checked, remediate existing violations in batches, then run <code>VALIDATE CONSTRAINT</code> separately. “Lower lock” is not “no impact”; define timeouts, abort thresholds, and postcondition queries.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -905,16 +905,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 6, expected output: eight rows ordered by <code>step_number</code> with <code>rollout_step</code>, <code>transaction_boundary</code>, <code>required_evidence</code>, and <code>abort_condition</code>; the SQL templates remain deliberately unexecuted.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 6, require pre/post catalog checks for index readiness/validity and constraint validation, bounded lock/lag/WAL/disk thresholds, restartable backfill reconciliation, and an explicit policy for a known invalid index artifact.</li>
 </ul>
-<h4 id="solution-1--exercise-7-semantic-drift-report">Exercise 7 — Semantic drift report<a class="heading-anchor" href="#solution-1--exercise-7-semantic-drift-report" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-semantic-drift-report">Exercise 7: Semantic drift report<a class="heading-anchor" href="#solution-1--exercise-7-semantic-drift-report" aria-label="Link to this section">#</a></h4>
 <p>Build expected rows with stable identities such as <code>(schema, table, column, ordinal)</code> and compare them to catalog-derived observed rows using full joins or <code>EXCEPT</code> in both directions. Canonicalize types with <code>format_type</code>, expressions with <code>pg_get_expr</code>, constraints with catalog keys and definitions, and indexes with semantic columns/predicate/operator classes.</p>
 <p>Emit <code>missing</code>, <code>unexpected</code>, and <code>changed</code> rows in a deterministic order. Do not hash OIDs, physical file locations, statistics, or generated names into the contract unless they are deliberately contractual.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all <code>service_requests</code> columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details.</li>
-<li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and <code>drift_status</code> equal to <code>matches</code>, <code>missing</code>, <code>unexpected</code>, or <code>changed</code>.</li>
+<li><strong>Expected result/shape:</strong> For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and <code>drift_status</code> equal to <code>matches</code>, <code>missing</code>, <code>unexpected</code>, or <code>changed</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-02 Exercise 7, prove the clean fixture reports only <code>matches</code>; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.</li>
 </ul>
-<h4 id="solution-1--exercise-8-phase-specific-recovery">Exercise 8 — Phase-specific recovery<a class="heading-anchor" href="#solution-1--exercise-8-phase-specific-recovery" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-phase-specific-recovery">Exercise 8: Phase-specific recovery<a class="heading-anchor" href="#solution-1--exercise-8-phase-specific-recovery" aria-label="Link to this section">#</a></h4>
 <p>During expand, old code should still work; recovery may be a forward fix while the additive object remains. During dual-write/backfill, pause or fence writers before choosing a source of truth and reconcile every key. During contract, old writers must already be absent; re-enabling them can corrupt the new rule.</p>
 <p>Record compatible application versions, traffic state, lock/lag/error evidence, backup restore point, lossy transformations, and decision owner at each gate. A schema rollback is unsafe once new-only writes or external side effects have occurred unless their data path is explicitly reversible and verified.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1445,16 +1445,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-found-02 — Versioned Schema Migrations and Safe Evolution.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-found-02 — Versioned Schema Migrations and Safe Evolution.
 
 I have completed the direct catalog prerequisites: `sql-found-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_found_02_versioned_migrations.md
@@ -1481,7 +1481,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1592,18 +1592,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

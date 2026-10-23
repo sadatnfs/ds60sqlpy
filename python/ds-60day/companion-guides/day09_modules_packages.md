@@ -291,9 +291,9 @@ does not run a CLI, and module execution uses the intended entry point.
 - [Check the separate solution](../solutions/day09_modules_packages/day09_solutions.md)
 - [Next: Day 10 - Testing with pytest](day10_testing_pytest.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

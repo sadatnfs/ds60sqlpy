@@ -14,7 +14,7 @@ DS60 is designed for a one-time connected bootstrap followed by offline study. â
 - PostgreSQL notebook magics after the `sql-notebooks` profile and local
   database are installed; no remote notebook service is required
 - Local plots, files, APIs, MLflow, and orchestration examples that do not opt into cloud services
-- Codex-independent course navigation and validation
+- Tutor-independent course navigation and validation
 
 ## First-use downloads
 

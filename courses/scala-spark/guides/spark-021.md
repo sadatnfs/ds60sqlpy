@@ -203,7 +203,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 Parquet schema and scans](https://spark.apache.org/docs/4.0.1/sql-data-sources-parquet.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-021: Read logical and physical plans.

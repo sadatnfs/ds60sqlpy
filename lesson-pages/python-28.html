@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-28-feature-engineering-with-scikit-learn">Day 28 — Feature Engineering with scikit-learn<a class="heading-anchor" href="#guide--day-28-feature-engineering-with-scikit-learn" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-28-feature-engineering-with-scikit-learn">Day 28: Feature Engineering with scikit-learn<a class="heading-anchor" href="#guide--day-28-feature-engineering-with-scikit-learn" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Feature engineering turns raw columns into model inputs. Any transformation that learns from data must be fit on training data only and reused unchanged on validation/test data.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,10 +405,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 28 — feature engineering with scikit-learn to practice reproducible feature transformations without information leakage and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 28; feature engineering with scikit-learn to practice reproducible feature transformations without information leakage and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
-<p>A feature is a model input available at the moment a prediction would be made. Feature engineering changes representation to expose useful structure: scaling numbers, encoding categories, extracting dates, binning, or combining fields. It must preserve the time/knowledge boundary—post-outcome data and target-derived values are leakage.</p>
+<p>A feature is a model input available at the moment a prediction would be made. Feature engineering changes representation to expose useful structure: scaling numbers, encoding categories, extracting dates, binning, or combining fields. It must preserve the time/knowledge boundary, post-outcome data and target-derived values are leakage.</p>
 <p>A transformer learns parameters during <code>fit</code> and applies them during <code>transform</code>. Split evaluation data before fitting learned means, scales, bins, imputers, or category vocabularies. A pipeline binds every learned step to the model and applies identical logic at inference. Define missing, unseen-category, and zero-variance behavior.</p>
 <h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>A <code>ColumnTransformer</code> selects named column groups and runs separate pipelines, then concatenates their outputs. <code>Pipeline([...])</code> fits each preprocessing step only on the training rows passed to <code>fit</code> and passes the transformed output to the estimator. <code>handle_unknown=&quot;ignore&quot;</code> defines inference behavior for categories absent during fit.</p>
-<h5 id="guide--worked-example-1-fit-scaling-on-training-data-only">Worked example 1 — Fit scaling on training data only<a class="heading-anchor" href="#guide--worked-example-1-fit-scaling-on-training-data-only" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-fit-scaling-on-training-data-only">Worked example 1: Fit scaling on training data only<a class="heading-anchor" href="#guide--worked-example-1-fit-scaling-on-training-data-only" aria-label="Link to this section">#</a></h5>
 <p>The held-out value is transformed with training parameters. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
@@ -433,7 +433,7 @@ scaler <span class="syntax-operator">=</span> StandardScaler<span class="syntax-
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The training mean is `[2.0]`; the held-out value becomes a large positive standardized value. Test data did not influence the mean.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-handle-an-unseen-category-explicitly">Worked example 2 — Handle an unseen category explicitly<a class="heading-anchor" href="#guide--worked-example-2-handle-an-unseen-category-explicitly" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-handle-an-unseen-category-explicitly">Worked example 2: Handle an unseen category explicitly<a class="heading-anchor" href="#guide--worked-example-2-handle-an-unseen-category-explicitly" aria-label="Link to this section">#</a></h5>
 <p>The encoder&#x27;s inference contract belongs inside preprocessing. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> OneHotEncoder
 
@@ -450,7 +450,7 @@ encoded <span class="syntax-operator">=</span> encoder<span class="syntax-operat
 <li>Write when every candidate feature becomes known relative to prediction time.</li>
 <li>Split before fitting any stateful transformation.</li>
 <li>Inspect transformed feature names, shape, and output ordering.</li>
-<li>Test missing values, unseen categories, and zero variance through the fitted pipeline—not ad hoc notebook fixes.</li>
+<li>Test missing values, unseen categories, and zero variance through the fitted pipeline, not ad hoc notebook fixes.</li>
 </ol>
 <h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
 <p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
@@ -508,7 +508,7 @@ transformed <span class="syntax-operator">=</span> preprocessor<span class="synt
 <li><strong>Tracing:</strong> Trace numeric and categorical columns through a <code>ColumnTransformer</code> and state the output order/shape. <strong>Progressive hint:</strong> Each branch selects columns, transforms them, then outputs are concatenated. <strong>Verify:</strong> Inspect <code>get_feature_names_out()</code> and transformed shape; map every output column back to its numeric or categorical branch in the declared order.</li>
 <li><strong>Implementation:</strong> Add deterministic date features (weekday and month) without retaining the original target or post-outcome timestamp. <strong>Progressive hint:</strong> Validate timezone and the moment at which a feature becomes known. <strong>Verify:</strong> Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names.</li>
 <li><strong>Debugging:</strong> Repair a pipeline that scales one-hot indicator columns unnecessarily and fails on an unseen category. <strong>Progressive hint:</strong> Use separate branches and <code>handle_unknown=&#x27;ignore&#x27;</code>. <strong>Verify:</strong> Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.</li>
-<li><strong>Edge case and explanation:</strong> Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. <strong>Progressive hint:</strong> The fitted pipeline—not ad hoc notebook code—owns these policies. <strong>Verify:</strong> Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.</li>
+<li><strong>Edge case and explanation:</strong> Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. <strong>Progressive hint:</strong> The fitted pipeline, not ad hoc notebook code, owns these policies. <strong>Verify:</strong> Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.</li>
 </ol>
 <p>Before opening the reference solution, write one sentence explaining which contract or mental model each result confirms.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
@@ -531,10 +531,10 @@ transformed <span class="syntax-operator">=</span> preprocessor<span class="synt
 <ul>
 <li><a href="python-28.html#learner">Open the learner notebook</a></li>
 <li><a href="python-28.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-29.html#guide">Next: Day 29 — Data validation schemas</a></li>
+<li><a href="python-29.html#guide">Next: Day 29; Data validation schemas</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-28`
 (Day 28 — Feature Engineering with scikit-learn). Direct catalog prerequisites: `python-27`.
 I have completed the direct prerequisites: `python-27`. Emphasize reproducible feature transformations without information leakage.
@@ -793,10 +793,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-28-solutions-feature-engineering">Day 28 — Solutions: Feature Engineering<a class="heading-anchor" href="#solution-1--day-28-solutions-feature-engineering" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-28-solutions-feature-engineering">Day 28: Solutions: Feature Engineering<a class="heading-anchor" href="#solution-1--day-28-solutions-feature-engineering" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>reproducible feature transformations without information leakage</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
-<p>A feature is a model input available at the moment a prediction would be made. Feature engineering changes representation to expose useful structure: scaling numbers, encoding categories, extracting dates, binning, or combining fields. It must preserve the time/knowledge boundary—post-outcome data and target-derived values are leakage.</p>
+<p>A feature is a model input available at the moment a prediction would be made. Feature engineering changes representation to expose useful structure: scaling numbers, encoding categories, extracting dates, binning, or combining fields. It must preserve the time/knowledge boundary, post-outcome data and target-derived values are leakage.</p>
 <p>A transformer learns parameters during <code>fit</code> and applies them during <code>transform</code>. Split evaluation data before fitting learned means, scales, bins, imputers, or category vocabularies. A pipeline binds every learned step to the model and applies identical logic at inference. Define missing, unseen-category, and zero-variance behavior.</p>
 <h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -809,8 +809,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>reproducible feature transformations without information leakage</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add a fare-bin feature using a transformer inside the preprocessing pipeline. <strong>Contract:</strong> thresholds are learned or fixed without evaluation data, bin closure/labels are documented, and missing/out-of-range behavior is defined. <strong>Verify:</strong> inspect fitted thresholds/feature names and test exact boundaries plus one missing value.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Add a fare-bin feature using a transformer inside the preprocessing pipeline. Contract: thresholds are learned or fixed without evaluation data, bin closure/labels are documented, and missing/out-of-range behavior is defined. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: inspect fitted thresholds/feature names and test exact boundaries plus one missing value. That connects the answer to reproducible feature transformations without information leakage.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -850,7 +850,7 @@ fitted_binner <span class="syntax-operator">=</span> preprocessing<span class="s
 <span class="syntax-keyword">assert</span> fitted_binner<span class="syntax-operator">.</span>get_feature_names_out<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">fare_band</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><code>pd.cut</code> is right-closed here: <code>0</code> and <code>10</code> are <code>low</code>, <code>25</code> is <code>medium</code>, and values above <code>25</code> are <code>high</code>. Missing or below-zero fares remain missing instead of being silently assigned a misleading band.</p>
 <p><strong>Verification evidence:</strong> inspect fitted thresholds/feature names and test exact boundaries plus one missing value.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Compare one model pipeline with scaling against the same model pipeline without scaling. <strong>Constraints:</strong> keep split/folds, random state, features, model, and all other transforms identical; fit both only on training data. <strong>Expected behavior:</strong> report held-out or cross-validated scores with uncertainty, not training score. <strong>Verify:</strong> report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family&#x27;s sensitivity to feature scale.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Compare one model pipeline with scaling against the same model pipeline without scaling. Constraints: keep split/folds, random state, features, model, and all other transforms identical; fit both only on training data. Expected behavior: report held-out or cross-validated scores with uncertainty, not training score. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family&#x27;s sensitivity to feature scale. That connects the answer to reproducible feature transformations without information leakage.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_classification
@@ -882,32 +882,32 @@ conclusion <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <span class="syntax-keyword">assert</span> conclusion</code></pre>
 <p>Scaling changes feature units, which can matter to a regularized distance-sensitive linear model. The conclusion deliberately compares the mean difference with observed fold variation instead of claiming that a tiny score change is universally important.</p>
 <p><strong>Verification evidence:</strong> report both score estimates, uncertainty intervals, and their difference; compare that difference with a stated practical threshold and connect the result to the model family&#x27;s sensitivity to feature scale.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how fitting a scaler or category encoder before the train/test split leaks information from evaluation data. <strong>Progressive hint:</strong> Learned means, scales, and categories become evaluation-derived parameters. <strong>Verify:</strong> Fit both ways on a fixture with an extreme held-out value; record differing learned parameters and assert the pipeline fit uses training rows only.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how fitting a scaler or category encoder before the train/test split leaks information from evaluation data. Progressive hint: Learned means, scales, and categories become evaluation-derived parameters. Then compare the prediction with this proof target: Fit both ways on a fixture with an extreme held-out value; record differing learned parameters and assert the pipeline fit uses training rows only. This makes reproducible feature transformations without information leakage observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Fit both ways on a fixture with an extreme held-out value; record differing learned parameters and assert the pipeline fit uses training rows only.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace numeric and categorical columns through a <code>ColumnTransformer</code> and state the output order/shape. <strong>Progressive hint:</strong> Each branch selects columns, transforms them, then outputs are concatenated. <strong>Verify:</strong> Inspect <code>get_feature_names_out()</code> and transformed shape; map every output column back to its numeric or categorical branch in the declared order.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace numeric and categorical columns through a <code>ColumnTransformer</code> and state the output order/shape. Progressive hint: Each branch selects columns, transforms them, then outputs are concatenated. Record the named value, shape, label, or iterator position needed to establish: Inspect <code>get_feature_names_out()</code> and transformed shape; map every output column back to its numeric or categorical branch in the declared order. The trace exposes reproducible feature transformations without information leakage directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Inspect <code>get_feature_names_out()</code> and transformed shape; map every output column back to its numeric or categorical branch in the declared order.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Add deterministic date features (weekday and month) without retaining the original target or post-outcome timestamp. <strong>Progressive hint:</strong> Validate timezone and the moment at which a feature becomes known. <strong>Verify:</strong> Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Add deterministic date features (weekday and month) without retaining the original target or post-outcome timestamp. Progressive hint: Validate timezone and the moment at which a feature becomes known. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names. That connects the answer to reproducible feature transformations without information leakage.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert weekday/month values for known timestamps and prove target/post-outcome columns are absent from the transformed feature names.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a pipeline that scales one-hot indicator columns unnecessarily and fails on an unseen category. <strong>Progressive hint:</strong> Use separate branches and <code>handle_unknown=&#x27;ignore&#x27;</code>. <strong>Verify:</strong> Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a pipeline that scales one-hot indicator columns unnecessarily and fails on an unseen category. Progressive hint: Use separate branches and <code>handle_unknown=&#x27;ignore&#x27;</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns. The diagnosis depends on reproducible feature transformations without information leakage.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. <strong>Progressive hint:</strong> The fitted pipeline—not ad hoc notebook code—owns these policies. <strong>Verify:</strong> Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.</p>
-<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. Progressive hint: The fitted pipeline—not ad hoc notebook code—owns these policies. Values below, at, and above the named boundary must produce the evidence Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result. Those cases show how reproducible feature transformations without information leakage behaves at its edge.</p>
-<p><strong>Evidence to locate in the grouped implementation:</strong> Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.</p>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. <strong>Progressive hint:</strong> The fitted pipeline, not ad hoc notebook code, owns these policies. <strong>Verify:</strong> Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.</p>
+<p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each. Progressive hint: The fitted pipeline, not ad hoc notebook code, owns these policies. Values below, at, and above the named boundary must produce the evidence Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result. Those cases show how reproducible feature transformations without information leakage behaves at its edge.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Fit learned transformations only on training data and keep every feature inside a reproducible pipeline with explicit unknown/missing behavior.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-fit-only-on-training-data">Shared implementation for Exercises 3–4 — Fit only on training data<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-fit-only-on-training-data" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-fit-only-on-training-data">Shared implementation for Exercises 3–4: Fit only on training data<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-fit-only-on-training-data" aria-label="Link to this section">#</a></h5>
 <p>Scaling and encoding learn parameters. Fitting before the split lets evaluation rows influence those parameters. <code>ColumnTransformer</code> runs branches in declared order and concatenates their feature matrices.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-deterministic-date-features-and-robust-preprocessing">Shared implementation for Exercises 5–7 — Deterministic date features and robust preprocessing<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-deterministic-date-features-and-robust-preprocessing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-deterministic-date-features-and-robust-preprocessing">Shared implementation for Exercises 5–7: Deterministic date features and robust preprocessing<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-deterministic-date-features-and-robust-preprocessing" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">from</span> sklearn.compose <span class="syntax-keyword">import</span> ColumnTransformer
 <span class="syntax-keyword">from</span> sklearn.impute <span class="syntax-keyword">import</span> SimpleImputer
@@ -1088,16 +1088,16 @@ transformed <span class="syntax-operator">=</span> preprocessor<span class="synt
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-28`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-28`
 (Day 28 — Feature Engineering with scikit-learn). Direct catalog prerequisites: `python-27`.
 I have completed the direct prerequisites: `python-27`. Emphasize reproducible feature transformations without information leakage.
 Read `python/ds-60day/companion-guides/day28_feature_engineering.md` and use the learner notebook
@@ -1112,7 +1112,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1223,18 +1223,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

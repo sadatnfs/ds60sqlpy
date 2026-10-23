@@ -172,7 +172,7 @@ Broadcasting may define a valid larger operation. The framework checks arithmeti
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-002, Tensors, devices, dtypes, strides and views.

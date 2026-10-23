@@ -1,4 +1,4 @@
-# Day 24 — Solutions: EDA Best Practices
+# Day 24: Solutions: EDA Best Practices
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ misleading.
 For this lesson's **question-led exploratory data analysis with evidence, caveats, and quality checks** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. **Expected behavior:** every table/plot answers a written question and has an observation plus limitation. **Constraint:** avoid causal language and full-data dumps. **Verify:** restart and reproduce all results top to bottom.
 
@@ -105,7 +105,7 @@ not proof that its segment causes higher amounts.
 
 **Verification evidence:** restart and reproduce all results top to bottom.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. **Coverage:** missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. **Verify:** trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.
 
@@ -181,9 +181,9 @@ remain unresolved caveats instead of being silently removed.
 
 **Verification evidence:** trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. **Progressive hint:** Robust and non-robust summaries respond differently to outliers. **Verify:** Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.
 
@@ -191,7 +191,7 @@ remain unresolved caveats instead of being silently removed.
 
 **Evidence to locate in the grouped implementation:** Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. **Progressive hint:** Aggregation discards within-customer event detail. **Verify:** List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.
 
@@ -199,7 +199,7 @@ remain unresolved caveats instead of being silently removed.
 
 **Evidence to locate in the grouped implementation:** List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. **Progressive hint:** Bound the result rather than dumping every row/value. **Verify:** Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.
 
@@ -207,7 +207,7 @@ remain unresolved caveats instead of being silently removed.
 
 **Evidence to locate in the grouped implementation:** Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. **Progressive hint:** Remove leakage and label correlations as associations. **Verify:** Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.
 
@@ -215,7 +215,7 @@ remain unresolved caveats instead of being silently removed.
 
 **Evidence to locate in the grouped implementation:** Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. **Progressive hint:** A calculation returning a number does not guarantee interpretability. **Verify:** Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.
 
@@ -227,14 +227,14 @@ remain unresolved caveats instead of being silently removed.
 
 Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.
 
-### Shared implementation for Exercises 3–4 — Robust summaries and grain
+### Shared implementation for Exercises 3–4: Robust summaries and grain
 
 An extreme value can move the mean and standard deviation substantially, while
 the median is usually more stable. Aggregating transactions to one row per
 customer supports customer questions but loses event order and transaction
 variation.
 
-### Shared implementation for Exercises 5–7 — A bounded profile with interpretation guards
+### Shared implementation for Exercises 5–7: A bounded profile with interpretation guards
 
 ```python
 import pandas as pd

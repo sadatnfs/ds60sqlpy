@@ -57,7 +57,7 @@ can then request only these fixed, catalog-resolved actions:
 - create an ignored, editable guided notebook for a cataloged SQL lesson and
   open that notebook in JupyterLab.
 
-Every Python and SQL reader also has an **Ask Codex about this lesson** panel.
+Every Python and SQL reader also has an **Ask an AI tutor about this lesson** panel.
 It contains the read-only, copy-ready fenced prompt authored in that lesson's
 companion guide. The guide is the single source of truth for the stable ID,
 paths, prerequisites, lesson-specific concepts, execution safety, solution

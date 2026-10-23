@@ -65,7 +65,7 @@ PATTERNS: Final = (
     ("Slack token", re.compile(r"x[o]x[baprs]-[A-Za-z0-9-]{20,}")),
     ("Google API key", re.compile(r"A[I]za[0-9A-Za-z_-]{30,}")),
     (
-        "OpenAI-style key",
+        "API secret key",
         re.compile(r"(?<![A-Za-z0-9])s[k]-[A-Za-z0-9_-]{20,}"),
     ),
     (
@@ -119,7 +119,11 @@ def sensitive_filename(path: Path) -> bool:
     name = path.name.casefold()
     if name == ".env.example":
         return False
-    return name in SENSITIVE_FILENAMES or path.suffix.casefold() in SENSITIVE_SUFFIXES
+    return (
+        name in SENSITIVE_FILENAMES
+        or name.startswith(".env.")
+        or path.suffix.casefold() in SENSITIVE_SUFFIXES
+    )
 
 
 def local_sensitive_paths(repo_root: Path) -> tuple[Path, ...]:

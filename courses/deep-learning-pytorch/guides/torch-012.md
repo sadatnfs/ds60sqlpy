@@ -178,7 +178,7 @@ The pilot has an independent arithmetic oracle and can localize gradient/update 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-012, Capstone: an auditable tiny PyTorch regressor.

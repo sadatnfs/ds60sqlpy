@@ -1,9 +1,9 @@
-# Day 46 — E-commerce Project, Part 1: LTV and Cohorts
+# Day 46: E-commerce Project, Part 1: LTV and Cohorts
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 45 — optimization project](day45_phase3_optimization_project.md)
+- **Prerequisites:** [Day 45; optimization project](day45_phase3_optimization_project.md)
 - **Artifacts:** [learner SQL](../day46_project1_ecommerce_part1.sql) ·
   [solution reasoning](../solutions/day46_solutions.md) ·
   [executable solution](../solutions/day46_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-46 — Project1 Ecommerce Part1** and choose
+2. Open **SQL-46; Project1 Ecommerce Part1** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -208,7 +208,7 @@ Add a zero-order-customer test and state its segment.
 
 ## Next step
 
-Continue to [Day 47 — cohort retention](day47_project1_ecommerce_part2.md).
+Continue to [Day 47; cohort retention](day47_project1_ecommerce_part2.md).
 
 ## Deep dive and reference
 
@@ -249,11 +249,11 @@ Use the numbered **Exercises** section above as the single authoritative practic
 - Signup month defines cohort membership; order month defines lifecycle revenue.
 - Synthetic data demonstrates the method, not a real customer-value benchmark.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-46 — Project1 Ecommerce Part1.

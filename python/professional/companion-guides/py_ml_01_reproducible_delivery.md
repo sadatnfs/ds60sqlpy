@@ -117,7 +117,7 @@ The focused test command is shown in **Self-check** below. The learner
 module is intentionally answer-free, so `TODO` output is the expected
 starting state rather than a setup failure.
 
-## Mechanism lab — two small examples before the full system
+## Mechanism lab: two small examples before the full system
 
 ### Boundary and mental model
 
@@ -130,13 +130,13 @@ A delivery bundle contains a safe model representation, schema, and
 manifest of hashes/versions/evidence. Loading verifies bytes and
 compatibility before parsing or prediction. Promotion is a policy
 decision based on tests, thresholds, limitations, ownership, and
-rollback—not the existence of a model file.
+rollback, not the existence of a model file.
 
 - **canonical data hash:** normalizes only declared non-semantic ordering and rejects duplicate/missing identity or unsupported values.
 - **feature/runtime compatibility:** checks ordered names, types, required fields, schema version, Python and direct package ranges.
 - **manifest verification before load:** checks every relative path, byte hash, format, and expected metadata before trusting content.
 
-### Micro-example A — make record order irrelevant but value changes visible
+### Micro-example A: make record order irrelevant but value changes visible
 
 ```python
 import hashlib
@@ -159,7 +159,7 @@ assert snapshot(records) != snapshot(changed)
 
 **Why it matters:** Record IDs are unique/nonempty and sorting them is semantically irrelevant for this dataset.
 
-### Micro-example B — fail a bundle when one artifact byte changes
+### Micro-example B: fail a bundle when one artifact byte changes
 
 ```python
 import hashlib
@@ -199,7 +199,7 @@ changed value does not.
 Explain what the hash does *not* prove: source ownership, legality, labeling
 quality, representativeness, or absence of leakage.
 
-**Verify:** Complete snapshot hashing — require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.
+**Verify:** Complete snapshot hashing; require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.
 
 ### 2. Fit and serialize the local model
 
@@ -207,7 +207,7 @@ Fit `y = intercept + coefficient*x` on three deterministic points. Store only
 format identifier, feature name, and numeric parameters in JSON. Do not use
 pickle: loading an untrusted pickle can execute code.
 
-**Verify:** Fit and serialize the local model — fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.
+**Verify:** Fit and serialize the local model; fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.
 
 ### 3. Version the feature schema
 
@@ -216,7 +216,7 @@ version. Test exact compatibility, reordered input, a renamed feature, and a
 version change. Decide which future changes could be safely additive for a
 different consumer contract.
 
-**Verify:** Version the feature schema — declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.
+**Verify:** Version the feature schema; declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.
 
 ### 4. Define runtime compatibility
 
@@ -224,7 +224,7 @@ Declare Python 3.11 through below 3.13 and required package major versions.
 Inject the observed versions into the check rather than dumping a
 machine-specific environment. Report every incompatibility, not only the first.
 
-**Verify:** Define runtime compatibility — declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.
+**Verify:** Define runtime compatibility; declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.
 
 ### 5. Build and tamper with a bundle
 
@@ -232,7 +232,7 @@ Write model, schema, and manifest into a temporary directory. Verify all
 hashes. Replace `model.json` with `{}` and confirm loading fails before parsing
 or prediction.
 
-**Verify:** Build and tamper with a bundle — write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.
+**Verify:** Build and tamper with a bundle; write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.
 
 ### 6. Promote with evidence
 
@@ -247,7 +247,7 @@ Register a candidate with:
 Move it to staging and production. Reject a version with missing tests even if
 its metric is high.
 
-**Verify:** Promote with evidence — assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.
+**Verify:** Promote with evidence; assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.
 
 ### 7. Rehearse rollback
 
@@ -255,7 +255,7 @@ Promote version 1, then version 2. Record a simulated latency regression and
 roll back to archived version 1. Confirm one production version remains and the
 event trail preserves action, target, and reason.
 
-**Verify:** Rehearse rollback — promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.
+**Verify:** Rehearse rollback; promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.
 
 ### 8. Relate the lab to MLflow
 
@@ -263,7 +263,7 @@ Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day
 53. MLflow can store evidence; it does not define your compatibility or
 approval policy automatically.
 
-**Verify:** Relate the lab to MLflow — produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.
+**Verify:** Relate the lab to MLflow; produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.
 
 ### Extended professional practice
 
@@ -271,69 +271,69 @@ These exercises move from prediction and implementation through debugging,
 operational trade-offs, and review. Keep the default path deterministic and
 offline; optional connected behavior must remain explicit.
 
-### Exercise 9 — rebuild a bundle deterministically
+### Exercise 9: rebuild a bundle deterministically
 
 Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.
 
 **Progressive hint:** Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.
 
-**Verify:** rebuild a bundle deterministically — build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.
+**Verify:** rebuild a bundle deterministically; build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.
 
-### Exercise 10 — write a claim-bounded model card
+### Exercise 10: write a claim-bounded model card
 
 Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.
 
 **Progressive hint:** Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.
 
-**Verify:** write a claim-bounded model card — create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.
+**Verify:** write a claim-bounded model card; create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.
 
-### Exercise 11 — design shadow and canary evidence
+### Exercise 11: design shadow and canary evidence
 
 Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.
 
 **Progressive hint:** Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.
 
-**Verify:** design shadow and canary evidence — specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.
+**Verify:** design shadow and canary evidence; specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.
 
-### Exercise 12 — separate drift from compatibility
+### Exercise 12: separate drift from compatibility
 
 Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.
 
 **Progressive hint:** Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.
 
-**Verify:** separate drift from compatibility — create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.
+**Verify:** separate drift from compatibility; create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.
 
-### Exercise 13 — test forward and backward compatibility
+### Exercise 13: test forward and backward compatibility
 
 Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.
 
 **Progressive hint:** Define compatibility from each consumer's contract; semantic changes may be breaking even when JSON types match.
 
-**Verify:** test forward and backward compatibility — build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.
+**Verify:** test forward and backward compatibility; build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.
 
-### Exercise 14 — capture dependency and supply-chain evidence
+### Exercise 14: capture dependency and supply-chain evidence
 
 Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.
 
 **Progressive hint:** Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.
 
-**Verify:** capture dependency and supply-chain evidence — create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.
+**Verify:** capture dependency and supply-chain evidence; create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.
 
-### Exercise 15 — verify artifact trust before parsing
+### Exercise 15: verify artifact trust before parsing
 
 Model a trusted local manifest root and verify every bundle file's relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.
 
 **Progressive hint:** Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.
 
-**Verify:** verify artifact trust before parsing — model a trusted local manifest root and verify every bundle file's relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.
+**Verify:** verify artifact trust before parsing; model a trusted local manifest root and verify every bundle file's relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.
 
-### Exercise 16 — rehearse rollback dependency failure
+### Exercise 16: rehearse rollback dependency failure
 
 Archive version 1, promote version 2, then discover that version 1's runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.
 
 **Progressive hint:** A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.
 
-**Verify:** rehearse rollback dependency failure — archive version 1, promote version 2, then discover that version 1's runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.
+**Verify:** rehearse rollback dependency failure; archive version 1, promote version 2, then discover that version 1's runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.
 
 ## Self-check
 
@@ -383,10 +383,10 @@ PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests
 Use this verified bundle in `python-svc-02`. Day 53 can record the same evidence
 in local MLflow, while Day 54 supplies monitoring and governance decisions.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-ml-01` — Reproducible data and model delivery.

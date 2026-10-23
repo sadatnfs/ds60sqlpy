@@ -194,7 +194,7 @@ After SQL Day 15 and Python Day 15, the optional
 queries, transaction and retry ownership, database test doubles, ETL,
 concurrency, and production failure recovery.
 
-## Progress and Codex
+## Progress and the AI tutor
 
 ```text
 python scripts/course.py progress show
@@ -207,7 +207,7 @@ Tutor prompt:
 Use $guide-ds60sqlpy-learning to guide SQL Day 1. Use the disposable training database, give hints before solutions, and explain my first failing statement.
 ```
 
-See [Learning with Codex](../../docs/learning-with-codex.md).
+See [Learning with an AI tutor](../../docs/learning-with-an-ai-tutor.md).
 
 ## Troubleshooting and validation
 

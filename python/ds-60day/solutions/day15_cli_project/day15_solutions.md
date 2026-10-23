@@ -1,4 +1,4 @@
-# Day 15 — Solutions: CLI Data Tool Project
+# Day 15: Solutions: CLI Data Tool Project
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -31,9 +31,9 @@ little more than `raise SystemExit(main())`.
 For this lesson's **a small command-line application with separated boundaries** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–5 — Worked answers
+## Exercises 1–5: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. **Architecture:** `build_parser()`, pure core function(s), and `main(argv=None) -> int`. **Constraints:** use `pathlib`, UTF-8, no notebook-only state, and no hard-coded absolute paths. **Verify:** assert `--help` exits `0` and names the command/options, a valid fixture exits `0` with the expected bounded output, and invalid input exits nonzero with a useful stderr message.
 
@@ -65,7 +65,7 @@ transformation; `main` coordinates them.
 
 **Verification evidence:** assert `--help` exits `0` and names the command/options, a valid fixture exits `0` with the expected bounded output, and invalid input exits nonzero with a useful stderr message.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add options for input path, output path, and a typed transformation parameter such as `--limit`. **Expected behavior:** argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. **Constraint:** do not catch programming errors broadly. **Verify:** Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.
 
@@ -94,7 +94,7 @@ invalid integer.
 
 **Verification evidence:** Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Write pytest tests that call core logic directly and call `main([...])` with temporary files. **Coverage:** happy path, empty input, missing path, invalid parameter, and output overwrite policy. **Verify:** assert return status, captured output, and exact file content without spawning a shell.
 
@@ -122,7 +122,7 @@ preserves it, then pass `overwrite=True` and compare the new JSON.
 
 **Verification evidence:** assert return status, captured output, and exact file content without spawning a shell.
 
-### Exercise 4 — worked answer
+### Exercise 4: worked answer
 
 **Learner contract:** Package the CLI invocation behind `if __name__ == '__main__': raise SystemExit(main())`. **Expected behavior:** importing the module produces no output or process exit; `python -m ... --help` works from the documented package parent. **Verify:** test both import and module execution.
 
@@ -155,7 +155,7 @@ Import defines functions only; the guard owns process execution.
 
 **Verification evidence:** test both import and module execution.
 
-### Exercise 5 — worked answer
+### Exercise 5: worked answer
 
 **Learner contract:** Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. **Constraint:** do not mix Bash syntax into PowerShell. **Verify:** copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument.
 
@@ -175,9 +175,9 @@ Both run from the repository root and quote the path containing spaces.
 
 **Verification evidence:** copy the command for your operating system, record exit code `0` and the expected output, and confirm the quoted path with spaces is received as one argument.
 
-## Exercises 6–10 — Expanded mastery answers
+## Exercises 6–10: Expanded mastery answers
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Prediction:** Predict the Python types produced by `argparse` when `--input` uses `type=Path` and `--limit` uses `type=int`. **Progressive hint:** The parser performs declared conversions before `main` receives values. **Verify:** Call `parse_args` with explicit text and assert the parsed input is a `Path`, limit is an `int`, and defaults have the documented types.
 
@@ -185,7 +185,7 @@ Both run from the repository root and quote the path containing spaces.
 
 **Evidence to locate in the grouped implementation:** Call `parse_args` with explicit text and assert the parsed input is a `Path`, limit is an `int`, and defaults have the documented types.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Tracing:** Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. **Progressive hint:** A pure transform accepts and returns data without reading global state. **Verify:** For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.
 
@@ -193,7 +193,7 @@ Both run from the repository root and quote the path containing spaces.
 
 **Evidence to locate in the grouped implementation:** For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Implementation:** Add `--overwrite` and refuse to replace an existing output unless the flag is present. **Progressive hint:** Check the destination before performing the write. **Verify:** Use a temporary existing destination: assert refusal leaves content unchanged without the flag and `--overwrite` deliberately replaces it with the flag.
 
@@ -201,7 +201,7 @@ Both run from the repository root and quote the path containing spaces.
 
 **Evidence to locate in the grouped implementation:** Use a temporary existing destination: assert refusal leaves content unchanged without the flag and `--overwrite` deliberately replaces it with the flag.
 
-### Exercise 9 — answer contract
+### Exercise 9: answer contract
 
 **Learner contract:** **Debugging:** Repair a module that parses arguments and writes files during import. **Progressive hint:** Move behavior into `main(argv)` and use the `__main__` guard. **Verify:** Import the module while capturing output/files and assert no parser or write occurs; then assert `main([...])` performs the intended operation.
 
@@ -209,7 +209,7 @@ Both run from the repository root and quote the path containing spaces.
 
 **Evidence to locate in the grouped implementation:** Import the module while capturing output/files and assert no parser or write occurs; then assert `main([...])` performs the intended operation.
 
-### Exercise 10 — answer contract
+### Exercise 10: answer contract
 
 **Learner contract:** **Edge case and explanation:** Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. **Progressive hint:** Translate expected boundary failures once, without hiding tracebacks in tests. **Verify:** Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.
 
@@ -221,13 +221,13 @@ Both run from the repository root and quote the path containing spaces.
 
 Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.
 
-### Shared implementation for Exercises 6–7 — Parsed types and boundaries
+### Shared implementation for Exercises 6–7: Parsed types and boundaries
 
 `type=Path` produces a `Path`; `type=int` produces an integer or lets argparse
 report invalid text. Reading and writing are boundaries; deterministic cleaning
 and summarization should be pure enough to test in memory.
 
-### Shared implementation for Exercises 8–10 — Safe overwrite and importable entry point
+### Shared implementation for Exercises 8–10: Safe overwrite and importable entry point
 
 ```python
 from __future__ import annotations

@@ -1,4 +1,4 @@
-# SQL-SEC-01 Solutions — Roles, Privileges, and RLS
+# SQL-SEC-01 Solutions: Roles, Privileges, and RLS
 
 
 <!-- beginner-solution-enrichment -->
@@ -64,7 +64,7 @@ capability it creates NOLOGIN course roles inside one transaction; without that
 capability it prints a read-only skip. Normal completion leaves no roles,
 memberships, grants, or schema.
 
-## Exercise 1 — Prove both privilege layers
+## Exercise 1: Prove both privilege layers
 
 `has_schema_privilege(role, schema, 'USAGE')` and
 `has_table_privilege(role, table, 'SELECT')` answer different questions.
@@ -81,7 +81,7 @@ and `INSERT=false`.
 - **Expected result/shape:** For sql-sec-01 Exercise 1, expected output: evidence for table SELECT without schema USAGE, schema USAGE without table SELECT, and a final three-role matrix with USAGE/SELECT true and INSERT false.
 - **Independent verification:** For sql-sec-01 Exercise 1, assert the two observed boolean rows equal `(USAGE=false, SELECT=true)` and `(USAGE=true, SELECT=false)`, attempt the corresponding qualified SELECTs, and restore only the intended least-privilege state before later exercises.
 
-## Exercise 2 — Read-only auditor
+## Exercise 2: Read-only auditor
 
 The solution creates a NOLOGIN `ds60_sec_auditor`, grants schema `USAGE`, lets
 the owner's default privileges grant future table `SELECT`, and adds:
@@ -108,7 +108,7 @@ this SQL lesson.
 - **Expected result/shape:** For sql-sec-01 Exercise 2, expected output: two tenant rows when SET ROLE auditor, correct north/south definer counts, and an expected insufficient-privilege notice for INSERT.
 - **Independent verification:** For sql-sec-01 Exercise 2, assert the auditor sees exactly both seeded IDs, has no INSERT/UPDATE/DELETE privilege, and cannot execute routines except those explicitly granted.
 
-## Exercise 3 — Owner-specific default privileges
+## Exercise 3: Owner-specific default privileges
 
 `audit_notes` is created by `ds60_sec_owner` after:
 
@@ -125,9 +125,9 @@ unchanged by `ALTER DEFAULT PRIVILEGES`; use an explicit `GRANT` for them.
 
 - **Inputs/evidence:** For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.
 - **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on `audit_notes` created by `ds60_sec_owner` but not on `other_owner_notes` created by `ds60_sec_other_owner`.
-- **Independent verification:** For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role—not inherited membership defaults.
+- **Independent verification:** For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role, not inherited membership defaults.
 
-## Exercise 4 — Review the definer boundary
+## Exercise 4: Review the definer boundary
 
 The solution's `document_count_for_tenant(text)` demonstrates minimum controls:
 
@@ -154,7 +154,7 @@ status can see rows that the caller cannot.
 - **Expected result/shape:** For sql-sec-01 Exercise 4, expected output: valid north/south counts, an invalid-parameter rejection for unknown tenant, and catalog rows with owner, `prosecdef`, `proconfig`, and `proacl`.
 - **Independent verification:** For sql-sec-01 Exercise 4, test allowed and NULL/unknown inputs under SET ROLE auditor, assert PUBLIC lacks EXECUTE, confirm the owner cannot login, and trace every referenced object as schema-qualified.
 
-## Exercise 5 — RLS bypass cases
+## Exercise 5: RLS bypass cases
 
 - An ordinary table owner normally bypasses RLS.
 - `ALTER TABLE ... FORCE ROW LEVEL SECURITY` makes an ordinary owner subject to
@@ -173,7 +173,7 @@ tenant-policy test identity.
 - **Expected result/shape:** For sql-sec-01 Exercise 5, expected output: north sees only north, south sees only south, the forced owner sees zero without a matching policy, and bypass-capable roles are clearly labeled unsuitable tenant-test identities.
 - **Independent verification:** For sql-sec-01 Exercise 5, assert one own-tenant row and zero cross-tenant rows for each low-privilege role, distinguish owner bypass before FORCE from forced-owner behavior, and never grant or rely on BYPASSRLS for tenants.
 
-## Exercise 6 — Effective-access inventory
+## Exercise 6: Effective-access inventory
 
 Use `has_*_privilege` functions for the final yes/no matrix because they account
 for ownership, membership inheritance, and PUBLIC grants. Pair that with
@@ -191,7 +191,7 @@ SUPERUSER or BYPASSRLS can dominate ordinary grants.
 - **Expected result/shape:** For sql-sec-01 Exercise 6, expected output: one row per role with five distinct privilege booleans and an `effective_source` explanation distinguishing owner-default table grants from direct function grants.
 - **Independent verification:** For sql-sec-01 Exercise 6, compare every effective-access boolean row with object ACLs, role membership, ownership, and PUBLIC and record the matching source evidence; do not infer the grant source from a true boolean alone.
 
-## Exercise 7 — Session and execution identity
+## Exercise 7: Session and execution identity
 
 `SESSION_USER` is the authenticated session identity. `CURRENT_USER` changes
 during `SET ROLE` and becomes the routine owner during SECURITY DEFINER
@@ -209,7 +209,7 @@ action appear to come from its owner.
 - **Expected result/shape:** For sql-sec-01 Exercise 7, expected output: authenticated identity remains SESSION_USER; effective identity changes to auditor under SET ROLE and to the function owner inside SECURITY DEFINER.
 - **Independent verification:** For sql-sec-01 Exercise 7, compare all three evidence rows and design audit fields that preserve both identities plus the called routine and tenant context.
 
-## Exercise 8 — Fail-closed tenant context
+## Exercise 8: Fail-closed tenant context
 
 The safe policy maps only exact allowed identities/context values and returns
 NULL/false for everything else. Test NULL, empty, case variants, unknown values,
@@ -227,7 +227,7 @@ cross-tenant SELECT, INSERT, UPDATE, and DELETE.
 - **Expected result/shape:** For sql-sec-01 Exercise 8, expected output: four rows with `candidate_role`, `derived_tenant`, and `accepted_identity`; only exact north/south role names are accepted.
 - **Independent verification:** For sql-sec-01 Exercise 8, assert unknown, case-changed, and NULL identities derive NULL and `accepted_identity = false`; if a pooled custom setting is adopted instead, validate and transaction-locally reset it.
 
-## Exercise 9 — A narrow writer
+## Exercise 9: A narrow writer
 
 Use one coherent API-only design: the writer receives schema `USAGE` and
 `EXECUTE` on a fixed-path SECURITY DEFINER insert function, but no table or
@@ -247,7 +247,7 @@ longer be the minimum model.
 - **Expected result/shape:** For sql-sec-01 Exercise 9, expected output: one returned north document from the insert API; cross-tenant INSERT, direct UPDATE, DELETE, and table SELECT each produce an expected denial.
 - **Independent verification:** For sql-sec-01 Exercise 9, SET LOCAL ROLE writer for every probe, assert the API owner/path/ACL and owner-scoped RLS policies in catalogs, confirm no direct table or sequence privilege, and prove the failed operations leave no rows changed.
 
-## Exercise 10 — Offboarding and emergency revocation
+## Exercise 10: Offboarding and emergency revocation
 
 First disable login/rotate the external credential and terminate or drain
 approved sessions according to incident authority. Revoke memberships and

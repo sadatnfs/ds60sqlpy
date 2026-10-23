@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-59-final-capstone-part-2-stakeholder-analytics">Day 59 — Final Capstone, Part 2: Stakeholder Analytics<a class="heading-anchor" href="#guide--day-59-final-capstone-part-2-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-59-final-capstone-part-2-stakeholder-analytics">Day 59: Final Capstone, Part 2: Stakeholder Analytics<a class="heading-anchor" href="#guide--day-59-final-capstone-part-2-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> <a href="sql-58.html#guide">Day 58 — capstone ingestion and data quality</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-58.html#guide">Day 58; capstone ingestion and data quality</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-59.html#learner">learner SQL</a> · <a href="sql-59.html#solution-1">solution reasoning</a> · <a href="sql-59.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-59 — Final Capstone Part2</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-59; Final Capstone Part2</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-59/lesson/workspace/sql/postgres-60day/day59_final_capstone_part2.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -458,7 +458,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day59_final_capstone_part2.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is KPI contract, Funnel denominator, Scale hypothesis. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>, <code>customers</code>, <code>events</code>, <code>products</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -596,29 +596,29 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Are campaign counts, pair counts, and funnel rates prevented from being summed across non-additive rows?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-60.html#guide">Day 60 — end-to-end sign-off</a>.</p>
+<p>Continue to <a href="sql-60.html#guide">Day 60; end-to-end sign-off</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Day 59 is a capstone checkpoint, not a pair of discrete exercises. It combines KPI definitions, performance evidence, stakeholder outputs, and scale planning.</p>
-<h4 id="guide--deliverable-1-kpi-suite">Deliverable 1 — KPI suite<a class="heading-anchor" href="#guide--deliverable-1-kpi-suite" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--deliverable-1-kpi-suite">Deliverable 1: KPI suite<a class="heading-anchor" href="#guide--deliverable-1-kpi-suite" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>LTV by signup cohort and customer segment, with customer count, average LTV, and total LTV.</li>
 <li>A 90-day customer-grain funnel for page view, add to cart, checkout, and purchase/order conversion, with explicit denominators.</li>
 <li>The top 20 distinct product pairs from order baskets, ranked by co-occurrence count (<code>together</code>), not by attributed pair revenue.</li>
 </ul>
-<h4 id="guide--deliverable-2-performance-evidence">Deliverable 2 — Performance evidence<a class="heading-anchor" href="#guide--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--deliverable-2-performance-evidence">Deliverable 2: Performance evidence<a class="heading-anchor" href="#guide--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
 <p>Create candidate indexes only inside the rollback-only experiment, then capture <code>EXPLAIN (ANALYZE, BUFFERS)</code> for the recent customer-revenue query. Save result reconciliation, timing, buffers, row estimates, and plan choice. The compact seed may correctly use a sequential scan.</p>
-<h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3 — Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--deliverable-3-stakeholder-outputs">Deliverable 3: Stakeholder outputs<a class="heading-anchor" href="#guide--deliverable-3-stakeholder-outputs" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Finance: current-year budget, actual expense, and variance by category.</li>
 <li>Marketing: campaign touches within seven days before each customer&#x27;s first order, counted as distinct assisted customers. Only the declared touch types (<code>page_view</code>, <code>add_to_cart</code>, and <code>checkout</code>) qualify; a campaign tag on an unrelated event must not create marketing credit.</li>
 </ul>
 <p>The marketing definition differs from Day 48&#x27;s all-purchase event attribution. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
-<h4 id="guide--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#guide--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--deliverable-4-large-scale-design-note">Deliverable 4: Large-scale design note<a class="heading-anchor" href="#guide--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
 <p>For a hypothetical 100M-row workload, identify candidate time partitions for orders/events, prove partition-key filters for pruning, describe local/partial indexes, and assign retention/maintenance ownership. Do not claim a benefit without a representative plan.</p>
 <h4 id="guide--sign-off-limits">Sign-off limits<a class="heading-anchor" href="#guide--sign-off-limits" aria-label="Link to this section">#</a></h4>
 <p>Record metric grain, time window, exclusions, reconciliation, and consumer for every KPI. All candidate DDL rolls back; production changes require a separate reviewed migration.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-59 — Final Capstone Part2.
 
 I have completed the direct catalog prerequisite: `sql-58`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -959,7 +959,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-59-solution-integrated-stakeholder-analytics">Day 59 Solution — Integrated Stakeholder Analytics<a class="heading-anchor" href="#solution-1--day-59-solution-integrated-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-59-solution-integrated-stakeholder-analytics">Day 59 Solution: Integrated Stakeholder Analytics<a class="heading-anchor" href="#solution-1--day-59-solution-integrated-stakeholder-analytics" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -980,7 +980,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Day 59 is a capstone checkpoint, not a pair of discrete exercises. Its deliverables are a reconciled KPI suite, performance evidence, stakeholder queries, and a large-scale design note. The canonical executable checkpoint is <a href="sql-59.html#solution-2"><code>day59_solutions.sql</code></a>.</p>
-<h4 id="solution-1--deliverable-1-business-kpi-suite">Deliverable 1 — Business KPI suite<a class="heading-anchor" href="#solution-1--deliverable-1-business-kpi-suite" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--deliverable-1-business-kpi-suite">Deliverable 1: Business KPI suite<a class="heading-anchor" href="#solution-1--deliverable-1-business-kpi-suite" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--ltv-by-signup-cohort-and-segment">LTV by signup cohort and segment<a class="heading-anchor" href="#solution-1--ltv-by-signup-cohort-and-segment" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
@@ -1063,7 +1063,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Expected shape: one row. Every later funnel population is a subset of the preceding population because its timestamp must follow the prior stage.</p>
 <h5 id="solution-1--product-pair-affinity">Product-pair affinity<a class="heading-anchor" href="#solution-1--product-pair-affinity" aria-label="Link to this section">#</a></h5>
 <p>The learner script already supplies the runnable market-basket query. Its deliverable is the 20 most frequent distinct product pairs. Deduplicate <code>(order_id, product_id)</code> first and enforce <code>a.product_id &lt; b.product_id</code>; this prevents self-pairs and reversed duplicates. The metric is co-occurrence count, despite the starter comment saying “revenue.”</p>
-<h4 id="solution-1--deliverable-2-performance-evidence">Deliverable 2 — Performance evidence<a class="heading-anchor" href="#solution-1--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--deliverable-2-performance-evidence">Deliverable 2: Performance evidence<a class="heading-anchor" href="#solution-1--deliverable-2-performance-evidence" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
@@ -1080,7 +1080,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Save the actual plan, execution time, buffer counts, and result reconciliation. The compact seed may correctly use a sequential scan; index presence does not guarantee index use.</p>
-<h4 id="solution-1--deliverable-3-stakeholder-queries">Deliverable 3 — Stakeholder queries<a class="heading-anchor" href="#solution-1--deliverable-3-stakeholder-queries" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--deliverable-3-stakeholder-queries">Deliverable 3: Stakeholder queries<a class="heading-anchor" href="#solution-1--deliverable-3-stakeholder-queries" aria-label="Link to this section">#</a></h4>
 <h5 id="solution-1--finance-ytd-budget-versus-actual">Finance: YTD budget versus actual<a class="heading-anchor" href="#solution-1--finance-ytd-budget-versus-actual" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
@@ -1105,7 +1105,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Expected grain: one row per category found in actuals or budget.</p>
 <h5 id="solution-1--marketing-campaign-assisted-purchases">Marketing: campaign-assisted purchases<a class="heading-anchor" href="#solution-1--marketing-campaign-assisted-purchases" aria-label="Link to this section">#</a></h5>
 <p>The learner query anchors on each customer&#x27;s first order and counts distinct customers with a campaign touch in the preceding seven days. The touch whitelist is <code>page_view</code>, <code>add_to_cart</code>, and <code>checkout</code>; campaign metadata on a different event type does not qualify. Document that definition: it is first-purchase assistance, not all-purchase event attribution from Day 48. Multiple campaigns can assist one customer, so campaign rows are not additive.</p>
-<h4 id="solution-1--deliverable-4-large-scale-design-note">Deliverable 4 — Large-scale design note<a class="heading-anchor" href="#solution-1--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--deliverable-4-large-scale-design-note">Deliverable 4: Large-scale design note<a class="heading-anchor" href="#solution-1--deliverable-4-large-scale-design-note" aria-label="Link to this section">#</a></h4>
 <p>For a hypothetical 100M-row deployment, record:</p>
 <ul>
 <li>candidate range partition keys (<code>orders.order_date</code>, <code>events.event_time</code>);</li>
@@ -1120,7 +1120,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>The current executable solution selects representative KPI, finance, and performance checks; the learner starter contains the product-pair and marketing queries that must also be discussed in the final write-up.</li>
 <li>All DDL in the solution transaction rolls back. Production changes require a separate reviewed migration.</li>
 </ul>
-<h4 id="solution-1--exercise-1-make-every-grain-transition-explicit">Exercise 1 — Make every grain transition explicit<a class="heading-anchor" href="#solution-1--exercise-1-make-every-grain-transition-explicit" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-make-every-grain-transition-explicit">Exercise 1: Make every grain transition explicit<a class="heading-anchor" href="#solution-1--exercise-1-make-every-grain-transition-explicit" aria-label="Link to this section">#</a></h4>
 <p>The executable <code>grain_map</code> states the key and row meaning for order values, customer LTV, and cohort/segment summary. A lower-grain join after aggregation would invalidate the metric.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1132,7 +1132,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 1, the chosen form is justified by this lesson-specific rationale: The executable <code>grain_map</code> states the key and row meaning for order values, customer LTV, and cohort/segment summary. Evaluate another form against the concrete expected result (one row per <code>step_name</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>step_name</code>; verify the result gains exactly one row carrying that <code>step_name</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population">Exercise 2 — Calculate funnel rates with a stable population<a class="heading-anchor" href="#solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population">Exercise 2: Calculate funnel rates with a stable population<a class="heading-anchor" href="#solution-1--exercise-2-calculate-funnel-rates-with-a-stable-population" aria-label="Link to this section">#</a></h4>
 <p>Start from all customers and derive the first valid timestamp at each ordered stage. A later event counts only when it occurs at or after the prior stage. Keep an independent buyer-without-view diagnostic, but do not mix it into the ordered conversion numerators.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1144,7 +1144,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 2, the chosen form is justified by this lesson-specific rationale: Start from all customers, left-join recent events, and use EXISTS for recent purchases. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add checkout and purchase events that occur before add-to-cart; they must not count as ordered checkout or purchase stages.</li>
 </ul>
-<h4 id="solution-1--exercise-3-reconcile-candidate-money-measures">Exercise 3 — Reconcile candidate money measures<a class="heading-anchor" href="#solution-1--exercise-3-reconcile-candidate-money-measures" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-reconcile-candidate-money-measures">Exercise 3: Reconcile candidate money measures<a class="heading-anchor" href="#solution-1--exercise-3-reconcile-candidate-money-measures" aria-label="Link to this section">#</a></h4>
 <p>Line values and payments each aggregate to <code>order_id</code> before joining orders. The answer retains stored total, calculated line total, paid amount, and both differences so stakeholders can choose a named measure.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1156,7 +1156,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 3, the chosen form is justified by this lesson-specific rationale: Line values and payments each aggregate to <code>order_id</code> before joining orders. Evaluate another form against the concrete expected result (at most 50 rows keyed by <code>order_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining <code>o.order_id</code>.</li>
 </ul>
-<h4 id="solution-1--exercise-4-include-direct-attribution">Exercise 4 — Include direct attribution<a class="heading-anchor" href="#solution-1--exercise-4-include-direct-attribution" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-include-direct-attribution">Exercise 4: Include direct attribution<a class="heading-anchor" href="#solution-1--exercise-4-include-direct-attribution" aria-label="Link to this section">#</a></h4>
 <p>Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Missing touches become <code>(direct)</code>, so attribution counts reconcile to the purchase population.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1168,7 +1168,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 4, the chosen form is justified by this lesson-specific rationale: Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Evaluate another form against the concrete expected result (one row per <code>attribution_bucket</code>, and <code>purchases</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>attribution_bucket</code>, and <code>purchases</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-5-compare-index-column-order">Exercise 5 — Compare index column order<a class="heading-anchor" href="#solution-1--exercise-5-compare-index-column-order" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-compare-index-column-order">Exercise 5: Compare index column order<a class="heading-anchor" href="#solution-1--exercise-5-compare-index-column-order" aria-label="Link to this section">#</a></h4>
 <p><code>(customer_id, order_date)</code> supports one customer&#x27;s history; <code>(order_date, customer_id)</code> better anchors a global date-bound scan. EXPLAIN evidence is environment-specific and both indexes add write cost.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1180,7 +1180,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 5, the chosen form is justified by this lesson-specific rationale: <code>(customer_id, order_date)</code> supports one customer&#x27;s history; <code>(order_date, customer_id)</code> better anchors a global date-bound scan. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.</li>
 </ul>
-<h4 id="solution-1--exercise-6-publish-a-metric-contract">Exercise 6 — Publish a metric contract<a class="heading-anchor" href="#solution-1--exercise-6-publish-a-metric-contract" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-publish-a-metric-contract">Exercise 6: Publish a metric contract<a class="heading-anchor" href="#solution-1--exercise-6-publish-a-metric-contract" aria-label="Link to this section">#</a></h4>
 <p>The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. This prevents silent semantic changes between teams.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1192,7 +1192,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. Evaluate another form against the concrete expected result (one row per <code>metric_name</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>metric_name</code>; verify the result gains exactly one row carrying that <code>metric_name</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-7-publish-defensible-basket-metrics">Exercise 7 — Publish defensible basket metrics<a class="heading-anchor" href="#solution-1--exercise-7-publish-defensible-basket-metrics" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-publish-defensible-basket-metrics">Exercise 7: Publish defensible basket metrics<a class="heading-anchor" href="#solution-1--exercise-7-publish-defensible-basket-metrics" aria-label="Link to this section">#</a></h4>
 <p>Distinct baskets feed support, confidence, and lift. A minimum pair count limits noise, and product IDs resolve ordering ties deterministically.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1204,7 +1204,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-59 Exercise 7, the chosen form is justified by this lesson-specific rationale: Distinct baskets feed support, confidence, and lift. Evaluate another form against the concrete expected result (at most 20 rows keyed by <code>order_item_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining <code>lift DESC, together DESC, product_a, product_b</code>.</li>
 </ul>
-<h4 id="solution-1--exercise-8-assemble-cross-domain-controls">Exercise 8 — Assemble cross-domain controls<a class="heading-anchor" href="#solution-1--exercise-8-assemble-cross-domain-controls" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-assemble-cross-domain-controls">Exercise 8: Assemble cross-domain controls<a class="heading-anchor" href="#solution-1--exercise-8-assemble-cross-domain-controls" aria-label="Link to this section">#</a></h4>
 <p>Named counts and money totals provide a small sign-off surface for customer, order, line, and payment domains. Any non-equivalence must be explained by a declared metric definition rather than hidden.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1586,16 +1586,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-59 — Final Capstone Part2.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-59 — Final Capstone Part2.
 
 I have completed the direct catalog prerequisite: `sql-58`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day59_final_capstone_part2.md
@@ -1622,7 +1622,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1733,18 +1733,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

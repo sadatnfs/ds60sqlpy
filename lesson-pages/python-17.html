@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-17-pandas-series-dataframes-and-indexing">Day 17 — pandas Series, DataFrames, and Indexing<a class="heading-anchor" href="#guide--day-17-pandas-series-dataframes-and-indexing" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-17-pandas-series-dataframes-and-indexing">Day 17: pandas Series, DataFrames, and Indexing<a class="heading-anchor" href="#guide--day-17-pandas-series-dataframes-and-indexing" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A DataFrame is a labeled table. Unlike a spreadsheet cell reference, a pandas selection has a shape, dtype, index, and alignment behavior.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,10 +405,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 17 — pandas series, dataframes, and indexing to practice labeled tabular data, row grain, indexes, selection, and vectorized columns and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 17; pandas series, dataframes, and indexing to practice labeled tabular data, row grain, indexes, selection, and vectorized columns and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
-<p>A Series is a one-dimensional labeled array; a DataFrame is a table of labeled columns sharing an index. Before manipulating a DataFrame, state its <strong>row grain</strong>—what one row represents—and what makes a row unique. Column names carry variable meaning; the index carries row labels, which may or may not be a business key.</p>
+<p>A Series is a one-dimensional labeled array; a DataFrame is a table of labeled columns sharing an index. Before manipulating a DataFrame, state its <strong>row grain</strong>, what one row represents, and what makes a row unique. Column names carry variable meaning; the index carries row labels, which may or may not be a business key.</p>
 <p><code>loc</code> selects by labels and boolean masks; <code>iloc</code> selects by integer positions. Pandas aligns many operations by index labels rather than blindly by current row position. Prefer vectorized column operations and explicit <code>.loc</code> assignment. Inspect shape, dtypes, missingness, and a small sample before trusting a calculation.</p>
 <h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>frame.loc[mask, [&quot;name&quot;, &quot;score&quot;]]</code> has two selectors: rows before the comma and columns after it. <code>frame.iloc[:3, 0]</code> uses positions instead of labels. <code>frame[&quot;rate&quot;] = frame[&quot;part&quot;] / frame[&quot;whole&quot;]</code> aligns the two Series by index and assigns the computed Series under a new column label.</p>
-<h5 id="guide--worked-example-1-build-and-inspect-a-tiny-labeled-table">Worked example 1 — Build and inspect a tiny labeled table<a class="heading-anchor" href="#guide--worked-example-1-build-and-inspect-a-tiny-labeled-table" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-build-and-inspect-a-tiny-labeled-table">Worked example 1: Build and inspect a tiny labeled table<a class="heading-anchor" href="#guide--worked-example-1-build-and-inspect-a-tiny-labeled-table" aria-label="Link to this section">#</a></h5>
 <p>Use constructed data so the example is fully offline. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -434,7 +434,7 @@ sales <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`((3, 3), {...}, True)`. The dtype spellings may vary slightly; each row represents one order and `order_id` is unique here.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-filter-rows-and-derive-a-column-without-a-loop">Worked example 2 — Filter rows and derive a column without a loop<a class="heading-anchor" href="#guide--worked-example-2-filter-rows-and-derive-a-column-without-a-loop" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-filter-rows-and-derive-a-column-without-a-loop">Worked example 2: Filter rows and derive a column without a loop<a class="heading-anchor" href="#guide--worked-example-2-filter-rows-and-derive-a-column-without-a-loop" aria-label="Link to this section">#</a></h5>
 <p>A mask selects west orders; a vectorized expression creates tax. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">west <span class="syntax-operator">=</span> sales<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span>sales<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>eq<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 sales <span class="syntax-operator">=</span> sales<span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>amount_with_tax<span class="syntax-operator">=</span>sales<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">1.08</span><span class="syntax-punctuation">)</span>
@@ -527,10 +527,10 @@ first_value <span class="syntax-operator">=</span> sales<span class="syntax-oper
 <ul>
 <li><a href="python-17.html#learner">Open the learner notebook</a></li>
 <li><a href="python-17.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-18.html#guide">Next: Day 18 — I/O and cleaning</a></li>
+<li><a href="python-18.html#guide">Next: Day 18; I/O and cleaning</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-17`
 (Day 17 — pandas Series, DataFrames, and Indexing). Direct catalog prerequisites: `python-16`.
 I have completed the direct prerequisites: `python-16`. Emphasize labeled tabular data, row grain, indexes, selection, and vectorized columns.
@@ -804,10 +804,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-17-solutions-pandas-intro-series-dataframe-index">Day 17 — Solutions: Pandas Intro (Series, DataFrame, Index)<a class="heading-anchor" href="#solution-1--day-17-solutions-pandas-intro-series-dataframe-index" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-17-solutions-pandas-intro-series-dataframe-index">Day 17: Solutions: Pandas Intro (Series, DataFrame, Index)<a class="heading-anchor" href="#solution-1--day-17-solutions-pandas-intro-series-dataframe-index" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>labeled tabular data, row grain, indexes, selection, and vectorized columns</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
-<p>A Series is a one-dimensional labeled array; a DataFrame is a table of labeled columns sharing an index. Before manipulating a DataFrame, state its <strong>row grain</strong>—what one row represents—and what makes a row unique. Column names carry variable meaning; the index carries row labels, which may or may not be a business key.</p>
+<p>A Series is a one-dimensional labeled array; a DataFrame is a table of labeled columns sharing an index. Before manipulating a DataFrame, state its <strong>row grain</strong>, what one row represents, and what makes a row unique. Column names carry variable meaning; the index carries row labels, which may or may not be a business key.</p>
 <p><code>loc</code> selects by labels and boolean masks; <code>iloc</code> selects by integer positions. Pandas aligns many operations by index labels rather than blindly by current row position. Prefer vectorized column operations and explicit <code>.loc</code> assignment. Inspect shape, dtypes, missingness, and a small sample before trusting a calculation.</p>
 <h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -820,8 +820,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>labeled tabular data, row grain, indexes, selection, and vectorized columns</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Using the lesson DataFrame, select rows where <code>time == &#x27;Dinner&#x27;</code>, then compute the mean of the selected <code>tip</code> values. <strong>Before code:</strong> state the row grain and write the mask separately. <strong>Expected behavior:</strong> the result is one scalar equal to <code>dinner_rows[&#x27;tip&#x27;].mean()</code>. <strong>Constraints:</strong> use <code>.loc</code> and do not loop. <strong>Verify:</strong> assert every selected row is Dinner and the selection is non-empty before reporting the mean.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Using the lesson DataFrame, select rows where <code>time == &#x27;Dinner&#x27;</code>, then compute the mean of the selected <code>tip</code> values. Before code: state the row grain and write the mask separately. Expected behavior: the result is one scalar equal to <code>dinner_rows[&#x27;tip&#x27;].mean()</code>. Constraints: use <code>.loc</code> and do not loop. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert every selected row is Dinner and the selection is non-empty before reporting the mean. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -847,7 +847,7 @@ average_tip <span class="syntax-operator">=</span> dinner_rows<span class="synta
 <span class="syntax-keyword">assert</span> average_tip <span class="syntax-operator">==</span> dinner_rows<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3.5</span></code></pre>
 <p>The fixture grain is one restaurant check per row. Keeping <code>dinner_mask</code>, <code>dinner_rows</code>, and the scalar aggregation separate makes each shape transition inspectable.</p>
 <p><strong>Verification evidence:</strong> assert every selected row is Dinner and the selection is non-empty before reporting the mean.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add a Boolean <code>is_big_party</code> column that is <code>True</code> exactly when <code>size &gt;= 5</code>. <strong>Constraints:</strong> use one vectorized comparison and explicit assignment; do not use row-wise <code>apply</code>. <strong>Verify:</strong> compare the new column with <code>df[&#x27;size&#x27;].ge(5)</code>, inspect both True and False rows, and confirm row count/index are unchanged.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Add a Boolean <code>is_big_party</code> column that is <code>True</code> exactly when <code>size &gt;= 5</code>. Constraints: use one vectorized comparison and explicit assignment; do not use row-wise <code>apply</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: compare the new column with <code>df[&#x27;size&#x27;].ge(5)</code>, inspect both True and False rows, and confirm row count/index are unchanged. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.</p>
 <pre class="highlighted-code"><code class="language-python">df <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>is_big_party<span class="syntax-operator">=</span>df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">size</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>ge<span class="syntax-punctuation">(</span><span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
@@ -858,7 +858,7 @@ average_tip <span class="syntax-operator">=</span> dinner_rows<span class="synta
 <span class="syntax-keyword">assert</span> df<span class="syntax-operator">.</span>index<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>original_df<span class="syntax-operator">.</span>index<span class="syntax-punctuation">)</span></code></pre>
 <p>Vectorized comparison preserves index alignment and avoids row loops.</p>
 <p><strong>Verification evidence:</strong> compare the new column with <code>df[&#x27;size&#x27;].ge(5)</code>, inspect both True and False rows, and confirm row count/index are unchanged.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a safe <code>tip_rate = tip / total_bill</code>, treating a zero bill as missing rather than infinity, then sort descending by <code>tip_rate</code>. <strong>Constraints:</strong> preserve the unsorted source in a separate name and choose where missing rates appear. <strong>Verify:</strong> assert there are no infinite values and that non-missing rates are monotonically decreasing.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a safe <code>tip_rate = tip / total_bill</code>, treating a zero bill as missing rather than infinity, then sort descending by <code>tip_rate</code>. Constraints: preserve the unsorted source in a separate name and choose where missing rates appear. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert there are no infinite values and that non-missing rates are monotonically decreasing. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -869,32 +869,32 @@ ordered <span class="syntax-operator">=</span> with_rate<span class="syntax-oper
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> np<span class="syntax-operator">.</span>isinf<span class="syntax-punctuation">(</span>ordered<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>any<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> ordered<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">tip_rate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>dropna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>is_monotonic_decreasing</code></pre>
 <p><strong>Verification evidence:</strong> assert there are no infinite values and that non-missing rates are monotonically decreasing.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the difference between <code>.loc[labels]</code> and <code>.iloc[positions]</code> after an integer index has been reordered. <strong>Progressive hint:</strong> Labels are not automatically row positions. <strong>Verify:</strong> After reordering integer labels, assert <code>.loc</code> returns the requested labels and <code>.iloc</code> returns the requested positions; list both resulting indexes.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the difference between <code>.loc[labels]</code> and <code>.iloc[positions]</code> after an integer index has been reordered. Progressive hint: Labels are not automatically row positions. Then compare the prediction with this proof target: After reordering integer labels, assert <code>.loc</code> returns the requested labels and <code>.iloc</code> returns the requested positions; list both resulting indexes. This makes labeled tabular data, row grain, indexes, selection, and vectorized columns observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> After reordering integer labels, assert <code>.loc</code> returns the requested labels and <code>.iloc</code> returns the requested positions; list both resulting indexes.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? <strong>Progressive hint:</strong> Pandas aligns many labeled objects by index. <strong>Verify:</strong> Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a boolean mask through creation, alignment by index, and row selection. What happens if mask/index labels differ? Progressive hint: Pandas aligns many labeled objects by index. Record the named value, shape, label, or iterator position needed to establish: Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches. The trace exposes labeled tabular data, row grain, indexes, selection, and vectorized columns directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Display mask and frame indexes side by side, then assert aligned selection for matching labels and the documented error/reindex policy for mismatches.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Create a safe <code>tip_rate</code> column that yields missing values rather than infinity when <code>total_bill</code> is zero. <strong>Progressive hint:</strong> Mask or replace the zero denominator before division. <strong>Verify:</strong> Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Create a safe <code>tip_rate</code> column that yields missing values rather than infinity when <code>total_bill</code> is zero. Progressive hint: Mask or replace the zero denominator before division. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity. That connects the answer to labeled tabular data, row grain, indexes, selection, and vectorized columns.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert zero bills yield missing rates, positive bills yield the calculated ratio, and the entire column contains no positive/negative infinity.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair chained assignment on a filtered DataFrame and explain when to use <code>.loc</code> or an explicit <code>.copy()</code>. <strong>Progressive hint:</strong> Make ownership and target rows explicit. <strong>Verify:</strong> Turn chained-assignment warnings into explicit <code>.loc</code> or <code>.copy()</code> ownership; assert the intended frame changes and the unintended frame does not.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair chained assignment on a filtered DataFrame and explain when to use <code>.loc</code> or an explicit <code>.copy()</code>. Progressive hint: Make ownership and target rows explicit. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Turn chained-assignment warnings into explicit <code>.loc</code> or <code>.copy()</code> ownership; assert the intended frame changes and the unintended frame does not. The diagnosis depends on labeled tabular data, row grain, indexes, selection, and vectorized columns.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Turn chained-assignment warnings into explicit <code>.loc</code> or <code>.copy()</code> ownership; assert the intended frame changes and the unintended frame does not.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Compute a statistic for a possibly empty selection and return <code>None</code> instead of silently presenting <code>NaN</code> as a real result. <strong>Progressive hint:</strong> Check <code>.empty</code> before aggregating when absence has business meaning. <strong>Verify:</strong> Test nonempty and empty selections; assert the former returns the statistic and the latter returns <code>None</code>, not a value presented as meaningful.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Compute a statistic for a possibly empty selection and return <code>None</code> instead of silently presenting <code>NaN</code> as a real result. Progressive hint: Check <code>.empty</code> before aggregating when absence has business meaning. Values below, at, and above the named boundary must produce the evidence Test nonempty and empty selections; assert the former returns the statistic and the latter returns <code>None</code>, not a value presented as meaningful. Those cases show how labeled tabular data, row grain, indexes, selection, and vectorized columns behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test nonempty and empty selections; assert the former returns the statistic and the latter returns <code>None</code>, not a value presented as meaningful.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>State a DataFrame&#x27;s row grain, column meanings, and index role before selecting or deriving data. Prefer vectorized, explicit assignments.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-4-5-labels-positions-and-alignment">Shared implementation for Exercises 4–5 — Labels, positions, and alignment<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-labels-positions-and-alignment" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-labels-positions-and-alignment">Shared implementation for Exercises 4–5: Labels, positions, and alignment<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-labels-positions-and-alignment" aria-label="Link to this section">#</a></h5>
 <p><code>.loc</code> selects index labels; <code>.iloc</code> selects zero-based positions. A boolean Series is aligned by labels, so a mismatched index can raise or select unexpected rows. Build masks from the frame being filtered.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-6-8-safe-derivation-and-explicit-ownership">Shared implementation for Exercises 6–8 — Safe derivation and explicit ownership<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-safe-derivation-and-explicit-ownership" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-safe-derivation-and-explicit-ownership">Shared implementation for Exercises 6–8: Safe derivation and explicit ownership<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-safe-derivation-and-explicit-ownership" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -1039,16 +1039,16 @@ dinners<span class="syntax-punctuation">[</span><span class="syntax-string">&quo
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-17`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-17`
 (Day 17 — pandas Series, DataFrames, and Indexing). Direct catalog prerequisites: `python-16`.
 I have completed the direct prerequisites: `python-16`. Emphasize labeled tabular data, row grain, indexes, selection, and vectorized columns.
 Read `python/ds-60day/companion-guides/day17_pandas_intro.md` and use the learner notebook
@@ -1063,7 +1063,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1174,18 +1174,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -252,7 +252,7 @@ API and mechanism reference: [PyTorch training mechanics](https://docs.pytorch.o
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-015, Full supervised fine-tuning of a tiny causal decoder.

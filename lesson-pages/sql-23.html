@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-23-common-table-expressions-ctes-introduction-companion-guide">Day 23 — Common Table Expressions (CTEs) Introduction (Companion Guide)<a class="heading-anchor" href="#guide--day-23-common-table-expressions-ctes-introduction-companion-guide" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-23-common-table-expressions-ctes-introduction-companion-guide">Day 23: Common Table Expressions (CTEs) Introduction (Companion Guide)<a class="heading-anchor" href="#guide--day-23-common-table-expressions-ctes-introduction-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Intermediate</li>
-<li><strong>Prerequisites:</strong> <a href="sql-22.html#guide">Day 22 — advanced windows</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-22.html#guide">Day 22; advanced windows</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-23.html#learner">learner SQL</a> · <a href="sql-23.html#solution-1">solution reasoning</a> · <a href="sql-23.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-23 — CTEs Intro</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-23; CTEs Intro</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-23/lesson/workspace/sql/postgres-60day/day23_ctes_intro.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -458,7 +458,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day23_ctes_intro.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is CTE, Inlining, Materialization. Its worked SQL reads or creates <code>orders</code>, <code>order_items</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -522,13 +522,13 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Trace <code>order_lines</code> at one row per order, then <code>top_customers</code> at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.</p>
 <h4 id="guide--practice-assumptions-and-review-method">Practice assumptions and review method<a class="heading-anchor" href="#guide--practice-assumptions-and-review-method" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><strong>Focus:</strong> Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.</li>
+<li><strong>Focus:</strong> Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.</li>
 <li><strong>Assumptions:</strong> Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless <code>MATERIALIZED</code> is requested.</li>
 <li><strong>Failure to watch for:</strong> A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.</li>
 <li><strong>Review loop:</strong> predict the row grain and NULL/order behavior, run the query, inspect a bounded sample, and reconcile counts or totals before accepting the result.</li>
 </ul>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
-<p>Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.</p>
+<p>Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.</p>
 <p>Attempt each prompt in a scratch SQL file before opening the solution. For every result, write its row grain and expected shape first.</p>
 <ol>
 <li><strong>Query writing:</strong> Build order-level net value in one CTE and summarize it by customer in the outer query. <strong>Progressive hint:</strong> Name the one-row-per-order grain before changing to customer grain. <strong>Inputs/evidence:</strong> For sql-23 Exercise 1, read from <code>orders</code>, and <code>order_items</code>. Build the answer toward <code>customer_id</code>, <code>order_count</code>, and <code>net_revenue</code>; keep <code>customer_id</code> visible whenever the result has row-level grain. <strong>Expected result/shape:</strong> For sql-23 Exercise 1, expected output: One row per ordering customer. The final columns are <code>customer_id</code>, <code>order_count</code>, and <code>net_revenue</code>. The final order is <code>net_revenue DESC, ov.customer_id</code>. <strong>Verify:</strong> For sql-23 Exercise 1, independently aggregate <code>orders</code>, and <code>order_items</code> by <code>customer_id</code>; require one output row for every distinct <code>customer_id</code> tuple and compare <code>order_count</code>, and <code>net_revenue</code> tuple by tuple. Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>net_revenue</code> for the existing <code>customer_id</code> tuple and verify the new tuple appears exactly once.</li>
@@ -552,7 +552,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Is <code>MATERIALIZED</code> or <code>NOT MATERIALIZED</code> used only for a measured reason?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-24.html#guide">Day 24 — recursive CTEs</a>.</p>
+<p>Continue to <a href="sql-24.html#guide">Day 24; recursive CTEs</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Learning objectives</p>
 <ul>
@@ -596,8 +596,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>WITH queries: https://www.postgresql.org/docs/current/queries-with.html</li>
 <li>MATERIALIZED/NOT MATERIALIZED: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-MATERIALIZED</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-23 — CTEs Intro.
 
 I have completed the direct catalog prerequisite: `sql-22`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -776,7 +776,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-23-solutions-common-table-expressions-ctes-introduction">Day 23 solutions — Common Table Expressions (CTEs) Introduction<a class="heading-anchor" href="#solution-1--day-23-solutions-common-table-expressions-ctes-introduction" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-23-solutions-common-table-expressions-ctes-introduction">Day 23 solutions: Common Table Expressions (CTEs) Introduction<a class="heading-anchor" href="#solution-1--day-23-solutions-common-table-expressions-ctes-introduction" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -799,12 +799,12 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>These answers align one-for-one with <a href="sql-23.html#learner">day23_ctes_intro.sql</a>. Run only against the disposable <code>advanced_sql_training</code> database. The executable companion wraps every answer in <code>BEGIN</code>/<code>ROLLBACK</code>. The snippets below assume the lesson&#x27;s <code>SET search_path TO training, public;</code> statement. Run the complete executable companion when you want a self-contained check.</p>
 <h4 id="solution-1--reading-contract">Reading contract<a class="heading-anchor" href="#solution-1--reading-contract" aria-label="Link to this section">#</a></h4>
 <ul>
-<li><strong>Focus:</strong> Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.</li>
+<li><strong>Focus:</strong> Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.</li>
 <li><strong>Assumptions:</strong> Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless <code>MATERIALIZED</code> is requested.</li>
 <li><strong>Primary pitfall:</strong> A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.</li>
 <li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
 </ul>
-<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Build order-level net value in one CTE and summarize it by customer in the outer query.</p>
 <p><strong>Reasoning:</strong> Name the one-row-per-order grain before changing to customer grain.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -843,7 +843,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-23 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name the one-row-per-order grain before changing to customer grain. Evaluate another form against the concrete expected result (One row per ordering customer) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>net_revenue</code> for the existing <code>customer_id</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Use one category-revenue CTE twice to return the highest category and total revenue.</p>
 <p><strong>Reasoning:</strong> A named aggregate can support multiple scalar reads without repeating the business formula.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -883,7 +883,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-23 Exercise 2, the chosen form is justified by this lesson-specific rationale: A named aggregate can support multiple scalar reads without repeating the business formula. Evaluate another form against the concrete expected result (One summary row) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>order_item_id</code>; verify the result gains exactly one row carrying that <code>order_item_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Create staged payment reconciliation CTEs at order grain.</p>
 <p><strong>Reasoning:</strong> Aggregate payment detail before joining to orders and preserve unpaid orders with a left join.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -927,7 +927,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-23 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate payment detail before joining to orders and preserve unpaid orders with a left join. Evaluate another form against the concrete expected result (One row per order) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Compare <code>MATERIALIZED</code> and <code>NOT MATERIALIZED</code> syntax on a side-effect-free filtered order CTE without claiming one is universally faster.</p>
 <p><strong>Reasoning:</strong> Both return the same rows; planning effects require <code>EXPLAIN</code> evidence in a representative environment.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -966,7 +966,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-23 Exercise 4, the chosen form is justified by this lesson-specific rationale: Both return the same rows; planning effects require <code>EXPLAIN</code> evidence in a representative environment. Evaluate another form against the concrete expected result (Two count rows with equal values) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Repair a multi-stage query whose repeated <code>total</code> column names are ambiguous by assigning grain-specific aliases.</p>
 <p><strong>Reasoning:</strong> Name measures <code>order_value</code>, <code>customer_revenue</code>, and similar rather than carrying generic <code>total</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1011,7 +1011,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-23 Exercise 5, the chosen form is justified by this lesson-specific rationale: Name measures <code>order_value</code>, <code>customer_revenue</code>, and similar rather than carrying generic <code>total</code>. Evaluate another form against the concrete expected result (One row per country) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>country_revenue</code> for the existing <code>country</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Use a data-modifying CTE to demonstrate an update and inspect its returned rows without persistence.</p>
 <p><strong>Reasoning:</strong> The outer lesson transaction rolls back; the CTE exposes changed rows as a relation.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1325,16 +1325,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-23 — CTEs Intro.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-23 — CTEs Intro.
 
 I have completed the direct catalog prerequisite: `sql-22`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day23_ctes_intro.md
@@ -1361,7 +1361,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1472,18 +1472,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

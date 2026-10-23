@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,9 +369,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-45-end-to-end-modeling-mini-project">Day 45 — End-to-End Modeling Mini-Project<a class="heading-anchor" href="#guide--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-45-end-to-end-modeling-mini-project">Day 45: End-to-End Modeling Mini-Project<a class="heading-anchor" href="#guide--day-45-end-to-end-modeling-mini-project" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-45</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> first-run Seaborn cache</p>
-<p>This checkpoint integrates data loading, leak-safe preprocessing, validation, evaluation, and a saved pipeline. The objective is reproducible evidence—not the highest possible score.</p>
+<p>This checkpoint integrates data loading, leak-safe preprocessing, validation, evaluation, and a saved pipeline. The objective is reproducible evidence, not the highest possible score.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of the project, you can:</p>
 <ul>
@@ -489,7 +489,7 @@ pipeline <span class="syntax-operator">=</span> make_pipeline<span class="syntax
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact">Concept deep dive — an end-to-end evidence chain from decision to reproducible artifact<a class="heading-anchor" href="#guide--concept-deep-dive-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact">Concept deep dive: an end-to-end evidence chain from decision to reproducible artifact<a class="heading-anchor" href="#guide--concept-deep-dive-an-end-to-end-evidence-chain-from-decision-to-reproducible-artifact" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>An end-to-end project is a sequence of contracts, not one long notebook: problem framing defines the decision and prediction time; data validation defines row grain and allowed values; splitting protects the evaluation boundary; a pipeline binds preprocessing to the model; metrics and error analysis support a scoped claim; artifact packaging preserves the exact fitted workflow.</p>
 <p>A baseline is a decision checkpoint. Added complexity is justified only if it improves a declared metric or operational property under the same data and evaluation design. Reproducibility also requires data identity, environment, seed, commands, and limitations.</p>
@@ -500,7 +500,7 @@ pipeline <span class="syntax-operator">=</span> make_pipeline<span class="syntax
 <li><strong>manifest + acceptance gates:</strong> connect data hash, schema, code/environment, metrics, limitations, and artifact identity.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline">Focused example A — require the candidate to beat a same-split baseline<a class="heading-anchor" href="#guide--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline">Focused example A: require the candidate to beat a same-split baseline<a class="heading-anchor" href="#guide--focused-example-a-require-the-candidate-to-beat-a-same-split-baseline" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
 <span class="syntax-keyword">from</span> sklearn.dummy <span class="syntax-keyword">import</span> DummyClassifier
@@ -526,7 +526,7 @@ scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <span class="syntax-keyword">assert</span> scores<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">candidate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span> scores<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> The model must improve the declared held-out metric over the simple prior baseline on identical rows.</p>
 <p><strong>Assumption to name:</strong> ROC AUC and this split reflect the decision; the test result was not repeatedly consulted during development.</p>
-<h5 id="guide--focused-example-b-turn-completion-into-explicit-acceptance-gates">Focused example B — turn completion into explicit acceptance gates<a class="heading-anchor" href="#guide--focused-example-b-turn-completion-into-explicit-acceptance-gates" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-turn-completion-into-explicit-acceptance-gates">Focused example B: turn completion into explicit acceptance gates<a class="heading-anchor" href="#guide--focused-example-b-turn-completion-into-explicit-acceptance-gates" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python">evidence <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">data_contract_passed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
@@ -590,31 +590,31 @@ gates <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <ol>
 <li>Load the dataset and create train/validation/test boundaries.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — an end-to-end evidence chain from decision to reproducible artifact — record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
+<p><strong>Verify:</strong> Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
 <ol>
 <li>Preprocess with <code>ColumnTransformer</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — an end-to-end evidence chain from decision to reproducible artifact — fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
+<p><strong>Verify:</strong> Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
 <ol>
 <li>Train a baseline model.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — an end-to-end evidence chain from decision to reproducible artifact — fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
+<p><strong>Verify:</strong> Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
 <ol>
 <li>Evaluate with appropriate metrics and cross-validation.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 4 — an end-to-end evidence chain from decision to reproducible artifact — print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
+<p><strong>Verify:</strong> Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
 <ol>
 <li>Save the model and preprocessing together with <code>joblib</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 5 — an end-to-end evidence chain from decision to reproducible artifact — save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
+<p><strong>Verify:</strong> Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
 <ol>
 <li>Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 6 — an end-to-end evidence chain from decision to reproducible artifact — include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
+<p><strong>Verify:</strong> Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
 <ol>
 <li>Optionally adapt the Day 44 FastAPI service.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 7 — an end-to-end evidence chain from decision to reproducible artifact — if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
+<p><strong>Verify:</strong> Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Start by writing the target, row unit, and split before feature engineering.</li>
@@ -628,31 +628,31 @@ gates <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <ol>
 <li><strong>Data-contract gate:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint. <strong>Progressive hint:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</li>
 </ol>
-<p><strong>Verify:</strong> Data-contract gate — run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
+<p><strong>Verify:</strong> Data-contract gate; run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
 <ol>
 <li><strong>Leakage audit:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field. <strong>Progressive hint:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</li>
 </ol>
-<p><strong>Verify:</strong> Leakage audit — save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
+<p><strong>Verify:</strong> Leakage audit; save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
 <ol>
 <li><strong>Baseline ladder:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results. <strong>Progressive hint:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</li>
 </ol>
-<p><strong>Verify:</strong> Baseline ladder — print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
+<p><strong>Verify:</strong> Baseline ladder; print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
 <ol>
 <li><strong>Operating-policy selection:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it. <strong>Progressive hint:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</li>
 </ol>
-<p><strong>Verify:</strong> Operating-policy selection — print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
+<p><strong>Verify:</strong> Operating-policy selection; print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
 <ol>
 <li><strong>Error-slice analysis:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values. <strong>Progressive hint:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</li>
 </ol>
-<p><strong>Verify:</strong> Error-slice analysis — for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
+<p><strong>Verify:</strong> Error-slice analysis; for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
 <ol>
 <li><strong>Artifact manifest:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes. <strong>Progressive hint:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</li>
 </ol>
-<p><strong>Verify:</strong> Artifact manifest — validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
+<p><strong>Verify:</strong> Artifact manifest; validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
 <ol>
 <li><strong>Fresh-process acceptance:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance. <strong>Progressive hint:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</li>
 </ol>
-<p><strong>Verify:</strong> Fresh-process acceptance — run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p>
+<p><strong>Verify:</strong> Fresh-process acceptance; run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -699,10 +699,10 @@ gates <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <ul>
 <li>Build in the <a href="python-45.html#learner">Day 45 learner notebook</a>.</li>
 <li>Use the differently-dataseted <a href="python-45.html#solution-1">Day 45 reference solution</a> only after producing your own evidence.</li>
-<li>Continue to <a href="python-46.html#guide">Day 46 — Deep Learning Overview</a>.</li>
+<li>Continue to <a href="python-46.html#guide">Day 46; Deep Learning Overview</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-45` — Day 45 — End-to-End Modeling Mini-Project.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1033,7 +1033,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-45-solutions-end-to-end-modeling-project">Day 45 — Solutions: End-to-End Modeling Project<a class="heading-anchor" href="#solution-1--day-45-solutions-end-to-end-modeling-project" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-45-solutions-end-to-end-modeling-project">Day 45: Solutions: End-to-End Modeling Project<a class="heading-anchor" href="#solution-1--day-45-solutions-end-to-end-modeling-project" aria-label="Link to this section">#</a></h3>
 <p>We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.</p>
 <p>Contents</p>
 <ul>
@@ -1042,7 +1042,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Exercise 3: Save model + artifacts; serve via FastAPI; write README instructions</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Problem framing and Pipeline</p>
+<p>Worked reference for Exercise 1; Problem framing and Pipeline</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
 <span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 <span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
@@ -1063,7 +1063,7 @@ pipe <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuat
 <li>Reproducibility: pin random_state and library versions</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — CV/tuning and holdout evaluation</p>
+<p>Worked reference for Exercise 2; CV/tuning and holdout evaluation</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> StratifiedKFold<span class="syntax-punctuation">,</span> GridSearchCV
 <span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> roc_auc_score<span class="syntax-punctuation">,</span> precision_recall_curve<span class="syntax-punctuation">,</span> average_precision_score
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -1091,7 +1091,7 @@ th_star<span class="syntax-punctuation">,</span> f1_star <span class="syntax-ope
 <li>Pick an operating threshold based on PR/F1 or business constraints (precision/recall tradeoff)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Save artifacts and serve via FastAPI</p>
+<p>Worked reference for Exercise 3; Save artifacts and serve via FastAPI</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
@@ -1164,90 +1164,90 @@ curl -s -X POST http://127.0.0.1:8000/predict -H <span class="syntax-string">&#x
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Load the dataset and create train/validation/test boundaries.</p>
 <p><strong>How to reason about it:</strong> Write the row unit, target, prediction time, and train/validation/test boundary before loading features. A stratified random split is valid only when entities and time do not require stronger separation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — an end-to-end evidence chain from decision to reproducible artifact — record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; an end-to-end evidence chain from decision to reproducible artifact; record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Preprocess with <code>ColumnTransformer</code>.</p>
 <p><strong>How to reason about it:</strong> Use ColumnTransformer to keep all learned preprocessing inside the pipeline. Test missing, unseen-category, dtype, and column-order behavior with tiny synthetic rows.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — an end-to-end evidence chain from decision to reproducible artifact — fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; an end-to-end evidence chain from decision to reproducible artifact; fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Train a baseline model.</p>
 <p><strong>How to reason about it:</strong> A baseline establishes the minimum useful comparison and catches broken evaluation. Include a dummy predictor and one simple model before tuning.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — an end-to-end evidence chain from decision to reproducible artifact — fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
-<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; an end-to-end evidence chain from decision to reproducible artifact; fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.</p>
+<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Evaluate with appropriate metrics and cross-validation.</p>
 <p><strong>How to reason about it:</strong> Cross-validation belongs only to development data. Report fold spread, choose metrics before results, and reserve the holdout for one frozen candidate and threshold.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 4 — an end-to-end evidence chain from decision to reproducible artifact — print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
-<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 4; an end-to-end evidence chain from decision to reproducible artifact; print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.</p>
+<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save the model and preprocessing together with <code>joblib</code>.</p>
 <p><strong>How to reason about it:</strong> Serialize preprocessing and model together, under an ignored artifacts path. Record dependency/model/schema versions and validate reload parity in a fresh process.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 5 — an end-to-end evidence chain from decision to reproducible artifact — save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
-<h5 id="solution-1--exercise-6-original-lesson-practice">Exercise 6 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-6-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 5; an end-to-end evidence chain from decision to reproducible artifact; save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.</p>
+<h5 id="solution-1--exercise-6-original-lesson-practice">Exercise 6: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-6-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write a short README-style section in the notebook covering rationale, metrics, limitations, and next steps.</p>
 <p><strong>How to reason about it:</strong> The README-style handoff must state exact commands, data origin, metric definitions, limitations, and output locations. A narrative without reproduction evidence is incomplete.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 6 — an end-to-end evidence chain from decision to reproducible artifact — include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
-<h5 id="solution-1--exercise-7-original-lesson-practice">Exercise 7 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-7-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 6; an end-to-end evidence chain from decision to reproducible artifact; include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.</p>
+<h5 id="solution-1--exercise-7-original-lesson-practice">Exercise 7: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-7-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally adapt the Day 44 FastAPI service.</p>
 <p><strong>How to reason about it:</strong> Serving is optional and should reuse the saved pipeline and schema rather than rebuilding preprocessing. Test the API boundary before adding network or container complexity.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 7 — an end-to-end evidence chain from decision to reproducible artifact — if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
-<h5 id="solution-1--exercise-8-data-contract-gate">Exercise 8 — Data-contract gate<a class="heading-anchor" href="#solution-1--exercise-8-data-contract-gate" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 7; an end-to-end evidence chain from decision to reproducible artifact; if the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.</p>
+<h5 id="solution-1--exercise-8-data-contract-gate">Exercise 8: Data-contract gate<a class="heading-anchor" href="#solution-1--exercise-8-data-contract-gate" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.</p>
 <p><strong>Reasoning before implementation:</strong> Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.</p>
 <p>The checks should fail with actionable field names and counts. Preserve the raw input, then create a validated copy for modeling. A row fingerprint must be stable across operating systems; canonicalize column order and serialization or hash the original immutable file.</p>
 <p>Record what was excluded and why. Quietly dropping invalid rows changes the training population and can make later metrics impossible to reproduce.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Data-contract gate — run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
-<h5 id="solution-1--exercise-9-leakage-audit">Exercise 9 — Leakage audit<a class="heading-anchor" href="#solution-1--exercise-9-leakage-audit" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Data-contract gate; run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.</p>
+<h5 id="solution-1--exercise-9-leakage-audit">Exercise 9: Leakage audit<a class="heading-anchor" href="#solution-1--exercise-9-leakage-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a feature-by-feature table with availability time, source, transformation fit scope, and leakage decision. Investigate at least one suspicious post-outcome field.</p>
 <p><strong>Reasoning before implementation:</strong> Ask whether the value exists at prediction time and whether it was computed using future rows or target information.</p>
 <p>Remove or quarantine post-outcome fields before model comparison, then show how metrics change. A dramatic decrease is evidence the earlier result was not deployable, not evidence that the corrected pipeline became worse.</p>
 <p>Version the audit beside the model. Feature names alone are insufficient: rolling aggregates and target encoders can leak through their time window or fit scope even when the raw field is available.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Leakage audit — save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
-<h5 id="solution-1--exercise-10-baseline-ladder">Exercise 10 — Baseline ladder<a class="heading-anchor" href="#solution-1--exercise-10-baseline-ladder" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Leakage audit; save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.</p>
+<h5 id="solution-1--exercise-10-baseline-ladder">Exercise 10: Baseline ladder<a class="heading-anchor" href="#solution-1--exercise-10-baseline-ladder" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Evaluate a dummy strategy, a simple linear/tree model, and one selected candidate on identical folds. Define a minimum practical improvement before seeing results.</p>
 <p><strong>Reasoning before implementation:</strong> Use paired fold scores and include runtime/complexity. A statistically detectable gain may still be operationally irrelevant.</p>
 <p>Keep preprocessing comparable and report mean, spread, and per-fold deltas. The dummy baseline validates class prevalence and metric direction. The simple baseline tests whether added complexity earns its maintenance cost.</p>
 <p>If the selected candidate misses the predeclared improvement, document that finding rather than optimizing the acceptance criterion after the fact.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Baseline ladder — print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
-<h5 id="solution-1--exercise-11-operating-policy-selection">Exercise 11 — Operating-policy selection<a class="heading-anchor" href="#solution-1--exercise-11-operating-policy-selection" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Baseline ladder; print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.</p>
+<h5 id="solution-1--exercise-11-operating-policy-selection">Exercise 11: Operating-policy selection<a class="heading-anchor" href="#solution-1--exercise-11-operating-policy-selection" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a threshold table with false-positive cost, false-negative cost, precision, recall, and queue volume. Select a threshold on validation data, then freeze it.</p>
 <p><strong>Reasoning before implementation:</strong> Translate confusion-matrix counts into the same business unit and include capacity constraints such as maximum daily reviews.</p>
 <p>The best threshold is conditional on prevalence, costs, and capacity. Save it as model metadata rather than hard-coding <code>0.5</code> in serving code. On the final holdout, report performance at the frozen threshold without reopening the selection.</p>
 <p>Include sensitivity scenarios because costs and prevalence are estimates. Ranking metrics alone cannot define the operating point.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Operating-policy selection — print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
-<h5 id="solution-1--exercise-12-error-slice-analysis">Exercise 12 — Error-slice analysis<a class="heading-anchor" href="#solution-1--exercise-12-error-slice-analysis" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Operating-policy selection; print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.</p>
+<h5 id="solution-1--exercise-12-error-slice-analysis">Exercise 12: Error-slice analysis<a class="heading-anchor" href="#solution-1--exercise-12-error-slice-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define at least three pre-motivated slices, report support and error metrics, and inspect representative false positives and false negatives without exposing sensitive raw values.</p>
 <p><strong>Reasoning before implementation:</strong> Choose slices from domain risk, not by mining the test set for the worst-looking subgroup. Small support requires uncertainty and caution.</p>
 <p>Use stable row IDs and redacted fields for case review. Report denominators, confidence intervals or bootstrap ranges, and missing-label coverage. A slice with two examples cannot sustain a broad fairness claim.</p>
 <p>New features or threshold changes prompted by test errors return the project to development and require a new untouched evaluation set.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Error-slice analysis — for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
-<h5 id="solution-1--exercise-13-artifact-manifest">Exercise 13 — Artifact manifest<a class="heading-anchor" href="#solution-1--exercise-13-artifact-manifest" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Error-slice analysis; for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.</p>
+<h5 id="solution-1--exercise-13-artifact-manifest">Exercise 13: Artifact manifest<a class="heading-anchor" href="#solution-1--exercise-13-artifact-manifest" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save the fitted pipeline with a JSON manifest containing model ID, training-data fingerprint, schema, metric definitions/results, threshold, dependency versions, and file hashes.</p>
 <p><strong>Reasoning before implementation:</strong> JSON holds metadata; joblib holds the trusted fitted object. Write both to a versioned artifacts directory and verify them on load.</p>
 <p>Use atomic writes where practical and fail if an existing version would be overwritten. Compute the artifact hash after serialization, then validate it before loading. Keep secrets and absolute developer paths out of metadata.</p>
 <p>The manifest makes the artifact reviewable but does not make pickle safe from untrusted sources. Provenance and access control remain required.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Artifact manifest — validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
-<h5 id="solution-1--exercise-14-fresh-process-acceptance">Exercise 14 — Fresh-process acceptance<a class="heading-anchor" href="#solution-1--exercise-14-fresh-process-acceptance" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Artifact manifest; validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.</p>
+<h5 id="solution-1--exercise-14-fresh-process-acceptance">Exercise 14: Fresh-process acceptance<a class="heading-anchor" href="#solution-1--exercise-14-fresh-process-acceptance" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a smoke test that starts from a clean process, loads the saved artifact, scores a fixed fixture, and compares the result with the pre-save prediction within a numeric tolerance.</p>
 <p><strong>Reasoning before implementation:</strong> Do not rely on notebook variables. The test needs only documented files, installed dependencies, and repository-relative paths.</p>
 <p>Run the smoke test from the repository root on both the documented Windows and POSIX commands. Assert response shape, finite probabilities, class mapping, threshold behavior, and model/schema version.</p>
-<p>Reload parity catches missing custom classes, accidental preprocessing outside the pipeline, path assumptions, and serialization drift. Delete and rebuild the ignored test artifact to prove the workflow—not a stale file—creates it.</p>
+<p>Reload parity catches missing custom classes, accidental preprocessing outside the pipeline, path assumptions, and serialization drift. Delete and rebuild the ignored test artifact to prove the workflow, not a stale file, creates it.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Fresh-process acceptance — run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p></div>
+<p><strong>Verify:</strong> Fresh-process acceptance; run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.</p></div>
       </section>
 
 
@@ -1425,16 +1425,16 @@ curl -s -X POST http://127.0.0.1:8000/predict -H <span class="syntax-string">&#x
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-45` — Day 45 — End-to-End Modeling Mini-Project.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-45` — Day 45 — End-to-End Modeling Mini-Project.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize an end-to-end evidence chain from decision to reproducible artifact. Use exactly these maintained learner materials:
@@ -1462,7 +1462,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1573,18 +1573,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

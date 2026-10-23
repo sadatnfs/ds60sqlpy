@@ -1,4 +1,4 @@
-# Day 22 — Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)
+# Day 22: Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ before and after and define behavior for unseen categories.
 For this lesson's **pandas vectorization, expression APIs, and memory-aware categoricals** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Find one row-wise `apply(axis=1)` in a supplied example and replace it with column arithmetic, string methods, mapping, masks, `np.select`, or group transform as appropriate. **Expected behavior:** values and index match the original for normal and missing inputs. **Constraints:** do not optimize by changing the contract. **Verify:** use `pd.testing` to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.
 
@@ -79,7 +79,7 @@ distributions rather than a brittle pass/fail speed threshold.
 
 **Verification evidence:** use `pd.testing` to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Convert a repeated string column to categorical only after profiling. **Evidence:** record row count, unique count, object memory, categorical memory, and the category levels. **Expected behavior:** keep the categorical version only if it reduces memory for this data. **Verify:** values remain equivalent and explain why a nearly unique ID may become larger.
 
@@ -127,9 +127,9 @@ larger and should be rejected.
 
 **Verification evidence:** values remain equivalent and explain why a nearly unique ID may become larger.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict why row-wise `apply(axis=1)` is usually slower than column arithmetic for a simple ratio. **Progressive hint:** Vectorized operations avoid constructing/calling Python work per row. **Verify:** Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.
 
@@ -137,15 +137,15 @@ larger and should be rejected.
 
 **Evidence to locate in the grouped implementation:** Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
-**Learner contract:** **Tracing:** Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope? **Progressive hint:** `@` marks an external Python variable. **Verify:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`—not a column—controls the result.
+**Learner contract:** **Tracing:** Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope? **Progressive hint:** `@` marks an external Python variable. **Verify:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`, not a column, controls the result.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope? Progressive hint: `@` marks an external Python variable. Record the named value, shape, label, or iterator position needed to establish: Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`—not a column—controls the result. The trace exposes pandas vectorization, expression APIs, and memory-aware categoricals directly.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope? Progressive hint: `@` marks an external Python variable. Record the named value, shape, label, or iterator position needed to establish: Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`, not a column, controls the result. The trace exposes pandas vectorization, expression APIs, and memory-aware categoricals directly.
 
-**Evidence to locate in the grouped implementation:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`—not a column—controls the result.
+**Evidence to locate in the grouped implementation:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`, not a column, controls the result.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. **Progressive hint:** Use `memory_usage(deep=True)` on the Series. **Verify:** Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.
 
@@ -153,7 +153,7 @@ larger and should be rejected.
 
 **Evidence to locate in the grouped implementation:** Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Replace a row-wise conditional `apply` with `np.select` or `.where` while preserving missing-value behavior. **Progressive hint:** List conditions from most specific to fallback. **Verify:** Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.
 
@@ -161,7 +161,7 @@ larger and should be rejected.
 
 **Evidence to locate in the grouped implementation:** Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. **Progressive hint:** Categories store both codes and a level table. **Verify:** Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.
 
@@ -173,13 +173,13 @@ larger and should be rejected.
 
 Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.
 
-### Shared implementation for Exercises 3–4 — Vectorization and query scope
+### Shared implementation for Exercises 3–4: Vectorization and query scope
 
 Column arithmetic runs through optimized array operations; row-wise `apply`
 creates a Series and calls Python code repeatedly. In `query`, `amount` is a
 column and `@threshold` is a Python variable.
 
-### Shared implementation for Exercises 5–7 — Measure categorical memory and vectorize conditions
+### Shared implementation for Exercises 5–7: Measure categorical memory and vectorize conditions
 
 ```python
 import numpy as np

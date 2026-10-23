@@ -1,4 +1,4 @@
-# Day 20 solutions — FIRST_VALUE, LAST_VALUE, NTH_VALUE
+# Day 20 solutions: FIRST_VALUE, LAST_VALUE, NTH_VALUE
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Show every order with the customer's first and last order timestamps.
 
@@ -113,7 +113,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-20 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one full-partition frame from unbounded preceding through unbounded following. Evaluate another form against the concrete expected result (One row per order with constant first/last values per customer) and the verification above.
 - **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Show each product with the cheapest and most expensive price in its category.
 
@@ -158,7 +158,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-20 Exercise 2, the chosen form is justified by this lesson-specific rationale: Order by price and use a full frame; values tie without needing row identity. Evaluate another form against the concrete expected result (One row per product) and the verification above.
 - **Edge case:** Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Compare every payment with the first and last payment amount for its order.
 
@@ -204,7 +204,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-20 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by order, order by timestamp/payment ID, and keep the full frame. Evaluate another form against the concrete expected result (One row per payment) and the verification above.
 - **Edge case:** Tie two rows on `p.order_id` and give them different `p.payment_id` values; verify `p.order_id, p.payment_date, p.payment_id` chooses a stable first/last row.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Demonstrate the default `LAST_VALUE` result versus a full-partition frame on values 10, 20, 30.
 
@@ -246,7 +246,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-20 Exercise 4, the chosen form is justified by this lesson-specific rationale: The default ends at the current row; explicit following reaches the true last row. Evaluate another form against the concrete expected result (Three rows showing default current value and full-frame 30) and the verification above.
 - **Edge case:** Use a one-row partition and a partition tied on `value`; verify `value` and `value` preserve the intended first/last row.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Return one first and one last order per customer without using window output as an accidental duplicate report.
 
@@ -296,7 +296,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-20 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute first/last IDs with full-frame windows, then select distinct customer-level output. Evaluate another form against the concrete expected result (One row per customer with orders) and the verification above.
 - **Edge case:** Tie two rows on `customer_id` and give them different `customer_id` values; verify `customer_id` chooses a stable first/last row.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Solve latest order per customer with PostgreSQL `DISTINCT ON` and compare its ordering contract with row number.
 

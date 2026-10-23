@@ -270,9 +270,9 @@ original string unchanged, and formatted output is readable.
 - [Check the separate transfer solutions](../solutions/day02_basics_types/day02_solutions.md)
 - [Next: Day 3 - Control flow and exceptions](day03_control_flow_exceptions.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

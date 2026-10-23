@@ -1,9 +1,9 @@
-# Day 23 — Common Table Expressions (CTEs) Introduction (Companion Guide)
+# Day 23: Common Table Expressions (CTEs) Introduction (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Prerequisites:** [Day 22 — advanced windows](day22_advanced_windows.md)
+- **Prerequisites:** [Day 22; advanced windows](day22_advanced_windows.md)
 - **Artifacts:** [learner SQL](../day23_ctes_intro.sql) ·
   [solution reasoning](../solutions/day23_solutions.md) ·
   [executable solution](../solutions/day23_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-23 — CTEs Intro** and choose
+2. Open **SQL-23; CTEs Intro** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -173,7 +173,7 @@ while developing and verify its key uniqueness before adding the next stage.
 
 ## Practice assumptions and review method
 
-- **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
+- **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
 - **Assumptions:** Each CTE declares its output grain. PostgreSQL 16 may inline a side-effect-free single-use CTE unless `MATERIALIZED` is requested.
 - **Failure to watch for:** A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
 - **Review loop:** predict the row grain and NULL/order behavior, run the
@@ -182,7 +182,7 @@ while developing and verify its key uniqueness before adding the next stage.
 
 ## Exercises
 
-Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability—not forced materialization—is the default goal.
+Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
 
 Attempt each prompt in a scratch SQL file before opening the solution.
 For every result, write its row grain and expected shape first.
@@ -240,7 +240,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 24 — recursive CTEs](day24_recursive_ctes.md).
+Continue to [Day 24; recursive CTEs](day24_recursive_ctes.md).
 
 ## Deep dive and reference
 
@@ -284,11 +284,11 @@ Further reading
 - WITH queries: https://www.postgresql.org/docs/current/queries-with.html
 - MATERIALIZED/NOT MATERIALIZED: https://www.postgresql.org/docs/current/queries-with.html#QUERIES-WITH-MATERIALIZED
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-23 — CTEs Intro.

@@ -110,7 +110,7 @@ The focused test command is shown in **Self-check** below. The learner
 module is intentionally answer-free, so `TODO` output is the expected
 starting state rather than a setup failure.
 
-## Mechanism lab — two small examples before the full system
+## Mechanism lab: two small examples before the full system
 
 ### Boundary and mental model
 
@@ -129,7 +129,7 @@ replace external integration evidence.
 - **shared contract suite:** applies the same observable create/read/update/delete requirements to fake and real-local implementations.
 - **Hypothesis strategy + property:** defines an input domain and invariant, with deterministic settings and no repository cache.
 
-### Micro-example A — replace wall-clock sleep with an injected clock
+### Micro-example A: replace wall-clock sleep with an injected clock
 
 ```python
 class FixedClock:
@@ -156,7 +156,7 @@ assert not is_fresh(10.0, 3.0, clock)
 
 **Why it matters:** The clock represents monotonic elapsed time rather than an adjustable wall clock.
 
-### Micro-example B — state an idempotence property
+### Micro-example B: state an idempotence property
 
 ```python
 def normalize_tags(tags):
@@ -188,11 +188,11 @@ assert once == twice  # applying normalization twice changes nothing
 
 ### 1. Choose fixture lifetime
 
-For each resource—immutable input rows, mutable in-memory store, temporary JSON
-file, and database connection—choose function, class, module, or session scope.
+For each resource, immutable input rows, mutable in-memory store, temporary JSON
+file, and database connection, choose function, class, module, or session scope.
 Prefer the narrowest lifetime that is fast enough and keeps tests independent.
 
-**Verify:** Choose fixture lifetime — run two tests that mutate the in-memory store and assert the second starts empty; assert a temporary JSON path differs between tests, immutable rows remain equal, and a database connection is rolled back/closed at the chosen scope.
+**Verify:** Choose fixture lifetime; run two tests that mutate the in-memory store and assert the second starts empty; assert a temporary JSON path differs between tests, immutable rows remain equal, and a database connection is rolled back/closed at the chosen scope.
 
 ### 2. Complete interval merging
 
@@ -206,7 +206,7 @@ Then express properties:
 - every original integer point remains covered, and
 - no new point is created.
 
-**Verify:** Complete interval merging — assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.
+**Verify:** Complete interval merging; assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.
 
 ### 3. Use Hypothesis meaningfully
 
@@ -220,7 +220,7 @@ Temporarily introduce a bug such as failing to merge adjacency. Read the
 smallest failing example. Restore the implementation and keep that example as a
 named regression test if it communicates an important rule.
 
-**Verify:** Use Hypothesis meaningfully — run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.
+**Verify:** Use Hypothesis meaningfully; run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.
 
 ### 4. Compare test doubles
 
@@ -228,7 +228,7 @@ Complete `choose_double`. Use a fake for the stateful store, a mock only for one
 audit interaction, and a real temporary file for serialization behavior.
 Explain why mocking every store method couples tests to implementation steps.
 
-**Verify:** Compare test doubles — assert the fake store preserves put/get/overwrite state, the audit mock receives exactly one expected call, and a real temporary JSON file round-trips bytes/data; include a test that would survive if every store method were merely mocked.
+**Verify:** Compare test doubles; assert the fake store preserves put/get/overwrite state, the audit mock receives exactly one expected call, and a real temporary JSON file round-trips bytes/data; include a test that would survive if every store method were merely mocked.
 
 ### 5. Patch and restore process state
 
@@ -236,7 +236,7 @@ Use `patch.dict(os.environ, ..., clear=False)` or pytest's `monkeypatch` fixture
 to change cache settings for one test. Assert the original environment is
 restored afterward. Prefer passing a mapping directly when the API permits it.
 
-**Verify:** Patch and restore process state — in two tests, set and read the named cache environment variable with patch.dict or monkeypatch, then assert the original value/presence is restored after each test and after an injected exception.
+**Verify:** Patch and restore process state; in two tests, set and read the named cache environment variable with patch.dict or monkeypatch, then assert the original value/presence is restored after each test and after an injected exception.
 
 ### 6. Add a contract failure
 
@@ -244,7 +244,7 @@ Create a deliberately broken store that never overwrites values. Run the shared
 contract and locate the exact violated behavior. Contract tests complement,
 rather than replace, implementation-specific failure tests.
 
-**Verify:** Add a contract failure — run the shared store contract against the broken no-overwrite store and record the exact failing overwrite assertion; then run the same contract against the conforming fake with exit code 0.
+**Verify:** Add a contract failure; run the shared store contract against the broken no-overwrite store and record the exact failing overwrite assertion; then run the same contract against the conforming fake with exit code 0.
 
 ### Extended professional practice
 
@@ -252,53 +252,53 @@ These exercises move from prediction and implementation through debugging,
 operational trade-offs, and review. Keep the default path deterministic and
 offline; optional connected behavior must remain explicit.
 
-### Exercise 7 — model a state machine
+### Exercise 7: model a state machine
 
 Create a deterministic rule-based state machine for `ExpiringCache`: put, get, delete, advance time, and overwrite. Compare every action with a simple in-memory model.
 
 **Progressive hint:** Keep keys/values bounded, use the injected FixedClock, and assert observable state after each rule rather than inspecting implementation fields.
 
-**Verify:** model a state machine — execute a seeded ExpiringCache state machine containing put/get/delete/advance/overwrite actions; after every action assert cache output equals the simple model, expired keys are absent, and size never exceeds the model.
+**Verify:** model a state machine; execute a seeded ExpiringCache state machine containing put/get/delete/advance/overwrite actions; after every action assert cache output equals the simple model, expired keys are absent, and size never exceeds the model.
 
-### Exercise 8 — add metamorphic tests
+### Exercise 8: add metamorphic tests
 
 Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.
 
 **Progressive hint:** A valid relation transforms input and predicts a corresponding output relationship without copying the implementation.
 
-**Verify:** add metamorphic tests — assert interval results are unchanged by input permutation and duplicate insertion, translated by exactly k when every endpoint gains k, and idempotent under merge_intervals(merge_intervals(x)).
+**Verify:** add metamorphic tests; assert interval results are unchanged by input permutation and duplicate insertion, translated by exactly k when every endpoint gains k, and idempotent under merge_intervals(merge_intervals(x)).
 
-### Exercise 9 — evaluate mutation-test survivors
+### Exercise 9: evaluate mutation-test survivors
 
 Make three deliberate mutations: change expiry `<` to `<=`, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.
 
 **Progressive hint:** Mutation testing evaluates the tests, not code quality by itself. Use tiny manual mutations if no optional tool is installed.
 
-**Verify:** evaluate mutation-test survivors — run each of the <= expiry, no-adjacency-merge, and no-overwrite mutants separately; name the test that fails, and add a focused assertion if any mutant survives so all three finish killed.
+**Verify:** evaluate mutation-test survivors; run each of the <= expiry, no-adjacency-merge, and no-overwrite mutants separately; name the test that fails, and add a focused assertion if any mutant survives so all three finish killed.
 
-### Exercise 10 — test concurrency without timing races
+### Exercise 10: test concurrency without timing races
 
 Design a two-worker cache/store test using barriers/events to force a specific interleaving. State whether the contract promises thread safety; if it does not, test the synchronization wrapper instead.
 
 **Progressive hint:** Control checkpoints explicitly. Do not assert that a race happens within a tiny sleep window.
 
-**Verify:** test concurrency without timing races — use barriers/events—not sleep—to force the declared two-worker interleaving; assert final value/call count or the synchronization wrapper's result, both workers terminate before a fixed timeout, and no exception is lost.
+**Verify:** test concurrency without timing races; use barriers/events, not sleep, to force the declared two-worker interleaving; assert final value/call count or the synchronization wrapper's result, both workers terminate before a fixed timeout, and no exception is lost.
 
-### Exercise 11 — triage a flaky test
+### Exercise 11: triage a flaky test
 
 Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.
 
 **Progressive hint:** Control clock/randomness, isolate storage, sort only when order is not contractual, and keep the original failure seed/input.
 
-**Verify:** triage a flaky test — repeat the original flaky test enough times to record its failure rate and classify clock/random/file/order state; replace that boundary with a fake clock, seed, tmp_path, or sorted assertion and then obtain a clean repeated-test transcript without retries.
+**Verify:** triage a flaky test; repeat the original flaky test enough times to record its failure rate and classify clock/random/file/order state; replace that boundary with a fake clock, seed, tmp_path, or sorted assertion and then obtain a clean repeated-test transcript without retries.
 
-### Exercise 12 — design a layered verification portfolio
+### Exercise 12: design a layered verification portfolio
 
 Map one feature across pure unit/property tests, shared store contract, real temporary-file integration, CLI/process smoke, and optional external system test. Define what each layer proves and does not prove.
 
 **Progressive hint:** Keep the default suite offline and fast. Use the fewest expensive tests that cover serialization, process, or external boundaries.
 
-**Verify:** design a layered verification portfolio — deliver a matrix with unit/property, shared contract, temporary-file integration, CLI subprocess, and optional external rows; for each name its command/test ID, input fixture, expected output/failure, runtime budget, and the claim it cannot prove.
+**Verify:** design a layered verification portfolio; deliver a matrix with unit/property, shared contract, temporary-file integration, CLI subprocess, and optional external rows; for each name its command/test ID, input fixture, expected output/failure, runtime budget, and the claim it cannot prove.
 
 ## Self-check
 
@@ -347,10 +347,10 @@ Apply the same contract/fake pattern to Bridge Day 5. Continue to
 `python-lang-01` to make test seams precise with generics, Protocols, overloads,
 and runtime validation.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-test-01` — Test architecture, doubles, and generative testing.

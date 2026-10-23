@@ -1,4 +1,4 @@
-# SQL-TEST-01 Solutions — Contracts and Migration Checks
+# SQL-TEST-01 Solutions: Contracts and Migration Checks
 
 
 <!-- beginner-solution-enrichment -->
@@ -26,7 +26,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked-model focus is:
-asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
+asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 The solution rolls back its schema and uses only PostgreSQL catalogs.
 
-## Exercise 1 — Migration and currency contract
+## Exercise 1: Migration and currency contract
 
 The exact manifest is `ARRAY[1,2,3]`. The column contract checks information
 schema type `character`, length 3, `NOT NULL`, and a USD default. A production
@@ -74,7 +74,7 @@ whether totals may combine currencies.
 - **Expected result/shape:** For sql-test-01 Exercise 1, expected output: the version and currency assertions pass, followed by one evidence row with migration IDs `{1,2,3}`, type `character`, length 3, `is_nullable = 'NO'`, and a default containing USD.
 - **Independent verification:** For sql-test-01 Exercise 1, independently query the ordered migration IDs and the `information_schema.columns` row; then change the length or omit migration 3 in a negative control and require the assertion to raise.
 
-## Exercise 2 — Duplicate producer keys
+## Exercise 2: Duplicate producer keys
 
 The detail query returns one row per duplicate key group and labels its count
 `participating_rows`. The summary wraps that query and expects one duplicate
@@ -90,7 +90,7 @@ resolution policy is explicit.
 - **Expected result/shape:** For sql-test-01 Exercise 2, expected output: one row per duplicate producer key with columns `source_order_key` and `participating_rows`, ordered by key; the supplied fixture returns `ORD-100` with 2 participating rows.
 - **Independent verification:** For sql-test-01 Exercise 2, independently assert one duplicate group and two participating rows; add another `ORD-100` plus two `ORD-102` rows and prove both groups appear once while `ORD-101` remains absent.
 
-## Exercise 3 — Constraint contracts
+## Exercise 3: Constraint contracts
 
 The solution searches `pg_constraint` by schema, relation, type, and rendered
 definition rather than relying on an auto-generated name. A more rigorous
@@ -106,7 +106,7 @@ and RLS policies may all be part of a migration contract.
 - **Expected result/shape:** For sql-test-01 Exercise 3, expected output: four named assertions pass for the required defaults, primary key on `order_id`, unique key on `order_key`, and `customer_id` foreign key; no constraint name is contractual.
 - **Independent verification:** For sql-test-01 Exercise 3, render candidates with `pg_get_constraintdef`, require exactly one semantic match per rule, and prove a negative control looking for a nonexistent `UNIQUE (reported_total)` contract raises.
 
-## Exercise 4 — Zero-line reconciliation
+## Exercise 4: Zero-line reconciliation
 
 A LEFT JOIN retains orders with no line aggregate. `COALESCE(line_total, 0)`
 implements the stated rule that no lines sum to numeric zero. Without that
@@ -119,7 +119,7 @@ DISTINCT FROM` compares NULL safely.
 - **Expected result/shape:** For sql-test-01 Exercise 4, expected output: one row per order with `order_id`, `order_key`, `reported_total`, `line_total`, and `reconciles`, ordered by `order_id`; zero-line orders remain and show zero.
 - **Independent verification:** For sql-test-01 Exercise 4, reconcile output count and unique IDs with the orders table, prove `ORD-200` totals 5 and `ORD-201` totals 0, then corrupt a reported total under a savepoint and require the assertion to fail.
 
-## Exercise 5 — Harness reasoning
+## Exercise 5: Harness reasoning
 
 Fixtures belong to this test module, carry deterministic keys/content tags, and
 live in a rollback-isolated schema. A negative control proves failure detection.
@@ -135,7 +135,7 @@ per-run schema/database, or transaction whose code does not require commits.
 - **Expected result/shape:** For sql-test-01 Exercise 5, expected output: exactly four ordered rows with `step_number`, `control_name`, `required_evidence`, and `failure_if_missing`, covering fixture ownership, rollback isolation, negative control, and process failure.
 - **Independent verification:** For sql-test-01 Exercise 5, run one intentionally false assertion in a disposable invocation and require a nonzero psql exit, then rerun the valid suite and confirm rollback leaves no `pro_contract_test_lab` schema.
 
-## Exercise 6 — Assert the intended error
+## Exercise 6: Assert the intended error
 
 Wrap the duplicate insert in a nested block, require `unique_violation`
 (SQLSTATE `23505`), and raise if the insert succeeds. Optionally inspect
@@ -152,7 +152,7 @@ permissions, missing objects, or syntax defects.
 - **Expected result/shape:** For sql-test-01 Exercise 6, expected output: one `negative_test_results` row showing SQLSTATE `23505`, a nonblank constraint name, unchanged before/after counts, and `passed = true`, followed by a passing assertion.
 - **Independent verification:** For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than `unique_violation`, compare the before/after counts independently, and verify the duplicate row is absent.
 
-## Exercise 7 — Table-driven boundaries
+## Exercise 7: Table-driven boundaries
 
 Represent cases as rows with case ID, input fields, and expected accept/reject
 or normalized result. Cover just below, exact, and just above numeric/date
@@ -165,18 +165,18 @@ its expected outcome so an accidentally filtered case cannot disappear.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
+- **Inputs/evidence:** For sql-test-01 Exercise 7, drive six quantity cases, below, lower bound, upper bound, above, NULL, and malformed, from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
 - **Expected result/shape:** For sql-test-01 Exercise 7, expected output: six rows with `case_id`, raw value, expected/observed acceptance, observed SQLSTATE, and `matches`; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.
 - **Independent verification:** For sql-test-01 Exercise 7, require exactly six unique case IDs and no false `matches`, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.
 
-## Exercise 8 — Deterministic concurrency test
+## Exercise 8: Deterministic concurrency test
 
 Use two independent sessions because one PostgreSQL transaction cannot observe
 every competing-transaction anomaly. Establish fixture state, set short
 `lock_timeout`/`statement_timeout`, coordinate named barriers, perform the
 interleaving, commit/rollback explicitly, and assert final rows plus errors.
 
-Avoid arbitrary sleeps as the only synchronization—they create flaky tests.
+Avoid arbitrary sleeps as the only synchronization, they create flaky tests.
 Use locks/advisory barriers or a harness that waits for observable session state,
 capture both session logs, and always clean a disposable target after failure.
 
@@ -186,7 +186,7 @@ capture both session logs, and always clean a disposable target after failure.
 - **Expected result/shape:** For sql-test-01 Exercise 8, expected output: seven ordered protocol rows with `step_number`, `session_name`, `action`, `wait_for`, `expected_observation`, and `failure_evidence`, from setup through cleanup.
 - **Independent verification:** For sql-test-01 Exercise 8, execute the protocol only in two disposable sessions, capture both transcripts and the final row, require one committed owner plus the expected losing outcome, and restore the fixture even after failure.
 
-## Exercise 9 — Stable schema fingerprint
+## Exercise 9: Stable schema fingerprint
 
 Canonicalize ordered semantic rows for columns/types/defaults/nullability,
 constraints and referenced columns, indexes/predicates/operator classes,
@@ -203,7 +203,7 @@ unexpected objects; a one-way expected-subset check misses accidental exposure.
 - **Expected result/shape:** For sql-test-01 Exercise 9, expected output: one deterministic result set at one-row-per-column grain and another at one-row-per-constraint grain, with definitions ordered by constraint type and definition.
 - **Independent verification:** For sql-test-01 Exercise 9, compare visible semantic rows before any hash, inject one missing and one unexpected property, and prove both drift directions are diagnosable without depending on an OID or generated name.
 
-## Exercise 10 — Destructive migration rehearsal
+## Exercise 10: Destructive migration rehearsal
 
 Restore a representative, access-isolated backup to a disposable database,
 record tool/server versions and baseline contracts, run the exact migration,

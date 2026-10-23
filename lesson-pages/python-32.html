@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-32-statistical-inference">Day 32 — Statistical Inference<a class="heading-anchor" href="#guide--day-32-statistical-inference" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-32-statistical-inference">Day 32: Statistical Inference<a class="heading-anchor" href="#guide--day-32-statistical-inference" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-32</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Descriptive statistics summarize the sample you observed. Statistical inference uses that sample, plus explicit assumptions, to quantify uncertainty about a larger population.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -456,7 +456,7 @@ ci_95 <span class="syntax-operator">=</span> <span class="syntax-punctuation">(<
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-sampling-uncertainty-confidence-intervals-and-hypothesis-test-evidence">Concept deep dive — sampling uncertainty, confidence intervals, and hypothesis-test evidence<a class="heading-anchor" href="#guide--concept-deep-dive-sampling-uncertainty-confidence-intervals-and-hypothesis-test-evidence" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-sampling-uncertainty-confidence-intervals-and-hypothesis-test-evidence">Concept deep dive: sampling uncertainty, confidence intervals, and hypothesis-test evidence<a class="heading-anchor" href="#guide--concept-deep-dive-sampling-uncertainty-confidence-intervals-and-hypothesis-test-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Statistical inference reasons from a finite sample toward an unknown population quantity. An estimator such as a sample mean varies across hypothetical repeated samples; its <strong>standard error</strong> describes that sampling variability. A confidence interval is a procedure with a long-run coverage property, not a probability statement about a fixed parameter after the data are observed.</p>
 <p>A hypothesis test asks how incompatible an observed statistic is with a precisely stated null model. The p-value is conditional on that null model and its assumptions. It is not the probability that the null is true, and it does not measure whether an effect is useful.</p>
@@ -467,7 +467,7 @@ ci_95 <span class="syntax-operator">=</span> <span class="syntax-punctuation">(<
 <li><strong><code>estimate ± critical_value * standard_error</code>:</strong> forms an interval only after choosing a confidence level and an appropriate sampling model.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-see-interval-width-respond-to-sample-size">Focused example A — see interval width respond to sample size<a class="heading-anchor" href="#guide--focused-example-a-see-interval-width-respond-to-sample-size" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-see-interval-width-respond-to-sample-size">Focused example A: see interval width respond to sample size<a class="heading-anchor" href="#guide--focused-example-a-see-interval-width-respond-to-sample-size" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
@@ -487,7 +487,7 @@ small_ci<span class="syntax-punctuation">,</span> large_ci <span class="syntax-o
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>ptp<span class="syntax-punctuation">(</span>large_ci<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> np<span class="syntax-operator">.</span>ptp<span class="syntax-punctuation">(</span>small_ci<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The larger sample normally produces a much narrower interval because its standard error is smaller.</p>
 <p><strong>Assumption to name:</strong> The observations are independent and the mean&#x27;s t-based sampling model is reasonable.</p>
-<h5 id="guide--focused-example-b-separate-statistical-detection-from-practical-size">Focused example B — separate statistical detection from practical size<a class="heading-anchor" href="#guide--focused-example-b-separate-statistical-detection-from-practical-size" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-separate-statistical-detection-from-practical-size">Focused example B: separate statistical detection from practical size<a class="heading-anchor" href="#guide--focused-example-b-separate-statistical-detection-from-practical-size" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
@@ -540,15 +540,15 @@ standardized_effect <span class="syntax-operator">=</span> sample<span class="sy
 <ol>
 <li>Draw groups from <code>Normal(0, 1)</code> and <code>Normal(0.3, 1)</code>, then test the difference in means with Welch&#x27;s t-test.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.</p>
+<p><strong>Verify:</strong> Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.</p>
 <ol>
 <li>Build a contingency table from categorical data and run a chi-square test. For a fully offline run, construct a small table directly; a cached Seaborn dataset is optional.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.</p>
+<p><strong>Verify:</strong> Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.</p>
 <ol>
 <li>Compute 90% and 99% confidence intervals for the same mean and compare their widths.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.</p>
+<p><strong>Verify:</strong> Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Use the same seeded generator, retain both sample sizes, and set <code>equal_var=False</code>. Interpret the estimated difference as well as the p-value.</li>
@@ -561,15 +561,15 @@ standardized_effect <span class="syntax-operator">=</span> sample<span class="sy
 <ol>
 <li><strong>Prediction:</strong> Hold the true mean difference and variance fixed, then predict how increasing each group&#x27;s sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size. <strong>Progressive hint:</strong> Standard error shrinks approximately with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mn>1</mn><mrow><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac1{\sqrt n}</annotation></semantics></math>; the underlying standardized effect does not grow merely because more rows were collected.</li>
 </ol>
-<p><strong>Verify:</strong> Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>10</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{10}</annotation></semantics></math>, power rises, and the population effect size remains fixed.</p>
+<p><strong>Verify:</strong> Prediction; with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>10</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{10}</annotation></semantics></math>, power rises, and the population effect size remains fixed.</p>
 <ol>
 <li><strong>Implementation:</strong> Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter. <strong>Progressive hint:</strong> Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.</li>
 </ol>
-<p><strong>Verify:</strong> Implementation — with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.</p>
+<p><strong>Verify:</strong> Implementation; with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.</p>
 <ol>
 <li><strong>Multiple-comparison reasoning:</strong> You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis. <strong>Progressive hint:</strong> Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.</li>
 </ol>
-<p><strong>Verify:</strong> Multiple-comparison reasoning — show family-wise false-positive probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mn>0.95</mn><mrow><mn>20</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-0.95^{20}</annotation></semantics></math> (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.</p>
+<p><strong>Verify:</strong> Multiple-comparison reasoning; show family-wise false-positive probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mn>0.95</mn><mrow><mn>20</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-0.95^{20}</annotation></semantics></math> (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -620,10 +620,10 @@ standardized_effect <span class="syntax-operator">=</span> sample<span class="sy
 <ul>
 <li>Work in the <a href="python-32.html#learner">Day 32 learner notebook</a>.</li>
 <li>Then consult the <a href="python-32.html#solution-1">Day 32 solution</a>.</li>
-<li>Continue to <a href="python-33.html#guide">Day 33 — Linear Algebra</a>.</li>
+<li>Continue to <a href="python-33.html#guide">Day 33; Linear Algebra</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-32` — Day 32 — Statistical Inference.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -879,7 +879,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-32-solutions-statistical-inference-estimation-testing">Day 32 — Solutions: Statistical Inference (Estimation &amp; Testing)<a class="heading-anchor" href="#solution-1--day-32-solutions-statistical-inference-estimation-testing" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-32-solutions-statistical-inference-estimation-testing">Day 32: Solutions: Statistical Inference (Estimation &amp; Testing)<a class="heading-anchor" href="#solution-1--day-32-solutions-statistical-inference-estimation-testing" aria-label="Link to this section">#</a></h3>
 <p>We perform common tests, compute confidence intervals, and interpret results carefully.</p>
 <p>Contents</p>
 <ul>
@@ -892,7 +892,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
 rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — One-sample and two-sample t-tests</p>
+<p>Worked reference for Exercise 1; One-sample and two-sample t-tests</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># One-sample: is the mean different from 0?</span>
 x <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>loc<span class="syntax-operator">=</span><span class="syntax-number">0.2</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">200</span><span class="syntax-punctuation">)</span>
 t<span class="syntax-punctuation">,</span> p <span class="syntax-operator">=</span> stats<span class="syntax-operator">.</span>ttest_1samp<span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> popmean<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">)</span>
@@ -909,7 +909,7 @@ t2<span class="syntax-punctuation">,</span> p2 <span class="syntax-operator">=</
 <li>Welch t-test is safer by default when variances differ</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Confidence intervals at multiple levels</p>
+<p>Worked reference for Exercise 2; Confidence intervals at multiple levels</p>
 <pre class="highlighted-code"><code class="language-python">mean <span class="syntax-operator">=</span> x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span> se <span class="syntax-operator">=</span> x<span class="syntax-operator">.</span>std<span class="syntax-punctuation">(</span>ddof<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">/</span>np<span class="syntax-operator">.</span>sqrt<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 ci90 <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>mean <span class="syntax-operator">-</span> <span class="syntax-number">1.645</span><span class="syntax-operator">*</span>se<span class="syntax-punctuation">,</span> mean <span class="syntax-operator">+</span> <span class="syntax-number">1.645</span><span class="syntax-operator">*</span>se<span class="syntax-punctuation">)</span>
 ci95 <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span>mean <span class="syntax-operator">-</span> <span class="syntax-number">1.960</span><span class="syntax-operator">*</span>se<span class="syntax-punctuation">,</span> mean <span class="syntax-operator">+</span> <span class="syntax-number">1.960</span><span class="syntax-operator">*</span>se<span class="syntax-punctuation">)</span>
@@ -921,7 +921,7 @@ ci99 <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</
 <li>For small n or unknown variance, use t critical values; with large n, z is close</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Chi-square test for independence</p>
+<p>Worked reference for Exercise 3; Chi-square test for independence</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> scipy <span class="syntax-keyword">import</span> stats
 <span class="syntax-comment"># Example contingency table (rows: group A/B, cols: outcome Yes/No)</span>
@@ -951,29 +951,29 @@ chi2<span class="syntax-punctuation">,</span> pval<span class="syntax-punctuatio
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draw groups from <code>Normal(0, 1)</code> and <code>Normal(0.3, 1)</code>, then test the difference in means with Welch&#x27;s t-test.</p>
 <p><strong>How to reason about it:</strong> Welch&#x27;s t-test does not assume equal group variances, but it still assumes independent observations and reasonably stable means. Report sample sizes, the signed mean difference, a confidence interval, and the test result; significance alone does not describe importance.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a contingency table from categorical data and run a chi-square test. For a fully offline run, construct a small table directly; a cached Seaborn dataset is optional.</p>
 <p><strong>How to reason about it:</strong> A chi-square test consumes counts, not raw category labels or percentages. Inspect expected cell counts and combine levels or choose an exact method when sparse cells make the asymptotic approximation weak.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute 90% and 99% confidence intervals for the same mean and compare their widths.</p>
 <p><strong>How to reason about it:</strong> For the same data and method, a 99% interval is wider than a 90% interval because it must cover the parameter under more repeated samples. The center should stay the same; only the critical value changes.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.</p>
-<h5 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.</p>
+<h5 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Hold the true mean difference and variance fixed, then predict how increasing each group&#x27;s sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.</p>
 <p><strong>Reasoning before implementation:</strong> Standard error shrinks approximately with <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mfrac><mn>1</mn><mrow><msqrt><mi>n</mi></msqrt></mrow></mfrac></mrow><annotation encoding="application/x-tex">\frac1{\sqrt n}</annotation></semantics></math>; the underlying standardized effect does not grow merely because more rows were collected.</p>
 <p>Larger samples generally narrow the interval and increase power because the sampling distribution of the mean becomes tighter. The population difference and standardized effect remain unchanged. A tiny effect can therefore become statistically detectable without becoming practically important.</p>
 <p>Simulate many datasets at both sizes with one seeded generator, but summarize the distribution of rejection rates rather than selecting a convenient run. Also verify that the observations are independent; duplicated customers would inflate the apparent sample size.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>10</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{10}</annotation></semantics></math>, power rises, and the population effect size remains fixed.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Prediction; with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mn>10</mn></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{10}</annotation></semantics></math>, power rises, and the population effect size remains fixed.</p>
+<h5 id="solution-1--exercise-5-implementation">Exercise 5: Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.</p>
 <p><strong>Reasoning before implementation:</strong> Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.</p>
 <p>The bootstrap approximates the estimator&#x27;s sampling distribution without assuming that the raw values are Normal.</p>
@@ -1002,14 +1002,14 @@ chi2<span class="syntax-punctuation">,</span> pval<span class="syntax-punctuatio
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>low<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>high<span class="syntax-punctuation">)</span></code></pre>
 <p>This percentile interval is a useful teaching baseline. Strong skew, tiny samples, dependence, or clustered observations call for a more suitable resampling design or a BCa/analytic interval.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Implementation — with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.</p>
-<h5 id="solution-1--exercise-6-multiple-comparison-reasoning">Exercise 6 — Multiple-comparison reasoning<a class="heading-anchor" href="#solution-1--exercise-6-multiple-comparison-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Implementation; with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.</p>
+<h5 id="solution-1--exercise-6-multiple-comparison-reasoning">Exercise 6: Multiple-comparison reasoning<a class="heading-anchor" href="#solution-1--exercise-6-multiple-comparison-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.</p>
 <p><strong>Reasoning before implementation:</strong> Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.</p>
 <p>The chance of at least one false positive is about <code>1 - 0.95**20</code>, or 64%, under the simplified independence assumption. Bonferroni would compare each p-value with <code>0.05/20</code>; it is conservative and fits a small set of confirmatory claims. Benjamini-Hochberg is often more powerful for exploratory discovery, but answers a different error question.</p>
 <p>Choose the hypothesis family and correction before inspecting results. Tests that were added after seeing the data should be labeled exploratory rather than quietly folded into the confirmatory analysis.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Multiple-comparison reasoning — show family-wise false-positive probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mn>0.95</mn><mrow><mn>20</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-0.95^{20}</annotation></semantics></math> (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.</p></div>
+<p><strong>Verify:</strong> Multiple-comparison reasoning; show family-wise false-positive probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><msup><mn>0.95</mn><mrow><mn>20</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-0.95^{20}</annotation></semantics></math> (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.</p></div>
       </section>
 
 
@@ -1137,16 +1137,16 @@ chi2<span class="syntax-punctuation">,</span> pval<span class="syntax-punctuatio
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-32` — Day 32 — Statistical Inference.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-32` — Day 32 — Statistical Inference.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize sampling uncertainty, confidence intervals, and hypothesis-test evidence. Use exactly these maintained learner materials:
@@ -1174,7 +1174,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1285,18 +1285,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

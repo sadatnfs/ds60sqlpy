@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-02-aggregations-group-by-having-grouping-sets-companion-guide">Day 02 — Aggregations, GROUP BY, HAVING, Grouping Sets (Companion Guide)<a class="heading-anchor" href="#guide--day-02-aggregations-group-by-having-grouping-sets-companion-guide" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-02-aggregations-group-by-having-grouping-sets-companion-guide">Day 02: Aggregations, GROUP BY, HAVING, Grouping Sets (Companion Guide)<a class="heading-anchor" href="#guide--day-02-aggregations-group-by-having-grouping-sets-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Foundation (beginner)</li>
-<li><strong>Prerequisites:</strong> <a href="sql-01.html#guide">Day 01 — SELECT, filtering, and ordering</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-01.html#guide">Day 01; SELECT, filtering, and ordering</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-02.html#learner">learner SQL</a> · <a href="sql-02.html#solution-1">solution reasoning</a> · <a href="sql-02.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -527,7 +527,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Do subtotal rows use <code>GROUPING(...)</code> rather than assuming every <code>NULL</code> is a subtotal marker?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-03.html#guide">Day 03 — inner joins</a>.</p>
+<p>Continue to <a href="sql-03.html#guide">Day 03; inner joins</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Learning objectives</p>
 <ul>
@@ -592,8 +592,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Postgres aggregation: https://www.postgresql.org/docs/current/functions-aggregate.html</li>
 <li>GROUPING SETS/ROLLUP/CUBE: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUPING-SETS</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-02 — Aggregates Groupby Having.
 
 I have completed the direct catalog prerequisite: `sql-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -775,7 +775,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-02-solutions-aggregations-group-by-having-grouping-sets">Day 02 solutions — Aggregations, GROUP BY, HAVING, Grouping Sets<a class="heading-anchor" href="#solution-1--day-02-solutions-aggregations-group-by-having-grouping-sets" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-02-solutions-aggregations-group-by-having-grouping-sets">Day 02 solutions: Aggregations, GROUP BY, HAVING, Grouping Sets<a class="heading-anchor" href="#solution-1--day-02-solutions-aggregations-group-by-having-grouping-sets" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -803,7 +803,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Primary pitfall:</strong> Selecting a non-grouped, non-aggregated column or using <code>WHERE</code> for an aggregate condition changes or invalidates the question.</li>
 <li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
 </ul>
-<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Count customers by country and order countries by count then country.</p>
 <p><strong>Reasoning:</strong> The output grain is one row per country; include a deterministic secondary sort.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -830,7 +830,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-02 Exercise 1, the chosen form is justified by this lesson-specific rationale: The output grain is one row per country; include a deterministic secondary sort. Evaluate another form against the concrete expected result (One row per country) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>customer_count</code> for the existing <code>country</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Calculate net revenue and average unit price by product category, keeping categories above 100,000 in revenue.</p>
 <p><strong>Reasoning:</strong> Join at line grain, aggregate once per category, and place the aggregate predicate in <code>HAVING</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -863,7 +863,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-02 Exercise 2, the chosen form is justified by this lesson-specific rationale: Join at line grain, aggregate once per category, and place the aggregate predicate in <code>HAVING</code>. Evaluate another form against the concrete expected result (One row per qualifying category) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>net_revenue</code>, and <code>average_unit_price</code> for the existing <code>category</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Summarize order count and average total by status, retaining statuses with at least 100 orders.</p>
 <p><strong>Reasoning:</strong> Filter groups after aggregation with <code>HAVING COUNT(*)</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -893,7 +893,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-02 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filter groups after aggregation with <code>HAVING COUNT(*)</code>. Evaluate another form against the concrete expected result (One row per qualifying order status) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>order_count</code>, and <code>average_order_total</code> for the existing <code>status</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Show <code>COUNT(*)</code>, <code>COUNT(email)</code>, and missing-email count together; predict their relationship.</p>
 <p><strong>Reasoning:</strong> <code>COUNT(email)</code> ignores NULL, while a filtered count makes missingness explicit.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -918,7 +918,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-02 Exercise 4, the chosen form is justified by this lesson-specific rationale: <code>COUNT(email)</code> ignores NULL, while a filtered count makes missingness explicit. Evaluate another form against the concrete expected result (One row; present plus missing equals total) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Repair a query that tries to filter <code>SUM(amount)</code> in <code>WHERE</code> by moving the aggregate condition to the correct clause.</p>
 <p><strong>Reasoning:</strong> <code>WHERE</code> filters expense rows before grouping; <code>HAVING</code> filters category groups afterward.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -947,7 +947,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-02 Exercise 5, the chosen form is justified by this lesson-specific rationale: <code>WHERE</code> filters expense rows before grouping; <code>HAVING</code> filters category groups afterward. Evaluate another form against the concrete expected result (One row per expense category over the threshold) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>total_expense</code> for the existing <code>category</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Produce monthly order count, total revenue, and returned-order count for the last 12 complete or partial months.</p>
 <p><strong>Reasoning:</strong> Group by a month expression, use conditional aggregation, and keep the timestamp predicate sargable.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1176,16 +1176,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-02 — Aggregates Groupby Having.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-02 — Aggregates Groupby Having.
 
 I have completed the direct catalog prerequisite: `sql-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day02_aggregates_groupby_having.md
@@ -1212,7 +1212,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1323,18 +1323,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -1,4 +1,4 @@
-# Day 32 — Solutions: Statistical Inference (Estimation & Testing)
+# Day 32: Solutions: Statistical Inference (Estimation & Testing)
 
 We perform common tests, compute confidence intervals, and interpret results carefully.
 
@@ -16,7 +16,7 @@ from scipy import stats
 rng = np.random.default_rng(0)
 ```
 
-Worked reference for Exercise 1 — One-sample and two-sample t-tests
+Worked reference for Exercise 1; One-sample and two-sample t-tests
 ```python
 # One-sample: is the mean different from 0?
 x = rng.normal(loc=0.2, scale=1.0, size=200)
@@ -35,7 +35,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — Confidence intervals at multiple levels
+Worked reference for Exercise 2; Confidence intervals at multiple levels
 ```python
 mean = x.mean(); se = x.std(ddof=1)/np.sqrt(len(x))
 ci90 = (mean - 1.645*se, mean + 1.645*se)
@@ -49,7 +49,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Chi-square test for independence
+Worked reference for Exercise 3; Chi-square test for independence
 ```python
 import numpy as np
 from scipy import stats
@@ -102,7 +102,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the difference in means with Welch's t-test.
 
@@ -112,9 +112,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
+**Verify:** Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Build a contingency table from categorical data and run a chi-square test. For a fully offline run, construct a small table directly; a cached Seaborn dataset is optional.
 
@@ -124,9 +124,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
+**Verify:** Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Compute 90% and 99% confidence intervals for the same mean and compare their widths.
 
@@ -136,9 +136,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
+**Verify:** Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
 
-### Exercise 4 — Prediction
+### Exercise 4: Prediction
 
 **Prompt:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
 
@@ -158,9 +158,9 @@ inflate the apparent sample size.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
+**Verify:** Prediction; with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
 
-### Exercise 5 — Implementation
+### Exercise 5: Implementation
 
 **Prompt:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
 
@@ -203,9 +203,9 @@ resampling design or a BCa/analytic interval.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Implementation — with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.
+**Verify:** Implementation; with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.
 
-### Exercise 6 — Multiple-comparison reasoning
+### Exercise 6: Multiple-comparison reasoning
 
 **Prompt:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
 
@@ -225,4 +225,4 @@ than quietly folded into the confirmatory analysis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
+**Verify:** Multiple-comparison reasoning; show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.

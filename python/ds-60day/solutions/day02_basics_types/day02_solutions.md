@@ -1,4 +1,4 @@
-# Day 02 — Solutions: Variables and Core Types
+# Day 02: Solutions: Variables and Core Types
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ empty strings, and `None` are false-like, but the non-empty string
 For this lesson's **objects, names, built-in types, conversion, and truthiness** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Prompt twice with `input()` for numbers such as `12.5` and `7.25`, convert both strings to `float`, and print `19.75`. **Constraints:** display a short label with the result and do not concatenate the raw strings. **Verify:** first show that `type(input(...))` is `str`, then test whole-number and decimal text.
 
@@ -71,7 +71,7 @@ while proving that parsing occurs before numeric addition.
 
 **Verification evidence:** first show that `type(input(...))` is `str`, then test whole-number and decimal text.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Starting from `raw = ' Data Science '`, create a new value exactly equal to `'data science'`. **Constraints:** use string methods rather than slicing or a hard-coded replacement. **Verify:** assert the normalized result and show that `raw` itself is unchanged because strings are immutable.
 
@@ -90,7 +90,7 @@ raw evidence.
 
 **Verification evidence:** assert the normalized result and show that `raw` itself is unchanged because strings are immutable.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Convert the text `'3.14'` to a floating-point number, double it, and format the result as `6.28`. **Constraints:** keep the original text in one name and the numeric value in another. **Verify:** assert the parsed value has type `float` and explain why `'3.14' * 2` is not numeric multiplication.
 
@@ -112,9 +112,9 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 **Verification evidence:** assert the parsed value has type `float` and explain why `'3.14' * 2` is not numeric multiplication.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the value and type of `"7" * 2`, `7 / 2`, `7 // 2`, `bool("")`, and `bool("0")` before running them. **Progressive hint:** Operators follow operand types; non-empty strings are truthy. **Verify:** Create a table of predicted/actual value and type for all five expressions; every row must match, including `bool('0') is True`.
 
@@ -122,7 +122,7 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 **Evidence to locate in the grouped implementation:** Create a table of predicted/actual value and type for all five expressions; every row must match, including `bool('0') is True`.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace `raw = ' 0042 '; cleaned = raw.strip(); number = int(cleaned)` and record the value/type after every assignment. **Progressive hint:** String methods return new strings; conversion constructs an integer. **Verify:** Record `repr(value)` and `type(value).__name__` after `raw`, `cleaned`, and `number`; confirm the original string still contains spaces.
 
@@ -130,7 +130,7 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 **Evidence to locate in the grouped implementation:** Record `repr(value)` and `type(value).__name__` after `raw`, `cleaned`, and `number`; confirm the original string still contains spaces.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement `parse_temperature(text)` so surrounding whitespace is accepted and the result is a float, then format one decimal place. **Progressive hint:** Keep parsing separate from f-string presentation. **Verify:** Assert whitespace inputs such as `' 32.5 '` return `32.5` and format as `'32.5'`; prove invalid text follows the documented exception path.
 
@@ -138,7 +138,7 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 **Evidence to locate in the grouped implementation:** Assert whitespace inputs such as `' 32.5 '` return `32.5` and format as `'32.5'`; prove invalid text follows the documented exception path.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair `enabled = bool(raw)` for inputs such as `"true"`, `"false"`, and `" FALSE "`. Reject unknown spellings. **Progressive hint:** Normalize the text and compare explicit accepted tokens. **Verify:** Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as `'yes-ish'` raises a specific `ValueError`.
 
@@ -146,7 +146,7 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 **Evidence to locate in the grouped implementation:** Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as `'yes-ish'` raises a specific `ValueError`.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Model an optional discount where `None` means not supplied and `0.0` means supplied but zero. Explain why a truthiness check loses meaning. **Progressive hint:** Use `is None` when absence is distinct from a numeric zero. **Verify:** Test `None`, `0.0`, and `0.25` separately; assert the first is absent while the latter two remain supplied numeric discounts.
 
@@ -158,13 +158,13 @@ By contrast, `"3.14" * 2` repeats text and returns `"3.143.14"`.
 
 Separate parsing, calculation, and presentation. Predict a value's type before relying on an operator or truthiness rule.
 
-### Shared implementation for Exercise 4 — Prediction
+### Shared implementation for Exercise 4: Prediction
 
 `"7" * 2` is the string `"77"`; `7 / 2` is the float `3.5`; `7 // 2` is
 the integer `3`; `bool("")` is false; and `bool("0")` is true because the
 string is non-empty.
 
-### Shared implementation for Exercises 5–8 — Parse first, calculate second, present last
+### Shared implementation for Exercises 5–8: Parse first, calculate second, present last
 
 ```python
 raw = " 0042 "

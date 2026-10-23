@@ -68,7 +68,7 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
   shape, tempting wrong approaches, verification queries, and rollback or
   persistence behavior instead of only displaying a final query.
 - End every guide with the copy-ready, lesson-specific
-  `## Ask Codex about this lesson` block defined in
+  `## Ask an AI tutor about this lesson` block defined in
   `docs/content-authoring.md`; coaching is optional and may not compensate for
   missing course prose.
 - Do not claim an executable solution exists when only prose is present.

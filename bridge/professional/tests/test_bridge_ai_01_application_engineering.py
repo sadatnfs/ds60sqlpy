@@ -315,19 +315,20 @@ def test_evaluation_reports_quality_safety_and_budget_dimensions() -> None:
 def test_solution_has_no_hosted_sdk_network_or_key_dependency(
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    source = SOLUTION_PATH.read_text(encoding="utf-8").casefold()
-    for forbidden in (
-        "import openai",
-        "from openai",
-        "import anthropic",
-        "from anthropic",
-        "import requests",
-        "urllib.request",
-        "api_key",
-        "http://",
-        "https://",
-    ):
-        assert forbidden not in source
+    source = SOLUTION_PATH.read_text(encoding="utf-8")
+    imports = {
+        alias.name.split(".")[0]
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Import)
+        for alias in node.names
+    } | {
+        (node.module or "").split(".")[0]
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.ImportFrom)
+    }
+    assert imports <= {"__future__", "collections", "dataclasses", "json", "math", "typing"}
+    for forbidden in ("__import__", "api_key", "http://", "https://"):
+        assert forbidden not in source.casefold()
 
     assert main() == 0
     output = capsys.readouterr().out

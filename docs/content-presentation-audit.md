@@ -101,3 +101,15 @@ exceptions are retained in the registry. A clean targeted scan does not prove
 that no future typo or unsupported mathematical macro can ever be authored.
 Runtime acceptance belongs to the Docker/browser evidence in
 [the implementation checkpoint](implementation/CHECKPOINT.md).
+
+## Public-release editorial follow-up
+
+The public-release wording pass changed tutoring labels and replaced older
+punctuation in prose. Its initial program-byte comparison remained exact.
+A later contract-parity check identified nine exercise-comment lines in seven
+professional SQL learner files whose punctuation still differed from the
+reviewed guide and explanatory solution. Those comment lines were deliberately
+aligned to the current guide. Every noncomment SQL byte and every `psql`
+metacommand byte remained unchanged, and the strict cross-surface contract
+tests were retained. This is an explicit comment-only byte change, not a new
+database execution receipt or a claim of unchanged whole-file hashes.

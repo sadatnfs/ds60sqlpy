@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-found-01-relational-design-ddl-and-integrity-constraints">SQL-FOUND-01 — Relational Design, DDL, and Integrity Constraints<a class="heading-anchor" href="#guide--sql-found-01-relational-design-ddl-and-integrity-constraints" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-found-01-relational-design-ddl-and-integrity-constraints">SQL-FOUND-01: Relational Design, DDL, and Integrity Constraints<a class="heading-anchor" href="#guide--sql-found-01-relational-design-ddl-and-integrity-constraints" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Intermediate</li>
-<li><strong>Catalog prerequisite:</strong> <code>sql-15</code> — <a href="sql-15.html#guide">SQL Day 15 — Phase 1 Project</a></li>
+<li><strong>Catalog prerequisite:</strong> <code>sql-15</code>; <a href="sql-15.html#guide">SQL Day 15; Phase 1 Project</a></li>
 <li><strong>Prerequisites:</strong> Complete SQL Days 1–15 so you can query, join, aggregate, modify, and verify the supplied training schema before designing one of your own. PostgreSQL setup and the disposable database are also required.</li>
 <li><strong>Artifacts:</strong> <a href="sql-found-01.html#learner">learner SQL</a> · <a href="sql-found-01.html#solution-1">solution reasoning</a> · <a href="sql-found-01.html#solution-2">executable solution</a></li>
 </ul>
@@ -451,7 +451,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-FOUND-01 — Relational Design, DDL, and Integrity Constraints</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-FOUND-01; Relational Design, DDL, and Integrity Constraints</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-found-01/lesson/workspace/sql/professional/lessons/sql_found_01_relational_design.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -462,7 +462,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_found_01_relational_design.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Grain, Cardinality, Natural key, Surrogate key, Primary key, Foreign key. Its worked SQL reads or creates <code>pro_relational_lab.members</code>, <code>pro_relational_lab.equipment_categories</code>, <code>pro_relational_lab.equipment_items</code>, <code>pro_relational_lab.loans</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -537,7 +537,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <ol>
 <li><strong>Maintenance DDL:</strong> translate every visit requirement into a column, constraint, key, default, or generated expression; annotate the table grain. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 1, create <code>pro_relational_lab.maintenance_visits</code> at one-row-per-visit grain inside the rollback-only lab, referencing <code>equipment_items</code>; inspect its columns, constraints, defaults, and generated expression through PostgreSQL catalogs. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 1, expected output: a successful <code>CREATE TABLE</code> command tag followed by catalog evidence for one identity primary key, one item foreign key, nonblank and nonnegative checks, completion-order logic, nullable uniqueness, the <code>opened_on</code> default, and stored <code>service_days</code> that remains NULL until completion. <strong>Verify:</strong> For sql-found-01 Exercise 1, assert the catalog definitions rather than generated constraint names, execute one accepted visit and rejected cost/date/foreign-key cases with their SQLSTATE classes, and confirm the final rollback removes <code>pro_relational_lab</code>.</li>
 <li><strong>Negative cost:</strong> insert one valid visit, isolate the rejected insert in a nested block, and verify the expected SQLSTATE category. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 2, resolve the <code>AUD-001</code> item key, insert one valid maintenance visit with <code>RETURNING visit_id, item_id, cost</code>, and attempt one negative-cost insert inside a nested exception block. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 2, expected output: exactly one returned valid visit with <code>cost = 28.50</code>; the invalid attempt emits the expected check-violation notice and contributes no visit row. <strong>Verify:</strong> For sql-found-01 Exercise 2, compare the returned <code>item_id</code> with the independently selected <code>AUD-001</code> key, count exactly one <code>VISIT-100</code> row, and prove the negative-cost target count remains zero after SQLSTATE <code>23514</code> is caught.</li>
-<li><strong>NULL uniqueness:</strong> insert two NULL references, explain the observed rule, and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 3, insert two visits with <code>external_reference IS NULL</code>, then inspect all visit rows plus the unique index property that controls NULL comparison. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with <code>indnullsnotdistinct = false</code>; PostgreSQL 15+ <code>UNIQUE NULLS NOT DISTINCT</code> is the stated alternative policy. <strong>Verify:</strong> For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL <code>VISIT-100</code> and record SQLSTATE <code>23505</code>, and explain that changing to <code>NULLS NOT DISTINCT</code> would permit at most one NULL.</li>
+<li><strong>NULL uniqueness:</strong> insert two NULL references, explain the observed rule, and write, but do not blindly apply, the stricter PostgreSQL 15+ alternative. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 3, insert two visits with <code>external_reference IS NULL</code>, then inspect all visit rows plus the unique index property that controls NULL comparison. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with <code>indnullsnotdistinct = false</code>; PostgreSQL 15+ <code>UNIQUE NULLS NOT DISTINCT</code> is the stated alternative policy. <strong>Verify:</strong> For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL <code>VISIT-100</code> and record SQLSTATE <code>23505</code>, and explain that changing to <code>NULLS NOT DISTINCT</code> would permit at most one NULL.</li>
 <li><strong>Historical fee:</strong> state the invariant, the historical question, and why the checkout snapshot is or is not deliberate denormalization. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 4, create a loan-level numeric <code>daily_fee_at_checkout</code>, copy the equipment item&#x27;s current fee at checkout, change the current fee, and return both values plus a decision record. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 4, expected output: one loan row showing current fee 15.00 and preserved checkout fee 12.00, followed by one classification row with <code>attribute_name</code>, <code>classification</code>, <code>invariant</code>, and <code>historical_question</code>. <strong>Verify:</strong> For sql-found-01 Exercise 4, change the equipment item&#x27;s current fee and compare both values; assert the historical <code>daily_fee_at_checkout</code> remains unchanged while the catalog fee changes.</li>
 <li><strong>Many-to-many work:</strong> model providers, technicians, and assignments with one declared grain and key per relation; do not use delimited text. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 5, model providers and technicians as keyed entities, one provider assignment per visit, and a many-to-many <code>visit_technicians</code> bridge; then join the normalized relationships for <code>VISIT-100</code>. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 5, expected output: a four-row grain map (<code>providers</code>, <code>technicians</code>, <code>visit_providers</code>, <code>visit_technicians</code>) followed by two assignment rows with <code>visit_id</code>, <code>provider_name</code>, <code>technician_id</code>, and <code>technician_name</code>. <strong>Verify:</strong> For sql-found-01 Exercise 5, inspect primary and foreign keys, assert one provider assignment and two distinct technician assignments for <code>VISIT-100</code>, and prove a duplicate <code>(visit_id, technician_id)</code> is rejected.</li>
 <li><strong>Outer-join report:</strong> retain never-borrowed equipment, make date ties deterministic, and test the result with an item that has no loan. <strong>Inputs/evidence:</strong> For sql-found-01 Exercise 6, start from <code>pro_relational_lab.equipment_items</code>, <code>LEFT JOIN</code> <code>loans</code>, count the nullable-side <code>loan_id</code>, and aggregate the latest <code>checked_out_on</code> at item grain. <strong>Expected result/shape:</strong> For sql-found-01 Exercise 6, expected output: one row per equipment item with columns <code>item_id</code>, <code>asset_tag</code>, <code>loan_count</code>, and <code>latest_checkout</code>, ordered by <code>asset_tag, item_id</code>; never-loaned items show zero and NULL. <strong>Verify:</strong> For sql-found-01 Exercise 6, assert output row count equals equipment-item count, <code>AUD-001</code> has one loan, and <code>TOL-001</code> has zero with NULL latest checkout; move a loan-side date predicate between <code>ON</code> and <code>WHERE</code> and record the preservation difference.</li>
@@ -565,9 +565,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Normalization is a reasoning tool, not a command to split every table.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Resume the numbered sequence at <a href="sql-16.html#guide">SQL-16 — window-function fundamentals</a>. Continue through SQL-39 before taking SQL-FOUND-02; that later foundation module combines this lesson&#x27;s schema design with the transaction and locking skills needed for safe migrations.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<p>Resume the numbered sequence at <a href="sql-16.html#guide">SQL-16; window-function fundamentals</a>. Continue through SQL-39 before taking SQL-FOUND-02; that later foundation module combines this lesson&#x27;s schema design with the transaction and locking skills needed for safe migrations.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-found-01 — Relational Design, DDL, and Integrity Constraints.
 
 I have completed the direct catalog prerequisite: `sql-15`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -1002,7 +1002,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-found-01-solutions-relational-design">SQL-FOUND-01 Solutions — Relational Design<a class="heading-anchor" href="#solution-1--sql-found-01-solutions-relational-design" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-found-01-solutions-relational-design">SQL-FOUND-01 Solutions: Relational Design<a class="heading-anchor" href="#solution-1--sql-found-01-solutions-relational-design" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -1025,7 +1025,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run the complete disposable solution with:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_found_01_relational_design_solutions.sql</code></pre>
 <p>It creates <code>pro_relational_lab</code> inside a transaction and rolls it back.</p>
-<h4 id="solution-1--exercise-1-translate-requirements-into-ddl">Exercise 1 — Translate requirements into DDL<a class="heading-anchor" href="#solution-1--exercise-1-translate-requirements-into-ddl" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-translate-requirements-into-ddl">Exercise 1: Translate requirements into DDL<a class="heading-anchor" href="#solution-1--exercise-1-translate-requirements-into-ddl" aria-label="Link to this section">#</a></h4>
 <p>The grain is <strong>one maintenance visit for one physical equipment item</strong>. An item can have many visits, while each visit names exactly one item, so the foreign key belongs on <code>maintenance_visits</code>.</p>
 <p>The executable solution uses an identity primary key for internal row identity and keeps <code>external_reference</code> as a nullable natural identifier:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">CREATE</span> <span class="syntax-keyword">TABLE</span> pro_relational_lab<span class="syntax-punctuation">.</span>maintenance_visits <span class="syntax-punctuation">(</span>
@@ -1056,16 +1056,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 1, expected output: a successful <code>CREATE TABLE</code> command tag followed by catalog evidence for one identity primary key, one item foreign key, nonblank and nonnegative checks, completion-order logic, nullable uniqueness, the <code>opened_on</code> default, and stored <code>service_days</code> that remains NULL until completion.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 1, assert the catalog definitions rather than generated constraint names, execute one accepted visit and rejected cost/date/foreign-key cases with their SQLSTATE classes, and confirm the final rollback removes <code>pro_relational_lab</code>.</li>
 </ul>
-<h4 id="solution-1--exercise-2-prove-an-invalid-cost-is-rejected">Exercise 2 — Prove an invalid cost is rejected<a class="heading-anchor" href="#solution-1--exercise-2-prove-an-invalid-cost-is-rejected" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-prove-an-invalid-cost-is-rejected">Exercise 2: Prove an invalid cost is rejected<a class="heading-anchor" href="#solution-1--exercise-2-prove-an-invalid-cost-is-rejected" aria-label="Link to this section">#</a></h4>
 <p>The solution inserts one valid completed visit, then attempts a negative cost inside an exception-catching test block. Catching <code>check_violation</code> keeps the outer transaction healthy. The block deliberately raises an unexpected exception if the insert ever succeeds, so weakening or removing the constraint causes the test to fail.</p>
-<p>An application should still validate cost early for a helpful user experience, but the database constraint is the final invariant because every writer—not only that application—must obey it.</p>
+<p>An application should still validate cost early for a helpful user experience, but the database constraint is the final invariant because every writer, not only that application, must obey it.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-found-01 Exercise 2, resolve the <code>AUD-001</code> item key, insert one valid maintenance visit with <code>RETURNING visit_id, item_id, cost</code>, and attempt one negative-cost insert inside a nested exception block.</li>
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 2, expected output: exactly one returned valid visit with <code>cost = 28.50</code>; the invalid attempt emits the expected check-violation notice and contributes no visit row.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 2, compare the returned <code>item_id</code> with the independently selected <code>AUD-001</code> key, count exactly one <code>VISIT-100</code> row, and prove the negative-cost target count remains zero after SQLSTATE <code>23514</code> is caught.</li>
 </ul>
-<h4 id="solution-1--exercise-3-null-uniqueness">Exercise 3 — NULL uniqueness<a class="heading-anchor" href="#solution-1--exercise-3-null-uniqueness" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-null-uniqueness">Exercise 3: NULL uniqueness<a class="heading-anchor" href="#solution-1--exercise-3-null-uniqueness" aria-label="Link to this section">#</a></h4>
 <p>Two rows with <code>external_reference IS NULL</code> succeed under an ordinary <code>UNIQUE</code> constraint. The database does not infer that the two unknown references are the same reference.</p>
 <p>If the rule were “at most one row may have no external reference,” PostgreSQL 15+ supports:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">UNIQUE</span> NULLS <span class="syntax-keyword">NOT</span> <span class="syntax-keyword">DISTINCT</span> <span class="syntax-punctuation">(</span>external_reference<span class="syntax-punctuation">)</span></code></pre>
@@ -1076,7 +1076,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with <code>indnullsnotdistinct = false</code>; PostgreSQL 15+ <code>UNIQUE NULLS NOT DISTINCT</code> is the stated alternative policy.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL <code>VISIT-100</code> and record SQLSTATE <code>23505</code>, and explain that changing to <code>NULLS NOT DISTINCT</code> would permit at most one NULL.</li>
 </ul>
-<h4 id="solution-1--exercise-4-deliberate-denormalization">Exercise 4 — Deliberate denormalization<a class="heading-anchor" href="#solution-1--exercise-4-deliberate-denormalization" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-deliberate-denormalization">Exercise 4: Deliberate denormalization<a class="heading-anchor" href="#solution-1--exercise-4-deliberate-denormalization" aria-label="Link to this section">#</a></h4>
 <p><code>daily_fee_at_checkout</code> is deliberate denormalization. The normalized current fee belongs to the equipment item, but a historical loan must preserve the fee quoted when the checkout occurred. The invariant is:</p>
 <blockquote><p>Once a checkout is accepted, its quoted fee changes only through an explicit correction workflow; later catalog-price changes do not rewrite history.</p></blockquote>
 <p>This snapshot answers historical billing questions reliably. Copying a category&#x27;s display name into each equipment row would not provide that benefit and would create an update anomaly when the category is renamed.</p>
@@ -1087,7 +1087,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 4, expected output: one loan row showing current fee 15.00 and preserved checkout fee 12.00, followed by one classification row with <code>attribute_name</code>, <code>classification</code>, <code>invariant</code>, and <code>historical_question</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 4, change the equipment item&#x27;s current fee and compare both values; assert the historical <code>daily_fee_at_checkout</code> remains unchanged while the catalog fee changes.</li>
 </ul>
-<h4 id="solution-1--exercise-5-providers-technicians-and-assignments">Exercise 5 — Providers, technicians, and assignments<a class="heading-anchor" href="#solution-1--exercise-5-providers-technicians-and-assignments" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-providers-technicians-and-assignments">Exercise 5: Providers, technicians, and assignments<a class="heading-anchor" href="#solution-1--exercise-5-providers-technicians-and-assignments" aria-label="Link to this section">#</a></h4>
 <p>Use one row per provider, one row per technician, and one row per visit/technician assignment. A provider-to-technician relationship may be modeled separately if employment changes independently of a visit. The assignment table needs a composite key such as <code>(visit_id, technician_id)</code> (or an identity plus that unique constraint) so the same technician cannot be silently assigned twice.</p>
 <p>Delimited names fail because the database cannot enforce a technician foreign key, distinguish a comma inside a name, or update/query one participant without parsing text. The executable solution creates normalized tables and demonstrates the join at one row per visit/technician assignment. It backfills a provider assignment for every existing visit and then drops the old mutable <code>maintenance_visits.provider_name</code>; keeping both writable representations would recreate the update anomaly normalization is meant to remove.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -1096,7 +1096,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 5, expected output: a four-row grain map (<code>providers</code>, <code>technicians</code>, <code>visit_providers</code>, <code>visit_technicians</code>) followed by two assignment rows with <code>visit_id</code>, <code>provider_name</code>, <code>technician_id</code>, and <code>technician_name</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 5, inspect primary and foreign keys, assert one provider assignment and two distinct technician assignments for <code>VISIT-100</code>, and prove a duplicate <code>(visit_id, technician_id)</code> is rejected.</li>
 </ul>
-<h4 id="solution-1--exercise-6-preserve-equipment-with-no-loans">Exercise 6 — Preserve equipment with no loans<a class="heading-anchor" href="#solution-1--exercise-6-preserve-equipment-with-no-loans" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-preserve-equipment-with-no-loans">Exercise 6: Preserve equipment with no loans<a class="heading-anchor" href="#solution-1--exercise-6-preserve-equipment-with-no-loans" aria-label="Link to this section">#</a></h4>
 <p>Start from <code>equipment_items</code>, LEFT JOIN <code>loans</code>, and aggregate by item. Put a loan-side time filter in the <code>ON</code> clause when equipment with no qualifying loan must remain. The latest date is <code>max(checked_out_on)</code> and count should use a non-NULL loan key, not <code>count(*)</code>, which counts the preserved outer row.</p>
 <p>If the report also needs columns from the latest loan, rank loans by <code>checked_out_on DESC, loan_id DESC</code> before joining. The identity is the stated tie-break; a date alone does not impose a total order.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1105,7 +1105,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 6, expected output: one row per equipment item with columns <code>item_id</code>, <code>asset_tag</code>, <code>loan_count</code>, and <code>latest_checkout</code>, ordered by <code>asset_tag, item_id</code>; never-loaned items show zero and NULL.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 6, assert output row count equals equipment-item count, <code>AUD-001</code> has one loan, and <code>TOL-001</code> has zero with NULL latest checkout; move a loan-side date predicate between <code>ON</code> and <code>WHERE</code> and record the preservation difference.</li>
 </ul>
-<h4 id="solution-1--exercise-7-referential-deletion-policy">Exercise 7 — Referential deletion policy<a class="heading-anchor" href="#solution-1--exercise-7-referential-deletion-policy" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-referential-deletion-policy">Exercise 7: Referential deletion policy<a class="heading-anchor" href="#solution-1--exercise-7-referential-deletion-policy" aria-label="Link to this section">#</a></h4>
 <p>The executable answer inventories all eight implemented foreign keys. Links from categories to equipment, members/equipment to loans, equipment to maintenance, and provider/technician identities to assignments use <code>RESTRICT</code>, because deleting those parents would erase the meaning of historical facts. Links from a visit to its provider/technician assignment rows use <code>CASCADE</code>, because those bridges have no meaning without the visit.</p>
 <p>The expected matrix is joined to <code>pg_constraint</code>, translating <code>confdeltype</code> into a readable <code>actual_action</code>; every supplied row must report <code>matches</code>. <code>SET NULL</code> would be valid only if the child remained truthful without its parent and the column were deliberately nullable.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1114,7 +1114,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-found-01 Exercise 7, expected output: eight rows with <code>relationship</code>, <code>expected_action</code>, <code>actual_action</code>, <code>drift_status</code>, and <code>rationale</code>; category, borrower, equipment, provider, and technician identities use <code>RESTRICT</code>, parentless visit-assignment bridges use <code>CASCADE</code>, and every row reports <code>matches</code>.</li>
 <li><strong>Independent verification:</strong> For sql-found-01 Exercise 7, require all eight expected relationships exactly once, compare actions with <code>pg_get_constraintdef</code>, attempt one protected parent deletion to observe a foreign-key violation, and verify deleting a disposable visit removes only its dependent assignment rows.</li>
 </ul>
-<h4 id="solution-1--exercise-8-catalog-level-contract">Exercise 8 — Catalog-level contract<a class="heading-anchor" href="#solution-1--exercise-8-catalog-level-contract" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-catalog-level-contract">Exercise 8: Catalog-level contract<a class="heading-anchor" href="#solution-1--exercise-8-catalog-level-contract" aria-label="Link to this section">#</a></h4>
 <p>Join <code>pg_constraint</code>, <code>pg_class</code>, <code>pg_namespace</code>, and <code>pg_attribute</code>, and inspect constraint type plus <code>pg_get_constraintdef</code>. Inspect <code>pg_attribute.attgenerated</code> and <code>pg_get_expr(pg_attrdef.adbin, ...)</code> for the generated expression. This checks semantic properties without coupling a test to a generated name.</p>
 <p>For NULL-aware uniqueness, inspect <code>pg_index.indnullsnotdistinct</code> on PostgreSQL 15+. The ordinary solution expects it to be false. A robust contract also checks column order/types and the referenced relation/columns rather than searching rendered text alone.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1638,16 +1638,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-found-01 — Relational Design, DDL, and Integrity Constraints.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-found-01 — Relational Design, DDL, and Integrity Constraints.
 
 I have completed the direct catalog prerequisite: `sql-15`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_found_01_relational_design.md
@@ -1674,7 +1674,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1785,18 +1785,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

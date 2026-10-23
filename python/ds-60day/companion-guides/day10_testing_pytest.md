@@ -1,4 +1,4 @@
-# Day 10 — Testing with pytest
+# Day 10: Testing with pytest
 
 **Level:** Beginner
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 10 — testing with pytest to practice tests as executable contracts and useful failure reports
+**Lesson outcome:** use day 10; testing with pytest to practice tests as executable contracts and useful failure reports
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -100,7 +100,7 @@ that the indented call must raise that exact failure and optionally
 match a stable message fragment. The test name should state behavior,
 such as `test_safe_divide_rejects_zero_denominator`.
 
-### Worked example 1 — Test a pure calculation with plain assertions
+### Worked example 1: Test a pure calculation with plain assertions
 
 Direct equality makes failures explain the two values. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -123,7 +123,7 @@ assert subtotal([]) == 0
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Represent cases as data
+### Worked example 2: Represent cases as data
 
 The same behavior can be checked across several boundaries. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -287,11 +287,11 @@ negative test fails if the function stops enforcing its contract.
 
 - [Open the learner notebook](../notebooks/day10_testing_pytest.ipynb)
 - [Check the separate solution](../solutions/day10_testing_pytest/day10_solutions.md)
-- [Next: Day 11 — Debugging, logging, and profiling](day11_debug_logging_profiling.md)
+- [Next: Day 11; Debugging, logging, and profiling](day11_debug_logging_profiling.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

@@ -319,7 +319,7 @@ or grouping contract and must not silently add unlike amounts. Live database
 integration is a separate opt-in project with its own transaction and recovery
 evidence.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The guide, fixtures, and local Python tests are sufficient offline. Copy this
 optional prompt for coaching:

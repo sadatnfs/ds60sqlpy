@@ -1,4 +1,4 @@
-# SQL-EXT-01 Solutions — Extensions, Spatial, and Vector Boundaries
+# SQL-EXT-01 Solutions: Extensions, Spatial, and Vector Boundaries
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 The solution uses only built-ins and rolls back.
 
-## Exercise 1 — Capability matrix
+## Exercise 1: Capability matrix
 
 Join a requested-extension list to `pg_available_extensions`. A missing row is
 unavailable; a row with NULL `installed_version` is available but not installed;
@@ -73,9 +73,9 @@ privilege, owner, replica compatibility, and supported upgrade path.
 
 - **Inputs/evidence:** For sql-ext-01 Exercise 1, LEFT JOIN the requested extension-name fixture (citext, pg_trgm, pgcrypto, postgis, postgres_fdw, and vector) to `pg_available_extensions` and `pg_extension`. This is read-only discovery.
 - **Expected result/shape:** For sql-ext-01 Exercise 1, One row per requested `extension_name`, with `extension_name`, `default_version`, `installed_version`, `installed_owner`, and `capability_state`, ordered by `extension_name`. State is `unavailable`, `available_not_installed`, or `installed`.
-- **Independent verification:** For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with `pg_extension`. Record CREATE privilege/approval as unknown unless separately proven—availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.
+- **Independent verification:** For sql-ext-01 Exercise 1, Every requested name appears exactly once even when unavailable; compare installed versions directly with `pg_extension`. Record CREATE privilege/approval as unknown unless separately proven, availability does not grant permission. Hint ladder, rung 1: Start from the requested list and LEFT JOIN catalogs, otherwise unavailable names disappear.
 
-## Exercise 2 — Case-insensitive identity
+## Exercise 2: Case-insensitive identity
 
 A generated lower-case key centralizes one invariant and supports a unique
 index. It differs from citext across operators, implicit casts, joins,
@@ -89,7 +89,7 @@ lowercase equals identity.
 - **Expected result/shape:** For sql-ext-01 Exercise 2, A catalog evidence row names the generated expression and unique index definition. A behavior table has `case_id`, `candidate_name`, `normalized_name`, `expected_outcome`, and `observed_sqlstate` for a distinct insert and a case-fold collision.
 - **Independent verification:** For sql-ext-01 Exercise 2, In a savepoint, `Charlie` succeeds and `alpha` conflicts with existing `Alpha` using SQLSTATE `23505`; rollback removes both attempts. Document Unicode/collation, operators/joins, and cross-writer limitations rather than claiming `lower()` is universally equivalent to `citext`. Hint ladder, rung 1: The generated column is a stored key; every lookup and join must use the same explicit normalization contract.
 
-## Exercise 3 — Spatial semantics
+## Exercise 3: Spatial semantics
 
 Built-in `point <-> point` returns planar units on an abstract coordinate grid.
 PostGIS geometry adds SRID-aware planar operations and transformations;
@@ -100,9 +100,9 @@ cross dateline/poles; select SRID/type before distance/index design.
 
 - **Inputs/evidence:** For sql-ext-01 Exercise 3, Calculate `<->` from each `pro_extensions_lab.items.location` to the built-in point `(1,1)`, and write a comparison matrix for built-in `point`, PostGIS `geometry`, and PostGIS `geography`.
 - **Expected result/shape:** For sql-ext-01 Exercise 3, One row per `item_id`, with `item_id`, `item_name`, and `planar_distance`, ordered by `planar_distance, item_id`. The matrix names coordinate model, SRID support, distance units, index/operator, and appropriate use for each type.
-- **Independent verification:** For sql-ext-01 Exercise 3, Distances may tie, so `item_id`—not distance—is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.
+- **Independent verification:** For sql-ext-01 Exercise 3, Distances may tie, so `item_id`, not distance, is the identity and final tie-break. Prove the built-in result is Cartesian grid distance and explicitly reject interpreting latitude/longitude degrees as meters. Hint ladder, rung 1: A numeric distance has no geographic meaning until the coordinate reference system and units are defined.
 
-## Exercise 4 — Vectors
+## Exercise 4: Vectors
 
 `checked_l2` rejects unequal dimensions and computes exact L2 by matching array
 ordinality. This is adequate only for tiny fixtures. pgvector adds typed
@@ -116,7 +116,7 @@ recall. Evaluate against labeled queries and pin embedding model/version.
 - **Expected result/shape:** For sql-ext-01 Exercise 4, One row per `item_id`, with `item_id`, `item_name`, and `vector_distance`, ordered by `vector_distance, item_id`. The supplied `[0,0,0]` to `[3,4,0]` control equals `5`.
 - **Independent verification:** For sql-ext-01 Exercise 4, Named negative controls reject dimension mismatch, empty arrays, NULL elements, `Infinity`, and `NaN` with SQLSTATE `23514`; equal distance ties remain separate item IDs. Compare exact scan results with any approved ANN index before reporting recall, memory, build, or write cost. Hint ladder, rung 1: `sum()` silently ignores NULL inputs, so validation must happen before unnesting and aggregation.
 
-## Exercise 5 — Cryptography
+## Exercise 5: Cryptography
 
 Built-in SHA-256 is a deterministic integrity checksum. pgcrypto adds digest,
 password `crypt`, random bytes, and PGP-style encryption, but database-side key
@@ -130,7 +130,7 @@ remain recoverable under strict access.
 - **Expected result/shape:** For sql-ext-01 Exercise 5, One row per `item_id` with the three evidence columns, ordered by `item_id`. A purpose matrix names integrity digest, password hashing, encryption, key custody, and capability/fallback.
 - **Independent verification:** For sql-ext-01 Exercise 5, Recompute SHA-256 from `payload` and compare all 64 hex characters; changing payload changes the digest. The matrix must explicitly forbid a fast unsalted digest for password storage and must not claim optional pgcrypto functions ran when unavailable. Hint ladder, rung 1: Hashing, password verification, encryption, and key management solve different threats.
 
-## Exercise 6 — FDW boundary
+## Exercise 6: FDW boundary
 
 Own foreign servers/mappings separately, keep credentials out of DDL/Git, import
 only reviewed columns, test pushdown with EXPLAIN, bound timeouts/concurrency,
@@ -144,7 +144,7 @@ record extraction watermark.
 - **Expected result/shape:** For sql-ext-01 Exercise 6, One row per `source_key`, with `source_key`, `snapshot_id`, `fetched_at`, and `payload`, ordered by `source_key`.
 - **Independent verification:** For sql-ext-01 Exercise 6, Add two same-time snapshots and prove greater `snapshot_id` wins. Separately review server ownership, secret location/rotation, imported columns, pushdown, transaction consistency, timeout, failure isolation, and snapshot fallback before any approved FDW deployment. Hint ladder, rung 1: Capability inventory and a local snapshot are safe evidence; neither proves a remote FDW connection is authorized or healthy.
 
-## Exercise 7 — Search
+## Exercise 7: Search
 
 Prefix `LIKE 'post%'` can use a compatible pattern index; full-text search uses
 lexemes/language; pg_trgm supports similarity and many wildcard patterns through
@@ -157,7 +157,7 @@ the matching GIN/GiST trigram operator class and measured threshold.
 - **Expected result/shape:** For sql-ext-01 Exercise 7, One row per `search_method`, with `search_method`, `query_operator`, `index_strategy`, `ranking_semantics`, `strength`, and `limitation`.
 - **Independent verification:** For sql-ext-01 Exercise 7, Use one exact prefix, one misspelling, and one multi-token document to show the methods answer different questions. If `pg_trgm` is absent, record that capability as unavailable and run only built-in comparisons. Hint ladder, rung 1: An index helps only operators supported by its operator class; “fuzzy,” “prefix,” and “linguistic” are not synonyms.
 
-## Exercise 8 — Extension lifecycle inventory
+## Exercise 8: Extension lifecycle inventory
 
 Join `pg_extension` to available versions and dependency catalogs; add owner,
 installed/default/available version, update paths, trust, package/image source,
@@ -174,7 +174,7 @@ inventories capabilities and never changes them.
 - **Expected result/shape:** For sql-ext-01 Exercise 8, One row per requested `extension_name`, with catalog facts kept separate from reviewed policy fields. No `CREATE EXTENSION`, `ALTER EXTENSION`, or `DROP EXTENSION` runs.
 - **Independent verification:** For sql-ext-01 Exercise 8, Every installed extension has an exact version, owner, schema, dependency inventory, package source, upgrade and restore rehearsal, and rollback limit. Unavailable extensions remain visible with an explicit fallback instead of disappearing. Hint ladder, rung 1: Catalog state is observed evidence; approval, provenance, rollback, and operational ownership are separate decisions.
 
-## Exercise 9 — Collation version drift
+## Exercise 9: Collation version drift
 
 Compare recorded provider versions with current actual versions. A mismatch
 means sort keys may have changed after libc/ICU updates; it does not identify
@@ -190,7 +190,7 @@ and post-checks. Refresh version metadata only after remediation is validated.
 - **Expected result/shape:** For sql-ext-01 Exercise 9, One row per mismatched `(collation_schema, collation_name, encoding)`, with those identity fields, `collprovider`, `recorded_version`, and `actual_version`, ordered by all three identity fields.
 - **Independent verification:** For sql-ext-01 Exercise 9, An empty result means no mismatch was detected, not that every dependent index was inspected. For each returned collation, inventory dependent indexes, rehearse `REINDEX`, validate ordering/uniqueness, and only then refresh version metadata under an approved runbook. Hint ladder, rung 1: `collname` alone is not globally unique; preserve its namespace and encoding.
 
-## Exercise 10 — PostGIS nearest-resource design
+## Exercise 10: PostGIS nearest-resource design
 
 Use geography point SRID 4326 (or a reviewed transformed geometry). Apply
 `ST_DWithin` in meters so GiST can prefilter, then order candidates by exact
@@ -206,7 +206,7 @@ already approved in an isolated environment.
 - **Expected result/shape:** For sql-ext-01 Exercise 10, A reviewed query contract names parameters, coordinate validation, meters as units, output grain/columns/order, antimeridian/pole cases, maximum radius, timeout, fallback, and owner.
 - **Independent verification:** For sql-ext-01 Exercise 10, In an approved isolated PostGIS environment, compare the indexed query with a small exact control set, inspect `EXPLAIN (ANALYZE, BUFFERS)`, and test equal distances plus antimeridian/pole fixtures. Otherwise report `not executed: capability unavailable`. Hint ladder, rung 1: Prefilter for indexable radius, then calculate exact distance and order by distance plus stable identity.
 
-## Exercise 11 — pgvector metric and ANN evidence
+## Exercise 11: pgvector metric and ANN evidence
 
 Choose L2, negative inner product, or cosine from the embedding model contract.
 Normalize when required and enforce comparable model/version/dimension.
@@ -221,7 +221,7 @@ parameters and retain an exact fallback; index use is not relevance evidence.
 - **Expected result/shape:** For sql-ext-01 Exercise 11, One row per `item_id`, with `item_id`, `item_name`, and `exact_l2`, ordered by `exact_l2, item_id`.
 - **Independent verification:** For sql-ext-01 Exercise 11, Compare every ANN candidate set with this exact ordering and report recall at the chosen `k`, filtered recall, latency, build memory/time, update cost, and index size. State normalization assumptions and use `item_id` to keep equal distances deterministic. Hint ladder, rung 1: A fast plan is not sufficient; ANN adoption needs a correctness benchmark against the exact metric.
 
-## Exercise 12 — Operable FDW boundary
+## Exercise 12: Operable FDW boundary
 
 Use external secret storage and a narrow mapping owner with rotation rehearsal;
 bound connections/timeouts and remote resources. Validate imported schema,
@@ -237,7 +237,7 @@ failure. Never commit credentials in SQL.
 - **Expected result/shape:** For sql-ext-01 Exercise 12, One row per `source_key`, with `source_key`, `snapshot_watermark`, and `retained_versions`, ordered by `source_key`.
 - **Independent verification:** For sql-ext-01 Exercise 12, Independently compare `max(fetched_at)` and counts per key; add a same-time version and confirm the latest-row query uses `snapshot_id` for its tie, while this aggregate correctly increments `retained_versions`. Simulate remote unavailability by using only the timestamped local fallback. Hint ladder, rung 1: A watermark says when the snapshot was fetched, not that the remote source is current or complete.
 
-## Exercise 13 — Extension supply-chain review
+## Exercise 13: Extension supply-chain review
 
 Require approved publisher/source, pinned checksums, reproducible or trusted
 packages, dependency/SBOM and CVE/license review, native-code privilege analysis,
@@ -253,7 +253,7 @@ lifecycle ownership is absent.
 - **Expected result/shape:** For sql-ext-01 Exercise 13, One row per `review_item`, with `review_item`, `observed_evidence`, `status`, `owner`, and `blocking_reason`. Unknown or missing evidence remains visible and blocks approval.
 - **Independent verification:** For sql-ext-01 Exercise 13, The review output must remain `rejected`/`blocked` when the source signature/SBOM is removed or the removal rehearsal fails; a successful local compile is not sufficient and nothing is installed. Hint ladder, rung 1: Native extension code executes inside the database server process, so provenance and patch ownership are security controls.
 
-## Exercise 14 — Upgrade rehearsal
+## Exercise 14: Upgrade rehearsal
 
 Restore a representative disposable database with old binaries, inventory
 dependent objects/functions/plans and data checks, then follow a supported

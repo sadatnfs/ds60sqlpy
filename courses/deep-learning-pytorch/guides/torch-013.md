@@ -168,7 +168,7 @@ Only if calibration evidence supports that interpretation for the relevant popul
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-013, Binary logits, BCEWithLogitsLoss and thresholds.

@@ -1,4 +1,4 @@
-# Bridge Day 8 — Production capstone: observability, security, and recovery
+# Bridge Day 8: Production capstone: observability, security, and recovery
 
 **Level:** Advanced  
 **Prerequisite:** [Bridge Day 7](day07_async_bounded_concurrency.md)
@@ -7,7 +7,7 @@
 
 Production readiness is not a framework choice. It is evidence that a program
 behaves predictably on success, invalid input, partial failure, retry, restart,
-and shutdown—without exposing secrets. This capstone keeps effectful adapters
+and shutdown, without exposing secrets. This capstone keeps effectful adapters
 small and makes orchestration order observable with fakes before any live
 database run.
 
@@ -274,12 +274,12 @@ contact this URL.
 - **No recovery rehearsal:** an untested runbook is a hypothesis.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-07`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -311,7 +311,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

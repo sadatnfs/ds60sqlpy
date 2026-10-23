@@ -1,4 +1,4 @@
-# Day 50 — Time-Series Modeling and Forecast Evaluation
+# Day 50: Time-Series Modeling and Forecast Evaluation
 
 **Lesson ID:** `python-50` · **Level:** advanced · **Dependencies:** `ml` · **Network:** offline
 
@@ -107,7 +107,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags
+## Concept deep dive: forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags
 
 ### The mental model
 
@@ -133,7 +133,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — construct a seasonal-naive forecast on matching timestamps
+### Focused example A: construct a seasonal-naive forecast on matching timestamps
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -158,7 +158,7 @@ assert mean_absolute_error(test, forecast) == 0.0
 
 **Assumption to name:** A seven-day season was available and stable; real data rarely repeat perfectly.
 
-### Focused example B — build a trailing feature that excludes the current target
+### Focused example B: build a trailing feature that excludes the current target
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -205,17 +205,17 @@ assert features.loc[3, "trailing_mean_2"] == 25.0
 1. Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the
    same test window.
 
-**Verify:** Practice 1 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
+**Verify:** Practice 1; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
 2. Create last-value and 30-day seasonal-naive forecasts and compare them with
    ARIMA.
 
-**Verify:** Practice 2 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
+**Verify:** Practice 2; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; on the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
 3. Difference the training series and inspect autocorrelation without using
    test-period observations.
 
-**Verify:** Practice 3 — forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags — difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
+**Verify:** Practice 3; forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags; difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
 ### Progressive hints
 
@@ -240,17 +240,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Rolling-origin evaluation:** Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.
    **Progressive hint:** At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.
 
-**Verify:** Rolling-origin evaluation — print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.
+**Verify:** Rolling-origin evaluation; print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.
 
 5. **Prediction intervals:** Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.
    **Progressive hint:** For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.
 
-**Verify:** Prediction intervals — print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.
+**Verify:** Prediction intervals; print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.
 
 6. **Timestamp/data-quality debugging:** Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.
    **Progressive hint:** Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.
 
-**Verify:** Timestamp/data-quality debugging — produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.
+**Verify:** Timestamp/data-quality debugging; produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -286,12 +286,12 @@ backtested evidence, operational latency, and maintainability.
 - Work in the [Day 50 learner notebook](../notebooks/day50_time_series_modeling.ipynb).
 - Then review the
   [Day 50 solution](../solutions/day50_time_series_modeling/day50_solutions.md).
-- Continue to [Day 51 — Target Encoding](day51_advanced_feature_engineering_target_encoding.md).
+- Continue to [Day 51; Target Encoding](day51_advanced_feature_engineering_target_encoding.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-50` — Day 50 — Time-Series Modeling and Forecast Evaluation.

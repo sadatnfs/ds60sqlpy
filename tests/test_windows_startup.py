@@ -231,6 +231,13 @@ def test_windows_commands_document_both_repository_environment_layouts() -> None
 
     for document in documents:
         text = document.read_text(encoding="utf-8")
+        manual_windows_python = re.search(r"\$CoursePython|\.venv\\(?:Scripts\\)?python\.exe", text)
+        if manual_windows_python is None:
+            # Managed development environments select their interpreter through
+            # uv on every OS; they must document both setup and invocation.
+            assert re.search(r"(?m)^uv sync --frozen(?:\s|$)", text), document
+            assert re.search(r"(?m)^uv run --no-sync python(?:\s|$)", text), document
+            continue
         assert r"Test-Path .\.venv\Scripts\python.exe" in text, document
         assert r"Resolve-Path .\.venv\python.exe" in text, document
         assert "$CoursePython" in text, document
@@ -262,17 +269,17 @@ def test_windows_troubleshooting_discovers_before_install_advice() -> None:
     )
 
 
-def test_beginner_sql_start_uses_day_one_before_foundation_milestones() -> None:
+def test_beginner_sql_onramp_precedes_historical_day_one() -> None:
     text = README.read_text(encoding="utf-8")
-    sql_start = text.index("\nSQL:\n")
-    sql_end = text.index("\nPython + PostgreSQL engineering bridge:", sql_start)
-    sql_steps = text[sql_start:sql_end]
-
-    assert "Open [SQL Day 1](lesson-pages/sql-01.html)" in sql_steps
-    assert "**Create/open guided SQL notebook**" in sql_steps
-    assert ".learning/sql/sql-01/" in sql_steps
-    assert sql_steps.index("Open [SQL Day 1]") < sql_steps.index("between Days 15 and 16")
-    assert sql_steps.index("between Days 15 and 16") < sql_steps.index("between Days 39 and 40")
+    route = ("`sql-start-01`", "`sql-start-02`", "`sql-start-03`", "`sql-01`")
+    positions = [text.index(lesson_id) for lesson_id in route]
+    assert positions == sorted(positions)
+    plan = (REPO_ROOT / "sql/ADVANCED_SQL_60DAY_PLAN.md").read_text(encoding="utf-8")
+    onramp = plan.split("## Relational foundations and professional extensions", maxsplit=1)[1]
+    for lesson_id in route[:3]:
+        assert lesson_id in onramp
+    assert "then begin Day 1" in onramp
+    assert onramp.index("then begin Day 1") < onramp.index("follows Day 15")
 
 
 def test_offline_windows_path_supports_both_repository_environment_layouts() -> None:
@@ -316,7 +323,7 @@ def test_native_windows_guided_sql_authentication_is_explicit_and_secret_free() 
         '$env:DS60_DATABASE_URL = "postgresql://postgres@localhost:5432/advanced_sql_training"'
     ) in windows
     assert "YOUR_LOCAL_POSTGRES_PASSWORD" in windows
-    assert "Never copy, commit, paste into Codex, or share it." in windows
+    assert "Never copy, commit, paste into an AI assistant, or share it." in windows
     assert "same PowerShell window" in windows
 
     assert "authenticate-without-a-hidden-prompt" in guided

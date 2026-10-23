@@ -187,7 +187,7 @@ No. More draws approximate the empirical resampling distribution more closely; t
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-035, Paired model comparisons and uncertainty.

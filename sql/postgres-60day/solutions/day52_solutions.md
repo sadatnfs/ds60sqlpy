@@ -1,4 +1,4 @@
-# Day 52 Solutions — Data Warehouse Design, Part 1
+# Day 52 Solutions: Data Warehouse Design, Part 1
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ The file first includes `../day52_project3_dwh_part1.sql`, which builds and
 commits `dim_date`, Type-2-ready customer/product dimensions, and `fact_sales`.
 It then completes both exercises in a second committed transaction.
 
-## Exercise 1 — Add `dim_country`
+## Exercise 1: Add `dim_country`
 
 The solution:
 
@@ -93,7 +93,7 @@ country code in `dim_country`; every customer-dimension version has exactly one
 - **Alternative/trade-off:** For sql-52 Exercise 1, the chosen form is justified by this lesson-specific rationale: The solution: 1. Evaluate another form against the concrete expected result (one row per country code in `dim_country`; every customer-dimension version has exactly one `country_sk`) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `country` values in both cases.
 
-## Exercise 2 — Add `fact_payments`
+## Exercise 2: Add `fact_payments`
 
 The answer creates one row per source payment with:
 
@@ -170,7 +170,7 @@ Day 54 depends on committed Day 52 state, not on rolled-back Day 53 changes.
   day before the new version starts.
 - A fact load must reconcile to source counts before it is trusted.
 
-## Exercise 3 — State the sales fact grain
+## Exercise 3: State the sales fact grain
 
 `COUNT(*)`, distinct orders, and distinct order-item keys prove that
 `fact_sales` is one row per order line. An order can therefore repeat.
@@ -185,7 +185,7 @@ Day 54 depends on committed Day 52 state, not on rolled-back Day 53 changes.
 - **Alternative/trade-off:** For sql-52 Exercise 3, the chosen form is justified by this lesson-specific rationale: `COUNT()`, distinct orders, and distinct order-item keys prove that `fact_sales` is one row per order line. Evaluate another form against the concrete expected result (one row per order line) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 4 — Route unknown members deliberately
+## Exercise 4: Route unknown members deliberately
 
 The solution reserves surrogate key `-1` in referenced dimensions and shows a
 missing natural customer key mapping to it. This policy must not hide a broken
@@ -201,7 +201,7 @@ required mapping.
 - **Alternative/trade-off:** For sql-52 Exercise 4, the chosen form is justified by this lesson-specific rationale: The solution reserves surrogate key `-1` in referenced dimensions and shows a missing natural customer key mapping to it. Evaluate another form against the concrete expected result (one row per `routed_customer_sk`) and the verification above.
 - **Edge case:** Add one source row with a new `routed_customer_sk`; verify the result gains exactly one row carrying that `routed_customer_sk` value.
 
-## Exercise 5 — Reconcile completeness and amount
+## Exercise 5: Reconcile completeness and amount
 
 Fact/source row counts and rounded line amounts appear together. Either a row
 or amount difference blocks trust in the warehouse load.
@@ -216,7 +216,7 @@ or amount difference blocks trust in the warehouse load.
 - **Alternative/trade-off:** For sql-52 Exercise 5, the chosen form is justified by this lesson-specific rationale: Fact/source row counts and rounded line amounts appear together. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
 - **Edge case:** Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 
-## Exercise 6 — Handle late dates explicitly
+## Exercise 6: Handle late dates explicitly
 
 The query lists payments outside `dim_date`. The chosen policy is fail and
 extend the dimension because silently mapping a real accounting date to unknown

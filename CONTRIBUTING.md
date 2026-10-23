@@ -1,201 +1,174 @@
 # Contributing
 
-Contributions should make the course more accurate, runnable, teachable, and portable. Small fixes are welcome; broad curriculum changes should preserve the learner path and update its artifacts, authoring metadata, and generated index together.
+Help make DS60 accurate, teachable and reproducible. Small fixes are welcome.
+A curriculum change should keep its guide, learner artifact, reference,
+metadata and rendered pages consistent. A runtime change needs evidence from
+execution, including failure behavior, rather than only a successful build.
+
+## Choose your setup
+
+To learn or inspect the running product, install a Linux-container engine with
+Compose and run `./classroom`. Windows uses WSL 2. The
+[one-command guide](docs/one-command-classroom.md) covers installation, logs,
+profiles, storage and recovery. No host language toolchain is needed for the
+ordinary Docker route.
+
+For application development or content generation, use Python 3.12 and the
+checked-in dependency lock. From the repository root, with `uv` installed:
+
+```sh
+uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/check_modules.py
+```
+
+These commands work in POSIX, WSL and PowerShell. `uv run --no-sync` uses the
+prepared environment without activating it. Node.js is needed for the UI
+behavior checker. Optional framework and compiler checks need their declared
+profiles; do not install every large dependency to make an unrelated docs edit.
+The setup scripts remain available for native learning and use compatible
+package ranges. See [dependency profiles](docs/dependency-profiles.md) and
+[validation](docs/validation.md).
 
 ## Before editing
 
-1. Run all commands from the repository root.
-2. Inspect the worktree:
+Run `git status --short --branch`, preserve unrelated work, and read
+[AGENTS.md](AGENTS.md) plus the closest subject `AGENTS.md`. Do not overwrite
+learner files or commit `.learning/`, `.classroom/`, credentials, caches or local
+logs. Use UTF-8, repository-relative paths and the checked-in editor settings.
 
-   ```text
-   git status --short --branch
-   ```
+Find the durable source before changing a generated artifact:
 
-3. Preserve unrelated changes. Do not reset, reformat, or regenerate files outside your task.
-4. Read the applicable instructions:
-   - [AGENTS.md](AGENTS.md)
-   - [python/AGENTS.md](python/AGENTS.md) for Python or notebook work
-   - [sql/AGENTS.md](sql/AGENTS.md) for SQL work
-   - [bridge/AGENTS.md](bridge/AGENTS.md) for Python/PostgreSQL integration work
-5. Check the generated lesson entry in `curriculum/catalog.json` and its inputs in the lesson artifacts and `src/ds60sqlpy/catalog_builder.py`.
+| Work | Start here |
+| --- | --- |
+| Python, SQL or bridge lesson | Subject `AGENTS.md`, catalog builder and lesson artifacts |
+| New module or language | [Extension playbook](docs/curriculum-extension-playbook.md), [module contract](docs/implementation/ADDING_A_MODULE.md) |
+| Existing generated subject | Its `courses/<subject>/authoring/README.md` |
+| Browser interface | `src/ds60sqlpy/assets/classroom.*` and `classroom.py` |
+| Runtime adapter | `module_jobs.py`, `worker_operations.py`, profile Dockerfile and Compose |
+| Reader formatting | `lesson_reader.py`, `reader_math.py`, `reader_content.py` |
 
-## Set up and inspect the repository
+Python implementation filenames are under `src/ds60sqlpy/`. The repository
+[add-learning-path skill](.agents/skills/add-learning-path/SKILL.md) provides a
+focused workflow for contributor agents. The
+[learning skill](.agents/skills/guide-ds60sqlpy-learning/SKILL.md) is for tutoring.
 
-Windows:
+## Choose a public commit identity
 
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1
-.\.venv\Scripts\python.exe scripts\course.py doctor
-.\.venv\Scripts\python.exe scripts\course.py catalog
+Before committing, review your Git name and email locally and choose an identity
+appropriate for public contribution. Configure only this repository if needed,
+replacing these placeholders with your chosen public identity:
+
+```sh
+git config --local user.name "Your public name"
+git config --local user.email "you@example.com"
 ```
 
-macOS or Linux:
+These settings apply to future commits. Cleaning tracked files or building a
+sanitized source ZIP does not remove names, emails or private content from
+existing Git history. History changes affect commit identities and shared
+branches, so they require a separate, explicitly authorized maintainer workflow.
+Keep committing, history editing and publication under the repository owner's
+control. Do not change global Git configuration as part of project setup.
 
-```bash
-bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-.venv/bin/python scripts/course.py catalog
+## Write useful learning material
+
+Define the problem, prerequisites and observable outcome. Explain vocabulary
+and syntax before using them. Include at least two focused worked examples,
+expected observations, common-error diagnosis and next steps. Practice should
+progress through prediction, modification, independent work, debugging and
+transfer, with separate explanatory solutions. Copying an answer or running a
+reference does not establish understanding.
+
+The [content contract](docs/content-authoring.md) specifies the detailed rules.
+Legacy lessons retain immutable practice baselines; modules use their subject
+contracts. The statistics/ML tutorial deliberately has worked theory and code
+without exams, problem sets or hidden solutions. Do not impose practice rules
+on that book.
+
+Keep default examples small, deterministic and offline after preparation.
+Disclose optional models, datasets, networks, hardware and services. Cite sources
+and preserve required licenses. Use original explanations and public or synthetic
+fixtures, without workplace identifiers, private infrastructure or machine paths.
+Use explicit LaTeX for mathematics and tagged code fences for program examples.
+Never modify executable logic only to repair typography.
+
+## Regenerate and validate
+
+Run the relevant subject authoring command first when one exists. Then refresh
+shared metadata and readers through Make or the equivalent individual commands:
+
+```sh
+make generate
 ```
 
-See [Validation](docs/validation.md) for focused and full checks.
+`make generate` normalizes reviewed prose, rebuilds the legacy catalog and
+reports, and generates the static dashboard and readers. It does not rerun all
+subject authoring pipelines. Never hand-edit generated HTML. Review generated
+diffs alongside source changes and run the `--check` forms documented in
+[validation](docs/validation.md).
 
-Optionally install the repository's local-only pre-commit hooks after setup:
+Use focused tests while iterating. The full suite uses four grouped workers:
 
-```text
-python -m pre_commit install
+```sh
+uv run --no-sync python -m pytest -n 4 --dist loadgroup
 ```
 
-The hooks run the sensitive-content guard plus Ruff checks using the selected
-environment; they do not fetch a third-party hook repository.
+Keep `--dist loadgroup`: live PostgreSQL tests share a disposable database and
+must remain in one scheduling group. Use `-n 0` for serial debugging or fewer
+workers on a constrained machine. Optional runtime skips are not successful
+runtime tests. Report which toolchains and databases actually ran.
 
-## Lesson content contract
+Common publication gates are:
 
-Every learner-facing lesson should provide:
-
-1. A clear title and level
-2. Prerequisites
-3. Learning objectives
-4. A complete-amateur mental model and defined vocabulary
-5. Syntax or query anatomy
-6. At least two topic-specific runnable examples with expected observations
-7. Exercises that progress from prediction through transfer
-8. An explicit **Expected** or **Verify** contract for every numbered exercise
-9. Common-error symptoms, causes, and recovery
-10. Retrieval questions and next steps
-11. A separately located, clause- or line-explained solution
-12. A final, copy-ready **Ask Codex about this lesson** prompt that names the
-    stable ID and exact paths while keeping `solutions/` closed until an attempt
-
-Do not put the complete answer directly below an exercise in the learner artifact. Preserve the hint-first experience.
-Every cataloged learner, guide, and explanatory-solution artifact must also
-meet its immutable `curriculum/practice_baseline.json` target:
-`max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py`; do not
-lower the baseline or inflate counts with answer steps.
-Also run `python scripts/audit_lesson_depth.py`. The structural audit is a
-minimum floor; review technical accuracy, progression, and teaching quality by
-reading and executing the changed lesson.
-
-## Cross-platform requirements
-
-- Support Windows PowerShell and POSIX shells explicitly.
-- Do not label Bash syntax as PowerShell.
-- Avoid `&&`, `||`, `source`, Bash line continuations, or `cat | command` in Windows snippets.
-- Prefer `python -m pip` to a bare `pip`.
-- Prefer activation-free Windows commands using `.\.venv\Scripts\python.exe`.
-- Use `pathlib` in Python examples and repository-relative paths.
-- Never use a developer-specific absolute path.
-- Keep text files UTF-8 and follow [.editorconfig](.editorconfig) and [.gitattributes](.gitattributes).
-
-## Offline-first requirements
-
-The supported default is one connected bootstrap followed by offline coursework.
-
-- Prefer generated data, tracked sample data, or packages that bundle their datasets.
-- Tag and explain any first-run download.
-- Do not add silent network calls.
-- Record source, license, checksum, and refresh process for tracked datasets.
-- Provide a local fallback when a remote model or dataset is only enrichment.
-
-See [Offline use](docs/setup/offline.md).
-
-## Dependency changes
-
-- Add a dependency only when a lesson imports it directly or validation requires it.
-- Put runtime, advanced/heavy, and development dependencies in the appropriate project group.
-- Update the cross-platform `uv.lock` through the repository’s supported workflow.
-- Verify the clean Python 3.12 path.
-- Avoid relying on a transitive dependency for a direct import.
-
-If `uv` is installed, refresh and verify the exact cross-platform resolution:
-
-```text
-uv lock
-uv lock --check
+```sh
+uv run --no-sync python scripts/check_modules.py
+uv run --no-sync python scripts/normalize_lesson_prose.py
+uv run --no-sync python scripts/check_content_rendering.py
+uv run --no-sync python scripts/course.py validate
+uv run --no-sync python scripts/audit_practice.py
+uv run --no-sync python scripts/audit_lesson_depth.py
+uv run --no-sync python scripts/build_course_guide.py --check
+uv run --no-sync python scripts/build_lesson_readers.py --check
+uv run --no-sync python scripts/check_published_links.py
+uv run --no-sync python -m ruff check
+uv run --no-sync python -m ruff format --check
+uv run --no-sync python -m mypy
+uv run --no-sync python scripts/scan_secrets.py --history
+uv run --no-sync python scripts/check_public_release.py
+node scripts/check_classroom_ui.mjs
+git diff --check
 ```
 
-Learner setup scripts use ordinary `pip` with the compatible ranges in
-`pyproject.toml`; CI uses `uv.lock` so unexpected dependency drift is detected.
-Do not hand-edit the lock.
+A UI change also needs browser checks: subject switching, keyboard navigation,
+small screens, both appearances, code/output contrast, math rendering and
+saved-work restoration. A runtime change needs the actual prepared worker,
+compile or execution errors, cancellation, bounded output and retained drafts.
+Only use disposable project resources. Preserve learner volumes during cleanup.
 
-## Notebook changes
+## Database and dependency changes
 
-- Use notebook-aware tooling; do not hand-edit large JSON blobs without validation.
-- Keep valid notebook metadata and the repository kernel convention.
-- Clear incidental outputs, timestamps, local paths, tokens, and generated artifacts.
-- Seed random operations where teaching does not depend on randomness.
-- Mark cells that intentionally require network, heavy dependencies, or manual interaction.
-- Run structural validation and the appropriate execution check.
+Use only the local disposable `advanced_sql_training` database for automated
+course SQL. `00_setup.sql` resets the course-owned `training` schema. Run with
+`psql -X -v ON_ERROR_STOP=1`, respect declared persistent sequences, and never
+redirect a test at a shared database. Bind SQL values and keep credentials out
+of source, command arguments, outputs and progress notes.
 
-## SQL changes
+Declare direct dependencies in the appropriate project group. Refresh
+`uv.lock` with `uv lock` and verify `uv lock --check`; do not hand-edit it.
+Worker-specific dependencies also have reviewed Docker locks and toolchain
+contracts. An installable lock is not proof that every runtime or architecture
+works. Document actual platform evidence separately from configuration.
 
-- Target PostgreSQL 16+; canonical automation uses PostgreSQL 17.
-- Execute with `psql -X -v ON_ERROR_STOP=1`.
-- Use only the disposable training database and schema.
-- Keep destructive setup explicit and idempotent where practical.
-- Daily exercises should roll back unless persistence is a stated prerequisite.
-- Multi-day projects must declare and validate persistent state rather than depending on a prior rolled-back lesson.
+## Submit a reviewable change
 
-## Bridge changes
+Explain the learner or contributor problem, the resulting behavior, the exact
+checks run and any remaining limitations. Include reproduction steps for bugs
+without private data. Keep the change focused, preserve stable IDs and progress,
+and do not relax a verifier to conceal a failed example. CI must validate the
+revision being submitted; previous local test counts do not establish that.
 
-- Keep learner modules, guides, executable solutions, reasoning guides, and
-  fake-backed tests aligned.
-- Use Psycopg 3 parameter binding and explicit transaction ownership.
-- Keep the default path offline; make live PostgreSQL checks opt-in,
-  `DS60_DATABASE_URL`-driven, and safe for the disposable course database.
-- Test pure policy separately from driver behavior and label what fakes cannot
-  prove.
-
-## Documentation changes
-
-- Use relative Markdown links for repository files.
-- Run internal-link and catalog validation.
-- Keep commands rooted at the repository root.
-- Avoid duplicating long setup procedures; link to the canonical OS guide.
-- Replace stale progress prose with catalog-derived status where possible.
-- Edit `scripts/build_course_guide.py`, not generated `START_HERE.html`, and
-  run its `--check` mode.
-- Edit `src/ds60sqlpy/lesson_reader.py`, not generated `lesson-pages/*.html`,
-  and run `scripts/build_lesson_readers.py --check`.
-- Preserve both portal modes and the loopback/token/origin/path/launch
-  allowlist boundary documented in `docs/learning-portal.md`.
-
-## Catalog changes
-
-`curriculum/catalog.json` is generated and checked in so learners and tools can inspect it without running a build first. Do not edit it by hand.
-
-When a lesson filename, solution availability, phase rule, dependency group, prerequisite rule, or network classification changes:
-
-```text
-python scripts/build_catalog.py
-python scripts/course.py validate
-git diff --exit-code -- curriculum/catalog.json
-```
-
-The final command is a CI drift check; run it only after the regenerated file is staged as the intended output or use `git diff -- curriculum/catalog.json` to review a local change.
-
-## Before submitting
-
-Run:
-
-```text
-python scripts/course.py doctor
-python scripts/course.py validate
-python scripts/audit_practice.py
-python scripts/audit_lesson_depth.py
-python scripts/build_course_guide.py --check
-python scripts/build_lesson_readers.py --check
-python scripts/scan_secrets.py --history
-```
-
-Then check:
-
-- The relevant lesson works from a clean environment.
-- The default lesson path works offline after bootstrap.
-- Windows and POSIX instructions are both valid.
-- The catalog matches files and prerequisites.
-- No learner answer was accidentally placed in the exercise artifact.
-- No generated data, model, notebook checkpoint, secret, or local configuration was added.
-- `git diff --check` passes.
-
-In your change summary, state what you validated and what you could not validate.
+Before submission, review the diff for unintended generated data, outputs,
+credentials, broken links and unrelated formatting. Follow repository review
+policy for commits and publication. Local image builds do not authorize pushing
+them to a registry.

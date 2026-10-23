@@ -1,4 +1,4 @@
-# Day 52 — Solutions: Scalability with Dask
+# Day 52: Solutions: Scalability with Dask
 
 We build a local CSV fixture, verify a Dask reduction against pandas, measure persisted reuse, and show an optional local-client boundary.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Port pandas to Dask
+Worked reference for Exercise 1; Port pandas to Dask
 ```python
 from pathlib import Path
 
@@ -61,7 +61,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2 — Persisted reuse timing
+Worked reference for Exercise 2; Persisted reuse timing
 ```python
 import time
 
@@ -91,7 +91,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Dashboard
+Worked reference for Exercise 3; Dashboard
 ```python
 from dask.distributed import Client
 
@@ -151,7 +151,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Read a large local CSV with Dask and compute groupby aggregations.
 
@@ -161,9 +161,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — lazy task graphs, partitions, bounded reducers, and scale evidence — generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
+**Verify:** Practice 1; lazy task graphs, partitions, bounded reducers, and scale evidence; generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Persist the DataFrame and compare repeated timings with and without persistence.
 
@@ -173,9 +173,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — lazy task graphs, partitions, bounded reducers, and scale evidence — record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
+**Verify:** Practice 2; lazy task graphs, partitions, bounded reducers, and scale evidence; record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and compare memory and elapsed time.
 
@@ -185,9 +185,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — lazy task graphs, partitions, bounded reducers, and scale evidence — for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
+**Verify:** Practice 3; lazy task graphs, partitions, bounded reducers, and scale evidence; for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
-### Exercise 4 — Task-graph tracing
+### Exercise 4: Task-graph tracing
 
 **Prompt:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
 
@@ -205,9 +205,9 @@ Keep output bounded; computing a small aggregation is different from calling
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Task-graph tracing — print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
+**Verify:** Task-graph tracing; print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
 
-### Exercise 5 — Partition-skew diagnosis
+### Exercise 5: Partition-skew diagnosis
 
 **Prompt:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
 
@@ -225,9 +225,9 @@ shuffle. Preserve exactness and test the salted/two-stage result against pandas.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Partition-skew diagnosis — print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
+**Verify:** Partition-skew diagnosis; print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
 
-### Exercise 6 — Reducer correctness
+### Exercise 6: Reducer correctness
 
 **Prompt:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
 
@@ -245,4 +245,4 @@ aggregations; averaging partition means is wrong when partition sizes differ.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Reducer correctness — test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.
+**Verify:** Reducer correctness; test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.

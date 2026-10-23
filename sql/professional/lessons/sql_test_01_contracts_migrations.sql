@@ -350,7 +350,7 @@ $negative_control$;
 --    Unicode text. Include just-below, exact-boundary, just-above, and malformed
 --    cases, with an explicit expected outcome for every row.
 --
---    Inputs: For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
+--    Inputs: For sql-test-01 Exercise 7, drive six quantity cases, below, lower bound, upper bound, above, NULL, and malformed, from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
 --    Expected result/shape: For sql-test-01 Exercise 7, expected output: six rows with `case_id`, raw value, expected/observed acceptance, observed SQLSTATE, and `matches`; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.
 --    Verify: For sql-test-01 Exercise 7, require exactly six unique case IDs and no false `matches`, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.
 --    Hint ladder, rung 1: Expected rejection must be caught in a nested

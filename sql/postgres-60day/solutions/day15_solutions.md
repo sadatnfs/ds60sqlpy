@@ -1,4 +1,4 @@
-# Day 15 solutions — Phase 1 Project: Multi-Dimensional Revenue Report
+# Day 15 solutions: Phase 1 Project: Multi-Dimensional Revenue Report
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Create a customer performance table with order count, stored revenue, and latest order date, retaining customers with no orders.
 
@@ -113,7 +113,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-15 Exercise 1, the chosen form is justified by this lesson-specific rationale: Left join from customers and aggregate at customer grain. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
 - **Edge case:** Use one key absent from `orders`; then tie two candidates on `stored_revenue DESC` and verify `c.customer_id` selects the same row on every run.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Create a product profitability table from net order-line revenue and catalog cost.
 
@@ -162,7 +162,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-15 Exercise 2, the chosen form is justified by this lesson-specific rationale: Calculate line revenue and line cost at item grain, then aggregate to product. Evaluate another form against the concrete expected result (One row per sold product) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `units_sold`, and `net_revenue` for the existing `product_id`, and `name` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Build a UTC monthly order-status report with counts and stored revenue.
 
@@ -202,7 +202,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-15 Exercise 3, the chosen form is justified by this lesson-specific rationale: Derive one reporting month and group by month/status. Evaluate another form against the concrete expected result (One row per observed month and status) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Debugging
+## Exercise 4: Debugging
 
 **Prompt:** Reconcile stored order total, computed line total, and paid total without multiplying details.
 
@@ -260,7 +260,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-15 Exercise 4, the chosen form is justified by this lesson-specific rationale: Aggregate items and payments independently to order grain before joining. Evaluate another form against the concrete expected result (One row per order with differences) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Prediction
+## Exercise 5: Prediction
 
 **Prompt:** Compare monthly budgets with actual expenses and preserve missing sides.
 
@@ -319,7 +319,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-15 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero. Evaluate another form against the concrete expected result (One row per category/month in either source) and the verification above.
 - **Edge case:** Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Produce one executive summary row with population, activity, stored revenue, computed revenue, and payments.
 

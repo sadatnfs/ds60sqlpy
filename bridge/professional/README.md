@@ -83,13 +83,13 @@ For each module:
 2. Open the learner artifact. Run it once before changing it.
 3. Complete one exercise at a time and add a test that would fail without your
    change.
-4. Ask Codex to explain a failing test or review your design, but ask it not to
+4. Ask an AI tutor to explain a failing test or review your design, but ask it not to
    open `solutions/` until you have attempted the exercise.
 5. Compare behavior with the reference answer and record why your design
    differs.
 6. Run the focused tests before moving to the next module.
 
-A useful Codex prompt is:
+A useful the AI tutor prompt is:
 
 > Guide me through `bridge-analytics-01`. Read its companion guide and learner
 > file, but do not read the solution yet. Ask me to predict the next test

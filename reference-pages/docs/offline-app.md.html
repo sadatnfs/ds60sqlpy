@@ -196,10 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <td>Reading without starting a server or running code</td>
 </tr>
 <tr>
-<td>Codex MCP tutor</td>
-<td>Codex plus the optional MCP dependency</td>
+<td>MCP tutor</td>
+<td>Compatible MCP client plus the optional MCP dependency</td>
 <td>Catalog-bound tutoring tools over stdio</td>
-<td>Coaching with your own Codex connection</td>
+<td>Coaching with your chosen AI client</td>
 </tr>
 </tbody></table></div>
 <p>The native executable contains its own application runtime. Its coding pads use an external Python environment so learners can install the dependencies their chosen lessons require. PostgreSQL is a separate backend. A basic pad does not replace an interactive Jupyter notebook, a database administration console, or a distributed compute service.</p>
@@ -258,7 +258,7 @@ bash scripts/docker_lab.sh start</code></pre>
 ./dist/DS60LearningLab --self-check</code></pre>
 <p>The equivalent Make target is <code>make app PYTHON=.app-build/bin/python</code>. Windows users do not need Make. Build output is ignored under <code>dist/</code>; intermediary payloads live under <code>build/</code>. The payload allowlist excludes Git history, credentials, package caches, notebooks&#x27; saved outputs, and learner state. Notebook source and separate solutions are included as course content.</p>
 <p>Run the executable. Its first launch copies the bundled course into <code>~/DS60 Learning Lab/0.3/</code>, then opens the browser lab. A valid existing workspace is reused without overwriting learner edits. A nonempty unrelated directory is rejected. Use <code>--workspace</code> to select an empty directory or an existing DS60 course, or <code>--repo</code> to use a checkout. For a new course release, use a new workspace and copy evidence deliberately instead of silently replacing edited artifacts.</p>
-<p>Point <code>--python</code> or <code>DS60_PYTHON</code> at the backend environment&#x27;s Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate Codex settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.</p>
+<p>Point <code>--python</code> or <code>DS60_PYTHON</code> at the backend environment&#x27;s Python, then install required lesson extras there. The build itself does not install PostgreSQL or mutate the AI tutor settings. Native signing/notarization and public distribution remain release work; the development executable is unsigned.</p>
 <p>The manual <strong>Application builds</strong> GitHub Actions workflow defines Windows, macOS, and Linux builds, bundle self-checks, and uploaded artifacts. A configured workflow is not a completed platform test; consult its actual run before distributing that platform&#x27;s executable.</p>
 <h3 id="troubleshooting">Troubleshooting<a class="heading-anchor" href="#troubleshooting" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
@@ -317,7 +317,7 @@ bash scripts/docker_lab.sh start</code></pre>
 <td>Start the new release in a new workspace and preserve old work</td>
 </tr>
 </tbody></table></div>
-<p>See <a href="mcp-tutor.md.html">MCP tutoring</a> for the optional Codex experience and <a href="validation.md.html">validation</a> for the exact tested surfaces and remaining evidence boundaries.</p>
+<p>See <a href="mcp-tutor.md.html">MCP tutoring</a> for the optional AI tutoring experience and <a href="validation.md.html">validation</a> for the exact tested surfaces and remaining evidence boundaries.</p>
 <h3 id="limited-database-logins-and-existing-docker-volumes">Limited database logins and existing Docker volumes<a class="heading-anchor" href="#limited-database-logins-and-existing-docker-volumes" aria-label="Link to this section">#</a></h3>
 <p>New Docker volumes initialize two separate roles. <code>ds60_admin</code> is the bootstrap administrator; the application and SQL runner use <code>admin</code>, a login with <code>NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS</code>, no elevated predefined-role memberships, and ownership of only the disposable <code>advanced_sql_training</code> database. Its course password is <code>admin</code>; the separate bootstrap password is <code>ds60_admin</code>. The course role&#x27;s name does not grant it cluster-administrator capabilities. Keep these development services bound to loopback. The app never uses the bootstrap administrator. A limited database owner can create ordinary course objects and reset its own course schema, but cannot run server-side programs or read server files using administrative PostgreSQL capabilities. Optional role-administration lessons retain their documented capability-check fallback.</p>
 <p>The SQL pad rejects an administrative backend login even on a local database. This check is separate from validating the database&#x27;s name and host. Native installations whose default PostgreSQL login is a superuser need a separate limited pad login, described below. The course&#x27;s explicit terminal or guided administration lessons keep their existing capability rules.</p>
@@ -396,7 +396,7 @@ docker compose --profile lab up --detach --no-build --pull never</code></pre>
 <p>The default Dockerfile base remains <code>python:3.12-slim-bookworm</code>. Dependency installation is cached separately from the course files, and the final source installation runs offline against the already installed build tooling. A curriculum or guide edit therefore does not require downloading all Core packages again.</p>
 <p>The image installs <code>postgresql-client-17</code> from the PostgreSQL project&#x27;s <a href="https://www.postgresql.org/download/linux/debian/">signed Debian package repository</a>, matching the PostgreSQL 17 course server. This repository/key setup exists inside the image; it does not change the host&#x27;s package sources or trust store.</p>
 <h3 id="package-the-windows-starter">Package the Windows starter<a class="heading-anchor" href="#package-the-windows-starter" aria-label="Link to this section">#</a></h3>
-<p>The Windows starter is a complete source ZIP with <code>START_DOCKER_LAB.cmd</code> at its entry point. A learner extracts it and double-clicks that file; Git and host Python are not required. The first-run Windows wizard checks the engine and prerequisites before handing over to the normal Docker launcher. Windows installation consent, UAC, or a required restart remain visible steps. See the <a href="docker-beginners.md.html#windows-start-with-the-first-run-wizard">beginner Windows walkthrough</a>.</p>
+<p>The Windows starter is a complete source ZIP with <code>START_DOCKER_LAB.cmd</code> at its entry point. A learner extracts it and double-clicks that file; Git and host Python are not required. The first-run Windows wizard checks the engine and prerequisites before handing over to the normal Docker launcher. Windows installation consent, UAC, or a required restart remain visible steps. See the <a href="docker-beginners.md.html#optional-legacy-windows-first-run-wizard">optional Windows installation wizard</a>.</p>
 <p>Maintainers can build the ZIP on any supported development OS:</p>
 <pre class="highlighted-code"><code class="language-bash">python scripts/build_windows_starter.py</code></pre>
 <p>Or use <code>make windows-starter</code> on macOS/Linux. The archive is written to <code>dist/DS60LearningLab-0.3.0-Windows-Starter.zip</code>. Packaging checks the generated readers, includes the authored course and Docker build files, and excludes local progress, environments, authentication files, and symlinks. The application-build workflow also produces this starter as a downloadable CI artifact. It does not publish a release or push an image.</p>

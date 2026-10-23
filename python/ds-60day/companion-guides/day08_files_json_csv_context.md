@@ -1,4 +1,4 @@
-# Day 8 — Files, JSON, CSV, and Context Managers
+# Day 8: Files, JSON, CSV, and Context Managers
 
 **Level:** Beginner
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 8 — files, json, csv, and context managers to practice resource ownership, text encodings, and structured file boundaries
+**Lesson outcome:** use day 8; files, json, csv, and context managers to practice resource ownership, text encodings, and structured file boundaries
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ binds the open handle, and guarantees `close` at block exit.
 parses an already-loaded string. For CSV output, `newline=""` lets the
 `csv` module manage platform newline rules correctly.
 
-### Worked example 1 — Round-trip JSON through an in-memory stream
+### Worked example 1: Round-trip JSON through an in-memory stream
 
 Observe serialization without creating learner files. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -128,7 +128,7 @@ The JSON text and `True` are displayed. Serialization creates text; parsing reco
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Read CSV rows as dictionaries
+### Worked example 2: Read CSV rows as dictionaries
 
 Column headers become keys while every field initially remains text. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -281,11 +281,11 @@ entry, and CSV output has one header plus the expected row count.
 
 - [Open the learner notebook](../notebooks/day08_files_json_csv_context.ipynb)
 - [Check the separate solution](../solutions/day08_files_json_csv_context/day08_solutions.md)
-- [Next: Day 9 — Modules and packages](day09_modules_packages.md)
+- [Next: Day 9; Modules and packages](day09_modules_packages.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

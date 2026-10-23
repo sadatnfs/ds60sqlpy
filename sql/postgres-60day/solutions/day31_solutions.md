@@ -1,4 +1,4 @@
-# Day 31 — Solutions: `EXPLAIN` and `EXPLAIN ANALYZE`
+# Day 31: Solutions: `EXPLAIN` and `EXPLAIN ANALYZE`
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ Execution plans are observations, not fixed expected text. PostgreSQL may choose
 different nodes after a version change, data refresh, or statistics update.
 Compare estimates, actuals, buffers, and timing rather than memorizing one plan.
 
-## Exercise 1 — Change predicates and observe selectivity
+## Exercise 1: Change predicates and observe selectivity
 
 These three queries ask for progressively smaller portions of `orders`.
 
@@ -95,7 +95,7 @@ scan.
 - **Alternative/trade-off:** For sql-31 Exercise 1, the chosen form is justified by this lesson-specific rationale: These three queries ask for progressively smaller portions of `orders`. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Compare estimated and actual rows
+## Exercise 2: Compare estimated and actual rows
 
 `EXPLAIN` plans but does not run the `SELECT`; `EXPLAIN ANALYZE` executes it and
 adds actual timing, loops, and row counts.
@@ -146,7 +146,7 @@ that ordinary statistics do not model well.
 - A sequential scan is often correct for a small table or a low-selectivity
   predicate.
 
-## Exercise 3 — Predict broad and selective plans
+## Exercise 3: Predict broad and selective plans
 
 The two queries differ only in threshold, so estimated/actual rows and buffers
 are comparable. `> 0` should be broader than `> 900`; scan choice still depends
@@ -163,7 +163,7 @@ on table size and cost. See the fully runnable query in
 - **Alternative/trade-off:** For sql-31 Exercise 3, the chosen form is justified by this lesson-specific rationale: The two queries differ only in threshold, so estimated/actual rows and buffers are comparable. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Read a verbose join plan
+## Exercise 4: Read a verbose join plan
 
 Start at each scan, follow rows into the join, then into the aggregate and root.
 `VERBOSE` identifies qualified output expressions; it does not make the query
@@ -179,7 +179,7 @@ faster.
 - **Alternative/trade-off:** For sql-31 Exercise 4, the chosen form is justified by this lesson-specific rationale: Start at each scan, follow rows into the join, then into the aggregate and root. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 5 — Analyze DML safely
+## Exercise 5: Analyze DML safely
 
 `EXPLAIN ANALYZE UPDATE` performs the update. The answer uses an impossible key
 and a savepoint, then rolls back to and releases that savepoint.
@@ -194,7 +194,7 @@ and a savepoint, then rolls back to and releases that savepoint.
 - **Alternative/trade-off:** For sql-31 Exercise 5, the chosen form is justified by this lesson-specific rationale: `EXPLAIN ANALYZE UPDATE` performs the update. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 6 — Interpret an empty result
+## Exercise 6: Interpret an empty result
 
 The negative-total predicate returns zero because the schema forbids negative
 totals. A zero actual with a small nonzero estimate can be ordinary statistical

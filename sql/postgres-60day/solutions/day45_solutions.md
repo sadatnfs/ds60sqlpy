@@ -1,4 +1,4 @@
-# Day 45 Solution — Performance Optimization Project
+# Day 45 Solution: Performance Optimization Project
 
 
 <!-- beginner-solution-enrichment -->
@@ -136,7 +136,7 @@ representative scale before changing production design.
   requires separate change planning and may need `CREATE INDEX CONCURRENTLY`.
 - Always reconcile the result values before accepting a faster plan.
 
-## Exercise 1 — Make the timestamp predicate sargable
+## Exercise 1: Make the timestamp predicate sargable
 
 The direct half-open range leaves `order_date` unwrapped, making the B-tree
 eligible while preserving a clear time boundary.
@@ -151,7 +151,7 @@ eligible while preserving a clear time boundary.
 - **Alternative/trade-off:** For sql-45 Exercise 1, the chosen form is justified by this lesson-specific rationale: The direct half-open range leaves `order_date` unwrapped, making the B-tree eligible while preserving a clear time boundary. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Capture structured evidence
+## Exercise 2: Capture structured evidence
 
 `FORMAT JSON` keeps plan nodes, estimates, actual rows, buffers, and timing
 machine-readable. It still describes only this run and environment.
@@ -166,7 +166,7 @@ machine-readable. It still describes only this run and environment.
 - **Alternative/trade-off:** For sql-45 Exercise 2, the chosen form is justified by this lesson-specific rationale: `FORMAT JSON` keeps plan nodes, estimates, actual rows, buffers, and timing machine-readable. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 3 — Prove semantic equivalence
+## Exercise 3: Prove semantic equivalence
 
 Direct and pre-aggregated country totals are compared with `EXCEPT` in both
 directions. Both difference sets must be empty before performance matters.
@@ -181,7 +181,7 @@ directions. Both difference sets must be empty before performance matters.
 - **Alternative/trade-off:** For sql-45 Exercise 3, the chosen form is justified by this lesson-specific rationale: Direct and pre-aggregated country totals are compared with `EXCEPT` in both directions. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 4 — Test the empty-window boundary
+## Exercise 4: Test the empty-window boundary
 
 An impossible historical window should return no rows for every equivalent
 shape. An optimization must not manufacture a zero-valued group.
@@ -196,7 +196,7 @@ shape. An optimization must not manufacture a zero-valued group.
 - **Alternative/trade-off:** For sql-45 Exercise 4, the chosen form is justified by this lesson-specific rationale: An impossible historical window should return no rows for every equivalent shape. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Insert rows immediately before, exactly at, and immediately after `order_date >= timestamptz '1900-01-01 00:00:00+00'`, and `order_date < timestamptz '1900-01-02 00:00:00+00'`; identify which rows pass each inclusive or exclusive comparison.
 
-## Exercise 5 — Document index tradeoffs
+## Exercise 5: Document index tradeoffs
 
 The candidate serves date-bounded customer work but consumes storage and makes
 writes more expensive. Production creation needs a reviewed migration.
@@ -211,7 +211,7 @@ writes more expensive. Production creation needs a reviewed migration.
 - **Alternative/trade-off:** For sql-45 Exercise 5, the chosen form is justified by this lesson-specific rationale: The candidate serves date-bounded customer work but consumes storage and makes writes more expensive. Evaluate another form against the concrete expected result (one row per `indexname`) and the verification above.
 - **Edge case:** Add one row for which `(schemaname = 'training' AND indexname LIKE '%solution')` is true and one for which it is false; verify only the matching `indexname` value is returned.
 
-## Exercise 6 — Write the decision record
+## Exercise 6: Write the decision record
 
 Report correctness, plan evidence, observed timing, operational cost, and limits
 as separate claims. The compact seed cannot support a universal speed promise.

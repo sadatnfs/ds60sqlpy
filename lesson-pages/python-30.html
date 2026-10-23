@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-30-project-reproducible-eda-and-preprocessing">Day 30 — Project: Reproducible EDA and Preprocessing<a class="heading-anchor" href="#guide--day-30-project-reproducible-eda-and-preprocessing" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-30-project-reproducible-eda-and-preprocessing">Day 30: Project: Reproducible EDA and Preprocessing<a class="heading-anchor" href="#guide--day-30-project-reproducible-eda-and-preprocessing" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate checkpoint</p>
 <p>This checkpoint combines loading, profiling, cleaning, visualization, schema validation, and written reasoning into one restartable analysis.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 30 — project: reproducible eda and preprocessing to practice a restartable EDA and preprocessing project with an auditable evidence chain and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 30; project: reproducible eda and preprocessing to practice a restartable EDA and preprocessing project with an auditable evidence chain and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A project notebook is a reproducible report, not a diary of accidental execution order. Start with the question, provenance, row grain, keys, scope, and acceptance criteria. Keep raw data immutable, put cleaning in functions, validate the final data, and write artifacts only after all gates pass.</p>
 <p>Build an evidence chain from raw to clean to validated to saved output. Reconcile row counts, unique entities, missingness, and additive totals at each boundary. Record each material decision with evidence, action, rationale, validation, and impact. Separate findings from limitations and stop output when data is empty, invalid, or contaminated by target or time leakage.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>A robust notebook flows through named values such as <code>raw</code>, <code>profile</code>, <code>cleaned</code>, <code>validated</code>, and <code>artifact_path</code> rather than overwriting one <code>df</code>. A decision-log record can contain <code>issue</code>, <code>evidence</code>, <code>action</code>, <code>rationale</code>, <code>validation</code>, and <code>impact</code>. Assertions at each transition turn narrative expectations into executable gates.</p>
-<h5 id="guide--worked-example-1-reconcile-a-cleaning-boundary">Worked example 1 — Reconcile a cleaning boundary<a class="heading-anchor" href="#guide--worked-example-1-reconcile-a-cleaning-boundary" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-reconcile-a-cleaning-boundary">Worked example 1: Reconcile a cleaning boundary<a class="heading-anchor" href="#guide--worked-example-1-reconcile-a-cleaning-boundary" aria-label="Link to this section">#</a></h5>
 <p>Make every row removal visible and explainable. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -441,7 +441,7 @@ reconciliation</code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The reconciliation reports four raw rows, two clean rows, two removed rows, and totals before/after. Those changes still need documented rationale.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-represent-a-decision-as-data">Worked example 2 — Represent a decision as data<a class="heading-anchor" href="#guide--worked-example-2-represent-a-decision-as-data" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-represent-a-decision-as-data">Worked example 2: Represent a decision as data<a class="heading-anchor" href="#guide--worked-example-2-represent-a-decision-as-data" aria-label="Link to this section">#</a></h5>
 <p>A structured entry is easier to audit than a scattered comment. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">decision <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">issue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">duplicate id=2 row</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
@@ -541,10 +541,10 @@ Impact: final output is blocked instead of silently changing those rows.</code><
 <ul>
 <li><a href="python-30.html#learner">Open the learner notebook</a></li>
 <li><a href="python-30.html#solution-1">Review the separate project solution</a></li>
-<li><a href="python-31.html#guide">Next: Day 31 — Probability basics</a></li>
+<li><a href="python-31.html#guide">Next: Day 31; Probability basics</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-30`
 (Day 30 — Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
 I have completed the direct prerequisites: `python-29`. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
@@ -849,7 +849,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-30-solutions-project-eda-and-preprocessing">Day 30 — Solutions: Project — EDA and Preprocessing<a class="heading-anchor" href="#solution-1--day-30-solutions-project-eda-and-preprocessing" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-30-solutions-project-eda-and-preprocessing">Day 30: Solutions: Project; EDA and Preprocessing<a class="heading-anchor" href="#solution-1--day-30-solutions-project-eda-and-preprocessing" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>a restartable EDA and preprocessing project with an auditable evidence chain</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A project notebook is a reproducible report, not a diary of accidental execution order. Start with the question, provenance, row grain, keys, scope, and acceptance criteria. Keep raw data immutable, put cleaning in functions, validate the final data, and write artifacts only after all gates pass.</p>
@@ -865,8 +865,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>a restartable EDA and preprocessing project with an auditable evidence chain</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Load and scope:</strong> choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. <strong>Expected behavior:</strong> a fresh-kernel run can recreate the same raw profile without hidden state or network access. <strong>Verify:</strong> assert expected columns and key/time bounds before continuing.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Load and scope: choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. Expected behavior: a fresh-kernel run can recreate the same raw profile without hidden state or network access. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert expected columns and key/time bounds before continuing. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -902,7 +902,7 @@ expected_columns <span class="syntax-operator">=</span> <span class="syntax-punc
 <span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">event_time</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Timestamp<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2025-01-03</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> tz<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">UTC</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Because the data is constructed in the cell, a fresh offline kernel can reproduce the same four raw rows without hidden files or network state.</p>
 <p><strong>Verification evidence:</strong> assert expected columns and key/time bounds before continuing.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Explore:</strong> analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. <strong>Constraints:</strong> pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. <strong>Verify:</strong> every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Explore: analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. Constraints: pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <pre class="highlighted-code"><code class="language-python">analysis_rows <span class="syntax-operator">=</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>notna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
@@ -951,7 +951,7 @@ leakage_prone_fields_excluded<span class="syntax-punctuation">:</span> <span cla
 <span class="syntax-keyword">assert</span> leakage_prone_fields_excluded <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span></code></pre>
 <p>The correlation is a reproducible description over only three known amounts, not a causal finding. This project has no predictive target, so no leakage-prone feature is present; the explicit empty list records that review instead of silently skipping it.</p>
 <p><strong>Verification evidence:</strong> every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Clean and transform:</strong> implement <code>clean(raw)</code> that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. <strong>Constraints:</strong> preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. <strong>Verify:</strong> test idempotence where promised and reconcile row/entity counts plus key totals.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Clean and transform: implement <code>clean(raw)</code> that returns a new DataFrame and records each decision&#x27;s evidence, action, rationale, validation, and impact. Constraints: preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test idempotence where promised and reconcile row/entity counts plus key totals. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">clean</span><span class="syntax-punctuation">(</span>raw_frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
@@ -988,7 +988,7 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <span class="syntax-keyword">assert</span> raw<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20.0</span>
 <span class="syntax-keyword">assert</span> cleaned<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></code></pre>
 <p><strong>Verification evidence:</strong> test idempotence where promised and reconcile row/entity counts plus key totals.</p>
-<h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-worked-answer">Exercise 4: worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Validate:</strong> apply the Day 29 schema to the actual final cleaned DataFrame before output. <strong>Expected behavior:</strong> one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. <strong>Constraint:</strong> do not catch and discard the validation failure. <strong>Verify:</strong> assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Validate: apply the Day 29 schema to the actual final cleaned DataFrame before output. Expected behavior: one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. Constraint: do not catch and discard the validation failure. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandera.pandas <span class="syntax-keyword">as</span> pa
@@ -1017,7 +1017,7 @@ frame_ready_to_save <span class="syntax-operator">=</span> validated
 <span class="syntax-keyword">assert</span> frame_ready_to_save <span class="syntax-operator">is</span> validated</code></pre>
 <p><code>frame_ready_to_save</code> is assigned only from the successful validation result. The negative fixture preserves its failure table as diagnostic evidence and never reaches the output code.</p>
 <p><strong>Verification evidence:</strong> assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.</p>
-<h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-worked-answer">Exercise 5: worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Save and report:</strong> write cleaned data and figures under an ignored <code>artifacts/day30/</code> path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. <strong>Constraints:</strong> handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. <strong>Verify:</strong> saved/reloaded shape, schema, and key totals match the validated in-memory frame.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Save and report: write cleaned data and figures under an ignored <code>artifacts/day30/</code> path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. Constraints: handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: saved/reloaded shape, schema, and key totals match the validated in-memory frame. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
@@ -1079,32 +1079,32 @@ revalidated <span class="syntax-operator">=</span> project_schema<span class="sy
     <span class="syntax-string">&quot;</span><span class="syntax-string">clean.csv</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">daily-amount.png</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">report.md</span><span class="syntax-string">&quot;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Verification evidence:</strong> saved/reloaded shape, schema, and key totals match the validated in-memory frame.</p>
-<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. <strong>Progressive hint:</strong> A declared expectation turns a surprise into a testable discrepancy. <strong>Verify:</strong> Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. Progressive hint: A declared expectation turns a surprise into a testable discrepancy. Then compare the prediction with this proof target: Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred. This makes a restartable EDA and preprocessing project with an auditable evidence chain observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. <strong>Progressive hint:</strong> Every material change needs a reason and reconciliation. <strong>Verify:</strong> Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. Progressive hint: Every material change needs a reason and reconciliation. Record the named value, shape, label, or iterator position needed to establish: Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row. The trace exposes a restartable EDA and preprocessing project with an auditable evidence chain directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. <strong>Progressive hint:</strong> Make decisions data, not scattered comments. <strong>Verify:</strong> Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. Progressive hint: Make decisions data, not scattered comments. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test. That connects the answer to a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.</p>
-<h5 id="solution-1--exercise-9-answer-contract">Exercise 9 — answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-9-answer-contract">Exercise 9: answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. <strong>Progressive hint:</strong> Put parameters/imports first and make <code>clean(raw)</code> return a copy. <strong>Verify:</strong> Restart and run top to bottom; assert <code>raw</code> remains unchanged, <code>clean(raw)</code> returns a copy, and no cell requires a later-created name.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. Progressive hint: Put parameters/imports first and make <code>clean(raw)</code> return a copy. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Restart and run top to bottom; assert <code>raw</code> remains unchanged, <code>clean(raw)</code> returns a copy, and no cell requires a later-created name. The diagnosis depends on a restartable EDA and preprocessing project with an auditable evidence chain.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Restart and run top to bottom; assert <code>raw</code> remains unchanged, <code>clean(raw)</code> returns a copy, and no cell requires a later-created name.</p>
-<h5 id="solution-1--exercise-10-answer-contract">Exercise 10 — answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-10-answer-contract">Exercise 10: answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. <strong>Progressive hint:</strong> Block artifact creation when acceptance criteria fail. <strong>Verify:</strong> Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. Progressive hint: Block artifact creation when acceptance criteria fail. Values below, at, and above the named boundary must produce the evidence Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files. Those cases show how a restartable EDA and preprocessing project with an auditable evidence chain behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Build a restartable evidence chain: question and provenance → raw checks → decisions → clean data → validation → artifacts → limitations.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit">Shared implementation for Exercises 6–7 — Define and reconcile the analytical unit<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit">Shared implementation for Exercises 6–7: Define and reconcile the analytical unit<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-define-and-reconcile-the-analytical-unit" aria-label="Link to this section">#</a></h5>
 <p>Record the question and grain before inspection. At each boundary, compare row count, unique IDs, missing critical values, and additive totals. A difference is acceptable only when a decision record explains and validates it.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance">Shared implementation for Exercises 8–10 — Structured decisions and artifact acceptance<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance">Shared implementation for Exercises 8–10: Structured decisions and artifact acceptance<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-structured-decisions-and-artifact-acceptance" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> asdict<span class="syntax-punctuation">,</span> dataclass
@@ -1376,16 +1376,16 @@ manifest <span class="syntax-operator">=</span> artifact_manifest<span class="sy
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-30`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-30`
 (Day 30 — Project: Reproducible EDA and Preprocessing). Direct catalog prerequisites: `python-29`.
 I have completed the direct prerequisites: `python-29`. Emphasize a restartable EDA and preprocessing project with an auditable evidence chain.
 Read `python/ds-60day/companion-guides/day30_project_eda_preprocessing.md` and use the learner notebook
@@ -1400,7 +1400,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1511,18 +1511,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -1,4 +1,4 @@
-# Day 49 Solutions — Revenue Forecast Backtesting
+# Day 49 Solutions: Revenue Forecast Backtesting
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ The exercises compare moving-average and seasonal-naive forecasts, then inspect
 a 50/50 blend. These are historical backtests, not a production forecasting
 model. See [`day49_solutions.sql`](day49_solutions.sql).
 
-## Exercise 1 — MA(6), MA(12), seasonal naive, and MAPE
+## Exercise 1: MA(6), MA(12), seasonal naive, and MAPE
 
 ```sql
 SET search_path TO training, public;
@@ -145,7 +145,7 @@ set. `scored_rows` and `zero_actual_rows` make the MAPE denominator explicit.
 - **Alternative/trade-off:** For sql-49 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: four model rows. Evaluate another form against the concrete expected result (four model rows. Lower MAPE is better on the months each model can score) and the verification above.
 - **Edge case:** Remove an observed month; `monthly_complete` must retain it as zero revenue, and all four models must still use the same complete-history scoring months.
 
-## Exercise 2 — Month-by-month blended forecast
+## Exercise 2: Month-by-month blended forecast
 
 ```sql
 SET search_path TO training, public;
@@ -195,7 +195,7 @@ ORDER BY month DESC;
 - Different models have different warm-up periods, so a rigorous comparison
   should score all models over the same common months.
 
-## Exercise 3 — Expose forecast leakage
+## Exercise 3: Expose forecast leakage
 
 The leaky frame includes `CURRENT ROW`; the honest MA(6) frame uses six preceding
 rows and stops at `1 PRECEDING`. Side-by-side output makes the bias visible.
@@ -210,7 +210,7 @@ rows and stops at `1 PRECEDING`. Side-by-side output makes the bias visible.
 - **Alternative/trade-off:** For sql-49 Exercise 3, the chosen form is justified by this lesson-specific rationale: The leaky frame includes `CURRENT ROW`; the honest MA(6) frame uses six preceding rows and stops at `1 PRECEDING`. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Build a monthly spine
+## Exercise 4: Build a monthly spine
 
 `generate_series` establishes one row per calendar month before the 12-row lag.
 The separate source-present flag distinguishes no row from a chosen zero policy.
@@ -225,7 +225,7 @@ The separate source-present flag distinguishes no row from a chosen zero policy.
 - **Alternative/trade-off:** For sql-49 Exercise 4, the chosen form is justified by this lesson-specific rationale: `generate_series` establishes one row per calendar month before the 12-row lag. Evaluate another form against the concrete expected result (one row per calendar month before the 12-row lag) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Report the MAPE denominator
+## Exercise 5: Report the MAPE denominator
 
 `NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts
 both scored and excluded observations. Never publish MAPE without that context.
@@ -240,7 +240,7 @@ both scored and excluded observations. Never publish MAPE without that context.
 - **Alternative/trade-off:** For sql-49 Exercise 5, the chosen form is justified by this lesson-specific rationale: `NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts both scored and excluded observations. Evaluate another form against the concrete expected result (one row per `mape`) and the verification above.
 - **Edge case:** Add one source row with a new `mape`; verify the result gains exactly one row carrying that `mape` value.
 
-## Exercise 6 — Compare MAE and MAPE
+## Exercise 6: Compare MAE and MAPE
 
 The deterministic fixture shows that MAE reflects currency-scale error while
 MAPE can be dominated by a modest miss on a very small actual.

@@ -206,7 +206,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Python os.replace](https://docs.python.org/3/library/os.html#os.replace)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-029: Restartable batch writes and data-quality contracts.

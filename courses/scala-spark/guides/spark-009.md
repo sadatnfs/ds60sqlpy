@@ -146,7 +146,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Java17 ObjectOutputStream](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/io/ObjectOutputStream.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-009: Packages, build inputs, and closure serialization.

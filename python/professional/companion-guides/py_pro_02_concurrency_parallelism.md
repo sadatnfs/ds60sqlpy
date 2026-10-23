@@ -139,7 +139,7 @@ The focused test command is shown in **Self-check** below. The learner
 module is intentionally answer-free, so `TODO` output is the expected
 starting state rather than a setup failure.
 
-## Mechanism lab — two small examples before the full system
+## Mechanism lab: two small examples before the full system
 
 ### Boundary and mental model
 
@@ -159,7 +159,7 @@ measurement against a sequential baseline.
 - **semaphore/worker queue:** bounds active and queued work rather than creating one task per input.
 - **structured result:** associates each input with success/failure/cancellation so no work disappears.
 
-### Micro-example A — state the execution choice from the blocking behavior
+### Micro-example A: state the execution choice from the blocking behavior
 
 ```python
 def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
@@ -180,7 +180,7 @@ assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 
 **Why it matters:** One dominant local bottleneck was measured; mixed pipelines may need multiple bounded stages.
 
-### Micro-example B — prove an async concurrency ceiling
+### Micro-example B: prove an async concurrency ceiling
 
 ```python
 import asyncio
@@ -225,7 +225,7 @@ assert results == [0, 2, 4, 6, 8, 10] and peak == 2
 
 ## Exercises
 
-### Exercise 1 — choose a model
+### Exercise 1: choose a model
 
 Implement `choose_execution_model` in the learner artifact. For each case,
 write one sentence explaining the choice:
@@ -238,9 +238,9 @@ write one sentence explaining the choice:
 Reject labels that contradict each other. An async function that performs
 computation without `await` is still CPU work and blocks the event loop.
 
-**Verify:** choose a model — implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.
+**Verify:** choose a model; implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.
 
-### Exercise 2 — build a bounded async map
+### Exercise 2: build a bounded async map
 
 Implement `bounded_map` with:
 
@@ -259,9 +259,9 @@ Implement `bounded_map` with:
 Place `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch
 `CancelledError` unless cleanup requires it; if caught, re-raise it.
 
-**Verify:** build a bounded async map — on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.
+**Verify:** build a bounded async map; on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.
 
-### Exercise 3 — add per-item timeouts
+### Exercise 3: add per-item timeouts
 
 Wrap each worker call with `asyncio.timeout`. Test one worker slower than the
 limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally`
@@ -269,9 +269,9 @@ block returns the active count to zero.
 
 Prediction: what happens to sibling consumers when one item times out?
 
-**Verify:** add per-item timeouts — test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.
+**Verify:** add per-item timeouts; test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.
 
-### Exercise 4 — adapt blocking I/O
+### Exercise 4: adapt blocking I/O
 
 Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs.
 Compare sequential and threaded elapsed time with generous bounds, then verify
@@ -280,9 +280,9 @@ ordered results rather than treating speed as the correctness assertion.
 Explain why a thread pool requires a deliberate `max_workers`, even if the
 remote service could theoretically accept more requests.
 
-**Verify:** adapt blocking I/O — use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.
+**Verify:** adapt blocking I/O; use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.
 
-### Exercise 5 — isolate CPU work
+### Exercise 5: isolate CPU work
 
 Make the CPU function a top-level function with serializable arguments and
 results. Use:
@@ -313,9 +313,9 @@ macOS/Linux:
 The workload is intentionally small for safety; process startup may make it
 slower than sequential execution. That observation is part of the lesson.
 
-**Verify:** isolate CPU work — make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
+**Verify:** isolate CPU work; make the CPU function a top-level function with serializable arguments and results; use: and ProcessPoolExecutor; run process creation only beneath: Windows PowerShell: macOS/Linux: The workload is intentionally small for safety; process startup may make it slower than sequential execution.
 
-### Exercise 6 — reason about shared state
+### Exercise 6: reason about shared state
 
 Implement `deterministic_lost_update`. Force two workers to read the same
 snapshot, then apply both writes. Compare with two serialized increments.
@@ -326,7 +326,7 @@ List three repairs:
 - a lock protects the complete read/modify/write unit, or
 - an external system performs an atomic update.
 
-**Verify:** reason about shared state — use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.
+**Verify:** reason about shared state; use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.
 
 ### Extended professional practice
 
@@ -334,53 +334,53 @@ These exercises move from prediction and implementation through debugging,
 operational trade-offs, and review. Keep the default path deterministic and
 offline; optional connected behavior must remain explicit.
 
-### Exercise 7 — prove cancellation cleanup
+### Exercise 7: prove cancellation cleanup
 
 Cancel `bounded_map` while workers are active. Instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
 
 **Progressive hint:** Put cleanup in `finally`, do not suppress `CancelledError`, and use TaskGroup as the child ownership boundary.
 
-**Verify:** prove cancellation cleanup — cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
+**Verify:** prove cancellation cleanup; cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
 
-### Exercise 8 — inspect structured failures
+### Exercise 8: inspect structured failures
 
 Run multiple workers that fail with different typed exceptions. Use `except*` to handle one expected category while preserving unexpected failures and their original tracebacks.
 
 **Progressive hint:** ExceptionGroup is a tree. Match by exception type and re-raise what the current layer cannot translate.
 
-**Verify:** inspect structured failures — run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.
+**Verify:** inspect structured failures; run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.
 
-### Exercise 9 — stream a backpressured producer
+### Exercise 9: stream a backpressured producer
 
 Adapt `bounded_map` from a finite Sequence to an async iterator whose length is unknown. Preserve output order without retaining every input or creating one task per item.
 
 **Progressive hint:** Assign increasing indexes at production, use a bounded queue, and emit completed results through a second bounded channel.
 
-**Verify:** stream a backpressured producer — adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.
+**Verify:** stream a backpressured producer; adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.
 
-### Exercise 10 — trace context across boundaries
+### Exercise 10: trace context across boundaries
 
 Set a request ID in `contextvars`, then observe propagation through an async task, `asyncio.to_thread`, a raw thread-pool submission, and a spawned process. Make any explicit propagation visible.
 
 **Progressive hint:** Async tasks and `to_thread` copy context by design; arbitrary executors and processes need deliberate value transfer.
 
-**Verify:** trace context across boundaries — set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.
+**Verify:** trace context across boundaries; set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.
 
-### Exercise 11 — design graceful executor shutdown
+### Exercise 11: design graceful executor shutdown
 
 Own a thread or process pool through a context manager. Stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
 
 **Progressive hint:** Lifecycle ownership belongs to the component that created the executor. Differentiate pending work from already-running calls.
 
-**Verify:** design graceful executor shutdown — own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
+**Verify:** design graceful executor shutdown; own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
 
-### Exercise 12 — make an evidence-based model decision
+### Exercise 12: make an evidence-based model decision
 
-Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
+Benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures. Record correctness, startup, throughput, peak active work, transfer size, and cleanup, not just fastest elapsed time.
 
 **Progressive hint:** Use generous repeated measurements and interpret each model only for the workload it matches. A tiny workload can legitimately stay sequential.
 
-**Verify:** make an evidence-based model decision — benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup—not just fastest elapsed time.
+**Verify:** make an evidence-based model decision; benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup, not just fastest elapsed time.
 
 ## Self-check
 
@@ -436,10 +436,10 @@ PYTHONDONTWRITEBYTECODE=1 .venv/bin/python -m unittest python.professional.tests
 - Investigate producer/consumer shutdown, signal handling, and process worker
   recycling in a project after mastering this deterministic core.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-pro-02` — Concurrency and parallelism decision lab.

@@ -1,4 +1,4 @@
-# Day 47 — PyTorch Tensors, Modules, and Training Loops
+# Day 47: PyTorch Tensors, Modules, and Training Loops
 
 **Lesson ID:** `python-47` · **Level:** advanced · **Dependencies:** `deep-learning` · **Network:** offline
 
@@ -114,7 +114,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — logits, minibatches, modes, and a correct PyTorch training loop
+## Concept deep dive: logits, minibatches, modes, and a correct PyTorch training loop
 
 ### The mental model
 
@@ -141,7 +141,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — make the logits-and-label contract executable
+### Focused example A: make the logits-and-label contract executable
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -165,7 +165,7 @@ assert logits.shape == (2, 2) and loss.ndim == 0
 
 **Assumption to name:** Class labels are zero-based indices and no softmax was applied before the loss.
 
-### Focused example B — observe dropout differ between train and eval modes
+### Focused example B: observe dropout differ between train and eval modes
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -215,11 +215,11 @@ assert torch.equal(eval_output, values)
 
 1. Add dropout to the MLP and compare results.
 
-**Verify:** Practice 1 — logits, minibatches, modes, and a correct PyTorch training loop — from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
+**Verify:** Practice 1; logits, minibatches, modes, and a correct PyTorch training loop; from identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
 2. Implement a small minibatch training loop with `DataLoader`.
 
-**Verify:** Practice 2 — logits, minibatches, modes, and a correct PyTorch training loop — for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
+**Verify:** Practice 2; logits, minibatches, modes, and a correct PyTorch training loop; for a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
 ### Progressive hints
 
@@ -243,22 +243,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Shape and dtype contract:** Write assertions at the start of a classification training step for feature shape/dtype, target shape/dtype, and logits shape.
    **Progressive hint:** CrossEntropyLoss expects floating logits `(batch, classes)` and integer class indices `(batch,)` with dtype long.
 
-**Verify:** Shape and dtype contract — assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.
+**Verify:** Shape and dtype contract; assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.
 
 4. **Validation implementation:** Implement an evaluation function that returns sample-weighted loss and accuracy, restores the caller's prior train/eval mode, and never retains an autograd graph.
    **Progressive hint:** Remember `was_training = model.training`, call eval and no_grad, aggregate counts, then restore train mode only if it was previously active.
 
-**Verify:** Validation implementation — call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.
+**Verify:** Validation implementation; call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.
 
 5. **DataLoader reproducibility:** Run two shuffled DataLoaders with the same seed and compare batch order. Then state what changes when using worker processes.
    **Progressive hint:** Pass a seeded `torch.Generator`; worker initialization and external NumPy/Python randomness need their own deliberate seeds.
 
-**Verify:** DataLoader reproducibility — with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.
+**Verify:** DataLoader reproducibility; with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.
 
 6. **Portable checkpoint:** Save model, optimizer, epoch, metric history, and configuration, then reload on CPU and resume one step. Explain `state_dict` versus serializing the entire model object.
    **Progressive hint:** Save plain state dictionaries plus architecture/config metadata. Use `map_location='cpu'` and recreate the model class before loading.
 
-**Verify:** Portable checkpoint — save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location='cpu', assert fixed-fixture prediction parity, then resume one step and increment epoch/history.
+**Verify:** Portable checkpoint; save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location='cpu', assert fixed-fixture prediction parity, then resume one step and increment epoch/history.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -292,12 +292,12 @@ optimization dynamics. Smaller batches add gradient noise and more updates.
 - Work in the [Day 47 learner notebook](../notebooks/day47_pytorch_basics_nn_training_loop.ipynb).
 - Then consult the
   [Day 47 solution](../solutions/day47_pytorch_basics_nn_training_loop/day47_solutions.md).
-- Continue to [Day 48 — Transfer Learning](day48_transfer_learning_cnn.md).
+- Continue to [Day 48; Transfer Learning](day48_transfer_learning_cnn.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-47` — Day 47 — PyTorch Tensors, Modules, and Training Loops.

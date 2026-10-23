@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-22-advanced-pandas-vectorization-query-and-categoricals">Day 22 — Advanced pandas: Vectorization, <code>query</code>, and Categoricals<a class="heading-anchor" href="#guide--day-22-advanced-pandas-vectorization-query-and-categoricals" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-22-advanced-pandas-vectorization-query-and-categoricals">Day 22: Advanced pandas: Vectorization, <code>query</code>, and Categoricals<a class="heading-anchor" href="#guide--day-22-advanced-pandas-vectorization-query-and-categoricals" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Express column operations with pandas/NumPy primitives before reaching for row-wise <code>apply</code>. Then measure memory and performance on representative data.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 22 — advanced pandas: vectorization, <code>query</code>, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 22; advanced pandas: vectorization, <code>query</code>, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Pandas is fastest and clearest when an operation can be expressed over entire columns: arithmetic, comparisons, string/datetime accessors, mapping, masks, or group transforms. A row-wise <code>apply(axis=1)</code> builds a Series and calls Python for each row, so it should be a last resort for genuinely row-dependent logic, not a default.</p>
 <p><code>query</code> and <code>eval</code> provide readable expression syntax but introduce another name-resolution layer. Categoricals store repeated labels as integer codes plus a level table; they can reduce memory and encode a closed vocabulary, but nearly unique values may use more memory. Measure before and after and define behavior for unseen categories.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>frame.query(&quot;amount &gt; @threshold&quot;)</code> resolves <code>amount</code> as a column and <code>@threshold</code> from Python scope. <code>frame.eval(&quot;rate = part / whole&quot;)</code> can assign an expression result. <code>series.astype(&quot;category&quot;)</code> creates codes and categories; <code>memory_usage(deep=True)</code> includes referenced string storage for a more honest comparison.</p>
-<h5 id="guide--worked-example-1-replace-row-wise-conditional-logic-with-masks">Worked example 1 — Replace row-wise conditional logic with masks<a class="heading-anchor" href="#guide--worked-example-1-replace-row-wise-conditional-logic-with-masks" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-replace-row-wise-conditional-logic-with-masks">Worked example 1: Replace row-wise conditional logic with masks<a class="heading-anchor" href="#guide--worked-example-1-replace-row-wise-conditional-logic-with-masks" aria-label="Link to this section">#</a></h5>
 <p>Column expressions state each rule and preserve index alignment. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -436,7 +436,7 @@ frame<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuatio
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[{&#x27;amount&#x27;: 5, &#x27;band&#x27;: &#x27;low&#x27;}, {&#x27;amount&#x27;: 20, &#x27;band&#x27;: &#x27;medium&#x27;}, {&#x27;amount&#x27;: 60, &#x27;band&#x27;: &#x27;high&#x27;}]`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-measure-categorical-conversion">Worked example 2 — Measure categorical conversion<a class="heading-anchor" href="#guide--worked-example-2-measure-categorical-conversion" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-measure-categorical-conversion">Worked example 2: Measure categorical conversion<a class="heading-anchor" href="#guide--worked-example-2-measure-categorical-conversion" aria-label="Link to this section">#</a></h5>
 <p>Keep the conversion only when data characteristics justify it. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">labels <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">east</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">west</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">1_000</span><span class="syntax-punctuation">,</span> name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 categorical <span class="syntax-operator">=</span> labels<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
@@ -503,7 +503,7 @@ large <span class="syntax-operator">=</span> sales<span class="syntax-operator">
 <p>Continue with five new exercises. Record each prediction before running code; these extend rather than replace the original practice above.</p>
 <ol>
 <li><strong>Prediction:</strong> Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. <strong>Progressive hint:</strong> Vectorized operations avoid constructing/calling Python work per row. <strong>Verify:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</li>
-<li><strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result.</li>
+<li><strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>, not a column, controls the result.</li>
 <li><strong>Implementation:</strong> Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. <strong>Progressive hint:</strong> Use <code>memory_usage(deep=True)</code> on the Series. <strong>Verify:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</li>
 <li><strong>Debugging:</strong> Replace a row-wise conditional <code>apply</code> with <code>np.select</code> or <code>.where</code> while preserving missing-value behavior. <strong>Progressive hint:</strong> List conditions from most specific to fallback. <strong>Verify:</strong> Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.</li>
 <li><strong>Edge case and explanation:</strong> Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. <strong>Progressive hint:</strong> Categories store both codes and a level table. <strong>Verify:</strong> Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.</li>
@@ -529,10 +529,10 @@ large <span class="syntax-operator">=</span> sales<span class="syntax-operator">
 <ul>
 <li><a href="python-22.html#learner">Open the learner notebook</a></li>
 <li><a href="python-22.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-23.html#guide">Next: Day 23 — Streaming data pipelines</a></li>
+<li><a href="python-23.html#guide">Next: Day 23; Streaming data pipelines</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-22`
 (Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals). Direct catalog prerequisites: `python-21`.
 I have completed the direct prerequisites: `python-21`. Emphasize pandas vectorization, expression APIs, and memory-aware categoricals.
@@ -789,7 +789,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals">Day 22 — Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals">Day 22: Solutions: Advanced Pandas (apply vs vectorize, query/eval, categoricals)<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-pandas-apply-vs-vectorize-query-eval-categoricals" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Pandas is fastest and clearest when an operation can be expressed over entire columns: arithmetic, comparisons, string/datetime accessors, mapping, masks, or group transforms. A row-wise <code>apply(axis=1)</code> builds a Series and calls Python for each row, so it should be a last resort for genuinely row-dependent logic, not a default.</p>
@@ -805,8 +805,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>pandas vectorization, expression APIs, and memory-aware categoricals</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. <strong>Expected behavior:</strong> values and index match the original for normal and missing inputs. <strong>Constraints:</strong> do not optimize by changing the contract. <strong>Verify:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Find one row-wise <code>apply(axis=1)</code> in a supplied example and replace it with column arithmetic, string methods, mapping, masks, <code>np.select</code>, or group transform as appropriate. Expected behavior: values and index match the original for normal and missing inputs. Constraints: do not optimize by changing the contract. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame. That connects the answer to pandas vectorization, expression APIs, and memory-aware categoricals.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -841,7 +841,7 @@ vectorized_trials <span class="syntax-operator">=</span> repeat<span class="synt
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rowwise_trials<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>vectorized_trials<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span></code></pre>
 <p>The vectorized expression states the same arithmetic without building a row Series and calling Python once per row. Timings are reported as distributions rather than a brittle pass/fail speed threshold.</p>
 <p><strong>Verification evidence:</strong> use <code>pd.testing</code> to assert equal values, dtype, and index, then report repeated median execution seconds for both implementations on the same representative frame.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Convert a repeated string column to categorical only after profiling. <strong>Evidence:</strong> record row count, unique count, object memory, categorical memory, and the category levels. <strong>Expected behavior:</strong> keep the categorical version only if it reduces memory for this data. <strong>Verify:</strong> values remain equivalent and explain why a nearly unique ID may become larger.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Convert a repeated string column to categorical only after profiling. Evidence: record row count, unique count, object memory, categorical memory, and the category levels. Expected behavior: keep the categorical version only if it reduces memory for this data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: values remain equivalent and explain why a nearly unique ID may become larger. That connects the answer to pandas vectorization, expression APIs, and memory-aware categoricals.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -878,32 +878,32 @@ nearly_unique_category <span class="syntax-operator">=</span> nearly_unique<span
 <span class="syntax-punctuation">)</span></code></pre>
 <p>The low-cardinality region column stores two levels plus integer codes and is retained. The nearly unique ID must store almost every original string in the category table <em>plus</em> codes, so conversion makes it larger and should be rejected.</p>
 <p><strong>Verification evidence:</strong> values remain equivalent and explain why a nearly unique ID may become larger.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. <strong>Progressive hint:</strong> Vectorized operations avoid constructing/calling Python work per row. <strong>Verify:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict why row-wise <code>apply(axis=1)</code> is usually slower than column arithmetic for a simple ratio. Progressive hint: Vectorized operations avoid constructing/calling Python work per row. Then compare the prediction with this proof target: Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote. This makes pandas vectorization, expression APIs, and memory-aware categoricals observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
-<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result.</p>
-<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? Progressive hint: <code>@</code> marks an external Python variable. Record the named value, shape, label, or iterator position needed to establish: Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result. The trace exposes pandas vectorization, expression APIs, and memory-aware categoricals directly.</p>
-<p><strong>Evidence to locate in the grouped implementation:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>—not a column—controls the result.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? <strong>Progressive hint:</strong> <code>@</code> marks an external Python variable. <strong>Verify:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>, not a column, controls the result.</p>
+<p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>frame.query(&#x27;amount &gt; @threshold&#x27;)</code>: which name comes from a column and which comes from Python scope? Progressive hint: <code>@</code> marks an external Python variable. Record the named value, shape, label, or iterator position needed to establish: Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>, not a column, controls the result. The trace exposes pandas vectorization, expression APIs, and memory-aware categoricals directly.</p>
+<p><strong>Evidence to locate in the grouped implementation:</strong> Set a known threshold and assert the selected row indexes; change only the Python variable and confirm <code>@threshold</code>, not a column, controls the result.</p>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. <strong>Progressive hint:</strong> Use <code>memory_usage(deep=True)</code> on the Series. <strong>Verify:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory. Progressive hint: Use <code>memory_usage(deep=True)</code> on the Series. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller. That connects the answer to pandas vectorization, expression APIs, and memory-aware categoricals.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Replace a row-wise conditional <code>apply</code> with <code>np.select</code> or <code>.where</code> while preserving missing-value behavior. <strong>Progressive hint:</strong> List conditions from most specific to fallback. <strong>Verify:</strong> Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Replace a row-wise conditional <code>apply</code> with <code>np.select</code> or <code>.where</code> while preserving missing-value behavior. Progressive hint: List conditions from most specific to fallback. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly. The diagnosis depends on pandas vectorization, expression APIs, and memory-aware categoricals.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use rows covering every condition plus missing input; assert vectorized labels match the reference apply and missing policy exactly.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. <strong>Progressive hint:</strong> Categories store both codes and a level table. <strong>Verify:</strong> Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Explain why a nearly unique string ID can consume more memory as a category and why category levels must be handled during concatenation. Progressive hint: Categories store both codes and a level table. Values below, at, and above the named boundary must produce the evidence Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation. Those cases show how pandas vectorization, expression APIs, and memory-aware categoricals behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Profile a repeated label and a nearly unique ID; assert the measured memory directions and reconcile category levels before/after concatenation.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Prefer vectorized operations and labeled expressions, but measure rather than assuming. Use categoricals only when repetition justifies them.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-vectorization-and-query-scope">Shared implementation for Exercises 3–4 — Vectorization and query scope<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-vectorization-and-query-scope" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-vectorization-and-query-scope">Shared implementation for Exercises 3–4: Vectorization and query scope<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-vectorization-and-query-scope" aria-label="Link to this section">#</a></h5>
 <p>Column arithmetic runs through optimized array operations; row-wise <code>apply</code> creates a Series and calls Python code repeatedly. In <code>query</code>, <code>amount</code> is a column and <code>@threshold</code> is a Python variable.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-measure-categorical-memory-and-vectorize-conditions">Shared implementation for Exercises 5–7 — Measure categorical memory and vectorize conditions<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-measure-categorical-memory-and-vectorize-conditions" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-measure-categorical-memory-and-vectorize-conditions">Shared implementation for Exercises 5–7: Measure categorical memory and vectorize conditions<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-measure-categorical-memory-and-vectorize-conditions" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -1059,16 +1059,16 @@ optimized<span class="syntax-punctuation">,</span> memory <span class="syntax-op
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-22`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-22`
 (Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals). Direct catalog prerequisites: `python-21`.
 I have completed the direct prerequisites: `python-21`. Emphasize pandas vectorization, expression APIs, and memory-aware categoricals.
 Read `python/ds-60day/companion-guides/day22_advanced_pandas_apply_query_eval.md` and use the learner notebook
@@ -1083,7 +1083,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1194,18 +1194,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

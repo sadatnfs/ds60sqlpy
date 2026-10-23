@@ -1,4 +1,4 @@
-# Day 31 — Probability Basics
+# Day 31: Probability Basics
 
 **Lesson ID:** `python-31` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -100,7 +100,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — probability models, conditional evidence, and simulation error
+## Concept deep dive: probability models, conditional evidence, and simulation error
 
 ### The mental model
 
@@ -128,7 +128,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — solve an at-least-one event by its complement
+### Focused example A: solve an at-least-one event by its complement
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -152,7 +152,7 @@ assert abs(simulated - analytic) < 0.02
 
 **Assumption to name:** The 1,000 opportunities are independent and all use the same event probability.
 
-### Focused example B — make the Bayes denominator visible with counts
+### Focused example B: make the Bayes denominator visible with counts
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -204,18 +204,18 @@ Complete these in the learner notebook:
 
 1. Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
 
-**Verify:** Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
+**Verify:** Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
 
 2. Generate `Normal(0, 1)` values, compute their mean and variance, and overlay
    the probability density function. The standard-library formula is enough;
    SciPy is optional.
 
-**Verify:** Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
+**Verify:** Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
 
 3. Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute
    \(P(\text{disease}\mid\text{positive})\).
 
-**Verify:** Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
+**Verify:** Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
 
 ### Progressive hints
 
@@ -236,17 +236,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
    **Progressive hint:** Compute \(1-(1-p)^n\) first. Treat each simulated experiment as one Bernoulli outcome and use \(\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}\) for its standard error.
 
-**Verify:** Prediction and uncertainty — show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
+**Verify:** Prediction and uncertainty; show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
 
 5. **Implementation:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
    **Progressive hint:** Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.
 
-**Verify:** Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.
+**Verify:** Implementation; for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.
 
 6. **Debugging and boundaries:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
    **Progressive hint:** n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.
 
-**Verify:** Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.
+**Verify:** Debugging and boundaries; assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -279,12 +279,12 @@ ones. Do not require exact equality from random draws.
 - Work in the [Day 31 learner notebook](../notebooks/day31_probability_basics.ipynb).
 - After attempting every exercise, compare reasoning with the
   [separate solution](../solutions/day31_probability_basics/day31_solutions.md).
-- Continue to [Day 32 — Statistical Inference](day32_statistical_inference.md).
+- Continue to [Day 32; Statistical Inference](day32_statistical_inference.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-31` — Day 31 — Probability Basics.

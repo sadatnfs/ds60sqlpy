@@ -1,4 +1,4 @@
-# Day 13 solutions — Date/Time Functions and Time Zones
+# Day 13 solutions: Date/Time Functions and Time Zones
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List orders from the last 30 days with their UTC calendar date.
 
@@ -107,7 +107,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-13 Exercise 1, the chosen form is justified by this lesson-specific rationale: Filter the timestamp directly and convert for display only. Evaluate another form against the concrete expected result (Recent order rows in deterministic order) and the verification above.
 - **Edge case:** Tie two rows on `o.order_date DESC` and give them different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Summarize orders and stored revenue by UTC month.
 
@@ -146,7 +146,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-13 Exercise 2, the chosen form is justified by this lesson-specific rationale: Convert to UTC before truncating when the reporting calendar is UTC. Evaluate another form against the concrete expected result (One row per observed UTC month) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `utc_month` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Calculate each customer's age in whole days as of the current date.
 
@@ -184,7 +184,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-13 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compare calendar dates after declaring the UTC reporting date. Evaluate another form against the concrete expected result (One row per customer with nonnegative age days) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Use a half-open interval to select one UTC calendar month and explain which boundary instant is excluded.
 
@@ -230,7 +230,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-13 Exercise 4, the chosen form is justified by this lesson-specific rationale: Include the month start and exclude the next month start. Evaluate another form against the concrete expected result (Orders in exactly one UTC month) and the verification above.
 - **Edge case:** Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Compare UTC and America/Los_Angeles display times without stripping the stored instant.
 
@@ -270,7 +270,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-13 Exercise 5, the chosen form is justified by this lesson-specific rationale: `AT TIME ZONE` on `timestamptz` produces a local wall-clock display value. Evaluate another form against the concrete expected result (One row per sampled event with two displays of the same instant) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `e.event_time, e.event_id`.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Create a seven-day UTC calendar and left join daily order counts so missing days appear as zero.
 

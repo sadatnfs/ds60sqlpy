@@ -1,4 +1,4 @@
-# SQL-FOUND-02 Solutions — Versioned Migrations
+# SQL-FOUND-02 Solutions: Versioned Migrations
 
 
 <!-- beginner-solution-enrichment -->
@@ -62,7 +62,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 It resets the isolated fixture, verifies versions 1–5, implements exercise
 versions 6–8, checks them, and removes `pro_migration_lab`.
 
-## Exercise 1 — Deterministic manifest
+## Exercise 1: Deterministic manifest
 
 The manifest must order by version explicitly:
 
@@ -91,7 +91,7 @@ different bytes.
 - **Expected result/shape:** For sql-found-02 Exercise 1, expected output: exactly five rows at one-row-per-migration grain, columns `migration_id`, `migration_name`, and `content_tag`, ordered by `migration_id`; the independent invariant is the exact array `[1, 2, 3, 4, 5]`.
 - **Independent verification:** For sql-found-02 Exercise 1, assert the exact ordered ID array, count five distinct IDs, compare each name/tag with the reviewed fixture manifest, and prove that a missing, duplicate, reordered, or altered identity fails rather than being silently accepted.
 
-## Exercise 2 — Compatibility and deployment order
+## Exercise 2: Compatibility and deployment order
 
 At version 2, old storage remains in `urgency_label`, the new
 `priority_code` is nullable, and the view returns
@@ -117,7 +117,7 @@ evidence. The tiny fixture proves logic, not production timing.
 - **Expected result/shape:** For sql-found-02 Exercise 2, expected output: three request rows showing NULL `expanded_storage` but unchanged `stable_api_value`, followed by five ordered rollout rows with `step_number`, compatibility, write policy, and promotion gate.
 - **Independent verification:** For sql-found-02 Exercise 2, assert every stable API value equals `COALESCE(expanded_storage, legacy_storage)`, the API keeps its five-column interface, and the contract step is gated on zero old-writer traffic plus a complete backfill.
 
-## Exercise 3 — Versions 6–8
+## Exercise 3: Versions 6–8
 
 The solution uses three separate transactions:
 
@@ -140,7 +140,7 @@ inserted last in each transaction so a failed body cannot advertise success.
 - **Expected result/shape:** For sql-found-02 Exercise 3, expected output: command tags for migrations 6–8; one row per request with `assigned_team`; three manifest rows; one column-catalog row proving text, NOT NULL, and `'general'` default; and one validated CHECK definition.
 - **Independent verification:** For sql-found-02 Exercise 3, assert manifest IDs are exactly `[1..8]`, every high/critical request is `response`, every other request is `general`, no NULL or disallowed value remains, the stable API projection is unchanged, and the catalog matches the promised contract.
 
-## Exercise 4 — Boundaries and recovery
+## Exercise 4: Boundaries and recovery
 
 Examples that require an explicit nontransactional boundary include:
 
@@ -166,7 +166,7 @@ is an evidence-based incident decision, not a filename convention.
 - **Expected result/shape:** For sql-found-02 Exercise 4, expected output: four rows ordered by `step_number` with columns `operation`, `transaction_requirement`, `reason`, and `recovery_policy`.
 - **Independent verification:** For sql-found-02 Exercise 4, cross-check each PostgreSQL transaction restriction in a disposable environment, distinguish retry/forward-fix from destructive rollback, and require backup plus reconciliation evidence before any recovery from a lossy change.
 
-## Exercise 5 — Retry after uncertain completion
+## Exercise 5: Retry after uncertain completion
 
 Serialize the runner, begin a transaction, lock/read the manifest row, and
 compare both recorded checksum and observed schema precondition. If neither
@@ -185,7 +185,7 @@ error.
 - **Expected result/shape:** For sql-found-02 Exercise 5, expected output: exactly one row with `manifest_matches` and `schema_matches`; only `(true, true)` is the already-applied state, `(false, false)` is eligible to apply, and either mixed state must stop.
 - **Independent verification:** For sql-found-02 Exercise 5, probe all four manifest/schema truth combinations, verify name and content identity as well as column type/nullability/default, serialize deployers, and prove incompatible same-named state fails instead of being hidden by `IF NOT EXISTS`.
 
-## Exercise 6 — Low-lock index and constraint rollout
+## Exercise 6: Low-lock index and constraint rollout
 
 `CREATE INDEX CONCURRENTLY` must run outside a transaction block and can leave
 an invalid index after interruption. Record progress, validity, locks, lag, and
@@ -203,7 +203,7 @@ abort thresholds, and postcondition queries.
 - **Expected result/shape:** For sql-found-02 Exercise 6, expected output: eight rows ordered by `step_number` with `rollout_step`, `transaction_boundary`, `required_evidence`, and `abort_condition`; the SQL templates remain deliberately unexecuted.
 - **Independent verification:** For sql-found-02 Exercise 6, require pre/post catalog checks for index readiness/validity and constraint validation, bounded lock/lag/WAL/disk thresholds, restartable backfill reconciliation, and an explicit policy for a known invalid index artifact.
 
-## Exercise 7 — Semantic drift report
+## Exercise 7: Semantic drift report
 
 Build expected rows with stable identities such as
 `(schema, table, column, ordinal)` and compare them to catalog-derived observed
@@ -218,10 +218,10 @@ contract unless they are deliberately contractual.
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-found-02 Exercise 7, FULL JOIN expected and unfiltered observed manifests for all `service_requests` columns, constraints, and indexes, comparing semantic properties rather than OIDs or storage details.
-- **Expected result/shape:** For sql-found-02 Exercise 7, expected output: three deterministic result sets—one row per column, constraint, and index—with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
+- **Expected result/shape:** For sql-found-02 Exercise 7, expected output: three deterministic result sets, one row per column, constraint, and index, with expected/observed evidence and `drift_status` equal to `matches`, `missing`, `unexpected`, or `changed`.
 - **Independent verification:** For sql-found-02 Exercise 7, prove the clean fixture reports only `matches`; inject one disposable missing, unexpected, and changed object; confirm every branch is reachable, defaults and validation state are checked, and ordering uses the displayed object identity.
 
-## Exercise 8 — Phase-specific recovery
+## Exercise 8: Phase-specific recovery
 
 During expand, old code should still work; recovery may be a forward fix while
 the additive object remains. During dual-write/backfill, pause or fence writers

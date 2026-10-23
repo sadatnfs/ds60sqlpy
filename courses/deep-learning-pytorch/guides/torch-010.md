@@ -176,7 +176,7 @@ IDs support pairing, split isolation, duplicate detection and error analysis. Th
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-010, Datasets, held-out families and leakage controls.

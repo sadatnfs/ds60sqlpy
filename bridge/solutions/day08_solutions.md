@@ -1,4 +1,4 @@
-# Bridge Day 8 — Solution notes
+# Bridge Day 8: Solution notes
 
 Complete the [capstone starter](../lessons/day08_production_capstone.py) before
 reviewing [day08_solution.py](day08_solution.py).
@@ -23,7 +23,7 @@ finite.
 ## Observability and security
 
 Metrics use stable job and exception-type tags. Logs contain job name, counts,
-and exception type—never the exception message, records, or connection strings.
+and exception type, never the exception message, records, or connection strings.
 The runner re-raises failure so an external scheduler can mark the run failed.
 
 `validate_database_transport()` checks scheme, host, and remote TLS mode without
@@ -73,7 +73,7 @@ reference is `bridge/solutions/day08_solution.py`; use it only after an honest a
 
 **Shared failure rule:** An advanced checkpoint or non-idempotent ambiguous sink write can permanently skip or duplicate records during recovery.
 
-### Exercise 1 — Validation
+### Exercise 1: Validation
 
 **Prompt:** Validate constructor inputs, including non-blank job name and positive batch size,
 before retaining dependencies.
@@ -87,7 +87,7 @@ effect.
 
 **Verification evidence:** Construct runners with blank names and non-positive batch sizes; assert `ValueError` before any dependency is retained or called, while a valid constructor has zero effects.
 
-### Exercise 2 — Orchestration
+### Exercise 2: Orchestration
 
 **Prompt:** Implement `run_once()` in load-extract-validate-batch-write-checkpoint order and
 return read, written, and final checkpoint evidence.
@@ -100,7 +100,7 @@ metrics, and return `JobResult`.
 
 **Verification evidence:** For a two-batch run, assert event order `load, extract, validate, write, checkpoint` per batch and compare `JobResult` read/written counts plus final checkpoint.
 
-### Exercise 3 — Test doubles
+### Exercise 3: Test doubles
 
 **Prompt:** Build extractor, sink, checkpoint, and metric fakes; configure the sink to fail on a
 selected call.
@@ -113,7 +113,7 @@ evidence.
 
 **Verification evidence:** Configure fakes with public call lists and sink failure index; assert inputs, batches, checkpoint saves, metric events, and failure call are all independently inspectable.
 
-### Exercise 4 — Recovery test
+### Exercise 4: Recovery test
 
 **Prompt:** With four records and batch size two, fail write two, assert only checkpoint two
 persists, then resume from two with a healthy sink.
@@ -125,7 +125,7 @@ records 3–4, and saves `4`. No checkpoint for the failed batch is recorded.
 
 **Verification evidence:** With sequences 1–4 and batch size two, fail write two; assert checkpoint `2`, then restart and assert only sequences 3–4 are written and checkpoint becomes `4`.
 
-### Exercise 5 — Record validation
+### Exercise 5: Record validation
 
 **Prompt:** Reject duplicate IDs, non-positive/non-increasing sequences, and
 non-finite/non-positive money before any sink effect.
@@ -138,7 +138,7 @@ records.
 
 **Verification evidence:** Parameterize duplicate IDs, sequence zero, repeated/decreasing sequence, `NaN`/infinity, and non-positive amount; assert each fails before the sink or checkpoint is touched.
 
-### Exercise 6 — Observability
+### Exercise 6: Observability
 
 **Prompt:** Emit success/failure and record-count metrics with only job and exception-class
 tags.
@@ -151,7 +151,7 @@ metric dimensions.
 
 **Verification evidence:** Inspect metrics/logs for success and failure: tags contain only job/outcome/exception class, counts are correct, and records, URLs, and exception messages are absent.
 
-### Exercise 7 — Transport security
+### Exercise 7: Transport security
 
 **Prompt:** Implement `validate_database_transport()` for PostgreSQL schemes, local course
 hosts, and required TLS modes on remote hosts.
@@ -164,7 +164,7 @@ messages.
 
 **Verification evidence:** Accept local PostgreSQL URLs and remote URLs with `require`, `verify-ca`, or `verify-full`; reject missing host, wrong scheme, and insecure remote mode without echoing URL.
 
-### Exercise 8 — Runbook
+### Exercise 8: Runbook
 
 **Prompt:** Write operational steps for startup, health evidence, retry ownership, checkpoint
 inspection, replay, rollback, credential rotation, and escalation.
@@ -178,7 +178,7 @@ condition.
 
 **Verification evidence:** Produce a runbook checklist covering startup, liveness/readiness/last-run evidence, retry owner, checkpoint query, replay, rollback, rotation, escalation owner, and stop condition.
 
-### Exercise 9 — No-op behavior
+### Exercise 9: No-op behavior
 
 **Prompt:** Define the result and metrics when extraction returns no records.
 
@@ -189,7 +189,7 @@ success/no-op count, and leave sink/checkpoint save histories empty.
 
 **Verification evidence:** For empty extraction, assert zero read/written counts, unchanged checkpoint, no sink or checkpoint-save call, and one bounded successful no-op metric/event.
 
-### Exercise 10 — Checkpoint validation
+### Exercise 10: Checkpoint validation
 
 **Prompt:** Detect records at or below the loaded checkpoint and out-of-order extractor results
 before writing.
@@ -202,7 +202,7 @@ promise.
 
 **Verification evidence:** Feed a record equal to the checkpoint and a decreasing pair; assert each raises before the first write and leaves the stored checkpoint unchanged.
 
-### Exercise 11 — Ambiguous writes
+### Exercise 11: Ambiguous writes
 
 **Prompt:** Explain recovery when the sink commits a batch but the client raises before seeing
 success.
@@ -216,7 +216,7 @@ replay.
 
 **Verification evidence:** Model server commit followed by client error; assert restart consults sink idempotency evidence and checkpoint state before replaying rather than advancing blindly.
 
-### Exercise 12 — Metric design
+### Exercise 12: Metric design
 
 **Prompt:** Classify which fields belong in metrics, structured logs, or neither, and test
 cardinality.
@@ -230,7 +230,7 @@ costs.
 
 **Verification evidence:** Classify job/outcome/error class/counts as bounded metrics, run/request ID as structured log fields, and record IDs/payloads/URLs as neither; test the resulting cardinality.
 
-### Exercise 13 — Health model
+### Exercise 13: Health model
 
 **Prompt:** Separate process liveness, dependency readiness, and last-run success for the job.
 
@@ -242,7 +242,7 @@ collapse them into one green flag.
 
 **Verification evidence:** Return independent evidence for process liveness, dependency readiness, and last-run success; force each one false while the other two remain true.
 
-### Exercise 14 — URL edge cases
+### Exercise 14: URL edge cases
 
 **Prompt:** Test loopback names, IPv4/IPv6, missing host, case-insensitive TLS values,
 unsupported schemes, and remote insecure modes.
@@ -256,7 +256,7 @@ secret-free.
 
 **Verification evidence:** Parameterize localhost, loopback IPv4/IPv6, missing host, mixed-case TLS values, wrong schemes, and insecure remote URLs; compare exact accept/reject outcomes and safe messages.
 
-### Exercise 15 — Operations drill
+### Exercise 15: Operations drill
 
 **Prompt:** Simulate credential rotation and prove the runner can restart without resetting a
 valid checkpoint.
@@ -269,7 +269,7 @@ durable sequence.
 
 **Verification evidence:** Swap a secret-bearing URL between runs without changing checkpoint storage; assert the new adapter is used, no URL is logged, and processing resumes after the valid checkpoint.
 
-### Exercise 16 — Invariant testing
+### Exercise 16: Invariant testing
 
 **Prompt:** Generate failure positions across multiple batch sizes and prove persisted
 checkpoints always correspond to fully successful batches.

@@ -332,7 +332,7 @@ The course works offline after setup. These optional official references describ
 
 - [PostgreSQL 16 documentation](https://www.postgresql.org/docs/16/transaction-iso.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson and expected observations are sufficient offline. For optional coaching, copy:
 

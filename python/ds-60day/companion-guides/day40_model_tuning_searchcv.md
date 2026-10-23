@@ -1,4 +1,4 @@
-# Day 40 — Hyperparameter Tuning with SearchCV
+# Day 40: Hyperparameter Tuning with SearchCV
 
 **Lesson ID:** `python-40` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -107,7 +107,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — hyperparameter search spaces, fit budgets, and nested evaluation
+## Concept deep dive: hyperparameter search spaces, fit budgets, and nested evaluation
 
 ### The mental model
 
@@ -134,7 +134,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — calculate the search budget before fitting
+### Focused example A: calculate the search budget before fitting
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -159,7 +159,7 @@ assert len(candidates) == 16
 
 **Assumption to name:** Every listed combination is valid for the estimator and receives the same fold assignments.
 
-### Focused example B — make the refit metric explicit in multi-metric search
+### Focused example B: make the refit metric explicit in multi-metric search
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -215,19 +215,19 @@ assert search.refit == "f1_macro"
 
 1. Use `RandomizedSearchCV` with a wider parameter space.
 
-**Verify:** Practice 1 — hyperparameter search spaces, fit budgets, and nested evaluation — declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
+**Verify:** Practice 1; hyperparameter search spaces, fit budgets, and nested evaluation; declare parameter distributions, n_iter, scorer, CV splitter, and seed; print candidate count, expected fit count, best parameters, best CV score, failed-fit count, and one untouched-test metric.
 
 2. Implement nested cross-validation and compare its result with the non-nested
    search score.
 
-**Verify:** Practice 2 — hyperparameter search spaces, fit budgets, and nested evaluation — print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
+**Verify:** Practice 2; hyperparameter search spaces, fit budgets, and nested evaluation; print every outer-fold score from a search fitted only inside that fold, its mean/std, and the optimistic non-nested best-CV score; assert outer validation indices never enter their inner search.
 
 ### Progressive hints
 
 1. Sample `C` over orders of magnitude (for example with SciPy's `loguniform`)
    and set `random_state`. Start with about 20 iterations on a laptop.
 2. Build separate inner and outer `StratifiedKFold` objects. Pass the entire
-   search object—not its already-selected best estimator—to
+   search object, not its already-selected best estimator, to
    `cross_val_score` with the outer splitter.
 
 ### Additional mastery practice
@@ -240,22 +240,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Search-budget calculation:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
    **Progressive hint:** Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.
 
-**Verify:** Search-budget calculation — show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
+**Verify:** Search-budget calculation; show 5×4×3=60 raw combinations and 60×5=300 fits before filtering; list invalid solver/penalty pairs, print the valid candidate/fit count, and reconcile it with cv_results_ rows.
 
 4. **Multi-metric selection:** Configure GridSearchCV to report ROC AUC, average precision, and balanced accuracy while refitting one declared metric. Explain why the refit choice belongs in the experiment plan.
    **Progressive hint:** Pass a scoring dictionary and set `refit` to a metric name. Selection changes when metrics rank candidates differently.
 
-**Verify:** Multi-metric selection — configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
+**Verify:** Multi-metric selection; configure all three scorers, print their mean/std/rank columns and the declared refit metric, and assert best_estimator_ corresponds to rank 1 for that metric rather than another scorer.
 
 5. **Results-table diagnosis:** Turn `cv_results_` into a tidy table containing parameters, mean and standard deviation of train/validation scores, rank, and fit time. Flag overfit and unstable candidates.
    **Progressive hint:** Large train-validation gaps suggest overfit; large fold standard deviation suggests sensitivity. Sort by the declared rank, not by eye.
 
-**Verify:** Results-table diagnosis — emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
+**Verify:** Results-table diagnosis; emit a tidy table with one row per candidate and explicit parameter, train mean/std, validation mean/std, rank, fit-time mean/std, and failure columns; flag candidates using declared train-validation-gap and variability rules.
 
 6. **Reproducibility debugging:** A randomized search produces different winners on repeated runs. List every random source and parallelism setting to inspect, then design a deterministic comparison.
    **Progressive hint:** Seed the sampler, splitters, and estimator. Threaded numeric libraries and GPU algorithms can still introduce small nondeterminism.
 
-**Verify:** Reproducibility debugging — run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.
+**Verify:** Reproducibility debugging; run the search twice and match candidate order, scores, ranks, and winner after fixing data split, estimator, distribution sampler, CV, and library-thread seeds; record n_jobs and versions.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -290,12 +290,12 @@ held-out set when the project requires a locked evaluation.
 - Work in the [Day 40 learner notebook](../notebooks/day40_model_tuning_searchcv.ipynb).
 - Then consult the
   [Day 40 solution](../solutions/day40_model_tuning_searchcv/day40_solutions.md).
-- Continue to [Day 41 — Class Imbalance](day41_imbalance_handling.md).
+- Continue to [Day 41; Class Imbalance](day41_imbalance_handling.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-40` — Day 40 — Hyperparameter Tuning with SearchCV.

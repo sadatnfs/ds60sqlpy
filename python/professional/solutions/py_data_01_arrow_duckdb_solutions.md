@@ -124,7 +124,7 @@ Use this map after an honest attempt. The executable implementation remains
 [`py_data_01_arrow_duckdb_solution.py`](py_data_01_arrow_duckdb_solution.py); this section explains the
 contract, evidence, alternatives, and edge cases behind every numbered task.
 
-### Exercise 1 — define the CSV contract
+### Exercise 1: define the CSV contract
 
 **Prompt recap:** Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and prices in one place rather than scattering conversion across analysis code. Test blank notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A binary `float` is used in the learner exercise only to keep its first step small.
 
@@ -138,9 +138,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** define the CSV contract — assert parse_nullable_text('') is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.
+**Verify:** define the CSV contract; assert parse_nullable_text('') is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.
 
-### Exercise 2 — compare storage contracts
+### Exercise 2: compare storage contracts
 
 **Prompt recap:** Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | | Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan select columns efficiently? | | | | Does Python need an extra engine? | | | | Is append/stream exchange simple? | | | Choose a format for a five-row configuration export and for a repeated 50-million-row analytical scan. Explain each answer.
 
@@ -154,9 +154,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** compare storage contracts — complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.
+**Verify:** compare storage contracts; complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.
 
-### Exercise 3 — build an Arrow schema
+### Exercise 3: build an Arrow schema
 
 **Prompt recap:** With PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note. Create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do not infer the schema first and then claim it was guaranteed.
 
@@ -170,9 +170,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** build an Arrow schema — with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.
+**Verify:** build an Arrow schema; with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.
 
-### Exercise 4 — make partitions deliberate
+### Exercise 4: make partitions deliberate
 
 **Prompt recap:** Implement `partition_directory`. Reject `../north`, slashes, empty strings, and unexpected case. Write one stable file per region at `region=<validated-value>/part-000.csv`. Partitioning every high-cardinality value can create millions of tiny files, so choose commonly filtered dimensions and plan file sizes.
 
@@ -186,9 +186,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** make partitions deliberate — assert north, south, and west map exactly to region=<value>/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.
+**Verify:** make partitions deliberate; assert north, south, and west map exactly to region=<value>/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.
 
-### Exercise 5 — query Parquet with DuckDB
+### Exercise 5: query Parquet with DuckDB
 
 **Prompt recap:** Use an in-memory connection and `read_parquet(?)`. Group revenue by region for rows with at least two units. Bind path and threshold values as parameters. Then run `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected columns that exclude `note`. Record the plan from your installed DuckDB version. Plan formatting changes, so look for semantics rather than copying one exact rendering.
 
@@ -202,9 +202,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** query Parquet with DuckDB — assert the parameterized DuckDB result equals the fallback's sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.
+**Verify:** query Parquet with DuckDB; assert the parameterized DuckDB result equals the fallback's sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.
 
-### Exercise 6 — explain pushdown honestly
+### Exercise 6: explain pushdown honestly
 
 **Prompt recap:** Pushdown does not mean every query reads zero irrelevant bytes. Row-group statistics, file organization, filter selectivity, expression support, and engine version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and 3. what would require profiling or scan metrics to prove.
 
@@ -218,9 +218,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** explain pushdown honestly — write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.
+**Verify:** explain pushdown honestly; write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.
 
-### Exercise 7 — exercise the fallback
+### Exercise 7: exercise the fallback
 
 **Prompt recap:** Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm the same row count, null count, region set, and revenue across engines.
 
@@ -234,9 +234,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** exercise the fallback — force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.
+**Verify:** exercise the fallback; force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.
 
-### Exercise 8 — plan schema evolution
+### Exercise 8: plan schema evolution
 
 **Prompt recap:** Create version 2 of the sales schema with one nullable additive column and one proposed type change. Define which readers remain compatible and write a migration/rejection policy.
 
@@ -255,9 +255,9 @@ coercion the installed engine happens to perform.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** plan schema evolution — create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.
+**Verify:** plan schema evolution; create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.
 
-### Exercise 9 — control file and row-group size
+### Exercise 9: control file and row-group size
 
 **Prompt recap:** Generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups. Record metadata count, scan planning, file sizes, and filtered query behavior.
 
@@ -276,9 +276,9 @@ universal number. Clean the generated data under an ignored temporary path.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** control file and row-group size — generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.
+**Verify:** control file and row-group size; generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.
 
-### Exercise 10 — validate a dataset before querying
+### Exercise 10: validate a dataset before querying
 
 **Prompt recap:** Build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
 
@@ -297,9 +297,9 @@ status. A successful Parquet read is not a data-quality proof.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** validate a dataset before querying — build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
+**Verify:** validate a dataset before querying; build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
 
-### Exercise 11 — reconcile a local analytical join
+### Exercise 11: reconcile a local analytical join
 
 **Prompt recap:** Create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic. Include an unknown region and duplicate lookup key.
 
@@ -319,9 +319,9 @@ rows.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** reconcile a local analytical join — create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.
+**Verify:** reconcile a local analytical join; create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.
 
-### Exercise 12 — find a non-pushdown filter
+### Exercise 12: find a non-pushdown filter
 
 **Prompt recap:** Compare `units >= ?` with a transformed predicate such as a function of units. Inspect plans and scan evidence, then rewrite only when semantics remain identical.
 
@@ -330,7 +330,7 @@ and which input would make the policy reject or choose a different path.
 Parameterize both queries, verify equal selected rows for the chosen rewrite,
 and inspect `EXPLAIN` for filter placement. Record engine/version because plan
 syntax and supported pushdown evolve. If scan metrics are unavailable, claim
-only what the plan shows—not bytes avoided.
+only what the plan shows, not bytes avoided.
 
 Never alter boundary behavior (nulls, overflow, rounding, timezone) merely to
 obtain a prettier plan.
@@ -340,9 +340,9 @@ obtain a prettier plan.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** find a non-pushdown filter — print both plans and measured scan evidence for units >= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.
+**Verify:** find a non-pushdown filter; print both plans and measured scan evidence for units >= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.
 
-### Exercise 13 — publish a dataset atomically
+### Exercise 13: publish a dataset atomically
 
 **Prompt recap:** Write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
 
@@ -361,9 +361,9 @@ change but do not prove source trust or data correctness.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** publish a dataset atomically — write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
+**Verify:** publish a dataset atomically; write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
 
-### Exercise 14 — reconcile decimals and timestamps across engines
+### Exercise 14: reconcile decimals and timestamps across engines
 
 **Prompt recap:** Add boundary decimal values and timezone-aware timestamps to a local round trip. Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.
 
@@ -382,4 +382,4 @@ letting local machine timezone decide.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** reconcile decimals and timestamps across engines — add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.
+**Verify:** reconcile decimals and timestamps across engines; add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.

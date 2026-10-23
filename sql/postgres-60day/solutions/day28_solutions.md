@@ -1,4 +1,4 @@
-# Day 28 solutions — JSON/JSONB and XML in PostgreSQL
+# Day 28 solutions: JSON/JSONB and XML in PostgreSQL
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Extract customer acquisition channel and referrer from JSONB attributes.
 
@@ -104,7 +104,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-28 Exercise 1, the chosen form is justified by this lesson-specific rationale: `->>` returns text and naturally yields NULL for a missing key. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Find mobile-channel customers using JSONB containment.
 
@@ -142,7 +142,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-28 Exercise 2, the chosen form is justified by this lesson-specific rationale: `@>` tests whether the left JSONB contains the declared object. Evaluate another form against the concrete expected result (Customer rows whose channel is mobile) and the verification above.
 - **Edge case:** Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Count event rows with missing device metadata separately from present values.
 
@@ -177,7 +177,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-28 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `?` to test key existence rather than comparing extracted text to NULL. Evaluate another form against the concrete expected result (One summary row) and the verification above.
 - **Edge case:** Add one source row with a new `has_device_key`; verify the result gains exactly one row carrying that `has_device_key` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
 
@@ -222,7 +222,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-28 Exercise 4, the chosen form is justified by this lesson-specific rationale: JSON objects are mappings; do not treat key order as a semantic contract. Evaluate another form against the concrete expected result (One row per customer with events) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `counts_by_type` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Extract order ID and status text from XML documents without assuming XPath returns a scalar.
 
@@ -258,7 +258,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-28 Exercise 5, the chosen form is justified by this lesson-specific rationale: Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath. Evaluate another form against the concrete expected result (One row per XML document) and the verification above.
 - **Edge case:** Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
 

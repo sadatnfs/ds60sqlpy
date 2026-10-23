@@ -1,4 +1,4 @@
-# SQL-TYPES-01 — PostgreSQL-Native Types and Searchable Documents
+# SQL-TYPES-01: PostgreSQL-Native Types and Searchable Documents
 
 ## Level and prerequisites
 
@@ -48,7 +48,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-TYPES-01 — PostgreSQL-Native Types and Searchable Documents** and choose
+2. Open **SQL-TYPES-01; PostgreSQL-Native Types and Searchable Documents** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -82,7 +82,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -255,7 +255,7 @@ choose from measured query requirements.
 The stored `search_vector` weights title lexemes above body lexemes. Passing an
 explicit `'english'::regconfig` makes tokenization stable across sessions.
 `websearch_to_tsquery` accepts familiar syntax; `@@` matches and `ts_rank_cd`
-ranks. Ranking is not a relevance guarantee—language, corpus, weights, recency,
+ranks. Ranking is not a relevance guarantee, language, corpus, weights, recency,
 and product expectations need evaluation.
 
 `pg_trgm` can support similarity and wildcard-like search, but it is an
@@ -281,7 +281,7 @@ write cost, and migration cost:
    ties deterministically.
    **Inputs/evidence:** For sql-types-01 Exercise 1, filter `documents` to published rows whose `tags` array contains both `postgresql` and `operations` using one `@>` containment predicate.
    **Expected result/shape:** For sql-types-01 Exercise 1, expected output: exactly one row at document grain with `document_id` and `title`, ordered by `document_id`.
-   **Verify:** For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
+   **Verify:** For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags, not either one, are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
 2. **Range subtraction:** apply the half-open rule and prove both range
    boundaries.
    **Inputs/evidence:** For sql-types-01 Exercise 2, require `availability @> probe_date` and NOT `blackout_windows @> probe_date`, then probe the lower and upper endpoints of both `[)` ranges for document 201.
@@ -362,16 +362,16 @@ write cost, and migration cost:
 
 ## Next step
 
-Continue to [SQL-OPS-01 — index types, statistics, and maintenance](sql_ops_01_indexes_statistics_maintenance.md)
+Continue to [SQL-OPS-01; index types, statistics, and maintenance](sql_ops_01_indexes_statistics_maintenance.md)
 to connect these operators to planner evidence and lifecycle cost. Revisit the
 relational-design module whenever a convenient native type begins hiding a
 cross-row invariant.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-types-01 — PostgreSQL-Native Types and Searchable Documents.

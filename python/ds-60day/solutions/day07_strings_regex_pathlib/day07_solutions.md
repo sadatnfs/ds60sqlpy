@@ -1,4 +1,4 @@
-# Day 07 — Solutions: Strings, Regex, Pathlib
+# Day 07: Solutions: Strings, Regex, Pathlib
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ collisions.
 For this lesson's **text normalization, bounded pattern matching, and portable paths** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** From the supplied multiline text, extract email-shaped values, normalize them to lowercase, and return first-seen unique addresses. **Constraints:** use one bounded regex for extraction, then separate normalization and de-duplication steps; do not attempt full Internet-email validation. **Verify:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
 
@@ -70,7 +70,7 @@ that the domain or mailbox exists.
 
 **Verification evidence:** assert differently cased duplicates collapse to one lowercase address in first-seen order and a no-match string returns `[]`.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Write `plan_kebab_renames(folder: Path)` that returns source/destination pairs for regular files such as `Quarterly Report.CSV` without renaming them. **Rules:** normalize the stem to lowercase hyphen-separated words, preserve the suffix, skip unchanged names, and reject collisions including case-normalized collisions. **Verify:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
 
@@ -138,9 +138,9 @@ complete plan passes collision checks.
 
 **Verification evidence:** use a temporary directory and inspect the complete plan before implementing a separate apply step.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Compare `"\n"` with `r"\n"` and predict their lengths and printed representations. **Progressive hint:** A raw string preserves the backslash needed by many regex patterns. **Verify:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
 
@@ -148,7 +148,7 @@ complete plan passes collision checks.
 
 **Evidence to locate in the grouped implementation:** Record `len`, `repr`, and printed behavior for both strings; confirm the newline has length 1 and the raw backslash-n has length 2.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace named regex groups while parsing `order-2048.csv`; distinguish `group(0)` from the named capture. **Progressive hint:** The whole match and captured subparts are different values. **Verify:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
 
@@ -156,7 +156,7 @@ complete plan passes collision checks.
 
 **Evidence to locate in the grouped implementation:** Assert `group(0)` is `'order-2048.csv'` while the named ID capture is `'2048'`; add a nonmatching filename returning no match.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `parse_report_name(Path)` returning a date and region for names like `sales_2025-07-01_west.csv`, rejecting mismatches. **Progressive hint:** Use `fullmatch` so extra suffix text cannot pass silently. **Verify:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
 
@@ -164,7 +164,7 @@ complete plan passes collision checks.
 
 **Evidence to locate in the grouped implementation:** Assert the valid filename returns the stated date/region and near misses with trailing text, bad date shape, or wrong suffix are rejected.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a greedy `<.*>` pattern that consumes multiple tags in one line, then explain why a real HTML parser is safer for HTML. **Progressive hint:** Use a constrained or non-greedy pattern only for a bounded format. **Verify:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
 
@@ -172,7 +172,7 @@ complete plan passes collision checks.
 
 **Evidence to locate in the grouped implementation:** Demonstrate the greedy overmatch, then assert the bounded repair returns separate intended tags; state why the fixture is not a general HTML parser.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Build a rename plan to kebab-case that detects collisions before changing any files, including `A B.txt` and `a-b.txt`. **Progressive hint:** Separate planning/validation from filesystem mutation. **Verify:** Generate a plan containing both colliding names and assert validation raises before any directory entry is renamed.
 
@@ -184,13 +184,13 @@ complete plan passes collision checks.
 
 Use ordinary string operations for fixed syntax, regular expressions for patterns, and `pathlib` for portable path semantics.
 
-### Shared implementation for Exercises 3–4 — Escapes and groups
+### Shared implementation for Exercises 3–4: Escapes and groups
 
 An ordinary `"\n"` is one newline character. The raw `r"\n"` is two characters:
 a backslash and `n`. `group(0)` is the full match; a named group returns only
 its captured portion.
 
-### Shared implementation for Exercises 5–7 — Parse and plan before mutating paths
+### Shared implementation for Exercises 5–7: Parse and plan before mutating paths
 
 ```python
 from __future__ import annotations

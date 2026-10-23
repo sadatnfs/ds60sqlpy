@@ -1,4 +1,4 @@
-# Day 42 Solutions — Data Quality and Validation
+# Day 42 Solutions: Data Quality and Validation
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ The goal is to turn scattered checks into one auditable report, then isolate
 bad email values. Run the canonical file at
 [`day42_solutions.sql`](day42_solutions.sql).
 
-## Exercise 1 — Core-table validation report
+## Exercise 1: Core-table validation report
 
 Each row is a named check and the number of failing records or duplicate groups.
 On the deterministic course seed, every count should be zero.
@@ -118,7 +118,7 @@ result is evidence to investigate, not permission to delete data automatically.
 - **Alternative/trade-off:** For sql-42 Exercise 1, the chosen form is justified by this lesson-specific rationale: Each row is a named check and the number of failing records or duplicate groups. Evaluate another form against the concrete expected result (seven rows with `check_name` and `failing_rows`. A nonzero result is evidence to investigate, not permission to delete data automatically) and the verification above.
 - **Edge case:** Add one row for which `(email IS NULL) OR (total_amount < 0) OR (c.customer_id IS NULL)` is true and one for which it is false; verify only the matching `check_name` value is returned.
 
-## Exercise 2 — Invalid email patterns
+## Exercise 2: Invalid email patterns
 
 ```sql
 SET search_path TO training, public;
@@ -153,7 +153,7 @@ complete implementation of every valid RFC email address.
 - Keep validation queries read-only. Fix source data or use a reviewed
   remediation transaction after examining the exact failures.
 
-## Exercise 3 — Explain CHECK and NULL
+## Exercise 3: Explain CHECK and NULL
 
 SQL CHECK rejects FALSE but accepts UNKNOWN. `NOT NULL` is therefore a separate
 schema rule when absence is invalid; the catalog query confirms both course
@@ -169,7 +169,7 @@ amount columns declare it.
 - **Alternative/trade-off:** For sql-42 Exercise 3, the chosen form is justified by this lesson-specific rationale: SQL CHECK rejects FALSE but accepts UNKNOWN. Evaluate another form against the concrete expected result (one row per `table_name`) and the verification above.
 - **Edge case:** Repeat with `NULL` in `table_name`, and `column_name` and state whether the row is kept, rejected, or classified.
 
-## Exercise 4 — Reconcile order totals
+## Exercise 4: Reconcile order totals
 
 Line values aggregate to one row per order before comparison. The one-cent
 tolerance is an explicit currency rule and failing order IDs remain visible.
@@ -184,7 +184,7 @@ tolerance is an explicit currency rule and failing order IDs remain visible.
 - **Alternative/trade-off:** For sql-42 Exercise 4, the chosen form is justified by this lesson-specific rationale: Line values aggregate to one row per order before comparison. Evaluate another form against the concrete expected result (one row per order before comparison) and the verification above.
 - **Edge case:** Add one row for which `(ABS(o.total_amount - c.line_total) > 0.01)` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 5 — Retain duplicate evidence
+## Exercise 5: Retain duplicate evidence
 
 The normalized email is the grouping key, but `array_agg` preserves raw variants
 needed to diagnose case/whitespace differences.
@@ -199,7 +199,7 @@ needed to diagnose case/whitespace differences.
 - **Alternative/trade-off:** For sql-42 Exercise 5, the chosen form is justified by this lesson-specific rationale: The normalized email is the grouping key, but `array_agg` preserves raw variants needed to diagnose case/whitespace differences. Evaluate another form against the concrete expected result (one row per `normalized_email`, and `raw_variants`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `normalized_email`, and `raw_variants`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 6 — Detect inclusive range overlap
+## Exercise 6: Detect inclusive range overlap
 
 Promotion pairs share a product, are compared once, and overlap when each start
 is no later than the other end. Touching inclusive endpoints therefore count.

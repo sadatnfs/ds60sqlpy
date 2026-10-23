@@ -159,7 +159,7 @@ Transfer the same reasoning to a new small fixture before using it on larger dat
 
 - [PostgreSQL DISTINCT ON and ordering](https://www.postgresql.org/docs/17/sql-select.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through sql-deep-02: Metric Algebra Across Grains, Snapshots, and Weighted Bridges.

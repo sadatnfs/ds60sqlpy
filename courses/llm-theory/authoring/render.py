@@ -118,7 +118,7 @@ API and mechanism reference: [{s['source'][0]}]({s['source'][1]}), reviewed 2026
 
 {s.get('appendix','')}
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 {prompt}

@@ -1,9 +1,9 @@
-# Day 59 — Final Capstone, Part 2: Stakeholder Analytics
+# Day 59: Final Capstone, Part 2: Stakeholder Analytics
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 58 — capstone ingestion and data quality](day58_final_capstone_part1.md)
+- **Prerequisites:** [Day 58; capstone ingestion and data quality](day58_final_capstone_part1.md)
 - **Artifacts:** [learner SQL](../day59_final_capstone_part2.sql) ·
   [solution reasoning](../solutions/day59_solutions.md) ·
   [executable solution](../solutions/day59_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-59 — Final Capstone Part2** and choose
+2. Open **SQL-59; Final Capstone Part2** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -291,14 +291,14 @@ Add a one-page metric dictionary and before/after evidence table.
 
 ## Next step
 
-Continue to [Day 60 — end-to-end sign-off](day60_final_capstone_part3.md).
+Continue to [Day 60; end-to-end sign-off](day60_final_capstone_part3.md).
 
 ## Deep dive and reference
 
 Day 59 is a capstone checkpoint, not a pair of discrete exercises. It combines
 KPI definitions, performance evidence, stakeholder outputs, and scale planning.
 
-## Deliverable 1 — KPI suite
+## Deliverable 1: KPI suite
 
 - LTV by signup cohort and customer segment, with customer count, average LTV,
   and total LTV.
@@ -307,14 +307,14 @@ KPI definitions, performance evidence, stakeholder outputs, and scale planning.
 - The top 20 distinct product pairs from order baskets, ranked by co-occurrence
   count (`together`), not by attributed pair revenue.
 
-## Deliverable 2 — Performance evidence
+## Deliverable 2: Performance evidence
 
 Create candidate indexes only inside the rollback-only experiment, then capture
 `EXPLAIN (ANALYZE, BUFFERS)` for the recent customer-revenue query. Save result
 reconciliation, timing, buffers, row estimates, and plan choice. The compact
 seed may correctly use a sequential scan.
 
-## Deliverable 3 — Stakeholder outputs
+## Deliverable 3: Stakeholder outputs
 
 - Finance: current-year budget, actual expense, and variance by category.
 - Marketing: campaign touches within seven days before each customer's first
@@ -325,7 +325,7 @@ seed may correctly use a sequential scan.
 The marketing definition differs from Day 48's all-purchase event attribution.
 Multiple campaigns can assist one customer, so campaign rows are not additive.
 
-## Deliverable 4 — Large-scale design note
+## Deliverable 4: Large-scale design note
 
 For a hypothetical 100M-row workload, identify candidate time partitions for
 orders/events, prove partition-key filters for pruning, describe local/partial
@@ -338,11 +338,11 @@ Record metric grain, time window, exclusions, reconciliation, and consumer for
 every KPI. All candidate DDL rolls back; production changes require a separate
 reviewed migration.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-59 — Final Capstone Part2.

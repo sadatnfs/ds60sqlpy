@@ -1,4 +1,4 @@
-# Day 41 — Solutions: Handling Class Imbalance
+# Day 41: Solutions: Handling Class Imbalance
 
 We diagnose imbalance, pick appropriate metrics, try class weighting and resampling, and tune the decision threshold for the minority class. We also plot PR curves for a clearer picture than ROC under imbalance.
 
@@ -24,7 +24,7 @@ X, y = make_classification(n_samples=5000, weights=[0.95, 0.05],
 Xtr, Xte, ytr, yte = train_test_split(X, y, stratify=y, random_state=42)
 ```
 
-Worked reference for Exercise 1 — class_weight vs SMOTE
+Worked reference for Exercise 1; class_weight vs SMOTE
 ```python
 # Class weighting
 clf_bal = LogisticRegression(max_iter=1000, class_weight='balanced', n_jobs=1)
@@ -58,7 +58,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2 — Threshold tuning for minority F1
+Worked reference for Exercise 2; Threshold tuning for minority F1
 ```python
 def best_f1_threshold(y_true, proba):
     prec, rec, th = precision_recall_curve(y_true, proba)
@@ -82,7 +82,7 @@ Tips
 
 ---
 
-Worked reference for Exercise 3 — PR curve
+Worked reference for Exercise 3; PR curve
 ```python
 prec, rec, _ = precision_recall_curve(yte, proba_bal)
 ap = average_precision_score(yte, proba_bal)
@@ -135,7 +135,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Compare `class_weight="balanced"` with a SMOTE strategy.
 
@@ -145,9 +145,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — rare-class metrics, training interventions, and threshold policy — compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
+**Verify:** Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Tune the threshold to maximize minority-class F1.
 
@@ -157,9 +157,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — rare-class metrics, training interventions, and threshold policy — choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
+**Verify:** Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Plot precision–recall curves and discuss the tradeoff.
 
@@ -169,9 +169,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — rare-class metrics, training interventions, and threshold policy — save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
+**Verify:** Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
-### Exercise 4 — Prevalence-shift reasoning
+### Exercise 4: Prevalence-shift reasoning
 
 **Prompt:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
 
@@ -191,9 +191,9 @@ deployment base rate and monitor it over time.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Prevalence-shift reasoning — choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
+**Verify:** Prevalence-shift reasoning; choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
 
-### Exercise 5 — Grouped imbalance split
+### Exercise 5: Grouped imbalance split
 
 **Prompt:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
 
@@ -211,9 +211,9 @@ grouped holdouts or a time-aware group design that matches deployment.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Grouped imbalance split — print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
+**Verify:** Grouped imbalance split; print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
 
-### Exercise 6 — Calibration after resampling
+### Exercise 6: Calibration after resampling
 
 **Prompt:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
 
@@ -231,4 +231,4 @@ without changing rank-based AUC very much.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.
+**Verify:** Calibration after resampling; fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.

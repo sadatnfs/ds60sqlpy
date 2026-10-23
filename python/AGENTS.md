@@ -4,6 +4,10 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
 
 ## Runtime and commands
 
+Lead learner instructions with the Docker classroom. The host interpreter
+commands below apply to optional native development and notebook workflows.
+Windows Docker instructions use WSL 2 rather than native PowerShell.
+
 - Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.
 - Run from the repository root.
 - Use the repository `.venv`; prefer `python -m ...` over bare tool commands.
@@ -23,7 +27,7 @@ This file extends the root [AGENTS.md](../AGENTS.md) for `python/`.
   behavior, guided and independent exercises, explicit expected/verify lines,
   common-error diagnosis, self-checks, and next steps.
 - End every companion guide with the copy-ready, lesson-specific
-  `## Ask Codex about this lesson` contract defined in
+  `## Ask an AI tutor about this lesson` contract defined in
   `docs/content-authoring.md`. The material before it must remain
   self-sufficient.
 - Each cataloged lesson must meet its immutable

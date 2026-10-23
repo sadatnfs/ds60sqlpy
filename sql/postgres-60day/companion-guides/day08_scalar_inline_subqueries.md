@@ -1,9 +1,9 @@
-# Day 08 — Scalar and Inline Subqueries (Companion Guide)
+# Day 08: Scalar and Inline Subqueries (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 07 — Week 1 project](day07_week1_project.md)
+- **Prerequisites:** [Day 07; Week 1 project](day07_week1_project.md)
 - **Artifacts:** [learner SQL](../day08_scalar_inline_subqueries.sql) ·
   [solution reasoning](../solutions/day08_solutions.md) ·
   [executable solution](../solutions/day08_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-08 — Scalar Inline Subqueries** and choose
+2. Open **SQL-08; Scalar Inline Subqueries** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -226,7 +226,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 09 — correlated subqueries and EXISTS](day09_correlated_subqueries.md).
+Continue to [Day 09; correlated subqueries and EXISTS](day09_correlated_subqueries.md).
 
 ## Deep dive and reference
 
@@ -258,11 +258,11 @@ Current practice map
 Further reading
 - Subqueries: https://www.postgresql.org/docs/current/sql-select.html#SQL-SELECT-SUBQUERIES
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-08 — Scalar Inline Subqueries.

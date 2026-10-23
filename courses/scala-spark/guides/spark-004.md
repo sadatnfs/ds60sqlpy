@@ -146,7 +146,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Scala 2.13 immutable collections](https://docs.scala-lang.org/overviews/collections-2.13/introduction.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-004: Immutable collections and transformations.

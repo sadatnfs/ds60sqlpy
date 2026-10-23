@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-15-project-a-testable-cli-data-tool">Day 15 — Project: A Testable CLI Data Tool<a class="heading-anchor" href="#guide--day-15-project-a-testable-cli-data-tool" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-15-project-a-testable-cli-data-tool">Day 15: Project: A Testable CLI Data Tool<a class="heading-anchor" href="#guide--day-15-project-a-testable-cli-data-tool" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner checkpoint</p>
 <p>This checkpoint combines the first 14 days into a small command-line program that reads CSV, cleans data, writes output, and remains testable.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 15 — project: a testable cli data tool to practice a small command-line application with separated boundaries and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 15; project: a testable cli data tool to practice a small command-line application with separated boundaries and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
 <p><code>argparse</code> defines flags, help, conversion, and validation close to the command boundary. A <code>main(argv: list[str] | None = None) -&gt; int</code> function is testable because tests can pass an explicit list rather than changing the real process arguments. The guarded entry point should do little more than <code>raise SystemExit(main())</code>.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>parser.add_argument(&quot;--limit&quot;, type=int, default=10)</code> declares the spelling, conversion, and fallback. <code>parser.parse_args(argv)</code> returns a namespace of parsed values. Supplying <code>argv</code> makes tests deterministic; <code>None</code> tells argparse to read the real process command line.</p>
-<h5 id="guide--worked-example-1-parse-an-explicit-argument-list">Worked example 1 — Parse an explicit argument list<a class="heading-anchor" href="#guide--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-parse-an-explicit-argument-list">Worked example 1: Parse an explicit argument list<a class="heading-anchor" href="#guide--worked-example-1-parse-an-explicit-argument-list" aria-label="Link to this section">#</a></h5>
 <p>Exercise the CLI contract without touching the notebook process arguments. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> argparse
 
@@ -436,7 +436,7 @@ args <span class="syntax-operator">=</span> build_parser<span class="syntax-punc
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`(2, [&#x27;Ada&#x27;, &#x27;Lin&#x27;, &#x27;Grace&#x27;])`. Argparse converted `2` to an integer and collected positional names.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-keep-core-work-independent-of-printing">Worked example 2 — Keep core work independent of printing<a class="heading-anchor" href="#guide--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-keep-core-work-independent-of-printing">Worked example 2: Keep core work independent of printing<a class="heading-anchor" href="#guide--worked-example-2-keep-core-work-independent-of-printing" aria-label="Link to this section">#</a></h5>
 <p>A plain function can be tested and reused by the CLI. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">select_names</span><span class="syntax-punctuation">(</span>names<span class="syntax-punctuation">:</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> limit<span class="syntax-punctuation">:</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> limit <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span><span class="syntax-punctuation">:</span>
@@ -542,10 +542,10 @@ select_names<span class="syntax-punctuation">(</span>args<span class="syntax-ope
 <ul>
 <li><a href="python-15.html#learner">Open the learner notebook</a></li>
 <li><a href="python-15.html#solution-1">Check the separate project solution</a></li>
-<li><a href="python-16.html#guide">Next: Day 16 — NumPy fundamentals</a></li>
+<li><a href="python-16.html#guide">Next: Day 16; NumPy fundamentals</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-15`
 (Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
 I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
@@ -850,7 +850,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-15-solutions-cli-data-tool-project">Day 15 — Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-15-solutions-cli-data-tool-project">Day 15: Solutions: CLI Data Tool Project<a class="heading-anchor" href="#solution-1--day-15-solutions-cli-data-tool-project" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>a small command-line application with separated boundaries</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A command-line interface (CLI) has three layers: parse external strings, call ordinary Python logic with typed values, then present a result and choose an exit status. Keeping the core logic free from <code>sys.argv</code>, printing, and process exit makes it reusable from tests and notebooks.</p>
@@ -866,8 +866,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>a small command-line application with separated boundaries</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-5-worked-answers">Exercises 1–5: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-5-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. <strong>Architecture:</strong> <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. <strong>Constraints:</strong> use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. <strong>Verify:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Build the Day 15 CLI with subcommands or flags that read a local CSV/JSON input, perform one documented transformation, and write or print a bounded result. Architecture: <code>build_parser()</code>, pure core function(s), and <code>main(argv=None) -&gt; int</code>. Constraints: use <code>pathlib</code>, UTF-8, no notebook-only state, and no hard-coded absolute paths. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message. That connects the answer to a small command-line application with separated boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
@@ -890,7 +890,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
     <span class="syntax-keyword">return</span> records<span class="syntax-punctuation">[</span><span class="syntax-punctuation">:</span>limit<span class="syntax-punctuation">]</span></code></pre>
 <p>These functions separate the file boundary from the deterministic transformation; <code>main</code> coordinates them.</p>
 <p><strong>Verification evidence:</strong> assert <code>--help</code> exits <code>0</code> and names the command/options, a valid fixture exits <code>0</code> with the expected bounded output, and invalid input exits nonzero with a useful stderr message.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. <strong>Expected behavior:</strong> argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. <strong>Constraint:</strong> do not catch programming errors broadly. <strong>Verify:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add options for input path, output path, and a typed transformation parameter such as <code>--limit</code>. Expected behavior: argparse rejects invalid numeric text and the application returns a nonzero status for a missing input without a traceback aimed at beginners. Constraint: do not catch programming errors broadly. Record the named value, shape, label, or iterator position needed to establish: Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message. The trace exposes a small command-line application with separated boundaries directly.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> argparse
@@ -910,7 +910,7 @@ parsed <span class="syntax-operator">=</span> build_parser<span class="syntax-pu
 <span class="syntax-keyword">assert</span> parsed<span class="syntax-operator">.</span>limit <span class="syntax-operator">==</span> <span class="syntax-number">3</span></code></pre>
 <p>Argparse owns text conversion and produces its own friendly error for an invalid integer.</p>
 <p><strong>Verification evidence:</strong> Exercise valid options, invalid integer text, and a missing input; assert parsed Python types and the documented nonzero exit status/message.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. <strong>Coverage:</strong> happy path, empty input, missing path, invalid parameter, and output overwrite policy. <strong>Verify:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Write pytest tests that call core logic directly and call <code>main([...])</code> with temporary files. Coverage: happy path, empty input, missing path, invalid parameter, and output overwrite policy. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert return status, captured output, and exact file content without spawning a shell. That connects the answer to a small command-line application with separated boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
@@ -929,7 +929,7 @@ parsed <span class="syntax-operator">=</span> build_parser<span class="syntax-pu
     path<span class="syntax-operator">.</span>write_text<span class="syntax-punctuation">(</span>json<span class="syntax-operator">.</span>dumps<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> indent<span class="syntax-operator">=</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> encoding<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">utf-8</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A pytest test should create an existing temporary file, prove refusal preserves it, then pass <code>overwrite=True</code> and compare the new JSON.</p>
 <p><strong>Verification evidence:</strong> assert return status, captured output, and exact file content without spawning a shell.</p>
-<h5 id="solution-1--exercise-4-worked-answer">Exercise 4 — worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-worked-answer">Exercise 4: worked answer<a class="heading-anchor" href="#solution-1--exercise-4-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. <strong>Expected behavior:</strong> importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. <strong>Verify:</strong> test both import and module execution.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Package the CLI invocation behind <code>if __name__ == &#x27;__main__&#x27;: raise SystemExit(main())</code>. Expected behavior: importing the module produces no output or process exit; <code>python -m ... --help</code> works from the documented package parent. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test both import and module execution. That connects the answer to a small command-line application with separated boundaries.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> sys
@@ -954,7 +954,7 @@ parsed <span class="syntax-operator">=</span> build_parser<span class="syntax-pu
     <span class="syntax-keyword">raise</span> SystemExit<span class="syntax-punctuation">(</span>main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Import defines functions only; the guard owns process execution.</p>
 <p><strong>Verification evidence:</strong> test both import and module execution.</p>
-<h5 id="solution-1--exercise-5-worked-answer">Exercise 5 — worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-worked-answer">Exercise 5: worked answer<a class="heading-anchor" href="#solution-1--exercise-5-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. <strong>Constraint:</strong> do not mix Bash syntax into PowerShell. <strong>Verify:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a short README usage block for Windows PowerShell and macOS/Linux showing repository-interpreter commands and an example with a path containing spaces. Constraint: do not mix Bash syntax into PowerShell. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument. That connects the answer to a small command-line application with separated boundaries.</p>
 <p>Copy-ready invocations keep platform syntax separate:</p>
@@ -962,32 +962,32 @@ parsed <span class="syntax-operator">=</span> build_parser<span class="syntax-pu
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m your_package.record_tool <span class="syntax-string">&quot;data/input records.json&quot;</span> --limit <span class="syntax-number">3</span></code></pre>
 <p>Both run from the repository root and quote the path containing spaces.</p>
 <p><strong>Verification evidence:</strong> copy the command for your operating system, record exit code <code>0</code> and the expected output, and confirm the quoted path with spaces is received as one argument.</p>
-<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-6-10-expanded-mastery-answers">Exercises 6–10: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-6-10-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. <strong>Progressive hint:</strong> The parser performs declared conversions before <code>main</code> receives values. <strong>Verify:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the Python types produced by <code>argparse</code> when <code>--input</code> uses <code>type=Path</code> and <code>--limit</code> uses <code>type=int</code>. Progressive hint: The parser performs declared conversions before <code>main</code> receives values. Then compare the prediction with this proof target: Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types. This makes a small command-line application with separated boundaries observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Call <code>parse_args</code> with explicit text and assert the parsed input is a <code>Path</code>, limit is an <code>int</code>, and defaults have the documented types.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. <strong>Progressive hint:</strong> A pure transform accepts and returns data without reading global state. <strong>Verify:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace one row through read → clean → summarize → write, and label which stages are I/O boundaries versus pure work. Progressive hint: A pure transform accepts and returns data without reading global state. Record the named value, shape, label, or iterator position needed to establish: For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data. The trace exposes a small command-line application with separated boundaries directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> For one fixture row, record the value/shape after every stage and assert only read/write touch files while the middle stages work from passed data.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. <strong>Progressive hint:</strong> Check the destination before performing the write. <strong>Verify:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Add <code>--overwrite</code> and refuse to replace an existing output unless the flag is present. Progressive hint: Check the destination before performing the write. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag. That connects the answer to a small command-line application with separated boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use a temporary existing destination: assert refusal leaves content unchanged without the flag and <code>--overwrite</code> deliberately replaces it with the flag.</p>
-<h5 id="solution-1--exercise-9-answer-contract">Exercise 9 — answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-9-answer-contract">Exercise 9: answer contract<a class="heading-anchor" href="#solution-1--exercise-9-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a module that parses arguments and writes files during import. <strong>Progressive hint:</strong> Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. <strong>Verify:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a module that parses arguments and writes files during import. Progressive hint: Move behavior into <code>main(argv)</code> and use the <code>__main__</code> guard. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation. The diagnosis depends on a small command-line application with separated boundaries.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Import the module while capturing output/files and assert no parser or write occurs; then assert <code>main([...])</code> performs the intended operation.</p>
-<h5 id="solution-1--exercise-10-answer-contract">Exercise 10 — answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-10-answer-contract">Exercise 10: answer contract<a class="heading-anchor" href="#solution-1--exercise-10-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. <strong>Progressive hint:</strong> Translate expected boundary failures once, without hiding tracebacks in tests. <strong>Verify:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Edge case and explanation: Define exit codes/messages for missing input, malformed data, existing output, and unexpected internal failure; decide which layers log. Progressive hint: Translate expected boundary failures once, without hiding tracebacks in tests. Record the named value, shape, label, or iterator position needed to establish: Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled. The trace exposes a small command-line application with separated boundaries directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Exercise all four failure categories and assert their exit codes/messages; an injected unexpected error must remain visible in tests rather than being mislabeled.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Keep command parsing and file I/O at thin boundaries around pure, importable transformations. Make failures observable through exit codes.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries">Shared implementation for Exercises 6–7 — Parsed types and boundaries<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries">Shared implementation for Exercises 6–7: Parsed types and boundaries<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-7-parsed-types-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><code>type=Path</code> produces a <code>Path</code>; <code>type=int</code> produces an integer or lets argparse report invalid text. Reading and writing are boundaries; deterministic cleaning and summarization should be pure enough to test in memory.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point">Shared implementation for Exercises 8–10 — Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point">Shared implementation for Exercises 8–10: Safe overwrite and importable entry point<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-8-10-safe-overwrite-and-importable-entry-point" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 
 <span class="syntax-keyword">import</span> argparse
@@ -1176,16 +1176,16 @@ parsed <span class="syntax-operator">=</span> parse_args<span class="syntax-punc
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-15`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-15`
 (Day 15 — Project: A Testable CLI Data Tool). Direct catalog prerequisites: `python-14`.
 I have completed the direct prerequisites: `python-14`. Emphasize a small command-line application with separated boundaries.
 Read `python/ds-60day/companion-guides/day15_cli_project.md` and use the learner notebook
@@ -1200,7 +1200,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1311,18 +1311,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

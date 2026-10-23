@@ -1,4 +1,4 @@
-# Day 38 — Solutions: Transactions and Isolation
+# Day 38: Solutions: Transactions and Isolation
 
 
 <!-- beginner-solution-enrichment -->
@@ -101,7 +101,7 @@ CREATE TABLE isolation_lab (
 INSERT INTO isolation_lab VALUES (1, 10), (2, 20);
 ```
 
-## Exercise 1 — Non-repeatable read under `READ COMMITTED`
+## Exercise 1: Non-repeatable read under `READ COMMITTED`
 
 Session A:
 
@@ -141,7 +141,7 @@ The two reads in A return different committed versions because
 - **Alternative/trade-off:** For sql-38 Exercise 1, the chosen form is justified by this lesson-specific rationale: Session A: While A remains open, Session B: Back in Session A: The two reads in A return different committed versions because `READ COMMITTED` takes a new statement snapshot. Evaluate another form against the concrete expected result (one row per `qty`) and the verification above.
 - **Edge case:** Add one row for which `(id = 1)` is true and one for which it is false; verify only the matching `qty` value is returned.
 
-## Exercise 2 — Phantom rows between two counts
+## Exercise 2: Phantom rows between two counts
 
 Reset, then start Session A:
 
@@ -179,7 +179,7 @@ continue to see its original predicate result.
 - **Alternative/trade-off:** For sql-38 Exercise 2, the chosen form is justified by this lesson-specific rationale: Reset, then start Session A: Session B inserts a new qualifying row: Back in Session A: The new qualifying row is a phantom. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `affected_row_count` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `command_tag` values in both cases.
 
-## Exercise 3 — Serialization failure under contention
+## Exercise 3: Serialization failure under contention
 
 Reset the two rows, then interleave these commands. Both transactions read the
 same set before either writes it.
@@ -242,7 +242,7 @@ DROP TABLE IF EXISTS training.isolation_lab;
 Do not leave terminals “idle in transaction.” Results depend on exact
 interleaving, and the setup state must be reset between experiments.
 
-## Exercise 4 — Reuse and release a savepoint
+## Exercise 4: Reuse and release a savepoint
 
 `ROLLBACK TO` reverses later work but retains the named savepoint. `RELEASE`
 then removes it explicitly before the outer transaction continues.
@@ -257,7 +257,7 @@ then removes it explicitly before the outer transaction continues.
 - **Alternative/trade-off:** For sql-38 Exercise 4, the chosen form is justified by this lesson-specific rationale: `ROLLBACK TO` reverses later work but retains the named savepoint. Evaluate another form against the concrete expected result (one row per `release`) and the verification above.
 - **Edge case:** Add one row for which `(id = 2)` is true and one for which it is false; verify only the matching `release` value is returned.
 
-## Exercise 5 — Transfer atomically
+## Exercise 5: Transfer atomically
 
 The solution locks/reads the debit account, rejects insufficient funds, and
 updates both balances in one unit. A final SUM proves conservation of money.
@@ -272,7 +272,7 @@ updates both balances in one unit. A final SUM proves conservation of money.
 - **Alternative/trade-off:** For sql-38 Exercise 5, the chosen form is justified by this lesson-specific rationale: The solution locks/reads the debit account, rejects insufficient funds, and updates both balances in one unit. Evaluate another form against the concrete expected result (one row per `available`) and the verification above.
 - **Edge case:** Add one row for which `(account_id = 1 FOR UPDATE) OR (account_id = 1) OR (account_id = 2)` is true and one for which it is false; verify only the matching `available` value is returned.
 
-## Exercise 6 — Recover from a constraint error
+## Exercise 6: Recover from a constraint error
 
 A PL/pgSQL exception block creates an internal subtransaction. It catches the
 expected unique violation and demonstrates that the outer transaction can
@@ -288,7 +288,7 @@ still execute a query.
 - **Alternative/trade-off:** For sql-38 Exercise 6, the chosen form is justified by this lesson-specific rationale: A PL/pgSQL exception block creates an internal subtransaction. Evaluate another form against the concrete expected result (one row per `still_usable`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `still_usable`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 7 — Choose isolation for read-only work
+## Exercise 7: Choose isolation for read-only work
 
 Several SELECT statements that must describe one consistent snapshot justify
 `REPEATABLE READ`. If per-statement freshness is intended, `READ COMMITTED` may

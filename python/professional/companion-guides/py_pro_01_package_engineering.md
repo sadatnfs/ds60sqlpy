@@ -142,7 +142,7 @@ The focused test command is shown in **Self-check** below. The learner
 module is intentionally answer-free, so `TODO` output is the expected
 starting state rather than a setup failure.
 
-## Mechanism lab — two small examples before the full system
+## Mechanism lab: two small examples before the full system
 
 ### Boundary and mental model
 
@@ -162,7 +162,7 @@ useful for development but do not prove the wheel.
 - **`[project]` metadata:** defines distribution identity, version, Python range, dependencies, and entry points.
 - **`python -m build` then clean install:** proves the built wheel, not repository-path import behavior.
 
-### Micro-example A — distinguish distribution and import identities
+### Micro-example A: distinguish distribution and import identities
 
 ```python
 import importlib.util
@@ -179,7 +179,7 @@ print("installed import available:", importlib.util.find_spec(import_name) is no
 
 **Why it matters:** This mechanics example does not install anything and does not require `bs4` to be present.
 
-### Micro-example B — create a deterministic source manifest digest
+### Micro-example B: create a deterministic source manifest digest
 
 ```python
 import hashlib
@@ -216,7 +216,7 @@ Work in
 [`lessons/py_pro_01_package_engineering.py`](../lessons/py_pro_01_package_engineering.py)
 or a copy under `.learning/`.
 
-### Exercise 1 — classify artifacts
+### Exercise 1: classify artifacts
 
 Implement `classify_artifact`. Use complete final suffixes and reject
 `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported
@@ -225,9 +225,9 @@ file.
 Hint: `Path.suffix` handles `.whl`; `Path.name.endswith(".tar.gz")` handles the
 two-part sdist suffix.
 
-**Verify:** classify artifacts — assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.
+**Verify:** classify artifacts; assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.
 
-### Exercise 2 — create an offline build command
+### Exercise 2: create an offline build command
 
 Implement `offline_build_command` as an argument list. Use the running
 interpreter, invoke the `build` module, request both formats, disable isolation,
@@ -236,9 +236,9 @@ and choose an explicit output directory.
 Why an argument list? It avoids a second round of shell parsing and behaves the
 same way in PowerShell, Command Prompt, Bash, and zsh.
 
-**Verify:** create an offline build command — assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.
+**Verify:** create an offline build command; assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.
 
-### Exercise 3 — inspect dependency intent
+### Exercise 3: inspect dependency intent
 
 For each fixture entry, decide whether it is:
 
@@ -253,9 +253,9 @@ For each fixture entry, decide whether it is:
 Explain when `colorama`'s environment marker is true. Confirm that building
 metadata does not install the `test` or `quality` groups.
 
-**Verify:** inspect dependency intent — for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama's environment marker is true; confirm that building metadata does not install the test or quality groups.
+**Verify:** inspect dependency intent; for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama's environment marker is true; confirm that building metadata does not install the test or quality groups.
 
-### Exercise 4 — build in a disposable directory
+### Exercise 4: build in a disposable directory
 
 Use a temporary or ignored directory. A production-quality helper should first
 copy the source tree to a disposable staging directory because some backends
@@ -283,9 +283,9 @@ If the frontend reports a missing build requirement, return to connected setup
 and install the build tools. Do not remove `--no-isolation` merely to make an
 offline test pass.
 
-**Verify:** build in a disposable directory — run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.
+**Verify:** build in a disposable directory; run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.
 
-### Exercise 5 — prove the installed origin
+### Exercise 5: prove the installed origin
 
 Install the wheel into a fresh target using `pip install --no-index --no-deps
 --target <directory> <wheel>`. Start Python from outside the fixture source
@@ -299,7 +299,7 @@ tree, put only that target on `PYTHONPATH`, and print:
 Implement `installed_origin_is_safe` so it accepts only a resolved path under
 the fresh target.
 
-**Verify:** prove the installed origin — from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.__file__ resolves under that target, version/entry point match metadata, and greeting('wheel') has the expected value.
+**Verify:** prove the installed origin; from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.__file__ resolves under that target, version/entry point match metadata, and greeting('wheel') has the expected value.
 
 ### Extended professional practice
 
@@ -307,45 +307,45 @@ These exercises move from prediction and implementation through debugging,
 operational trade-offs, and review. Keep the default path deterministic and
 offline; optional connected behavior must remain explicit.
 
-### Exercise 6 — build a wheel from the source distribution
+### Exercise 6: build a wheel from the source distribution
 
 Build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with `--no-isolation`, and compare the result with the direct wheel build. Record every required local tool.
 
 **Progressive hint:** A direct wheel and an sdist exercise different inclusion paths. Use temporary directories and inspect archive members before rebuilding.
 
-**Verify:** build a wheel from the source distribution — build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.
+**Verify:** build a wheel from the source distribution; build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.
 
-### Exercise 7 — inspect installed metadata without importing
+### Exercise 7: inspect installed metadata without importing
 
 Use `importlib.metadata` against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package. Reject unexpected or missing metadata.
 
 **Progressive hint:** Distribution metadata and import packages are related but distinct. Place only the target on the child process search path.
 
-**Verify:** inspect installed metadata without importing — use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.
+**Verify:** inspect installed metadata without importing; use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.
 
-### Exercise 8 — separate reproducibility from equivalence
+### Exercise 8: separate reproducibility from equivalence
 
 Build twice from the same clean staged source. Compare file hashes, archive member lists, metadata contents, and installed behavior. Explain which differences are harmless and which invalidate the release.
 
 **Progressive hint:** Start with semantic equivalence. Byte-for-byte reproducibility requires controlled timestamps, toolchains, environment variables, and ordering.
 
-**Verify:** separate reproducibility from equivalence — build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.
+**Verify:** separate reproducibility from equivalence; build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.
 
-### Exercise 9 — test dependency markers across targets
+### Exercise 9: test dependency markers across targets
 
 Create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
 
 **Progressive hint:** Parse marker intent with packaging metadata; do not infer it from the developer machine where the lesson happens to run.
 
-**Verify:** test dependency markers across targets — create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
+**Verify:** test dependency markers across targets; create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
 
-### Exercise 10 — design a local release gate
+### Exercise 10: design a local release gate
 
 Write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
 
 **Progressive hint:** Every gate should produce bounded evidence and fail closed. Keep index credentials, signing services, and publication outside this local lab.
 
-**Verify:** design a local release gate — write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
+**Verify:** design a local release gate; write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.
 
 ## Self-check
 
@@ -405,10 +405,10 @@ build tools were not bootstrapped.
 - Continue to `python-svc-01` to package a reliable service boundary or
   `python-pro-02` to choose a concurrency model deliberately.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-pro-01` — Package engineering and a local release workflow.

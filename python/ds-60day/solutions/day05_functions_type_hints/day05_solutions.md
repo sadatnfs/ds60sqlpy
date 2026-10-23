@@ -1,4 +1,4 @@
-# Day 05 — Solutions: Functions, Docstrings, and Type Hints
+# Day 05: Solutions: Functions, Docstrings, and Type Hints
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ normally be replaced by `None` plus a fresh object inside the function.
 For this lesson's **function contracts, parameters, return values, scope, and type hints** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Implement `describe(values: list[float]) -> tuple[float, float]` returning the arithmetic mean and **population** standard deviation. **Input:** `[2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0]`. **Expected result:** `(5.0, 2.0)`. **Constraints:** compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task. **Verify:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
 
@@ -66,11 +66,11 @@ assert result == (5.0, 2.0)
 
 **Verification evidence:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
-**Learner contract:** Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior—this lesson's reference raises `ValueError`. **Verify:** capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body.
+**Learner contract:** Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior, this lesson's reference raises `ValueError`. **Verify:** capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body.
 
-**Reasoning:** Implement this exact contract as written: Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. Constraint: choose and document one explicit behavior—this lesson's reference raises `ValueError`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body. That connects the answer to function contracts, parameters, return values, scope, and type hints.
+**Reasoning:** Implement this exact contract as written: Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. Constraint: choose and document one explicit behavior, this lesson's reference raises `ValueError`. Keep the prompt's named data and constraints visible in the code, then establish this specific result: capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body. That connects the answer to function contracts, parameters, return values, scope, and type hints.
 
 The docstring belongs directly below the signature and names tuple
 order plus failure behavior. The Exercise 1 implementation already
@@ -84,7 +84,7 @@ assert "ValueError" in describe.__doc__
 
 **Verification evidence:** capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Validate `describe` near its boundary: reject an empty list and any non-finite value such as `float('nan')` with a useful `ValueError`. **Verify:** show the normal result and use two separate `try`/`except ValueError` checks for the invalid cases; do not catch errors inside the function that it cannot repair.
 
@@ -105,9 +105,9 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 **Verification evidence:** show the normal result and use two separate `try`/`except ValueError` checks for the invalid cases; do not catch errors inside the function that it cannot repair.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the result of calling a function with `items=[]` as a default three times when it appends on each call. Explain shared defaults. **Progressive hint:** Default objects are created once when `def` executes. **Verify:** Call the faulty function three times and record cumulative state, then assert the `None`-sentinel repair returns independent one-item lists on every call.
 
@@ -115,7 +115,7 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 **Evidence to locate in the grouped implementation:** Call the faulty function three times and record cumulative state, then assert the `None`-sentinel repair returns independent one-item lists on every call.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace a local variable that shadows a global of the same name. Which binding changes, and when would `global` be required? **Progressive hint:** Assignment makes a name local unless explicitly declared otherwise. **Verify:** Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.
 
@@ -123,7 +123,7 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 **Evidence to locate in the grouped implementation:** Record local/global values before, during, and after the call; confirm ordinary local assignment leaves the global unchanged.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement typed `weighted_mean(values, weights)` with length, empty, and zero-total-weight validation. **Progressive hint:** State every invalid condition before calculating. **Verify:** Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.
 
@@ -131,7 +131,7 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 **Evidence to locate in the grouped implementation:** Assert a known weighted mean and separately assert empty, length-mismatch, and zero-total-weight inputs raise the documented errors.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair a function whose `*items` argument is accidentally passed as one list instead of unpacked individual items. **Progressive hint:** Compare `f(values)` with `f(*values)`. **Verify:** Capture arguments received by `f(values)` and `f(*values)`; assert the repaired call presents individual items rather than one nested list.
 
@@ -139,7 +139,7 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 **Evidence to locate in the grouped implementation:** Capture arguments received by `f(values)` and `f(*values)`; assert the repaired call presents individual items rather than one nested list.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Write a docstring for a name-normalization function and test empty, whitespace-only, and Unicode input. **Progressive hint:** Document whether empty normalized output is valid or an error. **Verify:** Test ordinary, empty, whitespace-only, and Unicode names against the docstring's stated contract; every behavior must match the documentation.
 
@@ -151,12 +151,12 @@ contract instead of surfacing a later divide-by-zero or NaN.
 
 Design functions from their contracts: accepted inputs, return value, failure behavior, side effects, and boundary cases.
 
-### Shared implementation for Exercise 4 — Mutable defaults
+### Shared implementation for Exercise 4: Mutable defaults
 
 A list default is shared across calls. Use `None` as a sentinel and create a new
 list inside the function when the caller supplied no collection.
 
-### Shared implementation for Exercises 5–8 — Contracts make functions predictable
+### Shared implementation for Exercises 5–8: Contracts make functions predictable
 
 ```python
 from collections.abc import Sequence

@@ -1,4 +1,4 @@
-# Day 20 — Merging and Joins
+# Day 20: Merging and Joins
 
 **Level:** Intermediate
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 20 — merging and joins to practice relational keys, join types, cardinality, and reconciliation
+**Lesson outcome:** use day 20; merging and joins to practice relational keys, join types, cardinality, and reconciliation
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -100,7 +100,7 @@ indicator=True)` preserves all left rows, matches equal `sku` values,
 asserts that the right key is unique, and adds `_merge` evidence. The
 validation wording is from left to right.
 
-### Worked example 1 — Enrich many line items from one product row
+### Worked example 1: Enrich many line items from one product row
 
 Make many-to-one cardinality executable. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -126,7 +126,7 @@ priced = items.merge(
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Make an orphan visible
+### Worked example 2: Make an orphan visible
 
 A left merge indicator supports reconciliation and anti-joins. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -281,11 +281,11 @@ identified rather than silently lost, and incorrect cardinality raises
 
 - [Open the learner notebook](../notebooks/day20_pandas_merging_joins.ipynb)
 - [Check the separate solution](../solutions/day20_pandas_merging_joins/day20_solutions.md)
-- [Next: Day 21 — Time series with pandas](day21_time_series_pandas.md)
+- [Next: Day 21; Time series with pandas](day21_time_series_pandas.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

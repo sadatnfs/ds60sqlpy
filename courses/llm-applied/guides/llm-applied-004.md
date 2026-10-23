@@ -220,7 +220,7 @@ API and mechanism reference: [Datasheets for Datasets](https://arxiv.org/abs/180
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-004, Corpus provenance, versions and evaluation isolation.

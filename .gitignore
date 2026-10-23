@@ -53,3 +53,9 @@ id_rsa
 
 # Local launcher ports, URL and transient per-project lock.
 .classroom/
+
+# Assistant session notes stay local; maintained guidance lives in AGENTS.md.
+.serena/
+
+# Local coding-assistant account configuration.
+.codex/

@@ -183,7 +183,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 sortWithinPartitions](https://spark.apache.org/docs/4.0.1/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.sortWithinPartitions.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-020: Partitions, repartition, coalesce and output order.

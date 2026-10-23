@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-19-groupby-aggregation-pivoting-and-melting">Day 19 — GroupBy, Aggregation, Pivoting, and Melting<a class="heading-anchor" href="#guide--day-19-groupby-aggregation-pivoting-and-melting" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-19-groupby-aggregation-pivoting-and-melting">Day 19: GroupBy, Aggregation, Pivoting, and Melting<a class="heading-anchor" href="#guide--day-19-groupby-aggregation-pivoting-and-melting" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Grouping changes a table&#x27;s grain. State the output grain before writing the aggregation so row counts and totals can be checked.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 19 — groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 19; groupby, aggregation, pivoting, and melting to practice split-apply-combine, grouped summaries, and reshaping and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Grouped analysis starts with grain. <code>groupby</code> splits rows by key values, applies reductions or transformations, and combines results. An aggregation reduces each group and changes row grain; <code>transform</code> returns one aligned value per original row and preserves row count.</p>
 <p>A pivot makes combinations of keys into rows and columns while applying an aggregation for duplicates. <code>melt</code> turns wide measurement columns into a long variable/value pair. Reshaping changes representation, so state which columns identify an observation and reconcile totals before and after.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>.groupby(&quot;region&quot;, as_index=False).agg(total=(&quot;amount&quot;, &quot;sum&quot;), orders=(&quot;order_id&quot;, &quot;nunique&quot;))</code> names the group key, keeps it as a column, and uses named aggregations whose left sides are output column names. In <code>pivot_table</code>, <code>index</code> defines output rows, <code>columns</code> defines output columns, <code>values</code> supplies measurements, and <code>aggfunc</code> resolves duplicate combinations.</p>
-<h5 id="guide--worked-example-1-aggregate-to-one-row-per-group">Worked example 1 — Aggregate to one row per group<a class="heading-anchor" href="#guide--worked-example-1-aggregate-to-one-row-per-group" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-aggregate-to-one-row-per-group">Worked example 1: Aggregate to one row per group<a class="heading-anchor" href="#guide--worked-example-1-aggregate-to-one-row-per-group" aria-label="Link to this section">#</a></h5>
 <p>Write the output grain before reading the result. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -438,7 +438,7 @@ summary<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuat
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[{&#x27;region&#x27;: &#x27;east&#x27;, &#x27;order_count&#x27;: 2, &#x27;total&#x27;: 25}, {&#x27;region&#x27;: &#x27;west&#x27;, &#x27;order_count&#x27;: 2, &#x27;total&#x27;: 15}]`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-align-a-group-total-back-to-every-source-row">Worked example 2 — Align a group total back to every source row<a class="heading-anchor" href="#guide--worked-example-2-align-a-group-total-back-to-every-source-row" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-align-a-group-total-back-to-every-source-row">Worked example 2: Align a group total back to every source row<a class="heading-anchor" href="#guide--worked-example-2-align-a-group-total-back-to-every-source-row" aria-label="Link to this section">#</a></h5>
 <p>Transform preserves the original index and row count. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">orders <span class="syntax-operator">=</span> orders<span class="syntax-operator">.</span>assign<span class="syntax-punctuation">(</span>
     region_total<span class="syntax-operator">=</span>orders<span class="syntax-operator">.</span>groupby<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>transform<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
@@ -532,10 +532,10 @@ summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ul>
 <li><a href="python-19.html#learner">Open the learner notebook</a></li>
 <li><a href="python-19.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-20.html#guide">Next: Day 20 — Merging and joins</a></li>
+<li><a href="python-20.html#guide">Next: Day 20; Merging and joins</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-19`
 (Day 19 — GroupBy, Aggregation, Pivoting, and Melting). Direct catalog prerequisites: `python-18`.
 I have completed the direct prerequisites: `python-18`. Emphasize split-apply-combine, grouped summaries, and reshaping.
@@ -798,7 +798,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-19-solutions-groupby-aggregation-pivoting">Day 19 — Solutions: GroupBy, Aggregation, Pivoting<a class="heading-anchor" href="#solution-1--day-19-solutions-groupby-aggregation-pivoting" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-19-solutions-groupby-aggregation-pivoting">Day 19: Solutions: GroupBy, Aggregation, Pivoting<a class="heading-anchor" href="#solution-1--day-19-solutions-groupby-aggregation-pivoting" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>split-apply-combine, grouped summaries, and reshaping</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Grouped analysis starts with grain. <code>groupby</code> splits rows by key values, applies reductions or transformations, and combines results. An aggregation reduces each group and changes row grain; <code>transform</code> returns one aligned value per original row and preserves row count.</p>
@@ -814,8 +814,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>split-apply-combine, grouped summaries, and reshaping</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Group the lesson data by two categorical columns and compute named count, sum, mean, and median outputs. <strong>Before code:</strong> state the output grain and whether missing group keys are included. <strong>Constraints:</strong> use named <code>.agg</code>, avoid ambiguous MultiIndex columns, and distinguish row count from unique-entity count. <strong>Verify:</strong> assert group-key uniqueness and reconcile the summed additive measure to the input total.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Group the lesson data by two categorical columns and compute named count, sum, mean, and median outputs. Before code: state the output grain and whether missing group keys are included. Constraints: use named <code>.agg</code>, avoid ambiguous MultiIndex columns, and distinguish row count from unique-entity count. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert group-key uniqueness and reconcile the summed additive measure to the input total. That connects the answer to split-apply-combine, grouped summaries, and reshaping.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -850,7 +850,7 @@ summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> summary<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> df<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">total_bill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The output grain is one row per observed <code>(day, smoker)</code> pair.</p>
 <p><strong>Verification evidence:</strong> assert group-key uniqueness and reconcile the summed additive measure to the input total.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a pivot table and then return it to long form with <code>melt</code> or <code>stack</code>. <strong>Contract:</strong> choose explicit index, column, value, aggregation, and missing-cell policy. <strong>Expected behavior:</strong> the long form clearly identifies every dimension and measurement. <strong>Verify:</strong> reconcile non-missing values/totals and explain any rows introduced or removed.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a pivot table and then return it to long form with <code>melt</code> or <code>stack</code>. Contract: choose explicit index, column, value, aggregation, and missing-cell policy. Expected behavior: the long form clearly identifies every dimension and measurement. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: reconcile non-missing values/totals and explain any rows introduced or removed. That connects the answer to split-apply-combine, grouped summaries, and reshaping.</p>
 <pre class="highlighted-code"><code class="language-python">pivot <span class="syntax-operator">=</span> df<span class="syntax-operator">.</span>pivot_table<span class="syntax-punctuation">(</span>
@@ -880,30 +880,30 @@ pd<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-punctuation">)</span></code></pre>
 <p>A mean is non-additive, so validate each day/time value against a direct grouped mean rather than summing all pivot cells. This contract drops unobserved day/time cells when returning to long form; removing <code>.dropna()</code> would instead retain those structural missing combinations.</p>
 <p><strong>Verification evidence:</strong> reconcile non-missing values/totals and explain any rows introduced or removed.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict whether rows with a missing group key are included by default and compare <code>dropna=True</code> with <code>dropna=False</code>. <strong>Progressive hint:</strong> Missing group keys are normally excluded unless requested. <strong>Verify:</strong> Group the same fixture both ways; assert totals differ exactly by the missing-key rows and state which output matches the intended policy.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict whether rows with a missing group key are included by default and compare <code>dropna=True</code> with <code>dropna=False</code>. Progressive hint: Missing group keys are normally excluded unless requested. Then compare the prediction with this proof target: Group the same fixture both ways; assert totals differ exactly by the missing-key rows and state which output matches the intended policy. This makes split-apply-combine, grouped summaries, and reshaping observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Group the same fixture both ways; assert totals differ exactly by the missing-key rows and state which output matches the intended policy.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a wide table through <code>melt</code> and back through <code>pivot_table</code>; name the identifier, variable, and value columns. <strong>Progressive hint:</strong> Reshaping changes layout, not the underlying measures. <strong>Verify:</strong> Assert the long table has identifier/variable/value columns and that pivoting back preserves the original labeled values and additive total.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a wide table through <code>melt</code> and back through <code>pivot_table</code>; name the identifier, variable, and value columns. Progressive hint: Reshaping changes layout, not the underlying measures. Record the named value, shape, label, or iterator position needed to establish: Assert the long table has identifier/variable/value columns and that pivoting back preserves the original labeled values and additive total. The trace exposes split-apply-combine, grouped summaries, and reshaping directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the long table has identifier/variable/value columns and that pivoting back preserves the original labeled values and additive total.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement grouped weighted means without using a simple mean of group means. <strong>Progressive hint:</strong> Aggregate weighted numerators and denominators at the same grain. <strong>Verify:</strong> For two groups, compute numerator and denominator explicitly and assert the grouped weighted means, including the chosen zero-weight behavior.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement grouped weighted means without using a simple mean of group means. Progressive hint: Aggregate weighted numerators and denominators at the same grain. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: For two groups, compute numerator and denominator explicitly and assert the grouped weighted means, including the chosen zero-weight behavior. That connects the answer to split-apply-combine, grouped summaries, and reshaping.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> For two groups, compute numerator and denominator explicitly and assert the grouped weighted means, including the chosen zero-weight behavior.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a calculation that joins a customer-level total back to line items and then sums it, multiplying totals by line count. <strong>Progressive hint:</strong> Do not re-aggregate a measure after broadcasting it to a finer grain. <strong>Verify:</strong> Show the inflated total after summing broadcast customer totals, then assert the repaired grain-aware calculation matches the original customer-level total.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a calculation that joins a customer-level total back to line items and then sums it, multiplying totals by line count. Progressive hint: Do not re-aggregate a measure after broadcasting it to a finer grain. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Show the inflated total after summing broadcast customer totals, then assert the repaired grain-aware calculation matches the original customer-level total. The diagnosis depends on split-apply-combine, grouped summaries, and reshaping.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Show the inflated total after summing broadcast customer totals, then assert the repaired grain-aware calculation matches the original customer-level total.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle groups whose total weight is zero and categories with no observed rows; state whether they appear in output. <strong>Progressive hint:</strong> Make zero-denominator and categorical <code>observed</code> behavior explicit. <strong>Verify:</strong> Test a zero-weight group and an unobserved categorical level; assert their value/presence follows the documented denominator and <code>observed</code> policy.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle groups whose total weight is zero and categories with no observed rows; state whether they appear in output. Progressive hint: Make zero-denominator and categorical <code>observed</code> behavior explicit. Values below, at, and above the named boundary must produce the evidence Test a zero-weight group and an unobserved categorical level; assert their value/presence follows the documented denominator and <code>observed</code> policy. Those cases show how split-apply-combine, grouped summaries, and reshaping behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test a zero-weight group and an unobserved categorical level; assert their value/presence follows the documented denominator and <code>observed</code> policy.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Write the input and output grain before grouping or reshaping. Reconcile row counts and totals at equivalent grains.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-missing-groups-and-reversible-shape">Shared implementation for Exercises 3–4 — Missing groups and reversible shape<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-missing-groups-and-reversible-shape" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-missing-groups-and-reversible-shape">Shared implementation for Exercises 3–4: Missing groups and reversible shape<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-missing-groups-and-reversible-shape" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 frame <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">value</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
@@ -916,7 +916,7 @@ wide <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</s
 long <span class="syntax-operator">=</span> wide<span class="syntax-operator">.</span>melt<span class="syntax-punctuation">(</span>id_vars<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> var_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">month</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> value_name<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 round_trip <span class="syntax-operator">=</span> long<span class="syntax-operator">.</span>pivot_table<span class="syntax-punctuation">(</span>index<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> columns<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">month</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> values<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> aggfunc<span class="syntax-operator">=</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> round_trip<span class="syntax-operator">.</span>loc<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">jan</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">10</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-weighted-aggregation-at-one-grain">Shared implementation for Exercises 5–7 — Weighted aggregation at one grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-weighted-aggregation-at-one-grain" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-weighted-aggregation-at-one-grain">Shared implementation for Exercises 5–7: Weighted aggregation at one grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-weighted-aggregation-at-one-grain" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">scores <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">80.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">50.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">weight</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">)</span>
@@ -1050,16 +1050,16 @@ parts<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-19`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-19`
 (Day 19 — GroupBy, Aggregation, Pivoting, and Melting). Direct catalog prerequisites: `python-18`.
 I have completed the direct prerequisites: `python-18`. Emphasize split-apply-combine, grouped summaries, and reshaping.
 Read `python/ds-60day/companion-guides/day19_pandas_groupby_pivot.md` and use the learner notebook
@@ -1074,7 +1074,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1185,18 +1185,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

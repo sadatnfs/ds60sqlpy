@@ -430,4 +430,4 @@ Capture:
 - `python --version` and `psql --version` when relevant
 - The selected VS Code interpreter/kernel
 
-Then ask Codex using [Learning with Codex](learning-with-codex.md) or open an issue with those details and no secrets.
+Then ask the AI tutor using [Learning with an AI tutor](learning-with-an-ai-tutor.md) or open an issue with those details and no secrets.

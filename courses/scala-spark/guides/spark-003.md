@@ -166,7 +166,7 @@ Returning println(...) gives Unit, not Long. Checking membership before a zero/n
 
 The next design lesson spark004 introduces immutable collections; it is not yet assumed published. Review [the track plan](../../../docs/expansion/tracks/scala-spark.md) and retain your boundary table.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-003.

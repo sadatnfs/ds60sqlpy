@@ -216,7 +216,7 @@ API and mechanism reference: [Python json documentation](https://docs.python.org
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-002, Data-science task contracts and structured extraction.

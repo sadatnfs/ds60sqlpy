@@ -1,4 +1,4 @@
-# Day 37 — Solutions: Partitioning
+# Day 37: Solutions: Partitioning
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ The optimizer can prune children whose bounds cannot satisfy a query predicate.
 “Sharding” across servers is a separate architectural concern and is not
 implemented by this single-database exercise.
 
-## Exercise 1 — Add a partition and test pruning
+## Exercise 1: Add a partition and test pruning
 
 Temporary tables keep the answer isolated from the learner script's
 `big_events` names.
@@ -118,7 +118,7 @@ and February were pruned). Exact wording varies by PostgreSQL version.
 - **Alternative/trade-off:** For sql-37 Exercise 1, the chosen form is justified by this lesson-specific rationale: Temporary tables keep the answer isolated from the learner script's `big_events` names. Evaluate another form against the concrete expected result (one row per `big_events`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Index partitions and compare plans
+## Exercise 2: Index partitions and compare plans
 
 ```sql
 BEGIN;
@@ -196,7 +196,7 @@ make a sequential scan rational.
 - Put the partition key in filtering predicates so pruning is possible.
 - Too many tiny partitions increase planning and maintenance overhead.
 
-## Exercise 3 — Prove pruning
+## Exercise 3: Prove pruning
 
 The unbounded count can visit every leaf; the March range can prune unrelated
 partitions. Inspect named child scans rather than inferring pruning from timing.
@@ -211,7 +211,7 @@ partitions. Inspect named child scans rather than inferring pruning from timing.
 - **Alternative/trade-off:** For sql-37 Exercise 3, the chosen form is justified by this lesson-specific rationale: The unbounded count can visit every leaf; the March range can prune unrelated partitions. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Route an uncovered row
+## Exercise 4: Route an uncovered row
 
 Because the original tasks already add April, the solution inserts a June row
 into the DEFAULT partition and verifies ownership with `tableoid::regclass`.
@@ -226,7 +226,7 @@ into the DEFAULT partition and verifies ownership with `tableoid::regclass`.
 - **Alternative/trade-off:** For sql-37 Exercise 4, the chosen form is justified by this lesson-specific rationale: Because the original tasks already add April, the solution inserts a June row into the DEFAULT partition and verifies ownership with `tableoid::regclass`. Evaluate another form against the concrete expected result (one row per `physical_partition`) and the verification above.
 - **Edge case:** Add one row for which `(event_time = timestamptz '2025-06-15 00:00:00+00')` is true and one for which it is false; verify only the matching `physical_partition` value is returned.
 
-## Exercise 5 — Diagnose a range gap
+## Exercise 5: Diagnose a range gap
 
 The catalog query prints every physical bound. Without DEFAULT, a date outside
 those bounds raises “no partition ... found”; that failure is preferable to
@@ -242,7 +242,7 @@ silent misrouting.
 - **Alternative/trade-off:** For sql-37 Exercise 5, the chosen form is justified by this lesson-specific rationale: The catalog query prints every physical bound. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `partition_name` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `partition_name` values in both cases.
 
-## Exercise 6 — Test the exact boundary
+## Exercise 6: Test the exact boundary
 
 February 1 lands in February because range partitions include `FROM` and
 exclude `TO`. The query proves placement rather than relying only on prose.

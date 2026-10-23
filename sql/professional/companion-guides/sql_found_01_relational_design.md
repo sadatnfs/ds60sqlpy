@@ -1,9 +1,9 @@
-# SQL-FOUND-01 — Relational Design, DDL, and Integrity Constraints
+# SQL-FOUND-01: Relational Design, DDL, and Integrity Constraints
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Catalog prerequisite:** `sql-15` — [SQL Day 15 — Phase 1 Project](../../postgres-60day/companion-guides/day15_phase1_project.md)
+- **Catalog prerequisite:** `sql-15`; [SQL Day 15; Phase 1 Project](../../postgres-60day/companion-guides/day15_phase1_project.md)
 - **Prerequisites:** Complete SQL Days 1–15 so you can query, join, aggregate,
   modify, and verify the supplied training schema before designing one of your
   own. PostgreSQL setup and the disposable database are also required.
@@ -50,7 +50,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-FOUND-01 — Relational Design, DDL, and Integrity Constraints** and choose
+2. Open **SQL-FOUND-01; Relational Design, DDL, and Integrity Constraints** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -84,7 +84,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -235,7 +235,7 @@ scratch SQL:
    **Expected result/shape:** For sql-found-01 Exercise 2, expected output: exactly one returned valid visit with `cost = 28.50`; the invalid attempt emits the expected check-violation notice and contributes no visit row.
    **Verify:** For sql-found-01 Exercise 2, compare the returned `item_id` with the independently selected `AUD-001` key, count exactly one `VISIT-100` row, and prove the negative-cost target count remains zero after SQLSTATE `23514` is caught.
 3. **NULL uniqueness:** insert two NULL references, explain the observed rule,
-   and write—but do not blindly apply—the stricter PostgreSQL 15+ alternative.
+   and write, but do not blindly apply, the stricter PostgreSQL 15+ alternative.
    **Inputs/evidence:** For sql-found-01 Exercise 3, insert two visits with `external_reference IS NULL`, then inspect all visit rows plus the unique index property that controls NULL comparison.
    **Expected result/shape:** For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with `indnullsnotdistinct = false`; PostgreSQL 15+ `UNIQUE NULLS NOT DISTINCT` is the stated alternative policy.
    **Verify:** For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL `VISIT-100` and record SQLSTATE `23505`, and explain that changing to `NULLS NOT DISTINCT` would permit at most one NULL.
@@ -291,16 +291,16 @@ scratch SQL:
 ## Next step
 
 Resume the numbered sequence at
-[SQL-16 — window-function fundamentals](../../postgres-60day/companion-guides/day16_window_functions_fundamentals.md).
+[SQL-16; window-function fundamentals](../../postgres-60day/companion-guides/day16_window_functions_fundamentals.md).
 Continue through SQL-39 before taking SQL-FOUND-02; that later foundation
 module combines this lesson's schema design with the transaction and locking
 skills needed for safe migrations.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-found-01 — Relational Design, DDL, and Integrity Constraints.

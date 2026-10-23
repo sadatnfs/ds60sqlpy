@@ -212,7 +212,7 @@ API and mechanism reference: [QLoRA](https://arxiv.org/abs/2305.14314), reviewed
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-017, Quantized frozen bases, adapter gradients and QLoRA limits.

@@ -1,4 +1,4 @@
-# Day 48 Solutions — E-commerce Analytics, Part 3
+# Day 48 Solutions: E-commerce Analytics, Part 3
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ ask for seven-day assisted conversions and equal-credit multi-touch
 attribution. The canonical file is
 [`day48_solutions.sql`](day48_solutions.sql).
 
-## Exercise 1 — Assisted conversions
+## Exercise 1: Assisted conversions
 
 ```sql
 SET search_path TO training, public;
@@ -101,7 +101,7 @@ campaigns, so `assisted_conversions` is not additive across rows.
 - **Alternative/trade-off:** For sql-48 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected grain: one row per campaign. Evaluate another form against the concrete expected result (one row per campaign) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `assisted_customers` for the existing `campaign` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Equal fractional multi-touch credit
+## Exercise 2: Equal fractional multi-touch credit
 
 ```sql
 SET search_path TO training, public;
@@ -160,7 +160,7 @@ its distinct campaigns sum to 1.
 - Campaign value `'none'` makes missing metadata visible; decide whether it
   should receive attribution in production.
 
-## Exercise 3 — Credit distinct campaigns
+## Exercise 3: Credit distinct campaigns
 
 The solution collapses repeated touches to `(purchase, campaign)` before
 dividing. That implements equal credit per distinct campaign rather than per
@@ -176,7 +176,7 @@ event.
 - **Alternative/trade-off:** For sql-48 Exercise 3, the chosen form is justified by this lesson-specific rationale: The solution collapses repeated touches to `(purchase, campaign)` before dividing. Evaluate another form against the concrete expected result (one row per `purchase_id`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Compute basket association metrics
+## Exercise 4: Compute basket association metrics
 
 Distinct order/product membership defines baskets. Pair counts feed support;
 single-product basket counts feed directional confidence; lift compares the
@@ -192,7 +192,7 @@ observed pair rate with independence.
 - **Alternative/trade-off:** For sql-48 Exercise 4, the chosen form is justified by this lesson-specific rationale: Distinct order/product membership defines baskets. Evaluate another form against the concrete expected result (at most 20 rows keyed by `order_item_id`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, product_a, product_b`.
 
-## Exercise 5 — Assign a touch only once
+## Exercise 5: Assign a touch only once
 
 A LATERAL subquery chooses the earliest qualifying purchase after each touch.
 `ORDER BY order_date, order_id LIMIT 1` prevents reuse and makes ties stable.
@@ -207,7 +207,7 @@ A LATERAL subquery chooses the earliest qualifying purchase after each touch.
 - **Alternative/trade-off:** For sql-48 Exercise 5, the chosen form is justified by this lesson-specific rationale: A LATERAL subquery chooses the earliest qualifying purchase after each touch. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one row for which `(e.metadata ? 'campaign')` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 6 — Reconcile direct purchases
+## Exercise 6: Reconcile direct purchases
 
 The query starts from every order and left-joins its most recent qualifying
 touch. Missing touches become `(direct)`, so bucket counts sum to purchases.

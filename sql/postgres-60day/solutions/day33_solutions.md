@@ -1,4 +1,4 @@
-# Day 33 — Solutions: Composite and Partial Indexes
+# Day 33: Solutions: Composite and Partial Indexes
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ Composite indexes are most useful when their leading columns match common
 filter or ordering patterns. Partial indexes contain only rows satisfying an
 immutable predicate.
 
-## Exercise 1 — Composite index on `(category, created_at)`
+## Exercise 1: Composite index on `(category, created_at)`
 
 ```sql
 BEGIN;
@@ -94,7 +94,7 @@ the search before applying the `created_at` range and can also support the
 - **Alternative/trade-off:** For sql-33 Exercise 1, the chosen form is justified by this lesson-specific rationale: The equality condition on the leading `category` column lets the B-tree narrow the search before applying the `created_at` range and can also support `ORDER BY created_at, product_id`. Evaluate another form against the concrete expected result (one row per `product_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Partial index for high-value orders
+## Exercise 2: Partial index for high-value orders
 
 ```sql
 BEGIN;
@@ -142,7 +142,7 @@ the index condition. The index excludes lower-value orders, reducing its size.
 - Small course tables may still receive sequential scans. Judge the design and
   inspect the plan; do not force a node type.
 
-## Exercise 3 — Test the leftmost-prefix limitation
+## Exercise 3: Test the leftmost-prefix limitation
 
 Filtering only `created_at` omits the composite index's first search column.
 PostgreSQL may still inspect the index in some conditions, but the query cannot
@@ -158,7 +158,7 @@ seek through a known category prefix.
 - **Alternative/trade-off:** For sql-33 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filtering only `created_at` omits the composite index's first search column. Evaluate another form against the concrete expected result (one row per `product_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Cover customer order history
+## Exercise 4: Cover customer order history
 
 `customer_id, order_date` are search/order keys. `status` and `total_amount` are
 included payload, which can support an index-only scan without widening the
@@ -174,7 +174,7 @@ search key.
 - **Alternative/trade-off:** For sql-33 Exercise 4, the chosen form is justified by this lesson-specific rationale: `customer_id, order_date` are search/order keys. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 5 — Prove partial-index eligibility
+## Exercise 5: Prove partial-index eligibility
 
 `total_amount > 1200` implies the stored `> 1000` predicate; `> 500` does not.
 Eligibility and final selection are separate planner decisions.
@@ -189,11 +189,11 @@ Eligibility and final selection are separate planner decisions.
 - **Alternative/trade-off:** For sql-33 Exercise 5, the chosen form is justified by this lesson-specific rationale: `total_amount > 1200` implies the stored `> 1000` predicate; `> 500` does not. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 6 — Evaluate the NULL subset
+## Exercise 6: Evaluate the NULL subset
 
 The answer first measures NULL prevalence, then builds a NULL-only index.
 Whether it is worthwhile depends on query frequency, subset size, and added
-write/storage cost—not on syntax alone.
+write/storage cost, not on syntax alone.
 
 ### Reasoning and verification
 

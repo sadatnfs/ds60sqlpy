@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-24-exploratory-data-analysis-best-practices">Day 24 — Exploratory Data Analysis Best Practices<a class="heading-anchor" href="#guide--day-24-exploratory-data-analysis-best-practices" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-24-exploratory-data-analysis-best-practices">Day 24: Exploratory Data Analysis Best Practices<a class="heading-anchor" href="#guide--day-24-exploratory-data-analysis-best-practices" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>EDA is a reproducible investigation, not a gallery of plots. Begin with the question and data grain, then record evidence, caveats, and next actions.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 24 — exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 24; exploratory data analysis best practices to practice question-led exploratory data analysis with evidence, caveats, and quality checks and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Exploratory data analysis (EDA) is a disciplined conversation with a dataset, not a gallery of every possible chart. Start with an analytical question, source/provenance, row grain, keys, and scope. Then inspect data quality, individual distributions, relationships, segments, and unusual records in an order that helps answer that question.</p>
 <p>Separate an observation (“the median differs”) from a hypothesis (“one segment may behave differently”) and from a causal claim, which EDA alone normally cannot establish. Every table or chart needs a sentence about evidence and a caveat. Missingness, duplicates, outliers, tiny samples, and target leakage can make technically valid calculations misleading.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>A useful EDA paragraph follows <strong>question → method → observation → limitation → next check</strong>. <code>frame.describe(include=&quot;all&quot;)</code> can orient you but is not a conclusion. A correlation matrix measures selected pairwise associations under assumptions; it does not explain cause, handle every nonlinear relationship, or protect against leakage.</p>
-<h5 id="guide--worked-example-1-create-a-bounded-quality-profile">Worked example 1 — Create a bounded quality profile<a class="heading-anchor" href="#guide--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-create-a-bounded-quality-profile">Worked example 1: Create a bounded quality profile<a class="heading-anchor" href="#guide--worked-example-1-create-a-bounded-quality-profile" aria-label="Link to this section">#</a></h5>
 <p>Make basic risks visible before plotting relationships. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -440,7 +440,7 @@ profile</code></pre>
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The profile reports four rows, one duplicate row, and a 0.25 missing rate for `amount`.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-compare-robust-and-non-robust-center">Worked example 2 — Compare robust and non-robust center<a class="heading-anchor" href="#guide--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-compare-robust-and-non-robust-center">Worked example 2: Compare robust and non-robust center<a class="heading-anchor" href="#guide--worked-example-2-compare-robust-and-non-robust-center" aria-label="Link to this section">#</a></h5>
 <p>One extreme value affects the mean more than the median. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>Series<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-number">200</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">median</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>median<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">max</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> values<span class="syntax-operator">.</span>max<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span></code></pre>
@@ -537,10 +537,10 @@ segment_summary <span class="syntax-operator">=</span> frame<span class="syntax-
 <ul>
 <li><a href="python-24.html#learner">Open the learner notebook</a></li>
 <li><a href="python-24.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-25.html#guide">Next: Day 25 — Matplotlib and Seaborn</a></li>
+<li><a href="python-25.html#guide">Next: Day 25; Matplotlib and Seaborn</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-24`
 (Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
 I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
@@ -793,7 +793,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-24-solutions-eda-best-practices">Day 24 — Solutions: EDA Best Practices<a class="heading-anchor" href="#solution-1--day-24-solutions-eda-best-practices" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-24-solutions-eda-best-practices">Day 24: Solutions: EDA Best Practices<a class="heading-anchor" href="#solution-1--day-24-solutions-eda-best-practices" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>question-led exploratory data analysis with evidence, caveats, and quality checks</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Exploratory data analysis (EDA) is a disciplined conversation with a dataset, not a gallery of every possible chart. Start with an analytical question, source/provenance, row grain, keys, and scope. Then inspect data quality, individual distributions, relationships, segments, and unusual records in an order that helps answer that question.</p>
@@ -809,8 +809,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>question-led exploratory data analysis with evidence, caveats, and quality checks</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. <strong>Expected behavior:</strong> every table/plot answers a written question and has an observation plus limitation. <strong>Constraint:</strong> avoid causal language and full-data dumps. <strong>Verify:</strong> restart and reproduce all results top to bottom.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Produce a concise EDA for one local or already-cached dataset, organized as question → provenance/scope/grain → quality → univariate distributions → relationships/segments → findings/caveats. Expected behavior: every table/plot answers a written question and has an observation plus limitation. Constraint: avoid causal language and full-data dumps. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: restart and reproduce all results top to bottom. That connects the answer to question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -869,7 +869,7 @@ observations <span class="syntax-operator">=</span> <span class="syntax-punctuat
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">all</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">limitation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> item<span class="syntax-operator">.</span>keys<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> item <span class="syntax-operator">in</span> observations<span class="syntax-punctuation">)</span></code></pre>
 <p>The sequence is explicit: question and provenance, row grain, quality profile, univariate distribution, segment relationship, then bounded observations with limitations. The 200-unit row is an observed outlier, not proof that its segment causes higher amounts.</p>
 <p><strong>Verification evidence:</strong> restart and reproduce all results top to bottom.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. <strong>Coverage:</strong> missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. <strong>Verify:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Add a data-quality register with one row per issue: evidence/count, possible analytical impact, proposed treatment, validation check, and status. Coverage: missingness, duplicates/key uniqueness, ranges, categories, and at least one dataset-specific rule. Record the named value, shape, label, or iterator position needed to establish: trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.</p>
 <pre class="highlighted-code"><code class="language-python">quality_issues <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>
@@ -935,32 +935,32 @@ treatment_impact <span class="syntax-operator">=</span> <span class="syntax-punc
 <span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">missing amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unexpected category</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p>Only the accepted exact-duplicate treatment changes data here, and its row/amount impact is reconciled. Missingness and the unknown category remain unresolved caveats instead of being silently removed.</p>
 <p><strong>Verification evidence:</strong> trace how each accepted treatment changes row count or a key measure and preserve rejected/unresolved issues as caveats.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. <strong>Progressive hint:</strong> Robust and non-robust summaries respond differently to outliers. <strong>Verify:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how one extreme value can change mean, median, standard deviation, and a scatterplot. Progressive hint: Robust and non-robust summaries respond differently to outliers. Then compare the prediction with this proof target: Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect. This makes question-led exploratory data analysis with evidence, caveats, and quality checks observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Compute statistics before/after adding the extreme value; record the exact mean/median/std changes and describe the visible plot-scale effect.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. <strong>Progressive hint:</strong> Aggregation discards within-customer event detail. <strong>Verify:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace row grain from transaction-level data to a customer summary and explain which questions can no longer be answered afterward. Progressive hint: Aggregation discards within-customer event detail. Record the named value, shape, label, or iterator position needed to establish: List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered. The trace exposes question-led exploratory data analysis with evidence, caveats, and quality checks directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> List questions answerable at transaction grain, then assert the customer summary row count/uniqueness and identify at least one detail that cannot be recovered.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. <strong>Progressive hint:</strong> Bound the result rather than dumping every row/value. <strong>Verify:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a compact profile returning shape, duplicate count, missing rates, numeric ranges, and unique counts. Progressive hint: Bound the result rather than dumping every row/value. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values. That connects the answer to question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Run the profile on ordinary, empty, duplicate, and missing fixtures; assert bounded keys/counts/rates without embedding full data values.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. <strong>Progressive hint:</strong> Remove leakage and label correlations as associations. <strong>Verify:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair an EDA that calculates correlations after target-derived fields were added and treats the strongest coefficient as causal. Progressive hint: Remove leakage and label correlations as associations. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix. The diagnosis depends on question-led exploratory data analysis with evidence, caveats, and quality checks.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Remove the target-derived field, recompute the association, and label it noncausal; assert the leakage column cannot enter the reported matrix.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. <strong>Progressive hint:</strong> A calculation returning a number does not guarantee interpretability. <strong>Verify:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Handle constant, all-missing, and tiny-sample columns in plots and summaries; state which results are not meaningful. Progressive hint: A calculation returning a number does not guarantee interpretability. Values below, at, and above the named boundary must produce the evidence Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic. Those cases show how question-led exploratory data analysis with evidence, caveats, and quality checks behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Detect constant/all-missing/tiny columns and assert each is skipped or annotated according to policy rather than reported as an interpretable statistic.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Organize exploratory data analysis around questions, grain, quality, and evidence. Separate observed patterns from hypotheses and causal claims.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain">Shared implementation for Exercises 3–4 — Robust summaries and grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain">Shared implementation for Exercises 3–4: Robust summaries and grain<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-robust-summaries-and-grain" aria-label="Link to this section">#</a></h5>
 <p>An extreme value can move the mean and standard deviation substantially, while the median is usually more stable. Aggregating transactions to one row per customer supports customer questions but loses event order and transaction variation.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards">Shared implementation for Exercises 5–7 — A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards">Shared implementation for Exercises 5–7: A bounded profile with interpretation guards<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-a-bounded-profile-with-interpretation-guards" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 
@@ -1121,16 +1121,16 @@ profile <span class="syntax-operator">=</span> compact_profile<span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-24`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-24`
 (Day 24 — Exploratory Data Analysis Best Practices). Direct catalog prerequisites: `python-23`.
 I have completed the direct prerequisites: `python-23`. Emphasize question-led exploratory data analysis with evidence, caveats, and quality checks.
 Read `python/ds-60day/companion-guides/day24_eda_best_practices.md` and use the learner notebook
@@ -1145,7 +1145,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1256,18 +1256,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

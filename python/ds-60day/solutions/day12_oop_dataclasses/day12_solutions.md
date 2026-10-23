@@ -1,4 +1,4 @@
-# Day 12 — Solutions: OOP Basics and Dataclasses
+# Day 12: Solutions: OOP Basics and Dataclasses
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ by each instance.
 For this lesson's **objects that keep related state and behavior together** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Create a `BankAccount` class with owner and private-by-convention balance state plus `deposit`, `withdraw`, and `balance` behavior. **Contract:** deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise `ValueError` without changing state. **Verify:** assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw.
 
@@ -93,7 +93,7 @@ allows read access while all mutation passes through validated methods.
 
 **Verification evidence:** assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus `ValueError` after a zero deposit and an overdraw.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Convert a plain product record to `@dataclass Product(name: str, price: float, quantity: int = 0)`. Add `__post_init__` validation and a `stock_value()` method. **Expected behavior:** `Product('tea', 4.0, 3).stock_value() == 12.0`; negative values raise. **Constraint:** use `field(default_factory=...)` if you add any mutable collection field. **Verify:** Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise.
 
@@ -140,9 +140,9 @@ default.
 
 **Verification evidence:** Assert `stock_value()` is `12.0`, equality uses field values, and separate negative-price and negative-quantity constructions raise.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict how a class attribute shared by instances differs from an instance attribute assigned through `self`. **Progressive hint:** Class lookup is shared until an instance shadows the name. **Verify:** Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.
 
@@ -150,7 +150,7 @@ default.
 
 **Evidence to locate in the grouped implementation:** Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using `is`. **Progressive hint:** Value equality and identity answer different questions. **Verify:** Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected.
 
@@ -158,7 +158,7 @@ default.
 
 **Evidence to locate in the grouped implementation:** Assert two equal-field dataclass values satisfy `==` but not `is`; mutate or replace a field and confirm equality changes as expected.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Create immutable `OrderLine` and `Order` dataclasses whose total sums quantity × unit price and applies a validated fractional discount. **Progressive hint:** Validate non-negative values in `__post_init__`. **Verify:** Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.
 
@@ -166,7 +166,7 @@ default.
 
 **Evidence to locate in the grouped implementation:** Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a dataclass field declared as `items: list[str] = []`. **Progressive hint:** Use `field(default_factory=list)` to create one list per instance. **Verify:** Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical.
 
@@ -174,7 +174,7 @@ default.
 
 **Evidence to locate in the grouped implementation:** Create two default instances, mutate one `items` list, and assert the other remains empty and the list objects are not identical.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Decide whether a discount policy should be a subclass of `Order` or a composed callable; justify the dependency direction. **Progressive hint:** A replaceable rule is usually behavior the order uses, not a kind of order. **Verify:** Swap two discount callables without changing `Order`; assert totals follow each policy and explain why composition preserves the dependency direction.
 
@@ -186,13 +186,13 @@ default.
 
 Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.
 
-### Shared implementation for Exercises 3–4 — Shared state, equality, and identity
+### Shared implementation for Exercises 3–4: Shared state, equality, and identity
 
 Class attributes are found through the class and shared by default; assigning
 `self.name` creates/updates an instance attribute. Dataclasses compare declared
 fields by default, so equal values can still be distinct objects.
 
-### Shared implementation for Exercises 5–7 — Validated value objects and composition
+### Shared implementation for Exercises 5–7: Validated value objects and composition
 
 ```python
 from dataclasses import dataclass, field

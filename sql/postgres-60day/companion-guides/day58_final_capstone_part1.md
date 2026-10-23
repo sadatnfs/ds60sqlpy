@@ -1,9 +1,9 @@
-# Day 58 — Final Capstone, Part 1: Ingestion and Data Quality
+# Day 58: Final Capstone, Part 1: Ingestion and Data Quality
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 57 — trends and anomalies](day57_project4_bi_part3.md)
+- **Prerequisites:** [Day 57; trends and anomalies](day57_project4_bi_part3.md)
 - **Artifacts:** [learner SQL](../day58_final_capstone_part1.sql) ·
   [solution reasoning](../solutions/day58_solutions.md) ·
   [executable solution](../solutions/day58_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-58 — Final Capstone Part1** and choose
+2. Open **SQL-58; Final Capstone Part1** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -215,7 +215,7 @@ Malformed inputs must become explained rejections.
 
 ## Next step
 
-Continue to [Day 59 — stakeholder analytics](day59_final_capstone_part2.md).
+Continue to [Day 59; stakeholder analytics](day59_final_capstone_part2.md).
 
 ## Deep dive and reference
 
@@ -256,11 +256,11 @@ Keep the entire demonstration in a transaction and roll it back. A procedure is
 appropriate for side effects and can expose `INOUT` counts; a table-returning
 function would be a different interface.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-58 — Final Capstone Part1.

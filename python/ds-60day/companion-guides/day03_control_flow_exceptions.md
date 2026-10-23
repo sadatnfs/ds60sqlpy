@@ -1,4 +1,4 @@
-# Day 3 — Control Flow, Truthiness, and Exceptions
+# Day 3: Control Flow, Truthiness, and Exceptions
 
 **Level:** Beginner
 
@@ -62,12 +62,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 3 — control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries
+**Lesson outcome:** use day 3; control flow, truthiness, and exceptions to practice branch selection, loop decisions, and narrow exception boundaries
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -100,7 +100,7 @@ indented suite. Only code indented under that branch belongs to it. In
 `exc` is the actual exception object. An exception handler is not a
 substitute for an ordinary condition that can be checked directly.
 
-### Worked example 1 — Order specific branches before general branches
+### Worked example 1: Order specific branches before general branches
 
 Classify a value after validating its domain. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -127,7 +127,7 @@ def classify_score(score: int) -> str:
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Protect only the fallible conversion
+### Worked example 2: Protect only the fallible conversion
 
 Let unrelated programming errors remain visible. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -283,11 +283,11 @@ exception.
 
 - [Open the learner notebook](../notebooks/day03_control_flow_exceptions.ipynb)
 - [Check the separate solution](../solutions/day03_control_flow_exceptions/day03_solutions.md)
-- [Next: Day 4 — Loops, comprehensions, and generators](day04_loops_comprehensions_generators.md)
+- [Next: Day 4; Loops, comprehensions, and generators](day04_loops_comprehensions_generators.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

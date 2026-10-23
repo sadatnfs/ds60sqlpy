@@ -202,7 +202,7 @@ API and mechanism reference: [Direct Preference Optimization](https://arxiv.org/
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-019, Preference optimization, DPO and the RLHF distinction.

@@ -1,4 +1,4 @@
-# Day 29 — Solutions: Data Validation & Schemas (Pandera/Pydantic)
+# Day 29: Solutions: Data Validation & Schemas (Pandera/Pydantic)
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ rule.
 For this lesson's **turning data contracts into executable schemas and informative failures** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. **Constraints:** derive each rule from written business meaning and include exact boundary values. **Verify:** one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.
 
@@ -123,7 +123,7 @@ its own invalid fixture so a learner can identify which check failed.
 
 **Verification evidence:** one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Validate the cleaned Day 18 DataFrame immediately before saving. **Sequence:** clean → validate returned frame → write only validated output → re-read/reconcile. **Expected behavior:** a deliberately invalid fixture blocks the write and preserves a useful failure report. **Constraint:** do not catch and discard `SchemaError`/`SchemaErrors`. **Verify:** Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.
 
@@ -204,9 +204,9 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 **Verification evidence:** Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict the difference between coercing a value to the schema dtype and validating it without coercion. **Progressive hint:** Coercion transforms compatible representations; validation checks a state. **Verify:** Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.
 
@@ -214,7 +214,7 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 **Evidence to locate in the grouped implementation:** Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? **Progressive hint:** Validate the actual final frame immediately before persistence. **Verify:** Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.
 
@@ -222,7 +222,7 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 **Evidence to locate in the grouped implementation:** Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. **Progressive hint:** Derive constraints from stated business rules, not observed values alone. **Verify:** Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.
 
@@ -230,7 +230,7 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 **Evidence to locate in the grouped implementation:** Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a pipeline that writes output before validating it or catches and discards every schema error. **Progressive hint:** Validation failure is a blocked output, not a warning-only event. **Verify:** Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.
 
@@ -238,7 +238,7 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 **Evidence to locate in the grouped implementation:** Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. **Progressive hint:** One failure fixture per rule makes contract coverage auditable. **Verify:** Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.
 
@@ -250,13 +250,13 @@ Pandera's failure cases for diagnosis and proves no file was created.
 
 Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.
 
-### Shared implementation for Exercises 3–4 — Transform versus assert
+### Shared implementation for Exercises 3–4: Transform versus assert
 
 Coercion can turn compatible text such as `"2"` into integer `2`; it should not
 silently invent a value for incompatible text. The final cleaned frame must
 validate before any destination is replaced.
 
-### Shared implementation for Exercises 5–7 — Executable business rules
+### Shared implementation for Exercises 5–7: Executable business rules
 
 ```python
 import pandas as pd

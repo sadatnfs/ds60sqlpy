@@ -285,11 +285,11 @@ Further reading
 - Postgres pattern matching: https://www.postgresql.org/docs/current/functions-matching.html
 - NULLs and three-valued logic: https://www.postgresql.org/docs/current/functions-comparison.html
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-01 - Select Where Orderby.

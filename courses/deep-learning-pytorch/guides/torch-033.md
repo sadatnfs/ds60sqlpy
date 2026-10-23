@@ -184,7 +184,7 @@ A strict API makes precision and meaning changes visible. If coercion is desired
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-033, Inference mode, model contracts and bounded batching.

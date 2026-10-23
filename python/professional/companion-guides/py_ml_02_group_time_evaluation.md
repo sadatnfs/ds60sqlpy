@@ -237,7 +237,7 @@ forecasting work. Keep an independent membership audit next to the model code;
 a library class name is useful documentation, not evidence that your inputs
 and availability assumptions are correct.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-ml-02.

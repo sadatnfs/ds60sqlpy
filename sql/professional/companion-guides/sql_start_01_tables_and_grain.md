@@ -240,7 +240,7 @@ Continue to `sql-start-02` for values, missingness, truth, and ordering.
 
 Concrete next target: [Values, NULL, and deterministic order](sql_start_02_values_null_order.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson and expected observations are sufficient offline. For optional coaching, copy:
 

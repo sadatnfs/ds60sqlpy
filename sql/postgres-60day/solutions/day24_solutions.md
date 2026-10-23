@@ -1,4 +1,4 @@
-# Day 24 solutions — Recursive CTEs: Hierarchies, Trees, and Graph Walks
+# Day 24 solutions: Recursive CTEs: Hierarchies, Trees, and Graph Walks
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List every manager's direct and indirect reports with depth and path.
 
@@ -127,7 +127,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-24 Exercise 1, the chosen form is justified by this lesson-specific rationale: Seed every direct edge, carry the original manager, and reject IDs already in the path. Evaluate another form against the concrete expected result (One row per ancestor-descendant pair) and the verification above.
 - **Edge case:** Add one source row with a new `manager_id`; verify the result gains exactly one row carrying that `manager_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Generate integers 1 through 100 recursively and return their sum.
 
@@ -170,7 +170,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-24 Exercise 2, the chosen form is justified by this lesson-specific rationale: Anchor at 1 and stop producing rows after 100. Evaluate another form against the concrete expected result (Exactly one row with 5050) and the verification above.
 - **Edge case:** Force the final predicate to match zero rows and record `sum_1_to_100`; distinguish `COUNT` zero from nullable `SUM` or `AVG` results.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Generate the first day of the current and prior 11 months recursively.
 
@@ -215,7 +215,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-24 Exercise 3, the chosen form is justified by this lesson-specific rationale: Carry a counter as an explicit termination condition. Evaluate another form against the concrete expected result (Exactly 12 chronological month rows) and the verification above.
 - **Edge case:** Tie two rows on `month_start` and give them different `month_start` values; verify `month_start` chooses a stable first/last row.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Traverse a local graph containing a cycle and prove a path-array guard terminates.
 
@@ -266,7 +266,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-24 Exercise 4, the chosen form is justified by this lesson-specific rationale: Reject a destination already present in the path before adding it. Evaluate another form against the concrete expected result (Finite paths starting from node 1; no repeated node inside a path) and the verification above.
 - **Edge case:** Add one source row with a new `node`; verify the result gains exactly one row carrying that `node` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Walk upward from every employee to ancestors while preventing cycles.
 
@@ -325,7 +325,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-24 Exercise 5, the chosen form is justified by this lesson-specific rationale: The recursive step follows current manager ID to the manager row and appends it to path. Evaluate another form against the concrete expected result (One row per employee-ancestor relation) and the verification above.
 - **Edge case:** Add one row for which `(ancestor_id IS NOT NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Summarize employee count by hierarchy depth from all roots.
 

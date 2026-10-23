@@ -1,4 +1,4 @@
-# Day 08 — Solutions: Files, JSON/CSV, and Context Managers
+# Day 08: Solutions: Files, JSON/CSV, and Context Managers
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ programming errors.
 For this lesson's **resource ownership, text encodings, and structured file boundaries** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Implement `safe_load_json(path)` that returns parsed data on success and `None` only for a missing file or malformed JSON, logging which expected failure occurred. **Constraints:** open with UTF-8, catch `FileNotFoundError` and `json.JSONDecodeError` explicitly, and let unrelated errors surface. **Verify:** test a valid file, a missing path, and an invalid JSON file inside a temporary directory.
 
@@ -80,7 +80,7 @@ permission or programming failures remain visible.
 
 **Verification evidence:** test a valid file, a missing path, and an invalid JSON file inside a temporary directory.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Implement `csv_to_records(path)` and `records_to_csv(records, path)` using `csv.DictReader` and `csv.DictWriter`. **Contract:** headers define keys, output field order is explicit, and numeric conversion policy is documented. **Constraints:** use UTF-8 and `newline=''`; do not hand-split comma-delimited text. **Verify:** round-trip two records including a non-ASCII name and compare the normalized records.
 
@@ -126,9 +126,9 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 **Verification evidence:** round-trip two records including a non-ASCII name and compare the normalized records.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** After `handle.read(2)` on a text file containing `abcd`, predict what a second `handle.read()` returns and explain the cursor. **Progressive hint:** Reads advance the file object's current position. **Verify:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
 
@@ -136,7 +136,7 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 **Evidence to locate in the grouped implementation:** Assert the first read is `'ab'`, the second is `'cd'`, and a third is empty; record cursor positions `2` and `4`.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace when a file is open and closed through a `with` block, including when JSON decoding raises inside the block. **Progressive hint:** Context-manager cleanup runs on both normal and exceptional exit. **Verify:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
 
@@ -144,7 +144,7 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 **Evidence to locate in the grouped implementation:** Record `handle.closed` inside and after both successful and failing `with` blocks; assert it is true after either exit.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement an atomic JSON writer that writes a sibling temporary file then replaces the destination. **Progressive hint:** Use explicit UTF-8, `json.dump`, and `Path.replace`. **Verify:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
 
@@ -152,7 +152,7 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 **Evidence to locate in the grouped implementation:** Read the replaced destination and assert it contains the complete new JSON; simulate serialization failure and assert the old destination is still intact.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair CSV writing that creates blank lines on Windows or corrupts non-ASCII names. **Progressive hint:** Open with `newline=''` and `encoding='utf-8'`. **Verify:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
 
@@ -160,7 +160,7 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 **Evidence to locate in the grouped implementation:** Round-trip two CSV rows including a non-ASCII name on the current platform; assert no blank records and exact decoded characters.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design a CSV reader policy for missing columns and extra columns; return accepted rows and quarantined row/error pairs. **Progressive hint:** Validate each row at the boundary rather than failing much later. **Verify:** Use one valid, one missing-column, and one extra-column row; assert accepted plus quarantined equals input and each quarantine reason names its violated rule.
 
@@ -172,12 +172,12 @@ convert them; the CSV transport layer does not guess numeric meaning.
 
 Treat files as fallible boundaries. Specify encoding, newline behavior, schema, and failure policy, and keep writes recoverable.
 
-### Shared implementation for Exercises 3–4 — Cursor and context-manager behavior
+### Shared implementation for Exercises 3–4: Cursor and context-manager behavior
 
 The second read returns `"cd"` because the cursor is already after `"ab"`.
 Leaving a `with` block closes the handle even when decoding raises.
 
-### Shared implementation for Exercises 5–7 — Recoverable writes and explicit row validation
+### Shared implementation for Exercises 5–7: Recoverable writes and explicit row validation
 
 ```python
 from __future__ import annotations

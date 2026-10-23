@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-09-correlated-subqueries-and-exists-companion-guide">Day 09 — Correlated Subqueries and EXISTS (Companion Guide)<a class="heading-anchor" href="#guide--day-09-correlated-subqueries-and-exists-companion-guide" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-09-correlated-subqueries-and-exists-companion-guide">Day 09: Correlated Subqueries and EXISTS (Companion Guide)<a class="heading-anchor" href="#guide--day-09-correlated-subqueries-and-exists-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Foundation (beginner)</li>
-<li><strong>Prerequisites:</strong> <a href="sql-08.html#guide">Day 08 — scalar and inline subqueries</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-08.html#guide">Day 08; scalar and inline subqueries</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-09.html#learner">learner SQL</a> · <a href="sql-09.html#solution-1">solution reasoning</a> · <a href="sql-09.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-09 — Correlated Subqueries</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-09; Correlated Subqueries</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-09/lesson/workspace/sql/postgres-60day/day09_correlated_subqueries.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -458,7 +458,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day09_correlated_subqueries.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Correlation, Semi-join, Anti-join. Its worked SQL reads or creates <code>customers</code>, <code>orders</code>, <code>order_items</code>, <code>products</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -536,7 +536,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Can you explain the <code>NULL</code> hazard of <code>NOT IN</code> and why <code>NOT EXISTS</code> avoids it?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-10.html#guide">Day 10 — data modification with subqueries</a>.</p>
+<p>Continue to <a href="sql-10.html#guide">Day 10; data modification with subqueries</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Learning objectives</p>
 <ul>
@@ -568,8 +568,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <ul>
 <li>EXISTS: https://www.postgresql.org/docs/current/functions-subquery.html</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-09 — Correlated Subqueries.
 
 I have completed the direct catalog prerequisite: `sql-08`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -753,7 +753,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-09-solutions-correlated-subqueries-and-exists">Day 09 solutions — Correlated Subqueries and EXISTS<a class="heading-anchor" href="#solution-1--day-09-solutions-correlated-subqueries-and-exists" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-09-solutions-correlated-subqueries-and-exists">Day 09 solutions: Correlated Subqueries and EXISTS<a class="heading-anchor" href="#solution-1--day-09-solutions-correlated-subqueries-and-exists" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -781,7 +781,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Primary pitfall:</strong> A correlated subquery can run conceptually per outer row; do not use it when a join or pre-aggregation states the grain more clearly.</li>
 <li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
 </ul>
-<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return customers who have at least one delivered order.</p>
 <p><strong>Reasoning:</strong> <code>EXISTS</code> expresses the yes/no question without multiplying customer rows.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -813,7 +813,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-09 Exercise 1, the chosen form is justified by this lesson-specific rationale: <code>EXISTS</code> expresses the yes/no question without multiplying customer rows. Evaluate another form against the concrete expected result (One row per qualifying customer) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row for which <code>(EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = &#x27;delivered&#x27; ))</code> is true and one for which it is false; verify only the matching <code>customer_id</code> value is returned.</li>
 </ul>
-<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return products that have never been sold.</p>
 <p><strong>Reasoning:</strong> <code>NOT EXISTS</code> correlates on product ID and is not confused by NULL membership.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -845,7 +845,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-09 Exercise 2, the chosen form is justified by this lesson-specific rationale: <code>NOT EXISTS</code> correlates on product ID and is not confused by NULL membership. Evaluate another form against the concrete expected result (One row per unsold product) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row for which <code>(NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))</code> is true and one for which it is false; verify only the matching <code>product_id</code> value is returned.</li>
 </ul>
-<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return each customer&#x27;s orders that are above that customer&#x27;s average order total.</p>
 <p><strong>Reasoning:</strong> Correlate the average to the current order&#x27;s customer, not to the current order ID.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -877,7 +877,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-09 Exercise 3, the chosen form is justified by this lesson-specific rationale: Correlate the average to the current order&#x27;s customer, not to the current order ID. Evaluate another form against the concrete expected result (Order rows above their own customer average) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row for which <code>(o.total_amount &gt; ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
 </ul>
-<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Explain and avoid the <code>NOT IN</code> plus NULL trap by finding customers without orders using <code>NOT EXISTS</code>.</p>
 <p><strong>Reasoning:</strong> Correlate on the customer key; a matching row alone determines exclusion.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -908,7 +908,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-09 Exercise 4, the chosen form is justified by this lesson-specific rationale: Correlate on the customer key; a matching row alone determines exclusion. Evaluate another form against the concrete expected result (One row per customer with no order) and the verification above.</li>
 <li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>customer_id</code>, and <code>full_name</code> and state whether the row is kept, rejected, or classified.</li>
 </ul>
-<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return only each customer&#x27;s most recent order without an arbitrary <code>LIMIT 1</code>.</p>
 <p><strong>Reasoning:</strong> Compare to the correlated <code>MAX(order_date)</code> and break timestamp ties with the maximum ID at that timestamp.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -943,7 +943,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-09 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compare to the correlated <code>MAX(order_date)</code> and break timestamp ties with the maximum ID at that timestamp. Evaluate another form against the concrete expected result (At most one deterministic order per customer) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row for which <code>(o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))</code> is true and one for which it is false; verify only the matching <code>order_id</code> value is returned.</li>
 </ul>
-<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return customers for whom every order has at least one payment, excluding customers with no orders.</p>
 <p><strong>Reasoning:</strong> Require an order to exist, then prove no order lacks a payment using double <code>NOT EXISTS</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1204,16 +1204,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-09 — Correlated Subqueries.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-09 — Correlated Subqueries.
 
 I have completed the direct catalog prerequisite: `sql-08`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day09_correlated_subqueries.md
@@ -1240,7 +1240,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1351,18 +1351,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

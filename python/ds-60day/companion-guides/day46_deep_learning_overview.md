@@ -1,4 +1,4 @@
-# Day 46 — Deep Learning Overview
+# Day 46: Deep Learning Overview
 
 **Lesson ID:** `python-46` · **Level:** advanced · **Dependencies:** `deep-learning` · **Network:** offline
 
@@ -67,7 +67,7 @@ for _ in range(200):
 
 The seed controls parameter initialization and generated noise on this CPU path.
 Hardware and library differences can still affect exact floating-point results,
-so reproducibility means bounded, explainable variation—not bitwise identity
+so reproducibility means bounded, explainable variation, not bitwise identity
 everywhere.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
@@ -110,7 +110,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — tensors, computation graphs, gradients, and the optimizer cycle
+## Concept deep dive: tensors, computation graphs, gradients, and the optimizer cycle
 
 ### The mental model
 
@@ -138,7 +138,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — differentiate a scalar function by autograd
+### Focused example A: differentiate a scalar function by autograd
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -158,7 +158,7 @@ assert x.grad.item() == 8.0  # derivative: 2*x + 2 at x=3
 
 **Assumption to name:** `x` is a scalar leaf and only one backward pass has contributed to its gradient.
 
-### Focused example B — see gradient accumulation explicitly
+### Focused example B: see gradient accumulation explicitly
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -205,15 +205,15 @@ assert (first, accumulated, cleared) == (4.0, 8.0, 0.0)
 
 1. Plot the loss over epochs.
 
-**Verify:** Practice 1 — tensors, computation graphs, gradients, and the optimizer cycle — save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
+**Verify:** Practice 1; tensors, computation graphs, gradients, and the optimizer cycle; save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
 2. Replace SGD with Adam and compare convergence.
 
-**Verify:** Practice 2 — tensors, computation graphs, gradients, and the optimizer cycle — from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
+**Verify:** Practice 2; tensors, computation graphs, gradients, and the optimizer cycle; from identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
 3. Add one hidden layer and a ReLU activation.
 
-**Verify:** Practice 3 — tensors, computation graphs, gradients, and the optimizer cycle — assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
+**Verify:** Practice 3; tensors, computation graphs, gradients, and the optimizer cycle; assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
 ### Progressive hints
 
@@ -238,17 +238,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Autograd tracing:** For one scalar regression batch, annotate every line from `zero_grad()` through `step()`: which tensors receive gradients, when are they accumulated, and when do parameters change?
    **Progressive hint:** Gradients accumulate in parameter `.grad` fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.
 
-**Verify:** Autograd tracing — print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
+**Verify:** Autograd tracing; print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
 
 5. **Mode debugging:** Build a model with Dropout and BatchNorm, then compare repeated predictions in `train()` and `eval()` modes. Explain why `torch.no_grad()` is related but not interchangeable.
    **Progressive hint:** Mode changes module behavior; no_grad disables graph recording. Validation usually needs both `model.eval()` and `with torch.no_grad()`.
 
-**Verify:** Mode debugging — for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
+**Verify:** Mode debugging; for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
 
 6. **Loss-aggregation edge case:** Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.
    **Progressive hint:** Multiply each mean batch loss by batch size, sum, then divide by the number of examples.
 
-**Verify:** Loss-aggregation edge case — with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.
+**Verify:** Loss-aggregation edge case; with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -283,12 +283,12 @@ not brand names.
 - Work in the [Day 46 learner notebook](../notebooks/day46_deep_learning_overview.ipynb).
 - Then review the
   [Day 46 solution](../solutions/day46_deep_learning_overview/day46_solutions.md).
-- Continue to [Day 47 — PyTorch Training Loops](day47_pytorch_basics_nn_training_loop.md).
+- Continue to [Day 47; PyTorch Training Loops](day47_pytorch_basics_nn_training_loop.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-46` — Day 46 — Deep Learning Overview.

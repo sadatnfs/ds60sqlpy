@@ -216,7 +216,7 @@ API and mechanism reference: [Reciprocal Rank Fusion](https://plg.uwaterloo.ca/~
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-008, Hybrid retrieval, reciprocal-rank fusion and reranking.

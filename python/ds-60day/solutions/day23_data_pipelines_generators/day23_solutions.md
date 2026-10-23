@@ -1,4 +1,4 @@
-# Day 23 — Solutions: Data Pipelines and Generators
+# Day 23: Solutions: Data Pipelines and Generators
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -7,8 +7,8 @@ These worked answers demonstrate **lazy, composable data-pipeline stages with ex
 result before comparing your attempt with its matching assertions.
 
 A pipeline is a sequence of stages that turn input into output. Give each
-stage one responsibility—read, parse, validate, normalize, filter,
-batch, or write—and define the shape it accepts and yields. Small stages
+stage one responsibility, read, parse, validate, normalize, filter,
+batch, or write, and define the shape it accepts and yields. Small stages
 are easier to test and recombine than one function mixing files, rules,
 logging, and output.
 
@@ -32,9 +32,9 @@ stop the stream, are skipped with evidence, or go to quarantine.
 For this lesson's **lazy, composable data-pipeline stages with explicit resource and error policy** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Build `stream_clean_csv(path)` that opens a UTF-8 CSV inside the generator, yields one normalized row dictionary at a time, and follows a written malformed-row policy. **Constraints:** use `csv.DictReader`, keep the file open during iteration, and do not return a list. **Verify:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
 
@@ -94,7 +94,7 @@ iteration is active and closes on exhaustion or generator close.
 
 **Verification evidence:** partially consume two rows, consume the rest, test an empty file, and confirm the handle closes after completion/failure.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Compose separate generator stages to filter, map, and batch clean rows. **Contract:** every stage documents input/output shape; batch size must be positive; the final partial batch is yielded. **Verify:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
 
@@ -173,9 +173,9 @@ else:
 
 **Verification evidence:** on a five-row fixture with size two, assert exact batches, source order, and input = accepted + quarantined + deliberately filtered counts.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict when side effects inside a generator body occur: at function call, first iteration, or full materialization. **Progressive hint:** Calling a generator function creates an iterator; its body starts on iteration. **Verify:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
 
@@ -183,15 +183,15 @@ else:
 
 **Evidence to locate in the grouped implementation:** Append an event inside the generator body and assert no event at construction, one at first `next`, and all remaining events only after full consumption.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
-**Learner contract:** **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. **Progressive hint:** Consumption is stateful and does not rewind automatically. **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.
+**Learner contract:** **Tracing:** Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. **Progressive hint:** Consumption is stateful and does not rewind automatically. **Verify:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. Progressive hint: Consumption is stateful and does not rewind automatically. Record the named value, shape, label, or iterator position needed to establish: Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence. The trace exposes lazy, composable data-pipeline stages with explicit resource and error policy directly.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Consume two items from a five-item generator, then pass it onward. Trace which values the next stage can still see. Progressive hint: Consumption is stateful and does not rewind automatically. Record the named value, shape, label, or iterator position needed to establish: Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence. The trace exposes lazy, composable data-pipeline stages with explicit resource and error policy directly.
 
-**Evidence to locate in the grouped implementation:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4—never a restarted sequence.
+**Evidence to locate in the grouped implementation:** Assert the first consumer sees values 0 and 1 and the downstream stage sees exactly 2, 3, and 4, never a restarted sequence.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `batch_rows(rows, size)` yielding tuples and preserving the final partial batch. **Progressive hint:** Validate positive size and reset the accumulator after each yield. **Verify:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
 
@@ -199,7 +199,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Assert five rows at size two produce `[(0, 1), (2, 3), (4,)]`, empty input produces none, and nonpositive size raises.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a function that returns a generator expression over a file after the surrounding `with` block has already closed the file. **Progressive hint:** Own the `with` block inside the generator that performs iteration. **Verify:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
 
@@ -207,7 +207,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Partially consume the repaired file generator and then finish it; assert rows remain readable until exhaustion and the handle closes afterward.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Add a quarantine side channel for malformed rows without making the clean stream eagerly load the entire file. **Progressive hint:** Pass a callback/list for bounded error records or yield tagged results. **Verify:** Feed valid/invalid/valid rows and assert the clean stream remains lazy, output order is preserved, and accepted plus quarantined counts equal input.
 
@@ -219,13 +219,13 @@ else:
 
 Build one-responsibility lazy stages with explicit resource ownership, error policy, and final-partial-batch behavior.
 
-### Shared implementation for Exercises 3–4 — Laziness is stateful
+### Shared implementation for Exercises 3–4: Laziness is stateful
 
 A generator body starts on the first `next`, not at function call. After two
 items are consumed, downstream stages can see only the remaining three unless a
 fresh iterator is constructed.
 
-### Shared implementation for Exercises 5–7 — Batching and correct resource lifetime
+### Shared implementation for Exercises 5–7: Batching and correct resource lifetime
 
 ```python
 from __future__ import annotations

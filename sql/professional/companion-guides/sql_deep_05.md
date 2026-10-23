@@ -157,7 +157,7 @@ Transfer the same reasoning to a new small fixture before using it on larger dat
 
 - [PostgreSQL17 INSERT ON CONFLICT](https://www.postgresql.org/docs/17/sql-insert.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through sql-deep-05: Predicate Proof, Partial Indexes, and Conditional Mutation Contracts.

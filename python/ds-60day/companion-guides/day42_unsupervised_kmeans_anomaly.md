@@ -1,9 +1,9 @@
-# Day 42 — K-Means and Anomaly Detection
+# Day 42: K-Means and Anomaly Detection
 
 **Lesson ID:** `python-42` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
 Unsupervised algorithms find structure without target labels. Their outputs are
-hypotheses to investigate—not automatically true customer segments, root causes,
+hypotheses to investigate, not automatically true customer segments, root causes,
 or fraud labels.
 
 ## Learning objectives
@@ -104,7 +104,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — unsupervised geometry, cluster stability, and anomaly ranking
+## Concept deep dive: unsupervised geometry, cluster stability, and anomaly ranking
 
 ### The mental model
 
@@ -131,7 +131,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — show that feature scale changes K-Means geometry
+### Focused example A: show that feature scale changes K-Means geometry
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -159,7 +159,7 @@ print({"raw_agreement_with_x_sign": np.mean(raw_labels == (X[:, 0] > 0)),
 
 **Assumption to name:** Standard-deviation scaling represents the intended similarity, rather than erasing meaningful units.
 
-### Focused example B — treat anomaly output as a ranking, not a verdict
+### Focused example B: treat anomaly output as a ranking, not a verdict
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -208,15 +208,15 @@ assert {200, 201}.issubset(set(most_unusual))
 
 1. Try several values of `k` and plot inertia versus `k` (the elbow plot).
 
-**Verify:** Practice 1 — unsupervised geometry, cluster stability, and anomaly ranking — for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
+**Verify:** Practice 1; unsupervised geometry, cluster stability, and anomaly ranking; for each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
 2. Compute silhouette scores for `k` from 2 through 6 and discuss the result.
 
-**Verify:** Practice 2 — unsupervised geometry, cluster stability, and anomaly ranking — for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
+**Verify:** Practice 2; unsupervised geometry, cluster stability, and anomaly ranking; for k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
 3. Compare Isolation Forest with Local Outlier Factor.
 
-**Verify:** Practice 3 — unsupervised geometry, cluster stability, and anomaly ranking — on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
+**Verify:** Practice 3; unsupervised geometry, cluster stability, and anomaly ranking; on identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
 ### Progressive hints
 
@@ -237,17 +237,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Scaling sensitivity:** Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.
    **Progressive hint:** Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.
 
-**Verify:** Scaling sensitivity — print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.
+**Verify:** Scaling sensitivity; print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.
 
 5. **Cluster stability:** Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.
    **Progressive hint:** Labels can permute. Use adjusted Rand index or align centers before comparing assignments.
 
-**Verify:** Cluster stability — over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.
+**Verify:** Cluster stability; over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.
 
 6. **Anomaly validation without labels:** Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.
    **Progressive hint:** Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.
 
-**Verify:** Anomaly validation without labels — deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.
+**Verify:** Anomaly validation without labels; deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -282,12 +282,12 @@ density differences but is sensitive to neighborhood size and scoring mode.
 - Work in the [Day 42 learner notebook](../notebooks/day42_unsupervised_kmeans_anomaly.ipynb).
 - Then review the
   [Day 42 solution](../solutions/day42_unsupervised_kmeans_anomaly/day42_solutions.md).
-- Continue to [Day 43 — Model Interpretation](day43_model_interpretation_shap_pdp.md).
+- Continue to [Day 43; Model Interpretation](day43_model_interpretation_shap_pdp.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-42` — Day 42 — K-Means and Anomaly Detection.

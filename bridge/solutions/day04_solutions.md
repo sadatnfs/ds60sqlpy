@@ -1,4 +1,4 @@
-# Bridge Day 4 — Solution notes
+# Bridge Day 4: Solution notes
 
 Try the [learner file](../lessons/day04_transactions_idempotency_retries.py)
 first. The executable reference is [day04_solution.py](day04_solution.py).
@@ -81,7 +81,7 @@ reference is `bridge/solutions/day04_solution.py`; use it only after an honest a
 
 **Shared failure rule:** Retrying a non-idempotent or ambiguously committed write can duplicate effects even when backoff logic is correct.
 
-### Exercise 1 — Validation
+### Exercise 1: Validation
 
 **Prompt:** Validate `RetryPolicy` so attempts are at least one and base delay is finite and
 non-negative.
@@ -94,7 +94,7 @@ failing retry loop.
 
 **Verification evidence:** Construct policies at attempts `0/1` and delays `-1/0/inf/nan`; assert only attempts at least one with finite non-negative delay succeed and every invalid case raises `ValueError` immediately.
 
-### Exercise 2 — SQL implementation
+### Exercise 2: SQL implementation
 
 **Prompt:** Implement `create_job_once()` with one parameterized `INSERT`, a unique idempotency
 key, `ON CONFLICT DO NOTHING`, and `RETURNING job_id`.
@@ -107,7 +107,7 @@ pre-read.
 
 **Verification evidence:** Record one cursor call and assert static SQL contains `ON CONFLICT ... DO NOTHING` plus `RETURNING job_id`, while idempotency key and payload appear only in the two-value tuple.
 
-### Exercise 3 — Mapping
+### Exercise 3: Mapping
 
 **Prompt:** Return the inserted ID when `fetchone()` yields a row and `None` for a duplicate
 without issuing a second statement.
@@ -119,7 +119,7 @@ preliminary `SELECT` would add a race window and is unnecessary.
 
 **Verification evidence:** Configure `fetchone()` as `(42,)` then `None`; assert results are `42` and `None` and each case issues exactly one statement.
 
-### Exercise 4 — Transaction
+### Exercise 4: Transaction
 
 **Prompt:** Implement `run_in_transaction()` so success commits and any operation failure rolls
 back before re-raising.
@@ -132,7 +132,7 @@ work.
 
 **Verification evidence:** Assert success events end `operation, commit` with no rollback; failure events end `operation, rollback`, no commit occurs, and the same exception is re-raised.
 
-### Exercise 5 — Retry
+### Exercise 5: Retry
 
 **Prompt:** Implement `run_with_retry()` for only `TransientDatabaseError`, stopping at
 `max_attempts` with delays `base * 2**(attempt - 1)`.
@@ -145,7 +145,7 @@ permanent errors.
 
 **Verification evidence:** For base delay `0.1` and three attempts, assert delays are `[0.1, 0.2]`; a third transient error is re-raised and a permanent `ValueError` is never retried.
 
-### Exercise 6 — Testing
+### Exercise 6: Testing
 
 **Prompt:** Test two transient failures followed by success with a list append sleeper, plus a
 permanent `ValueError` that escapes immediately.
@@ -158,7 +158,7 @@ classification.
 
 **Verification evidence:** Use an operation that fails transiently twice then returns `ok`; assert three calls, delays `[base, base*2]`, result `ok`, and a separate `ValueError` case has one call.
 
-### Exercise 7 — Design
+### Exercise 7: Design
 
 **Prompt:** Decide whether retry owns a statement, a complete transaction attempt, or an entire
 command and justify the chosen scope.
@@ -172,7 +172,7 @@ needs fresh state.
 
 **Verification evidence:** Produce a scope decision naming the complete transaction attempt as the retry unit and show why retrying only a statement can reuse an aborted transaction.
 
-### Exercise 8 — Composition
+### Exercise 8: Composition
 
 **Prompt:** Compose retry with transaction ownership so every attempt receives fresh connection
 state and cleanup happens before delay.
@@ -186,7 +186,7 @@ transaction attempt.
 
 **Verification evidence:** Record resource identities and events across two failures and success; assert each attempt gets a new connection and rollback/close precede the corresponding sleep.
 
-### Exercise 9 — Extension
+### Exercise 9: Extension
 
 **Prompt:** Add optional jitter through an injected function while keeping tests deterministic
 and delays bounded.
@@ -199,7 +199,7 @@ no-sleep-after-final rule.
 
 **Verification evidence:** Inject fixed jitter values and assert every computed delay stays within the declared bounds; replaying the same jitter sequence must produce identical delays.
 
-### Exercise 10 — Failure analysis
+### Exercise 10: Failure analysis
 
 **Prompt:** Explain how a connection loss during commit creates an uncertain outcome and how the
 idempotency key resolves the next attempt.
@@ -212,7 +212,7 @@ lookup when the existing job ID is required.
 
 **Verification evidence:** Model a commit that succeeds server-side then raises client-side; assert the next attempt re-checks the idempotency key and reports the existing job without a second effect.
 
-### Exercise 11 — Input validation
+### Exercise 11: Input validation
 
 **Prompt:** Define and test boundaries for blank idempotency keys and oversized payloads before
 opening a transaction.
@@ -226,7 +226,7 @@ does not replace constraints.
 
 **Verification evidence:** Assert blank/whitespace keys and payloads above the declared byte limit fail before the connection factory or cursor is called.
 
-### Exercise 12 — Concurrency
+### Exercise 12: Concurrency
 
 **Prompt:** Model two workers racing on the same idempotency key and identify which outcome the
 unique constraint guarantees.
@@ -240,7 +240,7 @@ guarantee.
 
 **Verification evidence:** Run two fake workers against one uniqueness arbiter; assert at most one receives an inserted ID and the other observes the duplicate path rather than a second logical job.
 
-### Exercise 13 — Observability
+### Exercise 13: Observability
 
 **Prompt:** Design retry metrics with low-cardinality tags and no payload, key, exception
 message, or request ID.
@@ -254,7 +254,7 @@ events.
 
 **Verification evidence:** Inspect emitted metrics: tags are limited to bounded outcome/error-class fields and contain no payload, idempotency key, request ID, or exception message.
 
-### Exercise 14 — Interruption
+### Exercise 14: Interruption
 
 **Prompt:** Decide how cancellation or `KeyboardInterrupt` crosses transaction and retry layers
 without being mistaken for a transient database error.

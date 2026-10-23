@@ -1,9 +1,9 @@
-# Day 10 — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT (Companion Guide)
+# Day 10: DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 09 — correlated subqueries and EXISTS](day09_correlated_subqueries.md)
+- **Prerequisites:** [Day 09; correlated subqueries and EXISTS](day09_correlated_subqueries.md)
 - **Artifacts:** [learner SQL](../day10_dml_with_subqueries.sql) ·
   [solution reasoning](../solutions/day10_solutions.md) ·
   [executable solution](../solutions/day10_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-10 — DML with Subqueries** and choose
+2. Open **SQL-10; DML with Subqueries** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -133,7 +133,7 @@ ORDER BY revenue DESC, category;
 
 ## Vocabulary and concepts
 
-- **DML:** data manipulation language—`INSERT`, `UPDATE`, and `DELETE`.
+- **DML:** data manipulation language, `INSERT`, `UPDATE`, and `DELETE`.
 - **Upsert:** insert a row or resolve a uniqueness conflict through a declared
   alternative action.
 - **Idempotent:** safe to repeat without accumulating unintended changes.
@@ -214,7 +214,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 11 — CASE expressions](day11_case_expressions.md).
+Continue to [Day 11; CASE expressions](day11_case_expressions.md).
 
 ## Deep dive and reference
 
@@ -252,11 +252,11 @@ Further reading
 - UPDATE: https://www.postgresql.org/docs/current/sql-update.html
 - UPSERT: https://www.postgresql.org/docs/current/sql-insert.html#SQL-ON-CONFLICT
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-10 — DML with Subqueries.

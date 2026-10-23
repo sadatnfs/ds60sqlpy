@@ -162,7 +162,7 @@ Transfer the same reasoning to a new small fixture before using it on larger dat
 
 - [PostgreSQL17 generate_series](https://www.postgresql.org/docs/17/functions-srf.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through sql-deep-06: Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality.

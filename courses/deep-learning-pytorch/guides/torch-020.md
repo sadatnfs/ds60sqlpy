@@ -167,7 +167,7 @@ Stochastic training changes are part of the fitting policy. Evaluation needs a d
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-020, Pooling, local augmentation and label invariants.

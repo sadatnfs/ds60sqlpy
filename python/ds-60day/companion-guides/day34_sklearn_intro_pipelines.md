@@ -1,4 +1,4 @@
-# Day 34 — scikit-learn Estimators and Pipelines
+# Day 34: scikit-learn Estimators and Pipelines
 
 **Lesson ID:** `python-34` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -106,7 +106,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — the scikit-learn estimator contract and leakage-safe pipelines
+## Concept deep dive: the scikit-learn estimator contract and leakage-safe pipelines
 
 ### The mental model
 
@@ -134,7 +134,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — prove that the scaler learned only training data
+### Focused example A: prove that the scaler learned only training data
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -162,7 +162,7 @@ assert learned_mean == X_train.mean()
 
 **Assumption to name:** Train/test membership was decided before any learned transformation.
 
-### Focused example B — handle an unseen category at prediction time
+### Focused example B: handle an unseen category at prediction time
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -208,12 +208,12 @@ assert transformed[0].sum() == 0
 
 1. Swap `LinearRegression` for `Ridge` and compare test scores.
 
-**Verify:** Practice 1 — the scikit-learn estimator contract and leakage-safe pipelines — use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
+**Verify:** Practice 1; the scikit-learn estimator contract and leakage-safe pipelines; use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.
 
 2. Inspect the coefficients and discuss how feature scaling changes their
    numeric values and interpretation.
 
-**Verify:** Practice 2 — the scikit-learn estimator contract and leakage-safe pipelines — print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
+**Verify:** Practice 2; the scikit-learn estimator contract and leakage-safe pipelines; print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.
 
 ### Progressive hints
 
@@ -234,22 +234,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Leakage prediction:** Predict how cross-validation scores can change when a scaler is fit on the complete dataset before `cross_val_score`, then explain why the code still runs without warning.
    **Progressive hint:** The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold's training rows.
 
-**Verify:** Leakage prediction — on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
+**Verify:** Leakage prediction; on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.
 
 4. **Mixed-type implementation:** Build a `ColumnTransformer` for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value.
    **Progressive hint:** Use separate nested pipelines and `handle_unknown='ignore'`; keep column lists explicit so schema drift is visible.
 
-**Verify:** Mixed-type implementation — fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
+**Verify:** Mixed-type implementation; fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.
 
 5. **Unknown-category debugging:** Fit on regions `north` and `south`, then predict a row with region `west`. Compare `OneHotEncoder` default behavior with `handle_unknown='ignore'` and explain the resulting representation.
    **Progressive hint:** The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.
 
-**Verify:** Unknown-category debugging — capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
+**Verify:** Unknown-category debugging; capture the default OneHotEncoder unknown-category ValueError for region='west'; with handle_unknown='ignore', assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.
 
 6. **Inspection and schema contract:** After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order.
    **Progressive hint:** Use `get_feature_names_out()` from the fitted ColumnTransformer. Select by column name rather than trusting an incoming positional order.
 
-**Verify:** Inspection and schema contract — print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.
+**Verify:** Inspection and schema contract; print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -284,12 +284,12 @@ right split, metric, or causal assumptions for you.
 - Work in the [Day 34 learner notebook](../notebooks/day34_sklearn_intro_pipelines.ipynb).
 - Then review the
   [Day 34 solution](../solutions/day34_sklearn_intro_pipelines/day34_solutions.md).
-- Continue to [Day 35 — Model Evaluation](day35_model_evaluation_cv.md).
+- Continue to [Day 35; Model Evaluation](day35_model_evaluation_cv.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-34` — Day 34 — scikit-learn Estimators and Pipelines.

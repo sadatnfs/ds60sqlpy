@@ -1,4 +1,4 @@
-# Bridge Day 3 — Safe parameterized Psycopg queries
+# Bridge Day 3: Safe parameterized Psycopg queries
 
 **Level:** Intermediate  
 **Prerequisite:** [Bridge Day 2](day02_protocols_context_decorators.md)
@@ -129,7 +129,7 @@ Identifiers are different because a table or column name changes SQL grammar.
 A value placeholder cannot stand for `training.customers`. If a reusable
 function truly needs a dynamic identifier, validate it against a small
 application allowlist and compose it with `psycopg.sql.Identifier`. The
-allowlist expresses authorization—what the application permits—while
+allowlist expresses authorization, what the application permits, while
 `Identifier` expresses correct quoting. Both are necessary.
 
 The query result has its own contract. A left join preserves customers without
@@ -248,12 +248,12 @@ temporary exploratory writes, call `rollback()` before closing.
 - **Assuming row shape forever:** map and validate rows at the adapter boundary.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-02`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -285,7 +285,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

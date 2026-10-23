@@ -1,4 +1,4 @@
-# Day 07 solutions — Week 1 Project: From Questions to Queries
+# Day 07 solutions: Week 1 Project: From Questions to Queries
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Build an order KPI table by status with order count, revenue, average order value, and distinct customers.
 
@@ -108,7 +108,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-07 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate orders at status grain and round only displayed monetary values. Evaluate another form against the concrete expected result (One row per order status) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, `customer_count`, and `revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Return the 20 products with the highest net line revenue.
 
@@ -152,7 +152,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-07 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate order items by product before ranking; use product ID as tie-breaker. Evaluate another form against the concrete expected result (At most 20 product rows) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `net_revenue DESC, p.product_id`.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Create a customer summary that retains customers with no orders.
 
@@ -196,7 +196,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-07 Exercise 3, the chosen form is justified by this lesson-specific rationale: Left join from customers and count/order-sum nullable matches with `COALESCE` only where zero has clear meaning. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_order_total` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Debugging
+## Exercise 4: Debugging
 
 **Prompt:** Reconcile stored order totals, computed line totals, and payments without multiplying item and payment rows.
 
@@ -255,7 +255,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-07 Exercise 4, the chosen form is justified by this lesson-specific rationale: Aggregate each detail table to order grain first, then join the one-row-per-order relations. Evaluate another form against the concrete expected result (One row per order with signed differences) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Prediction
+## Exercise 5: Prediction
 
 **Prompt:** Build a monthly order trend and explain which months are absent rather than zero.
 
@@ -294,7 +294,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-07 Exercise 5, the chosen form is justified by this lesson-specific rationale: Grouping observed orders alone cannot create empty calendar months. Evaluate another form against the concrete expected result (One row per observed order month) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_month`, `order_count`, and `stored_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Create a compact one-row audit of customer, order, item, and payment coverage.
 

@@ -1,9 +1,9 @@
-# Day 38 — Transactions and Isolation Levels
+# Day 38: Transactions and Isolation Levels
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 37 — partitioning and sharding](day37_partitioning_sharding.md)
+- **Prerequisites:** [Day 37; partitioning and sharding](day37_partitioning_sharding.md)
 - **Artifacts:** [learner SQL](../day38_transactions_isolation.sql) ·
   [solution reasoning](../solutions/day38_solutions.md) ·
   [executable solution](../solutions/day38_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-38 — Transactions Isolation** and choose
+2. Open **SQL-38; Transactions Isolation** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -72,7 +72,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -179,7 +179,7 @@ Record exact two-session ordering and SQLSTATEs.
 
 ## Next step
 
-Continue to [Day 39 — locks and deadlocks](day39_locks_deadlocks.md).
+Continue to [Day 39; locks and deadlocks](day39_locks_deadlocks.md).
 
 ## Deep dive and reference
 
@@ -234,11 +234,11 @@ For the transfer, lock/check/update both balances as one transaction and verify
 that total money is unchanged. A multi-query read-only report can still need
 `REPEATABLE READ` when all results must describe one consistent snapshot.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-38 — Transactions Isolation.

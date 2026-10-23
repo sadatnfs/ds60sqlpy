@@ -1,4 +1,4 @@
-# BRIDGE-JUPYTER-01 — Solution reasoning
+# BRIDGE-JUPYTER-01: Solution reasoning
 
 Try the
 [learner notebook](../notebooks/bridge_jupyter_01_postgresql_magics.ipynb)
@@ -121,7 +121,7 @@ companion guide. The executable reference is `bridge/professional/solutions/brid
 
 **Shared failure rule:** Notebook output, connection displays, Jinja rendering, or unbounded result materialization can leak secrets or turn exploration into unsafe application behavior.
 
-### Exercise 1 — Magic selection
+### Exercise 1: Magic selection
 
 **Prompt:** Run the line diagnostic and multi-line training query; explain why one `%sql` form
 is easier to review for each statement.
@@ -134,7 +134,7 @@ discipline.
 
 **Verification evidence:** Run `%sql SELECT current_database()` and the formatted customer cell query; record the same database name plus bounded rows, then explain that line magic suits a short diagnostic while cell magic exposes multi-line structure.
 
-### Exercise 2 — Security testing
+### Exercise 2: Security testing
 
 **Prompt:** Bind an injection-shaped string to a harmless read-only comparison, verify it
 behaves as data, then remove the value.
@@ -147,7 +147,7 @@ SQL structure.
 
 **Verification evidence:** Bind `US' OR TRUE --` through `:injection_value`; assert the harmless comparison returns zero/expected rows, no schema changes, and saved SQL still contains `:injection_value` rather than the rendered sentinel.
 
-### Exercise 3 — SQL practice
+### Exercise 3: SQL practice
 
 **Prompt:** Query US customers whose lifetime order total meets a Python threshold; bind country
 and threshold, order deterministically, and limit to 10.
@@ -160,7 +160,7 @@ tie-breaker.
 
 **Verification evidence:** Assert the query keeps `:exercise_country` and `:exercise_minimum_total`, returns at most 10 US customers meeting the threshold, and orders equal totals by customer ID.
 
-### Exercise 4 — DataFrame boundary
+### Exercise 4: DataFrame boundary
 
 **Prompt:** Convert the assigned result with `.DataFrame()` and assert the expected columns in
 order.
@@ -172,7 +172,7 @@ and assert the row count is bounded by 10 before using the frame.
 
 **Verification evidence:** Convert the assigned result and assert columns equal `['customer_id', 'full_name', 'lifetime_total']` in that order, row count is at most 10, and `lifetime_total` is numeric/Decimal-compatible.
 
-### Exercise 5 — Configuration
+### Exercise 5: Configuration
 
 **Prompt:** Repeat one small query with `autopandas=True`, identify the changed return type,
 then restore it to false.
@@ -184,7 +184,7 @@ and reset it in the same teaching section so later cells retain explicit result 
 
 **Verification evidence:** With `autopandas=False`, record a JupySQL result supporting `.DataFrame()`; with it true, record a pandas DataFrame; finally inspect configuration and assert it is restored false.
 
-### Exercise 6 — Memory reasoning
+### Exercise 6: Memory reasoning
 
 **Prompt:** Explain why `displaylimit=25` does not bound memory and identify the setting/query
 clause that does.
@@ -197,7 +197,7 @@ substantial server work.
 
 **Verification evidence:** State that `displaylimit=25` changes rendering only; inspect `autolimit` and explicit SQL `LIMIT` as fetch bounds, and identify aggregation/server work that `LIMIT` does not bound.
 
-### Exercise 7 — Identifier boundary
+### Exercise 7: Identifier boundary
 
 **Prompt:** Explain why `FROM :table_name` is not identifier binding and how a Psycopg
 application handles a validated dynamic identifier.
@@ -210,7 +210,7 @@ object, then composes it with `psycopg.sql.Identifier`; it does not pass a table
 
 **Verification evidence:** Show `FROM :table_name` fails as grammar rather than selecting a table; the application design must allowlist the name and compose it with `psycopg.sql.Identifier`.
 
-### Exercise 8 — Architecture decision
+### Exercise 8: Architecture decision
 
 **Prompt:** Write a decision note choosing interactive exploration or Psycopg application code
 using at least three criteria.
@@ -224,7 +224,7 @@ observability.
 
 **Verification evidence:** Choose notebook magics or Psycopg in a decision table covering reuse, typing/testing, transaction ownership, result size, and interactivity; the choice must follow those facts.
 
-### Exercise 9 — Cleanup
+### Exercise 9: Cleanup
 
 **Prompt:** List active aliases, close `ds60-course`, dispose the engine, and verify no
 connection literal or output remains saved.
@@ -236,7 +236,7 @@ clear all outputs/execution counts, and scan notebook JSON for URL-shaped creden
 
 **Verification evidence:** Run `%sql --connections`, close alias `ds60-course`, dispose the engine, and assert the final saved notebook has no connection URL, rendered credential, or non-empty output.
 
-### Exercise 10 — Setup review
+### Exercise 10: Setup review
 
 **Prompt:** Trace how the environment URL becomes a SQLAlchemy engine without ever being
 displayed and identify every validation step.
@@ -252,7 +252,7 @@ remote, multi-host, service, routing, or file-reading redirect.
 
 **Verification evidence:** Trace `DS60_DATABASE_URL` through `validate_course_database_target`, optional literal-name normalization, `make_url`, `postgresql+psycopg`, `create_engine`, and `%sql engine`; name the local transports it accepts and the redirect controls it rejects, then assert no step prints or evaluates the URL/engine as the final cell expression.
 
-### Exercise 11 — Prediction
+### Exercise 11: Prediction
 
 **Prompt:** Predict the difference between a `%sql` line assignment and a `%%sql` cell when both
 return the same rows.
@@ -265,7 +265,7 @@ otherwise equivalent.
 
 **Verification evidence:** Predict and confirm that assigned `%sql` returns a result object, while `%%sql` owns the remaining cell and cannot be placed on the assignment's right side; both return the same rows.
 
-### Exercise 12 — Capacity
+### Exercise 12: Capacity
 
 **Prompt:** Design a query/result-size check for a table with millions of rows and explain what
 remains unbounded after `LIMIT 25`.
@@ -278,7 +278,7 @@ large scan/sort and does not cap aggregate work.
 
 **Verification evidence:** For a million-row table, show a reviewed aggregate/count plus an explicit `LIMIT 25`; record that returned rows are bounded while scan, sort, and server execution may remain large.
 
-### Exercise 13 — Type binding
+### Exercise 13: Type binding
 
 **Prompt:** Bind a `Decimal`, date, boolean, and list value in small read-only queries and
 record their PostgreSQL result types.
@@ -291,7 +291,7 @@ explicitly.
 
 **Verification evidence:** Bind a `Decimal`, `date`, Boolean, and Python list through named parameters; record PostgreSQL types/values and assert none of their literal representations was pasted into SQL.
 
-### Exercise 14 — Transaction reasoning
+### Exercise 14: Transaction reasoning
 
 **Prompt:** Use `engine.begin()` for a rollback-safe teaching write in a disposable temporary
 scope, then explain why magics are not the transaction owner.
@@ -305,7 +305,7 @@ authorized disposable lab.
 
 **Verification evidence:** Use `engine.begin()` with a temporary/course-owned rollback-safe scope and inspect cleanup; state that the context, not `%sql`, owns commit/rollback and leave the checked-in notebook read-only.
 
-### Exercise 15 — Jinja boundary
+### Exercise 15: Jinja boundary
 
 **Prompt:** Demonstrate conceptually why `{{value}}` is code generation rather than safe value
 binding, including a harmless fixed example.
@@ -318,7 +318,7 @@ driver binding.
 
 **Verification evidence:** Render one harmless fixed Jinja example as text and compare it with `:value`: assert Jinja changes SQL source before execution while the named parameter leaves source unchanged.
 
-### Exercise 16 — Notebook hygiene
+### Exercise 16: Notebook hygiene
 
 **Prompt:** Validate nbformat, stable IDs, kernel metadata, live/static tags, empty outputs, and
 the absence of package-install magics, shell installs, URLs, and destructive SQL.
@@ -331,7 +331,7 @@ installation/credential/write patterns.
 
 **Verification evidence:** Run notebook validation and assert nbformat/stable IDs/kernel/tags are valid, outputs and execution counts are clear, and no install magic, shell install, URL literal, or destructive SQL exists.
 
-### Exercise 17 — Offline review
+### Exercise 17: Offline review
 
 **Prompt:** Explain how a learner without a running PostgreSQL server can still review this
 module and which claims remain unexecuted.
@@ -344,7 +344,7 @@ against PostgreSQL remain explicitly unverified until the opt-in live path runs.
 
 **Verification evidence:** Offline, compile/inspect Python and SQL cells, verify tags/metadata/parameters/cleanup text, and explicitly label database name, returned rows, and driver adaptation as unexecuted claims.
 
-### Exercise 18 — Handoff
+### Exercise 18: Handoff
 
 **Prompt:** Extract the capstone query into a Psycopg function design with typed inputs, a small
 cursor Protocol, and a fake-backed test.

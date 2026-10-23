@@ -1,4 +1,4 @@
-# Day 17 — pandas Series, DataFrames, and Indexing
+# Day 17: pandas Series, DataFrames, and Indexing
 
 **Level:** Intermediate
 
@@ -63,18 +63,18 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 17 — pandas series, dataframes, and indexing to practice labeled tabular data, row grain, indexes, selection, and vectorized columns
+**Lesson outcome:** use day 17; pandas series, dataframes, and indexing to practice labeled tabular data, row grain, indexes, selection, and vectorized columns
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
 A Series is a one-dimensional labeled array; a DataFrame is a table of
 labeled columns sharing an index. Before manipulating a DataFrame,
-state its **row grain**—what one row represents—and what makes a row
+state its **row grain**, what one row represents, and what makes a row
 unique. Column names carry variable meaning; the index carries row
 labels, which may or may not be a business key.
 
@@ -101,7 +101,7 @@ of labels. `frame["rate"] = frame["part"] / frame["whole"]` aligns the
 two Series by index and assigns the computed Series under a new column
 label.
 
-### Worked example 1 — Build and inspect a tiny labeled table
+### Worked example 1: Build and inspect a tiny labeled table
 
 Use constructed data so the example is fully offline. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -126,7 +126,7 @@ sales = pd.DataFrame({
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Filter rows and derive a column without a loop
+### Worked example 2: Filter rows and derive a column without a loop
 
 A mask selects west orders; a vectorized expression creates tax. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -281,11 +281,11 @@ boolean, and the highest valid tip percentage appears first.
 
 - [Open the learner notebook](../notebooks/day17_pandas_intro.ipynb)
 - [Check the separate solution](../solutions/day17_pandas_intro/day17_solutions.md)
-- [Next: Day 18 — I/O and cleaning](day18_pandas_io_cleaning.md)
+- [Next: Day 18; I/O and cleaning](day18_pandas_io_cleaning.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

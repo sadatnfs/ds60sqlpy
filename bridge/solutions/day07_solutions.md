@@ -1,4 +1,4 @@
-# Bridge Day 7 — Solution notes
+# Bridge Day 7: Solution notes
 
 Start with the [learner file](../lessons/day07_async_bounded_concurrency.py).
 Then inspect [day07_solution.py](day07_solution.py).
@@ -29,7 +29,7 @@ significant.
 - Preserving input order requires retaining indexed results. A streaming caller
   may prefer completion order to reduce latency and memory.
 - One failed task cancels the group. Some bulk workloads instead collect
-  per-item failures, but that must be an explicit result type—not suppressed
+  per-item failures, but that must be an explicit result type, not suppressed
   exceptions.
 - Async improves overlap for I/O waits; it does not speed CPU-heavy transforms.
 - Connection-pool capacity should usually be the same as or lower than the
@@ -67,7 +67,7 @@ reference is `bridge/solutions/day07_solution.py`; use it only after an honest a
 
 **Shared failure rule:** Blocking calls, shared unsafe cursors, swallowed cancellation, and unbounded task creation turn async code into a reliability hazard.
 
-### Exercise 1 — Implementation
+### Exercise 1: Implementation
 
 **Prompt:** Implement `managed_async_connection()` with awaited factory, one yield, commit on
 success, rollback on failure, and close on every path.
@@ -80,7 +80,7 @@ calls.
 
 **Verification evidence:** Assert async success events are `acquire, body, commit, close`; failure events are `acquire, body, rollback, close`; all lifecycle calls are awaited and the body error escapes.
 
-### Exercise 2 — Concurrency
+### Exercise 2: Concurrency
 
 **Prompt:** Implement `map_bounded()` with `asyncio.Semaphore` and `TaskGroup`, reject limits
 below one, and preserve input order.
@@ -94,7 +94,7 @@ append-on-completion order.
 
 **Verification evidence:** Assert limits below one raise `ValueError`; with limit two, peak active operations is at most two and returned results remain in input order.
 
-### Exercise 3 — Testing
+### Exercise 3: Testing
 
 **Prompt:** Measure active fake operations and assert maximum concurrency never exceeds the
 configured limit.
@@ -107,7 +107,7 @@ zero.
 
 **Verification evidence:** Use an active-counter fake guarded by `try/finally`; for limits one, two, and four, assert the recorded peak never exceeds the requested limit and returns to zero.
 
-### Exercise 4 — Ordering
+### Exercise 4: Ordering
 
 **Prompt:** Use different fake completion delays to prove output order follows input order
 rather than completion order.
@@ -119,7 +119,7 @@ one-for-one to the original sequence. Indexed storage makes scheduling irrelevan
 
 **Verification evidence:** Give later inputs shorter completion waits; assert completion log differs from input order while the returned list still matches input order.
 
-### Exercise 5 — Async SQL
+### Exercise 5: Async SQL
 
 **Prompt:** Define `AsyncReadCursor` and implement one query using `customer_id = ANY(%s)` with
 the Python ID list as one bound parameter.
@@ -132,7 +132,7 @@ list.
 
 **Verification evidence:** Inspect one awaited cursor call: SQL contains `customer_id = ANY(%s)`, parameters equal `([id1, id2],)`, and fetched rows map to the expected ID-to-name dictionary.
 
-### Exercise 6 — Validation
+### Exercise 6: Validation
 
 **Prompt:** Return early for empty customer IDs without touching the cursor and reject any
 non-positive ID.
@@ -145,7 +145,7 @@ effect.
 
 **Verification evidence:** Assert an empty ID sequence returns `{}` with zero cursor calls and any zero/negative ID raises `ValueError` before execute.
 
-### Exercise 7 — Scale design
+### Exercise 7: Scale design
 
 **Prompt:** Explain why a semaphore still creates one task per item and design a fixed-worker
 queue for a million inputs.
@@ -159,7 +159,7 @@ bounds.
 
 **Verification evidence:** For one million inputs, calculate one-million-task semaphore memory versus a fixed worker count; diagram producer, bounded queue, workers, sentinel shutdown, and result policy.
 
-### Exercise 8 — Cancellation
+### Exercise 8: Cancellation
 
 **Prompt:** Cancel a task inside `managed_async_connection()` and verify rollback/close happen
 before cancellation escapes.
@@ -172,7 +172,7 @@ result.
 
 **Verification evidence:** Cancel inside the managed body; assert awaited rollback and close finish before `CancelledError` reaches the parent.
 
-### Exercise 9 — Failure analysis
+### Exercise 9: Failure analysis
 
 **Prompt:** Trigger two concurrent task failures and inspect `ExceptionGroup` behavior from
 `TaskGroup`.
@@ -186,7 +186,7 @@ failures.
 
 **Verification evidence:** Synchronize two child failures, catch the resulting `ExceptionGroup`, and assert both configured exception types are inspectable after sibling cancellation cleanup.
 
-### Exercise 10 — Empty work
+### Exercise 10: Empty work
 
 **Prompt:** Test `map_bounded([], operation, limit=1)` and prove the operation is never called.
 
@@ -198,7 +198,7 @@ concurrency request.
 
 **Verification evidence:** Call `map_bounded([], operation, limit=1)`; assert result `[]` and operation call count zero.
 
-### Exercise 11 — Duplicates
+### Exercise 11: Duplicates
 
 **Prompt:** Define whether duplicate customer IDs are preserved, deduplicated, or rejected and
 test the chosen contract.
@@ -212,7 +212,7 @@ duplicate semantics.
 
 **Verification evidence:** Document one duplicate-ID policy and test `[2, 2, 3]` against it, including exact query parameters and returned keys/order.
 
-### Exercise 12 — Architecture
+### Exercise 12: Architecture
 
 **Prompt:** Compare a semaphore-per-item design with the worker queue on fairness, memory,
 cancellation, and complexity.
@@ -226,7 +226,7 @@ as universally superior.
 
 **Verification evidence:** Provide a comparison table with task count, peak memory, fairness, cancellation path, ordering policy, and implementation complexity for semaphore and worker-queue designs.
 
-### Exercise 13 — Database ownership
+### Exercise 13: Database ownership
 
 **Prompt:** Decide whether concurrent operations may share one connection/cursor or require a
 pool-acquired resource per worker.
@@ -240,7 +240,7 @@ safe choice.
 
 **Verification evidence:** Record resource IDs under concurrent work; assert each worker owns a pool-acquired connection/cursor and no unsafe cursor is entered concurrently.
 
-### Exercise 14 — Deterministic testing
+### Exercise 14: Deterministic testing
 
 **Prompt:** Replace timing-based async assertions with events/barriers and explain why
 wall-clock sleeps make tests flaky.

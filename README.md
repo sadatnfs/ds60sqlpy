@@ -66,11 +66,14 @@ second application.
 | Applied LLM systems | [Applied LLMs](courses/llm-applied/README.md) | RAG, evaluation, fine-tuning, tools and subject assistants |
 
 The library contains **598 canonical lessons and chapters across 14 subjects**,
-with 30 additional PySpark implementations. The statistics book develops all
-1,005 topics in its supplied outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
+with 30 additional PySpark implementations. The statistics book maps its chapters to 1,005 topics in the source outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
 connects mechanisms to a running subject-assistant case study; [Inside a
 Transformer](docs/learning/inside-a-transformer.md) provides a connected
 numerical explanation of the architecture.
+
+For a first SQL course, start with `sql-start-01`, `sql-start-02` and
+`sql-start-03`, then continue to `sql-01`. The classroom keeps this on-ramp
+ahead of schema and operations topics.
 
 Prerequisites and estimated durations help you choose your next step. They do
 not impose a deadline or lock you into one subject. Read slowly, revisit a
@@ -113,289 +116,54 @@ Native VS Code/Jupyter workflows remain available for learners who deliberately
 prepare those tools. Existing `/learn` and `/journeys` links are compatibility
 entrypoints into the unified classroom; new documentation uses `/classroom`.
 
-The optional [Codex MCP tutor](docs/mcp-tutor.md) can search content and help plan
+The optional [MCP tutor](docs/mcp-tutor.md) can search content and help plan
 study. It is read-only by default, reveals official solutions only on request,
-and does not execute pad code. Codex is optional; every lesson must explain
+and does not execute pad code. An AI tutor is optional; every lesson must explain
 its topic without requiring an agent.
 
 The [implementation checkpoint](docs/implementation/CHECKPOINT.md) records
-current acceptance evidence and explicit platform limits. Historical test
-counts describe the version tested, not a guarantee about every future edit.
+the maintained architecture and explicit verification boundaries. Use the
+workflow result for the exact revision when checking CI status.
 The [curriculum map](docs/curriculum-map.md) and generated catalog describe the
 Python, SQL and bridge inventory; authored module manifests retain the newer
 subjects' stable IDs.
 
-## Optional native development setup
+## Clone and contribute
 
-Run commands from the repository root - the directory containing this README.
+Install Git and clone the project, then start the classroom from its root:
 
-### 1. Install prerequisites
-
-The recommended compatibility baseline is:
-
-- Python 3.12
-- PostgreSQL 16 or newer
-- PostgreSQL 17 for the canonical automated environment
-- Current Visual Studio Code with the recommended extensions
-
-Follow the guide for your operating system:
-
-- [Windows](docs/setup/windows.md)
-- [macOS](docs/setup/macos.md)
-- [Linux](docs/setup/linux.md)
-
-### 2. Set up the Python environment
-
-Windows PowerShell:
-
-```powershell
-# Easiest guided route: double-click START_DS60.cmd in File Explorer.
-#
-# Recommended on a new Windows machine, including when Anaconda or PostgreSQL
-# is installed but not on PATH:
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-& .\scripts\bootstrap_windows.ps1
-
-$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
-    (Resolve-Path .\.venv\Scripts\python.exe).Path
-} else {
-    (Resolve-Path .\.venv\python.exe).Path
-}
-& $CoursePython scripts\course.py doctor
+```sh
+git clone https://github.com/sadatnfs/ds60sqlpy.git
+cd ds60sqlpy
+./classroom
 ```
 
-The discovery bootstrap leaves PATH process-local by default, installs
-IPython, JupyterLab, Jupyter Notebook, ipykernel, and the course dependency
-profile, registers `Python (ds60sqlpy)`, and verifies `psql` without connecting
-to a database. A standard `venv` puts Python under `.venv\Scripts`; the
-Anaconda fallback creates a conda prefix whose interpreter is
-`.venv\python.exe`. Resolve `$CoursePython` once per PowerShell window and
-reuse it for the commands below. See the
-[one-command Windows bootstrap guide](docs/setup/windows-bootstrap.md).
-Use the smaller historical `scripts\setup.ps1` only when a supported Python is
-already discoverable and you specifically want its standard-`venv`
-`.venv\Scripts\python.exe` layout; do not run it over a conda-prefix `.venv`.
+On Windows, run these commands in the WSL terminal after configuring your
+engine's WSL integration. The first build downloads dependencies and can take
+time. Keep its terminal open to follow the build logs. Use the printed address
+if your browser does not open automatically.
 
-`START_DS60.cmd` is the day-to-day Windows entry point; the PowerShell command
-above is the lower-level setup tool. The launcher reuses a ready environment
-without reinstalling packages. Before its first download it clearly labels the
-connected setup and asks you to type `SETUP`. It never asks for a database
-credential and never creates, drops, or resets database data.
+Developers who modify Python application code or content generators should read
+[CONTRIBUTING.md](CONTRIBUTING.md). It explains the locked Python environment,
+focused checks, grouped parallel tests, source ownership and generated readers.
+Running the classroom and developing its application are separate setup paths.
+Optional native notebook, SQL and editor workflows are documented under
+[setup](docs/setup/offline.md) and [dependency profiles](docs/dependency-profiles.md).
 
-macOS or Linux:
+To add a lesson or subject, start with the
+[curriculum extension playbook](docs/curriculum-extension-playbook.md) and the
+[repository authoring skill](.agents/skills/add-learning-path/SKILL.md).
+The skill covers learning progression, manifests, runtime boundaries, offline
+examples, browser delivery and saved-work verification. New subjects join the
+same classroom instead of creating another application.
 
-```bash
-bash scripts/setup.sh
-.venv/bin/python scripts/course.py doctor
-```
+## Project boundaries
 
-The Windows workflow intentionally does not require activating the virtual environment. In VS Code, select the interpreter inside `.venv`.
+DS60 runs trusted local learning code on your own machine. It is not intended
+as a public multi-user code-execution service. Keep its ports on loopback and
+use the provided disposable training database. Runtime limits and cleanup help
+contain mistakes; they do not make arbitrary untrusted programs safe.
 
-Core setup installs notebook, data, and quality tooling. Before later machine-learning and production lessons, install the larger optional groups while connected:
-
-Windows PowerShell:
-
-```powershell
-& .\scripts\bootstrap_windows.ps1 -Profile Advanced
-```
-
-macOS or Linux:
-
-```bash
-bash scripts/setup.sh --advanced
-```
-
-The advanced profile includes machine learning, production, Python/PostgreSQL
-bridge, professional data tooling, PostgreSQL notebook magics, deep-learning,
-natural-language-processing, and geospatial packages. It can take substantially
-longer and may use platform-specific wheels, so install it when the catalog
-shows that you need it. Catalog labels are not all literal package extras; use the
-[dependency-label mapping](docs/dependency-profiles.md) before choosing a
-targeted install.
-
-### 3. See what is ready
-
-```text
-python scripts/course.py catalog
-python scripts/course.py validate
-```
-
-If `python` does not resolve to the repository environment, use
-`.venv/bin/python` on macOS/Linux or `& $CoursePython` on Windows. In a new
-PowerShell window, rerun the resolver from step 2 first.
-
-To use the progress dashboard and launcher:
-
-```powershell
-# Windows PowerShell
-& $CoursePython scripts\learning_portal.py
-```
-
-```bash
-# macOS/Linux
-.venv/bin/python scripts/learning_portal.py
-```
-
-The server binds only to `127.0.0.1`, chooses a free port, uses a per-session
-request token, and accepts no arbitrary commands or paths. Use
-`--no-launches` for progress synchronization without native launch buttons.
-
-### 4. Start a lesson
-
-Python:
-
-1. Read [Python Day 1 companion guide](python/ds-60day/companion-guides/day01_setup_and_repl.md).
-2. Open [Python Day 1 notebook](python/ds-60day/notebooks/day01_setup_and_repl.ipynb) in VS Code.
-3. Attempt exercises before opening [the worked solution](python/ds-60day/solutions/day01_setup_and_repl/day01_solutions.md).
-
-SQL:
-
-Start with the three `sql-start` labs in catalog order before the historical
-Day 1 exercises; each uses a small fixture and a plain-language query model.
-
-1. Complete [SQL setup](sql/postgres-60day/README.md).
-2. Open the private course portal with `START_DS60.cmd` on Windows or
-   `scripts/learning_portal.py` with the repository interpreter on macOS/Linux.
-3. Open [SQL Day 1](lesson-pages/sql-01.html), read its guide, and choose
-   **Create/open guided SQL notebook**. The generated learner workspace is
-   ignored under `.learning/sql/sql-01/` and preserves your edits.
-4. If you prefer the terminal, run the complete lesson with error-stop behavior:
-
-   ```text
-   psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/postgres-60day/day01_select_where_orderby.sql
-   ```
-
-   That command uses the current operating system's PostgreSQL role and
-   authentication defaults. A native Windows installation normally needs the
-   `-h localhost -U postgres` flags from the
-   [Windows setup guide](docs/setup/windows.md#option-a-native-postgresql).
-   Before opening a guided notebook against native Windows PostgreSQL, also
-   complete the guide's non-interactive local-authentication step; the notebook
-   will never stop in a hidden password prompt.
-
-5. Attempt the exercises before opening [the worked solution](sql/postgres-60day/solutions/day01_solutions.md).
-6. Follow the generated catalog order: complete
-   [relational design](sql/professional/companion-guides/sql_found_01_relational_design.md)
-   between Days 15 and 16, then
-   [versioned migrations](sql/professional/companion-guides/sql_found_02_versioned_migrations.md)
-   between Days 39 and 40.
-
-`sql/postgres-60day/00_setup.sql` is a destructive reset of the disposable `training` schema. Never run it against a database that contains data you care about.
-
-Python + PostgreSQL engineering bridge:
-
-1. Complete at least Python Day 15 and SQL Day 15.
-2. Read the [bridge guide](bridge/README.md).
-3. Open [Bridge Day 1](bridge/lessons/day01_config_logging_cli.py) and its
-   [companion guide](bridge/companion-guides/day01_config_logging_cli.md).
-4. Run it with the repository interpreter; live-database work is optional and
-   uses `DS60_DATABASE_URL`.
-
-## Learn with Codex
-
-Codex is optional. The lessons, examples, and local tools remain usable without it.
-
-This repository includes the repo-local skill `$guide-ds60sqlpy-learning`. Try:
-
-```text
-Use $guide-ds60sqlpy-learning to assess my level and guide me through the next Python, SQL, or bridge lesson. Give hints before solutions.
-```
-
-The tutor should adapt commands to your operating system, inspect your actual
-work, and avoid opening official solutions until you ask. Every companion
-guide ends with a lesson-specific prompt; the same exact prompt is copyable
-from its generated reader and from the lesson selector in `START_HERE.html`.
-See [Learning with Codex](docs/learning-with-codex.md).
-
-## What is in the repository
-
-```text
-python/
-  PYTHON_TRAINING.md
-  ds-60day/
-    notebooks/
-    companion-guides/
-    solutions/
-  professional/
-sql/
-  ADVANCED_SQL_60DAY_PLAN.md
-  postgres-60day/
-    00_setup.sql
-    day*.sql
-    companion-guides/
-    solutions/
-  professional/
-bridge/
-  lessons/
-  companion-guides/
-  solutions/
-  tests/
-  professional/
-curriculum/catalog.json
-scripts/
-docs/
-.agents/skills/guide-ds60sqlpy-learning/
-```
-
-The maintained content has learner artifacts, companion guides, and runnable
-solutions for all 60 lessons in both main tracks, eight engineering bridge
-lessons, and 40 named foundation/professional/specialization modules. The
-generated catalog indexes 186 learning modules and reports their exact artifact
-paths.
-
-Every lesson also has a checked exercise-enrichment target. The immutable
-historical baseline lives in `curriculum/practice_baseline.json`; new lessons
-are registered separately in `curriculum/practice_expansion.json`. The target for each
-learner artifact, guide, and every explanatory solution artifact is at least
-`max(6, 2 × audited baseline)`. Run `python scripts/audit_practice.py` or read
-the generated [practice coverage report](docs/practice-coverage.md).
-The companion [lesson depth report](docs/lesson-depth-report.md) checks the
-self-contained beginner-teaching contract, explanatory solution floor,
-historical Python notebook depth, and per-lesson Codex prompts. These automated
-checks are minimums; runnable examples and technical explanations still
-receive human and execution review.
-
-## Documentation
-
-- [Curriculum map](docs/curriculum-map.md)
-- [Portable guided course portal](START_HERE.html)
-- [Portal modes, progress, and launcher security](docs/learning-portal.md)
-- [Professional and specialization paths](docs/professional-paths.md)
-- [VS Code workflow](docs/vscode.md)
-- [One-command Windows bootstrap](docs/setup/windows-bootstrap.md)
-- [Offline use](docs/setup/offline.md)
-- [PostgreSQL in Jupyter](docs/setup/jupyter-postgresql.md)
-- [Practice coverage](docs/practice-coverage.md)
-- [Lesson depth report](docs/lesson-depth-report.md)
-- [Curriculum design references](docs/curriculum-design-references.md)
-- [Local environments and caches](docs/local-files-and-caches.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Validation](docs/validation.md)
-- [Content authoring](docs/content-authoring.md)
-- [Contributing](CONTRIBUTING.md)
-
-## Continuous validation
-
-The badge at the top reflects `.github/workflows/ci.yml`. Every push and pull
-request runs locked core checks on Ubuntu (Python 3.11 and 3.12), Windows
-(3.12), and macOS (3.12), exercises the learner bootstrap, and executes the
-complete learner/solution SQL sequence against PostgreSQL 17. A scheduled or
-manual job also verifies every optional dependency group on Windows, Ubuntu,
-and macOS. See [Validation](docs/validation.md) for the exact local
-equivalents and the difference between structural, smoke, and full execution
-evidence.
-
-## Scope and expectations
-
-The Python track is strongest as a practical Python-for-data-science path; it
-is not a substitute for the complete Python language reference. The SQL track
-targets PostgreSQL. The bridge adds focused application-engineering practice,
-not a full distributed-systems or database-administration program. Treat lesson
-objectives and the generated catalog view - not a promise to teach
-“everything” - as the contract.
-
-Progress matters more than the 60-day label. A good session ends with runnable work, an explanation in your own words, and one small note about what to revisit.
-
-## License
-
-See [LICENSE](LICENSE).
+The repository is licensed under [Apache 2.0](LICENSE). Dependencies and linked
+learning resources retain their own licenses. See [CONTRIBUTING.md](CONTRIBUTING.md)
+for content attribution, verification and how to report a reproducible problem.

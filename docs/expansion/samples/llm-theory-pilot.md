@@ -309,7 +309,7 @@ is independent of that runtime. The exact NumPy examples and solution checks
 were executed with an existing prepared interpreter during authoring. No model,
 package or data download was performed.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning teaching workflow for planned

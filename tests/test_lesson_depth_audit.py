@@ -278,7 +278,7 @@ def test_sql_guide_rejects_nested_order_by_as_the_outer_result_order() -> None:
    **Verify:** Compare each rank with the expected row values.
    **Expected result/shape:** The final order is `{broken_order}`.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use guide-ds60sqlpy-learning for sql-17 with guide.md and lesson.sql.
@@ -299,7 +299,7 @@ Done when the verification passes.
 
 def test_heading_section_stops_at_the_next_peer_heading() -> None:
     source = """\
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the lesson prompt.
@@ -310,13 +310,13 @@ Use the lesson prompt.
 Not part of the prompt.
 """
 
-    section = _heading_section(source, re.compile(r"ask codex", re.IGNORECASE))
+    section = _heading_section(source, re.compile(r"ask an AI tutor", re.IGNORECASE))
 
     assert "Use the lesson prompt" in section
     assert "Not part of the prompt" not in section
 
 
-def test_ask_codex_prompt_names_direct_catalog_prerequisites() -> None:
+def test_ask_tutor_prompt_names_direct_catalog_prerequisites() -> None:
     lesson = Lesson(
         id="python-02",
         track="python",
@@ -335,7 +335,7 @@ def test_ask_codex_prompt_names_direct_catalog_prerequisites() -> None:
     source = """\
 # Example
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use guide-ds60sqlpy-learning for python-02 with guide.md and lesson.ipynb.
@@ -344,7 +344,7 @@ Done when the verification passes.
 ```
 """
 
-    assert "Ask Codex prompt does not name catalog prerequisite python-01" in _guide_issues(
+    assert "Ask an AI tutor prompt does not name catalog prerequisite python-01" in _guide_issues(
         lesson,
         source,
         solution_words=700,

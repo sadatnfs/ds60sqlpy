@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -520,8 +520,8 @@ label <span class="syntax-operator">=</span> <span class="syntax-string">&quot;<
 <li><a href="python-02.html#solution-1">Check the separate transfer solutions</a></li>
 <li><a href="python-03.html#guide">Next: Day 3 - Control flow and exceptions</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-02`
 (Day 2: Variables and Core Types). Direct catalog prerequisites: `python-foundations-01`.
 I have completed the direct prerequisites: `python-foundations-01`. Emphasize objects, names, built-in types, conversion, and truthiness.
@@ -802,7 +802,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-02-solutions-variables-and-core-types">Day 02 — Solutions: Variables and Core Types<a class="heading-anchor" href="#solution-1--day-02-solutions-variables-and-core-types" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-02-solutions-variables-and-core-types">Day 02: Solutions: Variables and Core Types<a class="heading-anchor" href="#solution-1--day-02-solutions-variables-and-core-types" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>objects, names, built-in types, conversion, and truthiness</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A Python value is an <strong>object</strong> with a type and behavior. A variable is a name that refers to an object; it is not a box permanently restricted to one type. Operators choose behavior from the operand types, which is why <code>7 + 2</code> performs arithmetic while <code>&quot;7&quot; + &quot;2&quot;</code> joins text.</p>
@@ -818,8 +818,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>objects, names, built-in types, conversion, and truthiness</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Prompt twice with <code>input()</code> for numbers such as <code>12.5</code> and <code>7.25</code>, convert both strings to <code>float</code>, and print <code>19.75</code>. <strong>Constraints:</strong> display a short label with the result and do not concatenate the raw strings. <strong>Verify:</strong> first show that <code>type(input(...))</code> is <code>str</code>, then test whole-number and decimal text.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Prompt twice with <code>input()</code> for numbers such as <code>12.5</code> and <code>7.25</code>, convert both strings to <code>float</code>, and print <code>19.75</code>. Constraints: display a short label with the result and do not concatenate the raw strings. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: first show that <code>type(input(...))</code> is <code>str</code>, then test whole-number and decimal text. That connects the answer to objects, names, built-in types, conversion, and truthiness.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable
@@ -846,7 +846,7 @@ whole_answers <span class="syntax-operator">=</span> <span class="syntax-builtin
 <span class="syntax-keyword">assert</span> prompt_for_sum<span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> _<span class="syntax-punctuation">:</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>whole_answers<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">19.0</span></code></pre>
 <p>Calling <code>prompt_for_sum()</code> without an argument uses real <code>input()</code> twice. Injecting a tiny reader supplies deterministic text during verification while proving that parsing occurs before numeric addition.</p>
 <p><strong>Verification evidence:</strong> first show that <code>type(input(...))</code> is <code>str</code>, then test whole-number and decimal text.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Starting from <code>raw = &#x27; Data Science &#x27;</code>, create a new value exactly equal to <code>&#x27;data science&#x27;</code>. <strong>Constraints:</strong> use string methods rather than slicing or a hard-coded replacement. <strong>Verify:</strong> assert the normalized result and show that <code>raw</code> itself is unchanged because strings are immutable.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Starting from <code>raw = &#x27; Data Science &#x27;</code>, create a new value exactly equal to <code>&#x27;data science&#x27;</code>. Constraints: use string methods rather than slicing or a hard-coded replacement. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the normalized result and show that <code>raw</code> itself is unchanged because strings are immutable. That connects the answer to objects, names, built-in types, conversion, and truthiness.</p>
 <pre class="highlighted-code"><code class="language-python">raw <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">  Data Science  </span><span class="syntax-string">&quot;</span>
@@ -856,7 +856,7 @@ normalized <span class="syntax-operator">=</span> raw<span class="syntax-operato
 <span class="syntax-keyword">assert</span> raw <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">  Data Science  </span><span class="syntax-string">&quot;</span></code></pre>
 <p>Both methods return new strings. Rebinding <code>normalized</code> preserves the raw evidence.</p>
 <p><strong>Verification evidence:</strong> assert the normalized result and show that <code>raw</code> itself is unchanged because strings are immutable.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Convert the text <code>&#x27;3.14&#x27;</code> to a floating-point number, double it, and format the result as <code>6.28</code>. <strong>Constraints:</strong> keep the original text in one name and the numeric value in another. <strong>Verify:</strong> assert the parsed value has type <code>float</code> and explain why <code>&#x27;3.14&#x27; * 2</code> is not numeric multiplication.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Convert the text <code>&#x27;3.14&#x27;</code> to a floating-point number, double it, and format the result as <code>6.28</code>. Constraints: keep the original text in one name and the numeric value in another. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the parsed value has type <code>float</code> and explain why <code>&#x27;3.14&#x27; * 2</code> is not numeric multiplication. That connects the answer to objects, names, built-in types, conversion, and truthiness.</p>
 <pre class="highlighted-code"><code class="language-python">raw_number <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3.14</span><span class="syntax-string">&quot;</span>
@@ -870,32 +870,32 @@ displayed <span class="syntax-operator">=</span> <span class="syntax-string">f</
 <span class="syntax-keyword">assert</span> raw_number <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">3.14</span><span class="syntax-string">&quot;</span></code></pre>
 <p>By contrast, <code>&quot;3.14&quot; * 2</code> repeats text and returns <code>&quot;3.143.14&quot;</code>.</p>
 <p><strong>Verification evidence:</strong> assert the parsed value has type <code>float</code> and explain why <code>&#x27;3.14&#x27; * 2</code> is not numeric multiplication.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the value and type of <code>&quot;7&quot; * 2</code>, <code>7 / 2</code>, <code>7 // 2</code>, <code>bool(&quot;&quot;)</code>, and <code>bool(&quot;0&quot;)</code> before running them. <strong>Progressive hint:</strong> Operators follow operand types; non-empty strings are truthy. <strong>Verify:</strong> Create a table of predicted/actual value and type for all five expressions; every row must match, including <code>bool(&#x27;0&#x27;) is True</code>.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the value and type of <code>&quot;7&quot; * 2</code>, <code>7 / 2</code>, <code>7 // 2</code>, <code>bool(&quot;&quot;)</code>, and <code>bool(&quot;0&quot;)</code> before running them. Progressive hint: Operators follow operand types; non-empty strings are truthy. Then compare the prediction with this proof target: Create a table of predicted/actual value and type for all five expressions; every row must match, including <code>bool(&#x27;0&#x27;) is True</code>. This makes objects, names, built-in types, conversion, and truthiness observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Create a table of predicted/actual value and type for all five expressions; every row must match, including <code>bool(&#x27;0&#x27;) is True</code>.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>raw = &#x27; 0042 &#x27;; cleaned = raw.strip(); number = int(cleaned)</code> and record the value/type after every assignment. <strong>Progressive hint:</strong> String methods return new strings; conversion constructs an integer. <strong>Verify:</strong> Record <code>repr(value)</code> and <code>type(value).__name__</code> after <code>raw</code>, <code>cleaned</code>, and <code>number</code>; confirm the original string still contains spaces.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>raw = &#x27; 0042 &#x27;; cleaned = raw.strip(); number = int(cleaned)</code> and record the value/type after every assignment. Progressive hint: String methods return new strings; conversion constructs an integer. Record the named value, shape, label, or iterator position needed to establish: Record <code>repr(value)</code> and <code>type(value).__name__</code> after <code>raw</code>, <code>cleaned</code>, and <code>number</code>; confirm the original string still contains spaces. The trace exposes objects, names, built-in types, conversion, and truthiness directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Record <code>repr(value)</code> and <code>type(value).__name__</code> after <code>raw</code>, <code>cleaned</code>, and <code>number</code>; confirm the original string still contains spaces.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>parse_temperature(text)</code> so surrounding whitespace is accepted and the result is a float, then format one decimal place. <strong>Progressive hint:</strong> Keep parsing separate from f-string presentation. <strong>Verify:</strong> Assert whitespace inputs such as <code>&#x27; 32.5 &#x27;</code> return <code>32.5</code> and format as <code>&#x27;32.5&#x27;</code>; prove invalid text follows the documented exception path.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>parse_temperature(text)</code> so surrounding whitespace is accepted and the result is a float, then format one decimal place. Progressive hint: Keep parsing separate from f-string presentation. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert whitespace inputs such as <code>&#x27; 32.5 &#x27;</code> return <code>32.5</code> and format as <code>&#x27;32.5&#x27;</code>; prove invalid text follows the documented exception path. That connects the answer to objects, names, built-in types, conversion, and truthiness.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert whitespace inputs such as <code>&#x27; 32.5 &#x27;</code> return <code>32.5</code> and format as <code>&#x27;32.5&#x27;</code>; prove invalid text follows the documented exception path.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair <code>enabled = bool(raw)</code> for inputs such as <code>&quot;true&quot;</code>, <code>&quot;false&quot;</code>, and <code>&quot; FALSE &quot;</code>. Reject unknown spellings. <strong>Progressive hint:</strong> Normalize the text and compare explicit accepted tokens. <strong>Verify:</strong> Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as <code>&#x27;yes-ish&#x27;</code> raises a specific <code>ValueError</code>.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair <code>enabled = bool(raw)</code> for inputs such as <code>&quot;true&quot;</code>, <code>&quot;false&quot;</code>, and <code>&quot; FALSE &quot;</code>. Reject unknown spellings. Progressive hint: Normalize the text and compare explicit accepted tokens. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as <code>&#x27;yes-ish&#x27;</code> raises a specific <code>ValueError</code>. The diagnosis depends on objects, names, built-in types, conversion, and truthiness.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert accepted case/whitespace variants map to the intended Booleans and that an unknown token such as <code>&#x27;yes-ish&#x27;</code> raises a specific <code>ValueError</code>.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Model an optional discount where <code>None</code> means not supplied and <code>0.0</code> means supplied but zero. Explain why a truthiness check loses meaning. <strong>Progressive hint:</strong> Use <code>is None</code> when absence is distinct from a numeric zero. <strong>Verify:</strong> Test <code>None</code>, <code>0.0</code>, and <code>0.25</code> separately; assert the first is absent while the latter two remain supplied numeric discounts.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Model an optional discount where <code>None</code> means not supplied and <code>0.0</code> means supplied but zero. Explain why a truthiness check loses meaning. Progressive hint: Use <code>is None</code> when absence is distinct from a numeric zero. Values below, at, and above the named boundary must produce the evidence Test <code>None</code>, <code>0.0</code>, and <code>0.25</code> separately; assert the first is absent while the latter two remain supplied numeric discounts. Those cases show how objects, names, built-in types, conversion, and truthiness behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test <code>None</code>, <code>0.0</code>, and <code>0.25</code> separately; assert the first is absent while the latter two remain supplied numeric discounts.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Separate parsing, calculation, and presentation. Predict a value&#x27;s type before relying on an operator or truthiness rule.</p>
-<h5 id="solution-1--shared-implementation-for-exercise-4-prediction">Shared implementation for Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-4-prediction" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercise-4-prediction">Shared implementation for Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercise-4-prediction" aria-label="Link to this section">#</a></h5>
 <p><code>&quot;7&quot; * 2</code> is the string <code>&quot;77&quot;</code>; <code>7 / 2</code> is the float <code>3.5</code>; <code>7 // 2</code> is the integer <code>3</code>; <code>bool(&quot;&quot;)</code> is false; and <code>bool(&quot;0&quot;)</code> is true because the string is non-empty.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-8-parse-first-calculate-second-present-last">Shared implementation for Exercises 5–8 — Parse first, calculate second, present last<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-8-parse-first-calculate-second-present-last" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-8-parse-first-calculate-second-present-last">Shared implementation for Exercises 5–8: Parse first, calculate second, present last<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-8-parse-first-calculate-second-present-last" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">raw <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> 0042 </span><span class="syntax-string">&quot;</span>
 cleaned <span class="syntax-operator">=</span> raw<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>       <span class="syntax-comment"># &quot;0042&quot; is still text; raw is unchanged.</span>
 number <span class="syntax-operator">=</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>cleaned<span class="syntax-punctuation">)</span>       <span class="syntax-comment"># int parses the compatible text as 42.</span>
@@ -1071,16 +1071,16 @@ discount<span class="syntax-punctuation">:</span> <span class="syntax-builtin">f
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-02`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-02`
 (Day 2: Variables and Core Types). Direct catalog prerequisites: `python-foundations-01`.
 I have completed the direct prerequisites: `python-foundations-01`. Emphasize objects, names, built-in types, conversion, and truthiness.
 Read `python/ds-60day/companion-guides/day02_basics_types.md` and use the learner notebook
@@ -1095,7 +1095,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1206,18 +1206,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

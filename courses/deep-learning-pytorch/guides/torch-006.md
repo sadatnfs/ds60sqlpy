@@ -176,7 +176,7 @@ It can bypass useful autograd safeguards and create silently incorrect derivativ
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-006, Autograd graphs, the chain rule and in-place hazards.

@@ -1,4 +1,4 @@
-# BRIDGE-ANALYTICS-01 — Solution reasoning
+# BRIDGE-ANALYTICS-01: Solution reasoning
 
 Start with the
 [learner file](../lessons/bridge_analytics_01_local_project.py). The executable
@@ -109,7 +109,7 @@ companion guide. The executable reference is `bridge/professional/solutions/brid
 
 **Shared failure rule:** A model can execute successfully while still duplicating grain, drifting schema, misdefining a metric, or failing reconciliation.
 
-### Exercise 1 — Producer contract
+### Exercise 1: Producer contract
 
 **Prompt:** Add primary-key validation and a duplicate fixture failure for every producer
 contract.
@@ -121,7 +121,7 @@ and add deterministic fixtures that differ only by the duplicate row.
 
 **Verification evidence:** For each producer contract, load one unique fixture successfully, duplicate its primary-key tuple, and assert validation fails with the source/grain named before DuckDB insertion.
 
-### Exercise 2 — DAG
+### Exercise 2: DAG
 
 **Prompt:** Draw dependencies and implement deterministic topological order with
 missing-dependency and cycle detection.
@@ -133,7 +133,7 @@ states, choose lexicographic ready nodes, and raise with the bounded cycle/missi
 
 **Verification evidence:** Assert raw sources precede dependent staging/intermediate/mart models with stable name ordering; an unknown dependency and a two-model cycle each raise `ValueError` listing unresolved names.
 
-### Exercise 3 — Staging
+### Exercise 3: Staging
 
 **Prompt:** Implement the three staging models without aggregation or `DISTINCT` and state each
 row grain.
@@ -145,7 +145,7 @@ source row. Let producer tests expose duplicates rather than masking them.
 
 **Verification evidence:** Compare staging row counts with their raw sources, assert no `DISTINCT`/aggregation, and record grains `customer_id`, `order_id`, and `(order_id, line_number)` with typed/normalized columns.
 
-### Exercise 4 — Intermediate model
+### Exercise 4: Intermediate model
 
 **Prompt:** Declare `int_order_revenue` grain, predict row count, then implement its join and
 aggregate.
@@ -157,7 +157,7 @@ only dimensions/many-to-one sources, and reconcile predicted order count with so
 
 **Verification evidence:** Predict and assert one row per order in `int_order_revenue`, with exact summed item revenue and retained customer/status/date fields; row count equals raw orders, including orders without matching items per policy.
 
-### Exercise 5 — Mart
+### Exercise 5: Mart
 
 **Prompt:** Build `mart_daily_revenue` and document exact status exclusions and UTC/date
 semantics.
@@ -170,7 +170,7 @@ documentation.
 
 **Verification evidence:** Assert one row per UTC order date, only the documented completed/paid statuses contribute, revenue/order/customer measures match fixtures, and output is ordered by date.
 
-### Exercise 6 — Identifier safety
+### Exercise 6: Identifier safety
 
 **Prompt:** Validate trusted model names before using them in generated DDL.
 
@@ -182,7 +182,7 @@ grammar/allowlist.
 
 **Verification evidence:** Pass every checked-in model name and injection-shaped/uppercase/punctuated names; assert only names matching the trusted identifier policy reach generated DDL.
 
-### Exercise 7 — Schema contract
+### Exercise 7: Schema contract
 
 **Prompt:** Compare `DESCRIBE` output with `MART_CONTRACT`; make separate name and type drift
 fixtures.
@@ -194,7 +194,7 @@ and raise targeted errors for missing/extra/type/nullability drift.
 
 **Verification evidence:** Compare exact `DESCRIBE` column order/type compatibility with `MART_CONTRACT`; separate fixtures must report name drift and type drift distinctly before publication.
 
-### Exercise 8 — Data tests
+### Exercise 8: Data tests
 
 **Prompt:** Write zero-row violation queries for uniqueness, not-null, accepted status,
 relationships, and positive money/quantity rules.
@@ -206,7 +206,7 @@ preserve individual results rather than one combined opaque flag.
 
 **Verification evidence:** Execute each violation query against valid fixtures and assert zero rows; inject one uniqueness, null, status, relationship, money, and quantity violation and assert its named test returns evidence rows.
 
-### Exercise 9 — Reconciliation
+### Exercise 9: Reconciliation
 
 **Prompt:** Write an independent reconciliation for mart revenue, orders, and customers by day.
 
@@ -217,7 +217,7 @@ day, and fail on missing sides or exact measure differences.
 
 **Verification evidence:** Independently recompute daily revenue/order/customer measures from order grain and full-outer compare; assert zero mismatches, then perturb each mart measure and observe a dated mismatch row.
 
-### Exercise 10 — Semantic metric
+### Exercise 10: Semantic metric
 
 **Prompt:** Define one extra metric with aggregation, grain, time dimension, unit, exclusions,
 and denominator.
@@ -230,7 +230,7 @@ behavior.
 
 **Verification evidence:** Define an additional metric with model, expression, aggregation, grain, time dimension, unit, exclusions, and denominator; calculate one fixture date and compare the exact value.
 
-### Exercise 11 — Idempotency
+### Exercise 11: Idempotency
 
 **Prompt:** Run the project twice in one connection and prove identical ordered snapshots.
 
@@ -241,7 +241,7 @@ both times, and compare deterministic `ORDER BY` snapshots plus unchanged row co
 
 **Verification evidence:** Run the project twice in one connection; assert identical ordered snapshots, row counts, test results, and reconciliation, with no duplicate append state.
 
-### Exercise 12 — Impact analysis
+### Exercise 12: Impact analysis
 
 **Prompt:** Add one deterministic source row, predict every downstream change, then update tests
 without weakening contracts.
@@ -253,7 +253,7 @@ rebuild, and assert only those rows/measures change while all contracts remain i
 
 **Verification evidence:** Add one source row and write predicted staging/intermediate/mart row and measure deltas first; assert the actual snapshot matches every predicted change and existing contracts remain unchanged.
 
-### Exercise 13 — Freshness
+### Exercise 13: Freshness
 
 **Prompt:** Add a producer freshness contract with an injected as-of time and distinguish stale
 from missing data.
@@ -265,7 +265,7 @@ timestamp with injected UTC as-of; report empty and stale sources as separate fa
 
 **Verification evidence:** With an injected as-of instant, assert a present old source is reported stale, an absent source missing, and a recent source current using the declared threshold.
 
-### Exercise 14 — Build strategy
+### Exercise 14: Build strategy
 
 **Prompt:** Compare full rebuild and incremental processing for this local project and state
 what evidence is missing for incrementality.
@@ -278,7 +278,7 @@ periodic full rebuilds.
 
 **Verification evidence:** Provide a comparison of full rebuild versus incremental state, keys, late updates, delete handling, and atomic publication; mark incrementality unproved until change-capture and replay tests exist.
 
-### Exercise 15 — Money correctness
+### Exercise 15: Money correctness
 
 **Prompt:** Trace exact revenue from producer Decimal through DuckDB type, aggregation, Python
 snapshot, and reconciliation.
@@ -290,7 +290,7 @@ to Decimal at the boundary, and round only labeled presentation values.
 
 **Verification evidence:** Trace one exact Decimal from source tuple through DuckDB `DECIMAL`, order aggregation, mart aggregation, Python snapshot, and reconciliation; assert equality at every boundary without float conversion.
 
-### Exercise 16 — NULL semantics
+### Exercise 16: NULL semantics
 
 **Prompt:** Choose behavior for missing dimension labels and prove it does not change fact row
 count or measure totals.
@@ -303,7 +303,7 @@ declared.
 
 **Verification evidence:** Inject a missing dimension label; assert the declared replacement/NULL policy, unchanged fact row count, and unchanged revenue/order totals.
 
-### Exercise 17 — Time semantics
+### Exercise 17: Time semantics
 
 **Prompt:** Define daily boundaries for timezone-aware source instants and test an order around
 midnight.
@@ -316,7 +316,7 @@ assignment.
 
 **Verification evidence:** Place timezone-aware orders immediately before and after the declared UTC midnight; assert they land on the two expected dates and no local-machine timezone changes the snapshot.
 
-### Exercise 18 — Late data
+### Exercise 18: Late data
 
 **Prompt:** Model a late-arriving order for a previously built day and compare full rebuild with
 an incremental repair.
@@ -328,7 +328,7 @@ ingestion-time lookback or affected-partition reprocessing plus reconciliation.
 
 **Verification evidence:** Add a late order to an already-built date; assert full rebuild corrects that date and the proposed incremental repair reprocesses the same affected partition to an identical result.
 
-### Exercise 19 — Snapshot determinism
+### Exercise 19: Snapshot determinism
 
 **Prompt:** Require explicit ordering and stable serialization for mart snapshots across
 platforms.
@@ -340,7 +340,7 @@ normalize exact scalar serialization, and compare tuples rather than display-for
 
 **Verification evidence:** Assert mart queries include a complete unique order, serialize dates/Decimals with the documented stable format, and produce byte-identical snapshots across repeated runs.
 
-### Exercise 20 — Performance
+### Exercise 20: Performance
 
 **Prompt:** Inspect a bounded `EXPLAIN` for the intermediate/mart build and identify one
 optimization that preserves grain.
@@ -352,7 +352,7 @@ columns or pre-aggregate at declared grain, then re-run all tests/reconciliation
 
 **Verification evidence:** Capture bounded `EXPLAIN` output for intermediate and mart builds, identify scan/join/aggregate operators, and propose one optimization whose post-change grain, counts, and reconciliation remain identical.
 
-### Exercise 21 — Lineage
+### Exercise 21: Lineage
 
 **Prompt:** Produce a compact source-to-metric lineage table from `depends_on` and metric
 definitions.
@@ -365,7 +365,7 @@ alone.
 
 **Verification evidence:** Generate lineage rows from every raw source through models to each metric; assert all declared dependencies appear, no orphan/cycle exists, and `gross_revenue` terminates at `mart_daily_revenue`.
 
-### Exercise 22 — Transaction
+### Exercise 22: Transaction
 
 **Prompt:** Design build publication so readers do not observe half-rebuilt models after a
 failure.
@@ -378,7 +378,7 @@ swap after validation.
 
 **Verification evidence:** Inject failure before publication and assert readers retain the prior complete mart; the design must stage or transact replacement so no partial model set becomes visible.
 
-### Exercise 23 — Failure policy
+### Exercise 23: Failure policy
 
 **Prompt:** Make any contract, data-test, or reconciliation failure stop publication while
 retaining inspectable results.
@@ -390,7 +390,7 @@ bounded failure evidence without mutating the last known-good artifact.
 
 **Verification evidence:** Force producer-contract, table-contract, data-test, and reconciliation failures separately; assert each blocks publication while retaining the named failing query/result for diagnosis.
 
-### Exercise 24 — Portable artifact
+### Exercise 24: Portable artifact
 
 **Prompt:** Export a deterministic local result with manifest, metric definitions, test
 evidence, and cleanup instructions.

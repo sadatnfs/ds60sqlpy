@@ -1,4 +1,4 @@
-# Day 54 — Monitoring and Model Governance
+# Day 54: Monitoring and Model Governance
 
 **Lesson ID:** `python-54` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
 
@@ -103,7 +103,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — monitoring layers, drift signals, delayed labels, and governance decisions
+## Concept deep dive: monitoring layers, drift signals, delayed labels, and governance decisions
 
 ### The mental model
 
@@ -131,7 +131,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — calculate PSI with fixed reference quantile bins
+### Focused example A: calculate PSI with fixed reference quantile bins
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -157,7 +157,7 @@ assert psi >= 0
 
 **Assumption to name:** Reference quantiles, smoothing, population, and sample window are documented and remain comparable.
 
-### Focused example B — keep label-available and label-delayed evidence separate
+### Focused example B: keep label-available and label-delayed evidence separate
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -206,15 +206,15 @@ assert label_coverage == 0.12
 
 1. Compute PSI for multiple features or score windows over time.
 
-**Verify:** Practice 1 — monitoring layers, drift signals, delayed labels, and governance decisions — for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
+**Verify:** Practice 1; monitoring layers, drift signals, delayed labels, and governance decisions; for each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
 2. Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.
 
-**Verify:** Practice 2 — monitoring layers, drift signals, delayed labels, and governance decisions — save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
+**Verify:** Practice 2; monitoring layers, drift signals, delayed labels, and governance decisions; save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
 3. Draft a governance policy covering roles, approvals, alerts, and rollback.
 
-**Verify:** Practice 3 — monitoring layers, drift signals, delayed labels, and governance decisions — produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
+**Verify:** Practice 3; monitoring layers, drift signals, delayed labels, and governance decisions; produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
 ### Progressive hints
 
@@ -227,7 +227,7 @@ assert label_coverage == 0.12
 
 ### Additional mastery practice
 
-Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery—not dashboards that merely display numbers.
+Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery, not dashboards that merely display numbers.
 
 Predict or plan before you run code. Use the hint only after an honest
 attempt, and record the evidence that would prove your result correct.
@@ -235,17 +235,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Label-delay analysis:** Simulate labels arriving 14–30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
    **Progressive hint:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
 
-**Verify:** Label-delay analysis — print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
+**Verify:** Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
 
 5. **Alert hysteresis:** Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.
    **Progressive hint:** Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.
 
-**Verify:** Alert hysteresis — feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.
+**Verify:** Alert hysteresis; feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.
 
 6. **Rollback drill:** Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.
    **Progressive hint:** A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.
 
-**Verify:** Rollback drill — record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.
+**Verify:** Rollback drill; record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -282,12 +282,12 @@ health; document what is intentionally not monitored.
 - Work in the [Day 54 learner notebook](../notebooks/day54_monitoring_model_governance.ipynb).
 - Then review the
   [Day 54 solution](../solutions/day54_monitoring_model_governance/day54_solutions.md).
-- Continue to [Day 55 — Docker](day55_apis_containerization_docker.md).
+- Continue to [Day 55; Docker](day55_apis_containerization_docker.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-54` — Day 54 — Monitoring and Model Governance.

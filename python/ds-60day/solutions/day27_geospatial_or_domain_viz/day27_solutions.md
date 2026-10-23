@@ -1,4 +1,4 @@
-# Day 27 — Solutions: Geospatial or Domain-specific Visualization
+# Day 27: Solutions: Geospatial or Domain-specific Visualization
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -8,7 +8,7 @@ result before comparing your attempt with its matching assertions.
 
 Geospatial data combines ordinary attributes with geometry and a
 coordinate reference system (CRS). A coordinate pair is conventionally
-`(x, y)`—longitude then latitude for geographic coordinates. Values can
+`(x, y)`, longitude then latitude for geographic coordinates. Values can
 look numerically valid while being semantically swapped, so record
 source order and bounds.
 
@@ -32,9 +32,9 @@ emptiness, bounds, provenance, and offline availability before plotting.
 For this lesson's **geospatial semantics, coordinate reference systems, valid geometry, and offline fallback** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. **Before plotting:** record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. **Constraints:** transform all layers to one appropriate CRS and never use `set_crs` as if it reprojected coordinates. **Verify:** check a known location/bounds and confirm entity count survives reprojection.
 
@@ -79,7 +79,7 @@ meaning and would be incorrect here.
 
 **Verification evidence:** check a known location/bounds and confirm entity count survives reprojection.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Alternatively, construct a deterministic NetworkX domain graph where node and edge meanings are written explicitly. **Constraints:** use a fixed layout seed, encode at most a few meaningful attributes, provide labels/legend, and do not require network data. **Verify:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
 
@@ -133,9 +133,9 @@ questions because its layout encodes readability, not physical space.
 
 **Verification evidence:** reconcile plotted node/edge counts to the graph and explain what spatial questions this fallback cannot answer.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict what goes wrong when latitude/longitude degrees are overlaid on a web map measured in Web Mercator meters. **Progressive hint:** Layers must use compatible coordinate reference systems (CRSs). **Verify:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 
@@ -143,15 +143,15 @@ questions because its layout encodes readability, not physical space.
 
 **Evidence to locate in the grouped implementation:** Compare both CRS/bounds, then assert reprojection makes units compatible and the transformed layers overlap in a plausible extent.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
-**Learner contract:** **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters. **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
+**Learner contract:** **Tracing:** Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. **Progressive hint:** Both numbers may fall in legal ranges, so semantic order matters. **Verify:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location.
 
-**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Progressive hint: Both numbers may fall in legal ranges, so semantic order matters. Record the named value, shape, label, or iterator position needed to establish: Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location. The trace exposes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback directly.
+**Reasoning:** Trace the concrete values in this contract one step at a time: Tracing: Trace one point represented as `(longitude, latitude)` and explain why swapping values can still create a valid but wrong location. Progressive hint: Both numbers may fall in legal ranges, so semantic order matters. Record the named value, shape, label, or iterator position needed to establish: Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location. The trace exposes geospatial semantics, coordinate reference systems, valid geometry, and offline fallback directly.
 
-**Evidence to locate in the grouped implementation:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks—not only numeric ranges—detect the wrong location.
+**Evidence to locate in the grouped implementation:** Validate the known longitude/latitude pair against real bounds, swap it, and show why semantic checks, not only numeric ranges, detect the wrong location.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement a longitude/latitude bounding-box validator with clear ordering and range checks. **Progressive hint:** Require west ≤ east, south ≤ north, and geographic bounds. **Verify:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
 
@@ -159,7 +159,7 @@ questions because its layout encodes readability, not physical space.
 
 **Evidence to locate in the grouped implementation:** Assert a valid box passes and separately reject west>east, south>north, longitude outside ±180, and latitude outside ±90.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a spatial join or overlay attempted before CRS comparison and reprojection. **Progressive hint:** Inspect `.crs`; transform one layer to the other's CRS. **Verify:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
 
@@ -167,7 +167,7 @@ questions because its layout encodes readability, not physical space.
 
 **Evidence to locate in the grouped implementation:** Show the pre-reprojection CRS mismatch, transform one layer, and assert the operation now uses equal CRS while preserving row identities.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Define fallback behavior for missing/invalid geometry or unavailable map data, including an offline domain-graph alternative. **Progressive hint:** A missing basemap should not erase the analytical data layer. **Verify:** Feed missing/invalid geometry and unavailable basemap fixtures; assert analytical records remain represented by the documented local layer or graph fallback.
 
@@ -179,13 +179,13 @@ questions because its layout encodes readability, not physical space.
 
 Treat coordinate reference system, coordinate order, source provenance, geometry validity, and network/cache behavior as part of the visualization.
 
-### Shared implementation for Exercises 3–4 — CRS and coordinate order
+### Shared implementation for Exercises 3–4: CRS and coordinate order
 
 Longitude/latitude data are commonly stored as `(x, y) = (longitude, latitude)`.
 Swapping them may still produce numbers inside valid ranges but a wrong place.
 Degrees and projected meters cannot be overlaid without reprojection.
 
-### Shared implementation for Exercises 5–7 — Validate spatial boundaries and degrade gracefully
+### Shared implementation for Exercises 5–7: Validate spatial boundaries and degrade gracefully
 
 ```python
 from dataclasses import dataclass

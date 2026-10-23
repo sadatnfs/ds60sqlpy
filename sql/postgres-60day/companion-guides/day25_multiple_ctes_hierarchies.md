@@ -1,9 +1,9 @@
-# Day 25 — Multiple CTEs and Hierarchies in One Query (Companion Guide)
+# Day 25: Multiple CTEs and Hierarchies in One Query (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Prerequisites:** [Day 24 — recursive CTEs](day24_recursive_ctes.md)
+- **Prerequisites:** [Day 24; recursive CTEs](day24_recursive_ctes.md)
 - **Artifacts:** [learner SQL](../day25_multiple_ctes_hierarchies.sql) ·
   [solution reasoning](../solutions/day25_solutions.md) ·
   [executable solution](../solutions/day25_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-25 — Multiple CTEs Hierarchies** and choose
+2. Open **SQL-25; Multiple CTEs Hierarchies** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -283,7 +283,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 26 — CTEs with window functions](day26_ctes_with_windows.md).
+Continue to [Day 26; CTEs with window functions](day26_ctes_with_windows.md).
 
 ## Deep dive and reference
 
@@ -318,11 +318,11 @@ Current practice map
 Further reading
 - WITH queries: https://www.postgresql.org/docs/current/queries-with.html
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-25 — Multiple CTEs Hierarchies.

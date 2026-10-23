@@ -1,9 +1,9 @@
-# Day 03 — INNER JOINs: Relational Linking and Predicate Placement (Companion Guide)
+# Day 03: INNER JOINs: Relational Linking and Predicate Placement (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 02 — aggregations and grouping](day02_aggregates_groupby_having.md)
+- **Prerequisites:** [Day 02; aggregations and grouping](day02_aggregates_groupby_having.md)
 - **Artifacts:** [learner SQL](../day03_inner_joins.sql) ·
   [solution reasoning](../solutions/day03_solutions.md) ·
   [executable solution](../solutions/day03_solutions.sql)
@@ -214,7 +214,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 04 — outer joins](day04_outer_joins.md).
+Continue to [Day 04; outer joins](day04_outer_joins.md).
 
 ## Deep dive and reference
 
@@ -236,7 +236,7 @@ Core concepts and deep dive
 - Joining chains: Join dimension tables (customers, products) to fact tables (orders, order_items) along keys. Prefer explicit column lists to avoid ambiguous names.
 
 Walkthrough mapping to your schema
-- orders o JOIN customers c ON c.customer_id=o.customer_id — adds customer context to orders.
+- orders o JOIN customers c ON c.customer_id=o.customer_id; adds customer context to orders.
 - `order_items oi JOIN products p ON p.product_id=oi.product_id` brings product
   name, category, catalog price, and cost to lines.
 - Multi-join: orders→order_items→products to compute revenue: SUM(oi.quantity*oi.unit_price*(1-oi.discount)).
@@ -246,7 +246,7 @@ Validation patterns
 - Check join selectivity: how many rows drop when adding additional ON predicates.
 
 Anti-patterns and pitfalls
-- Old-style comma joins with predicates in WHERE — easy to miss a condition and create cross joins; use explicit JOIN ... ON.
+- Old-style comma joins with predicates in WHERE; easy to miss a condition and create cross joins; use explicit JOIN ... ON.
 - Using LIKE to join keys; always use exact key equality unless justified.
 - Ambiguity in column names after join; qualify columns to avoid surprises.
 
@@ -259,11 +259,11 @@ Current practice map
 Further reading
 - Joins: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-JOINS
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-03 — Inner Joins.

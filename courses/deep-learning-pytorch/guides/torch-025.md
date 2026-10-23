@@ -170,7 +170,7 @@ No. It standardizes a score calculation within a representation space. Different
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-025, Contrastive embeddings and negative sampling.

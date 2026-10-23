@@ -168,7 +168,7 @@ No. PyTorch MSELoss averages tensor elements. The semantic example unit must be 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-004, Loss functions, reductions and gradient scale.

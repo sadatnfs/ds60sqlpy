@@ -1,4 +1,4 @@
-# Day 59 Solution — Integrated Stakeholder Analytics
+# Day 59 Solution: Integrated Stakeholder Analytics
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ deliverables are a reconciled KPI suite, performance evidence, stakeholder
 queries, and a large-scale design note. The canonical executable checkpoint is
 [`day59_solutions.sql`](day59_solutions.sql).
 
-## Deliverable 1 — Business KPI suite
+## Deliverable 1: Business KPI suite
 
 ### LTV by signup cohort and segment
 
@@ -160,7 +160,7 @@ deliverable is the 20 most frequent distinct product pairs. Deduplicate
 prevents self-pairs and reversed duplicates. The metric is co-occurrence count,
 despite the starter comment saying “revenue.”
 
-## Deliverable 2 — Performance evidence
+## Deliverable 2: Performance evidence
 
 ```sql
 BEGIN;
@@ -184,7 +184,7 @@ Save the actual plan, execution time, buffer counts, and result reconciliation.
 The compact seed may correctly use a sequential scan; index presence does not
 guarantee index use.
 
-## Deliverable 3 — Stakeholder queries
+## Deliverable 3: Stakeholder queries
 
 ### Finance: YTD budget versus actual
 
@@ -222,7 +222,7 @@ different event type does not qualify. Document that definition: it is
 first-purchase assistance, not all-purchase event attribution from Day 48.
 Multiple campaigns can assist one customer, so campaign rows are not additive.
 
-## Deliverable 4 — Large-scale design note
+## Deliverable 4: Large-scale design note
 
 For a hypothetical 100M-row deployment, record:
 
@@ -241,7 +241,7 @@ For a hypothetical 100M-row deployment, record:
 - All DDL in the solution transaction rolls back. Production changes require a
   separate reviewed migration.
 
-## Exercise 1 — Make every grain transition explicit
+## Exercise 1: Make every grain transition explicit
 
 The executable `grain_map` states the key and row meaning for order values,
 customer LTV, and cohort/segment summary. A lower-grain join after aggregation
@@ -257,7 +257,7 @@ would invalidate the metric.
 - **Alternative/trade-off:** For sql-59 Exercise 1, the chosen form is justified by this lesson-specific rationale: The executable `grain_map` states the key and row meaning for order values, customer LTV, and cohort/segment summary. Evaluate another form against the concrete expected result (one row per `step_name`) and the verification above.
 - **Edge case:** Add one source row with a new `step_name`; verify the result gains exactly one row carrying that `step_name` value.
 
-## Exercise 2 — Calculate funnel rates with a stable population
+## Exercise 2: Calculate funnel rates with a stable population
 
 Start from all customers and derive the first valid timestamp at each ordered
 stage. A later event counts only when it occurs at or after the prior stage.
@@ -274,7 +274,7 @@ ordered conversion numerators.
 - **Alternative/trade-off:** For sql-59 Exercise 2, the chosen form is justified by this lesson-specific rationale: Start from all customers, left-join recent events, and use EXISTS for recent purchases. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add checkout and purchase events that occur before add-to-cart; they must not count as ordered checkout or purchase stages.
 
-## Exercise 3 — Reconcile candidate money measures
+## Exercise 3: Reconcile candidate money measures
 
 Line values and payments each aggregate to `order_id` before joining orders.
 The answer retains stored total, calculated line total, paid amount, and both
@@ -290,7 +290,7 @@ differences so stakeholders can choose a named measure.
 - **Alternative/trade-off:** For sql-59 Exercise 3, the chosen form is justified by this lesson-specific rationale: Line values and payments each aggregate to `order_id` before joining orders. Evaluate another form against the concrete expected result (at most 50 rows keyed by `order_id`) and the verification above.
 - **Edge case:** Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining `o.order_id`.
 
-## Exercise 4 — Include direct attribution
+## Exercise 4: Include direct attribution
 
 Start from purchases and choose at most one latest qualifying touch with a
 LATERAL query. Missing touches become `(direct)`, so attribution counts
@@ -306,7 +306,7 @@ reconcile to the purchase population.
 - **Alternative/trade-off:** For sql-59 Exercise 4, the chosen form is justified by this lesson-specific rationale: Start from purchases and choose at most one latest qualifying touch with a LATERAL query. Evaluate another form against the concrete expected result (one row per `attribution_bucket`, and `purchases`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `attribution_bucket`, and `purchases` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Compare index column order
+## Exercise 5: Compare index column order
 
 `(customer_id, order_date)` supports one customer's history; `(order_date,
 customer_id)` better anchors a global date-bound scan. EXPLAIN evidence is
@@ -322,7 +322,7 @@ environment-specific and both indexes add write cost.
 - **Alternative/trade-off:** For sql-59 Exercise 5, the chosen form is justified by this lesson-specific rationale: `(customer_id, order_date)` supports one customer's history; `(order_date, customer_id)` better anchors a global date-bound scan. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 6 — Publish a metric contract
+## Exercise 6: Publish a metric contract
 
 The answer records metric name, grain, numerator, denominator, UTC window, NULL
 policy, exclusions, and owner as queryable values. This prevents silent semantic
@@ -338,7 +338,7 @@ changes between teams.
 - **Alternative/trade-off:** For sql-59 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer records metric name, grain, numerator, denominator, UTC window, NULL policy, exclusions, and owner as queryable values. Evaluate another form against the concrete expected result (one row per `metric_name`) and the verification above.
 - **Edge case:** Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.
 
-## Exercise 7 — Publish defensible basket metrics
+## Exercise 7: Publish defensible basket metrics
 
 Distinct baskets feed support, confidence, and lift. A minimum pair count limits
 noise, and product IDs resolve ordering ties deterministically.
@@ -353,7 +353,7 @@ noise, and product IDs resolve ordering ties deterministically.
 - **Alternative/trade-off:** For sql-59 Exercise 7, the chosen form is justified by this lesson-specific rationale: Distinct baskets feed support, confidence, and lift. Evaluate another form against the concrete expected result (at most 20 rows keyed by `order_item_id`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, together DESC, product_a, product_b`.
 
-## Exercise 8 — Assemble cross-domain controls
+## Exercise 8: Assemble cross-domain controls
 
 Named counts and money totals provide a small sign-off surface for customer,
 order, line, and payment domains. Any non-equivalence must be explained by a

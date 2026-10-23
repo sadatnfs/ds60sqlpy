@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -563,7 +563,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><a href="https://www.postgresql.org/docs/16/functions-comparisons.html">PostgreSQL 16 documentation</a></li>
 <li><a href="https://www.postgresql.org/docs/16/queries-limit.html">PostgreSQL 16 documentation</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>The lesson and expected observations are sufficient offline. For optional coaching, copy:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-start-02: Values NULL and Deterministic Order using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_start_02_values_null_order.md
@@ -917,16 +917,16 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-start-02: Values NULL and Deterministic Order using the checked-in $guide-ds60sqlpy-learning skill.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-start-02: Values NULL and Deterministic Order using the checked-in $guide-ds60sqlpy-learning skill.
 Guide: sql/professional/companion-guides/sql_start_02_values_null_order.md
 Answer-free learner: sql/professional/lessons/sql_start_02_values_null_order.sql
 Direct prerequisite boundary: sql-start-01.
@@ -943,7 +943,7 @@ with each Expected contract, and explain the first discrepancy before editing.
 Done when my attempted exercises have inspectable matching evidence and I can
 answer the guide&#x27;s retrieval questions and a small transfer question in my own words.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1054,18 +1054,18 @@ answer the guide&#x27;s retrieval questions and a small transfer question in my 
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

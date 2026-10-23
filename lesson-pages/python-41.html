@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-41-handling-class-imbalance">Day 41 — Handling Class Imbalance<a class="heading-anchor" href="#guide--day-41-handling-class-imbalance" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-41-handling-class-imbalance">Day 41: Handling Class Imbalance<a class="heading-anchor" href="#guide--day-41-handling-class-imbalance" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-41</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>ml</code> · <strong>Network:</strong> offline</p>
 <p>An imbalanced target is not automatically a problem. It becomes a modeling problem when the minority outcome matters and the chosen metric or decision threshold hides poor performance on it.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -464,7 +464,7 @@ scores <span class="syntax-operator">=</span> model<span class="syntax-operator"
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy">Concept deep dive — rare-class metrics, training interventions, and threshold policy<a class="heading-anchor" href="#guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy">Concept deep dive: rare-class metrics, training interventions, and threshold policy<a class="heading-anchor" href="#guide--concept-deep-dive-rare-class-metrics-training-interventions-and-threshold-policy" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Class imbalance means the outcome of interest is uncommon, not that the dataset is automatically unusable. Accuracy can look excellent when a classifier always predicts the majority class. Start by recording prevalence and the counts/costs of false negatives and false positives.</p>
 <p>Class weights and resampling change the <strong>training objective or training distribution</strong>. A decision threshold changes how fitted scores become actions. These are separate choices. Resampling must occur inside each training fold, and a threshold must be selected on validation evidence, never final-test labels.</p>
@@ -475,7 +475,7 @@ scores <span class="syntax-operator">=</span> model<span class="syntax-operator"
 <li><strong><code>precision_recall_curve(y, score)</code>:</strong> shows threshold trade-offs; selecting a threshold still requires a decision rule and validation boundary.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-expose-the-majority-class-accuracy-trap">Focused example A — expose the majority-class accuracy trap<a class="heading-anchor" href="#guide--focused-example-a-expose-the-majority-class-accuracy-trap" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-expose-the-majority-class-accuracy-trap">Focused example A: expose the majority-class accuracy trap<a class="heading-anchor" href="#guide--focused-example-a-expose-the-majority-class-accuracy-trap" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> accuracy_score<span class="syntax-punctuation">,</span> recall_score
@@ -491,7 +491,7 @@ always_negative <span class="syntax-operator">=</span> np<span class="syntax-ope
 <span class="syntax-keyword">assert</span> recall_score<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> always_negative<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">0.0</span></code></pre>
 <p><strong>Expected observation:</strong> The classifier is 95% accurate while finding none of the positive cases.</p>
 <p><strong>Assumption to name:</strong> Positive cases are the operational focus; missing all of them is unacceptable.</p>
-<h5 id="guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint">Focused example B — choose a threshold from an explicit recall constraint<a class="heading-anchor" href="#guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint">Focused example B: choose a threshold from an explicit recall constraint<a class="heading-anchor" href="#guide--focused-example-b-choose-a-threshold-from-an-explicit-recall-constraint" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> precision_recall_curve
@@ -548,15 +548,15 @@ chosen <span class="syntax-operator">=</span> <span class="syntax-builtin">max</
 <ol>
 <li>Compare <code>class_weight=&quot;balanced&quot;</code> with a SMOTE strategy.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — rare-class metrics, training interventions, and threshold policy — compare class_weight=&#x27;balanced&#x27; and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.</p>
+<p><strong>Verify:</strong> Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight=&#x27;balanced&#x27; and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.</p>
 <ol>
 <li>Tune the threshold to maximize minority-class F1.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — rare-class metrics, training interventions, and threshold policy — choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.</p>
+<p><strong>Verify:</strong> Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.</p>
 <ol>
 <li>Plot precision–recall curves and discuss the tradeoff.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — rare-class metrics, training interventions, and threshold policy — save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker&#x27;s precision/recall rather than judging the plot alone.</p>
+<p><strong>Verify:</strong> Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker&#x27;s precision/recall rather than judging the plot alone.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Resample only <code>X_train, y_train</code>. For cross-validation, place SMOTE inside an <code>imblearn.pipeline.Pipeline</code> so each fold synthesizes from its training rows.</li>
@@ -569,15 +569,15 @@ chosen <span class="syntax-operator">=</span> <span class="syntax-builtin">max</
 <ol>
 <li><strong>Prevalence-shift reasoning:</strong> Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes&#x27; rule. <strong>Progressive hint:</strong> Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.</li>
 </ol>
-<p><strong>Verify:</strong> Prevalence-shift reasoning — choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes&#x27; rule, and verify both against a hand-built confusion table; the 2% precision must be lower.</p>
+<p><strong>Verify:</strong> Prevalence-shift reasoning; choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes&#x27; rule, and verify both against a hand-built confusion table; the 2% precision must be lower.</p>
 <ol>
 <li><strong>Grouped imbalance split:</strong> Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold. <strong>Progressive hint:</strong> Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.</li>
 </ol>
-<p><strong>Verify:</strong> Grouped imbalance split — print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.</p>
+<p><strong>Verify:</strong> Grouped imbalance split; print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.</p>
 <ol>
 <li><strong>Calibration after resampling:</strong> Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data. <strong>Progressive hint:</strong> Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.</li>
 </ol>
-<p><strong>Verify:</strong> Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.</p>
+<p><strong>Verify:</strong> Calibration after resampling; fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -624,10 +624,10 @@ chosen <span class="syntax-operator">=</span> <span class="syntax-builtin">max</
 <ul>
 <li>Work in the <a href="python-41.html#learner">Day 41 learner notebook</a>.</li>
 <li>Then consult the <a href="python-41.html#solution-1">Day 41 solution</a>.</li>
-<li>Continue to <a href="python-42.html#guide">Day 42 — Unsupervised Learning</a>.</li>
+<li>Continue to <a href="python-42.html#guide">Day 42; Unsupervised Learning</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -883,7 +883,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-41-solutions-handling-class-imbalance">Day 41 — Solutions: Handling Class Imbalance<a class="heading-anchor" href="#solution-1--day-41-solutions-handling-class-imbalance" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-41-solutions-handling-class-imbalance">Day 41: Solutions: Handling Class Imbalance<a class="heading-anchor" href="#solution-1--day-41-solutions-handling-class-imbalance" aria-label="Link to this section">#</a></h3>
 <p>We diagnose imbalance, pick appropriate metrics, try class weighting and resampling, and tune the decision threshold for the minority class. We also plot PR curves for a clearer picture than ROC under imbalance.</p>
 <p>Contents</p>
 <ul>
@@ -904,7 +904,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> make_classification<span class="syntax-punctuation">(</span>n_samples<span class="syntax-operator">=</span><span class="syntax-number">5000</span><span class="syntax-punctuation">,</span> weights<span class="syntax-operator">=</span><span class="syntax-punctuation">[</span><span class="syntax-number">0.95</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.05</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
                            flip_y<span class="syntax-operator">=</span><span class="syntax-number">0.01</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
 Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> stratify<span class="syntax-operator">=</span>y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — class_weight vs SMOTE</p>
+<p>Worked reference for Exercise 1; class_weight vs SMOTE</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Class weighting</span>
 clf_bal <span class="syntax-operator">=</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> class_weight<span class="syntax-operator">=</span><span class="syntax-string">&#x27;</span><span class="syntax-string">balanced</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> n_jobs<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 clf_bal<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
@@ -936,7 +936,7 @@ yhat_bal  <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>SMOTE synthesizes minority samples; use with care (only on training folds)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Threshold tuning for minority F1</p>
+<p>Worked reference for Exercise 2; Threshold tuning for minority F1</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">best_f1_threshold</span><span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> th <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>y_true<span class="syntax-punctuation">,</span> proba<span class="syntax-punctuation">)</span>
     <span class="syntax-comment"># precision_recall_curve returns thresholds for all but first point</span>
@@ -958,7 +958,7 @@ yhat_star <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Use cross-validation to choose threshold robustly, then evaluate on held-out data</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — PR curve</p>
+<p>Worked reference for Exercise 3; PR curve</p>
 <pre class="highlighted-code"><code class="language-python">prec<span class="syntax-punctuation">,</span> rec<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">=</span> precision_recall_curve<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span>
 ap <span class="syntax-operator">=</span> average_precision_score<span class="syntax-punctuation">(</span>yte<span class="syntax-punctuation">,</span> proba_bal<span class="syntax-punctuation">)</span>
 plt<span class="syntax-operator">.</span>plot<span class="syntax-punctuation">(</span>rec<span class="syntax-punctuation">,</span> prec<span class="syntax-punctuation">,</span> label<span class="syntax-operator">=</span><span class="syntax-string">f</span><span class="syntax-string">&#x27;</span><span class="syntax-string">LogReg (AP=</span><span class="syntax-string">{</span>ap<span class="syntax-string">:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">)</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">)</span>
@@ -987,43 +987,43 @@ plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare <code>class_weight=&quot;balanced&quot;</code> with a SMOTE strategy.</p>
 <p><strong>How to reason about it:</strong> Class weights change the loss; SMOTE changes the training sample. Resample only within each training fold and compare precision, recall, average precision, calibration, and runtime on untouched validation rows.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — rare-class metrics, training interventions, and threshold policy — compare class_weight=&#x27;balanced&#x27; and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight=&#x27;balanced&#x27; and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Tune the threshold to maximize minority-class F1.</p>
 <p><strong>How to reason about it:</strong> Threshold optimization consumes validation data. Align the shorter threshold array from <code>precision_recall_curve</code>, state the target metric or constraint, and freeze the threshold before final testing.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — rare-class metrics, training interventions, and threshold policy — choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot precision–recall curves and discuss the tradeoff.</p>
 <p><strong>How to reason about it:</strong> A precision-recall curve should include class prevalence and support. Use model scores rather than hard labels and do not compare curves drawn from different evaluation populations without labeling that difference.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — rare-class metrics, training interventions, and threshold policy — save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker&#x27;s precision/recall rather than judging the plot alone.</p>
-<h5 id="solution-1--exercise-4-prevalence-shift-reasoning">Exercise 4 — Prevalence-shift reasoning<a class="heading-anchor" href="#solution-1--exercise-4-prevalence-shift-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker&#x27;s precision/recall rather than judging the plot alone.</p>
+<h5 id="solution-1--exercise-4-prevalence-shift-reasoning">Exercise 4: Prevalence-shift reasoning<a class="heading-anchor" href="#solution-1--exercise-4-prevalence-shift-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes&#x27; rule.</p>
 <p><strong>Reasoning before implementation:</strong> Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.</p>
 <p>With lower prevalence, true positives become rarer while false positives from the much larger negative population can dominate. For sensitivity <code>s</code>, specificity <code>c</code>, and prevalence <code>p</code>:</p>
 <p><code>precision = s*p / (s*p + (1-c)*(1-p))</code>.</p>
 <p>This is why a threshold tuned on a balanced development sample may not deliver the expected precision after deployment. Re-estimate operating metrics for the deployment base rate and monitor it over time.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Prevalence-shift reasoning — choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes&#x27; rule, and verify both against a hand-built confusion table; the 2% precision must be lower.</p>
-<h5 id="solution-1--exercise-5-grouped-imbalance-split">Exercise 5 — Grouped imbalance split<a class="heading-anchor" href="#solution-1--exercise-5-grouped-imbalance-split" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Prevalence-shift reasoning; choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes&#x27; rule, and verify both against a hand-built confusion table; the 2% precision must be lower.</p>
+<h5 id="solution-1--exercise-5-grouped-imbalance-split">Exercise 5: Grouped imbalance split<a class="heading-anchor" href="#solution-1--exercise-5-grouped-imbalance-split" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.</p>
 <p><strong>Reasoning before implementation:</strong> Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.</p>
 <p>No splitter can create positives that do not exist across enough independent groups. Before modeling, count positive groups and reduce the fold count when necessary. Then assert group disjointness and report fold support.</p>
 <p>If a fold has zero positives, recall and average precision are not meaningful; do not replace that condition with a reassuring zero. Consider repeated grouped holdouts or a time-aware group design that matches deployment.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Grouped imbalance split — print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.</p>
-<h5 id="solution-1--exercise-6-calibration-after-resampling">Exercise 6 — Calibration after resampling<a class="heading-anchor" href="#solution-1--exercise-6-calibration-after-resampling" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Grouped imbalance split; print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.</p>
+<h5 id="solution-1--exercise-6-calibration-after-resampling">Exercise 6: Calibration after resampling<a class="heading-anchor" href="#solution-1--exercise-6-calibration-after-resampling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.</p>
 <p><strong>Reasoning before implementation:</strong> Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.</p>
 <p>Oversampling is a training intervention; it must never be applied to validation or test rows. Evaluate reliability diagrams, Brier score, and log loss on unresampled data. If calibration is needed, use a separate calibration split or cross-validated calibrator after the resampling pipeline has been selected.</p>
 <p>Also compare ranking metrics: calibration can improve probability meaning without changing rank-based AUC very much.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.</p></div>
+<p><strong>Verify:</strong> Calibration after resampling; fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.</p></div>
       </section>
 
 
@@ -1149,16 +1149,16 @@ plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-41` — Day 41 — Handling Class Imbalance.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize rare-class metrics, training interventions, and threshold policy. Use exactly these maintained learner materials:
@@ -1186,7 +1186,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1297,18 +1297,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

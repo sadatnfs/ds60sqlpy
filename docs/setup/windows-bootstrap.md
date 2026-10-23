@@ -99,9 +99,9 @@ psql --version
 & $CoursePython -m jupyter lab
 ```
 
-In VS Code, select the interpreter path printed by the bootstrapper—normally
+In VS Code, select the interpreter path printed by the bootstrapper, normally
 `.venv\Scripts\python.exe`, or `.venv\python.exe` for the conda-prefix
-fallback—and `Python (ds60sqlpy)` as the notebook kernel.
+fallback, and `Python (ds60sqlpy)` as the notebook kernel.
 
 The `psql` command above works in the same PowerShell process used to invoke
 the script. In a new terminal it requires `-PersistUserPath` or the full

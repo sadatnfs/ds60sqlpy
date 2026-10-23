@@ -1,4 +1,4 @@
-# Day 57 — Solutions: Security, Privacy, and Ethics
+# Day 57: Solutions: Security, Privacy, and Ethics
 
 We build a data classification matrix, compute group metrics for fairness, and provide a model card template.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Data classification matrix
+Worked reference for Exercise 1; Data classification matrix
 ```markdown
 | Data class | Examples | Storage | Access | Retention |
 |-----------:|----------|---------|--------|-----------|
@@ -23,7 +23,7 @@ Guidance
 
 ---
 
-Worked reference for Exercise 2 — Group metrics
+Worked reference for Exercise 2; Group metrics
 ```python
 import numpy as np, pandas as pd
 from sklearn.metrics import precision_score, recall_score
@@ -53,7 +53,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Model card template
+Worked reference for Exercise 3; Model card template
 ```markdown
 # Model Card — <model name>
 
@@ -124,19 +124,19 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Build a DataFrame PII scanner covering column names and free text.
 
-**How to reason about it:** A PII scanner should return finding type, safe row identifier, column, and count—not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.
+**How to reason about it:** A PII scanner should return finding type, safe row identifier, column, and count, not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.
 
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — data minimization, privacy boundaries, fairness evidence, and accountable controls — run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
+**Verify:** Practice 1; data minimization, privacy boundaries, fairness evidence, and accountable controls; run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Add a function that masks email addresses and phone numbers in text.
 
@@ -146,9 +146,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — data minimization, privacy boundaries, fairness evidence, and accountable controls — assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
+**Verify:** Practice 2; data minimization, privacy boundaries, fairness evidence, and accountable controls; assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Simulate subgroup precision and recall for a classifier and compare groups.
 
@@ -158,9 +158,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — data minimization, privacy boundaries, fairness evidence, and accountable controls — for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
+**Verify:** Practice 3; data minimization, privacy boundaries, fairness evidence, and accountable controls; for each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
-### Exercise 4 — Original lesson practice
+### Exercise 4: Original lesson practice
 
 **Prompt:** Draft a one-page data-ethics checklist for your project.
 
@@ -170,9 +170,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4 — data minimization, privacy boundaries, fairness evidence, and accountable controls — save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
+**Verify:** Practice 4; data minimization, privacy boundaries, fairness evidence, and accountable controls; save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
-### Exercise 5 — Threat modeling
+### Exercise 5: Threat modeling
 
 **Prompt:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
 
@@ -190,9 +190,9 @@ checkbox marked complete.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Threat modeling — save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
+**Verify:** Threat modeling; save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
 
-### Exercise 6 — Re-identification reasoning
+### Exercise 6: Re-identification reasoning
 
 **Prompt:** Generalize a small dataset to satisfy a chosen k-anonymity target, then demonstrate why k-anonymity does not prevent attribute disclosure or attacks using outside information.
 
@@ -210,9 +210,9 @@ data, or differential privacy with an explicit threat model and privacy budget.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Re-identification reasoning — print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
+**Verify:** Re-identification reasoning; print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
 
-### Exercise 7 — Fairness uncertainty
+### Exercise 7: Fairness uncertainty
 
 **Prompt:** Bootstrap subgroup precision and recall, show confidence intervals and support, and compare a gap with a ratio. Explain what to do when one group's denominator is nearly zero.
 
@@ -231,9 +231,9 @@ not by whichever metric looks most favorable.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Fairness uncertainty — with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
+**Verify:** Fairness uncertainty; with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
 
-### Exercise 8 — Incident response
+### Exercise 8: Incident response
 
 **Prompt:** Simulate discovering raw emails in a committed notebook output. Write the containment, notification, credential review, history cleanup decision, verification, and prevention steps.
 
@@ -252,4 +252,4 @@ access. Do not reproduce the sensitive value in tickets or logs.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Incident response — produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.
+**Verify:** Incident response; produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.

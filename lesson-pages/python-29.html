@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-29-data-validation-with-schemas">Day 29 — Data Validation with Schemas<a class="heading-anchor" href="#guide--day-29-data-validation-with-schemas" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-29-data-validation-with-schemas">Day 29: Data Validation with Schemas<a class="heading-anchor" href="#guide--day-29-data-validation-with-schemas" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A schema turns assumptions about columns, types, ranges, and uniqueness into an executable boundary contract. Validation detects problems; it does not decide how to clean them.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 29 — data validation with schemas to practice turning data contracts into executable schemas and informative failures and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 29; data validation with schemas to practice turning data contracts into executable schemas and informative failures and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A data schema describes more than column names: required presence, dtypes, nullability, ranges, allowed categories, uniqueness, and cross-field rules. Derive constraints from domain/business meaning and declared interfaces, not merely from values observed in one sample.</p>
 <p>Validation should sit immediately before a boundary that depends on the contract, especially saving or handing data to a model. Coercion changes compatible representations; validation checks the resulting state. Treat a failure as blocked output with actionable evidence. Test one valid fixture and one deliberately invalid fixture for every important rule.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>In Pandera, <code>pa.Column(float, checks=pa.Check.ge(0), nullable=False)</code> states representation, a non-negative constraint, and missing policy. <code>schema.validate(frame, lazy=True)</code> collects multiple failures before raising a <code>SchemaErrors</code> report. Coercion, if enabled, occurs before checks and must not be mistaken for silently repairing invalid meaning.</p>
-<h5 id="guide--worked-example-1-validate-a-small-table-against-explicit-rules">Worked example 1 — Validate a small table against explicit rules<a class="heading-anchor" href="#guide--worked-example-1-validate-a-small-table-against-explicit-rules" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-validate-a-small-table-against-explicit-rules">Worked example 1: Validate a small table against explicit rules<a class="heading-anchor" href="#guide--worked-example-1-validate-a-small-table-against-explicit-rules" aria-label="Link to this section">#</a></h5>
 <p>A good fixture makes the accepted contract easy to see. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">import</span> pandera.pandas <span class="syntax-keyword">as</span> pa
@@ -441,7 +441,7 @@ checked<span class="syntax-operator">.</span>to_dict<span class="syntax-punctuat
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The two records are returned after successful validation; `price` follows the declared floating representation.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-show-that-validation-guards-persistence">Worked example 2 — Show that validation guards persistence<a class="heading-anchor" href="#guide--worked-example-2-show-that-validation-guards-persistence" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-show-that-validation-guards-persistence">Worked example 2: Show that validation guards persistence<a class="heading-anchor" href="#guide--worked-example-2-show-that-validation-guards-persistence" aria-label="Link to this section">#</a></h5>
 <p>Only data returned from validation should continue to a write boundary. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">validated_for_output</span><span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">:</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">:</span>
     checked <span class="syntax-operator">=</span> schema<span class="syntax-operator">.</span>validate<span class="syntax-punctuation">(</span>frame<span class="syntax-punctuation">,</span> lazy<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
@@ -537,10 +537,10 @@ validated <span class="syntax-operator">=</span> ReadingSchema<span class="synta
 <ul>
 <li><a href="python-29.html#learner">Open the learner notebook</a></li>
 <li><a href="python-29.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-30.html#guide">Next: Day 30 — EDA and preprocessing project</a></li>
+<li><a href="python-30.html#guide">Next: Day 30; EDA and preprocessing project</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-29`
 (Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
 I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
@@ -805,7 +805,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic">Day 29 — Solutions: Data Validation &amp; Schemas (Pandera/Pydantic)<a class="heading-anchor" href="#solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic">Day 29: Solutions: Data Validation &amp; Schemas (Pandera/Pydantic)<a class="heading-anchor" href="#solution-1--day-29-solutions-data-validation-schemas-pandera-pydantic" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>turning data contracts into executable schemas and informative failures</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A data schema describes more than column names: required presence, dtypes, nullability, ranges, allowed categories, uniqueness, and cross-field rules. Derive constraints from domain/business meaning and declared interfaces, not merely from values observed in one sample.</p>
@@ -821,8 +821,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>turning data contracts into executable schemas and informative failures</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. <strong>Constraints:</strong> derive each rule from written business meaning and include exact boundary values. <strong>Verify:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Extend a Pandera schema with documented inclusive/exclusive ranges, allowed categories, nullability, and key uniqueness. Constraints: derive each rule from written business meaning and include exact boundary values. Values below, at, and above the named boundary must produce the evidence one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence. Those cases show how turning data contracts into executable schemas and informative failures behaves at its edge.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -901,7 +901,7 @@ invalid_fixtures <span class="syntax-operator">=</span> <span class="syntax-punc
         <span class="syntax-punctuation">)</span></code></pre>
 <p>The valid fixture includes the exact inclusive lower boundaries and a value immediately below the exclusive upper boundary. Every rule gets its own invalid fixture so a learner can identify which check failed.</p>
 <p><strong>Verification evidence:</strong> one valid fixture passes and a separate invalid fixture for each rule fails with the expected column/check evidence.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Validate the cleaned Day 18 DataFrame immediately before saving. <strong>Sequence:</strong> clean → validate returned frame → write only validated output → re-read/reconcile. <strong>Expected behavior:</strong> a deliberately invalid fixture blocks the write and preserves a useful failure report. <strong>Constraint:</strong> do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. <strong>Verify:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Validate the cleaned Day 18 DataFrame immediately before saving. Sequence: clean → validate returned frame → write only validated output → re-read/reconcile. Expected behavior: a deliberately invalid fixture blocks the write and preserves a useful failure report. Constraint: do not catch and discard <code>SchemaError</code>/<code>SchemaErrors</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists. That connects the answer to turning data contracts into executable schemas and informative failures.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
@@ -972,32 +972,32 @@ cleaned_day18 <span class="syntax-operator">=</span> clean_day18<span class="syn
     <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> invalid_output<span class="syntax-operator">.</span>exists<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The order is explicit: clean, validate the returned frame, save only that validated object, reopen, and reconcile. The invalid path keeps Pandera&#x27;s failure cases for diagnosis and proves no file was created.</p>
 <p><strong>Verification evidence:</strong> Use a temporary output path to prove valid data writes/reloads, while an invalid fixture raises before the file exists.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the difference between coercing a value to the schema dtype and validating it without coercion. <strong>Progressive hint:</strong> Coercion transforms compatible representations; validation checks a state. <strong>Verify:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the difference between coercing a value to the schema dtype and validating it without coercion. Progressive hint: Coercion transforms compatible representations; validation checks a state. Then compare the prediction with this proof target: Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation. This makes turning data contracts into executable schemas and informative failures observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Validate numeric text with/without coercion and assert the coerced dtype/value versus the strict failure; record what changed rather than calling it mere validation.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? <strong>Progressive hint:</strong> Validate the actual final frame immediately before persistence. <strong>Verify:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace a row through cleaning, schema validation, and saving. At which boundary must failure stop the write? Progressive hint: Validate the actual final frame immediately before persistence. Record the named value, shape, label, or iterator position needed to establish: Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event. The trace exposes turning data contracts into executable schemas and informative failures directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Use a temporary path and event log; assert valid rows reach save only after validation and invalid rows raise before any file/write event.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. <strong>Progressive hint:</strong> Derive constraints from stated business rules, not observed values alone. <strong>Verify:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Create a Pandera schema with non-negative quantity, finite price, and an allowed status set, then validate one good fixture. Progressive hint: Derive constraints from stated business rules, not observed values alone. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks. That connects the answer to turning data contracts into executable schemas and informative failures.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert one good fixture returns unchanged meaning, then independently fail negative quantity, nonfinite price, and unknown status with named checks.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a pipeline that writes output before validating it or catches and discards every schema error. <strong>Progressive hint:</strong> Validation failure is a blocked output, not a warning-only event. <strong>Verify:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a pipeline that writes output before validating it or catches and discards every schema error. Progressive hint: Validation failure is a blocked output, not a warning-only event. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning. The diagnosis depends on turning data contracts into executable schemas and informative failures.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Reorder the pipeline and assert invalid data leaves no output file; retain and inspect the schema failure instead of converting it to a warning.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. <strong>Progressive hint:</strong> One failure fixture per rule makes contract coverage auditable. <strong>Verify:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Create invalid fixtures for null, range, category, duplicate-key, and dtype rules; use lazy validation to inspect multiple failures. Progressive hint: One failure fixture per rule makes contract coverage auditable. Values below, at, and above the named boundary must produce the evidence Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category. Those cases show how turning data contracts into executable schemas and informative failures behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Run lazy validation on fixtures violating all five rule families and assert the failure cases include each expected column/check category.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Translate business rules into executable boundary contracts and prove both acceptance and informative failure before persisting data.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert">Shared implementation for Exercises 3–4 — Transform versus assert<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert">Shared implementation for Exercises 3–4: Transform versus assert<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-transform-versus-assert" aria-label="Link to this section">#</a></h5>
 <p>Coercion can turn compatible text such as <code>&quot;2&quot;</code> into integer <code>2</code>; it should not silently invent a value for incompatible text. The final cleaned frame must validate before any destination is replaced.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-executable-business-rules">Shared implementation for Exercises 5–7 — Executable business rules<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-executable-business-rules" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-executable-business-rules">Shared implementation for Exercises 5–7: Executable business rules<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-executable-business-rules" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">import</span> pandera.pandas <span class="syntax-keyword">as</span> pa
 
@@ -1174,16 +1174,16 @@ invalid <span class="syntax-operator">=</span> pd<span class="syntax-operator">.
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-29`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-29`
 (Day 29 — Data Validation with Schemas). Direct catalog prerequisites: `python-28`.
 I have completed the direct prerequisites: `python-28`. Emphasize turning data contracts into executable schemas and informative failures.
 Read `python/ds-60day/companion-guides/day29_data_validation_schemas.md` and use the learner notebook
@@ -1198,7 +1198,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1309,18 +1309,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

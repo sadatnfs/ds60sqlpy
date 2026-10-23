@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,12 +429,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-prog-01-functions-procedures-and-triggers">SQL-PROG-01 — Functions, Procedures, and Triggers<a class="heading-anchor" href="#guide--sql-prog-01-functions-procedures-and-triggers" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-prog-01-functions-procedures-and-triggers">SQL-PROG-01: Functions, Procedures, and Triggers<a class="heading-anchor" href="#guide--sql-prog-01-functions-procedures-and-triggers" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
 <li><strong>Catalog prerequisite:</strong> <code>sql-found-02</code></li>
-<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02 — versioned migrations</a>, transactions, constraints, and multirow <code>UPDATE</code>.</li>
+<li><strong>Prerequisites:</strong> <a href="sql-found-02.html#guide">SQL-FOUND-02; versioned migrations</a>, transactions, constraints, and multirow <code>UPDATE</code>.</li>
 <li><strong>Artifacts:</strong> <a href="sql-prog-01.html#learner">learner SQL</a> · <a href="sql-prog-01.html#solution-1">solution reasoning</a> · <a href="sql-prog-01.html#solution-2">executable solution</a></li>
 </ul>
 <p>Run from the repository root on Windows PowerShell, macOS, or Linux:</p>
@@ -451,7 +451,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-PROG-01 — Functions, Procedures, and Triggers</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-PROG-01; Functions, Procedures, and Triggers</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-prog-01/lesson/workspace/sql/professional/lessons/sql_prog_01_routines_triggers.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -462,7 +462,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_prog_01_routines_triggers.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked SQL reads or creates <code>pro_routines_lab.work_items</code>, <code>pro_routines_lab.work_item_audit</code>, <code>pro_routines_lab.statement_audit</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -558,9 +558,9 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>DDL and routine changes belong in ordered migrations, not manual production console edits.</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-types-01.html#guide">SQL-TYPES-01 — PostgreSQL-native types and searchable documents</a>. Later, combine routines with the migration and contract-test modules so their signatures, owners, grants, triggers, and side effects are release-tested.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<p>Continue to <a href="sql-types-01.html#guide">SQL-TYPES-01; PostgreSQL-native types and searchable documents</a>. Later, combine routines with the migration and contract-test modules so their signatures, owners, grants, triggers, and side effects are release-tested.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.
 
 I have completed the direct catalog prerequisite: `sql-found-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -965,7 +965,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-prog-01-solutions-routines-and-triggers">SQL-PROG-01 Solutions — Routines and Triggers<a class="heading-anchor" href="#solution-1--sql-prog-01-solutions-routines-and-triggers" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-prog-01-solutions-routines-and-triggers">SQL-PROG-01 Solutions: Routines and Triggers<a class="heading-anchor" href="#solution-1--sql-prog-01-solutions-routines-and-triggers" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -988,7 +988,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql</code></pre>
 <p>The solution is transactional and leaves no schema behind.</p>
-<h4 id="solution-1--exercise-1-audit-count-function">Exercise 1 — Audit-count function<a class="heading-anchor" href="#solution-1--exercise-1-audit-count-function" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-audit-count-function">Exercise 1: Audit-count function<a class="heading-anchor" href="#solution-1--exercise-1-audit-count-function" aria-label="Link to this section">#</a></h4>
 <p><code>status_change_count(bigint)</code> is <code>STABLE</code>, <code>PARALLEL SAFE</code>, and security invoker. It uses <code>COUNT(*)</code>, so a NULL or unknown item returns zero rather than NULL. That behavior is part of the function contract and should be tested.</p>
 <p>It is not immutable: inserting an audit row changes the result for the same argument.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -997,7 +997,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 1, compare each function result with an independent filtered <code>COUNT(*)</code>, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.</li>
 </ul>
-<h4 id="solution-1--exercise-2-reassignment-procedure">Exercise 2 — Reassignment procedure<a class="heading-anchor" href="#solution-1--exercise-2-reassignment-procedure" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-reassignment-procedure">Exercise 2: Reassignment procedure<a class="heading-anchor" href="#solution-1--exercise-2-reassignment-procedure" aria-label="Link to this section">#</a></h4>
 <p>The procedure rejects a NULL/blank destination and updates only rows whose status is not closed. It participates in the caller&#x27;s transaction. Closed items remain with their historical owner.</p>
 <p>An alternative is one parameterized <code>UPDATE</code> from application code. A procedure is justified when the command is shared by several trusted callers and its permissions, migration, observability, and tests are maintained as an API.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -1006,7 +1006,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan&#x27;s eligible item to Taylor, while Morgan&#x27;s closed item remains unchanged; a blank destination is caught as SQLSTATE class <code>check_violation</code>.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.</li>
 </ul>
-<h4 id="solution-1--exercise-3-transition-guard">Exercise 3 — Transition guard<a class="heading-anchor" href="#solution-1--exercise-3-transition-guard" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-transition-guard">Exercise 3: Transition guard<a class="heading-anchor" href="#solution-1--exercise-3-transition-guard" aria-label="Link to this section">#</a></h4>
 <p>The BEFORE trigger compares OLD and NEW status and raises <code>check_violation</code> for <code>closed -&gt; open</code>. The solution catches that expected condition and raises a different exception if the forbidden update succeeds.</p>
 <p>A richer workflow should usually model allowed transitions in data or expose named application commands. A growing chain of trigger <code>IF</code> statements hides business policy and can be difficult to version.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
@@ -1015,7 +1015,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 3, attempt both an allowed <code>closed</code> to <code>in_progress</code> transition and a forbidden <code>closed</code> to <code>open</code> transition, record SQLSTATE <code>23514</code>, and reselect the row after each attempt.</li>
 </ul>
-<h4 id="solution-1--exercise-4-audit-grain">Exercise 4 — Audit grain<a class="heading-anchor" href="#solution-1--exercise-4-audit-grain" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-audit-grain">Exercise 4: Audit grain<a class="heading-anchor" href="#solution-1--exercise-4-audit-grain" aria-label="Link to this section">#</a></h4>
 <p>The learner row audit has grain “one changed item status.” The statement audit has grain “one UPDATE statement,” with an array of affected item IDs. Therefore two changed rows can legitimately produce two rows in one table and one row in the other. Reconcile <code>SUM(changed_rows)</code> to the row-audit count, not raw table row counts.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1023,7 +1023,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 4, expected output: one reconciliation row with <code>row_audit_records = 2</code>, <code>statement_audit_records = 1</code>, and <code>statement_changed_status_rows = 2</code>.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.</li>
 </ul>
-<h4 id="solution-1--exercise-5-declarative-and-transaction-boundaries">Exercise 5 — Declarative and transaction boundaries<a class="heading-anchor" href="#solution-1--exercise-5-declarative-and-transaction-boundaries" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-declarative-and-transaction-boundaries">Exercise 5: Declarative and transaction boundaries<a class="heading-anchor" href="#solution-1--exercise-5-declarative-and-transaction-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Allowed status values are row-local and declarative, so a <code>CHECK</code> is visible, automatically enforced for every writer, and simpler than a trigger. Audit history needs OLD/NEW event context, which fits a trigger.</p>
 <p>Functions execute within their statement and cannot commit. Procedures may control transactions only in permitted top-level <code>CALL</code> contexts; nested calls, explicit outer transactions, exception blocks, and certain procedure attributes restrict that ability. Default to caller-owned transactions unless the procedure&#x27;s transaction contract is deliberate and integration-tested.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
@@ -1032,7 +1032,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 5, expected output: four rows with <code>rule</code>, <code>mechanism</code>, and <code>reason</code>, ordered deterministically by rule.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.</li>
 </ul>
-<h4 id="solution-1--exercise-6-volatility-and-parallel-promises">Exercise 6 — Volatility and parallel promises<a class="heading-anchor" href="#solution-1--exercise-6-volatility-and-parallel-promises" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-volatility-and-parallel-promises">Exercise 6: Volatility and parallel promises<a class="heading-anchor" href="#solution-1--exercise-6-volatility-and-parallel-promises" aria-label="Link to this section">#</a></h4>
 <p>The audit-count function is STABLE because it reads tables and should see one statement snapshot; it is not IMMUTABLE because table contents can change. Procedures and trigger functions that write are VOLATILE. A pure immutable arithmetic function can be IMMUTABLE only when its result does not depend on tables, configuration, collation changes, clock, or session state.</p>
 <p>Read-only SQL may be parallel safe, but routines that write, manipulate sequences, use unsafe functions, or depend on backend-local state are unsafe. PostgreSQL trusts these declarations for planning and constant folding, so an incorrect promise can reuse a stale result or execute in an invalid worker.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
@@ -1041,7 +1041,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through <code>identity_arguments</code>.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 6, compare catalog values with every <code>CREATE FUNCTION/PROCEDURE</code> declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.</li>
 </ul>
-<h4 id="solution-1--exercise-7-statement-trigger-with-transition-tables">Exercise 7 — Statement trigger with transition tables<a class="heading-anchor" href="#solution-1--exercise-7-statement-trigger-with-transition-tables" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-statement-trigger-with-transition-tables">Exercise 7: Statement trigger with transition tables<a class="heading-anchor" href="#solution-1--exercise-7-statement-trigger-with-transition-tables" aria-label="Link to this section">#</a></h4>
 <p>Define an AFTER UPDATE statement trigger with REFERENCING OLD TABLE and NEW TABLE. Its function counts rows whose status is distinct and stores one summary row for that statement. Transition tables expose the whole affected set and are unavailable to row triggers.</p>
 <p>An UPDATE matching zero rows still fires an applicable statement trigger, so decide whether to store a zero summary. Reconcile <code>sum(changed_rows)</code> to the row-audit count over the same transaction/test window; raw statement rows have a different grain.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1050,7 +1050,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 7, expected output: one summary row <code>(matched_rows=2, changed_status_rows=0)</code>, one <code>(0,0)</code> row for the empty target, and one <code>(2,2)</code> row for a two-item status change.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records <code>(0,0)</code>, and keep <code>item_id</code> immutable so transition-table pairing cannot undercount.</li>
 </ul>
-<h4 id="solution-1--exercise-8-exact-expected-failure">Exercise 8 — Exact expected failure<a class="heading-anchor" href="#solution-1--exercise-8-exact-expected-failure" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-exact-expected-failure">Exercise 8: Exact expected failure<a class="heading-anchor" href="#solution-1--exercise-8-exact-expected-failure" aria-label="Link to this section">#</a></h4>
 <p>A PL/pgSQL block with an inner <code>BEGIN ... EXCEPTION WHEN unique_violation</code> creates a subtransaction. Changes inside the failed inner block roll back, while earlier outer-block changes remain. After the handler, assert both facts.</p>
 <p>The handler must raise if the statement succeeds and re-raise an unexpected condition. <code>WHEN OTHERS THEN NULL</code> makes permission errors, missing tables, and programmer mistakes look like passing negative tests.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1059,7 +1059,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner <code>duplicate</code> inserts are absent because the inner block rolled back.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 8, query <code>exception_probe</code> for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent <code>WHEN OTHERS</code> branch.</li>
 </ul>
-<h4 id="solution-1--exercise-9-security-definer-hardening">Exercise 9 — SECURITY DEFINER hardening<a class="heading-anchor" href="#solution-1--exercise-9-security-definer-hardening" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-security-definer-hardening">Exercise 9: SECURITY DEFINER hardening<a class="heading-anchor" href="#solution-1--exercise-9-security-definer-hardening" aria-label="Link to this section">#</a></h4>
 <p>Own the function with a NOLOGIN role that has only the required read access, set a fixed safe <code>search_path</code>, qualify every relation/operator-sensitive object, avoid writable helper schemas and unsafe dynamic SQL, validate parameters, and return a bounded result. Revoke PUBLIC execution before granting named callers.</p>
 <p>The routine executes with owner privileges, so changing its owner can silently change its authority. Test identity, RLS behavior, error leakage, overloads, temporary-object attacks, grants, and dependency changes as part of the API.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
@@ -1068,7 +1068,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification.</li>
 <li><strong>Independent verification:</strong> For sql-prog-01 Exercise 9, require <code>prosecdef = false</code> for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.</li>
 </ul>
-<h4 id="solution-1--exercise-10-concurrent-work-claiming">Exercise 10 — Concurrent work claiming<a class="heading-anchor" href="#solution-1--exercise-10-concurrent-work-claiming" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-concurrent-work-claiming">Exercise 10: Concurrent work claiming<a class="heading-anchor" href="#solution-1--exercise-10-concurrent-work-claiming" aria-label="Link to this section">#</a></h4>
 <p>In a short transaction, select eligible IDs in a deterministic order <code>FOR UPDATE SKIP LOCKED LIMIT n</code>, then update only those IDs and commit. Competing workers skip locks instead of blocking and cannot claim the same row.</p>
 <p>This favors throughput, not fairness: a repeatedly locked early row can starve. Use bounded batches, lease/attempt metadata, retry/backoff, stale-claim recovery, and monitoring. Keep external work outside the lock transaction or use an outbox so slow calls do not retain row locks.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1590,16 +1590,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.
 
 I have completed the direct catalog prerequisite: `sql-found-02`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_prog_01_routines_triggers.md
@@ -1626,7 +1626,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1737,18 +1737,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

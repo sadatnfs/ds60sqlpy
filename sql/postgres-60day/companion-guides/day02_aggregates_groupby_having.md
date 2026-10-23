@@ -1,9 +1,9 @@
-# Day 02 — Aggregations, GROUP BY, HAVING, Grouping Sets (Companion Guide)
+# Day 02: Aggregations, GROUP BY, HAVING, Grouping Sets (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 01 — SELECT, filtering, and ordering](day01_select_where_orderby.md)
+- **Prerequisites:** [Day 01; SELECT, filtering, and ordering](day01_select_where_orderby.md)
 - **Artifacts:** [learner SQL](../day02_aggregates_groupby_having.sql) ·
   [solution reasoning](../solutions/day02_solutions.md) ·
   [executable solution](../solutions/day02_solutions.sql)
@@ -212,7 +212,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 03 — inner joins](day03_inner_joins.md).
+Continue to [Day 03; inner joins](day03_inner_joins.md).
 
 ## Deep dive and reference
 
@@ -278,11 +278,11 @@ Further reading
 - Postgres aggregation: https://www.postgresql.org/docs/current/functions-aggregate.html
 - GROUPING SETS/ROLLUP/CUBE: https://www.postgresql.org/docs/current/queries-table-expressions.html#QUERIES-GROUPING-SETS
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-02 — Aggregates Groupby Having.

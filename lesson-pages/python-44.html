@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,9 +369,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-44-model-deployment-with-fastapi">Day 44 — Model Deployment with FastAPI<a class="heading-anchor" href="#guide--day-44-model-deployment-with-fastapi" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-44-model-deployment-with-fastapi">Day 44: Model Deployment with FastAPI<a class="heading-anchor" href="#guide--day-44-model-deployment-with-fastapi" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-44</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>production</code> · <strong>Network:</strong> offline</p>
-<p>This lesson turns a fitted scikit-learn model into a local HTTP service. It teaches a development baseline—schema validation, serialization, and a request contract—not a complete production platform.</p>
+<p>This lesson turns a fitted scikit-learn model into a local HTTP service. It teaches a development baseline, schema validation, serialization, and a request contract, not a complete production platform.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of the lesson, you can:</p>
 <ul>
@@ -473,7 +473,7 @@ $body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation"
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints">Concept deep dive — validated request contracts, trusted artifacts, and testable inference endpoints<a class="heading-anchor" href="#guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints">Concept deep dive: validated request contracts, trusted artifacts, and testable inference endpoints<a class="heading-anchor" href="#guide--concept-deep-dive-validated-request-contracts-trusted-artifacts-and-testable-inference-endpoints" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Deployment turns a model into a boundary other software can call. The request schema validates untrusted JSON before it reaches model code; the feature builder establishes exact name, order, type, missing-value, and range rules; the response schema makes outputs stable for clients.</p>
 <p>FastAPI handles HTTP routing and delegates data validation to Pydantic. A successful model load is not proof of compatibility or trust. Artifact format, source, digest, library versions, and feature schema must be verified before the service becomes ready.</p>
@@ -484,7 +484,7 @@ $body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation"
 <li><strong><code>TestClient(app).post(..., json=payload)</code>:</strong> exercises serialization, routing, validation, and response behavior without starting a network server.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-make-request-validation-fail-before-inference">Focused example A — make request validation fail before inference<a class="heading-anchor" href="#guide--focused-example-a-make-request-validation-fail-before-inference" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-make-request-validation-fail-before-inference">Focused example A: make request validation fail before inference<a class="heading-anchor" href="#guide--focused-example-a-make-request-validation-fail-before-inference" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel<span class="syntax-punctuation">,</span> Field<span class="syntax-punctuation">,</span> ValidationError
 
@@ -501,7 +501,7 @@ valid <span class="syntax-operator">=</span> PredictionRequest<span class="synta
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>exc<span class="syntax-operator">.</span>errors<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">type</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The valid payload becomes a typed object; the short list raises a structured validation error before any model call.</p>
 <p><strong>Assumption to name:</strong> Exactly four ordered measurements is the public contract; coercion and range policy are documented.</p>
-<h5 id="guide--focused-example-b-check-artifact-feature-compatibility-explicitly">Focused example B — check artifact feature compatibility explicitly<a class="heading-anchor" href="#guide--focused-example-b-check-artifact-feature-compatibility-explicitly" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-check-artifact-feature-compatibility-explicitly">Focused example B: check artifact feature compatibility explicitly<a class="heading-anchor" href="#guide--focused-example-b-check-artifact-feature-compatibility-explicitly" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
@@ -556,15 +556,15 @@ request_features <span class="syntax-operator">=</span> np<span class="syntax-op
 <ol>
 <li>Add input validation and friendly error behavior.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
+<p><strong>Verify:</strong> Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
 <ol>
 <li>Return the class name as well as the numeric class identifier.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
+<p><strong>Verify:</strong> Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
 <ol>
 <li>Create a minimal runtime dependency file for this API.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
+<p><strong>Verify:</strong> Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Let Pydantic reject the wrong length or nonnumeric values. Do not catch every exception and turn programming defects into vague client errors.</li>
@@ -577,15 +577,15 @@ request_features <span class="syntax-operator">=</span> np<span class="syntax-op
 <ol>
 <li><strong>Boundary-case testing:</strong> Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each. <strong>Progressive hint:</strong> Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.</li>
 </ol>
-<p><strong>Verify:</strong> Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
+<p><strong>Verify:</strong> Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
 <ol>
 <li><strong>Batch contract:</strong> Design a <code>/predict-batch</code> request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata. <strong>Progressive hint:</strong> Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.</li>
 </ol>
-<p><strong>Verify:</strong> Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
+<p><strong>Verify:</strong> Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
 <ol>
 <li><strong>Artifact-compatibility check:</strong> At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe. <strong>Progressive hint:</strong> Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.</li>
 </ol>
-<p><strong>Verify:</strong> Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p>
+<p><strong>Verify:</strong> Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -632,10 +632,10 @@ request_features <span class="syntax-operator">=</span> np<span class="syntax-op
 <ul>
 <li>Work in the <a href="python-44.html#learner">Day 44 learner notebook</a>.</li>
 <li>Then review the <a href="python-44.html#solution-1">Day 44 solution</a>.</li>
-<li>Continue to <a href="python-45.html#guide">Day 45 — End-to-End Project</a>.</li>
+<li>Continue to <a href="python-45.html#guide">Day 45; End-to-End Project</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -909,7 +909,7 @@ model <span class="syntax-operator">=</span> joblib<span class="syntax-operator"
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-44-solutions-model-deployment-basics-with-fastapi">Day 44 — Solutions: Model Deployment Basics with FastAPI<a class="heading-anchor" href="#solution-1--day-44-solutions-model-deployment-basics-with-fastapi" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-44-solutions-model-deployment-basics-with-fastapi">Day 44: Solutions: Model Deployment Basics with FastAPI<a class="heading-anchor" href="#solution-1--day-44-solutions-model-deployment-basics-with-fastapi" aria-label="Link to this section">#</a></h3>
 <p>We train and save a model (joblib), build a minimal FastAPI endpoint to serve predictions, and test it with curl. We then add small improvements: input validation and class name mapping.</p>
 <p>Contents</p>
 <ul>
@@ -918,7 +918,7 @@ model <span class="syntax-operator">=</span> joblib<span class="syntax-operator"
 <li>Exercise 3: Validate inputs and return class names; test with curl</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Train and save model</p>
+<p>Worked reference for Exercise 1; Train and save model</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_iris
 <span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LogisticRegression
 <span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
@@ -942,7 +942,7 @@ m <span class="syntax-operator">=</span> joblib<span class="syntax-operator">.</
 <li>joblib.dump persists the fitted estimator; joblib.load restores it for serving</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Minimal FastAPI endpoint Create <code>artifacts/day44/app.py</code>:</p>
+<p>Worked reference for Exercise 2; Minimal FastAPI endpoint Create <code>artifacts/day44/app.py</code>:</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Annotated
 
 <span class="syntax-keyword">import</span> joblib
@@ -968,7 +968,7 @@ CLASS_NAMES <span class="syntax-operator">=</span> <span class="syntax-punctuati
 <p>Run the server in a terminal:</p>
 <pre class="highlighted-code"><code class="language-bash">python -m uvicorn app:app --app-dir artifacts/day44 --reload</code></pre>
 <hr>
-<p>Worked reference for Exercise 3 — Test with curl; handle bad inputs</p>
+<p>Worked reference for Exercise 3; Test with curl; handle bad inputs</p>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># OK request</span>
 curl -s -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
   -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
@@ -1006,42 +1006,42 @@ curl -s -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</spa
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add input validation and friendly error behavior.</p>
 <p><strong>How to reason about it:</strong> Let Pydantic reject malformed requests with field-level messages, but validate domain rules such as finite values and exact feature count. Do not catch programming defects and relabel them as client mistakes.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Return the class name as well as the numeric class identifier.</p>
 <p><strong>How to reason about it:</strong> Map numeric classes through metadata saved with the model and test every valid identifier. A class-name list copied independently into the service can drift from the fitted encoder.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a minimal runtime dependency file for this API.</p>
-<p><strong>How to reason about it:</strong> A runtime dependency list contains direct imports needed to load the artifact and serve requests—not the entire notebook environment. Build and smoke-test it in a clean environment.</p>
+<p><strong>How to reason about it:</strong> A runtime dependency list contains direct imports needed to load the artifact and serve requests, not the entire notebook environment. Build and smoke-test it in a clean environment.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
-<h5 id="solution-1--exercise-4-boundary-case-testing">Exercise 4 — Boundary-case testing<a class="heading-anchor" href="#solution-1--exercise-4-boundary-case-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.</p>
+<h5 id="solution-1--exercise-4-boundary-case-testing">Exercise 4: Boundary-case testing<a class="heading-anchor" href="#solution-1--exercise-4-boundary-case-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.</p>
 <p><strong>Reasoning before implementation:</strong> Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.</p>
 <p>Prefer named request fields when the feature set is stable; they make missing and extra values visible. If a numeric vector is required, constrain its length and reject non-finite values before NumPy/model calls.</p>
 <p>Tests should assert a stable error shape without pinning every word of framework-generated prose. A valid request should assert response schema, probability range, class mapping, and model version.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
-<h5 id="solution-1--exercise-5-batch-contract">Exercise 5 — Batch contract<a class="heading-anchor" href="#solution-1--exercise-5-batch-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.</p>
+<h5 id="solution-1--exercise-5-batch-contract">Exercise 5: Batch contract<a class="heading-anchor" href="#solution-1--exercise-5-batch-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a <code>/predict-batch</code> request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.</p>
 <p><strong>Reasoning before implementation:</strong> Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.</p>
 <p>Include <code>request_id</code> per input and return it with each prediction. Enforce a bounded batch size to protect memory and latency. Score one matrix rather than looping through individual model calls, then preserve request order explicitly.</p>
 <p>Choose atomic failure for a teaching service: if any row is invalid, return a 4xx response with indexed details and score none. Partial success is possible but requires a more complex, versioned response contract.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
-<h5 id="solution-1--exercise-6-artifact-compatibility-check">Exercise 6 — Artifact-compatibility check<a class="heading-anchor" href="#solution-1--exercise-6-artifact-compatibility-check" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.</p>
+<h5 id="solution-1--exercise-6-artifact-compatibility-check">Exercise 6: Artifact-compatibility check<a class="heading-anchor" href="#solution-1--exercise-6-artifact-compatibility-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.</p>
 <p><strong>Reasoning before implementation:</strong> Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.</p>
 <p>Fail fast if artifact files are absent, hashes or schema versions disagree, or the model lacks required prediction methods. Health/readiness should remain false until these checks pass.</p>
 <p>Only load artifacts produced through the trusted course pipeline. Hashes detect accidental change but do not make an untrusted pickle safe; artifact provenance and controlled storage are security boundaries.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p></div>
+<p><strong>Verify:</strong> Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.</p></div>
       </section>
 
 
@@ -1166,16 +1166,16 @@ curl -s -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</spa
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize validated request contracts, trusted artifacts, and testable inference endpoints. Use exactly these maintained learner materials:
@@ -1203,7 +1203,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1314,18 +1314,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -441,7 +441,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_data_01_arrow_duckdb.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
-<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab: two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
 <p>CSV records text and delimiters but carries no authoritative type or nullability contract. Arrow is a language-independent columnar memory representation; Parquet is a columnar file format with schema, row groups, encodings, and statistics. DuckDB is an embedded engine that can query these files without loading every column into pandas first.</p>
 <p>Columnar performance depends on selecting columns, filtering using supported predicates, row-group statistics, file sizes, and partition layout. An <code>EXPLAIN</code> plan shows intended operations; bytes read and elapsed profiles establish what was actually skipped.</p>
@@ -450,7 +450,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Parquet row groups/partitions:</strong> organize data for selective scans without creating unsafe values or millions of tiny files.</li>
 <li><strong>DuckDB projection/filter:</strong> pushes required columns and supported predicates near the scan; inspect plan and profile.</li>
 </ul>
-<h5 id="guide--micro-example-a-observe-csv-s-string-only-boundary">Micro-example A — observe CSV&#x27;s string-only boundary<a class="heading-anchor" href="#guide--micro-example-a-observe-csv-s-string-only-boundary" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-a-observe-csv-s-string-only-boundary">Micro-example A: observe CSV&#x27;s string-only boundary<a class="heading-anchor" href="#guide--micro-example-a-observe-csv-s-string-only-boundary" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> csv
 <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
@@ -462,7 +462,7 @@ types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>types<span class="syntax-operator">.</span>values<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">str</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Expected observation:</strong> Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.</p>
 <p><strong>Why it matters:</strong> The tracked fixture encoding, delimiter, header, decimal/date meanings, and blank-value policy are known.</p>
-<h5 id="guide--micro-example-b-show-why-projection-changes-analytical-work">Micro-example B — show why projection changes analytical work<a class="heading-anchor" href="#guide--micro-example-b-show-why-projection-changes-analytical-work" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-b-show-why-projection-changes-analytical-work">Micro-example B: show why projection changes analytical work<a class="heading-anchor" href="#guide--micro-example-b-show-why-projection-changes-analytical-work" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">north</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">large free text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">region</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">south</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">note</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">another free text</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -477,11 +477,11 @@ projected <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p><strong>Diagnostic:</strong> Validate schema/nulls/keys/ranges, inspect file/row-group metadata and plan, then profile a bounded query against a CSV/pandas fallback.</p>
 <p><strong>Transfer question:</strong> How would decimal precision, timestamp timezone, and an additive nullable field be versioned across readers?</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
-<h5 id="guide--exercise-1-define-the-csv-contract">Exercise 1 — define the CSV contract<a class="heading-anchor" href="#guide--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--exercise-1-define-the-csv-contract">Exercise 1: define the CSV contract<a class="heading-anchor" href="#guide--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>parse_nullable_text</code> and <code>total_revenue</code>. Parse dates, integers, and prices in one place rather than scattering conversion across analysis code. Test blank notes and a malformed number.</p>
 <p>For real money, prefer <code>Decimal</code> or integer minor units. A binary <code>float</code> is used in the learner exercise only to keep its first step small.</p>
-<p><strong>Verify:</strong> define the CSV contract — assert parse_nullable_text(&#x27;&#x27;) is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.</p>
-<h5 id="guide--exercise-2-compare-storage-contracts">Exercise 2 — compare storage contracts<a class="heading-anchor" href="#guide--exercise-2-compare-storage-contracts" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> define the CSV contract; assert parse_nullable_text(&#x27;&#x27;) is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.</p>
+<h5 id="guide--exercise-2-compare-storage-contracts">Exercise 2: compare storage contracts<a class="heading-anchor" href="#guide--exercise-2-compare-storage-contracts" aria-label="Link to this section">#</a></h5>
 <p>Make a table in your notes:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Question</th>
@@ -515,8 +515,8 @@ projected <span class="syntax-operator">=</span> <span class="syntax-punctuation
 </tr>
 </tbody></table></div>
 <p>Choose a format for a five-row configuration export and for a repeated 50-million-row analytical scan. Explain each answer.</p>
-<p><strong>Verify:</strong> compare storage contracts — complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.</p>
-<h5 id="guide--exercise-3-build-an-arrow-schema">Exercise 3 — build an Arrow schema<a class="heading-anchor" href="#guide--exercise-3-build-an-arrow-schema" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> compare storage contracts; complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.</p>
+<h5 id="guide--exercise-3-build-an-arrow-schema">Exercise 3: build an Arrow schema<a class="heading-anchor" href="#guide--exercise-3-build-an-arrow-schema" aria-label="Link to this section">#</a></h5>
 <p>With PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note. Create the table with this schema, write Parquet, read it, and assert:</p>
 <ul>
 <li>schema equality,</li>
@@ -524,15 +524,15 @@ projected <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>three null notes.</li>
 </ul>
 <p>Do not infer the schema first and then claim it was guaranteed.</p>
-<p><strong>Verify:</strong> build an Arrow schema — with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.</p>
-<h5 id="guide--exercise-4-make-partitions-deliberate">Exercise 4 — make partitions deliberate<a class="heading-anchor" href="#guide--exercise-4-make-partitions-deliberate" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> build an Arrow schema; with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.</p>
+<h5 id="guide--exercise-4-make-partitions-deliberate">Exercise 4: make partitions deliberate<a class="heading-anchor" href="#guide--exercise-4-make-partitions-deliberate" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>partition_directory</code>. Reject <code>../north</code>, slashes, empty strings, and unexpected case. Write one file per region under:</p>
 <pre class="highlighted-code"><code class="language-text">region=north/part-000.csv
 region=south/part-000.csv
 region=west/part-000.csv</code></pre>
 <p>Partitioning every high-cardinality value can create millions of tiny files. Choose stable, commonly filtered dimensions and plan file sizes.</p>
-<p><strong>Verify:</strong> make partitions deliberate — assert north, south, and west map exactly to region=&lt;value&gt;/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.</p>
-<h5 id="guide--exercise-5-query-parquet-with-duckdb">Exercise 5 — query Parquet with DuckDB<a class="heading-anchor" href="#guide--exercise-5-query-parquet-with-duckdb" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> make partitions deliberate; assert north, south, and west map exactly to region=&lt;value&gt;/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.</p>
+<h5 id="guide--exercise-5-query-parquet-with-duckdb">Exercise 5: query Parquet with DuckDB<a class="heading-anchor" href="#guide--exercise-5-query-parquet-with-duckdb" aria-label="Link to this section">#</a></h5>
 <p>Use an in-memory connection and <code>read_parquet(?)</code>. Group revenue by region for rows with at least two units. Bind path and threshold values as parameters.</p>
 <p>Then run <code>EXPLAIN</code> on the same SQL. Find:</p>
 <ul>
@@ -541,8 +541,8 @@ region=west/part-000.csv</code></pre>
 <li>projected columns that exclude <code>note</code>.</li>
 </ul>
 <p>Record the plan from your installed DuckDB version. Plan formatting changes, so look for semantics rather than copying one exact rendering.</p>
-<p><strong>Verify:</strong> query Parquet with DuckDB — assert the parameterized DuckDB result equals the fallback&#x27;s sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.</p>
-<h5 id="guide--exercise-6-explain-pushdown-honestly">Exercise 6 — explain pushdown honestly<a class="heading-anchor" href="#guide--exercise-6-explain-pushdown-honestly" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> query Parquet with DuckDB; assert the parameterized DuckDB result equals the fallback&#x27;s sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.</p>
+<h5 id="guide--exercise-6-explain-pushdown-honestly">Exercise 6: explain pushdown honestly<a class="heading-anchor" href="#guide--exercise-6-explain-pushdown-honestly" aria-label="Link to this section">#</a></h5>
 <p>Pushdown does not mean every query reads zero irrelevant bytes. Row-group statistics, file organization, filter selectivity, expression support, and engine version matter. Write:</p>
 <ul>
 <li>what the plan proves,</li>
@@ -553,40 +553,40 @@ region=west/part-000.csv</code></pre>
 <ul>
 <li>what would require profiling or scan metrics to prove.</li>
 </ul>
-<p><strong>Verify:</strong> explain pushdown honestly — write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.</p>
-<h5 id="guide--exercise-7-exercise-the-fallback">Exercise 7 — exercise the fallback<a class="heading-anchor" href="#guide--exercise-7-exercise-the-fallback" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> explain pushdown honestly; write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.</p>
+<h5 id="guide--exercise-7-exercise-the-fallback">Exercise 7: exercise the fallback<a class="heading-anchor" href="#guide--exercise-7-exercise-the-fallback" aria-label="Link to this section">#</a></h5>
 <p>Run <code>summarize_with_csv_fallback</code> in an environment without PyArrow/DuckDB. If pandas exists, it uses typed <code>read_csv</code>; otherwise it uses the standard library. Confirm the same row count, null count, region set, and revenue across engines.</p>
-<p><strong>Verify:</strong> exercise the fallback — force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.</p>
+<p><strong>Verify:</strong> exercise the fallback; force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
-<h5 id="guide--exercise-8-plan-schema-evolution">Exercise 8 — plan schema evolution<a class="heading-anchor" href="#guide--exercise-8-plan-schema-evolution" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--exercise-8-plan-schema-evolution">Exercise 8: plan schema evolution<a class="heading-anchor" href="#guide--exercise-8-plan-schema-evolution" aria-label="Link to this section">#</a></h5>
 <p>Create version 2 of the sales schema with one nullable additive column and one proposed type change. Define which readers remain compatible and write a migration/rejection policy.</p>
 <p><strong>Progressive hint:</strong> Adding a nullable field is often backward-compatible; changing decimal scale, nullability, meaning, or type may require a new dataset version.</p>
-<p><strong>Verify:</strong> plan schema evolution — create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.</p>
-<h5 id="guide--exercise-9-control-file-and-row-group-size">Exercise 9 — control file and row-group size<a class="heading-anchor" href="#guide--exercise-9-control-file-and-row-group-size" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> plan schema evolution; create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.</p>
+<h5 id="guide--exercise-9-control-file-and-row-group-size">Exercise 9: control file and row-group size<a class="heading-anchor" href="#guide--exercise-9-control-file-and-row-group-size" aria-label="Link to this section">#</a></h5>
 <p>Generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups. Record metadata count, scan planning, file sizes, and filtered query behavior.</p>
 <p><strong>Progressive hint:</strong> Partition values and file size solve different problems. Keep the total dataset small enough for a laptop and repeat measurements.</p>
-<p><strong>Verify:</strong> control file and row-group size — generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.</p>
-<h5 id="guide--exercise-10-validate-a-dataset-before-querying">Exercise 10 — validate a dataset before querying<a class="heading-anchor" href="#guide--exercise-10-validate-a-dataset-before-querying" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> control file and row-group size; generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.</p>
+<h5 id="guide--exercise-10-validate-a-dataset-before-querying">Exercise 10: validate a dataset before querying<a class="heading-anchor" href="#guide--exercise-10-validate-a-dataset-before-querying" aria-label="Link to this section">#</a></h5>
 <p>Build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
 <p><strong>Progressive hint:</strong> Read metadata and bounded columns first where possible; include failing row counts and opaque IDs without dumping sensitive data.</p>
-<p><strong>Verify:</strong> validate a dataset before querying — build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
-<h5 id="guide--exercise-11-reconcile-a-local-analytical-join">Exercise 11 — reconcile a local analytical join<a class="heading-anchor" href="#guide--exercise-11-reconcile-a-local-analytical-join" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> validate a dataset before querying; build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
+<h5 id="guide--exercise-11-reconcile-a-local-analytical-join">Exercise 11: reconcile a local analytical join<a class="heading-anchor" href="#guide--exercise-11-reconcile-a-local-analytical-join" aria-label="Link to this section">#</a></h5>
 <p>Create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic. Include an unknown region and duplicate lookup key.</p>
 <p><strong>Progressive hint:</strong> Validate lookup-key uniqueness before the join and choose inner versus left semantics explicitly.</p>
-<p><strong>Verify:</strong> reconcile a local analytical join — create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.</p>
-<h5 id="guide--exercise-12-find-a-non-pushdown-filter">Exercise 12 — find a non-pushdown filter<a class="heading-anchor" href="#guide--exercise-12-find-a-non-pushdown-filter" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> reconcile a local analytical join; create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.</p>
+<h5 id="guide--exercise-12-find-a-non-pushdown-filter">Exercise 12: find a non-pushdown filter<a class="heading-anchor" href="#guide--exercise-12-find-a-non-pushdown-filter" aria-label="Link to this section">#</a></h5>
 <p>Compare <code>units &gt;= ?</code> with a transformed predicate such as a function of units. Inspect plans and scan evidence, then rewrite only when semantics remain identical.</p>
 <p><strong>Progressive hint:</strong> Simple comparisons often map to row-group statistics; arbitrary functions may need evaluation after scanning.</p>
-<p><strong>Verify:</strong> find a non-pushdown filter — print both plans and measured scan evidence for units &gt;= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.</p>
-<h5 id="guide--exercise-13-publish-a-dataset-atomically">Exercise 13 — publish a dataset atomically<a class="heading-anchor" href="#guide--exercise-13-publish-a-dataset-atomically" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> find a non-pushdown filter; print both plans and measured scan evidence for units &gt;= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.</p>
+<h5 id="guide--exercise-13-publish-a-dataset-atomically">Exercise 13: publish a dataset atomically<a class="heading-anchor" href="#guide--exercise-13-publish-a-dataset-atomically" aria-label="Link to this section">#</a></h5>
 <p>Write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
 <p><strong>Progressive hint:</strong> Readers must never see a half-written dataset. The manifest is written after data files and verified before promotion.</p>
-<p><strong>Verify:</strong> publish a dataset atomically — write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
-<h5 id="guide--exercise-14-reconcile-decimals-and-timestamps-across-engines">Exercise 14 — reconcile decimals and timestamps across engines<a class="heading-anchor" href="#guide--exercise-14-reconcile-decimals-and-timestamps-across-engines" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> publish a dataset atomically; write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
+<h5 id="guide--exercise-14-reconcile-decimals-and-timestamps-across-engines">Exercise 14: reconcile decimals and timestamps across engines<a class="heading-anchor" href="#guide--exercise-14-reconcile-decimals-and-timestamps-across-engines" aria-label="Link to this section">#</a></h5>
 <p>Add boundary decimal values and timezone-aware timestamps to a local round trip. Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p>
 <p><strong>Progressive hint:</strong> Declare decimal precision/scale and one timestamp storage timezone. Compare canonical values, not default display strings.</p>
-<p><strong>Verify:</strong> reconcile decimals and timestamps across engines — add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p>
+<p><strong>Verify:</strong> reconcile decimals and timestamps across engines; add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Raw CSV values are recognized as text until parsed.</li>
@@ -621,8 +621,8 @@ region=west/part-000.csv</code></pre>
 <li>Compare DuckDB&#x27;s local analytical role with PostgreSQL&#x27;s multi-user, transactional role.</li>
 <li>Continue to <code>python-pro-01</code> if the data pipeline should become an installable package, or Bridge Day 6 for database bulk-loading contracts.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1006,104 +1006,104 @@ types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-data-01.html#solution-2"><code>py_data_01_arrow_duckdb_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
-<h5 id="solution-1--exercise-1-define-the-csv-contract">Exercise 1 — define the CSV contract<a class="heading-anchor" href="#solution-1--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-define-the-csv-contract">Exercise 1: define the CSV contract<a class="heading-anchor" href="#solution-1--exercise-1-define-the-csv-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>parse_nullable_text</code> and <code>total_revenue</code>. Parse dates, integers, and prices in one place rather than scattering conversion across analysis code. Test blank notes and a malformed number. For real money, prefer <code>Decimal</code> or integer minor units. A binary <code>float</code> is used in the learner exercise only to keep its first step small.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> define the CSV contract — assert parse_nullable_text(&#x27;&#x27;) is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.</p>
-<h5 id="solution-1--exercise-2-compare-storage-contracts">Exercise 2 — compare storage contracts<a class="heading-anchor" href="#solution-1--exercise-2-compare-storage-contracts" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> define the CSV contract; assert parse_nullable_text(&#x27;&#x27;) is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.</p>
+<h5 id="solution-1--exercise-2-compare-storage-contracts">Exercise 2: compare storage contracts<a class="heading-anchor" href="#solution-1--exercise-2-compare-storage-contracts" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | | Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan select columns efficiently? | | | | Does Python need an extra engine? | | | | Is append/stream exchange simple? | | | Choose a format for a five-row configuration export and for a repeated 50-million-row analytical scan. Explain each answer.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> compare storage contracts — complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.</p>
-<h5 id="solution-1--exercise-3-build-an-arrow-schema">Exercise 3 — build an Arrow schema<a class="heading-anchor" href="#solution-1--exercise-3-build-an-arrow-schema" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> compare storage contracts; complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.</p>
+<h5 id="solution-1--exercise-3-build-an-arrow-schema">Exercise 3: build an Arrow schema<a class="heading-anchor" href="#solution-1--exercise-3-build-an-arrow-schema" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> With PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note. Create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do not infer the schema first and then claim it was guaranteed.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> build an Arrow schema — with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.</p>
-<h5 id="solution-1--exercise-4-make-partitions-deliberate">Exercise 4 — make partitions deliberate<a class="heading-anchor" href="#solution-1--exercise-4-make-partitions-deliberate" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> build an Arrow schema; with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.</p>
+<h5 id="solution-1--exercise-4-make-partitions-deliberate">Exercise 4: make partitions deliberate<a class="heading-anchor" href="#solution-1--exercise-4-make-partitions-deliberate" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>partition_directory</code>. Reject <code>../north</code>, slashes, empty strings, and unexpected case. Write one stable file per region at <code>region=&lt;validated-value&gt;/part-000.csv</code>. Partitioning every high-cardinality value can create millions of tiny files, so choose commonly filtered dimensions and plan file sizes.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> make partitions deliberate — assert north, south, and west map exactly to region=&lt;value&gt;/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.</p>
-<h5 id="solution-1--exercise-5-query-parquet-with-duckdb">Exercise 5 — query Parquet with DuckDB<a class="heading-anchor" href="#solution-1--exercise-5-query-parquet-with-duckdb" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> make partitions deliberate; assert north, south, and west map exactly to region=&lt;value&gt;/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.</p>
+<h5 id="solution-1--exercise-5-query-parquet-with-duckdb">Exercise 5: query Parquet with DuckDB<a class="heading-anchor" href="#solution-1--exercise-5-query-parquet-with-duckdb" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Use an in-memory connection and <code>read_parquet(?)</code>. Group revenue by region for rows with at least two units. Bind path and threshold values as parameters. Then run <code>EXPLAIN</code> on the same SQL. Find: - a Parquet scan, - a units filter, and - projected columns that exclude <code>note</code>. Record the plan from your installed DuckDB version. Plan formatting changes, so look for semantics rather than copying one exact rendering.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> query Parquet with DuckDB — assert the parameterized DuckDB result equals the fallback&#x27;s sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.</p>
-<h5 id="solution-1--exercise-6-explain-pushdown-honestly">Exercise 6 — explain pushdown honestly<a class="heading-anchor" href="#solution-1--exercise-6-explain-pushdown-honestly" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> query Parquet with DuckDB; assert the parameterized DuckDB result equals the fallback&#x27;s sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.</p>
+<h5 id="solution-1--exercise-6-explain-pushdown-honestly">Exercise 6: explain pushdown honestly<a class="heading-anchor" href="#solution-1--exercise-6-explain-pushdown-honestly" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Pushdown does not mean every query reads zero irrelevant bytes. Row-group statistics, file organization, filter selectivity, expression support, and engine version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and 3. what would require profiling or scan metrics to prove.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> explain pushdown honestly — write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.</p>
-<h5 id="solution-1--exercise-7-exercise-the-fallback">Exercise 7 — exercise the fallback<a class="heading-anchor" href="#solution-1--exercise-7-exercise-the-fallback" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> explain pushdown honestly; write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.</p>
+<h5 id="solution-1--exercise-7-exercise-the-fallback">Exercise 7: exercise the fallback<a class="heading-anchor" href="#solution-1--exercise-7-exercise-the-fallback" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Run <code>summarize_with_csv_fallback</code> in an environment without PyArrow/DuckDB. If pandas exists, it uses typed <code>read_csv</code>; otherwise it uses the standard library. Confirm the same row count, null count, region set, and revenue across engines.</p>
 <p><strong>Reference reasoning:</strong> A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> exercise the fallback — force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.</p>
-<h5 id="solution-1--exercise-8-plan-schema-evolution">Exercise 8 — plan schema evolution<a class="heading-anchor" href="#solution-1--exercise-8-plan-schema-evolution" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> exercise the fallback; force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.</p>
+<h5 id="solution-1--exercise-8-plan-schema-evolution">Exercise 8: plan schema evolution<a class="heading-anchor" href="#solution-1--exercise-8-plan-schema-evolution" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create version 2 of the sales schema with one nullable additive column and one proposed type change. Define which readers remain compatible and write a migration/rejection policy.</p>
 <p><strong>Reasoning path:</strong> Adding a nullable field is often backward-compatible; changing decimal scale, nullability, meaning, or type may require a new dataset version.</p>
 <p>Persist a schema version and field metadata beside each dataset. A v1 reader can ignore an additive nullable field when its projection is explicit. A v2 reader supplies a documented default/null when reading v1. A type or semantic change is rejected or transformed through a named migration with validation.</p>
 <p>Test both directions using explicit Arrow schemas; do not rely on whatever coercion the installed engine happens to perform.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> plan schema evolution — create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.</p>
-<h5 id="solution-1--exercise-9-control-file-and-row-group-size">Exercise 9 — control file and row-group size<a class="heading-anchor" href="#solution-1--exercise-9-control-file-and-row-group-size" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> plan schema evolution; create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.</p>
+<h5 id="solution-1--exercise-9-control-file-and-row-group-size">Exercise 9: control file and row-group size<a class="heading-anchor" href="#solution-1--exercise-9-control-file-and-row-group-size" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups. Record metadata count, scan planning, file sizes, and filtered query behavior.</p>
 <p><strong>Reasoning path:</strong> Partition values and file size solve different problems. Keep the total dataset small enough for a laptop and repeat measurements.</p>
 <p>Write the same typed rows with two layouts, verify identical aggregates, then compare file count, median file bytes, row-group statistics, and repeated query times. Treat timing as machine-specific evidence. Tiny files add filesystem and planning overhead; overly large row groups reduce pruning granularity.</p>
 <p>Choose a target range based on actual storage/engine workload rather than a universal number. Clean the generated data under an ignored temporary path.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> control file and row-group size — generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.</p>
-<h5 id="solution-1--exercise-10-validate-a-dataset-before-querying">Exercise 10 — validate a dataset before querying<a class="heading-anchor" href="#solution-1--exercise-10-validate-a-dataset-before-querying" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> control file and row-group size; generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.</p>
+<h5 id="solution-1--exercise-10-validate-a-dataset-before-querying">Exercise 10: validate a dataset before querying<a class="heading-anchor" href="#solution-1--exercise-10-validate-a-dataset-before-querying" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
 <p><strong>Reasoning path:</strong> Read metadata and bounded columns first where possible; include failing row counts and opaque IDs without dumping sensitive data.</p>
 <p>Separate hard contract failures from informational statistics. Validate every file against the declared schema and ensure the path partition value equals the stored region. Duplicate IDs, unsafe regions, negative units, or schema drift fail before analytical SQL runs.</p>
 <p>The report includes dataset/version hash, file count, rows, and per-check status. A successful Parquet read is not a data-quality proof.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> validate a dataset before querying — build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
-<h5 id="solution-1--exercise-11-reconcile-a-local-analytical-join">Exercise 11 — reconcile a local analytical join<a class="heading-anchor" href="#solution-1--exercise-11-reconcile-a-local-analytical-join" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> validate a dataset before querying; build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.</p>
+<h5 id="solution-1--exercise-11-reconcile-a-local-analytical-join">Exercise 11: reconcile a local analytical join<a class="heading-anchor" href="#solution-1--exercise-11-reconcile-a-local-analytical-join" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic. Include an unknown region and duplicate lookup key.</p>
 <p><strong>Reasoning path:</strong> Validate lookup-key uniqueness before the join and choose inner versus left semantics explicitly.</p>
 <p>Reject the duplicate dimension key rather than allowing an accidental many-to-many revenue multiplication. For a left join, preserve every sale and mark unknown region metadata as missing; for an inner join, report excluded row and revenue counts.</p>
 <p>Sort and compare canonical output rows across engines, including decimal normalization and nulls. Matching totals alone can hide duplicated and dropped rows.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> reconcile a local analytical join — create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.</p>
-<h5 id="solution-1--exercise-12-find-a-non-pushdown-filter">Exercise 12 — find a non-pushdown filter<a class="heading-anchor" href="#solution-1--exercise-12-find-a-non-pushdown-filter" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> reconcile a local analytical join; create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.</p>
+<h5 id="solution-1--exercise-12-find-a-non-pushdown-filter">Exercise 12: find a non-pushdown filter<a class="heading-anchor" href="#solution-1--exercise-12-find-a-non-pushdown-filter" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Compare <code>units &gt;= ?</code> with a transformed predicate such as a function of units. Inspect plans and scan evidence, then rewrite only when semantics remain identical.</p>
 <p><strong>Reasoning path:</strong> Simple comparisons often map to row-group statistics; arbitrary functions may need evaluation after scanning.</p>
-<p>Parameterize both queries, verify equal selected rows for the chosen rewrite, and inspect <code>EXPLAIN</code> for filter placement. Record engine/version because plan syntax and supported pushdown evolve. If scan metrics are unavailable, claim only what the plan shows—not bytes avoided.</p>
+<p>Parameterize both queries, verify equal selected rows for the chosen rewrite, and inspect <code>EXPLAIN</code> for filter placement. Record engine/version because plan syntax and supported pushdown evolve. If scan metrics are unavailable, claim only what the plan shows, not bytes avoided.</p>
 <p>Never alter boundary behavior (nulls, overflow, rounding, timezone) merely to obtain a prettier plan.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> find a non-pushdown filter — print both plans and measured scan evidence for units &gt;= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.</p>
-<h5 id="solution-1--exercise-13-publish-a-dataset-atomically">Exercise 13 — publish a dataset atomically<a class="heading-anchor" href="#solution-1--exercise-13-publish-a-dataset-atomically" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> find a non-pushdown filter; print both plans and measured scan evidence for units &gt;= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.</p>
+<h5 id="solution-1--exercise-13-publish-a-dataset-atomically">Exercise 13: publish a dataset atomically<a class="heading-anchor" href="#solution-1--exercise-13-publish-a-dataset-atomically" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
 <p><strong>Reasoning path:</strong> Readers must never see a half-written dataset. The manifest is written after data files and verified before promotion.</p>
 <p>Use a unique staging directory under ignored storage. Close all writers, validate every file, and write the manifest last. Promotion uses an atomic rename or small pointer-file replacement supported by the local filesystem. On failure, leave the previous version untouched and remove/review staging.</p>
 <p>Do not overwrite an existing immutable version. Hashes detect accidental change but do not prove source trust or data correctness.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> publish a dataset atomically — write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
-<h5 id="solution-1--exercise-14-reconcile-decimals-and-timestamps-across-engines">Exercise 14 — reconcile decimals and timestamps across engines<a class="heading-anchor" href="#solution-1--exercise-14-reconcile-decimals-and-timestamps-across-engines" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> publish a dataset atomically; write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.</p>
+<h5 id="solution-1--exercise-14-reconcile-decimals-and-timestamps-across-engines">Exercise 14: reconcile decimals and timestamps across engines<a class="heading-anchor" href="#solution-1--exercise-14-reconcile-decimals-and-timestamps-across-engines" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Add boundary decimal values and timezone-aware timestamps to a local round trip. Compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p>
 <p><strong>Reasoning path:</strong> Declare decimal precision/scale and one timestamp storage timezone. Compare canonical values, not default display strings.</p>
 <p>Represent money as Arrow decimal and SQL DECIMAL, checking overflow and scale before write. Store instants in UTC with timezone metadata and derive local calendar fields separately. CSV needs explicit parsers for both contracts.</p>
 <p>Normalize query results into decimal strings/minor units and UTC ISO timestamps before cross-engine comparison. Reject naive/ambiguous timestamps rather than letting local machine timezone decide.</p>
 <p><strong>Common trap:</strong> Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> reconcile decimals and timestamps across engines — add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p></div>
+<p><strong>Verify:</strong> reconcile decimals and timestamps across engines; add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.</p></div>
       </section>
 
 
@@ -1503,16 +1503,16 @@ types <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-data-01` — Columnar data, Arrow, Parquet, and embedded analytical SQL.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize typed data boundaries, Arrow/Parquet schema, partitions, and pushdown evidence. Use exactly these maintained learner materials:
@@ -1540,7 +1540,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1651,18 +1651,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

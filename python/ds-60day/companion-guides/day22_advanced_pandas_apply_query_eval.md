@@ -1,4 +1,4 @@
-# Day 22 — Advanced pandas: Vectorization, `query`, and Categoricals
+# Day 22: Advanced pandas: Vectorization, `query`, and Categoricals
 
 **Level:** Intermediate
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 22 — advanced pandas: vectorization, `query`, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals
+**Lesson outcome:** use day 22; advanced pandas: vectorization, `query`, and categoricals to practice pandas vectorization, expression APIs, and memory-aware categoricals
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -101,7 +101,7 @@ assign an expression result. `series.astype("category")` creates codes
 and categories; `memory_usage(deep=True)` includes referenced string
 storage for a more honest comparison.
 
-### Worked example 1 — Replace row-wise conditional logic with masks
+### Worked example 1: Replace row-wise conditional logic with masks
 
 Column expressions state each rule and preserve index alignment. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -128,7 +128,7 @@ frame.to_dict("records")
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Measure categorical conversion
+### Worked example 2: Measure categorical conversion
 
 Keep the conversion only when data characteristics justify it. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -245,7 +245,7 @@ code; these extend rather than replace the original practice above.
    **Verify:** Assert row-wise and vectorized ratios agree including missing values, then report repeated timings on the same frame rather than a single anecdote.
 4. **Tracing:** Trace `frame.query('amount > @threshold')`: which name comes from a column and which comes from Python scope?
    **Progressive hint:** `@` marks an external Python variable.
-   **Verify:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`—not a column—controls the result.
+   **Verify:** Set a known threshold and assert the selected row indexes; change only the Python variable and confirm `@threshold`, not a column, controls the result.
 5. **Implementation:** Write a function that compares memory before/after categorical conversion and keeps the category only when it reduces memory.
    **Progressive hint:** Use `memory_usage(deep=True)` on the Series.
    **Verify:** Assert values are unchanged, record both deep-memory counts, and return categorical only in the fixture where its bytes are smaller.
@@ -284,11 +284,11 @@ values), and the categorical decision is supported by measured bytes.
 
 - [Open the learner notebook](../notebooks/day22_advanced_pandas_apply_query_eval.ipynb)
 - [Check the separate solution](../solutions/day22_advanced_pandas_apply_query_eval/day22_solutions.md)
-- [Next: Day 23 — Streaming data pipelines](day23_data_pipelines_generators.md)
+- [Next: Day 23; Streaming data pipelines](day23_data_pipelines_generators.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

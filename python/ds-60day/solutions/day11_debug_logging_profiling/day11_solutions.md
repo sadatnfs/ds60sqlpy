@@ -1,4 +1,4 @@
-# Day 11 — Solutions: Debugging, Logging, and Profiling
+# Day 11: Solutions: Debugging, Logging, and Profiling
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ representative measurement, not after guessing which line “looks slow.”
 For this lesson's **evidence-driven debugging, useful logs, and measurement before optimization** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Start from a supplied failing function and use `breakpoint()` or the VS Code debugger to pause immediately before the wrong value is produced. **Evidence:** record the call arguments, two relevant local variables, and the branch taken. **Constraint:** do not change logic until you can state one falsifiable hypothesis. **Verify:** record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.
 
@@ -67,7 +67,7 @@ repair, rerun the original case and the no-positive boundary.
 
 **Verification evidence:** record the original failing test result before repair, then assert that exact input and one nearby passing input both produce their expected values after the fix.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add module-level logging with `logging.getLogger(__name__)` and emit useful DEBUG/INFO/WARNING events for a small processing function. **Constraints:** use lazy `%s`/`%d` formatting, do not call `basicConfig` inside reusable library logic, and log counts/identifiers rather than sensitive record contents. **Verify:** demonstrate that changing the configured level changes visibility without changing the returned value.
 
@@ -98,7 +98,7 @@ file contents or credentials.
 
 **Verification evidence:** demonstrate that changing the configured level changes visibility without changing the returned value.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Profile a deliberately slow membership or aggregation function with `cProfile` or `timeit`, implement one behavior-preserving improvement, and compare under identical inputs. **Expected behavior:** outputs match exactly and the measurement identifies where time changed. **Constraint:** report repeated timings rather than claiming from a single run. **Verify:** Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.
 
@@ -146,9 +146,9 @@ constant-time membership checks.
 
 **Verification evidence:** Assert old and new functions return identical results, then report repeated measurements and the profiler line/call count supporting the change.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** With a logger set to `WARNING`, predict which of DEBUG, INFO, WARNING, and ERROR calls are emitted. **Progressive hint:** The threshold keeps records at that level or more severe. **Verify:** Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.
 
@@ -156,7 +156,7 @@ constant-time membership checks.
 
 **Evidence to locate in the grouped implementation:** Capture emitted records and assert WARNING and ERROR appear while DEBUG and INFO do not at a WARNING threshold.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace a nested call failure and identify the first frame you own, the input value, and the violated assumption. **Progressive hint:** Read a traceback from the final exception upward through your code. **Verify:** Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.
 
@@ -164,7 +164,7 @@ constant-time membership checks.
 
 **Evidence to locate in the grouped implementation:** Annotate the traceback with failure type, first owned frame, input, and violated assumption; rerun the minimal fixture to reproduce it exactly.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement a reusable `timed(label)` context manager using `time.perf_counter` and logging. **Progressive hint:** Put elapsed-time logging in `finally` so failures are still timed. **Verify:** Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.
 
@@ -172,7 +172,7 @@ constant-time membership checks.
 
 **Evidence to locate in the grouped implementation:** Capture one success and one raised block; assert both log a non-negative elapsed duration and the original exception is not swallowed.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Explain why repeated `logging.basicConfig(...)` calls in notebooks may appear ineffective and configure a named logger without duplicate handlers. **Progressive hint:** Configuration is process state; inspect handlers before adding one. **Verify:** Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.
 
@@ -180,7 +180,7 @@ constant-time membership checks.
 
 **Evidence to locate in the grouped implementation:** Run configuration twice and assert the named logger has exactly one intended handler and emits one copy of each message.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design a fair comparison between a loop and an alternative: include warm-up, equal inputs, repeated trials, and result verification. **Progressive hint:** A faster wrong answer is not an optimization. **Verify:** Assert both implementations return identical values across all benchmark inputs, then report warm-up and multiple comparable trial distributions.
 
@@ -192,13 +192,13 @@ constant-time membership checks.
 
 Observe before optimizing: reproduce a defect, add bounded context, profile representative work, and change the measured bottleneck.
 
-### Shared implementation for Exercises 4–5 — Logging and traceback reading
+### Shared implementation for Exercises 4–5: Logging and traceback reading
 
 At `WARNING`, warning and error records are emitted. Start traceback diagnosis
 at the deepest frame in code you control, then inspect the input and assumption
 there before editing callers.
 
-### Shared implementation for Exercises 6–8 — A timing tool and a fair benchmark
+### Shared implementation for Exercises 6–8: A timing tool and a fair benchmark
 
 ```python
 from __future__ import annotations

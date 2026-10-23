@@ -173,7 +173,7 @@ Yes. Autograd tracking and module registration are separate. A plain requires_gr
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-003, Linear modules, parameters and matrix contracts.

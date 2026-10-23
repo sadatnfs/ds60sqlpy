@@ -213,7 +213,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 stateful checkpoint configuration limits](https://spark.apache.org/docs/4.0.1/streaming/additional-information.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-034: Stream-stream joins and bounded state.

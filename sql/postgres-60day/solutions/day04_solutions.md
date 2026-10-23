@@ -1,4 +1,4 @@
-# Day 04 solutions — OUTER JOINs: Preserving Unmatched Rows
+# Day 04 solutions: OUTER JOINs: Preserving Unmatched Rows
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List every customer with order count, including customers with zero orders.
 
@@ -109,7 +109,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-04 Exercise 1, the chosen form is justified by this lesson-specific rationale: Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`. Evaluate another form against the concrete expected result (One row per customer; zero is visible) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Find products that have never appeared in an order item.
 
@@ -150,7 +150,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-04 Exercise 2, the chosen form is justified by this lesson-specific rationale: Left join and retain rows where the right-side primary key is NULL. Evaluate another form against the concrete expected result (One row per unsold product) and the verification above.
 - **Edge case:** Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Compare monthly budgets and expenses by category with a full outer join.
 
@@ -208,7 +208,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-04 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate each side to the same category/month grain before joining; preserve keys from either side. Evaluate another form against the concrete expected result (One row per category/month present in either source) and the verification above.
 - **Edge case:** Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
 
@@ -250,7 +250,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-04 Exercise 4, the chosen form is justified by this lesson-specific rationale: Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers. Evaluate another form against the concrete expected result (One row per customer, including zero delivered orders) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
 
@@ -290,7 +290,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-04 Exercise 5, the chosen form is justified by this lesson-specific rationale: Count a non-nullable right-side key that becomes NULL for an unmatched row. Evaluate another form against the concrete expected result (One row per customer with correct zero counts) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
 

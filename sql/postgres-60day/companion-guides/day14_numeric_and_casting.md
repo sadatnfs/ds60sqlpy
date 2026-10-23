@@ -1,9 +1,9 @@
-# Day 14 — Numeric Types, Casting, and Precision (Companion Guide)
+# Day 14: Numeric Types, Casting, and Precision (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 13 — date, time, and time zones](day13_date_time_functions.md)
+- **Prerequisites:** [Day 13; date, time, and time zones](day13_date_time_functions.md)
 - **Artifacts:** [learner SQL](../day14_numeric_and_casting.sql) ·
   [solution reasoning](../solutions/day14_solutions.md) ·
   [executable solution](../solutions/day14_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-14 — Numeric and Casting** and choose
+2. Open **SQL-14; Numeric and Casting** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -219,7 +219,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 15 — Phase 1 project](day15_phase1_project.md).
+Continue to [Day 15; Phase 1 project](day15_phase1_project.md).
 
 ## Deep dive and reference
 
@@ -240,7 +240,7 @@ Examples
 
 Pitfalls
 - Silent rounding when casting to narrower numeric precision.
-- Dividing by zero — use NULLIF(den,0) to avoid errors.
+- Dividing by zero; use NULLIF(den,0) to avoid errors.
 
 Current practice map
 - The authoritative six prompts, progressive hints, and expected shapes
@@ -251,11 +251,11 @@ Current practice map
 Further reading
 - Numeric types: https://www.postgresql.org/docs/current/datatype-numeric.html
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-14 — Numeric and Casting.

@@ -175,7 +175,7 @@ PyTorch supports probability targets in particular forms, but that is a differen
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-014, CrossEntropyLoss, multiclass and multilabel contracts.

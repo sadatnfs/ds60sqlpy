@@ -86,9 +86,9 @@ Use this map after an honest attempt. The executable implementation remains
 [`py_test_01_architecture_generative_solution.py`](py_test_01_architecture_generative_solution.py); this section explains the
 contract, evidence, alternatives, and edge cases behind every numbered task.
 
-### Exercise 1 — Choose fixture lifetime
+### Exercise 1: Choose fixture lifetime
 
-**Prompt recap:** For each resource—immutable input rows, mutable in-memory store, temporary JSON file, and database connection—choose function, class, module, or session scope. Prefer the narrowest lifetime that is fast enough and keeps tests independent.
+**Prompt recap:** For each resource, immutable input rows, mutable in-memory store, temporary JSON file, and database connection, choose function, class, module, or session scope. Prefer the narrowest lifetime that is fast enough and keeps tests independent.
 
 **Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
 the focused discussion earlier in this file implement this original
@@ -100,9 +100,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Choose fixture lifetime — run two tests that mutate the in-memory store and assert the second starts empty; assert a temporary JSON path differs between tests, immutable rows remain equal, and a database connection is rolled back/closed at the chosen scope.
+**Verify:** Choose fixture lifetime; run two tests that mutate the in-memory store and assert the second starts empty; assert a temporary JSON path differs between tests, immutable rows remain equal, and a database connection is rolled back/closed at the chosen scope.
 
-### Exercise 2 — Complete interval merging
+### Exercise 2: Complete interval merging
 
 **Prompt recap:** Implement `merge_intervals`. Add examples for empty input, reversed endpoints, adjacent intervals, duplicates, and nesting. Then express properties: - output is sorted, - output intervals no longer touch, - every original integer point remains covered, and - no new point is created.
 
@@ -116,9 +116,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Complete interval merging — assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.
+**Verify:** Complete interval merging; assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.
 
-### Exercise 3 — Use Hypothesis meaningfully
+### Exercise 3: Use Hypothesis meaningfully
 
 **Prompt recap:** Generate lists of bounded integer endpoint pairs with 100 deterministic examples, no example database, and no deadline. Introduce an adjacency bug briefly, inspect the smallest counterexample, restore the implementation, and keep a useful named regression case.
 
@@ -132,9 +132,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Use Hypothesis meaningfully — run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.
+**Verify:** Use Hypothesis meaningfully; run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.
 
-### Exercise 4 — Compare test doubles
+### Exercise 4: Compare test doubles
 
 **Prompt recap:** Complete `choose_double`. Use a fake for the stateful store, a mock only for one audit interaction, and a real temporary file for serialization behavior. Explain why mocking every store method couples tests to implementation steps.
 
@@ -148,9 +148,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Compare test doubles — assert the fake store preserves put/get/overwrite state, the audit mock receives exactly one expected call, and a real temporary JSON file round-trips bytes/data; include a test that would survive if every store method were merely mocked.
+**Verify:** Compare test doubles; assert the fake store preserves put/get/overwrite state, the audit mock receives exactly one expected call, and a real temporary JSON file round-trips bytes/data; include a test that would survive if every store method were merely mocked.
 
-### Exercise 5 — Patch and restore process state
+### Exercise 5: Patch and restore process state
 
 **Prompt recap:** Use `patch.dict(os.environ, ..., clear=False)` or pytest's `monkeypatch` fixture to change cache settings for one test. Assert the original environment is restored afterward. Prefer passing a mapping directly when the API permits it.
 
@@ -164,9 +164,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Patch and restore process state — in two tests, set and read the named cache environment variable with patch.dict or monkeypatch, then assert the original value/presence is restored after each test and after an injected exception.
+**Verify:** Patch and restore process state; in two tests, set and read the named cache environment variable with patch.dict or monkeypatch, then assert the original value/presence is restored after each test and after an injected exception.
 
-### Exercise 6 — Add a contract failure
+### Exercise 6: Add a contract failure
 
 **Prompt recap:** Create a deliberately broken store that never overwrites values. Run the shared contract and locate the exact violated behavior. Contract tests complement, rather than replace, implementation-specific failure tests.
 
@@ -180,9 +180,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Add a contract failure — run the shared store contract against the broken no-overwrite store and record the exact failing overwrite assertion; then run the same contract against the conforming fake with exit code 0.
+**Verify:** Add a contract failure; run the shared store contract against the broken no-overwrite store and record the exact failing overwrite assertion; then run the same contract against the conforming fake with exit code 0.
 
-### Exercise 7 — model a state machine
+### Exercise 7: model a state machine
 
 **Prompt recap:** Create a deterministic rule-based state machine for `ExpiringCache`: put, get, delete, advance time, and overwrite. Compare every action with a simple in-memory model.
 
@@ -203,9 +203,9 @@ named regression test.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** model a state machine — execute a seeded ExpiringCache state machine containing put/get/delete/advance/overwrite actions; after every action assert cache output equals the simple model, expired keys are absent, and size never exceeds the model.
+**Verify:** model a state machine; execute a seeded ExpiringCache state machine containing put/get/delete/advance/overwrite actions; after every action assert cache output equals the simple model, expired keys are absent, and size never exceeds the model.
 
-### Exercise 8 — add metamorphic tests
+### Exercise 8: add metamorphic tests
 
 **Prompt recap:** Write metamorphic relations for interval merging when the exact output is inconvenient: input permutation, duplicate insertion, endpoint translation, and applying merge twice.
 
@@ -224,9 +224,9 @@ infect both relation and implementation, so review the mathematical contract.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** add metamorphic tests — assert interval results are unchanged by input permutation and duplicate insertion, translated by exactly k when every endpoint gains k, and idempotent under merge_intervals(merge_intervals(x)).
+**Verify:** add metamorphic tests; assert interval results are unchanged by input permutation and duplicate insertion, translated by exactly k when every endpoint gains k, and idempotent under merge_intervals(merge_intervals(x)).
 
-### Exercise 9 — evaluate mutation-test survivors
+### Exercise 9: evaluate mutation-test survivors
 
 **Prompt recap:** Make three deliberate mutations: change expiry `<` to `<=`, stop merging adjacent intervals, and skip store overwrite. Predict which test should fail and add a focused test for any survivor.
 
@@ -245,9 +245,9 @@ need review. The useful output is a concrete missing behavioral assertion.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** evaluate mutation-test survivors — run each of the <= expiry, no-adjacency-merge, and no-overwrite mutants separately; name the test that fails, and add a focused assertion if any mutant survives so all three finish killed.
+**Verify:** evaluate mutation-test survivors; run each of the <= expiry, no-adjacency-merge, and no-overwrite mutants separately; name the test that fails, and add a focused assertion if any mutant survives so all three finish killed.
 
-### Exercise 10 — test concurrency without timing races
+### Exercise 10: test concurrency without timing races
 
 **Prompt recap:** Design a two-worker cache/store test using barriers/events to force a specific interleaving. State whether the contract promises thread safety; if it does not, test the synchronization wrapper instead.
 
@@ -267,9 +267,9 @@ only to prevent a hung test, not as the correctness condition.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** test concurrency without timing races — use barriers/events—not sleep—to force the declared two-worker interleaving; assert final value/call count or the synchronization wrapper's result, both workers terminate before a fixed timeout, and no exception is lost.
+**Verify:** test concurrency without timing races; use barriers/events, not sleep, to force the declared two-worker interleaving; assert final value/call count or the synchronization wrapper's result, both workers terminate before a fixed timeout, and no exception is lost.
 
-### Exercise 11 — triage a flaky test
+### Exercise 11: triage a flaky test
 
 **Prompt recap:** Take a test that depends on wall-clock sleep, random data, shared files, or unordered output. Classify the cause, collect repeat evidence, and replace the unstable boundary rather than adding retries.
 
@@ -289,9 +289,9 @@ owner and deadline if used.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** triage a flaky test — repeat the original flaky test enough times to record its failure rate and classify clock/random/file/order state; replace that boundary with a fake clock, seed, tmp_path, or sorted assertion and then obtain a clean repeated-test transcript without retries.
+**Verify:** triage a flaky test; repeat the original flaky test enough times to record its failure rate and classify clock/random/file/order state; replace that boundary with a fake clock, seed, tmp_path, or sorted assertion and then obtain a clean repeated-test transcript without retries.
 
-### Exercise 12 — design a layered verification portfolio
+### Exercise 12: design a layered verification portfolio
 
 **Prompt recap:** Map one feature across pure unit/property tests, shared store contract, real temporary-file integration, CLI/process smoke, and optional external system test. Define what each layer proves and does not prove.
 
@@ -312,4 +312,4 @@ wiring evidence.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** design a layered verification portfolio — deliver a matrix with unit/property, shared contract, temporary-file integration, CLI subprocess, and optional external rows; for each name its command/test ID, input fixture, expected output/failure, runtime budget, and the claim it cannot prove.
+**Verify:** design a layered verification portfolio; deliver a matrix with unit/property, shared contract, temporary-file integration, CLI subprocess, and optional external rows; for each name its command/test ID, input fixture, expected output/failure, runtime budget, and the claim it cannot prove.

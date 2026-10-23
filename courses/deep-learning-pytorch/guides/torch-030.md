@@ -175,7 +175,7 @@ Actual process-group setup, collective ordering, uneven-input handling, cancella
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-030, Distributed gradients and accumulation semantics on CPU.

@@ -1,4 +1,4 @@
-# Day 29 solutions — Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions
+# Day 29 solutions: Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Find customer names beginning with `Customer 1` case-insensitively.
 
@@ -106,7 +106,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-29 Exercise 1, the chosen form is justified by this lesson-specific rationale: `ILIKE 'Customer 1%'` uses `%` for any suffix. Evaluate another form against the concrete expected result (Matching customer rows in stable ID order) and the verification above.
 - **Edge case:** Add one row for which `(c.full_name ILIKE 'Customer 1%')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Find emails that match the course's simple lowercase example.com pattern.
 
@@ -144,7 +144,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-29 Exercise 2, the chosen form is justified by this lesson-specific rationale: Anchor both ends and escape the literal dot in the POSIX regex. Evaluate another form against the concrete expected result (Only matching non-null email rows) and the verification above.
 - **Edge case:** Add one row for which `(c.email ~ '^customer[0-9]+@example[.]com$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Return event paths under `/p/` using JSON extraction and an anchored pattern.
 
@@ -182,7 +182,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-29 Exercise 3, the chosen form is justified by this lesson-specific rationale: Extract path text, then anchor the literal prefix. Evaluate another form against the concrete expected result (Events whose path begins `/p/`) and the verification above.
 - **Edge case:** Add one row for which `(e.metadata ->> 'path' LIKE '/p/%')` is true and one for which it is false; verify only the matching `event_id` value is returned.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Match literal percent and underscore characters in sample text and contrast them with wildcard behavior.
 
@@ -221,7 +221,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-29 Exercise 4, the chosen form is justified by this lesson-specific rationale: Declare an escape character and prefix each literal wildcard. Evaluate another form against the concrete expected result (Only the two rows containing the requested literal symbols) and the verification above.
 - **Edge case:** Add one row for which `(value LIKE '%\%%' ESCAPE '\' OR value LIKE '%\_%' ESCAPE '\')` is true and one for which it is false; verify only the matching `value` value is returned.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Extract the captured numeric suffix from a valid customer name without replacing the entire string blindly.
 
@@ -259,7 +259,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-29 Exercise 5, the chosen form is justified by this lesson-specific rationale: First assert the anchored grammar, then use `substring(... FROM regex)`. Evaluate another form against the concrete expected result (One row per valid course customer name) and the verification above.
 - **Edge case:** Add one row for which `(c.full_name ~ '^Customer [0-9]+$')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Classify emails as course example, other valid-looking, missing, or malformed using ordered patterns.
 

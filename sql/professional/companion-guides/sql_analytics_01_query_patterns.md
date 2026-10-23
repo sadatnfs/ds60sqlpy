@@ -1,4 +1,4 @@
-# SQL-ANALYTICS-01 — Reusable Analytical Query Patterns
+# SQL-ANALYTICS-01: Reusable Analytical Query Patterns
 
 ## Level and prerequisites
 
@@ -48,7 +48,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-ANALYTICS-01 — Reusable Analytical Query Patterns** and choose
+2. Open **SQL-ANALYTICS-01; Reusable Analytical Query Patterns** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -82,7 +82,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -243,7 +243,7 @@ policy, time zone, half-open bounds, tie-break, and an invariant query:
    **Verify:** For sql-analytics-01 Exercise 8, independently list distinct users for two half-open seven-day windows and add the same user on another day to prove weekly distinct count rises by at most one.
 9. **Percentiles:** calculate median/P90 session duration and document
    interpolation and NULL behavior.
-   **Inputs/evidence:** For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations—not raw events—to ordered-set percentile aggregates.
+   **Inputs/evidence:** For sql-analytics-01 Exercise 9, derive one row per session with the 60-minute rule, then pass non-NULL session durations, not raw events, to ordered-set percentile aggregates.
    **Expected result/shape:** For sql-analytics-01 Exercise 9, expected output: one aggregate row with `session_count` and a two-element interval array `median_and_p90` from continuous percentiles 0.5 and 0.9.
    **Verify:** For sql-analytics-01 Exercise 9, materialize and sort session durations, reconcile the session count, compare continuous percentile, discrete percentile, and average on a skewed fixture, and confirm empty input yields NULL percentiles.
 10. **Top-N:** compare `row_number`, `rank`, and `dense_rank` under ties.
@@ -294,15 +294,15 @@ policy, time zone, half-open bounds, tie-break, and an invariant query:
 
 ## Next step
 
-Continue to [SQL-OPS-02 — backup, restore, and recovery rehearsals](sql_ops_02_backup_restore_recovery.md).
+Continue to [SQL-OPS-02; backup, restore, and recovery rehearsals](sql_ops_02_backup_restore_recovery.md).
 Use the contract-test module to freeze each analytical definition and add
 edge-case fixtures before turning a pattern into a metric.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-analytics-01 — Reusable Analytical Query Patterns.

@@ -239,7 +239,7 @@ records can share a real transaction boundary. Before adding concurrent writers
 or external side effects, define ownership, conflict detection, and the exact
 failure model rather than reusing this single-writer file design unchanged.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-pro-03.

@@ -137,7 +137,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [Python bisect boundary semantics](https://docs.python.org/3/library/bisect.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-algo-02: Stable Ordering, Binary-Search Boundaries, and Merge Algorithms.

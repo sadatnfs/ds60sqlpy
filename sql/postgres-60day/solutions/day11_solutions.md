@@ -1,4 +1,4 @@
-# Day 11 solutions — CASE Expressions and Conditional Logic
+# Day 11 solutions: CASE Expressions and Conditional Logic
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Classify orders as small, medium, or large by total amount.
 
@@ -109,7 +109,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-11 Exercise 1, the chosen form is justified by this lesson-specific rationale: Validate boundaries and place the highest threshold first. Evaluate another form against the concrete expected result (One row per order with exactly one size label) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
 
@@ -145,7 +145,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-11 Exercise 2, the chosen form is justified by this lesson-specific rationale: Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator. Evaluate another form against the concrete expected result (One summary row) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Label missing customer segments separately from known segment values.
 
@@ -186,7 +186,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-11 Exercise 3, the chosen form is justified by this lesson-specific rationale: Test `IS NULL` before comparing text values. Evaluate another form against the concrete expected result (One row per customer with an explicit segment label) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
 
@@ -227,7 +227,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-11 Exercise 4, the chosen form is justified by this lesson-specific rationale: First-match wins, so specific/high thresholds must precede broader/lower ones. Evaluate another form against the concrete expected result (A value of 500 is labeled high) and the verification above.
 - **Edge case:** Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Replace a CASE expression that returns mixed numeric and text types with one consistent output type.
 
@@ -268,7 +268,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-11 Exercise 5, the chosen form is justified by this lesson-specific rationale: All result branches must resolve to a compatible PostgreSQL type. Evaluate another form against the concrete expected result (Three rows with text labels) and the verification above.
 - **Edge case:** Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Create payment-method display labels and preserve unknown future methods with an explicit fallback.
 

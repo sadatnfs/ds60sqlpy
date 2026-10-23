@@ -176,7 +176,7 @@ Only local stationarity for that variable and objective at the evaluated point. 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-005, Derivatives, requires_grad and finite-difference checks.

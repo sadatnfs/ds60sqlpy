@@ -1,4 +1,4 @@
-# Bridge Day 7 — Async I/O and bounded concurrency
+# Bridge Day 7: Async I/O and bounded concurrency
 
 **Level:** Advanced  
 **Prerequisite:** [Bridge Day 6](day06_bulk_etl_validation.md)
@@ -273,12 +273,12 @@ holding other resources.
 - **Swallowing cancellation:** resources may remain open and shutdown hangs.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-06`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -310,7 +310,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

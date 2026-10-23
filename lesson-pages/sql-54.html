@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-54-data-warehouse-project-part-3-aggregates">Day 54 — Data Warehouse Project, Part 3: Aggregates<a class="heading-anchor" href="#guide--day-54-data-warehouse-project-part-3-aggregates" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-54-data-warehouse-project-part-3-aggregates">Day 54: Data Warehouse Project, Part 3: Aggregates<a class="heading-anchor" href="#guide--day-54-data-warehouse-project-part-3-aggregates" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> Review <a href="sql-53.html#guide">Day 53 — slowly changing dimensions</a> and retain the committed Day 52 warehouse in the same database. Day 54 does not depend on Day 53&#x27;s rolled-back changes.</li>
+<li><strong>Prerequisites:</strong> Review <a href="sql-53.html#guide">Day 53; slowly changing dimensions</a> and retain the committed Day 52 warehouse in the same database. Day 54 does not depend on Day 53&#x27;s rolled-back changes.</li>
 <li><strong>Artifacts:</strong> <a href="sql-54.html#learner">learner SQL</a> · <a href="sql-54.html#solution-1">solution reasoning</a> · <a href="sql-54.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-54 — Project3 DWH Part3 Aggregations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-54; Project3 DWH Part3 Aggregations</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-54/lesson/workspace/sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -459,7 +459,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day54_project3_dwh_part3_aggregations.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Aggregate table, Idempotent refresh, Late-arriving fact. Its worked SQL reads or creates <code>agg_sales_category_month</code>, <code>agg_sales_customer_month</code>, <code>fact_sales</code>, <code>dim_date</code>, <code>dim_product</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -524,7 +524,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Can a late fact be incorporated through a deliberate period backfill?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-55.html#guide">Day 55 — BI drill-downs</a>.</p>
+<p>Continue to <a href="sql-55.html#guide">Day 55; BI drill-downs</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <h4 id="guide--project-focus">Project focus<a class="heading-anchor" href="#guide--project-focus" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -552,8 +552,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>The compact seed does not need aggregates for speed; this is a warehouse serving-pattern exercise.</li>
 <li>Day 54 does not require rolled-back Day 53 audit/SCD changes.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
 
 I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -782,7 +782,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure">Day 54 Solutions — Warehouse Aggregates and Refresh Procedure<a class="heading-anchor" href="#solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure">Day 54 Solutions: Warehouse Aggregates and Refresh Procedure<a class="heading-anchor" href="#solution-1--day-54-solutions-warehouse-aggregates-and-refresh-procedure" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -803,7 +803,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 54 creates and tests aggregate objects inside a transaction, then rolls everything back. The complete runnable answer is <a href="sql-54.html#solution-2"><code>day54_solutions.sql</code></a>.</p>
-<h4 id="solution-1--exercise-1-aggsalesproductmonth">Exercise 1 — <code>agg_sales_product_month</code><a class="heading-anchor" href="#solution-1--exercise-1-aggsalesproductmonth" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-aggsalesproductmonth">Exercise 1: <code>agg_sales_product_month</code><a class="heading-anchor" href="#solution-1--exercise-1-aggsalesproductmonth" aria-label="Link to this section">#</a></h4>
 <p>The answer uses this grain and schema:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
@@ -862,7 +862,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 1, the chosen form is justified by this lesson-specific rationale: The answer uses this grain and schema: The two sides are aggregated independently before joining, preventing join fanout. Evaluate another form against the concrete expected result (one row per <code>year</code>, <code>month</code>, and <code>product_sk</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>row_count</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-2-refresh-all-aggregates-for-year-month">Exercise 2 — Refresh all aggregates for <code>(year, month)</code><a class="heading-anchor" href="#solution-1--exercise-2-refresh-all-aggregates-for-year-month" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-refresh-all-aggregates-for-year-month">Exercise 2: Refresh all aggregates for <code>(year, month)</code><a class="heading-anchor" href="#solution-1--exercise-2-refresh-all-aggregates-for-year-month" aria-label="Link to this section">#</a></h4>
 <p>The executable solution creates:</p>
 <pre class="highlighted-code"><code class="language-text">dwh.refresh_sales_aggregates_solution(p_year int, p_month int)</code></pre>
 <p>Within one procedure call it:</p>
@@ -897,7 +897,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <li>The compact seed does not justify aggregate tables for performance; this is a warehouse-design exercise.</li>
 <li>Reconcile independently aggregated sides; joining aggregates to detail rows before summing can fan out both measures.</li>
 </ul>
-<h4 id="solution-1--exercise-3-account-for-late-facts">Exercise 3 — Account for late facts<a class="heading-anchor" href="#solution-1--exercise-3-account-for-late-facts" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-account-for-late-facts">Exercise 3: Account for late facts<a class="heading-anchor" href="#solution-1--exercise-3-account-for-late-facts" aria-label="Link to this section">#</a></h4>
 <p>The period inventory identifies every loaded month. A late fact requires refreshing its own affected period, not merely the newest month.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -909,7 +909,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 3, the chosen form is justified by this lesson-specific rationale: The period inventory identifies every loaded month. Evaluate another form against the concrete expected result (one row per <code>year</code>, and <code>month</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>fact_rows</code> for the existing <code>year</code>, and <code>month</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-4-refresh-atomically">Exercise 4 — Refresh atomically<a class="heading-anchor" href="#solution-1--exercise-4-refresh-atomically" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-refresh-atomically">Exercise 4: Refresh atomically<a class="heading-anchor" href="#solution-1--exercise-4-refresh-atomically" aria-label="Link to this section">#</a></h4>
 <p>Delete and all aggregate inserts run in one transaction through the procedure. Failure rolls back the whole period instead of leaving partial tables.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -921,7 +921,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 4, the chosen form is justified by this lesson-specific rationale: Delete and all aggregate inserts run in one transaction through the procedure. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected <code>year</code>, and <code>month</code> values) and the verification above.</li>
 <li><strong>Edge case:</strong> Use an empty target set and a multi-row target set; reconcile the affected <code>year</code>, and <code>month</code> values in both cases.</li>
 </ul>
-<h4 id="solution-1--exercise-5-make-reconciliation-null-safe">Exercise 5 — Make reconciliation NULL-safe<a class="heading-anchor" href="#solution-1--exercise-5-make-reconciliation-null-safe" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-make-reconciliation-null-safe">Exercise 5: Make reconciliation NULL-safe<a class="heading-anchor" href="#solution-1--exercise-5-make-reconciliation-null-safe" aria-label="Link to this section">#</a></h4>
 <p>FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -933,7 +933,7 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 <li><strong>Alternative/trade-off:</strong> For sql-54 Exercise 5, the chosen form is justified by this lesson-specific rationale: FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference. Evaluate another form against the concrete expected result (one row per <code>year</code>, and <code>month</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>year</code>, and <code>month</code> and state whether the row is kept, rejected, or classified.</li>
 </ul>
-<h4 id="solution-1--exercise-6-prove-idempotency">Exercise 6 — Prove idempotency<a class="heading-anchor" href="#solution-1--exercise-6-prove-idempotency" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-prove-idempotency">Exercise 6: Prove idempotency<a class="heading-anchor" href="#solution-1--exercise-6-prove-idempotency" aria-label="Link to this section">#</a></h4>
 <p>The answer snapshots category aggregates, reruns the same latest period, and uses two-way <code>EXCEPT</code>. Both difference sets must be empty.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1194,16 +1194,16 @@ psql -X -v ON_ERROR_STOP=1 -d course -f day54_solutions.sql</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-54 — Project3 DWH Part3 Aggregations.
 
 I have completed the direct catalog prerequisite: `sql-53`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day54_project3_dwh_part3_aggregations.md
@@ -1230,7 +1230,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1341,18 +1341,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

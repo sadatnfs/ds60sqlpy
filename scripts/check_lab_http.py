@@ -9,7 +9,7 @@ import re
 import time
 from typing import Any
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 def main() -> int:
@@ -31,13 +31,23 @@ def main() -> int:
         parser.error(
             "This writes test pads/evidence. Use --confirm-disposable only on a test workspace."
         )
-    url = args.url.rstrip("/")
-    if urlsplit(url).hostname != "127.0.0.1":
-        parser.error("The smoke test accepts only the explicit loopback lab URL.")
+    parsed = urlsplit(args.url)
+    if (
+        parsed.scheme != "http"
+        or parsed.hostname != "127.0.0.1"
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.query
+        or parsed.fragment
+        or parsed.path.rstrip("/") not in {"", "/classroom", "/learn"}
+    ):
+        parser.error("The smoke test accepts only an explicit loopback classroom URL.")
+    url = f"http://{parsed.netloc}"
+    opener = build_opener(ProxyHandler({}))
     deadline = time.monotonic() + 45
     while True:
         try:
-            with urlopen(url + "/learn", timeout=3) as response:
+            with opener.open(url + "/classroom", timeout=3) as response:
                 html = response.read().decode()
             break
         except OSError:
@@ -50,7 +60,7 @@ def main() -> int:
 
     def call(action: str, **fields: Any) -> dict[str, Any]:
         request = Request(
-            url + "/api/lab",
+            url + ("/api/classroom" if action.startswith("classroom-") else "/api/lab"),
             data=json.dumps({"action": action, **fields}).encode(),
             headers={
                 "Content-Type": "application/json",
@@ -58,10 +68,14 @@ def main() -> int:
                 "X-DS60-Token": token.group(1),
             },
         )
-        with urlopen(request, timeout=25) as response:
+        with opener.open(request, timeout=25) as response:
             result: dict[str, Any] = json.loads(response.read())
             return result
 
+    directory = call("classroom-index")
+    subjects = {track["id"] for track in directory["tracks"]}
+    if not {"python", "sql", "cpp", "java", "javascript-typescript"} <= subjects:
+        raise RuntimeError("The unified classroom omitted published subjects.")
     info = call("paths")
     if not info["paths"] or info["lesson_count"] < 128:
         raise RuntimeError("The bundled course catalog is incomplete.")
@@ -75,6 +89,20 @@ def main() -> int:
         evidence = call("lesson", lesson_id="python-01")["session"]
         if not saved["saved"] or saved["code"] != python_source or evidence.get("read") != note:
             raise RuntimeError("The saved coding pad or evidence did not survive recreation.")
+        history = call(
+            "classroom-history", lesson_id="python-01", language="python", mode="snippet"
+        )["history"]
+        if not history:
+            raise RuntimeError("The Python result history did not survive recreation.")
+        receipt = call(
+            "classroom-run-result",
+            lesson_id="python-01",
+            language="python",
+            mode="snippet",
+            receipt_id=history[0]["id"],
+        )["receipt"]
+        if receipt["source"] != python_source or receipt["result"]["output"].strip() != "42":
+            raise RuntimeError("The original Python result or exact source was lost.")
     if args.reset_sql:
         setup = call("prepare-sql", confirmation="RESET TRAINING")
         if setup["returncode"]:
@@ -82,7 +110,11 @@ def main() -> int:
                 "The explicit training reset/verification failed: " + setup["output"]
             )
     python = call("run", lesson_id="python-01", language="python", code="print(6 * 7)")
-    if python["returncode"] or python["output"].strip() != "42":
+    if (
+        python["returncode"]
+        or python["output"].strip() != "42"
+        or python.get("receipt_saved") is not True
+    ):
         raise RuntimeError("The Python coding backend did not produce 42.")
     sql = call("run", lesson_id="sql-start-01", language="sql", code="SELECT 42 AS answer;")
     if sql["returncode"] or json.loads(sql["output"])["results"][0]["rows"] != [[42]]:
@@ -127,7 +159,8 @@ def main() -> int:
     call("save", lesson_id="python-01", phase="read", note=note)
     print(
         f"PASS: {info['lesson_count']} lessons, planning, Python/SQL pads, limited role, "
-        "empty-pad/history recovery" + (", persisted workspace" if args.check_persistence else "")
+        "empty-pad/history recovery, durable run receipts"
+        + (", persisted workspace" if args.check_persistence else "")
     )
     return 0
 

@@ -488,7 +488,7 @@ prediction and attempt and show the capability message to the teacher. Do not
 install an arbitrary package from a tutor answer. Provisioning and compatibility
 are a separate, explicit step.
 
-## Ask Codex
+## Ask an AI tutor
 
 ```text
 I am studying planned spark-013 from

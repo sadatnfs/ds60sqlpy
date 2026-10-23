@@ -187,7 +187,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 try_to_timestamp](https://spark.apache.org/docs/4.0.1/api/sql/index.html#try_to_timestamp)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-018: Timestamp types, time zones and interval boundaries.

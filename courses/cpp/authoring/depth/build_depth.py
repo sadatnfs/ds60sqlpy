@@ -49,6 +49,6 @@ refs={6:'[Numeric conversion contract](https://eel.is/c++draft/charconv.from.cha
 for n in DETAILS:
     path=BASE/f'guides/cpp-{n:03d}.md';text=path.read_text()
     reference=refs.get(n,'[C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)')
-    if '## Primary references' not in text:text=text.replace('## Ask Codex about this lesson','## Primary references\n\n'+reference+'\n\n## Ask Codex about this lesson')
+    if '## Primary references' not in text:text=text.replace('## Ask an AI tutor about this lesson','## Primary references\n\n'+reference+'\n\n## Ask an AI tutor about this lesson')
     path.write_text(text)
 runpy.run_path(str(HERE/'normalize_prose.py'),run_name='__main__')

@@ -1,4 +1,4 @@
-# Day 32 — Solutions: Index Fundamentals
+# Day 32: Solutions: Index Fundamentals
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ Indexes trade storage and write cost for faster access to selected rows. Both
 answers run inside a transaction and roll back, so rerunning the document does
 not leave demonstration indexes behind.
 
-## Exercise 1 — Index `products(category)` and test a filter
+## Exercise 1: Index `products(category)` and test a filter
 
 ```sql
 BEGIN;
@@ -91,7 +91,7 @@ cheaper even though the index is valid.
 - **Alternative/trade-off:** For sql-32 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected plan shape is not guaranteed. Evaluate another form against the concrete expected result (one row per `product_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Compare without, with, and after dropping the index
+## Exercise 2: Compare without, with, and after dropping the index
 
 ```sql
 BEGIN;
@@ -147,7 +147,7 @@ valid observation, not a failed exercise.
 - Indexes created in the learner script are rolled back at the end of that
   script and are not available on later days.
 
-## Exercise 3 — Predict from selectivity
+## Exercise 3: Predict from selectivity
 
 Count each category before reading the plan. The optimizer may prefer a
 sequential scan on this compact seed even when the index is valid and usable.
@@ -162,7 +162,7 @@ sequential scan on this compact seed even when the index is valid and usable.
 - **Alternative/trade-off:** For sql-32 Exercise 3, the chosen form is justified by this lesson-specific rationale: Count each category before reading the plan. Evaluate another form against the concrete expected result (one row per `category`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Index a timestamp range
+## Exercise 4: Index a timestamp range
 
 The solution indexes `payment_date` and uses `[start, end)` bounds. Half-open
 windows compose cleanly without double-counting a boundary timestamp.
@@ -177,7 +177,7 @@ windows compose cleanly without double-counting a boundary timestamp.
 - **Alternative/trade-off:** For sql-32 Exercise 4, the chosen form is justified by this lesson-specific rationale: The solution indexes `payment_date` and uses `[start, end)` bounds. Evaluate another form against the concrete expected result (one row per `payment_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 5 — Match an expression index
+## Exercise 5: Match an expression index
 
 An index on `country` does not store `lower(country)`. The solution indexes that
 exact expression and repeats it exactly in the predicate.
@@ -192,7 +192,7 @@ exact expression and repeats it exactly in the predicate.
 - **Alternative/trade-off:** For sql-32 Exercise 5, the chosen form is justified by this lesson-specific rationale: An index on `country` does not store `lower(country)`. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 6 — Preserve the ordering contract
+## Exercise 6: Preserve the ordering contract
 
 The unordered query is intentionally nondeterministic. Only the query with
 `ORDER BY country, customer_id` promises reproducible presentation order; an

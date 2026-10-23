@@ -1,10 +1,10 @@
-# SQL-TEST-01 — SQL Tests, Migration Checks, and Data Contracts
+# SQL-TEST-01: SQL Tests, Migration Checks, and Data Contracts
 
 ## Level and prerequisites
 
 - **Level:** Advanced
 - **Catalog prerequisites:** `sql-found-02` and `sql-42`
-- **Prerequisites:** [SQL-FOUND-02 — migrations](sql_found_02_versioned_migrations.md),
+- **Prerequisites:** [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md),
   [SQL Day 42 data-quality checks](../../postgres-60day/companion-guides/day42_data_quality_validation.md),
   constraints, catalogs, and transactions.
 - **Artifacts:** [learner SQL](../lessons/sql_test_01_contracts_migrations.sql) ·
@@ -47,7 +47,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-TEST-01 — SQL Tests, Migration Checks, and Data Contracts** and choose
+2. Open **SQL-TEST-01; SQL Tests, Migration Checks, and Data Contracts** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -81,7 +81,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -99,7 +99,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status—CI cannot mistake printed warnings for success.
+The worked walkthrough's lesson-specific task is: asserttrue(name, condition, detail) treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With ONERRORSTOP=1, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
 The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_contract_test_lab.schema_migrations`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state. Its final projection is the columns written in the final `SELECT`. Verify the command tag in `pg_catalog`/`information_schema`, run one accepted value and one value the declared rule rejects, and confirm the lesson rollback removes the course-owned object. Where this query can emit `NULL`, identify the exact source expression and explain whether the output preserves, classifies, or rejects it.
 
 ## Two worked SQL examples
@@ -162,7 +162,7 @@ CREATE TABLE pro_contract_test_lab.customers (
 `assert_true(name, condition, detail)` treats both false and NULL as failure,
 raises an exception, and emits a PASS notice only after success. With
 `ON_ERROR_STOP=1`, an uncaught failed assertion gives the command a nonzero exit
-status—CI cannot mistake printed warnings for success.
+status, CI cannot mistake printed warnings for success.
 
 The fixture manifest names its owner (`sql-test-01`), content tag, and expected
 row count. This distinguishes course-owned deterministic rows from arbitrary
@@ -235,7 +235,7 @@ test harness with a negative control:
    **Verify:** For sql-test-01 Exercise 6, fail if the insert succeeds or raises any category other than `unique_violation`, compare the before/after counts independently, and verify the duplicate row is absent.
 7. **Boundary matrix:** drive below/exact/above/malformed/NULL cases from data
    with an expected outcome for each.
-   **Inputs/evidence:** For sql-test-01 Exercise 7, drive six quantity cases—below, lower bound, upper bound, above, NULL, and malformed—from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
+   **Inputs/evidence:** For sql-test-01 Exercise 7, drive six quantity cases, below, lower bound, upper bound, above, NULL, and malformed, from data, executing each insert in its own exception subtransaction and recording observed SQLSTATE.
    **Expected result/shape:** For sql-test-01 Exercise 7, expected output: six rows with `case_id`, raw value, expected/observed acceptance, observed SQLSTATE, and `matches`; bounds 1 and 100 pass, and all four invalid cases fail with their intended category.
    **Verify:** For sql-test-01 Exercise 7, require exactly six unique case IDs and no false `matches`, independently inspect accepted rows, and prove an omitted or misclassified case makes the final assertion raise.
 8. **Concurrency:** specify sessions, barriers, timeouts, observed states,
@@ -279,16 +279,16 @@ test harness with a negative control:
 
 ## Next step
 
-Continue to [SQL-ANALYTICS-01 — reusable analytical query patterns](sql_analytics_01_query_patterns.md)
+Continue to [SQL-ANALYTICS-01; reusable analytical query patterns](sql_analytics_01_query_patterns.md)
 and apply these assertion/reconciliation habits to every pattern. Pair this
 module with migration delivery so contract tests run on both fresh installs and
 upgrades.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-test-01 — SQL Tests, Migration Checks, and Data Contracts.

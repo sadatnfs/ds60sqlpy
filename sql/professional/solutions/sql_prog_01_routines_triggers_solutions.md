@@ -1,4 +1,4 @@
-# SQL-PROG-01 Solutions — Routines and Triggers
+# SQL-PROG-01 Solutions: Routines and Triggers
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 The solution is transactional and leaves no schema behind.
 
-## Exercise 1 — Audit-count function
+## Exercise 1: Audit-count function
 
 `status_change_count(bigint)` is `STABLE`, `PARALLEL SAFE`, and security
 invoker. It uses `COUNT(*)`, so a NULL or unknown item returns zero rather than
@@ -76,7 +76,7 @@ argument.
 - **Expected result/shape:** For sql-prog-01 Exercise 1, expected output: one scalar count per invocation plus a four-row probe matrix demonstrating zero, one, multiple, and NULL-input cases; every count is a nonnegative bigint.
 - **Independent verification:** For sql-prog-01 Exercise 1, compare each function result with an independent filtered `COUNT(*)`, assert item 1 has multiple audits, item 3 has one, an absent ID has zero, and NULL has zero because SQL equality matches no row.
 
-## Exercise 2 — Reassignment procedure
+## Exercise 2: Reassignment procedure
 
 The procedure rejects a NULL/blank destination and updates only rows whose
 status is not closed. It participates in the caller's transaction. Closed items
@@ -92,7 +92,7 @@ permissions, migration, observability, and tests are maintained as an API.
 - **Expected result/shape:** For sql-prog-01 Exercise 2, expected output: a successful CALL that moves Morgan's eligible item to Taylor, while Morgan's closed item remains unchanged; a blank destination is caught as SQLSTATE class `check_violation`.
 - **Independent verification:** For sql-prog-01 Exercise 2, snapshot eligible and closed source rows before CALL, reconcile the changed target set afterward, and prove the nested invalid CALL changes no owner values.
 
-## Exercise 3 — Transition guard
+## Exercise 3: Transition guard
 
 The BEFORE trigger compares OLD and NEW status and raises `check_violation` for
 `closed -> open`. The solution catches that expected condition and raises a
@@ -108,7 +108,7 @@ business policy and can be difficult to version.
 - **Expected result/shape:** For sql-prog-01 Exercise 3, expected output: allowed transitions succeed, direct reopen and identity mutation each emit an expected rejection notice, and rejected rows retain their original values.
 - **Independent verification:** For sql-prog-01 Exercise 3, attempt both an allowed `closed` to `in_progress` transition and a forbidden `closed` to `open` transition, record SQLSTATE `23514`, and reselect the row after each attempt.
 
-## Exercise 4 — Audit grain
+## Exercise 4: Audit grain
 
 The learner row audit has grain “one changed item status.” The statement audit
 has grain “one UPDATE statement,” with an array of affected item IDs. Therefore
@@ -122,7 +122,7 @@ row counts.
 - **Expected result/shape:** For sql-prog-01 Exercise 4, expected output: one reconciliation row with `row_audit_records = 2`, `statement_audit_records = 1`, and `statement_changed_status_rows = 2`.
 - **Independent verification:** For sql-prog-01 Exercise 4, filter row audits to the two known item IDs and transition, identify the one matching statement summary, and explain that row-audit grain is one changed item while statement-audit grain is one UPDATE statement.
 
-## Exercise 5 — Declarative and transaction boundaries
+## Exercise 5: Declarative and transaction boundaries
 
 Allowed status values are row-local and declarative, so a `CHECK` is visible,
 automatically enforced for every writer, and simpler than a trigger. Audit
@@ -140,7 +140,7 @@ procedure's transaction contract is deliberate and integration-tested.
 - **Expected result/shape:** For sql-prog-01 Exercise 5, expected output: four rows with `rule`, `mechanism`, and `reason`, ordered deterministically by rule.
 - **Independent verification:** For sql-prog-01 Exercise 5, reject one disallowed status through the CHECK, prove the transition trigger sees OLD/NEW, and state that functions cannot transaction-control while a procedure may do so only at an allowed top-level CALL boundary.
 
-## Exercise 6 — Volatility and parallel promises
+## Exercise 6: Volatility and parallel promises
 
 The audit-count function is STABLE because it reads tables and should see one
 statement snapshot; it is not IMMUTABLE because table contents can change.
@@ -159,7 +159,7 @@ incorrect promise can reuse a stale result or execute in an invalid worker.
 - **Expected result/shape:** For sql-prog-01 Exercise 6, expected output: one row per routine signature, ordered by routine name, with overloaded routines distinguishable through `identity_arguments`.
 - **Independent verification:** For sql-prog-01 Exercise 6, compare catalog values with every `CREATE FUNCTION/PROCEDURE` declaration and explain that falsely promising STABLE/IMMUTABLE or PARALLEL SAFE can permit invalid planner assumptions and wrong results.
 
-## Exercise 7 — Statement trigger with transition tables
+## Exercise 7: Statement trigger with transition tables
 
 Define an AFTER UPDATE statement trigger with REFERENCING OLD TABLE and
 NEW TABLE. Its function
@@ -178,7 +178,7 @@ a different grain.
 - **Expected result/shape:** For sql-prog-01 Exercise 7, expected output: one summary row `(matched_rows=2, changed_status_rows=0)`, one `(0,0)` row for the empty target, and one `(2,2)` row for a two-item status change.
 - **Independent verification:** For sql-prog-01 Exercise 7, assert exactly one summary per UPDATE statement, reconcile changed-status counts with row audits, prove the zero-target statement records `(0,0)`, and keep `item_id` immutable so transition-table pairing cannot undercount.
 
-## Exercise 8 — Exact expected failure
+## Exercise 8: Exact expected failure
 
 A PL/pgSQL block with an inner `BEGIN ... EXCEPTION WHEN unique_violation`
 creates a subtransaction. Changes inside the failed inner block roll back, while
@@ -194,7 +194,7 @@ programmer mistakes look like passing negative tests.
 - **Expected result/shape:** For sql-prog-01 Exercise 8, expected output: one expected NOTICE; the outer marker remains, while both inner `duplicate` inserts are absent because the inner block rolled back.
 - **Independent verification:** For sql-prog-01 Exercise 8, query `exception_probe` for both keys after the handler and fail unless outer count is one and duplicate count is zero; never use a silent `WHEN OTHERS` branch.
 
-## Exercise 9 — SECURITY DEFINER hardening
+## Exercise 9: SECURITY DEFINER hardening
 
 Own the function with a NOLOGIN role that has only the required read access, set
 a fixed safe `search_path`, qualify every relation/operator-sensitive object,
@@ -211,7 +211,7 @@ temporary-object attacks, grants, and dependency changes as part of the API.
 - **Expected result/shape:** For sql-prog-01 Exercise 9, expected output: catalog rows proving every lab routine is security-invoker, followed by six ordered controls covering NOLOGIN ownership, fixed path, qualified objects, validation, PUBLIC revocation, narrow grant, and catalog verification.
 - **Independent verification:** For sql-prog-01 Exercise 9, require `prosecdef = false` for the executable lab and treat the checklist as proposed policy; perform privileged role/grant validation only in SQL-SEC-01 rather than implying it happened here.
 
-## Exercise 10 — Concurrent work claiming
+## Exercise 10: Concurrent work claiming
 
 In a short transaction, select eligible IDs in a deterministic order
 `FOR UPDATE SKIP LOCKED LIMIT n`, then update only those IDs and commit. Competing

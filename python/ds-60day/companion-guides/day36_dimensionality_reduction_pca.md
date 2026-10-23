@@ -1,4 +1,4 @@
-# Day 36 — Dimensionality Reduction with PCA
+# Day 36: Dimensionality Reduction with PCA
 
 **Lesson ID:** `python-36` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -101,7 +101,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — PCA geometry, scaling, variance, and reconstruction
+## Concept deep dive: PCA geometry, scaling, variance, and reconstruction
 
 ### The mental model
 
@@ -129,7 +129,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — observe how units change the first component
+### Focused example A: observe how units change the first component
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -157,7 +157,7 @@ print({"raw_loading": raw.components_[0],
 
 **Assumption to name:** Equal standard-deviation weighting is scientifically appropriate; scaling is not automatically correct.
 
-### Focused example B — connect retained components to reconstruction error
+### Focused example B: connect retained components to reconstruction error
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -206,16 +206,16 @@ assert all(errors[k] >= errors[k + 1] for k in (1, 2, 3))
 
 1. Plot cumulative explained variance and choose a component count.
 
-**Verify:** Practice 1 — PCA geometry, scaling, variance, and reconstruction — fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
+**Verify:** Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
 
 2. Compare PCA before and after feature standardization.
 
-**Verify:** Practice 2 — PCA geometry, scaling, variance, and reconstruction — on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
+**Verify:** Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
 
 3. Try `SelectKBest` on a classification dataset and compare its validated
    performance with PCA.
 
-**Verify:** Practice 3 — PCA geometry, scaling, variance, and reconstruction — evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
+**Verify:** Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
 
 ### Progressive hints
 
@@ -236,17 +236,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Reconstruction analysis:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
    **Progressive hint:** Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.
 
-**Verify:** Reconstruction analysis — for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.
+**Verify:** Reconstruction analysis; for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.
 
 5. **Interpretation edge case:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
    **Progressive hint:** Eigenvectors are direction axes: v and -v describe the same axis. Compare subspaces or absolute loading patterns, not raw signs alone.
 
-**Verify:** Interpretation edge case — fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.
+**Verify:** Interpretation edge case; fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.
 
 6. **Leakage debugging:** Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.
    **Progressive hint:** Selection performed globally can choose noise features that happen to correlate with all labels, including validation labels.
 
-**Verify:** Leakage debugging — print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.
+**Verify:** Leakage debugging; print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -281,12 +281,12 @@ downstream objective.
 - Work in the [Day 36 learner notebook](../notebooks/day36_dimensionality_reduction_pca.ipynb).
 - Then review the
   [Day 36 solution](../solutions/day36_dimensionality_reduction_pca/day36_solutions.md).
-- Continue to [Day 37 — Regularization](day37_regularization_linear_models.md).
+- Continue to [Day 37; Regularization](day37_regularization_linear_models.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-36` — Day 36 — Dimensionality Reduction with PCA.

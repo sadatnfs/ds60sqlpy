@@ -182,7 +182,7 @@ It proves the architecture can represent the fixture and separates an optimizati
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-016, Initialization, nonlinearities and gradient diagnostics.

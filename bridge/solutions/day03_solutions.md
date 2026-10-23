@@ -1,4 +1,4 @@
-# Bridge Day 3 — Solution notes
+# Bridge Day 3: Solution notes
 
 Start with the [learner file](../lessons/day03_safe_psycopg_queries.py). The
 reference implementation is [day03_solution.py](day03_solution.py).
@@ -65,7 +65,7 @@ reference is `bridge/solutions/day03_solution.py`; use it only after an honest a
 
 **Shared failure rule:** String interpolation, quoted placeholders, and treating identifiers as value parameters all break the security boundary.
 
-### Exercise 1 — SQL implementation
+### Exercise 1: SQL implementation
 
 **Prompt:** Write `FIND_CUSTOMERS_SQL` for customer ID, name, and lifetime order value by
 country and minimum total with deterministic ordering.
@@ -79,7 +79,7 @@ placeholders unquoted.
 
 **Verification evidence:** Inspect `FIND_CUSTOMERS_SQL`: it selects customer ID/name, uses `LEFT JOIN`, `COALESCE`, `GROUP BY`, and `HAVING`, contains exactly two `%s` placeholders, and orders by lifetime value descending then customer ID.
 
-### Exercise 2 — Implementation
+### Exercise 2: Implementation
 
 **Prompt:** Implement `find_customers()` with two bound parameters and map rows to `Customer`
 while preserving `Decimal` money.
@@ -92,7 +92,7 @@ application boundary.
 
 **Verification evidence:** Configure rows with integer/string/Decimal fields; assert one execute call receives `(country, minimum_lifetime_value)` and the returned tuple contains exact typed `Customer` objects with `Decimal` money.
 
-### Exercise 3 — Security testing
+### Exercise 3: Security testing
 
 **Prompt:** Use a recording cursor and an injection-shaped country to prove values never enter
 SQL text.
@@ -105,7 +105,7 @@ text appears only in parameters.
 
 **Verification evidence:** Use country `US' OR TRUE --`; assert that sentinel is absent from SQL text, appears unchanged as the first bound parameter, and cannot add rows to the fake result.
 
-### Exercise 4 — Identifier safety
+### Exercise 4: Identifier safety
 
 **Prompt:** Implement `build_count_query()` for only `customers`, `orders`, and `order_items`
 using `psycopg.sql.Identifier`.
@@ -119,7 +119,7 @@ then compose schema and table identifiers.
 
 **Verification evidence:** Assert each of `customers`, `orders`, and `order_items` composes through `sql.Identifier`, while `users` and an injection-shaped name raise `ValueError` before cursor execution.
 
-### Exercise 5 — Reasoning
+### Exercise 5: Reasoning
 
 **Prompt:** Explain why an allowlist remains valuable when `Identifier` already quotes safely.
 
@@ -132,7 +132,7 @@ object may be selected.
 
 **Verification evidence:** Show that `Identifier` quotes a syntactically valid but unauthorized name, whereas the allowlist rejects it; record authorization and quoting as separate guarantees.
 
-### Exercise 6 — Prediction
+### Exercise 6: Prediction
 
 **Prompt:** Predict the result for a customer with no orders and explain the roles of `LEFT
 JOIN`, `COALESCE`, `GROUP BY`, and `HAVING`.
@@ -146,7 +146,7 @@ filtering.
 
 **Verification evidence:** For a customer with no orders and minimum total zero, predict and assert lifetime value `Decimal('0')`; explain that the left join retains the row and `COALESCE` supplies zero before `HAVING` evaluates it.
 
-### Exercise 7 — Boundary testing
+### Exercise 7: Boundary testing
 
 **Prompt:** Test rows containing integer, string, and already-Decimal values plus an empty
 result; document conversion failures.
@@ -159,7 +159,7 @@ secret-bearing log.
 
 **Verification evidence:** Assert integer, numeric string, and `Decimal` money rows map predictably, an empty fetch returns `()`, and malformed ID or money data raises the documented conversion exception.
 
-### Exercise 8 — Debugging
+### Exercise 8: Debugging
 
 **Prompt:** Repair queries that use `f"...{country}..."` or `WHERE country = '%s'` and explain
 both failures.
@@ -172,7 +172,7 @@ quoted.
 
 **Verification evidence:** Show the f-string version embeds the sentinel and the quoted-placeholder version sends literal `%s`; after repair, SQL stays static and the sentinel exists only in parameters.
 
-### Exercise 9 — Protocol testing
+### Exercise 9: Protocol testing
 
 **Prompt:** Verify that `find_customers()` does not depend on the return value of `execute()`
 and calls `fetchall()` exactly once.
@@ -185,7 +185,7 @@ cycle.
 
 **Verification evidence:** Use an `execute()` method that returns `None`; assert `find_customers()` still succeeds, `execute` is called once, and `fetchall` is called exactly once.
 
-### Exercise 10 — Optional integration
+### Exercise 10: Optional integration
 
 **Prompt:** Design a bounded, read-only PostgreSQL smoke test gated by `DS60_DATABASE_URL`
 without importing Psycopg during normal fake tests.

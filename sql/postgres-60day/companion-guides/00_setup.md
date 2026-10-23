@@ -1,4 +1,4 @@
-# 00 — Setup: Schema, Seed Data, and How to Run Safely (Companion Guide)
+# 00: Setup: Schema, Seed Data, and How to Run Safely (Companion Guide)
 
 Purpose
 - Create a self-contained training schema named training with realistic tables and data.

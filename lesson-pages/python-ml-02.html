@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -481,7 +481,7 @@ label_available <span class="syntax-operator">=</span> datetime<span class="synt
 <p>If evaluation looks implausibly good, inspect fitted state and feature availability before trying a more complex model. If one event is scored in two folds, inspect the exclusive end boundary. If a fold unexpectedly empties, report excluded ids and label delays. If the metric returns zero on no rows, repair its preconditions. If entity sets overlap, compare that fact against the declared question before calling it either acceptable or a defect.</p>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Bring these contracts into scikit-learn splitters, pipelines, and optional forecasting work. Keep an independent membership audit next to the model code; a library class name is useful documentation, not evidence that your inputs and availability assumptions are correct.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for python-ml-02.
 Read python/professional/companion-guides/py_ml_02_group_time_evaluation.md and python/professional/lessons/py_ml_02_group_time_evaluation.py.
 Check my direct prerequisites: python-35, python-data-02.
@@ -875,16 +875,16 @@ prediction <span class="syntax-operator">=</span> <span class="syntax-builtin">s
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning for python-ml-02.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning for python-ml-02.
 Read python/professional/companion-guides/py_ml_02_group_time_evaluation.md and python/professional/lessons/py_ml_02_group_time_evaluation.py.
 Check my direct prerequisites: python-35, python-data-02.
 Keep solutions/ closed unless I request comparison after an attempt.
@@ -893,7 +893,7 @@ give one hint at a time, inspect my evidence, and ask a retrieval question.
 Done when I can independently reproduce the numbered acceptance checks,
 explain a failure case, and transfer the policy to a changed input.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1004,18 +1004,18 @@ explain a failure case, and transfer the policy to a changed input.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

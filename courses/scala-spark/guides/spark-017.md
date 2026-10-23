@@ -187,7 +187,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Apache Spark built-in functions](https://spark.apache.org/docs/4.0.1/sql-ref-functions-builtin.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-017: Nested records, JSON and explode row accounting.

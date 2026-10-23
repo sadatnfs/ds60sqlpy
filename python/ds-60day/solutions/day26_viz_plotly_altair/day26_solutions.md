@@ -1,4 +1,4 @@
-# Day 26 — Solutions: Interactive Visualization (Plotly / Altair)
+# Day 26: Solutions: Interactive Visualization (Plotly / Altair)
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -6,7 +6,7 @@
 These worked answers demonstrate **interactive visual encodings, bounded interaction, and portable HTML export**. Predict each named
 result before comparing your attempt with its matching assertions.
 
-Interaction is useful when it helps a reader answer a question—inspect a
+Interaction is useful when it helps a reader answer a question, inspect a
 point, filter a segment, zoom a dense range, or compare parameter
 choices. It is not a substitute for a clear initial view. The chart
 still needs an honest title, visible axes/legend, sensible defaults,
@@ -32,9 +32,9 @@ export self-contained content and test it while disconnected.
 For this lesson's **interactive visual encodings, bounded interaction, and portable HTML export** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Create an interactive histogram whose bin count can be changed only within sensible bounds. **Plotly route:** isolate a builder accepting `bins`; **Altair route:** bind a range input to a parameter. **Expected behavior:** changing bins alters aggregation without changing the underlying observations. **Verify:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
 
@@ -73,7 +73,7 @@ granularity changes.
 
 **Verification evidence:** test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Export the chart to a self-contained HTML file under an ignored learner artifact directory. **Constraints:** embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. **Verify:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
 
@@ -105,9 +105,9 @@ offline mode should still show hover tooltips and toolbar controls.
 
 **Verification evidence:** disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. **Progressive hint:** A CDN reference needs network access when opened. **Verify:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
 
@@ -115,7 +115,7 @@ offline mode should still show hover tooltips and toolbar controls.
 
 **Evidence to locate in the grouped implementation:** Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. **Progressive hint:** A field retained only in source data is not visibly encoded. **Verify:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
 
@@ -123,7 +123,7 @@ offline mode should still show hover tooltips and toolbar controls.
 
 **Evidence to locate in the grouped implementation:** For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. **Progressive hint:** Separate figure construction from export. **Verify:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
 
@@ -131,7 +131,7 @@ offline mode should still show hover tooltips and toolbar controls.
 
 **Evidence to locate in the grouped implementation:** Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. **Progressive hint:** Validate the schema before calling the plotting library. **Verify:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
 
@@ -139,7 +139,7 @@ offline mode should still show hover tooltips and toolbar controls.
 
 **Evidence to locate in the grouped implementation:** Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. **Progressive hint:** Browser rendering and HTML size are part of the data contract. **Verify:** Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.
 
@@ -151,13 +151,13 @@ offline mode should still show hover tooltips and toolbar controls.
 
 Use interaction to answer a question, not to decorate a chart. Keep tooltips, filters, payload size, and offline HTML behavior intentional.
 
-### Shared implementation for Exercises 3–4 — Portability and visible encodings
+### Shared implementation for Exercises 3–4: Portability and visible encodings
 
 Embedded Plotly JavaScript makes a larger standalone file that works offline;
 a CDN-based file is smaller but needs network access. A reader can interpret
 only fields encoded on axes, color/shape, facets, labels, or tooltips.
 
-### Shared implementation for Exercises 5–7 — Validate before rendering
+### Shared implementation for Exercises 5–7: Validate before rendering
 
 ```python
 from collections.abc import Sequence

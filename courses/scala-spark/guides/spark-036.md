@@ -224,7 +224,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Python rename semantics](https://docs.python.org/3/library/os.html#os.rename)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-036: foreachBatch, idempotent sinks and failure injection.

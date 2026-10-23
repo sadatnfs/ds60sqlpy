@@ -199,7 +199,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 save modes](https://spark.apache.org/docs/4.0.1/sql-data-sources-load-save-functions.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-025: Parquet, column pruning and file layout.

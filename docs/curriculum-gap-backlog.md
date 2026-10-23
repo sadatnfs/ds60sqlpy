@@ -19,7 +19,7 @@ The historical practice baseline was preserved; new IDs are registered in
 
 **Status:** implemented; all 25 audited gaps have runnable learner and solution artifacts.  
 **Reviewed:** 2026-07-30  
-**Audience:** curriculum maintainers, learners choosing an advanced path, and Codex agents planning future changes.
+**Audience:** curriculum maintainers, learners choosing an advanced path, and coding agents planning future changes.
 
 At the July review, DS60 had 70 Python/data-science lessons, 72 PostgreSQL
 lessons, and a 12-lesson Python/PostgreSQL engineering bridge. The October

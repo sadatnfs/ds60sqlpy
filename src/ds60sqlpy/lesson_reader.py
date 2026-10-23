@@ -38,7 +38,7 @@ COURSE_GUIDE_REFERENCE_PATHS = (
     "docs/guided-sql-notebooks.md",
     "docs/lesson-readers.md",
     "docs/learning-portal.md",
-    "docs/learning-with-codex.md",
+    "docs/learning-with-an-ai-tutor.md",
     "docs/professional-paths.md",
     "docs/offline-app.md",
     "docs/docker-beginners.md",
@@ -1052,7 +1052,7 @@ def _static_run_help(lesson: Lesson) -> str:
     )
 
 
-def _default_codex_coaching_prompt(lesson: Lesson) -> str:
+def _default_tutor_coaching_prompt(lesson: Lesson) -> str:
     """Build a context-rich fallback prompt when a guide has no prompt block."""
 
     prerequisites = ", ".join(lesson.prerequisites) if lesson.prerequisites else "none"
@@ -1119,7 +1119,7 @@ def _default_codex_coaching_prompt(lesson: Lesson) -> str:
     )
 
 
-def codex_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
+def tutor_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
     """Return the guide's checked-in tutoring prompt, with a safe fallback.
 
     The companion guide is the authoring source of truth for lesson-specific
@@ -1131,7 +1131,7 @@ def codex_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
     with suppress(OSError):
         source = guide_path.read_text(encoding="utf-8")
         heading = re.search(
-            r"(?im)^##[ \t]+Ask Codex about this lesson[ \t]*$",
+            r"(?im)^##[ \t]+Ask an AI tutor about this lesson[ \t]*$",
             source,
         )
         if heading:
@@ -1145,7 +1145,7 @@ def codex_coaching_prompt(catalog: Catalog, lesson: Lesson) -> str:
             if prompt and prompt.group("body").strip():
                 return prompt.group("body").strip()
 
-    return _default_codex_coaching_prompt(lesson)
+    return _default_tutor_coaching_prompt(lesson)
 
 
 def _sql_run_walkthrough(lesson: Lesson) -> str:
@@ -1371,7 +1371,7 @@ def build_lesson_html(
     lesson_id_json = _safe_script_json(lesson.id)
     lesson_path_json = _safe_script_json(lesson.lesson_path)
     static_run_help = _static_run_help(lesson)
-    codex_prompt = html.escape(codex_coaching_prompt(catalog, lesson))
+    tutor_prompt = html.escape(tutor_coaching_prompt(catalog, lesson))
     sql_run_walkthrough = _sql_run_walkthrough(lesson)
     notebook_action = (
         '<button class="button launcher-only" type="button" id="launch-jupyter" hidden>'
@@ -1520,7 +1520,7 @@ def build_lesson_html(
     .coach-grid {{ display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }}
     .coach-card h2 {{ margin-bottom: .55rem; font-size: 1.65rem; }}
     .coach-card p {{ max-width: 78ch; color: var(--muted); }}
-    .codex-prompt {{
+    .tutor-prompt {{
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -1687,18 +1687,18 @@ def build_lesson_html(
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>{codex_prompt}</textarea>
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>{tutor_prompt}</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1809,18 +1809,18 @@ def build_lesson_html(
       }}
     }});
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {{
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {{
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {{
         if (navigator.clipboard && window.isSecureContext) {{
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         }} else if (!document.execCommand("copy")) {{
           throw new Error("copy command was unavailable");
         }}
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       }} catch {{
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }}

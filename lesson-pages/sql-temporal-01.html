@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,7 +429,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-temporal-01-temporal-and-domain-modelling">SQL-TEMPORAL-01 — Temporal and Domain Modelling<a class="heading-anchor" href="#guide--sql-temporal-01-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-temporal-01-temporal-and-domain-modelling">SQL-TEMPORAL-01: Temporal and Domain Modelling<a class="heading-anchor" href="#guide--sql-temporal-01-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
@@ -451,7 +451,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-TEMPORAL-01 — Temporal and Domain Modelling</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-TEMPORAL-01; Temporal and Domain Modelling</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-temporal-01/lesson/workspace/sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -462,7 +462,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_temporal_01_domain_modelling.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. Its worked SQL reads or creates <code>pro_temporal_lab.customer_terms</code>, <code>pro_temporal_lab.global_maintenance_windows</code>, <code>pg_catalog.pg_available_extensions</code>, <code>pro_temporal_lab.change_ledger</code>, <code>pro_temporal_lab.retention_classes</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -579,8 +579,8 @@ EXCLUDE <span class="syntax-keyword">USING</span> gist <span class="syntax-punct
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Use <a href="sql-test-01.html#guide">SQL-TEST-01</a> to freeze boundary, overlap, correction, and retention contracts; use <a href="sql-repl-01.html#guide">SQL-REPL-01</a> to propagate immutable versioned events idempotently; and use <a href="sql-ops-02.html#guide">SQL-OPS-02</a> to rehearse recovery without erasing required historical evidence. This completes the shared PostgreSQL professional specialization path.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-temporal-01 — Temporal and Domain Modelling.
 
 I have completed the direct catalog prerequisites: `sql-found-01`, `sql-types-01`, `sql-prog-01`, `sql-test-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -1197,7 +1197,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling">SQL-TEMPORAL-01 Solutions — Temporal and Domain Modelling<a class="heading-anchor" href="#solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling">SQL-TEMPORAL-01 Solutions: Temporal and Domain Modelling<a class="heading-anchor" href="#solution-1--sql-temporal-01-solutions-temporal-and-domain-modelling" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -1220,7 +1220,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql</code></pre>
 <p>The solution is fixed-time and rolls back.</p>
-<h4 id="solution-1--exercise-1-retroactive-correction">Exercise 1 — Retroactive correction<a class="heading-anchor" href="#solution-1--exercise-1-retroactive-correction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-retroactive-correction">Exercise 1: Retroactive correction<a class="heading-anchor" href="#solution-1--exercise-1-retroactive-correction" aria-label="Link to this section">#</a></h4>
 <p>Close the prior system period at April 1 and append a new version whose valid period still begins January 1. Valid February 15 as known March 15 returns the March version; the same valid date as known April 2 returns the April correction. This answers “what did we know then?” without rewriting knowledge history.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1228,7 +1228,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 1, One row per <code>(valid_on, system_as_of)</code> probe, with <code>valid_on</code>, <code>system_as_of</code>, <code>term_version_id</code>, <code>monthly_rate</code>, and <code>recorded_reason</code>, ordered by <code>system_as_of</code>; March 15 returns the prior rate and April 2 returns the retroactive correction.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 1, Group the as-of join by both probe columns and require exactly one match per probe. Prove the earlier system-period row still exists and that no current valid periods overlap for <code>CUS-100</code>.</li>
 </ul>
-<h4 id="solution-1--exercise-2-boundaries">Exercise 2 — Boundaries<a class="heading-anchor" href="#solution-1--exercise-2-boundaries" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-boundaries">Exercise 2: Boundaries<a class="heading-anchor" href="#solution-1--exercise-2-boundaries" aria-label="Link to this section">#</a></h4>
 <p>Test <code>lower</code>, just before upper, and exactly upper for both date and timestamp ranges. <code>[lower,upper)</code> includes lower and excludes upper, so adjacent versions can meet at one boundary without double matching. Assert match count at most one, not merely choose one with ORDER/LIMIT.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1236,7 +1236,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 2, One row per <code>probe_id</code>, with <code>valid_on</code>, <code>known_at</code>, <code>matching_versions</code>, and <code>expected_matches</code>, ordered by <code>probe_id</code>; no <code>matching_versions</code> value is greater than one.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 2, Independently count matching <code>term_version_id</code> values for every probe. Require the old version to stop at the upper bound and an adjacent successor, when present, to begin there without a double match.</li>
 </ul>
-<h4 id="solution-1--exercise-3-exclusion-versus-fallback">Exercise 3 — Exclusion versus fallback<a class="heading-anchor" href="#solution-1--exercise-3-exclusion-versus-fallback" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-exclusion-versus-fallback">Exercise 3: Exclusion versus fallback<a class="heading-anchor" href="#solution-1--exercise-3-exclusion-versus-fallback" aria-label="Link to this section">#</a></h4>
 <p>With approved <code>btree_gist</code>, a partial GiST exclusion combines <code>customer_key WITH =</code> and <code>valid_period WITH &amp;&amp;</code> for current system rows. PostgreSQL enforces conflicts under concurrency. The fallback advisory-lock trigger qualifies the query and serializes one hashed key before checking; hash collisions reduce concurrency, and every write path/trigger enablement must remain controlled.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1244,7 +1244,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 3, One comparison row per enforcement approach, with <code>approach</code>, <code>enforcement_mechanism</code>, <code>assumption_or_limit</code>, and <code>concurrent_failure_behavior</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 3, The comparison output records which writes each approach locks or constrains, how a conflicting concurrent transaction fails, and what happens if an application writer bypasses the agreed advisory-lock protocol.</li>
 </ul>
-<h4 id="solution-1--exercise-4-reversal-chain">Exercise 4 — Reversal chain<a class="heading-anchor" href="#solution-1--exercise-4-reversal-chain" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-reversal-chain">Exercise 4: Reversal chain<a class="heading-anchor" href="#solution-1--exercise-4-reversal-chain" aria-label="Link to this section">#</a></h4>
 <p>Entries L-1 (+5), L-2 (-5 reversing L-1), and L-3 (+5 correcting/reversing L-2) sum to +5 without UPDATE. Unique idempotency keys prevent duplicate append and foreign keys preserve reversal references. Domain policy should prevent multiple unauthorized reversals of one entry if that is invalid.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1252,7 +1252,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 4, One row per <code>ledger_entry_id</code>, with <code>idempotency_key</code>, <code>event_kind</code>, signed amount, <code>reverses_entry_id</code>, and a scalar reconciled amount, ordered by <code>ledger_entry_id</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 4, Require three rows and a reconciled amount of <code>5.00</code>. Prove an UPDATE, DELETE, duplicate <code>LEDGER-102</code> retry, second reversal of the same entry, and wrong-sign reversal all fail without changing the row count.</li>
 </ul>
-<h4 id="solution-1--exercise-5-hold-decisions">Exercise 5 — Hold decisions<a class="heading-anchor" href="#solution-1--exercise-5-hold-decisions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-hold-decisions">Exercise 5: Hold decisions<a class="heading-anchor" href="#solution-1--exercise-5-hold-decisions" aria-label="Link to this section">#</a></h4>
 <p>The decision log appends who, reason, action, and time. Current hold state is derived from the latest authorized decision. Deletion still requires retention age, no current hold, approval, dependency/backup review, and an immutable execution audit. The course solution records decisions but deletes nothing.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1260,7 +1260,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 5, One row per retained <code>record_key</code>, with the latest decision event/key, approver, reason, decision time, and <code>eligible_for_deletion_review</code>, ordered by <code>record_key</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 5, Prove decision UPDATE/DELETE and duplicate/backdated appends fail. Keep a held fixture ineligible, release another through an ordered event, and confirm no <code>retained_records</code> row is actually deleted.</li>
 </ul>
-<h4 id="solution-1--exercise-6-domain-assumptions">Exercise 6 — Domain assumptions<a class="heading-anchor" href="#solution-1--exercise-6-domain-assumptions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-domain-assumptions">Exercise 6: Domain assumptions<a class="heading-anchor" href="#solution-1--exercise-6-domain-assumptions" aria-label="Link to this section">#</a></h4>
 <p>Record business time zone and clock authority; valid/system boundary convention; late-arrival/correction authority; allowed gaps/overlaps; customer identity; money/unit semantics; ledger reconciliation and reversal policy; retention/legal basis; hold ownership; deletion versus anonymization; and how replicas/backups honor erasure and audit duties.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1268,7 +1268,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 6, One row per assumption topic, with <code>topic</code>, <code>decision_or_assumption</code>, <code>evidence</code>, <code>owner</code>, and <code>failure_response</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 6, Every row names an accountable owner and an operational response; every claimed fact cites a query/catalog result, while policy not present in the repository is labeled as an assumption needing approval.</li>
 </ul>
-<h4 id="solution-1--exercise-7-civil-time-and-daylight-saving">Exercise 7 — Civil time and daylight saving<a class="heading-anchor" href="#solution-1--exercise-7-civil-time-and-daylight-saving" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-civil-time-and-daylight-saving">Exercise 7: Civil time and daylight saving<a class="heading-anchor" href="#solution-1--exercise-7-civil-time-and-daylight-saving" aria-label="Link to this section">#</a></h4>
 <p>Store the authoritative instant as <code>timestamptz</code> and retain the IANA zone name used to interpret/display civil time. A fixed offset has no DST rules; a bare timestamp cannot identify which occurrence an ambiguous fall-back time means.</p>
 <p>Detect/reject nonexistent spring-forward times and require an explicit earlier/later-offset policy for ambiguous input. Test both transitions for the supported zone database/version.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1277,7 +1277,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 7, One row per <code>case_id</code>, with <code>local_time</code>, <code>zone_name</code>, <code>civil_time_status</code>, candidate instants, PostgreSQL&#x27;s default interpreted instant, and <code>resolution_policy</code>, ordered by <code>case_id</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 7, The result contains exactly one <code>nonexistent</code>, one <code>ambiguous</code>, and one <code>ordinary</code> case. A nonexistent time has zero round-trip candidates; an ambiguous time has more than one and requires explicit disambiguation.</li>
 </ul>
-<h4 id="solution-1--exercise-8-event-ingestion-and-processing-clocks">Exercise 8 — Event, ingestion, and processing clocks<a class="heading-anchor" href="#solution-1--exercise-8-event-ingestion-and-processing-clocks" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-event-ingestion-and-processing-clocks">Exercise 8: Event, ingestion, and processing clocks<a class="heading-anchor" href="#solution-1--exercise-8-event-ingestion-and-processing-clocks" aria-label="Link to this section">#</a></h4>
 <p>Event time is source occurrence, ingestion time is arrival, and processing time is computation. A watermark such as maximum observed event time minus allowed lateness closes windows only under a documented source/partition policy.</p>
 <p>Beyond-window data should be quarantined or applied as a versioned correction/retraction. Publish metric version, as-of/watermark, changed keys, and downstream recomputation/notification evidence.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1286,7 +1286,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 8, Exactly one summary row with <code>event_count</code>, <code>maximum_event_time</code>, <code>example_watermark</code>, <code>maximum_arrival_delay</code>, <code>maximum_processing_delay</code>, <code>events_behind_watermark</code>, and the correction policy.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 8, Recompute arrival and processing delays row by row, require the late fixture to fall behind the watermark, and describe a stable window/version identity for the corrected aggregate.</li>
 </ul>
-<h4 id="solution-1--exercise-9-type-2-as-of-dimension-join">Exercise 9 — Type-2 as-of dimension join<a class="heading-anchor" href="#solution-1--exercise-9-type-2-as-of-dimension-join" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-type-2-as-of-dimension-join">Exercise 9: Type-2 as-of dimension join<a class="heading-anchor" href="#solution-1--exercise-9-type-2-as-of-dimension-join" aria-label="Link to this section">#</a></h4>
 <p>Give each version a surrogate key, stable business key, half-open effective range, and correction metadata. Join a fact where business keys match and the range contains fact time; persist the resolved surrogate when interpretation must never drift.</p>
 <p>Enforce/report no overlap and assert each fact has at most or exactly one match according to missing-dimension policy. A current flag must agree with range state.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
@@ -1295,7 +1295,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 9, One row per <code>order_key</code>, with <code>ordered_on</code>, <code>customer_version_id</code>, segment, effective period, current marker, and correction metadata, ordered by <code>order_key</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 9, Require output count to equal fact count and group by <code>order_key</code> with <code>HAVING count(customer_version_id) &gt; 1</code> returning no rows. Inject one overlapping dimension row, prove the diagnostic catches it, then roll it back.</li>
 </ul>
-<h4 id="solution-1--exercise-10-temporal-referential-integrity">Exercise 10 — Temporal referential integrity<a class="heading-anchor" href="#solution-1--exercise-10-temporal-referential-integrity" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-temporal-referential-integrity">Exercise 10: Temporal referential integrity<a class="heading-anchor" href="#solution-1--exercise-10-temporal-referential-integrity" aria-label="Link to this section">#</a></h4>
 <p>The child period must be contained by an allowed parent period, not merely share a key. A trigger can lock a stable business-key namespace, query containment, and reject gaps under concurrency.</p>
 <p>Exclusion constraints prevent overlap but do not alone prove containment. Deferred/bulk loading needs an explicit validation and quarantine/repair gate; test parent shrink/delete and concurrent changes.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1304,7 +1304,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 10, One row per write path, with <code>write_path</code>, <code>concurrency_or_validation_control</code>, and <code>failure_response</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 10, Walk through two concurrent transactions for both child insertion and parent shrink. Identify the lock acquired first and show that cutover is blocked whenever the final containment diagnostic is nonempty.</li>
 </ul>
-<h4 id="solution-1--exercise-11-gap-and-overlap-report">Exercise 11 — Gap and overlap report<a class="heading-anchor" href="#solution-1--exercise-11-gap-and-overlap-report" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-11-gap-and-overlap-report">Exercise 11: Gap and overlap report<a class="heading-anchor" href="#solution-1--exercise-11-gap-and-overlap-report" aria-label="Link to this section">#</a></h4>
 <p>Order nonempty periods by lower bound, upper bound, stable ID and compare each lower bound with the running maximum prior upper. Lower means overlap, greater means gap, equal means adjacency. Plain <code>lag(upper)</code> can miss overlap hidden by an earlier long interval.</p>
 <p>Multirange aggregation/subtraction can expose coverage compactly. Report duplicates/empty/inverted periods separately and define adjacency policy.</p>
 <h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
@@ -1313,7 +1313,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-temporal-01 Exercise 11, One row per <code>period_id</code>, with <code>business_key</code>, <code>valid_period</code>, <code>has_unbounded_upper</code>, duplicate count, prior maximum upper bound, and <code>relationship_to_prior_coverage</code>, ordered by bounds and <code>period_id</code>.</li>
 <li><strong>Independent verification:</strong> For sql-temporal-01 Exercise 11, Require explicit <code>duplicate</code>, <code>empty</code>, <code>gap</code>, <code>adjacent</code>, and <code>overlap</code> outcomes. Add a bounded period after an unbounded range and prove it is classified as overlap rather than first/gap.</li>
 </ul>
-<h4 id="solution-1--exercise-12-partition-archive-under-hold">Exercise 12 — Partition archive under hold<a class="heading-anchor" href="#solution-1--exercise-12-partition-archive-under-hold" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-12-partition-archive-under-hold">Exercise 12: Partition archive under hold<a class="heading-anchor" href="#solution-1--exercise-12-partition-archive-under-hold" aria-label="Link to this section">#</a></h4>
 <p>Inventory retention and holds before detach. If one held row blocks an expirable partition, move/repartition only through audited review. Verify counts/checksums, dependencies, indexes, encryption/access, manifest, and test restore.</p>
 <p>Keep archive discoverable to authorized recovery/legal processes, propagate hold decisions to replicas/backups, and record deletion evidence. Partition age alone is not authorization to erase.</p>
 <h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
@@ -2652,16 +2652,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-temporal-01 — Temporal and Domain Modelling.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-temporal-01 — Temporal and Domain Modelling.
 
 I have completed the direct catalog prerequisites: `sql-found-01`, `sql-types-01`, `sql-prog-01`, `sql-test-01`, `sql-39`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_temporal_01_domain_modelling.md
@@ -2688,7 +2688,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -2799,18 +2799,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

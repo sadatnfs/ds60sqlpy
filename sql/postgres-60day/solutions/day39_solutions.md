@@ -1,4 +1,4 @@
-# Day 39 — Solutions: Locks and Deadlocks
+# Day 39: Solutions: Locks and Deadlocks
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ Deadlocks and lock waits require concurrent sessions. A single sequential
 solution file cannot fully execute these labs. Use two terminals for the
 staged commands and a third terminal when observing a wait.
 
-## Exercise 1 — Reproduce and observe a deadlock
+## Exercise 1: Reproduce and observe a deadlock
 
 Session A locks order 1:
 
@@ -123,7 +123,7 @@ the final cycle edge rather than promising to freeze a deadlock.
 - **Alternative/trade-off:** For sql-39 Exercise 1, the chosen form is justified by this lesson-specific rationale: Session A locks order 1: Session B locks order 2: Session A now waits for B: Before completing the cycle, run this safe diagnostic in a third session: Then Session B completes the cycle: PostgreSQL detects the. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `order_id` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 
-## Exercise 2 — Prevent the deadlock with consistent ordering
+## Exercise 2: Prevent the deadlock with consistent ordering
 
 Every worker must acquire the same set of row locks in the same order:
 
@@ -155,7 +155,7 @@ order 2 while requesting order 1, so this pair does not form a cycle.
 - **Alternative/trade-off:** For sql-39 Exercise 2, the chosen form is justified by this lesson-specific rationale: Every worker must acquire the same set of row locks in the same order: Run the same transaction in both sessions. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `order_id` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 
-## Exercise 3 — Job-queue claiming with `SKIP LOCKED`
+## Exercise 3: Job-queue claiming with `SKIP LOCKED`
 
 ```sql
 BEGIN;
@@ -198,7 +198,7 @@ batch.
 - `total_amount = total_amount` is used only to request a write lock without
   changing course data; do not use no-op updates as a production lock pattern.
 
-## Exercise 4 — Predict NOWAIT
+## Exercise 4: Predict NOWAIT
 
 `FOR UPDATE NOWAIT` raises SQLSTATE `55P03` immediately when a conflicting lock
 already exists. The executable solution explains the two-session check without
@@ -214,7 +214,7 @@ blocking automated validation.
 - **Alternative/trade-off:** For sql-39 Exercise 4, the chosen form is justified by this lesson-specific rationale: `FOR UPDATE NOWAIT` raises SQLSTATE `55P03` immediately when a conflicting lock already exists. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 5 — Claim and update queue rows
+## Exercise 5: Claim and update queue rows
 
 The locking CTE selects up to five unprocessed jobs with `SKIP LOCKED`; the
 UPDATE joins only those keys and `RETURNING` proves exactly what this worker
@@ -230,7 +230,7 @@ claimed.
 - **Alternative/trade-off:** For sql-39 Exercise 5, the chosen form is justified by this lesson-specific rationale: The locking CTE selects up to five unprocessed jobs with `SKIP LOCKED`; the UPDATE joins only those keys and `RETURNING` proves exactly what this worker claimed. Evaluate another form against the concrete expected result (up to five unprocessed jobs with `SKIP LOCKED`; the UPDATE joins only those keys and `RETURNING` proves exactly what this worker claimed) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `returning` values in both cases.
 
-## Exercise 6 — Preserve lock order
+## Exercise 6: Preserve lock order
 
 Keys and the final locking SELECT both order by the unique `order_id`. Every
 writer must share that order for the pattern to prevent cycles.
@@ -245,7 +245,7 @@ writer must share that order for the pattern to prevent cycles.
 - **Alternative/trade-off:** For sql-39 Exercise 6, the chosen form is justified by this lesson-specific rationale: Keys and the final locking SELECT both order by the unique `order_id`. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `order_id` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 
-## Exercise 7 — Prefer transaction advisory locks
+## Exercise 7: Prefer transaction advisory locks
 
 `pg_try_advisory_xact_lock` is non-blocking and releases automatically when the
 transaction ends. It works only if all cooperating applications derive the same

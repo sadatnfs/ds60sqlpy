@@ -1,4 +1,4 @@
-# Day 33 — Solutions: Linear Algebra & Matrices for ML Intuition
+# Day 33: Solutions: Linear Algebra & Matrices for ML Intuition
 
 We implement the normal equation (closed-form least squares), add an intercept, and compare to scikit-learn. We also discuss numerical stability and when to prefer iterative methods.
 
@@ -20,7 +20,7 @@ true_w = np.array([2.0, -1.0, 0.5])
 y = X @ true_w + rng.normal(scale=0.5, size=n)
 ```
 
-Worked reference for Exercise 1 — Add intercept and recompute w
+Worked reference for Exercise 1; Add intercept and recompute w
 ```python
 # Add a column of ones for intercept
 X1 = np.c_[np.ones((n, 1)), X]   # shape (n, d+1)
@@ -35,7 +35,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — Compare to sklearn LinearRegression
+Worked reference for Exercise 2; Compare to sklearn LinearRegression
 ```python
 from sklearn.linear_model import LinearRegression
 
@@ -53,7 +53,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Stability and iterative methods
+Worked reference for Exercise 3; Stability and iterative methods
 - Normal equation inverts \(X^{\mathsf T}X\) (or solves a system); if X has multicollinearity or large condition number, numerical errors grow
 - Use np.linalg.lstsq or pinv to mitigate; better yet, rely on QR/SVD inside libraries
 - For large n,d or online learning, gradient-based solvers (SGD, coordinate descent) scale better (avoid \(O(d^3)\) inversion)
@@ -101,7 +101,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Add an intercept column of ones and recompute the coefficients.
 
@@ -111,9 +111,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
+**Verify:** Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Compare the closed-form result with scikit-learn's `LinearRegression` on the same data.
 
@@ -123,9 +123,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
+**Verify:** Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.
 
@@ -135,9 +135,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
+**Verify:** Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
 
-### Exercise 4 — Shape tracing
+### Exercise 4: Shape tracing
 
 **Prompt:** For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).
 
@@ -156,9 +156,9 @@ contract.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.
+**Verify:** Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.
 
-### Exercise 5 — Rank-deficiency debugging
+### Exercise 5: Rank-deficiency debugging
 
 **Prompt:** Construct a design matrix whose third column equals the sum of the first two. Compare `np.linalg.solve(X.T @ X, X.T @ y)` with `np.linalg.lstsq(X, y, rcond=None)` and interpret the rank.
 
@@ -190,9 +190,9 @@ rather than inventing meaning for unstable individual coefficients.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve's singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.
+**Verify:** Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve's singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.
 
-### Exercise 6 — Robust vector operation
+### Exercise 6: Robust vector operation
 
 **Prompt:** Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.
 
@@ -223,4 +223,4 @@ zero denominator.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.
+**Verify:** Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.

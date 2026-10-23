@@ -1,9 +1,9 @@
-# Day 41 — Complex Aggregations
+# Day 41: Complex Aggregations
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 40 — advanced analytic functions](day40_analytic_functions_advanced.md)
+- **Prerequisites:** [Day 40; advanced analytic functions](day40_analytic_functions_advanced.md)
 - **Artifacts:** [learner SQL](../day41_complex_aggregations.sql) ·
   [solution reasoning](../solutions/day41_solutions.md) ·
   [executable solution](../solutions/day41_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-41 — Complex Aggregations** and choose
+2. Open **SQL-41; Complex Aggregations** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -239,7 +239,7 @@ Decide explicitly when an absent measure should be `NULL` or zero.
 
 ## Next step
 
-Continue to [Day 42 — data quality and validation](day42_data_quality_validation.md).
+Continue to [Day 42; data quality and validation](day42_data_quality_validation.md).
 
 ## Deep dive and reference
 
@@ -293,11 +293,11 @@ than `column IS NULL` to detect a subtotal.
 Aggregates over no input rows often return NULL, so `COALESCE(array_agg(...),
 '{}'::text[])` needs an explicit type matching the aggregate result.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-41 — Complex Aggregations.

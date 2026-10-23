@@ -1,4 +1,4 @@
-# Day 59 — Solutions: Capstone Kickoff
+# Day 59: Solutions: Capstone Kickoff
 
 We provide concrete templates and examples for scope, metrics, data access, baseline, risks, and milestones.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Problem and hypotheses (template)
+Worked reference for Exercise 1; Problem and hypotheses (template)
 ```markdown
 # Problem Statement
 We aim to predict <target> for <users/stakeholders> to achieve <business value>.
@@ -24,7 +24,7 @@ We aim to predict <target> for <users/stakeholders> to achieve <business value>.
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95
 ```
 
-Worked reference for Exercise 2 — Data sources and contracts
+Worked reference for Exercise 2; Data sources and contracts
 ```markdown
 ## Sources
 - Warehouse table analytics.users_daily (owner: data-eng)
@@ -35,7 +35,7 @@ Worked reference for Exercise 2 — Data sources and contracts
 - Access: request via JIRA SEC‑123; principle of least privilege
 ```
 
-Worked reference for Exercise 3 — Baseline, risks, milestones
+Worked reference for Exercise 3; Baseline, risks, milestones
 ```markdown
 ## Baseline
 - Heuristic: last_30d_activity>0 → non‑churner; baseline AUC ≈ 0.62
@@ -91,7 +91,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Write the problem statement and success metric in the notebook.
 
@@ -101,9 +101,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
+**Verify:** Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Create the project skeleton.
 
@@ -113,9 +113,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
+**Verify:** Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Build a baseline and record metrics.
 
@@ -125,9 +125,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
+**Verify:** Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
-### Exercise 4 — Scope and stop rules
+### Exercise 4: Scope and stop rules
 
 **Prompt:** Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.
 
@@ -144,9 +144,9 @@ Record the decision and date in a log. A well-supported “do not deploy” or
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
+**Verify:** Scope and stop rules; deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
 
-### Exercise 5 — Capstone data contract
+### Exercise 5: Capstone data contract
 
 **Prompt:** Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.
 
@@ -163,9 +163,9 @@ credential, restricted dataset, or developer-specific absolute path.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
+**Verify:** Capstone data contract; validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
 
-### Exercise 6 — Decision log
+### Exercise 6: Decision log
 
 **Prompt:** Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.
 
@@ -183,4 +183,4 @@ operational rather than permanent dogma.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.
+**Verify:** Decision log; record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.

@@ -1,4 +1,4 @@
-# Day 55 — Solutions: APIs and Containerization with Docker
+# Day 55: Solutions: APIs and Containerization with Docker
 
 We containerize a FastAPI service, add a health endpoint and Docker HEALTHCHECK, and optimize image size via multi‑stage builds.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile
+Worked reference for Exercise 1; Minimal FastAPI app and Dockerfile
 ```python
 # app.py
 from fastapi import FastAPI
@@ -51,7 +51,7 @@ docker run -p 8000:8000 ds-fastapi:latest
 
 ---
 
-Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK
+Worked reference for Exercise 2; Health endpoint and HEALTHCHECK
 ```python
 # app.py addition
 @app.get("/health")
@@ -74,7 +74,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 3 — Multi‑stage build
+Worked reference for Exercise 3; Multi‑stage build
 ```dockerfile
 # Stage 1: build dependencies in an isolated virtual environment.
 FROM python:3.12-slim AS builder
@@ -144,7 +144,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Create a slim dependency file containing only direct API runtime needs.
 
@@ -154,9 +154,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
+**Verify:** Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Add `GET /health` returning `{"status": "ok"}`.
 
@@ -166,9 +166,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
+**Verify:** Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Optionally push the image to a registry if you intentionally use a connected account.
 
@@ -178,9 +178,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
+**Verify:** Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
-### Exercise 4 — Layer and secret audit
+### Exercise 4: Layer and secret audit
 
 **Prompt:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
 
@@ -191,16 +191,16 @@ artifact into the context. Use runtime secret injection for connected
 extensions; the portable lesson should require no credential.
 
 Inspect final files as a non-root user and scan both source and image. If a
-secret ever entered a built/pushed layer, rotate it—removing the file from the
+secret ever entered a built/pushed layer, rotate it, removing the file from the
 latest layer is not sufficient.
 
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
+**Verify:** Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
 
-### Exercise 5 — Least-privilege runtime
+### Exercise 5: Least-privilege runtime
 
 **Prompt:** Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.
 
@@ -218,9 +218,9 @@ does not replace dependency updates, network policy, or input validation.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
+**Verify:** Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
 
-### Exercise 6 — Health semantics
+### Exercise 6: Health semantics
 
 **Prompt:** Implement separate `/live` and `/ready` checks and a startup failure when the model manifest is incompatible. Test all three states.
 
@@ -238,4 +238,4 @@ or a network, then add one container smoke test for the packaged path.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.
+**Verify:** Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.

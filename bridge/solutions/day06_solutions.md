@@ -1,4 +1,4 @@
-# Bridge Day 6 — Solution notes
+# Bridge Day 6: Solution notes
 
 Work through the [learner file](../lessons/day06_bulk_etl_validation.py) before
 opening [day06_solution.py](day06_solution.py).
@@ -69,7 +69,7 @@ reference is `bridge/solutions/day06_solution.py`; use it only after an honest a
 
 **Shared failure rule:** Bulk speed does not excuse weak validation, unbounded materialization, or diagnostics that copy entire rejected records.
 
-### Exercise 1 — Validation
+### Exercise 1: Validation
 
 **Prompt:** Implement `parse_sale()` for non-blank source ID, positive integer customer ID,
 finite positive amount, and ISO date without mutating input.
@@ -83,7 +83,7 @@ conversion failures.
 
 **Verification evidence:** Parse one valid mapping and compare exact typed fields; assert blank source ID, non-positive/non-integer customer ID, non-finite/non-positive amount, and bad ISO date raise `RowValidationError`, and the input mapping is unchanged.
 
-### Exercise 2 — Money
+### Exercise 2: Money
 
 **Prompt:** Quantize accepted amounts to two decimals and document the chosen rounding rule.
 
@@ -95,7 +95,7 @@ and tested.
 
 **Verification evidence:** Check amounts with more than two places and a halfway value; assert the exact two-place `Decimal` results under the documented rounding mode, not merely formatted strings.
 
-### Exercise 3 — Partitioning
+### Exercise 3: Partitioning
 
 **Prompt:** Implement `partition_rows()` so accepted sales and rejected source IDs/reasons
 retain input order without storing full raw rows.
@@ -108,7 +108,7 @@ original mapping or unrelated exceptions.
 
 **Verification evidence:** Feed valid-invalid-valid rows; assert accepted sales and rejection `(source_id, reason)` records preserve input order and no rejected object stores the complete raw mapping.
 
-### Exercise 4 — Batching
+### Exercise 4: Batching
 
 **Prompt:** Implement `batches()` with positive-size validation and tests for empty, exact, and
 remainder cases.
@@ -120,7 +120,7 @@ a tuple. Empty input returns an empty list and input order is unchanged.
 
 **Verification evidence:** Assert `batches([], 2) == []`, exact division has no empty tail, a remainder becomes the last tuple, and sizes `0`/negative raise `ValueError`.
 
-### Exercise 5 — Bulk SQL
+### Exercise 5: Bulk SQL
 
 **Prompt:** Implement a parameterized `executemany()` upsert into `pg_temp.bridge_sales` with no
 values in SQL text.
@@ -132,7 +132,7 @@ pass an iterable of `(source_id, customer_id, amount, occurred_on)` tuples to `e
 
 **Verification evidence:** Inspect one `executemany` call: SQL contains placeholders and the upsert clause, every sale value exists only in parameter rows, and empty input makes no driver call.
 
-### Exercise 6 — Accounting
+### Exercise 6: Accounting
 
 **Prompt:** Track accepted, rejected, submitted, inserted, and updated counts separately and
 state what `executemany()` cannot cheaply distinguish.
@@ -145,7 +145,7 @@ comparison/`RETURNING` if that distinction is required.
 
 **Verification evidence:** For a mixed fixture, report separate accepted, rejected, and submitted counts; label inserted/updated as unknown unless returned/reconciled database evidence distinguishes them.
 
-### Exercise 7 — Extension
+### Exercise 7: Extension
 
 **Prompt:** Design the Psycopg COPY variant using typed `write_row()` calls and a staging table
 instead of hand-built delimited text.
@@ -159,7 +159,7 @@ semantics.
 
 **Verification evidence:** Provide a COPY design that calls typed `write_row` into a staging table, validates staging rows, and performs one set-based merge without constructing delimited text.
 
-### Exercise 8 — Edge cases
+### Exercise 8: Edge cases
 
 **Prompt:** Test NaN, infinities, zero, negatives, whitespace IDs, leading-zero customer IDs,
 and invalid dates.
@@ -173,7 +173,7 @@ safe.
 
 **Verification evidence:** Parameterize `NaN`, both infinities, zero, negative amount, blank ID, leading-zero customer ID, and invalid dates; compare exact acceptance or `RowValidationError` outcome.
 
-### Exercise 9 — Idempotency
+### Exercise 9: Idempotency
 
 **Prompt:** Choose a policy for duplicate `source_id` values within one input batch and test it
 before database submission.
@@ -187,7 +187,7 @@ contradictory source rows.
 
 **Verification evidence:** Choose reject-first, reject-all, or deterministic-last-wins for duplicate `source_id`; assert the chosen result is decided before `executemany` and documented in counts.
 
-### Exercise 10 — Scale design
+### Exercise 10: Scale design
 
 **Prompt:** Compare materializing all accepted rows with a streaming validator and identify
 where bounded memory changes APIs.
@@ -201,7 +201,7 @@ sources.
 
 **Verification evidence:** Compare peak retained rows for materialized and streaming designs; the streaming API must emit bounded batches/rejections without requiring the entire input sequence.
 
-### Exercise 11 — Capacity
+### Exercise 11: Capacity
 
 **Prompt:** Select batch size from parameter count, row width, memory, and transaction duration
 rather than a universal constant.
@@ -214,7 +214,7 @@ tuning.
 
 **Verification evidence:** Show a batch-size calculation using parameter count, row width, memory budget, and transaction-duration target; assert the selected size stays below every stated limit.
 
-### Exercise 12 — Transaction failure
+### Exercise 12: Transaction failure
 
 **Prompt:** Specify behavior when `executemany()` fails halfway and identify which layer owns
 rollback and retry.
@@ -227,7 +227,7 @@ rows as committed without database evidence.
 
 **Verification evidence:** Inject a mid-load driver failure; assert the transaction owner rolls back the complete unit, the loader does not claim partial success, and retry starts from a defined boundary.
 
-### Exercise 13 — Observability
+### Exercise 13: Observability
 
 **Prompt:** Create a bounded rejection taxonomy and metrics that do not use source IDs or raw
 reasons as tags.
@@ -240,7 +240,7 @@ in a protected bounded sink.
 
 **Verification evidence:** Inspect metrics for a fixed rejection-reason enum and bounded outcome tags; assert no source ID, raw reason text, or complete rejected row appears as a tag.
 
-### Exercise 14 — Reconciliation
+### Exercise 14: Reconciliation
 
 **Prompt:** Design a replay test that loads the same accepted sales twice and reconciles source
 IDs and total amount.

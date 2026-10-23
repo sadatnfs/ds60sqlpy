@@ -218,7 +218,7 @@ Continue into loops and functions. Keep the investigation log for Day 10 tests
 and Day 11 debugging tools. Those tools make observations easier to collect;
 they do not replace a clear contract or a falsifiable hypothesis.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-foundations-02.

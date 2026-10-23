@@ -211,7 +211,7 @@ API and mechanism reference: [Hugging Face chat templates 4.57.1](https://huggin
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-003, Prompt and context engineering with measurable boundaries.

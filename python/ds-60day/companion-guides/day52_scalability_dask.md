@@ -1,4 +1,4 @@
-# Day 52 — Scalability with Dask and Chunked pandas
+# Day 52: Scalability with Dask and Chunked pandas
 
 **Lesson ID:** `python-52` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
@@ -101,7 +101,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — lazy task graphs, partitions, bounded reducers, and scale evidence
+## Concept deep dive: lazy task graphs, partitions, bounded reducers, and scale evidence
 
 ### The mental model
 
@@ -128,7 +128,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — combine chunk sums and counts correctly
+### Focused example A: combine chunk sums and counts correctly
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -154,7 +154,7 @@ assert correct_mean == 26.5 and wrong_mean_of_means != correct_mean
 
 **Assumption to name:** Every valid value contributes once and missing-value rules are the same in every chunk.
 
-### Focused example B — see a lazy Dask computation remain unevaluated
+### Focused example B: see a lazy Dask computation remain unevaluated
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -204,17 +204,17 @@ assert result == 42 and calls == [21]
 
 1. Read a large local CSV with Dask and compute groupby aggregations.
 
-**Verify:** Practice 1 — lazy task graphs, partitions, bounded reducers, and scale evidence — generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
+**Verify:** Practice 1; lazy task graphs, partitions, bounded reducers, and scale evidence; generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
 2. Persist the DataFrame and compare repeated timings with and without
    persistence.
 
-**Verify:** Practice 2 — lazy task graphs, partitions, bounded reducers, and scale evidence — record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
+**Verify:** Practice 2; lazy task graphs, partitions, bounded reducers, and scale evidence; record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
 3. Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and
    compare memory and elapsed time.
 
-**Verify:** Practice 3 — lazy task graphs, partitions, bounded reducers, and scale evidence — for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
+**Verify:** Practice 3; lazy task graphs, partitions, bounded reducers, and scale evidence; for identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
 ### Progressive hints
 
@@ -239,17 +239,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Task-graph tracing:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
    **Progressive hint:** Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.
 
-**Verify:** Task-graph tracing — print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
+**Verify:** Task-graph tracing; print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
 
 5. **Partition-skew diagnosis:** Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.
    **Progressive hint:** A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.
 
-**Verify:** Partition-skew diagnosis — print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
+**Verify:** Partition-skew diagnosis; print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
 
 6. **Reducer correctness:** Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.
    **Progressive hint:** A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.
 
-**Verify:** Reducer correctness — test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.
+**Verify:** Reducer correctness; test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -284,12 +284,12 @@ data over the Internet. Close the client to release processes.
 - Work in the [Day 52 learner notebook](../notebooks/day52_scalability_dask.ipynb).
 - Then review the
   [Day 52 solution](../solutions/day52_scalability_dask/day52_solutions.md).
-- Continue to [Day 53 — MLflow](day53_mlops_mlflow_experiment_tracking.md).
+- Continue to [Day 53; MLflow](day53_mlops_mlflow_experiment_tracking.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-52` — Day 52 — Scalability with Dask and Chunked pandas.

@@ -1,4 +1,4 @@
-# Day 25 solutions — Multiple CTEs and Hierarchies in One Query
+# Day 25 solutions: Multiple CTEs and Hierarchies in One Query
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Build a root-based organization CTE and report headcount and payroll by depth.
 
@@ -129,7 +129,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-25 Exercise 1, the chosen form is justified by this lesson-specific rationale: Assign depth during recursion, then aggregate employee rows once. Evaluate another form against the concrete expected result (One row per hierarchy depth) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Report each manager's direct-report count and payroll.
 
@@ -180,7 +180,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-25 Exercise 2, the chosen form is justified by this lesson-specific rationale: Direct-team grain needs one self join, not full recursive descendants. Evaluate another form against the concrete expected result (One row per manager with at least one direct report) and the verification above.
 - **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Identify hierarchy roots and leaves in one report.
 
@@ -230,7 +230,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-25 Exercise 3, the chosen form is justified by this lesson-specific rationale: Create root and leaf CTEs at employee grain, then union compatible labeled rows. Evaluate another form against the concrete expected result (One labeled row per root or leaf employee) and the verification above.
 - **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Count employees reachable from roots and compare with total employees.
 
@@ -279,7 +279,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-25 Exercise 4, the chosen form is justified by this lesson-specific rationale: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema. Evaluate another form against the concrete expected result (One row with zero unreachable employees) and the verification above.
 - **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Calculate full-subtree report counts per manager without counting the manager as their own report.
 
@@ -336,7 +336,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-25 Exercise 5, the chosen form is justified by this lesson-specific rationale: Seed direct edges and recurse descendants while carrying the original manager. Evaluate another form against the concrete expected result (One row per manager with descendant count) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Report department headcount split between managers and nonmanagers.
 

@@ -1,4 +1,4 @@
-# Day 16 solutions — Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames
+# Day 16 solutions: Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Show each order with the customer's average order total.
 
@@ -107,7 +107,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-16 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer ID and keep one output row per order. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Show each employee salary with department average, minimum, and maximum.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-16 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition all three window aggregates by department. Evaluate another form against the concrete expected result (One row per employee) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Calculate every order's share of its customer's stored revenue.
 
@@ -192,7 +192,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-16 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use a partition total denominator and guard it with `NULLIF`. Evaluate another form against the concrete expected result (One row per order with shares summing near one per customer) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare `GROUP BY customer_id` with `AVG(...) OVER (PARTITION BY customer_id)` and report their row counts.
 
@@ -241,7 +241,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-16 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping collapses to one row per customer; a window preserves every order row. Evaluate another form against the concrete expected result (Two labeled count rows) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Return orders above their customer average without placing a window function in `WHERE`.
 
@@ -288,7 +288,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-16 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute the window value in a CTE, then filter the named column outside. Evaluate another form against the concrete expected result (Order rows above their customer mean) and the verification above.
 - **Edge case:** Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Show order count and revenue context at both customer and country levels in the same row.
 

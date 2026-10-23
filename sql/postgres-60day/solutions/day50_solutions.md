@@ -1,4 +1,4 @@
-# Day 50 Solutions — Expense and Budget Variance
+# Day 50 Solutions: Expense and Budget Variance
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ This day adds year-over-year context, a greater-than-15% overspend flag, and a
 static monthly pivot using the categories present in the course seed. See
 [`day50_solutions.sql`](day50_solutions.sql).
 
-## Exercise 1 — YoY and budget variance
+## Exercise 1: YoY and budget variance
 
 ```sql
 SET search_path TO training, public;
@@ -111,7 +111,7 @@ one side of the actual/budget comparison.
 - **Alternative/trade-off:** For sql-50 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected grain: one row per month and category, including periods found on only one side of the actual/budget comparison. Evaluate another form against the concrete expected result (one row per month and category, including periods found on only one side of the actual/budget comparison) and the verification above.
 - **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 
-## Exercise 2 — Monthly variance pivot
+## Exercise 2: Monthly variance pivot
 
 ```sql
 SET search_path TO training, public;
@@ -167,7 +167,7 @@ category.
 - Treat zero or absent budgets explicitly; `NULL` percentage is safer than a
   fabricated infinite or zero rate.
 
-## Exercise 3 — Preserve missing-budget meaning
+## Exercise 3: Preserve missing-budget meaning
 
 The FULL JOIN retains actual-only and budget-only rows. Status is assigned before
 display-time `COALESCE`, so missing planning data is not relabeled zero.
@@ -182,7 +182,7 @@ display-time `COALESCE`, so missing planning data is not relabeled zero.
 - **Alternative/trade-off:** For sql-50 Exercise 3, the chosen form is justified by this lesson-specific rationale: The FULL JOIN retains actual-only and budget-only rows. Evaluate another form against the concrete expected result (one row per `month`, and `category`) and the verification above.
 - **Edge case:** Add one source row with a new `month`, and `category`; verify the result gains exactly one row carrying that `month`, and `category` value.
 
-## Exercise 4 — Calculate YTD windows
+## Exercise 4: Calculate YTD windows
 
 The `monthly` CTE first establishes canonical coalesced keys. Windows then
 partition by category and calendar year and order by month.
@@ -197,7 +197,7 @@ partition by category and calendar year and order by month.
 - **Alternative/trade-off:** For sql-50 Exercise 4, the chosen form is justified by this lesson-specific rationale: The `monthly` CTE first establishes canonical coalesced keys. Evaluate another form against the concrete expected result (one row per `month`, and `category`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Normalize joined keys once
+## Exercise 5: Normalize joined keys once
 
 Every later expression references `monthly.month` and `monthly.category`,
 avoiding inconsistent use of nullable columns from one join side.
@@ -212,7 +212,7 @@ avoiding inconsistent use of nullable columns from one join side.
 - **Alternative/trade-off:** For sql-50 Exercise 5, the chosen form is justified by this lesson-specific rationale: Every later expression references `monthly.month` and `monthly.category`, avoiding inconsistent use of nullable columns from one join side. Evaluate another form against the concrete expected result (a completed the normalize joined keys before applying windows written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
 - **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
 
-## Exercise 6 — Separate unbudgeted spend
+## Exercise 6: Separate unbudgeted spend
 
 The CASE checks missing and zero budgets before normal overspend. This prevents
 an absent plan from becoming an ordinary variance percentage.

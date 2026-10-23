@@ -216,7 +216,7 @@ API and mechanism reference: [Python datetime documentation](https://docs.python
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-023, Domain assistant boundaries: freshness, injection, budgets and traces.

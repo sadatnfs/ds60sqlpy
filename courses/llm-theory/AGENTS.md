@@ -5,8 +5,8 @@ Follow root [AGENTS.md](../../AGENTS.md) and the
 [the reviewed track](../../docs/expansion/tracks/llm-theory.md).
 
 - Preserve the reviewed stable IDs and prerequisites. `lessons.json` inventories
-  authored beta artifacts; it does not register the active catalog or enable a
-  runtime. Keep unfinished IDs absent instead of inventing placeholder bodies.
+  authored artifacts for the module catalog; it does not alter the legacy
+  catalog or enable a runtime by itself. Keep unfinished IDs absent instead of inventing placeholder bodies.
 - Define every new term, explain the code or reasoning anatomy, give two focused
   worked examples, and supply six distinct exercises with exact Expected/Verify
   observations. Keep executable and explanatory solutions separate from learners.

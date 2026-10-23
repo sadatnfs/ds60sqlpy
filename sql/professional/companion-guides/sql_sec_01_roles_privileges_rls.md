@@ -1,11 +1,11 @@
-# SQL-SEC-01 — Roles, Privileges, and Row-Level Security
+# SQL-SEC-01: Roles, Privileges, and Row-Level Security
 
 ## Level and prerequisites
 
 - **Level:** Advanced
 - **Catalog prerequisites:** `sql-found-02` and `sql-39`
-- **Prerequisites:** [SQL-FOUND-01 — relational design](sql_found_01_relational_design.md),
-  [SQL-FOUND-02 — migrations](sql_found_02_versioned_migrations.md), SQL Day 38
+- **Prerequisites:** [SQL-FOUND-01; relational design](sql_found_01_relational_design.md),
+  [SQL-FOUND-02; migrations](sql_found_02_versioned_migrations.md), SQL Day 38
   transactions, [SQL Day 39 locks and deadlocks](../../postgres-60day/companion-guides/day39_locks_deadlocks.md),
   and the disposable `advanced_sql_training` database.
 - **Optional capability:** hands-on role tests require the connected PostgreSQL
@@ -54,7 +54,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-SEC-01 — Schemas, Roles, Privileges, and Row-Level Security** and choose
+2. Open **SQL-SEC-01; Schemas, Roles, Privileges, and Row-Level Security** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -90,7 +90,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -271,7 +271,7 @@ Security work is complete only when both allowed and denied paths are proven:
    grant and which different owner does not.
    **Inputs/evidence:** For sql-sec-01 Exercise 3, create one future table as the role whose default privileges were configured and one as a different NOLOGIN owner with schema CREATE authority.
    **Expected result/shape:** For sql-sec-01 Exercise 3, expected output: the auditor has SELECT on `audit_notes` created by `ds60_sec_owner` but not on `other_owner_notes` created by `ds60_sec_other_owner`.
-   **Verify:** For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role—not inherited membership defaults.
+   **Verify:** For sql-sec-01 Exercise 3, compare `has_table_privilege` for both tables and state that ALTER DEFAULT PRIVILEGES uses only the current object's creating role, not inherited membership defaults.
 4. **Definer boundary:** inventory owner, search path, qualification, parameter,
    PUBLIC, grant, and RLS risks around the routine.
    **Inputs/evidence:** For sql-sec-01 Exercise 4, create a validated, fixed-search-path SECURITY DEFINER tenant-count function owned by the NOLOGIN owner, revoke PUBLIC, grant only the auditor, and inspect `pg_proc`.
@@ -350,11 +350,11 @@ modules on routines/triggers, SQL contract tests, index operations, and recovery
 rehearsals; use the [curriculum gap backlog](../../../docs/curriculum-gap-backlog.md)
 to see their planned order.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-sec-01 — Schemas, Roles, Privileges, and Row-Level Security.

@@ -13,9 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT))
 
 from ds60sqlpy.curriculum_framework import is_content_link  # noqa: E402
 from ds60sqlpy.desktop import BUNDLE_PATHS  # noqa: E402
+from scripts.check_public_release import scan as scan_public_payload  # noqa: E402
 
 
 def ignore_private_files(directory: str, names: list[str]) -> set[str]:
@@ -35,6 +37,19 @@ def ignore_private_files(directory: str, names: list[str]) -> set[str]:
         "cache",
         ".ipynb_checkpoints",
         ".git",
+        ".serena",
+        ".codex",
+        ".module-runtime",
+        ".module-runtime-not-prepared",
+        ".app-build",
+        ".cache",
+        "work",
+        "build",
+        "dist",
+        "artifacts",
+        "mlruns",
+        "wandb",
+        "classroom-runs",
         ".learning",
         ".classroom",
         ".venv",
@@ -86,6 +101,10 @@ def stage_course(destination: Path, *, source_root: Path | None = None) -> None:
         elif source.is_file():
             shutil.copy2(source, target)
 
+    findings, _ = scan_public_payload(destination, payload=True)
+    if findings:
+        raise ValueError("Staged distribution failed the public-release boundary check.")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -100,6 +119,13 @@ def main() -> int:
         if result.returncode:
             print("Refresh course outputs with make generate before building the application.")
             return result.returncode
+    links = subprocess.run(
+        [sys.executable, str(ROOT / "scripts/check_published_links.py")],
+        cwd=ROOT,
+        check=False,
+    )
+    if links.returncode:
+        return links.returncode
     work = ROOT / "build" / "native"
     # Build intermediates only. Never remove a course or learner workspace.
     if work.exists():

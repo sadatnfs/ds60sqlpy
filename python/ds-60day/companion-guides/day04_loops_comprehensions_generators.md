@@ -277,9 +277,9 @@ generator is lazy, and frequency counts include every occurrence.
 - [Check the separate solution](../solutions/day04_loops_comprehensions_generators/day04_solutions.md)
 - [Next: Day 5 - Functions and type hints](day05_functions_type_hints.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

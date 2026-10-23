@@ -1,4 +1,4 @@
-# Day 53 Solutions — SCD Type 2 and Temporal Fact Keys
+# Day 53 Solutions: SCD Type 2 and Temporal Fact Keys
 
 
 <!-- beginner-solution-enrichment -->
@@ -26,7 +26,7 @@ ordering with the explanation before comparing syntax.
 ## Clause-by-clause reading map
 
 The lesson's main concepts are SCD Type 2, Business key, Validity interval. Its worked-model focus is:
-For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key—not zero and not two.
+For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.
 
 - Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
   before adding aggregates; a one-to-many join is allowed to multiply rows only
@@ -58,7 +58,7 @@ Day 53 reads that committed `dwh` state but wraps its own changes in a
 transaction and rolls them back. The full answer is
 [`day53_solutions.sql`](day53_solutions.sql).
 
-## Exercise 1 — Resolve dimension versions by fact date
+## Exercise 1: Resolve dimension versions by fact date
 
 The exercise requires the customer and product surrogate keys whose validity
 intervals contain each source order date.
@@ -113,7 +113,7 @@ new current row, and then performs this temporal mapping.
 - **Alternative/trade-off:** For sql-53 Exercise 1, the chosen form is justified by this lesson-specific rationale: The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Audit columns
+## Exercise 2: Audit columns
 
 Inside the Day 53 transaction, the answer adds:
 
@@ -159,7 +159,7 @@ lesson.
 - Do not run this before Day 52; the executable file raises a clear exception if
   `dwh.dim_customer` is absent.
 
-## Exercise 3 — Diagnose same-day changes
+## Exercise 3: Diagnose same-day changes
 
 Inclusive DATE ranges cannot order two changes on one day without overlap or an
 invalid close-before-open interval. The answer surfaces invalid ranges.
@@ -174,7 +174,7 @@ invalid close-before-open interval. The answer surfaces invalid ranges.
 - **Alternative/trade-off:** For sql-53 Exercise 3, the chosen form is justified by this lesson-specific rationale: Inclusive DATE ranges cannot order two changes on one day without overlap or an invalid close-before-open interval. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one row for which `(customer_id = 1)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
 
-## Exercise 4 — Detect overlapping versions
+## Exercise 4: Detect overlapping versions
 
 The self-join compares each customer-version pair once and applies the inclusive
 overlap condition. Any row can map one fact date to multiple surrogates.
@@ -189,11 +189,11 @@ overlap condition. Any row can map one fact date to multiple surrogates.
 - **Alternative/trade-off:** For sql-53 Exercise 4, the chosen form is justified by this lesson-specific rationale: The self-join compares each customer-version pair once and applies the inclusive overlap condition. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 5 — Gate unchanged reruns
+## Exercise 5: Gate unchanged reruns
 
 `IS DISTINCT FROM` compares nullable attributes safely. The replay must use the
-same staged desired state that produced the new version—not the unchanged base
-table—otherwise the deliberate segment change looks like a new change again.
+same staged desired state that produced the new version, not the unchanged base
+table, otherwise the deliberate segment change looks like a new change again.
 
 ```sql
 WITH desired_customer_state AS (
@@ -221,7 +221,7 @@ WHERE current_version.is_current
 - **Alternative/trade-off:** For sql-53 Exercise 5, the chosen form is justified by this lesson-specific rationale: `IS DISTINCT FROM` compares nullable attributes safely. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** A duplicate `customer_id` in desired state must fail a uniqueness gate before versioning; do not let the join multiply candidate changes.
 
-## Exercise 6 — Define a same-day policy
+## Exercise 6: Define a same-day policy
 
 Half-open `tstzrange` examples show how effective timestamps can order changes.
 They require trustworthy source effective time or sequence, not load-time guesswork.

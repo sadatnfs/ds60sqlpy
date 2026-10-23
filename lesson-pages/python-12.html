@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-12-oop-basics-and-dataclasses">Day 12 — OOP Basics and Dataclasses<a class="heading-anchor" href="#guide--day-12-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-12-oop-basics-and-dataclasses">Day 12: OOP Basics and Dataclasses<a class="heading-anchor" href="#guide--day-12-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>Use a class when data and behavior form one meaningful concept with invariants. Use a plain function or collection when they do not.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 12 — oop basics and dataclasses to practice objects that keep related state and behavior together and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 12; oop basics and dataclasses to practice objects that keep related state and behavior together and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A class defines how a family of objects is constructed and behaves; an instance is one concrete object. Instance attributes hold per-object state, and methods are functions retrieved through an instance so that the instance is passed as <code>self</code>. Use a class when state and invariant- preserving behavior genuinely belong together, not merely to wrap a dictionary.</p>
 <p>A dataclass generates common record behavior such as initialization, representation, and equality from annotated fields. It does not validate values automatically. Use <code>__post_init__</code> for small invariant checks and distinguish class attributes shared by all instances from fields owned by each instance.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>@dataclass</code> decorates the following class. In <code>quantity: int</code>, the annotation declares a field and generated constructor parameter. <code>self.quantity</code> refers to the current instance&#x27;s field. A method that returns a calculation without mutation is easier to reason about than one that silently changes several attributes.</p>
-<h5 id="guide--worked-example-1-model-a-validated-record-with-a-computed-method">Worked example 1 — Model a validated record with a computed method<a class="heading-anchor" href="#guide--worked-example-1-model-a-validated-record-with-a-computed-method" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-model-a-validated-record-with-a-computed-method">Worked example 1: Model a validated record with a computed method<a class="heading-anchor" href="#guide--worked-example-1-model-a-validated-record-with-a-computed-method" aria-label="Link to this section">#</a></h5>
 <p>Keep line-item state and its subtotal behavior together. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
 
@@ -443,7 +443,7 @@ item <span class="syntax-operator">=</span> LineItem<span class="syntax-punctuat
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`LineItem(name=&#x27;notebook&#x27;, unit_price=4.5, quantity=3)` and `13.5`. Construction enforces the invariant.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-show-that-fields-belong-to-each-instance">Worked example 2 — Show that fields belong to each instance<a class="heading-anchor" href="#guide--worked-example-2-show-that-fields-belong-to-each-instance" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-show-that-fields-belong-to-each-instance">Worked example 2: Show that fields belong to each instance<a class="heading-anchor" href="#guide--worked-example-2-show-that-fields-belong-to-each-instance" aria-label="Link to this section">#</a></h5>
 <p>Mutating one instance should not alter another independent record. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">first <span class="syntax-operator">=</span> LineItem<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pen</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 second <span class="syntax-operator">=</span> LineItem<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">pen</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
@@ -532,10 +532,10 @@ first<span class="syntax-operator">.</span>quantity <span class="syntax-operator
 <ul>
 <li><a href="python-12.html#learner">Open the learner notebook</a></li>
 <li><a href="python-12.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-13.html#guide">Next: Day 13 — Functional tools</a></li>
+<li><a href="python-13.html#guide">Next: Day 13; Functional tools</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-12`
 (Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
 I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
@@ -799,7 +799,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-12-solutions-oop-basics-and-dataclasses">Day 12 — Solutions: OOP Basics and Dataclasses<a class="heading-anchor" href="#solution-1--day-12-solutions-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-12-solutions-oop-basics-and-dataclasses">Day 12: Solutions: OOP Basics and Dataclasses<a class="heading-anchor" href="#solution-1--day-12-solutions-oop-basics-and-dataclasses" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>objects that keep related state and behavior together</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A class defines how a family of objects is constructed and behaves; an instance is one concrete object. Instance attributes hold per-object state, and methods are functions retrieved through an instance so that the instance is passed as <code>self</code>. Use a class when state and invariant- preserving behavior genuinely belong together, not merely to wrap a dictionary.</p>
@@ -815,8 +815,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>objects that keep related state and behavior together</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. <strong>Contract:</strong> deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. <strong>Verify:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create a <code>BankAccount</code> class with owner and private-by-convention balance state plus <code>deposit</code>, <code>withdraw</code>, and <code>balance</code> behavior. Contract: deposits are positive, withdrawals cannot exceed the balance, and invalid operations raise <code>ValueError</code> without changing state. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw. That connects the answer to objects that keep related state and behavior together.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">class</span> <span class="syntax-class">BankAccount</span><span class="syntax-punctuation">:</span>
@@ -865,7 +865,7 @@ account<span class="syntax-operator">.</span>withdraw<span class="syntax-punctua
     <span class="syntax-keyword">assert</span> account<span class="syntax-operator">.</span>balance <span class="syntax-operator">==</span> before</code></pre>
 <p><code>_balance</code> communicates internal state by convention. The property allows read access while all mutation passes through validated methods.</p>
 <p><strong>Verification evidence:</strong> assert the starting balance, exact balance after one deposit and one withdrawal, and unchanged balance plus <code>ValueError</code> after a zero deposit and an overdraw.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code>__post_init__</code> validation and a <code>stock_value()</code> method. <strong>Expected behavior:</strong> <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. <strong>Constraint:</strong> use <code>field(default_factory=...)</code> if you add any mutable collection field. <strong>Verify:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Convert a plain product record to <code>@dataclass Product(name: str, price: float, quantity: int = 0)</code>. Add <code>__post_init__</code> validation and a <code>stock_value()</code> method. Expected behavior: <code>Product(&#x27;tea&#x27;, 4.0, 3).stock_value() == 12.0</code>; negative values raise. Constraint: use <code>field(default_factory=...)</code> if you add any mutable collection field. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise. That connects the answer to objects that keep related state and behavior together.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass
@@ -902,32 +902,32 @@ tea <span class="syntax-operator">=</span> Product<span class="syntax-punctuatio
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid product should fail: </span><span class="syntax-string">{</span>arguments<span class="syntax-string">!r}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>No collection field is needed here. If one is added later, use <code>field(default_factory=list)</code> so instances do not share one mutable default.</p>
 <p><strong>Verification evidence:</strong> Assert <code>stock_value()</code> is <code>12.0</code>, equality uses field values, and separate negative-price and negative-quantity constructions raise.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. <strong>Progressive hint:</strong> Class lookup is shared until an instance shadows the name. <strong>Verify:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict how a class attribute shared by instances differs from an instance attribute assigned through <code>self</code>. Progressive hint: Class lookup is shared until an instance shadows the name. Then compare the prediction with this proof target: Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly. This makes objects that keep related state and behavior together observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Construct two instances, mutate/shadow one instance field, and assert shared class lookup versus independent instance values explicitly.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. <strong>Progressive hint:</strong> Value equality and identity answer different questions. <strong>Verify:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace dataclass equality for two separately constructed values with equal fields and compare it with object identity using <code>is</code>. Progressive hint: Value equality and identity answer different questions. Record the named value, shape, label, or iterator position needed to establish: Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected. The trace exposes objects that keep related state and behavior together directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert two equal-field dataclass values satisfy <code>==</code> but not <code>is</code>; mutate or replace a field and confirm equality changes as expected.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. <strong>Progressive hint:</strong> Validate non-negative values in <code>__post_init__</code>. <strong>Verify:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Create immutable <code>OrderLine</code> and <code>Order</code> dataclasses whose total sums quantity × unit price and applies a validated fractional discount. Progressive hint: Validate non-negative values in <code>__post_init__</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail. That connects the answer to objects that keep related state and behavior together.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert exact order total for multiple lines and a discount, then assert negative quantity/price and out-of-range discount construction each fail.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a dataclass field declared as <code>items: list[str] = []</code>. <strong>Progressive hint:</strong> Use <code>field(default_factory=list)</code> to create one list per instance. <strong>Verify:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a dataclass field declared as <code>items: list[str] = []</code>. Progressive hint: Use <code>field(default_factory=list)</code> to create one list per instance. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical. The diagnosis depends on objects that keep related state and behavior together.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Create two default instances, mutate one <code>items</code> list, and assert the other remains empty and the list objects are not identical.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. <strong>Progressive hint:</strong> A replaceable rule is usually behavior the order uses, not a kind of order. <strong>Verify:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Decide whether a discount policy should be a subclass of <code>Order</code> or a composed callable; justify the dependency direction. Progressive hint: A replaceable rule is usually behavior the order uses, not a kind of order. Values below, at, and above the named boundary must produce the evidence Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction. Those cases show how objects that keep related state and behavior together behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Swap two discount callables without changing <code>Order</code>; assert totals follow each policy and explain why composition preserves the dependency direction.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Put behavior with the data it protects, while keeping ownership and mutation explicit. Prefer composition unless the subtype truly is-a base.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity">Shared implementation for Exercises 3–4 — Shared state, equality, and identity<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity">Shared implementation for Exercises 3–4: Shared state, equality, and identity<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-shared-state-equality-and-identity" aria-label="Link to this section">#</a></h5>
 <p>Class attributes are found through the class and shared by default; assigning <code>self.name</code> creates/updates an instance attribute. Dataclasses compare declared fields by default, so equal values can still be distinct objects.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition">Shared implementation for Exercises 5–7 — Validated value objects and composition<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition">Shared implementation for Exercises 5–7: Validated value objects and composition<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validated-value-objects-and-composition" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> dataclasses <span class="syntax-keyword">import</span> dataclass<span class="syntax-punctuation">,</span> field
 <span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable
 
@@ -1118,16 +1118,16 @@ no_discount<span class="syntax-punctuation">:</span> DiscountPolicy <span class=
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-12`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-12`
 (Day 12 — OOP Basics and Dataclasses). Direct catalog prerequisites: `python-11`.
 I have completed the direct prerequisites: `python-11`. Emphasize objects that keep related state and behavior together.
 Read `python/ds-60day/companion-guides/day12_oop_dataclasses.md` and use the learner notebook
@@ -1142,7 +1142,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1253,18 +1253,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

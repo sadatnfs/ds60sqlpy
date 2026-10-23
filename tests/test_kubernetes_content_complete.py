@@ -55,7 +55,7 @@ def test_added_lesson_has_substantive_separate_contracts(record: dict[str, Any])
     assert "no API calls" in guide
     assert "LAB_KUBECONFIG" in guide and "LAB_CONTEXT" in guide and "LAB_NAMESPACE" in guide
     assert "```powershell" in guide and "```sh" in guide
-    assert guide.rfind("## Ask Codex about this lesson") > guide.rfind("## Next step")
+    assert guide.rfind("## Ask an AI tutor about this lesson") > guide.rfind("## Next step")
     assert record["guide_path"] in guide and record["source_path"] in guide
     assert len(explanation.split()) >= 450
     if record["runtime_profile"] == "k8s-kind":

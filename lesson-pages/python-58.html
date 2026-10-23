@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-58-code-review-refactoring-and-tests">Day 58 — Code Review, Refactoring, and Tests<a class="heading-anchor" href="#guide--day-58-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-58-code-review-refactoring-and-tests">Day 58: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#guide--day-58-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-58</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Refactoring changes structure while preserving intended behavior. Today you move notebook logic behind importable interfaces, add focused tests, and use Ruff, mypy, and pytest as complementary evidence.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -468,7 +468,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review">Concept deep dive — behavior-preserving refactoring, seams, tests, and compatibility review<a class="heading-anchor" href="#guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review">Concept deep dive: behavior-preserving refactoring, seams, tests, and compatibility review<a class="heading-anchor" href="#guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Refactoring changes internal structure while preserving observable behavior. Before changing unfamiliar code, a <strong>characterization test</strong> records what it currently does for representative and boundary inputs. Then small pure functions and explicit dependencies create seams that can be tested without files, networks, clocks, or global state.</p>
 <p>Code review is risk analysis, not style preference. Trace inputs, outputs, exceptions, side effects, data/security boundaries, backward compatibility, and evidence. Static tools catch classes of problems but cannot prove runtime or domain behavior.</p>
@@ -479,7 +479,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Ruff + mypy + pytest:</strong> checks formatting/lint, static type contracts, and executable behavior as complementary evidence.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-capture-legacy-behavior-before-extraction">Focused example A — capture legacy behavior before extraction<a class="heading-anchor" href="#guide--focused-example-a-capture-legacy-behavior-before-extraction" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-capture-legacy-behavior-before-extraction">Focused example A: capture legacy behavior before extraction<a class="heading-anchor" href="#guide--focused-example-a-capture-legacy-behavior-before-extraction" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">legacy_total</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
@@ -493,7 +493,7 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <span class="syntax-keyword">assert</span> observed <span class="syntax-operator">==</span> <span class="syntax-number">4.0</span>  <span class="syntax-comment"># characterization: preserve while restructuring</span></code></pre>
 <p><strong>Expected observation:</strong> The test records the current numeric contract before parsing and calculation are separated.</p>
 <p><strong>Assumption to name:</strong> Rounding only the final total is intended behavior; malformed-row policy still needs a failure test.</p>
-<h5 id="guide--focused-example-b-extract-a-pure-boundary-with-explicit-failures">Focused example B — extract a pure boundary with explicit failures<a class="heading-anchor" href="#guide--focused-example-b-extract-a-pure-boundary-with-explicit-failures" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-extract-a-pure-boundary-with-explicit-failures">Focused example B: extract a pure boundary with explicit failures<a class="heading-anchor" href="#guide--focused-example-b-extract-a-pure-boundary-with-explicit-failures" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal<span class="syntax-punctuation">,</span> InvalidOperation
 
@@ -554,15 +554,15 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <ol>
 <li>Move at least two notebook functions into a <code>src/</code> package and add tests.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
+<p><strong>Verify:</strong> Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
 <ol>
 <li>Add type hints and docstrings, then run mypy.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
+<p><strong>Verify:</strong> Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
 <ol>
 <li>Write a short maintainer guide in the project root.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
+<p><strong>Verify:</strong> Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Start with deterministic transformation/build functions. Create tiny synthetic DataFrames in fixtures so tests remain offline.</li>
@@ -571,20 +571,20 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 </ol>
 <p>The separate solution demonstrates a small extraction, local pre-commit hooks, and GitHub Actions. Treat CI as remote repetition of checks you can already run locally.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
-<p>Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support—not replace—domain evidence.</p>
+<p>Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support, not replace, domain evidence.</p>
 <p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol>
 <li><strong>Characterization testing:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change. <strong>Progressive hint:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</li>
 </ol>
-<p><strong>Verify:</strong> Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
+<p><strong>Verify:</strong> Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
 <ol>
 <li><strong>Risk-based review:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths. <strong>Progressive hint:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</li>
 </ol>
-<p><strong>Verify:</strong> Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
+<p><strong>Verify:</strong> Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
 <ol>
 <li><strong>Compatibility change:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan. <strong>Progressive hint:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</li>
 </ol>
-<p><strong>Verify:</strong> Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p>
+<p><strong>Verify:</strong> Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -631,10 +631,10 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <ul>
 <li>Work in the <a href="python-58.html#learner">Day 58 learner notebook</a>.</li>
 <li>Then consult the <a href="python-58.html#solution-1">Day 58 solution</a>.</li>
-<li>Continue to <a href="python-59.html#guide">Day 59 — Capstone Kickoff</a>.</li>
+<li>Continue to <a href="python-59.html#guide">Day 59; Capstone Kickoff</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -948,7 +948,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-58-solutions-code-review-refactoring-and-tests">Day 58 — Solutions: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#solution-1--day-58-solutions-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-58-solutions-code-review-refactoring-and-tests">Day 58: Solutions: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#solution-1--day-58-solutions-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
 <p>We refactor notebook logic into a module, write unit tests, configure pre‑commit hooks, and add a CI workflow.</p>
 <p>Contents</p>
 <ul>
@@ -957,7 +957,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Exercise 3: GitHub Actions CI for lint+tests</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Extract and test</p>
+<p>Worked reference for Exercise 1; Extract and test</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># src/myproj/fe.py</span>
 <span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 <span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Iterable
@@ -983,7 +983,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS or Linux</span>
 .venv/bin/python -m pytest -q</code></pre>
 <hr>
-<p>Worked reference for Exercise 2 — pre‑commit</p>
+<p>Worked reference for Exercise 2; pre‑commit</p>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-comment"># .pre-commit-config.yaml</span>
 <span class="syntax-tag">repos</span><span class="syntax-punctuation">:</span>
 <span class="syntax-punctuation">-</span> <span class="syntax-tag">repo</span><span class="syntax-punctuation">:</span> local
@@ -1006,7 +1006,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 .venv/bin/python -m pre_commit install
 .venv/bin/python -m pre_commit run --all-files</code></pre>
 <hr>
-<p>Worked reference for Exercise 3 — CI workflow</p>
+<p>Worked reference for Exercise 3; CI workflow</p>
 <pre class="highlighted-code"><code class="language-yaml"><span class="syntax-comment"># .github/workflows/ci.yml</span>
 <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> CI
 <span class="syntax-tag">on</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>push<span class="syntax-punctuation">,</span> pull_request<span class="syntax-punctuation">]</span>
@@ -1043,42 +1043,42 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Move at least two notebook functions into a <code>src/</code> package and add tests.</p>
 <p><strong>How to reason about it:</strong> Extract deterministic transformation/model-building functions first and add tiny offline tests before changing behavior. Keep notebooks as reader-facing orchestration, not the only home of reusable logic.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add type hints and docstrings, then run mypy.</p>
 <p><strong>How to reason about it:</strong> Type public boundaries and document inputs, outputs, assumptions, and failures. Run mypy on the real package; broad Any or unexplained ignores erase the value of the contract.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write a short maintainer guide in the project root.</p>
 <p><strong>How to reason about it:</strong> A maintainer guide should cover setup, architecture, tests, formatting, data contracts, artifacts, security, and acceptance gates with Windows and POSIX commands where they differ.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
-<h5 id="solution-1--exercise-4-characterization-testing">Exercise 4 — Characterization testing<a class="heading-anchor" href="#solution-1--exercise-4-characterization-testing" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
+<h5 id="solution-1--exercise-4-characterization-testing">Exercise 4: Characterization testing<a class="heading-anchor" href="#solution-1--exercise-4-characterization-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.</p>
 <p><strong>Reasoning before implementation:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</p>
 <p>Freeze representative fixtures and outputs before moving code. Include error types/messages only to the degree they are part of the public contract. Then refactor in small steps while the unchanged tests stay green.</p>
 <p>For the known bug, first add a failing regression test that describes desired behavior, then implement the fix. Do not quietly update all snapshots to accept whatever the refactor produced.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
-<h5 id="solution-1--exercise-5-risk-based-review">Exercise 5 — Risk-based review<a class="heading-anchor" href="#solution-1--exercise-5-risk-based-review" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
+<h5 id="solution-1--exercise-5-risk-based-review">Exercise 5: Risk-based review<a class="heading-anchor" href="#solution-1--exercise-5-risk-based-review" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.</p>
 <p><strong>Reasoning before implementation:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</p>
 <p>Ask for evidence: tests, before/after contract, bounded benchmark, secret scan, and fresh-environment command. Verify that unrelated dirty files are not mixed into the change and that generated artifacts were regenerated from their source.</p>
 <p>Categorize comments by correctness/risk, maintainability, and optional style so the author can act on the most important issues first.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
-<h5 id="solution-1--exercise-6-compatibility-change">Exercise 6 — Compatibility change<a class="heading-anchor" href="#solution-1--exercise-6-compatibility-change" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
+<h5 id="solution-1--exercise-6-compatibility-change">Exercise 6: Compatibility change<a class="heading-anchor" href="#solution-1--exercise-6-compatibility-change" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.</p>
 <p><strong>Reasoning before implementation:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</p>
 <p>Compatibility is a time-bounded contract. The warning should name the new parameter and intended removal version, use an appropriate stack level, and avoid firing for unrelated code paths. Tests should assert both semantics and warning behavior.</p>
 <p>Search all repository references and update maintained examples. Remove the alias only in a declared breaking release or after the documented migration window.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p></div>
+<p><strong>Verify:</strong> Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p></div>
       </section>
 
 
@@ -1253,16 +1253,16 @@ merely ran is not evidence of mastery.</code></pre></div>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize behavior-preserving refactoring, seams, tests, and compatibility review. Use exactly these maintained learner materials:
@@ -1290,7 +1290,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1401,18 +1401,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

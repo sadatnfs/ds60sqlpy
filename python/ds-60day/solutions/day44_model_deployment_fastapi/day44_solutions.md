@@ -1,4 +1,4 @@
-# Day 44 — Solutions: Model Deployment Basics with FastAPI
+# Day 44: Solutions: Model Deployment Basics with FastAPI
 
 We train and save a model (joblib), build a minimal FastAPI endpoint to serve predictions, and test it with curl. We then add small improvements: input validation and class name mapping.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Train and save model
+Worked reference for Exercise 1; Train and save model
 ```python
 from sklearn.datasets import load_iris
 from sklearn.linear_model import LogisticRegression
@@ -35,7 +35,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — Minimal FastAPI endpoint
+Worked reference for Exercise 2; Minimal FastAPI endpoint
 Create `artifacts/day44/app.py`:
 ```python
 from typing import Annotated
@@ -68,7 +68,7 @@ python -m uvicorn app:app --app-dir artifacts/day44 --reload
 
 ---
 
-Worked reference for Exercise 3 — Test with curl; handle bad inputs
+Worked reference for Exercise 3; Test with curl; handle bad inputs
 ```bash
 # OK request
 curl -s -X POST http://127.0.0.1:8000/predict \
@@ -128,7 +128,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Add input validation and friendly error behavior.
 
@@ -138,9 +138,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
+**Verify:** Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Return the class name as well as the numeric class identifier.
 
@@ -150,21 +150,21 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
+**Verify:** Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Create a minimal runtime dependency file for this API.
 
-**How to reason about it:** A runtime dependency list contains direct imports needed to load the artifact and serve requests—not the entire notebook environment. Build and smoke-test it in a clean environment.
+**How to reason about it:** A runtime dependency list contains direct imports needed to load the artifact and serve requests, not the entire notebook environment. Build and smoke-test it in a clean environment.
 
 Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
+**Verify:** Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
-### Exercise 4 — Boundary-case testing
+### Exercise 4: Boundary-case testing
 
 **Prompt:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
 
@@ -182,9 +182,9 @@ probability range, class mapping, and model version.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
+**Verify:** Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
 
-### Exercise 5 — Batch contract
+### Exercise 5: Batch contract
 
 **Prompt:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
 
@@ -202,9 +202,9 @@ but requires a more complex, versioned response contract.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
+**Verify:** Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
 
-### Exercise 6 — Artifact-compatibility check
+### Exercise 6: Artifact-compatibility check
 
 **Prompt:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
 
@@ -222,4 +222,4 @@ and controlled storage are security boundaries.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.
+**Verify:** Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.

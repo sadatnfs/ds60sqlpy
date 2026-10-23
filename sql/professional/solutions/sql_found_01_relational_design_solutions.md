@@ -1,4 +1,4 @@
-# SQL-FOUND-01 Solutions — Relational Design
+# SQL-FOUND-01 Solutions: Relational Design
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 It creates `pro_relational_lab` inside a transaction and rolls it back.
 
-## Exercise 1 — Translate requirements into DDL
+## Exercise 1: Translate requirements into DDL
 
 The grain is **one maintenance visit for one physical equipment item**. An item
 can have many visits, while each visit names exactly one item, so the foreign
@@ -105,7 +105,7 @@ calendar-day difference. Returning zero for an open visit would falsely make
 - **Expected result/shape:** For sql-found-01 Exercise 1, expected output: a successful `CREATE TABLE` command tag followed by catalog evidence for one identity primary key, one item foreign key, nonblank and nonnegative checks, completion-order logic, nullable uniqueness, the `opened_on` default, and stored `service_days` that remains NULL until completion.
 - **Independent verification:** For sql-found-01 Exercise 1, assert the catalog definitions rather than generated constraint names, execute one accepted visit and rejected cost/date/foreign-key cases with their SQLSTATE classes, and confirm the final rollback removes `pro_relational_lab`.
 
-## Exercise 2 — Prove an invalid cost is rejected
+## Exercise 2: Prove an invalid cost is rejected
 
 The solution inserts one valid completed visit, then attempts a negative cost
 inside an exception-catching test block. Catching `check_violation` keeps the
@@ -114,8 +114,8 @@ exception if the insert ever succeeds, so weakening or removing the constraint
 causes the test to fail.
 
 An application should still validate cost early for a helpful user experience,
-but the database constraint is the final invariant because every writer—not
-only that application—must obey it.
+but the database constraint is the final invariant because every writer, not
+only that application, must obey it.
 
 ### Reasoning and verification
 
@@ -123,7 +123,7 @@ only that application—must obey it.
 - **Expected result/shape:** For sql-found-01 Exercise 2, expected output: exactly one returned valid visit with `cost = 28.50`; the invalid attempt emits the expected check-violation notice and contributes no visit row.
 - **Independent verification:** For sql-found-01 Exercise 2, compare the returned `item_id` with the independently selected `AUD-001` key, count exactly one `VISIT-100` row, and prove the negative-cost target count remains zero after SQLSTATE `23514` is caught.
 
-## Exercise 3 — NULL uniqueness
+## Exercise 3: NULL uniqueness
 
 Two rows with `external_reference IS NULL` succeed under an ordinary `UNIQUE`
 constraint. The database does not infer that the two unknown references are the
@@ -146,7 +146,7 @@ unique.
 - **Expected result/shape:** For sql-found-01 Exercise 3, expected output: exactly three visits in the supplied solution state, exactly two with NULL external references, and ordinary uniqueness with `indnullsnotdistinct = false`; PostgreSQL 15+ `UNIQUE NULLS NOT DISTINCT` is the stated alternative policy.
 - **Independent verification:** For sql-found-01 Exercise 3, assert the two NULL rows both survive, retry a duplicate non-NULL `VISIT-100` and record SQLSTATE `23505`, and explain that changing to `NULLS NOT DISTINCT` would permit at most one NULL.
 
-## Exercise 4 — Deliberate denormalization
+## Exercise 4: Deliberate denormalization
 
 `daily_fee_at_checkout` is deliberate denormalization. The normalized current
 fee belongs to the equipment item, but a historical loan must preserve the fee
@@ -170,7 +170,7 @@ reselects the loan to show that its quoted 12.00 remains unchanged.
 - **Expected result/shape:** For sql-found-01 Exercise 4, expected output: one loan row showing current fee 15.00 and preserved checkout fee 12.00, followed by one classification row with `attribute_name`, `classification`, `invariant`, and `historical_question`.
 - **Independent verification:** For sql-found-01 Exercise 4, change the equipment item's current fee and compare both values; assert the historical `daily_fee_at_checkout` remains unchanged while the catalog fee changes.
 
-## Exercise 5 — Providers, technicians, and assignments
+## Exercise 5: Providers, technicians, and assignments
 
 Use one row per provider, one row per technician, and one row per
 visit/technician assignment. A provider-to-technician relationship may be
@@ -193,7 +193,7 @@ would recreate the update anomaly normalization is meant to remove.
 - **Expected result/shape:** For sql-found-01 Exercise 5, expected output: a four-row grain map (`providers`, `technicians`, `visit_providers`, `visit_technicians`) followed by two assignment rows with `visit_id`, `provider_name`, `technician_id`, and `technician_name`.
 - **Independent verification:** For sql-found-01 Exercise 5, inspect primary and foreign keys, assert one provider assignment and two distinct technician assignments for `VISIT-100`, and prove a duplicate `(visit_id, technician_id)` is rejected.
 
-## Exercise 6 — Preserve equipment with no loans
+## Exercise 6: Preserve equipment with no loans
 
 Start from `equipment_items`, LEFT JOIN `loans`, and aggregate by item. Put a
 loan-side time filter in the `ON` clause when equipment with no qualifying loan
@@ -210,7 +210,7 @@ tie-break; a date alone does not impose a total order.
 - **Expected result/shape:** For sql-found-01 Exercise 6, expected output: one row per equipment item with columns `item_id`, `asset_tag`, `loan_count`, and `latest_checkout`, ordered by `asset_tag, item_id`; never-loaned items show zero and NULL.
 - **Independent verification:** For sql-found-01 Exercise 6, assert output row count equals equipment-item count, `AUD-001` has one loan, and `TOL-001` has zero with NULL latest checkout; move a loan-side date predicate between `ON` and `WHERE` and record the preservation difference.
 
-## Exercise 7 — Referential deletion policy
+## Exercise 7: Referential deletion policy
 
 The executable answer inventories all eight implemented foreign keys. Links
 from categories to equipment, members/equipment to loans, equipment to
@@ -230,7 +230,7 @@ parent and the column were deliberately nullable.
 - **Expected result/shape:** For sql-found-01 Exercise 7, expected output: eight rows with `relationship`, `expected_action`, `actual_action`, `drift_status`, and `rationale`; category, borrower, equipment, provider, and technician identities use `RESTRICT`, parentless visit-assignment bridges use `CASCADE`, and every row reports `matches`.
 - **Independent verification:** For sql-found-01 Exercise 7, require all eight expected relationships exactly once, compare actions with `pg_get_constraintdef`, attempt one protected parent deletion to observe a foreign-key violation, and verify deleting a disposable visit removes only its dependent assignment rows.
 
-## Exercise 8 — Catalog-level contract
+## Exercise 8: Catalog-level contract
 
 Join `pg_constraint`, `pg_class`, `pg_namespace`, and `pg_attribute`, and inspect
 constraint type plus `pg_get_constraintdef`. Inspect `pg_attribute.attgenerated`

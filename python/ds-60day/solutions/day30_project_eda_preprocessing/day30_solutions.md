@@ -1,4 +1,4 @@
-# Day 30 — Solutions: Project — EDA and Preprocessing
+# Day 30: Solutions: Project; EDA and Preprocessing
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ or time leakage.
 For this lesson's **a restartable EDA and preprocessing project with an auditable evidence chain** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–5 — Worked answers
+## Exercises 1–5: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** **Load and scope:** choose a local, constructed, or already-cached dataset and record source/provenance, license if applicable, row grain, keys, shape, time range, analytical question, and measurable acceptance criteria. **Expected behavior:** a fresh-kernel run can recreate the same raw profile without hidden state or network access. **Verify:** assert expected columns and key/time bounds before continuing.
 
@@ -80,7 +80,7 @@ reproduce the same four raw rows without hidden files or network state.
 
 **Verification evidence:** assert expected columns and key/time bounds before continuing.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** **Explore:** analyze quality, distributions, missingness, duplicates, relationships, correlations, and relevant segments. **Constraints:** pair every table/plot with evidence, sample size/denominator, and a caveat; do not treat correlation as causation. **Verify:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
 
@@ -140,7 +140,7 @@ that review instead of silently skipping it.
 
 **Verification evidence:** every stated finding points to a reproducible calculation or plot and leakage-prone fields are excluded.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** **Clean and transform:** implement `clean(raw)` that returns a new DataFrame and records each decision's evidence, action, rationale, validation, and impact. **Constraints:** preserve raw data, avoid broad silent row dropping, and split before fitting learned transforms if a target exists. **Verify:** test idempotence where promised and reconcile row/entity counts plus key totals.
 
@@ -184,7 +184,7 @@ assert cleaned["amount"].isna().sum() == 1
 
 **Verification evidence:** test idempotence where promised and reconcile row/entity counts plus key totals.
 
-### Exercise 4 — worked answer
+### Exercise 4: worked answer
 
 **Learner contract:** **Validate:** apply the Day 29 schema to the actual final cleaned DataFrame before output. **Expected behavior:** one valid fixture passes and a deliberately invalid fixture proves an important rule blocks progress. **Constraint:** do not catch and discard the validation failure. **Verify:** assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.
 
@@ -223,7 +223,7 @@ evidence and never reaches the output code.
 
 **Verification evidence:** assert the invalid fixture raises the named validation error and no output file exists; then assert the valid frame passes, the save runs, and the expected nonempty file exists.
 
-### Exercise 5 — worked answer
+### Exercise 5: worked answer
 
 **Learner contract:** **Save and report:** write cleaned data and figures under an ignored `artifacts/day30/` path plus a manifest containing source, timestamp/version policy, row count, schema result, and file list. **Constraints:** handle an empty clean dataset as a blocked project, reopen outputs, and summarize findings, limitations, and lessons learned. **Verify:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
 
@@ -292,9 +292,9 @@ assert set(manifest["files"]) == {
 
 **Verification evidence:** saved/reloaded shape, schema, and key totals match the validated in-memory frame.
 
-## Exercises 6–10 — Expanded mastery answers
+## Exercises 6–10: Expanded mastery answers
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Prediction:** Before loading data, write the analytical question, row grain, entity keys, expected time range, and acceptance criteria. Predict one failure. **Progressive hint:** A declared expectation turns a surprise into a testable discrepancy. **Verify:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
 
@@ -302,7 +302,7 @@ assert set(manifest["files"]) == {
 
 **Evidence to locate in the grouped implementation:** Save the written contract before loading, then assert the raw profile against keys/time/schema and record whether the predicted failure actually occurred.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Tracing:** Trace row count, unique entity count, missing target count, and an additive total across raw, cleaned, validated, and saved boundaries. **Progressive hint:** Every material change needs a reason and reconciliation. **Verify:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
 
@@ -310,7 +310,7 @@ assert set(manifest["files"]) == {
 
 **Evidence to locate in the grouped implementation:** Build a four-boundary reconciliation table and assert every row/entity/missing/total change has an explicit reason; reopen saved data for the final row.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Implementation:** Implement a structured decision log entry containing evidence, action, rationale, validation, and impact. **Progressive hint:** Make decisions data, not scattered comments. **Verify:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
 
@@ -318,7 +318,7 @@ assert set(manifest["files"]) == {
 
 **Evidence to locate in the grouped implementation:** Validate that each decision entry contains evidence, action, rationale, validation, and impact and links to a reproducible count/test.
 
-### Exercise 9 — answer contract
+### Exercise 9: answer contract
 
 **Learner contract:** **Debugging:** Repair a notebook that depends on out-of-order state and overwrites its raw frame during cleaning. **Progressive hint:** Put parameters/imports first and make `clean(raw)` return a copy. **Verify:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
 
@@ -326,7 +326,7 @@ assert set(manifest["files"]) == {
 
 **Evidence to locate in the grouped implementation:** Restart and run top to bottom; assert `raw` remains unchanged, `clean(raw)` returns a copy, and no cell requires a later-created name.
 
-### Exercise 10 — answer contract
+### Exercise 10: answer contract
 
 **Learner contract:** **Edge case and explanation:** Prevent target/time leakage, handle an empty cleaned dataset, and write an artifact manifest with source, row count, schema result, and version. **Progressive hint:** Block artifact creation when acceptance criteria fail. **Verify:** Use leakage and empty-data fixtures to prove artifact creation is blocked; for a valid run, assert manifest source/count/schema/version match reopened files.
 
@@ -338,13 +338,13 @@ assert set(manifest["files"]) == {
 
 Build a restartable evidence chain: question and provenance → raw checks → decisions → clean data → validation → artifacts → limitations.
 
-### Shared implementation for Exercises 6–7 — Define and reconcile the analytical unit
+### Shared implementation for Exercises 6–7: Define and reconcile the analytical unit
 
 Record the question and grain before inspection. At each boundary, compare row
 count, unique IDs, missing critical values, and additive totals. A difference
 is acceptable only when a decision record explains and validates it.
 
-### Shared implementation for Exercises 8–10 — Structured decisions and artifact acceptance
+### Shared implementation for Exercises 8–10: Structured decisions and artifact acceptance
 
 ```python
 from __future__ import annotations

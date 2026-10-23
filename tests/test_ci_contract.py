@@ -43,6 +43,12 @@ def test_core_workflow_runs_every_generated_curriculum_gate() -> None:
 
     required_commands = (
         "scripts/build_catalog.py",
+        "scripts/check_public_release.py",
+        "scripts/check_published_links.py",
+        "scripts/normalize_lesson_prose.py",
+        "scripts/check_content_rendering.py",
+        "scripts/check_modules.py",
+        "scripts/check_classroom_ui.mjs",
         "scripts/audit_practice.py --write-report",
         "scripts/audit_lesson_depth.py --write-report",
         "scripts/build_course_guide.py --check",
@@ -90,3 +96,50 @@ def test_advanced_imports_are_manual_or_scheduled_and_cross_platform() -> None:
     assert "run: brew install libomp" in advanced_job
     assert "uv sync --frozen --all-extras" in advanced_job
     assert "scripts/check_advanced_imports.py" in advanced_job
+
+
+def test_ci_installs_renderer_before_sql_or_starter_checks() -> None:
+    workflow = WORKFLOW.read_text(encoding="utf-8")
+    postgres = workflow.split("  postgres:", maxsplit=1)[1].split("  advanced-imports:")[0]
+    assert postgres.index("uv sync --frozen") < postgres.index("scripts/course.py sql")
+    assert "DS60_TEST_DATABASE_URL:" in postgres
+    assert "DS60_SQL_EXPANSION_TEST_URL:" in postgres
+    assert "tests/test_execution.py tests/test_sql_expansion_live.py" in postgres
+    app = (WORKFLOW.parent / "app-build.yml").read_text(encoding="utf-8")
+    starter = app.split("  windows-starter:", maxsplit=1)[1].split("  native:")[0]
+    assert starter.index("uv sync --frozen") < starter.index("scripts/build_windows_starter.py")
+
+
+def test_current_docker_entrypoint_covers_every_profile_and_recreation_receipts() -> None:
+    from scripts.check_classroom_profiles import CASES
+
+    workflow = (WORKFLOW.parent / "app-build.yml").read_text(encoding="utf-8")
+    docker = workflow.split("  docker:", maxsplit=1)[1]
+    matrix = docker.split("    env:", maxsplit=1)[0]
+    assert "paths:" not in workflow
+    assert "  push:" in workflow and "  pull_request:" in workflow
+    assert "bash classroom --registry upstream --no-browser" in docker
+    assert "scripts/docker_lab.sh" not in docker
+    assert "compose.classroom.yaml" in docker
+    assert "work/runtime-receipts.json" in docker and "--check-persistence" in docker
+    assert "python-core $DS60_PROFILES" in docker
+    for profile in CASES.keys() - {"python-core"}:
+        assert profile in matrix
+    assert "--profile '*' down\n" in docker
+    assert "if: always()" in docker and "--volumes --remove-orphans" in docker
+    assert "docker system prune" not in docker and "docker image prune" not in docker
+
+
+def test_workflows_pin_actions_and_install_node_explicitly() -> None:
+    import re
+
+    for path in WORKFLOW.parent.glob("*.yml"):
+        workflow = path.read_text(encoding="utf-8")
+        for action in re.findall(r"uses:\s+(\S+)", workflow):
+            assert re.fullmatch(r"[\w.-]+/[\w.-]+@[0-9a-f]{40}", action), action
+        assert "contents: read" in workflow and "persist-credentials: false" in workflow
+    core = WORKFLOW.read_text(encoding="utf-8")
+    assert "actions/setup-node@" in core
+    assert 'node-version: "24"' in core
+    assert "pytest -n 4 --dist loadgroup" in core
+    assert "--basetemp=work/test-tmp" in core

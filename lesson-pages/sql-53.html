@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-53-data-warehouse-project-part-2-scd-type-2">Day 53 — Data Warehouse Project, Part 2: SCD Type 2<a class="heading-anchor" href="#guide--day-53-data-warehouse-project-part-2-scd-type-2" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-53-data-warehouse-project-part-2-scd-type-2">Day 53: Data Warehouse Project, Part 2: SCD Type 2<a class="heading-anchor" href="#guide--day-53-data-warehouse-project-part-2-scd-type-2" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> Run and verify committed <a href="sql-52.html#guide">Day 52 — star-schema warehouse</a> in the same database.</li>
+<li><strong>Prerequisites:</strong> Run and verify committed <a href="sql-52.html#guide">Day 52; star-schema warehouse</a> in the same database.</li>
 <li><strong>Artifacts:</strong> <a href="sql-53.html#learner">learner SQL</a> · <a href="sql-53.html#solution-1">solution reasoning</a> · <a href="sql-53.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-53 — Project3 DWH Part2 SCD</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-53; Project3 DWH Part2 SCD</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-53/lesson/workspace/sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -459,11 +459,11 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is SCD Type 2, Business key, Validity interval. Its worked SQL reads or creates <code>training.customers</code>, <code>dim_customer</code>, <code>training.products</code>, <code>dim_product</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
-<p>The worked walkthrough&#x27;s lesson-specific task is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key—not zero and not two. The first runnable example has a concrete contract: Example 1 returns one row per <code>customer_id</code>, <code>full_name</code>, and <code>country</code>, capped at 10 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code> from <code>training.customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code>. Reselect the returned key columns from <code>training.customers</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
+<p>The worked walkthrough&#x27;s lesson-specific task is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two. The first runnable example has a concrete contract: Example 1 returns one row per <code>customer_id</code>, <code>full_name</code>, and <code>country</code>, capped at 10 rows with columns <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code> from <code>training.customers</code>. Compare the key set and row count with a simpler control over the same filter/window; inspect <code>NULL</code> versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is <code>customer_id</code>, <code>full_name</code>, <code>country</code>, and <code>segment</code>. Reselect the returned key columns from <code>training.customers</code>, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
 <p>These are answer-free worked excerpts from <code>sql/postgres-60day/day53_project3_dwh_part2_scd.sql</code>. Run the complete file through the guided notebook or <code>psql</code> because setup and transaction context can matter.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
@@ -518,7 +518,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Validity interval:</strong> the dates or timestamps for which one version applies.</li>
 </ul>
 <h4 id="guide--worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#guide--worked-example-walkthrough" aria-label="Link to this section">#</a></h4>
-<p>For one changed customer, locate exactly one current row, set its <code>valid_to</code> to the day before the new version, and insert the successor at <code>CURRENT_DATE</code>. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key—not zero and not two.</p>
+<p>For one changed customer, locate exactly one current row, set its <code>valid_to</code> to the day before the new version, and insert the successor at <code>CURRENT_DATE</code>. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <p>Complete these in the <a href="sql-53.html#learner">learner SQL</a>:</p>
 <ol>
@@ -544,7 +544,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Does temporal fact mapping preserve the source fact count exactly?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue in the same database to <a href="sql-54.html#guide">Day 54 — warehouse aggregates</a>.</p>
+<p>Continue in the same database to <a href="sql-54.html#guide">Day 54; warehouse aggregates</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <h4 id="guide--project-focus">Project focus<a class="heading-anchor" href="#guide--project-focus" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -571,8 +571,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Audit defaults cover inserts but do not explain update actors; set them on close operations too.</li>
 <li>The course uses date-grain validity. Timestamp-effective changes require a different boundary model.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-53 — Project3 DWH Part2 SCD.
 
 I have completed the direct catalog prerequisite: `sql-52`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -813,7 +813,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys">Day 53 Solutions — SCD Type 2 and Temporal Fact Keys<a class="heading-anchor" href="#solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys">Day 53 Solutions: SCD Type 2 and Temporal Fact Keys<a class="heading-anchor" href="#solution-1--day-53-solutions-scd-type-2-and-temporal-fact-keys" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -823,7 +823,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
   -f sql/postgres-60day/solutions/day53_solutions.sql</code></pre>
 <p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
 <h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
-<p>The lesson&#x27;s main concepts are SCD Type 2, Business key, Validity interval. Its worked-model focus is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key—not zero and not two.</p>
+<p>The lesson&#x27;s main concepts are SCD Type 2, Business key, Validity interval. Its worked-model focus is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.</p>
 <ul>
 <li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
 <li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
@@ -834,7 +834,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>Run <a href="sql-52.html#solution-2"><code>day52_solutions.sql</code></a> first in the same database. Day 53 reads that committed <code>dwh</code> state but wraps its own changes in a transaction and rolls them back. The full answer is <a href="sql-53.html#solution-2"><code>day53_solutions.sql</code></a>.</p>
-<h4 id="solution-1--exercise-1-resolve-dimension-versions-by-fact-date">Exercise 1 — Resolve dimension versions by fact date<a class="heading-anchor" href="#solution-1--exercise-1-resolve-dimension-versions-by-fact-date" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-resolve-dimension-versions-by-fact-date">Exercise 1: Resolve dimension versions by fact date<a class="heading-anchor" href="#solution-1--exercise-1-resolve-dimension-versions-by-fact-date" aria-label="Link to this section">#</a></h4>
 <p>The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
@@ -877,7 +877,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-53 Exercise 1, the chosen form is justified by this lesson-specific rationale: The exercise requires the customer and product surrogate keys whose validity intervals contain each source order date. Evaluate another form against the concrete expected result (one row per <code>order_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-2-audit-columns">Exercise 2 — Audit columns<a class="heading-anchor" href="#solution-1--exercise-2-audit-columns" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-audit-columns">Exercise 2: Audit columns<a class="heading-anchor" href="#solution-1--exercise-2-audit-columns" aria-label="Link to this section">#</a></h4>
 <p>Inside the Day 53 transaction, the answer adds:</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> dwh<span class="syntax-punctuation">,</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
@@ -910,7 +910,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Audit defaults cover inserts, not meaningful update actors; set audit values explicitly when closing versions.</li>
 <li>Do not run this before Day 52; the executable file raises a clear exception if <code>dwh.dim_customer</code> is absent.</li>
 </ul>
-<h4 id="solution-1--exercise-3-diagnose-same-day-changes">Exercise 3 — Diagnose same-day changes<a class="heading-anchor" href="#solution-1--exercise-3-diagnose-same-day-changes" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-diagnose-same-day-changes">Exercise 3: Diagnose same-day changes<a class="heading-anchor" href="#solution-1--exercise-3-diagnose-same-day-changes" aria-label="Link to this section">#</a></h4>
 <p>Inclusive DATE ranges cannot order two changes on one day without overlap or an invalid close-before-open interval. The answer surfaces invalid ranges.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -922,7 +922,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-53 Exercise 3, the chosen form is justified by this lesson-specific rationale: Inclusive DATE ranges cannot order two changes on one day without overlap or an invalid close-before-open interval. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row for which <code>(customer_id = 1)</code> is true and one for which it is false; verify only the matching <code>customer_id</code> value is returned.</li>
 </ul>
-<h4 id="solution-1--exercise-4-detect-overlapping-versions">Exercise 4 — Detect overlapping versions<a class="heading-anchor" href="#solution-1--exercise-4-detect-overlapping-versions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-detect-overlapping-versions">Exercise 4: Detect overlapping versions<a class="heading-anchor" href="#solution-1--exercise-4-detect-overlapping-versions" aria-label="Link to this section">#</a></h4>
 <p>The self-join compares each customer-version pair once and applies the inclusive overlap condition. Any row can map one fact date to multiple surrogates.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -934,8 +934,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-53 Exercise 4, the chosen form is justified by this lesson-specific rationale: The self-join compares each customer-version pair once and applies the inclusive overlap condition. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>customer_id</code>; verify the result gains exactly one row carrying that <code>customer_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-5-gate-unchanged-reruns">Exercise 5 — Gate unchanged reruns<a class="heading-anchor" href="#solution-1--exercise-5-gate-unchanged-reruns" aria-label="Link to this section">#</a></h4>
-<p><code>IS DISTINCT FROM</code> compares nullable attributes safely. The replay must use the same staged desired state that produced the new version—not the unchanged base table—otherwise the deliberate segment change looks like a new change again.</p>
+<h4 id="solution-1--exercise-5-gate-unchanged-reruns">Exercise 5: Gate unchanged reruns<a class="heading-anchor" href="#solution-1--exercise-5-gate-unchanged-reruns" aria-label="Link to this section">#</a></h4>
+<p><code>IS DISTINCT FROM</code> compares nullable attributes safely. The replay must use the same staged desired state that produced the new version, not the unchanged base table, otherwise the deliberate segment change looks like a new change again.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">WITH</span> desired_customer_state <span class="syntax-keyword">AS</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">SELECT</span> customer_id<span class="syntax-punctuation">,</span> full_name<span class="syntax-punctuation">,</span> country<span class="syntax-punctuation">,</span> segment
   <span class="syntax-keyword">FROM</span> staged_customer_change
@@ -959,7 +959,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-53 Exercise 5, the chosen form is justified by this lesson-specific rationale: <code>IS DISTINCT FROM</code> compares nullable attributes safely. Evaluate another form against the concrete expected result (one row per <code>customer_id</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> A duplicate <code>customer_id</code> in desired state must fail a uniqueness gate before versioning; do not let the join multiply candidate changes.</li>
 </ul>
-<h4 id="solution-1--exercise-6-define-a-same-day-policy">Exercise 6 — Define a same-day policy<a class="heading-anchor" href="#solution-1--exercise-6-define-a-same-day-policy" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-define-a-same-day-policy">Exercise 6: Define a same-day policy<a class="heading-anchor" href="#solution-1--exercise-6-define-a-same-day-policy" aria-label="Link to this section">#</a></h4>
 <p>Half-open <code>tstzrange</code> examples show how effective timestamps can order changes. They require trustworthy source effective time or sequence, not load-time guesswork.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1156,16 +1156,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-53 — Project3 DWH Part2 SCD.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-53 — Project3 DWH Part2 SCD.
 
 I have completed the direct catalog prerequisite: `sql-52`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day53_project3_dwh_part2_scd.md
@@ -1192,7 +1192,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1303,18 +1303,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

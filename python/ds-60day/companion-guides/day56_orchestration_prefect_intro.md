@@ -1,4 +1,4 @@
-# Day 56 — Orchestration with Prefect 3
+# Day 56: Orchestration with Prefect 3
 
 **Lesson ID:** `python-56` · **Level:** advanced · **Dependencies:** `production` · **Network:** first-run Seaborn cache
 
@@ -133,7 +133,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — observable task boundaries, retries, caching, and idempotent orchestration
+## Concept deep dive: observable task boundaries, retries, caching, and idempotent orchestration
 
 ### The mental model
 
@@ -160,7 +160,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — derive an idempotent local output identity
+### Focused example A: derive an idempotent local output identity
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -182,7 +182,7 @@ assert key in output_path
 
 **Assumption to name:** The key includes every input that changes result meaning, including data and code/version identity where needed.
 
-### Focused example B — separate retryable from permanent failures
+### Focused example B: separate retryable from permanent failures
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -231,16 +231,16 @@ assert decisions == [True, True, False]
 
 1. Add `test_size` and `random_state` parameters to the training flow.
 
-**Verify:** Practice 1 — observable task boundaries, retries, caching, and idempotent orchestration — run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
+**Verify:** Practice 1; observable task boundaries, retries, caching, and idempotent orchestration; run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
 2. Split the training task into separate train and evaluate tasks with explicit
    outputs.
 
-**Verify:** Practice 2 — observable task boundaries, retries, caching, and idempotent orchestration — make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
+**Verify:** Practice 2; observable task boundaries, retries, caching, and idempotent orchestration; make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
 3. Explore the optional local Prefect UI and scheduling basics.
 
-**Verify:** Practice 3 — observable task boundaries, retries, caching, and idempotent orchestration — either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
+**Verify:** Practice 3; observable task boundaries, retries, caching, and idempotent orchestration; either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
 ### Progressive hints
 
@@ -249,7 +249,7 @@ assert decisions == [True, True, False]
 2. Return the fitted pipeline plus held-out arrays or a small typed result.
    Consider whether passing a large dataset between task processes would scale.
 3. First prove `training_flow()` succeeds directly. Then run a local server and
-   use Prefect 3's current `serve`/deployment workflow—not commands copied from
+   use Prefect 3's current `serve`/deployment workflow, not commands copied from
    older major versions.
 
 The separate solution reinforces retry, notification, and scheduling concepts.
@@ -266,17 +266,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Retry and idempotence:** Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.
    **Progressive hint:** Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.
 
-**Verify:** Retry and idempotence — inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
+**Verify:** Retry and idempotence; inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
 
 5. **Cache-key design:** Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.
    **Progressive hint:** Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.
 
-**Verify:** Cache-key design — print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
+**Verify:** Cache-key design; print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
 
 6. **Failure observability:** Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.
    **Progressive hint:** Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.
 
-**Verify:** Failure observability — capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.
+**Verify:** Failure observability; capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -310,12 +310,12 @@ late-run handling, alerts, backfills, retention, and recovery tests.
 - Work in the [Day 56 learner notebook](../notebooks/day56_orchestration_prefect_intro.ipynb).
 - Then consult the
   [Day 56 solution](../solutions/day56_orchestration_prefect_intro/day56_solutions.md).
-- Continue to [Day 57 — Security, Privacy, and Ethics](day57_security_privacy_ethics.md).
+- Continue to [Day 57; Security, Privacy, and Ethics](day57_security_privacy_ethics.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-56` — Day 56 — Orchestration with Prefect 3.

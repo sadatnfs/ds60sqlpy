@@ -162,77 +162,145 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>docs/implementation/ADDING_A_MODULE.md</code></p>
     </header>
     <article class="document"><h2 id="add-or-extend-a-learning-module">Add or extend a learning module<a class="heading-anchor" href="#add-or-extend-a-learning-module" aria-label="Link to this section">#</a></h2>
-<p>The public learner shell is <code>/classroom</code> for all fourteen current subjects. Register a new subject in that same home and workspace with a distinct theme and a visible text label. Preserve IDs and progress; do not add a separate public application. The shared <a href="../content-authoring.md.html">content-authoring contract</a> requires explicit LaTeX mathematics and correctly tagged code fences. Native commands and design previews remain optional developer or compatibility tools.</p>
-<p>Read the <a href="CHECKPOINT.md.html">checkpoint</a> and <a href="../expansion/architecture.md.html">expansion architecture</a> first. Reuse one existing runtime when it fits. A new subject, a new lesson and a new execution backend are separate changes, with separate acceptance evidence.</p>
-<h3 id="add-a-lesson-to-an-existing-subject">Add a lesson to an existing subject<a class="heading-anchor" href="#add-a-lesson-to-an-existing-subject" aria-label="Link to this section">#</a></h3>
-<ol>
-<li>Read <code>courses/&lt;track&gt;/AGENTS.md</code>. Add the complete prerequisite-aware plan entry in its existing <code>docs/expansion/plans/</code> plan or additive <code>courses/&lt;track&gt;/track.json</code>, retaining a stable lesson ID.</li>
-<li>Author a substantial guide, learner source or worksheet, separate executable solution and explanation, and deterministic small fixtures. Define vocabulary, explain the mechanism, show worked examples, and progress from observation to repair and transfer. Do not use an empty heading or a task list as a lesson.</li>
-<li>Register only completed content in <code>courses/&lt;track&gt;/lessons.json</code>. Copy an existing record&#x27;s schema: ID, authored status, language, fixed runtime profile, guide/source/solution paths and optional registered verification ID. Keep paths inside that course and exclude credentials, downloads and shell text.</li>
-<li>Use <code>reading</code> plus <code>markdown</code> for a theory worksheet that needs no execution. Use a curated language variant only when the same learning objective has a separately authored implementation. <code>spark-013@pyspark</code> demonstrates separate saved pads while retaining one canonical lesson count.</li>
-<li>Add meaningful correctness and misconception tests. Run <code>check_modules.py</code>, the teaching depth/practice checks used by the subject, its reference code, the affected verifier and the actual prepared worker. Printed success text is not a verifier. Execution success does not certify learner understanding.</li>
-<li>Regenerate the preview and HTML readers, then test the real browser guide, source, explicit solution reveal, save/reload and result rendering. Planned prerequisites must remain visibly planned until their complete content exists.</li>
-</ol>
-<p>The module manifest cannot contain a run command, endpoint, compiler flag or arbitrary file path. <code>ModuleCatalog</code> validates curated file ownership, suffixes, source limits and profile/language compatibility. Reads revalidate paths. <code>ModuleState</code> preserves drafts in the host learning directory and never rewrites the original progress file or the learner source in <code>courses/</code>.</p>
-<h3 id="add-a-subject-or-execution-backend">Add a subject or execution backend<a class="heading-anchor" href="#add-a-subject-or-execution-backend" aria-label="Link to this section">#</a></h3>
-<p>New subject routes use <code>courses/&lt;track&gt;/track.json</code> with schema version 1, ID matching the directory, title, summary and lesson rows. Each row supplies a stable ID, title, stage, duration, prerequisites, one registered runtime, concepts, outcome, lab description and verification explanation. The loader checks all three stages and the combined prerequisite graph. These are metadata, not commands. Authored file admission still uses <code>lessons.json</code> and the exact reviewed schema. New subjects appear in the UI and read-only MCP discovery without editing a second subject list.</p>
-<p>The statistics book uses <code>courses/statistics-ml/manifest.json</code> and tutorial mode. Its complete chapter/example pairs are exposed directly, with no exams, problem sets, verifier or solution gate. Its manual read marker records reading only. The exact source outline and method coverage index remain separately auditable.</p>
-<p>Do not assume adding a JSON file enables arbitrary languages. New execution backends still require updating and testing these deliberate gates:</p>
+<p>New subjects belong in the existing <code>/classroom</code> home and workspace. Content, runtime execution and presentation have separate contracts. Reuse a prepared runtime when it fits and preserve stable IDs and progress. Read the <a href="../content-authoring.md.html">content contract</a>, <a href="../curriculum-extension-playbook.md.html">extension playbook</a> and closest subject <code>AGENTS.md</code> before editing. The authoring skill provides the repeatable contributor workflow.</p>
+<h3 id="route-metadata-and-authored-admission">Route metadata and authored admission<a class="heading-anchor" href="#route-metadata-and-authored-admission" aria-label="Link to this section">#</a></h3>
+<p>For a new subject, <code>courses/&lt;subject&gt;/track.json</code> uses schema version 1, an ID matching its directory, a title, a summary and <code>lessons</code>. Each lesson row has:</p>
 <div class="table-wrap"><table><thead><tr>
-<th>Layer</th>
-<th>Implementation</th>
+<th>Field</th>
+<th>Meaning</th>
 </tr></thead><tbody>
 <tr>
-<td>Planned route and prerequisite graph</td>
-<td><code>journey_design.py</code> for the original five designs; <code>module_extensions.py</code> for additive subjects and tutorial books</td>
+<td><code>id</code></td>
+<td>Unique stable ID ending in a three-digit suffix, such as <code>java-001</code></td>
 </tr>
 <tr>
-<td>Authored file admission</td>
-<td><code>modules.py</code>: languages, profile pairs, verifiers and manifests</td>
+<td><code>title</code>, <code>level</code>, <code>minutes</code></td>
+<td>Learner title, <code>beginner</code>/<code>intermediate</code>/<code>advanced</code>, bounded estimate</td>
 </tr>
 <tr>
-<td>App-to-worker routing</td>
-<td><code>module_jobs.py</code>: fixed <code>SERVICES</code> and endpoint validation</td>
+<td><code>prerequisites</code></td>
+<td>Existing stable lesson IDs, with no duplicates or graph cycles</td>
 </tr>
 <tr>
-<td>Worker operation</td>
-<td><code>worker_operations.py</code>: fixed <code>PROFILES</code>, argv, preparation and typed verifier</td>
+<td><code>runtime</code></td>
+<td>A registered profile name, including <code>reading</code> when appropriate</td>
+</tr>
+<tr>
+<td><code>concepts</code></td>
+<td>Searchable, nonempty concept labels</td>
+</tr>
+<tr>
+<td><code>outcome</code>, <code>lab</code>, <code>verification</code></td>
+<td>Observable learning goal, concrete task and expected evidence</td>
+</tr>
+</tbody></table></div>
+<p>The additive loader requires a route to cover all three stages. A partial proposal belongs in design documentation until its complete route is ready; do not pad the plan with meaningless entries to satisfy validation. Plan rows can describe not-yet-authored work, but only complete authored bundles may enter <code>lessons.json</code>. Learners must be able to distinguish planned from authored work.</p>
+<p>For the original Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark subjects, edit their existing <code>docs/expansion/plans/</code> metadata instead of adding a second plan. The original design graph remains a route input. Java is a useful additive example; inspect <code>courses/java/track.json</code> and <code>lessons.json</code>.</p>
+<p><code>courses/&lt;subject&gt;/lessons.json</code> has <code>schema_version</code>, <code>track_id</code> and <code>lessons</code>. Each admitted practice record has exactly these fields:</p>
+<pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
+  <span class="syntax-tag">&quot;id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java-001&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;status&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;authored&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;language&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;runtime_profile&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;java21&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;guide_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/java/guides/java-001.md&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;source_path&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;courses/java/lessons/java-001.java&quot;</span><span class="syntax-punctuation">,</span>
+  <span class="syntax-tag">&quot;solution_paths&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span>
+    <span class="syntax-string">&quot;courses/java/solutions/java-001_solution.java&quot;</span><span class="syntax-punctuation">,</span>
+    <span class="syntax-string">&quot;courses/java/solutions/java-001_solutions.md&quot;</span>
+  <span class="syntax-punctuation">],</span>
+  <span class="syntax-tag">&quot;verification_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">null</span>
+<span class="syntax-punctuation">}</span></code></pre>
+<p>This is an existing schema example, not a command to overwrite Java content. Use actual relative paths with exact case. <code>ModuleCatalog</code> validates ownership, suffixes, size limits and registered language/profile pairs, and revalidates paths on reads. There are no command, endpoint or compiler-flag fields.</p>
+<p>A registered verifier is optional. Keep <code>verification_id: null</code> unless the trusted verifier exists and is meaningfully tested. Exit code zero or printed success text must not be presented as a behavioral verifier.</p>
+<h3 id="content-and-variants">Content and variants<a class="heading-anchor" href="#content-and-variants" aria-label="Link to this section">#</a></h3>
+<p>Keep guides, learner source, executable references, explanations and small fixtures separate. Follow the subject&#x27;s authoring sources when they exist. Define vocabulary, explain mechanisms and syntax, show worked examples, progress through distinct practice, and state expected behavior and failures. Six exercises are the ordinary module floor; quantity is not a substitute for teaching quality. Do not use empty headings or repeated task wording.</p>
+<p>A reading-only practice lesson uses <code>language: markdown</code> and <code>runtime_profile: reading</code>, plus a separate explanatory solution. It has no invented Run action. For an implementation of the same objective in another language, use the exact <code>variants</code> schema in <code>modules.py</code>. The curated <code>spark-013@pyspark</code> pattern has separate saved source and jobs while retaining one canonical lesson count. A different learning objective needs a new lesson.</p>
+<p>The statistics tutorial uses its dedicated <code>manifest.json</code> contract, exposed by <code>module_extensions.py</code>. Its chapter/example pairs are directly available, without exams, problem sets, verifiers or solution gates. Preserve its source outline and coverage identities. Adding a different tutorial book currently requires an explicit loader extension; a filename alone does not register one.</p>
+<h3 id="existing-execution-contracts">Existing execution contracts<a class="heading-anchor" href="#existing-execution-contracts" aria-label="Link to this section">#</a></h3>
+<p>Read <code>LANGUAGES</code> in <code>modules.py</code>, <code>SERVICES</code> in <code>module_jobs.py</code> and <code>PROFILES</code> in <code>worker_operations.py</code> before choosing a profile. Examples include:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Profile</th>
+<th>Artifact contract</th>
+</tr></thead><tbody>
+<tr>
+<td><code>python-core</code>, <code>tensorflow-cpu</code>, <code>llm-torch-cpu</code></td>
+<td>Python source with the profile&#x27;s prepared packages and small CPU fixtures</td>
+</tr>
+<tr>
+<td><code>cpp20</code></td>
+<td><code>main.cpp</code>, C++20, bounded compile and execution</td>
+</tr>
+<tr>
+<td><code>java21</code></td>
+<td><code>Main.java</code>, public <code>Main</code> class, no package declaration, Java 21 assertions</td>
+</tr>
+<tr>
+<td><code>javascript-node</code></td>
+<td><code>main.mjs</code> in Node; browser DOM APIs are unavailable</td>
+</tr>
+<tr>
+<td><code>typescript-node</code></td>
+<td><code>main.mts</code>, strict NodeNext checking and compilation before Node execution</td>
+</tr>
+<tr>
+<td><code>scala-jvm</code></td>
+<td><code>Main.scala</code>, <code>object Main</code> entrypoint</td>
+</tr>
+<tr>
+<td><code>spark-local-scala</code>, <code>spark-local-python</code></td>
+<td>Bounded local Spark with deterministic fixtures and explicit session cleanup</td>
+</tr>
+<tr>
+<td><code>k8s-kind</code></td>
+<td>Reviewed operations on an explicitly owned disposable cluster target</td>
+</tr>
+</tbody></table></div>
+<p>Language support is specific to the profile. Inspect the actual arguments, standard-input, file and multi-file channels before promising an interactive CLI or project build. Existing pads submit source to fixed runtime operations; package managers, custom argv and project archives are not implied. Provide a bounded supported path or clearly label a separately prepared external workflow.</p>
+<p>Do not assume external libraries, multi-file builds, package installs, a GPU or ambient credentials. Browser DOM examples need the documented browser route or reading mode, not a fake Node execution claim. Runtime readiness and actual lesson execution are separate checks.</p>
+<h3 id="add-a-backend-deliberately">Add a backend deliberately<a class="heading-anchor" href="#add-a-backend-deliberately" aria-label="Link to this section">#</a></h3>
+<p>A new execution language or external operation must update and test these boundaries as applicable:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Layer</th>
+<th>Source</th>
+</tr></thead><tbody>
+<tr>
+<td>Profile/language and verifier admission</td>
+<td><code>modules.py</code>, <code>module_extensions.py</code></td>
+</tr>
+<tr>
+<td>App routing and durable jobs</td>
+<td><code>module_jobs.py</code>, <code>module_service.py</code></td>
+</tr>
+<tr>
+<td>Fixed argv, preparation and typed checks</td>
+<td><code>worker_operations.py</code> and reviewed adapters</td>
 </tr>
 <tr>
 <td>External resource ownership</td>
-<td>A dedicated adapter, as in <code>kubernetes_module.py</code></td>
+<td>A dedicated adapter such as <code>kubernetes_module.py</code></td>
 </tr>
 <tr>
-<td>Image and resource budget</td>
-<td><code>docker/workers/</code>, an explicit Compose profile and private network</td>
+<td>Image, packages and resource budget</td>
+<td><code>docker/workers/</code>, locks and Compose profiles</td>
 </tr>
 <tr>
-<td>One-command setup</td>
-<td>Add a new ordinary runtime to the fixed profile/service mapping in <code>scripts/classroom.sh</code> and its startup-order tests; new subjects reusing a runtime need no launcher change</td>
+<td>Shared launch defaults</td>
+<td><code>scripts/classroom.sh</code> profile/service map and launcher tests</td>
 </tr>
 <tr>
-<td>Host preparation</td>
-<td>Both module launchers, local engine checks and private session handling</td>
-</tr>
-<tr>
-<td>Reader and tutor delivery</td>
-<td><code>lesson_reader.py</code>, module UI and read-only MCP module tools</td>
-</tr>
-<tr>
-<td>Portable payload</td>
-<td><code>desktop.py</code> allowlist and starter archive validation</td>
+<td>Portable packaging</td>
+<td><code>desktop.py</code>, starter archive allowlist and packaging tests</td>
 </tr>
 </tbody></table></div>
-<p>A backend needs an actual bounded readiness smoke, process isolation, compile failure behavior, shared work deadline, cancellation, descendant cleanup, output/file limits and unknown-outcome recovery. External resources additionally need explicit scope, namespace/cluster identity, ownership receipts, UID-aware cleanup and fresh bounded cleanup time. No browser or learner worker receives an engine socket, ambient kubeconfig, arbitrary host command or cloud credential.</p>
-<p>Prepare dependencies explicitly, pin the relevant toolchain and platform locks, and keep small default fixtures offline. Document which additional tasks need network access, GPUs, larger data or optional downloads. Never start those tasks as a side effect of opening a lesson. Keep container image publication separate from local build and test.</p>
-<h3 id="publication-and-honest-status">Publication and honest status<a class="heading-anchor" href="#publication-and-honest-status" aria-label="Link to this section">#</a></h3>
-<p>A lesson can be authored while a profile is unavailable. A working arm64 Docker image does not establish Linux amd64 or Windows host acceptance. Record exact image IDs, architecture, reference results, rejected misconceptions, timeout, cancellation, saved-work recovery and the platform actually tested.</p>
-<p>Keep module manifests separate from the numbered legacy catalog and preserve existing IDs and progress namespaces. Check prerequisite chains and publication gates before presenting a complete route. Update the checkpoint and owner status after each coherent batch. Future agents should resume from those files and actual receipts, rather than infer completion from the number of plan entries.</p>
-<p>Run the grouped four-worker suite after integration. Add platform-specific CI or execution rows deliberately; leave untested rows unqualified. Preserve the historical baseline, ignored learner work and unrelated services throughout.</p>
-<h3 id="one-classroom-for-future-subjects">One classroom for future subjects<a class="heading-anchor" href="#one-classroom-for-future-subjects" aria-label="Link to this section">#</a></h3>
-<p>Register the new subject in the existing catalog/module contract. The unified <code>classroom.py</code> directory derives its lessons and guide links automatically; <code>classroom.js</code> renders every subject through the same navigation, editor, reflection and result panels. Add a distinct accessible theme keyed by subject ID and verify both appearances. Do not create a separate language application.</p>
-<p>Use tagged code fences and explicit LaTeX for mathematical prose. The shared renderer typesets mathematics and highlights code without network access. Run the reviewed prose normalization pipeline after authoring generators, then the publication rendering gate before regenerating readers and packaging. A rendering change must preserve copied source characters and executable data.</p>
-<p>Choose the declared runtime and persistence adapter deliberately. Python/SQL retain their existing pads, coaching phases and context-specific run receipts; module runtimes retain saved jobs and recovery semantics. Future adapters need bounded execution and actual acceptance evidence. A syntax lexer alone is not an execution adapter. Navigation must save or retain recoverable drafts before switching lessons, languages or modes, and past-result views must never execute code or replace a current draft.</p></article>
+<p>Python filenames are under <code>src/ds60sqlpy/</code>. A new subject that reuses an existing profile does not need a new image or launcher service.</p>
+<p>Use non-shell argument arrays, controlled working directories, bounded work and cleanup deadlines, output/file limits, cancellation and descendant cleanup. Test compiler errors, invalid inputs, timeout, interrupted or unknown job outcomes and saved-work preservation. No browser or ordinary learner worker receives an engine socket, host kubeconfig or arbitrary host command.</p>
+<p>Optional external resources need exact identity and ownership, no ambient selection, and cleanup after failure. Prepare dependencies explicitly and separate offline fixtures from optional network, hardware or model assets. Never fetch dependencies merely by opening a lesson.</p>
+<h3 id="integrate-and-qualify-the-learner-experience">Integrate and qualify the learner experience<a class="heading-anchor" href="#integrate-and-qualify-the-learner-experience" aria-label="Link to this section">#</a></h3>
+<p><code>classroom.py</code> derives subjects, lessons and guide links from the loaders. <code>classroom.js</code> supplies their common interface. Add a distinct accessible theme keyed by subject ID, a visible label and both light/dark checks. Save or retain recoverable drafts before switching contexts. Viewing an earlier result must not execute code or replace current source.</p>
+<p>Use explicit LaTeX and tagged code fences. Run the subject authoring generator when relevant, then <code>python scripts/normalize_lesson_prose.py --write</code>, shared generation and the publication rendering gate. Do not hand-edit HTML or change reference code to resolve a display defect.</p>
+<p>Run <code>python scripts/check_modules.py</code>, relevant subject tests, actual reference programs and typed verifiers in the prepared runtime. Review browser guide, source, reveal, error output, variant switching and save/reload behavior. Registration changes also need read-only MCP discovery and prerequisite checks. Run the grouped suite with <code>python -m pytest -n 4 --dist loadgroup</code> after integration. See <a href="../validation.md.html">validation</a> for all release gates.</p>
+<p>When introducing a new ordinary runtime profile, add a small deterministic cataloged reference to <code>CASES</code> in <code>scripts/check_classroom_profiles.py</code> and to the container workflow&#x27;s grouped profile matrix. The check requires actual source-bound reference execution, declared typed checks and readback after container replacement without rerunning. Generic references validate their assertions and expected output; specialized typed checks are an additional contract only where registered. A subject reusing an existing runtime needs its lesson tests, not another runtime image. Native OS checks and Linux-container execution remain separate evidence.</p>
+<p>Record what ran, on which revision and platform, and what remains unverified. A configured profile, container build or one architecture&#x27;s success is not acceptance on every operating system. Preserve learning volumes and unrelated workloads when removing test resources.</p></article>
   </main>
 </body>
 </html>

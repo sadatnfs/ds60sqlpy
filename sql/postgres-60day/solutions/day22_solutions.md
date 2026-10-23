@@ -1,4 +1,4 @@
-# Day 22 solutions — Advanced Windows: Multiple Partitions, Named Windows, Exclusion
+# Day 22 solutions: Advanced Windows: Multiple Partitions, Named Windows, Exclusion
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Use a named window to show each order with customer count, average, first date, and last date.
 
@@ -114,7 +114,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-22 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name a full-partition customer window once and reuse it. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id` values; verify `o.customer_id, o.order_date, o.order_id` chooses a stable first/last row.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Compare each employee salary with the average of other employees in the department.
 
@@ -161,7 +161,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-22 Exercise 2, the chosen form is justified by this lesson-specific rationale: Use `EXCLUDE CURRENT ROW`; a one-person partition yields NULL. Evaluate another form against the concrete expected result (One row per employee with nullable peer average) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Show each order's distance from its customer's average and standard deviation.
 
@@ -207,7 +207,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-22 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute independent partition windows and guard interpretation when variation is zero. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Sessionize events using a 30-minute gap and predict why the first event starts a session.
 
@@ -270,7 +270,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-22 Exercise 4, the chosen form is justified by this lesson-specific rationale: Lag event time per customer, flag NULL/large gaps, then cumulative-sum flags in a second layer. Evaluate another form against the concrete expected result (One row per event with session number starting at one) and the verification above.
 - **Edge case:** Use a one-row partition and a partition tied on `customer_id`; verify `event_id` and `customer_id, event_time, event_id` preserve the intended first/last row.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Find consecutive calendar-day islands in customer order dates without nesting windows.
 
@@ -330,7 +330,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-22 Exercise 5, the chosen form is justified by this lesson-specific rationale: Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands. Evaluate another form against the concrete expected result (One row per customer/date island) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `island_start`, `island_end`, and `days_in_island` for the existing `customer_id`, and `island_key` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Summarize sessions from the sessionized event stream with start, end, event count, and duration.
 

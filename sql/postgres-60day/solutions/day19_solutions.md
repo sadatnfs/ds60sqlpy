@@ -1,4 +1,4 @@
-# Day 19 solutions — Running Aggregates and Moving Windows
+# Day 19 solutions: Running Aggregates and Moving Windows
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Calculate cumulative stored revenue across all orders.
 
@@ -110,7 +110,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-19 Exercise 1, the chosen form is justified by this lesson-specific rationale: Order by timestamp and unique ID; declare `ROWS ... CURRENT ROW`. Evaluate another form against the concrete expected result (One row per order with nondecreasing cumulative revenue) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate each customer's cumulative stored spend.
 
@@ -155,7 +155,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-19 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition by customer and reset the explicit row frame for every customer. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Calculate a trailing seven-order average within each customer.
 
@@ -202,7 +202,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-19 Exercise 3, the chosen form is justified by this lesson-specific rationale: A seven-row frame is based on observations, not seven calendar days. Evaluate another form against the concrete expected result (One row per order with up to seven observations in its frame) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Compare `ROWS` and `RANGE` cumulative sums when two rows share the same ordering value.
 
@@ -253,7 +253,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-19 Exercise 4, the chosen form is justified by this lesson-specific rationale: `RANGE` includes ordering peers together; `ROWS` advances one physical row at a time. Evaluate another form against the concrete expected result (Three rows making the peer difference visible) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Reset a running expense total at each category and month.
 
@@ -299,7 +299,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-19 Exercise 5, the chosen form is justified by this lesson-specific rationale: Partition by both reset keys and order by date plus expense ID. Evaluate another form against the concrete expected result (One row per expense) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Prove the final cumulative stored revenue equals the ordinary stored-revenue sum.
 

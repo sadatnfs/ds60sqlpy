@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,9 +369,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-26-interactive-visualization-with-plotly-and-altair">Day 26 — Interactive Visualization with Plotly and Altair<a class="heading-anchor" href="#guide--day-26-interactive-visualization-with-plotly-and-altair" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-26-interactive-visualization-with-plotly-and-altair">Day 26: Interactive Visualization with Plotly and Altair<a class="heading-anchor" href="#guide--day-26-interactive-visualization-with-plotly-and-altair" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
-<p>Interaction should answer a reader question—inspect a point, filter a segment, or adjust a meaningful parameter—not decorate a chart.</p>
+<p>Interaction should answer a reader question, inspect a point, filter a segment, or adjust a meaningful parameter, not decorate a chart.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of this lesson, you can:</p>
 <ul>
@@ -405,10 +405,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 26 — interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 26; interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
-<p>Interaction is useful when it helps a reader answer a question—inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
+<p>Interaction is useful when it helps a reader answer a question, inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
 <p>Plotly builds figure objects directly; Altair declares how fields map to visual encodings and transformations. Both can produce HTML, but portability depends on whether JavaScript and data are embedded or loaded from a Content Delivery Network (CDN). For offline course use, export self-contained content and test it while disconnected.</p>
 <h5 id="guide--vocabulary-in-plain-language">Vocabulary in plain language<a class="heading-anchor" href="#guide--vocabulary-in-plain-language" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p>In Plotly Express, <code>x</code>, <code>y</code>, <code>color</code>, and <code>hover_data</code> name visible or inspectable encodings. <code>fig.write_html(path, include_plotlyjs=True)</code> embeds the JavaScript library for offline use; a CDN option makes a smaller file that needs network access. In Altair, a chart combines a mark with encoded fields whose type declarations affect scales and aggregation.</p>
-<h5 id="guide--worked-example-1-build-an-inspectable-plotly-figure">Worked example 1 — Build an inspectable Plotly figure<a class="heading-anchor" href="#guide--worked-example-1-build-an-inspectable-plotly-figure" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-build-an-inspectable-plotly-figure">Worked example 1: Build an inspectable Plotly figure<a class="heading-anchor" href="#guide--worked-example-1-build-an-inspectable-plotly-figure" aria-label="Link to this section">#</a></h5>
 <p>Return the figure so construction remains separate from export. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">import</span> plotly.express <span class="syntax-keyword">as</span> px
@@ -439,7 +439,7 @@ fig <span class="syntax-operator">=</span> px<span class="syntax-operator">.</sp
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The notebook also renders the interactive figure.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-inspect-a-self-contained-html-representation">Worked example 2 — Inspect a self-contained HTML representation<a class="heading-anchor" href="#guide--worked-example-2-inspect-a-self-contained-html-representation" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-inspect-a-self-contained-html-representation">Worked example 2: Inspect a self-contained HTML representation<a class="heading-anchor" href="#guide--worked-example-2-inspect-a-self-contained-html-representation" aria-label="Link to this section">#</a></h5>
 <p>Embedding removes a runtime dependency on a remote CDN. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">html <span class="syntax-operator">=</span> fig<span class="syntax-operator">.</span>to_html<span class="syntax-punctuation">(</span>full_html<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> include_plotlyjs<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 <span class="syntax-punctuation">{</span>
@@ -539,10 +539,10 @@ figure<span class="syntax-operator">.</span>write_html<span class="syntax-punctu
 <ul>
 <li><a href="python-26.html#learner">Open the learner notebook</a></li>
 <li><a href="python-26.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-27.html#guide">Next: Day 27 — Geospatial/domain visualization</a></li>
+<li><a href="python-27.html#guide">Next: Day 27; Geospatial/domain visualization</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-26`
 (Day 26 — Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
 I have completed the direct prerequisites: `python-25`. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
@@ -802,10 +802,10 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-26-solutions-interactive-visualization-plotly-altair">Day 26 — Solutions: Interactive Visualization (Plotly / Altair)<a class="heading-anchor" href="#solution-1--day-26-solutions-interactive-visualization-plotly-altair" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-26-solutions-interactive-visualization-plotly-altair">Day 26: Solutions: Interactive Visualization (Plotly / Altair)<a class="heading-anchor" href="#solution-1--day-26-solutions-interactive-visualization-plotly-altair" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>interactive visual encodings, bounded interaction, and portable HTML export</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
-<p>Interaction is useful when it helps a reader answer a question—inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
+<p>Interaction is useful when it helps a reader answer a question, inspect a point, filter a segment, zoom a dense range, or compare parameter choices. It is not a substitute for a clear initial view. The chart still needs an honest title, visible axes/legend, sensible defaults, units, and a bounded amount of data.</p>
 <p>Plotly builds figure objects directly; Altair declares how fields map to visual encodings and transformations. Both can produce HTML, but portability depends on whether JavaScript and data are embedded or loaded from a Content Delivery Network (CDN). For offline course use, export self-contained content and test it while disconnected.</p>
 <h5 id="solution-1--vocabulary-used-in-the-worked-answers">Vocabulary used in the worked answers<a class="heading-anchor" href="#solution-1--vocabulary-used-in-the-worked-answers" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -818,8 +818,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>interactive visual encodings, bounded interaction, and portable HTML export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create an interactive histogram whose bin count can be changed only within sensible bounds. <strong>Plotly route:</strong> isolate a builder accepting <code>bins</code>; <strong>Altair route:</strong> bind a range input to a parameter. <strong>Expected behavior:</strong> changing bins alters aggregation without changing the underlying observations. <strong>Verify:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Create an interactive histogram whose bin count can be changed only within sensible bounds. Plotly route: isolate a builder accepting <code>bins</code>; Altair route: bind a range input to a parameter. Expected behavior: changing bins alters aggregation without changing the underlying observations. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -849,7 +849,7 @@ source_snapshot <span class="syntax-operator">=</span> frame<span class="syntax-
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">out-of-range bins should fail</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The source observations do not change; only the displayed aggregation granularity changes.</p>
 <p><strong>Verification evidence:</strong> test minimum/default/maximum settings and show the displayed total count remains the number of non-missing values.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Export the chart to a self-contained HTML file under an ignored learner artifact directory. <strong>Constraints:</strong> embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. <strong>Verify:</strong> disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Export the chart to a self-contained HTML file under an ignored learner artifact directory. Constraints: embed required JavaScript/data, use no remote font/analytics dependency, and document payload size. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function. That connects the answer to interactive visual encodings, bounded interaction, and portable HTML export.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
@@ -870,32 +870,32 @@ payload_bytes <span class="syntax-operator">=</span> destination<span class="syn
 <span class="syntax-keyword">assert</span> payload_bytes <span class="syntax-operator">&gt;</span> <span class="syntax-number">100_000</span></code></pre>
 <p><code>include_plotlyjs=True</code> embeds the runtime so the file remains interactive without a Content Delivery Network. Record <code>payload_bytes</code> when comparing portability with file size; browser offline mode should still show hover tooltips and toolbar controls.</p>
 <p><strong>Verification evidence:</strong> disconnect network access or use browser offline mode, reopen the file, and confirm tooltips/controls still function.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. <strong>Progressive hint:</strong> A CDN reference needs network access when opened. <strong>Verify:</strong> Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict the portability difference between Plotly HTML that embeds its JavaScript and HTML that loads a CDN copy. Progressive hint: A CDN reference needs network access when opened. Then compare the prediction with this proof target: Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled. This makes interactive visual encodings, bounded interaction, and portable HTML export observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Export embedded and CDN versions, inspect asset references/file sizes, and confirm only the embedded version remains interactive with network disabled.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. <strong>Progressive hint:</strong> A field retained only in source data is not visibly encoded. <strong>Verify:</strong> For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace one row into x, y, color, and hover fields and explain what the reader can infer from each visible encoding. Progressive hint: A field retained only in source data is not visibly encoded. Record the named value, shape, label, or iterator position needed to establish: For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded. The trace exposes interactive visual encodings, bounded interaction, and portable HTML export directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> For one known row, assert its x/y values, visible group, and bounded hover fields; explain one source field intentionally not encoded.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. <strong>Progressive hint:</strong> Separate figure construction from export. <strong>Verify:</strong> Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Implementation: Implement a Plotly scatter builder that validates required columns, bounds hover fields, and returns a figure without writing files. Progressive hint: Separate figure construction from export. Record the named value, shape, label, or iterator position needed to establish: Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing. The trace exposes interactive visual encodings, bounded interaction, and portable HTML export directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test valid data and missing-column data; assert the valid builder returns a figure with expected traces while the invalid path lists exact missing names and writes nothing.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. <strong>Progressive hint:</strong> Validate the schema before calling the plotting library. <strong>Verify:</strong> Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a chart-builder failure caused by a misspelled column and return an actionable error listing missing names. Progressive hint: Validate the schema before calling the plotting library. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame. The diagnosis depends on interactive visual encodings, bounded interaction, and portable HTML export.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Pass two misspelled/missing fields and assert one actionable pre-plot error names both before Plotly receives the frame.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. <strong>Progressive hint:</strong> Browser rendering and HTML size are part of the data contract. <strong>Verify:</strong> Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Design deterministic sampling or aggregation for a million-row interactive chart while preserving important groups. Progressive hint: Browser rendering and HTML size are part of the data contract. Values below, at, and above the named boundary must produce the evidence Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts. Those cases show how interactive visual encodings, bounded interaction, and portable HTML export behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Apply the deterministic reduction twice and assert identical rows/group representation, bounded payload size, and retained important-group counts.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use interaction to answer a question, not to decorate a chart. Keep tooltips, filters, payload size, and offline HTML behavior intentional.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings">Shared implementation for Exercises 3–4 — Portability and visible encodings<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings">Shared implementation for Exercises 3–4: Portability and visible encodings<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-portability-and-visible-encodings" aria-label="Link to this section">#</a></h5>
 <p>Embedded Plotly JavaScript makes a larger standalone file that works offline; a CDN-based file is smaller but needs network access. A reader can interpret only fields encoded on axes, color/shape, facets, labels, or tooltips.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering">Shared implementation for Exercises 5–7 — Validate before rendering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering">Shared implementation for Exercises 5–7: Validate before rendering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-validate-before-rendering" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Sequence
 
 <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -1059,16 +1059,16 @@ figure <span class="syntax-operator">=</span> build_scatter<span class="syntax-p
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-26`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-26`
 (Day 26 — Interactive Visualization with Plotly and Altair). Direct catalog prerequisites: `python-25`.
 I have completed the direct prerequisites: `python-25`. Emphasize interactive visual encodings, bounded interaction, and portable HTML export.
 Read `python/ds-60day/companion-guides/day26_viz_plotly_altair.md` and use the learner notebook
@@ -1083,7 +1083,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1194,18 +1194,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

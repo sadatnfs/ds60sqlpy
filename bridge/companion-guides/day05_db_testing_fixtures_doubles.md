@@ -1,4 +1,4 @@
-# Bridge Day 5 — Database tests, fixtures, and test doubles
+# Bridge Day 5: Database tests, fixtures, and test doubles
 
 **Level:** Intermediate  
 **Prerequisite:** [Bridge Day 4](day04_transactions_idempotency_retries.md)
@@ -196,7 +196,7 @@ twice without leaving learner data behind.
    numeric, isolation, or driver behavior tests.
    - **Progressive hint:** A fast substitute is useful only when it shares the semantics under
      test.
-   - **Verify:** List the PostgreSQL behavior under test—conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls—and mark each as unproved by SQLite.
+   - **Verify:** List the PostgreSQL behavior under test, conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls, and mark each as unproved by SQLite.
 11. **Security testing:** Pass an injection-shaped value through the cursor adapter and prove it
    appears only in the parameter tuple.
    - **Progressive hint:** Recording fakes should keep query and parameters in separate fields.
@@ -264,12 +264,12 @@ database happens to be named in a developer's shell.
   from locks, sequences, or accidental non-transactional operations.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-04`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -301,7 +301,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

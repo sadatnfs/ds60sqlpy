@@ -1,4 +1,4 @@
-# Bridge Day 6 — Bulk ETL and data validation
+# Bridge Day 6: Bulk ETL and data validation
 
 **Level:** Advanced  
 **Prerequisite:** [Bridge Day 5](day05_db_testing_fixtures_doubles.md)
@@ -265,12 +265,12 @@ export DS60_DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/advanced_sql
   recovery work.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-05`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -302,7 +302,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

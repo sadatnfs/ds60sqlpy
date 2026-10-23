@@ -216,7 +216,7 @@ API and mechanism reference: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-014, Supervised fine-tuning data and answer-target masks.

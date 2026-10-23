@@ -147,7 +147,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [MIT OpenCourseWare, dynamic programming lectures](https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-fall-2011/pages/lecture-notes/).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-algo-04: Dynamic Programming, State Design, and Reconstructable Decisions.

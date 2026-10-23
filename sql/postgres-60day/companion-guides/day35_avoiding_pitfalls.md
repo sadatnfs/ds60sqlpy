@@ -1,9 +1,9 @@
-# Day 35 — Avoiding Common Performance Pitfalls
+# Day 35: Avoiding Common Performance Pitfalls
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 34 — query optimization](day34_query_optimization.md)
+- **Prerequisites:** [Day 34; query optimization](day34_query_optimization.md)
 - **Artifacts:** [learner SQL](../day35_avoiding_pitfalls.sql) ·
   [solution reasoning](../solutions/day35_solutions.md) ·
   [executable solution](../solutions/day35_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-35 — Avoiding Pitfalls** and choose
+2. Open **SQL-35; Avoiding Pitfalls** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -172,7 +172,7 @@ Add an edge-case result check before every performance comparison.
 
 ## Next step
 
-Continue to [Day 36 — materialized views](day36_materialized_views.md).
+Continue to [Day 36; materialized views](day36_materialized_views.md).
 
 ## Deep dive and reference
 
@@ -224,13 +224,13 @@ ordering in the seek predicate.
 
 Fix fanout at the grain boundary instead of hiding it with `DISTINCT`.
 `COUNT(*)` counts rows; `COUNT(email)` counts only non-NULL emails. Neither is
-universally “correct”—the metric definition decides.
+universally “correct”, the metric definition decides.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-35 — Avoiding Pitfalls.

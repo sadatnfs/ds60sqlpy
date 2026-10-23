@@ -170,7 +170,7 @@ Do not confuse Scala3 with the selected Scala2.13 Spark binary family. Do not tr
 
 Continue with [spark-002](spark-002.md) for Scala-first study; the PySpark branch spark011 remains a separately planned prerequisite bridge. See the [full plan](../../../docs/expansion/tracks/scala-spark.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach spark-001.

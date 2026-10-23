@@ -182,15 +182,15 @@ python scripts/build_lesson_readers.py</code></pre>
 <h3 id="before-authoring">Before authoring<a class="heading-anchor" href="#before-authoring" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Read the closest <code>AGENTS.md</code>.</li>
-<li>Inspect the generated <code>curriculum/catalog.json</code> and the applicable rules in <code>src/ds60sqlpy/catalog_builder.py</code>.</li>
-<li>Run <code>python scripts/course.py catalog</code>.</li>
+<li>Choose the existing authoring contract with the <a href="curriculum-extension-playbook.md.html">extension playbook</a>. Inspect the legacy catalog or subject plan and manifest as appropriate.</li>
+<li>Run <code>python scripts/course.py catalog</code> for legacy content and <code>python scripts/check_modules.py</code> for authored modules.</li>
 <li>Identify the learning gap and prerequisite chain.</li>
 <li>Decide whether to revise an existing lesson or add a new stable lesson ID.</li>
 </ol>
 <p>Do not add a lesson solely to increase the count.</p>
 <p>Established Days 1–60 keep their IDs and filenames. New professional modules use the stable named specifications in <code>src/ds60sqlpy/catalog_builder.py</code> and live under the applicable <code>professional/</code> directory. Do not force a foundation, elective, or specialization into a misleading sequential day.</p>
 <h3 id="lesson-contract">Lesson contract<a class="heading-anchor" href="#lesson-contract" aria-label="Link to this section">#</a></h3>
-<p>Every lesson should include:</p>
+<p>Practice lessons should include:</p>
 <ol>
 <li><strong>Title and level</strong> - beginner, intermediate, or advanced</li>
 <li><strong>Prerequisites</strong> - concepts and environment</li>
@@ -204,7 +204,8 @@ python scripts/build_lesson_readers.py</code></pre>
 <li><strong>Next steps</strong> - review or successor lessons</li>
 <li><strong>Separate solution</strong> - reasoning, alternatives, and edge cases</li>
 </ol>
-<p>Prefer “write a query that returns…” or “implement and verify…” over “understand…”. For a named professional module, list every direct catalog prerequisite by its exact backticked stable ID inside <code>## Level and prerequisites</code>. Put transitive background and merely helpful material in separately labeled prose so Codex and learners do not mistake it for a hard gate.</p>
+<p>Prefer “write a query that returns…” or “implement and verify…” over “understand…”. For a named professional module, list every direct catalog prerequisite by its exact backticked stable ID inside <code>## Level and prerequisites</code>. Put transitive background and merely helpful material in separately labeled prose so an AI tutor and learners do not mistake it for a hard gate.</p>
+<p>The statistics/ML tutorial has a different contract: detailed theory, assumptions, worked examples, use cases, failure modes and answered interview discussions. It has no exams, problem sets, exercise quota or hidden-solution gate. Its coverage and executable-example checks replace practice-count gates. Reading markers record reading rather than mastery.</p>
 <h3 id="complete-amateur-depth-standard">Complete-amateur depth standard<a class="heading-anchor" href="#complete-amateur-depth-standard" aria-label="Link to this section">#</a></h3>
 <p>The section checklist above is necessary, but a heading with one sentence or a list of unexplained terms is not a complete lesson. Write for a learner who has never seen the topic and may not yet know what to type, where to type it, or how to tell whether it worked.</p>
 <p>Every companion guide in the Python, SQL, and bridge tracks must provide all of the following:</p>
@@ -252,8 +253,8 @@ python scripts/build_lesson_readers.py</code></pre>
 </ol>
 <p>The notebook cell, code-cell, and teaching-text minimums apply to every Python-runner learner notebook, including a new track or a lesson numbered beyond sixty. A new topic name must not bypass notebook depth checks.</p>
 <p>The exact number of cells may vary, but each cell should have one teaching job. Do not hide all examples in one large code cell or all instructions in one large Markdown cell. A learner must be able to run top to bottom from a fresh kernel without relying on state created out of order.</p>
-<h4 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Every companion guide must end with an optional <code>## Ask Codex about this lesson</code> section containing a copy-ready fenced <code>text</code> prompt. The course prose must remain sufficient without it.</p>
+<h4 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Every companion guide must end with an optional <code>## Ask an AI tutor about this lesson</code> section containing a copy-ready fenced <code>text</code> prompt. The course prose must remain sufficient without it.</p>
 <p>The prompt must be specific rather than “explain this topic.” Include:</p>
 <ul>
 <li>the stable lesson ID and title;</li>
@@ -383,11 +384,11 @@ python scripts/build_lesson_readers.py
 python scripts/build_course_guide.py --check
 python scripts/build_lesson_readers.py --check</code></pre>
 <h3 id="extending-subjects-languages-and-learning-modes">Extending subjects, languages, and learning modes<a class="heading-anchor" href="#extending-subjects-languages-and-learning-modes" aria-label="Link to this section">#</a></h3>
-<p>Follow <a href="curriculum-extension-playbook.md.html">the curriculum extension playbook</a> when adding a new track. Add a manifest under <code>curriculum/extensions/</code> rather than editing the generated catalog or stretching the historical day-number scanner. Its schema supports track metadata, complete lesson records, cross-track prerequisites, topic tags, and goal targets. An inactive <a href="examples/curriculum-extension.json.html">example manifest</a> shows the required fields; create its authored files and quality evidence before registering it.</p>
-<p>The lesson&#x27;s <code>runner</code> describes how a learner works. The <code>track</code> and <code>topics</code> describe what they learn. Deep learning uses Python when its exercise is Python; LLM theory can use <code>none</code> when its evidence is written reasoning. Planned C++, Scala, and Kubernetes runner descriptors allow correctly labeled reading and saved work, with execution available only after a real backend adapter is implemented and verified. A manifest never grants permission to execute an arbitrary command.</p>
-<p>Every new ID needs an explicit <code>curriculum/practice_expansion.json</code> entry with baseline zero and target six. Keep the historical baseline unchanged. All shared teaching gates remain: self-contained definitions, two worked examples, six progressive and bounded exercises on each required surface, inspectable expected results and verification, explanations of failure, retrieval questions, and the exact lesson-specific Codex block. Reading-only lessons can use fenced text examples and reasoned counterexamples; they still need a separate explanatory solution and the same minimum teaching depth. Code and operations lessons require two solution artifacts, including a written explanation.</p>
-<p>For C++/Scala learner sources, label prompts <code>// Exercise 1:</code> through the final number. For Kubernetes YAML, use <code># Exercise 1:</code> comments. Labels identify distinct tasks; repeated labels and answer steps do not increase the audited count. Keep guide and solution prompts aligned with the same numbered tasks.</p>
-<p>Preserve one-click setup and offline behavior. List any compiler, JVM, cluster, GPU, model, or first download beside the lesson&#x27;s run instructions. An operations exercise must name its local target and cleanup boundary. A new execution adapter also needs timeout, output, cancellation, invalid-input, saved-work, and failure-cleanup evidence before its capability becomes runnable.</p>
+<p>Follow <a href="curriculum-extension-playbook.md.html">the extension playbook</a> to choose between a legacy catalog extension, an authored module and the tutorial book. New classroom subjects normally use <code>courses/&lt;subject&gt;/track.json</code> and <code>lessons.json</code>; the original five modules retain their existing plans. Follow <a href="implementation/ADDING_A_MODULE.md.html">the module contract</a> for exact admission, profile and variant rules. Do not put every new subject into <code>curriculum/extensions/</code> or count module lessons in legacy practice audits.</p>
+<p>A subject describes what learners study; a runtime describes how its code runs. C++, Java, Node, TypeScript, Scala/Spark and framework modules have fixed reviewed workers. Use the actual lesson capability report, because legacy descriptors and module runtimes are separate routes. A registered profile or highlighted source alone does not establish execution readiness.</p>
+<p>For legacy catalog additions, preserve <code>curriculum/practice_baseline.json</code> and register new IDs in <code>curriculum/practice_expansion.json</code>. Ordinary module practice uses the subject&#x27;s depth and six-exercise contract. Reading-only practice still needs worked reasoning and a separate explanation. The tutorial book has no practice requirement or answer gate.</p>
+<p>For C++/Scala learner sources, label prompts <code>// Exercise 1:</code> through the final number. Kubernetes YAML uses <code># Exercise 1:</code> comments. Count distinct learner tasks, not repeated labels or answer steps. Keep guide and solution tasks aligned. A new execution adapter requires reviewed backend code, bounded runs, cleanup, saved-work protection and actual runtime evidence.</p>
+<p>List any compiler, JVM, cluster, GPU, model or first download beside the run instructions, and distinguish Docker-provided tools from optional host setup. External operations need a deliberately owned local target. Keep the default path offline after its documented preparation.</p>
 <h3 id="accessibility-and-tone">Accessibility and tone<a class="heading-anchor" href="#accessibility-and-tone" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Use plain language without talking down to the learner.</li>
@@ -415,7 +416,7 @@ python scripts/build_lesson_readers.py --check</code></pre>
 </ul>
 <p>Run <a href="validation.md.html">repository validation</a> before handoff.</p>
 <h3 id="new-lesson-practice-evidence">New-lesson practice evidence<a class="heading-anchor" href="#new-lesson-practice-evidence" aria-label="Link to this section">#</a></h3>
-<p>Do not rewrite historical enrichment counts. Register genuinely new lesson IDs in <code>curriculum/practice_expansion.json</code> with baseline zero and target six; the audit merges this disjoint registry with the immutable historical baseline. The new guides still need distinct inspectable exercises, and the depth and shared guide-contract checks both apply.</p></article>
+<p>Do not rewrite historical enrichment counts. Register genuinely new legacy catalog lesson IDs in <code>curriculum/practice_expansion.json</code> with baseline zero and target six; the audit merges this disjoint registry with the immutable historical baseline. The new legacy guides still need distinct inspectable exercises, and the depth and shared guide-contract checks both apply. Module subjects and tutorial books use their separate contracts described above.</p></article>
   </main>
 </body>
 </html>

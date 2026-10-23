@@ -311,7 +311,7 @@ Score each item 0,1 or 2: ownership prediction; all fourteen normal/boundary che
 
 On 2026-10-22, the existing Apple Clang 21.0.0 toolchain on Darwin arm64 directly compiled and ran the worked program and complete solution/check program in Debug and Release (`-DNDEBUG`). The exact two worked-example lines and `14 checks passed` were observed; the unchanged learner stubs returned a clear nonzero failure. This is a narrow snippet check. CMake/Ninja/CTest were not installed or run, and no Windows/Linux build, sanitizer profile or browser compiler adapter was qualified.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach planned lesson cpp-009, Vectors own; references borrow.

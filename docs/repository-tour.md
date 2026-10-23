@@ -6,7 +6,7 @@ The Git history starts with the Python and SQL course in January 2026. The major
 
 The starting snapshot for this review was `3ed0a31`. It contained 154 cataloged lessons: 70 Python, 72 SQL, and 12 bridge. It was already a large curriculum, with complete numbered cores, more than brief answer files, 122 notebooks, a safe guided SQL notebook generator, an authenticated local launcher, and substantial tests. The canonical Python 3.12 environment passed 455 tests, with two PowerShell checks skipped because that parser was unavailable on the review host.
 
-This upgrade preserves that work. It adds a gentler beginner sequence and advanced correctness practice, then turns the materials into a usable coding application with an optional Codex tutor. It does not renumber the historical days or treat a browser checkbox as proof of mastery.
+This upgrade preserves that work. It adds a gentler beginner sequence and advanced correctness practice, then turns the materials into a usable coding application with an optional AI tutor. It does not renumber the historical days or treat a browser checkbox as proof of mastery.
 
 ## Sources of truth and data flow
 
@@ -59,7 +59,7 @@ Every addition has a learner artifact, deep guide, executable reference, and exp
 
 ## Application design decisions
 
-The course now has three complementary delivery modes. Static HTML provides a complete offline reading library. The local coding application adds a guided route, code pads, transcripts, figures, saved evidence, and explicit solution comparison. The optional MCP server lets Codex use those same lesson and prerequisite operations while retaining a read-only default and no arbitrary code execution.
+The course now has three complementary delivery modes. Static HTML provides a complete offline reading library. The local coding application adds a guided route, code pads, transcripts, figures, saved evidence, and explicit solution comparison. The optional MCP server lets the AI tutor use those same lesson and prerequisite operations while retaining a read-only default and no arbitrary code execution.
 
 The native executable bundles the application runtime and course assets; its backend uses the learner's installed Python/PostgreSQL. Docker packages the backend environment and database for a consistent browser experience. Native build evidence is specific to the actual build platform. A Dockerfile or hosted workflow definition is not evidence that another operating system has been executed successfully.
 

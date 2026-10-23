@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-43-model-interpretation-with-shap-pdp-and-permutation">Day 43 — Model Interpretation with SHAP, PDP, and Permutation<a class="heading-anchor" href="#guide--day-43-model-interpretation-with-shap-pdp-and-permutation" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-43-model-interpretation-with-shap-pdp-and-permutation">Day 43: Model Interpretation with SHAP, PDP, and Permutation<a class="heading-anchor" href="#guide--day-43-model-interpretation-with-shap-pdp-and-permutation" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-43</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>ml</code> · <strong>Network:</strong> offline</p>
 <p>Interpretation tools describe how a fitted model behaves under their own assumptions. They do not make the model causal, fair, correct, or safe.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -460,7 +460,7 @@ values <span class="syntax-operator">=</span> shap<span class="syntax-operator">
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits">Concept deep dive — global versus local explanations, perturbation assumptions, and causal limits<a class="heading-anchor" href="#guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits">Concept deep dive: global versus local explanations, perturbation assumptions, and causal limits<a class="heading-anchor" href="#guide--concept-deep-dive-global-versus-local-explanations-perturbation-assumptions-and-causal-limits" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>An explanation describes a fitted model under a chosen data reference; it does not automatically describe the data-generating process. <strong>Global</strong> tools summarize behavior across many observations. <strong>Local</strong> tools allocate one prediction relative to a baseline or nearby cases.</p>
 <p>Permutation importance breaks a feature&#x27;s observed association and measures score loss. Partial dependence averages predictions while varying features, potentially creating unrealistic combinations when features are correlated. SHAP values also require assumptions about missing-feature dependence and a background distribution.</p>
@@ -471,7 +471,7 @@ values <span class="syntax-operator">=</span> shap<span class="syntax-operator">
 <li><strong><code>shap.TreeExplainer(model, data=background, ...)</code>:</strong> allocates model output under an explicit dependence/background convention; output shape is model/version dependent.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-measure-one-local-prediction-s-sensitivity">Focused example A — measure one local prediction&#x27;s sensitivity<a class="heading-anchor" href="#guide--focused-example-a-measure-one-local-prediction-s-sensitivity" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-measure-one-local-prediction-s-sensitivity">Focused example A: measure one local prediction&#x27;s sensitivity<a class="heading-anchor" href="#guide--focused-example-a-measure-one-local-prediction-s-sensitivity" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
@@ -493,7 +493,7 @@ perturbed <span class="syntax-operator">=</span> model<span class="syntax-operat
        <span class="syntax-string">&quot;</span><span class="syntax-string">difference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> perturbed <span class="syntax-operator">-</span> baseline<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Changing one feature can move the prediction, but the difference is a model sensitivity under an artificial intervention.</p>
 <p><strong>Assumption to name:</strong> The changed feature value combined with all unchanged values represents a plausible input.</p>
-<h5 id="guide--focused-example-b-give-permutation-importance-an-uncertainty-interval">Focused example B — give permutation importance an uncertainty interval<a class="heading-anchor" href="#guide--focused-example-b-give-permutation-importance-an-uncertainty-interval" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-give-permutation-importance-an-uncertainty-interval">Focused example B: give permutation importance an uncertainty interval<a class="heading-anchor" href="#guide--focused-example-b-give-permutation-importance-an-uncertainty-interval" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> permutation_importance
 
@@ -550,16 +550,16 @@ summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li>On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.</p>
+<p><strong>Verify:</strong> Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.</p>
 <ol>
 <li>Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.</p>
+<p><strong>Verify:</strong> Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.</p>
 <ol>
 <li>Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare the signs, top-five overlap, and instability; skip only when importing <code>lime</code> raises <code>ModuleNotFoundError</code>.</li>
 </ol>
 <p>LIME is installed by the <code>ml</code> dependency group but remains an optional lesson extension. Complete the required work with SHAP and scikit-learn before adding a second explanation library.</p>
-<p><strong>Verify:</strong> Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing <code>lime</code> import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.</p>
+<p><strong>Verify:</strong> Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing <code>lime</code> import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Normalize the SHAP output shape for the positive class, compute mean absolute values over exactly 50 held-out rows, and retain original feature names. Compute permutation importance on those same rows before comparing ranks.</li>
@@ -572,15 +572,15 @@ summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li><strong>Local-versus-global diagnosis:</strong> Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict. <strong>Progressive hint:</strong> Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.</li>
 </ol>
-<p><strong>Verify:</strong> Local-versus-global diagnosis — record the feature&#x27;s aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row&#x27;s local contribution is near zero, and identify the row-specific baseline.</p>
+<p><strong>Verify:</strong> Local-versus-global diagnosis; record the feature&#x27;s aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row&#x27;s local contribution is near zero, and identify the row-specific baseline.</p>
 <ol>
 <li><strong>Explanation leakage:</strong> Explain why selecting the &#x27;most important&#x27; features with the final test set and then retraining a smaller model contaminates evaluation. <strong>Progressive hint:</strong> The explanation becomes a supervised feature-selection step. Keep the test set unavailable until the complete selection procedure is frozen.</li>
 </ol>
-<p><strong>Verify:</strong> Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.</p>
+<p><strong>Verify:</strong> Explanation leakage; draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.</p>
 <ol>
 <li><strong>Correlated-feature and causality check:</strong> Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation. <strong>Progressive hint:</strong> Credit can move or split between substitutes; marginal perturbations can create implausible combinations.</li>
 </ol>
-<p><strong>Verify:</strong> Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.</p>
+<p><strong>Verify:</strong> Correlated-feature and causality check; report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -627,10 +627,10 @@ summary <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ul>
 <li>Work in the <a href="python-43.html#learner">Day 43 learner notebook</a>.</li>
 <li>Then consult the <a href="python-43.html#solution-1">Day 43 solution</a>.</li>
-<li>Continue to <a href="python-44.html#guide">Day 44 — FastAPI Deployment</a>.</li>
+<li>Continue to <a href="python-44.html#guide">Day 44; FastAPI Deployment</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -904,7 +904,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-43-solutions-model-interpretation-shap-pdp-lime">Day 43 — Solutions: Model Interpretation (SHAP, PDP, LIME)<a class="heading-anchor" href="#solution-1--day-43-solutions-model-interpretation-shap-pdp-lime" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-43-solutions-model-interpretation-shap-pdp-lime">Day 43: Solutions: Model Interpretation (SHAP, PDP, LIME)<a class="heading-anchor" href="#solution-1--day-43-solutions-model-interpretation-shap-pdp-lime" aria-label="Link to this section">#</a></h3>
 <p>We introduce global vs local interpretability, compute SHAP values for a tree model, draw Partial Dependence Plots (PDP), and briefly show how to apply LIME (optional).</p>
 <p>Contents</p>
 <ul>
@@ -949,7 +949,7 @@ most_important <span class="syntax-operator">=</span> <span class="syntax-builti
         <span class="syntax-string">&quot;</span><span class="syntax-string">permutation_mean</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> permutation<span class="syntax-operator">.</span>importances_mean<span class="syntax-punctuation">[</span>most_important<span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — SHAP summary (tree model)</p>
+<p>Worked reference for Exercise 1; SHAP summary (tree model)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Missing SHAP is a disclosed capability boundary. Any failure after a</span>
 <span class="syntax-comment"># successful import is a real defect and must remain visible.</span>
 <span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
@@ -994,7 +994,7 @@ most_important <span class="syntax-operator">=</span> <span class="syntax-builti
 <li>Global importance can be approximated by mean |SHAP| per feature</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Partial Dependence Plots (PDP)</p>
+<p>Worked reference for Exercise 2; Partial Dependence Plots (PDP)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.inspection <span class="syntax-keyword">import</span> PartialDependenceDisplay
 <span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
@@ -1018,7 +1018,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <li>Interactions: use tuples (i, j) to plot 2D PDPs</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 (optional) — LIME on a single prediction</p>
+<p>Worked reference for Exercise 3 (optional); LIME on a single prediction</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">from</span> lime.lime_tabular <span class="syntax-keyword">import</span> LimeTabularExplainer
 <span class="syntax-keyword">except</span> ModuleNotFoundError<span class="syntax-punctuation">:</span>
@@ -1064,42 +1064,42 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.</p>
 <p><strong>How to reason about it:</strong> Aggregate absolute SHAP values over a representative held-out sample, preserve feature names, and record the explainer/background choice. Magnitude ranks influence; sign and dependence require separate inspection.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.</p>
 <p><strong>How to reason about it:</strong> A PDP averages model predictions over counterfactual feature values. Mark regions with little support and prefer conditional/ICE diagnostics when correlated features make those combinations unrealistic.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare signs, top-five overlap, and instability; skip only when importing <code>lime</code> raises <code>ModuleNotFoundError</code>.</p>
 <p><strong>How to reason about it:</strong> LIME is an optional local surrogate whose result depends on neighborhood sampling and kernel choices. Compare repeated explanations and do not treat agreement with SHAP as proof of causal truth.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing <code>lime</code> import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.</p>
-<h5 id="solution-1--exercise-4-local-versus-global-diagnosis">Exercise 4 — Local-versus-global diagnosis<a class="heading-anchor" href="#solution-1--exercise-4-local-versus-global-diagnosis" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing <code>lime</code> import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.</p>
+<h5 id="solution-1--exercise-4-local-versus-global-diagnosis">Exercise 4: Local-versus-global diagnosis<a class="heading-anchor" href="#solution-1--exercise-4-local-versus-global-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.</p>
 <p><strong>Reasoning before implementation:</strong> Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.</p>
 <p>A feature can drive predictions for many records while the selected record has a value near the model&#x27;s baseline or lies in a region where another feature dominates. Report the local predicted value, baseline, and contributions, then separately report how global importance was aggregated.</p>
 <p>Do not use one compelling local waterfall plot to summarize an entire population. Sample representative correct cases, errors, and important slices.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Local-versus-global diagnosis — record the feature&#x27;s aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row&#x27;s local contribution is near zero, and identify the row-specific baseline.</p>
-<h5 id="solution-1--exercise-5-explanation-leakage">Exercise 5 — Explanation leakage<a class="heading-anchor" href="#solution-1--exercise-5-explanation-leakage" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Local-versus-global diagnosis; record the feature&#x27;s aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row&#x27;s local contribution is near zero, and identify the row-specific baseline.</p>
+<h5 id="solution-1--exercise-5-explanation-leakage">Exercise 5: Explanation leakage<a class="heading-anchor" href="#solution-1--exercise-5-explanation-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why selecting the &#x27;most important&#x27; features with the final test set and then retraining a smaller model contaminates evaluation.</p>
 <p><strong>Reasoning before implementation:</strong> The explanation becomes a supervised feature-selection step. Keep the test set unavailable until the complete selection procedure is frozen.</p>
 <p>Importance computed on test rows uses their features and often their labels through the evaluation choice. If it changes the model, threshold, or feature set, the test data has entered development.</p>
 <p>Perform explanation-guided pruning within training/validation or nested CV, then evaluate the frozen reduced pipeline on the untouched test once. It is fine to explain final test errors afterward if no new performance claim is made from a retrained model.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.</p>
-<h5 id="solution-1--exercise-6-correlated-feature-and-causality-check">Exercise 6 — Correlated-feature and causality check<a class="heading-anchor" href="#solution-1--exercise-6-correlated-feature-and-causality-check" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Explanation leakage; draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.</p>
+<h5 id="solution-1--exercise-6-correlated-feature-and-causality-check">Exercise 6: Correlated-feature and causality check<a class="heading-anchor" href="#solution-1--exercise-6-correlated-feature-and-causality-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.</p>
 <p><strong>Reasoning before implementation:</strong> Credit can move or split between substitutes; marginal perturbations can create implausible combinations.</p>
 <p>State that the model uses a correlated feature group rather than claiming one member independently causes the outcome. Show the correlation/support evidence and, when appropriate, grouped permutation or conditional analysis.</p>
 <p>Predictive explanation answers how this fitted model behaves under a specified background and perturbation. A causal claim requires a causal design and assumptions not supplied by SHAP, PDP, LIME, or permutation importance.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.</p></div>
+<p><strong>Verify:</strong> Correlated-feature and causality check; report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.</p></div>
       </section>
 
 
@@ -1208,16 +1208,16 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize global versus local explanations, perturbation assumptions, and causal limits. Use exactly these maintained learner materials:
@@ -1245,7 +1245,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1356,18 +1356,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

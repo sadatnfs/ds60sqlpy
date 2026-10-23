@@ -1,9 +1,9 @@
-# Day 21 — Time Series with pandas
+# Day 21: Time Series with pandas
 
 **Level:** Intermediate
 
 Time-series correctness depends on timestamp meaning, time zones, ordering, and
-window boundaries—not just the numeric calculation.
+window boundaries, not just the numeric calculation.
 
 ## Learning objectives
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 21 — time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features
+**Lesson outcome:** use day 21; time series with pandas to practice time-aware indexes, timezone policy, resampling, rolling windows, and lag features
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ min_periods=1).mean()` uses up to three consecutive rows and permits a
 result at the beginning. `shift(1)` moves values one row later without
 changing the index.
 
-### Worked example 1 — Parse, index, and resample deterministic daily values
+### Worked example 1: Parse, index, and resample deterministic daily values
 
 Choose and name the calendar boundary. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -128,7 +128,7 @@ Both weekly bins together sum to `28`, preserving the additive total. The keys a
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Compare rolling and lagged values
+### Worked example 2: Compare rolling and lagged values
 
 A rolling statistic includes nearby history; a lag exposes a prior observation. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -176,7 +176,7 @@ of them as blank-code prompts:
 5. **Retrieval:** close the guide and explain the core model from memory
    before moving on.
 
-**Useful alternative:** Use row-count windows for evenly sampled observations and time-offset windows when elapsed time—not row count—defines the question.
+**Useful alternative:** Use row-count windows for evenly sampled observations and time-offset windows when elapsed time, not row count, defines the question.
 
 **Boundary to remember:** Daylight-saving ambiguity/nonexistence, duplicate times, irregular gaps, empty bins, and partial boundary windows need policy.
 <!-- END BEGINNER DEEP DIVE -->
@@ -278,11 +278,11 @@ represent the same instants after UTC conversion, and window choices are stated.
 
 - [Open the learner notebook](../notebooks/day21_time_series_pandas.ipynb)
 - [Check the separate solution](../solutions/day21_time_series_pandas/day21_solutions.md)
-- [Next: Day 22 — Advanced pandas](day22_advanced_pandas_apply_query_eval.md)
+- [Next: Day 22; Advanced pandas](day22_advanced_pandas_apply_query_eval.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

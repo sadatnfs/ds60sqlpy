@@ -1,4 +1,4 @@
-# Day 26 solutions — CTEs with Window Functions: Layered Analytics
+# Day 26 solutions: CTEs with Window Functions: Layered Analytics
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Calculate monthly stored revenue and its prior-month value/change.
 
@@ -120,7 +120,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-26 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to month in a CTE, then lag the monthly measure. Evaluate another form against the concrete expected result (One row per observed month) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Rank product categories by net revenue within each UTC order month.
 
@@ -176,7 +176,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-26 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate month/category first, then rank the stable aggregate. Evaluate another form against the concrete expected result (One row per observed month/category) and the verification above.
 - **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Return the top three category revenue levels per month.
 
@@ -233,7 +233,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-26 Exercise 3, the chosen form is justified by this lesson-specific rationale: Rank in one CTE and filter the window result outside. Evaluate another form against the concrete expected result (Top three revenue ranks for each observed month) and the verification above.
 - **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Calculate each category's cumulative share of monthly revenue in descending contribution order.
 
@@ -294,7 +294,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-26 Exercise 4, the chosen form is justified by this lesson-specific rationale: Divide running category revenue by the full monthly total; use explicit frames. Evaluate another form against the concrete expected result (One row per month/category with final share equal to one) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Calculate a three-month moving average after building a dense month calendar.
 
@@ -361,7 +361,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-26 Exercise 5, the chosen form is justified by this lesson-specific rationale: Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way. Evaluate another form against the concrete expected result (A continuous chronological month series) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Reconcile the final cumulative monthly revenue with the independent order total.
 

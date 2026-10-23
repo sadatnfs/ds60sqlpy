@@ -1,9 +1,9 @@
-# Day 52 — Data Warehouse Project, Part 1: Star Schema
+# Day 52: Data Warehouse Project, Part 1: Star Schema
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 51 — cash flow](day51_project2_finance_part3.md).
+- **Prerequisites:** [Day 51; cash flow](day51_project2_finance_part3.md).
   Use only the course-owned disposable `dwh` schema; Day 52 resets and commits
   it for Days 53–54.
 - **Artifacts:** [learner SQL](../day52_project3_dwh_part1.sql) ·
@@ -38,7 +38,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-52 — Project3 DWH Part1** and choose
+2. Open **SQL-52; Project3 DWH Part1** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -74,7 +74,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -210,7 +210,7 @@ Run from a reset and save checks for Days 53–54.
 ## Next step
 
 Continue in the same database to
-[Day 53 — slowly changing dimensions](day53_project3_dwh_part2_scd.md).
+[Day 53; slowly changing dimensions](day53_project3_dwh_part2_scd.md).
 
 ## Deep dive and reference
 
@@ -252,11 +252,11 @@ Day 54 depends on committed Day 52 state, not on Day 53 changes persisting.
 - Every fact date and dimension key must resolve exactly once.
 - Use `psql -v ON_ERROR_STOP=1`; a partial warehouse is not a passing load.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-52 — Project3 DWH Part1.

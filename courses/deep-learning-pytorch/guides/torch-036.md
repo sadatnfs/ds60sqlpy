@@ -194,7 +194,7 @@ It shows that the gate is connected to the decision rather than merely printing 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-036, Capstone: release a small reproducible PyTorch model.

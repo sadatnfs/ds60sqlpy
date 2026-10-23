@@ -1,4 +1,4 @@
-# Day 60 Solution — End-to-End Capstone Sign-off
+# Day 60 Solution: End-to-End Capstone Sign-off
 
 
 <!-- beginner-solution-enrichment -->
@@ -72,7 +72,7 @@ Sign off only when:
 The compact seed makes the 10-second target easy; it does not prove
 production-scale performance.
 
-## Deliverable 1 — Reusable DQ views
+## Deliverable 1: Reusable DQ views
 
 The learner creates `v_dq_customers` and `v_dq_orders`. The reference solution
 uses a suffixed customer view so it cannot collide with a learner's view:
@@ -104,7 +104,7 @@ ROLLBACK;
 Expected shape: one customer summary row and one order summary row. The course
 seed should report zero failures.
 
-## Deliverable 2 — Core business views and reconciliation
+## Deliverable 2: Core business views and reconciliation
 
 ```sql
 BEGIN;
@@ -147,7 +147,7 @@ ROLLBACK;
 Expected reconciliation: `difference = 0.00`. The monthly view has one row per
 represented order month; it does not manufacture missing months.
 
-## Deliverable 3 — Stakeholder-ready outputs
+## Deliverable 3: Stakeholder-ready outputs
 
 The learner file contains three runnable outputs:
 
@@ -159,7 +159,7 @@ The learner file contains three runnable outputs:
 For each output, record the consumer, business definition, result grain,
 freshness expectation, and at least one reconciliation or sanity check.
 
-## Deliverable 4 — Performance sign-off
+## Deliverable 4: Performance sign-off
 
 ```sql
 BEGIN;
@@ -200,7 +200,7 @@ ROLLBACK;
 Capture actual execution time and buffers before and after candidate indexes.
 The transaction rolls back both views and indexes.
 
-## Deliverable 5 — Written sign-off
+## Deliverable 5: Written sign-off
 
 The final write-up must cover:
 
@@ -225,7 +225,7 @@ decision.
 - Days 59–60 are sign-off checkpoints, so some deliverables are documentation
   and measured evidence rather than new SQL exercises.
 
-## Exercise 1 — Identify clock dependence
+## Exercise 1: Identify clock dependence
 
 Snapshot summaries depend only on table state. Trailing/current-period reports
 also depend on the clock and need a bound `as_of_date` for reproducible review.
@@ -240,7 +240,7 @@ also depend on the clock and need a bound `as_of_date` for reproducible review.
 - **Alternative/trade-off:** For sql-60 Exercise 1, the chosen form is justified by this lesson-specific rationale: Snapshot summaries depend only on table state. Evaluate another form against the concrete expected result (one row per `object_name`) and the verification above.
 - **Edge case:** Add one source row with a new `object_name`; verify the result gains exactly one row carrying that `object_name` value.
 
-## Exercise 2 — Return executable sign-off checks
+## Exercise 2: Return executable sign-off checks
 
 Each check contains observed/expected values, computed pass status, severity,
 and remediation. A typed label cannot substitute for the equality expression.
@@ -255,7 +255,7 @@ and remediation. A typed label cannot substitute for the equality expression.
 - **Alternative/trade-off:** For sql-60 Exercise 2, the chosen form is justified by this lesson-specific rationale: Each check contains observed/expected values, computed pass status, severity, and remediation. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 3 — Calculate LAG once
+## Exercise 3: Calculate LAG once
 
 `monthly` establishes grain; `with_previous` computes LAG one time; the outer
 query calculates growth. The first month remains NULL because it has no valid
@@ -271,7 +271,7 @@ comparison.
 - **Alternative/trade-off:** For sql-60 Exercise 3, the chosen form is justified by this lesson-specific rationale: `monthly` establishes grain; `with_previous` computes LAG one time; the outer query calculates growth. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
 - **Edge case:** Repeat with `NULL` in `LAG` and state whether the row is kept, rejected, or classified.
 
-## Exercise 4 — Flag an incomplete month
+## Exercise 4: Flag an incomplete month
 
 The current calendar month is marked explicitly. Production evaluation should
 bind an as-of date and avoid comparing a partial period with a complete one.
@@ -286,7 +286,7 @@ bind an as-of date and avoid comparing a partial period with a complete one.
 - **Alternative/trade-off:** For sql-60 Exercise 4, the chosen form is justified by this lesson-specific rationale: The current calendar month is marked explicitly. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
 - **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 
-## Exercise 5 — Retain structured plan evidence
+## Exercise 5: Retain structured plan evidence
 
 `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` captures plan shape, estimates, actual
 rows, buffer activity, and timing. Evidence applies only to the tested server,
@@ -302,7 +302,7 @@ data volume, parameters, and cache state.
 - **Alternative/trade-off:** For sql-60 Exercise 5, the chosen form is justified by this lesson-specific rationale: `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)` captures plan shape, estimates, actual rows, buffer activity, and timing. Evaluate another form against the concrete expected result (at most 12 rows keyed by `plan_node`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 6 — Complete the operational release checklist
+## Exercise 6: Complete the operational release checklist
 
 Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all
 have named owners/evidence. Query correctness alone is not production readiness.
@@ -317,10 +317,10 @@ have named owners/evidence. Query correctness alone is not production readiness.
 - **Alternative/trade-off:** For sql-60 Exercise 6, the chosen form is justified by this lesson-specific rationale: Rollback, ownership, privileges, refresh, monitoring, contracts, and limits all have named owners/evidence. Evaluate another form against the concrete expected result (one row per `evidence`) and the verification above.
 - **Edge case:** Add one source row with a new `evidence`; verify the result gains exactly one row carrying that `evidence` value.
 
-## Exercise 7 — Publish lineage
+## Exercise 7: Publish lineage
 
 Every published metric maps to sources, transformation grain, and a validation
-query. This gives Codex and human maintainers a compact impact-analysis trail.
+query. This gives the AI tutor and human maintainers a compact impact-analysis trail.
 
 ### Reasoning and verification
 
@@ -332,7 +332,7 @@ query. This gives Codex and human maintainers a compact impact-analysis trail.
 - **Alternative/trade-off:** For sql-60 Exercise 7, the chosen form is justified by this lesson-specific rationale: Every published metric maps to sources, transformation grain, and a validation query. Evaluate another form against the concrete expected result (one row per `metric_name`) and the verification above.
 - **Edge case:** Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.
 
-## Exercise 8 — Reconcile dashboard totals
+## Exercise 8: Reconcile dashboard totals
 
 Monthly-view revenue is summed and compared with the simplest order total.
 Nonzero difference blocks sign-off before any optimization is accepted.
@@ -347,7 +347,7 @@ Nonzero difference blocks sign-off before any optimization is accepted.
 - **Alternative/trade-off:** For sql-60 Exercise 8, the chosen form is justified by this lesson-specific rationale: Monthly-view revenue is summed and compared with the simplest order total. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 9 — Test edge fixtures
+## Exercise 9: Test edge fixtures
 
 The in-query fixture represents NULL, one-row-like, and duplicate-key cases
 without changing course data. Counts expose assumptions that production
@@ -363,7 +363,7 @@ constraints or quarantine rules must enforce.
 - **Alternative/trade-off:** For sql-60 Exercise 9, the chosen form is justified by this lesson-specific rationale: The in-query fixture represents NULL, one-row-like, and duplicate-key cases without changing course data. Evaluate another form against the concrete expected result (one row per `fixture_rows`) and the verification above.
 - **Edge case:** Repeat with `NULL` in `fixture_rows`, and `null_email_rows` and state whether the row is kept, rejected, or classified.
 
-## Exercise 10 — Distinguish FAIL from NOT_RUN
+## Exercise 10: Distinguish FAIL from NOT_RUN
 
 Executed checks compare observed and expected values. An unexecuted Windows CI
 bootstrap remains `NOT_RUN`; prose or confidence must never upgrade it to PASS.

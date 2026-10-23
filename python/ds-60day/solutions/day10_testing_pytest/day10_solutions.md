@@ -1,4 +1,4 @@
-# Day 10 — Solutions: Testing with Pytest
+# Day 10: Solutions: Testing with Pytest
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -31,9 +31,9 @@ which case failed.
 For this lesson's **tests as executable contracts and useful failure reports** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Write pytest tests for `safe_divide(numerator, denominator)` and `validate_email(text)`. **Coverage:** one ordinary result, negative values, zero denominator, one accepted bounded email example, and several rejected near misses. **Constraints:** name each behavior clearly and compare observable return values directly. **Verify:** run the test file from the repository root and confirm all intended cases are collected.
 
@@ -79,7 +79,7 @@ def test_validate_email(text: str, expected: bool) -> None:
 
 **Verification evidence:** run the test file from the repository root and confirm all intended cases are collected.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Add negative tests with `pytest.raises` for the narrow exception types documented by both functions. **Constraints:** keep only the expected failing call inside each context manager and match one stable, useful message fragment. **Verify:** temporarily change the expected exception once to observe a meaningful failure, then restore it.
 
@@ -105,9 +105,9 @@ actual type and stable message before the test is restored.
 
 **Verification evidence:** temporarily change the expected exception once to observe a meaningful failure, then restore it.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict how pytest reports `assert actual == expected` compared with `assert check(actual)` when the values differ. **Progressive hint:** Direct comparisons usually produce more useful assertion introspection. **Verify:** Run both deliberately failing assertions once and compare pytest's messages; record which report exposes actual/expected values directly.
 
@@ -115,7 +115,7 @@ actual type and stable message before the test is restored.
 
 **Evidence to locate in the grouped implementation:** Run both deliberately failing assertions once and compare pytest's messages; record which report exposes actual/expected values directly.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace fixture setup, test execution, and teardown when the test passes and when it raises. **Progressive hint:** A yielding fixture resumes after `yield` for cleanup in both paths. **Verify:** Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.
 
@@ -123,7 +123,7 @@ actual type and stable message before the test is restored.
 
 **Evidence to locate in the grouped implementation:** Append events from setup, test, and teardown for pass and raise cases; assert teardown is the final event in both traces.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Write parameterized tests for a slug function covering ordinary text, extra whitespace, punctuation, and empty text. **Progressive hint:** Each parameter row should communicate one behavior. **Verify:** Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.
 
@@ -131,7 +131,7 @@ actual type and stable message before the test is restored.
 
 **Evidence to locate in the grouped implementation:** Confirm pytest reports a separate named case for ordinary, whitespace, punctuation, and empty inputs and that all match the written slug contract.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a test whose `pytest.raises(Exception)` would accept unrelated bugs and whose protected block contains several operations. **Progressive hint:** Assert a narrow exception around one operation. **Verify:** Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.
 
@@ -139,7 +139,7 @@ actual type and stable message before the test is restored.
 
 **Evidence to locate in the grouped implementation:** Prove the narrow expected error passes, then trigger an unrelated error and confirm the test fails instead of accepting it.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Test floating-point output and `NaN` correctly. Explain why direct equality is inappropriate for each. **Progressive hint:** Use `pytest.approx` for tolerance and `math.isnan` for NaN. **Verify:** Assert one computed float passes with `pytest.approx`, assert `math.isnan(value)` is true for NaN, and record that `value == value` is false.
 
@@ -151,12 +151,12 @@ actual type and stable message before the test is restored.
 
 Test observable contracts across normal, boundary, and invalid inputs. A good failure explains which behavior changed.
 
-### Shared implementation for Exercises 3–4 — Readable failures and reliable cleanup
+### Shared implementation for Exercises 3–4: Readable failures and reliable cleanup
 
 Direct value comparisons let pytest display the differing values. A yielding
 fixture's code after `yield` behaves like a `finally` cleanup step.
 
-### Shared implementation for Exercises 5–7 — Focused tests
+### Shared implementation for Exercises 5–7: Focused tests
 
 ```python
 import math

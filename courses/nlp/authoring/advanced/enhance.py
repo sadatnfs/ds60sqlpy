@@ -237,5 +237,5 @@ RELATED={
 }
 for n,body in RELATED.items():
     path=ROOT/'courses/nlp/guides'/f'nlp-{n:03d}.md';text=path.read_text()
-    if '## Related local tracks' not in text:text=text.replace('## Ask Codex about this lesson','## Related local tracks\n\n'+body+'\n\n## Ask Codex about this lesson')
+    if '## Related local tracks' not in text:text=text.replace('## Ask an AI tutor about this lesson','## Related local tracks\n\n'+body+'\n\n## Ask an AI tutor about this lesson')
     path.write_text(text)

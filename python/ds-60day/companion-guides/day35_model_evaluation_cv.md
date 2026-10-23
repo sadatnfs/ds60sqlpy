@@ -1,4 +1,4 @@
-# Day 35 — Model Evaluation and Cross-Validation
+# Day 35: Model Evaluation and Cross-Validation
 
 **Lesson ID:** `python-35` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -109,7 +109,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — metrics, resampling design, and honest generalization estimates
+## Concept deep dive: metrics, resampling design, and honest generalization estimates
 
 ### The mental model
 
@@ -138,7 +138,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — derive precision and recall from outcome counts
+### Focused example A: derive precision and recall from outcome counts
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -163,7 +163,7 @@ assert recall == tp / (tp + fn)
 
 **Assumption to name:** Class `1` is the positive class and each error type has a known operational consequence.
 
-### Focused example B — keep entity groups out of each other's folds
+### Focused example B: keep entity groups out of each other's folds
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -212,15 +212,15 @@ print("all validation groups were unseen during training")
 
 1. Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 
-**Verify:** Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.
+**Verify:** Practice 1; metrics, resampling design, and honest generalization estimates; on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
 
 2. Compare the variability from 5-fold and 10-fold cross-validation.
 
-**Verify:** Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
+**Verify:** Practice 2; metrics, resampling design, and honest generalization estimates; use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
 
 3. Explain leakage risks and how placing preprocessing in a pipeline helps.
 
-**Verify:** Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
+**Verify:** Practice 3; metrics, resampling design, and honest generalization estimates; show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
 ### Progressive hints
 
@@ -241,17 +241,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Threshold analysis:** Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.
    **Progressive hint:** A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.
 
-**Verify:** Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
+**Verify:** Threshold analysis; for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
 
 5. **Grouped resampling:** Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.
    **Progressive hint:** Use `StratifiedGroupKFold` when both label balance and entity separation matter; assert that train and validation group sets are disjoint.
 
-**Verify:** Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
+**Verify:** Grouped resampling; print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
 
 6. **Selection-bias debugging:** Explain why reporting `GridSearchCV.best_score_` as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.
    **Progressive hint:** The same inner folds both select and report the best candidate. Nested CV puts the complete search inside an outer held-out fold.
 
-**Verify:** Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.
+**Verify:** Selection-bias debugging; print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -286,12 +286,12 @@ lower variance for every dataset.
 - Work in the [Day 35 learner notebook](../notebooks/day35_model_evaluation_cv.ipynb).
 - Then use the
   [Day 35 solution](../solutions/day35_model_evaluation_cv/day35_solutions.md).
-- Continue to [Day 36 — PCA and Feature Selection](day36_dimensionality_reduction_pca.md).
+- Continue to [Day 36; PCA and Feature Selection](day36_dimensionality_reduction_pca.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-35` — Day 35 — Model Evaluation and Cross-Validation.

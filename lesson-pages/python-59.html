@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,9 +369,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-59-capstone-kickoff">Day 59 — Capstone Kickoff<a class="heading-anchor" href="#guide--day-59-capstone-kickoff" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-59-capstone-kickoff">Day 59: Capstone Kickoff<a class="heading-anchor" href="#guide--day-59-capstone-kickoff" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-59</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>advanced</code> · <strong>Network:</strong> offline</p>
-<p>Today you freeze a feasible problem, evaluation plan, and reproducible project skeleton. A strong capstone is a defensible, runnable argument—not a large pile of techniques.</p>
+<p>Today you freeze a feasible problem, evaluation plan, and reproducible project skeleton. A strong capstone is a defensible, runnable argument, not a large pile of techniques.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <p>By the end of the lesson, you can:</p>
 <ul>
@@ -501,7 +501,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules">Concept deep dive — capstone scope, decision framing, data contracts, and early stop rules<a class="heading-anchor" href="#guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules">Concept deep dive: capstone scope, decision framing, data contracts, and early stop rules<a class="heading-anchor" href="#guide--concept-deep-dive-capstone-scope-decision-framing-data-contracts-and-early-stop-rules" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A capstone begins with a decision and stakeholder, not an algorithm. The problem statement identifies who acts, what prediction or analysis is available at that moment, and what outcome changes. A baseline, primary metric, guardrails, and acceptance threshold make success falsifiable.</p>
 <p>A data contract records source/license, row grain, keys, schema, missingness, time boundary, target construction, and prohibited fields. A risk register covers leakage, privacy, fairness, security, operations, and uncertainty. Stop rules prevent endless tuning when data or evidence cannot support the proposed claim.</p>
@@ -512,7 +512,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>milestone checkpoint:</strong> produces a reviewable artifact and explicit continue/pivot/stop decision.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-validate-a-project-charter-as-data">Focused example A — validate a project charter as data<a class="heading-anchor" href="#guide--focused-example-a-validate-a-project-charter-as-data" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-validate-a-project-charter-as-data">Focused example A: validate a project charter as data<a class="heading-anchor" href="#guide--focused-example-a-validate-a-project-charter-as-data" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">charter <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">stakeholder</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">course reviewer</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
@@ -532,7 +532,7 @@ missing <span class="syntax-operator">=</span> required <span class="syntax-oper
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> missing</code></pre>
 <p><strong>Expected observation:</strong> The charter is reviewable because every required decision field has a concrete value.</p>
 <p><strong>Assumption to name:</strong> The stakeholder confirms the metric and capacity actually reflect the intended action.</p>
-<h5 id="guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks">Focused example B — turn a claim into predeclared acceptance checks<a class="heading-anchor" href="#guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks">Focused example B: turn a claim into predeclared acceptance checks<a class="heading-anchor" href="#guide--focused-example-b-turn-a-claim-into-predeclared-acceptance-checks" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python">acceptance <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">observed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">&gt;=</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">threshold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -592,15 +592,15 @@ results <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li>Write the problem statement and success metric in the notebook.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.</p>
+<p><strong>Verify:</strong> Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.</p>
 <ol>
 <li>Create the project skeleton.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.</p>
+<p><strong>Verify:</strong> Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.</p>
 <ol>
 <li>Build a baseline and record metrics.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.</p>
+<p><strong>Verify:</strong> Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Start with the decision and cost of errors; select the metric afterward.</li>
@@ -614,15 +614,15 @@ results <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li><strong>Scope and stop rules:</strong> Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value. <strong>Progressive hint:</strong> Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.</li>
 </ol>
-<p><strong>Verify:</strong> Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.</p>
+<p><strong>Verify:</strong> Scope and stop rules; deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.</p>
 <ol>
 <li><strong>Capstone data contract:</strong> Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint. <strong>Progressive hint:</strong> Use a tiny valid fixture and deliberately invalid fixture to test the validator.</li>
 </ol>
-<p><strong>Verify:</strong> Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.</p>
+<p><strong>Verify:</strong> Capstone data contract; validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.</p>
 <ol>
 <li><strong>Decision log:</strong> Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger. <strong>Progressive hint:</strong> Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.</li>
 </ol>
-<p><strong>Verify:</strong> Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.</p>
+<p><strong>Verify:</strong> Decision log; record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -673,10 +673,10 @@ results <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ul>
 <li>Build in the <a href="python-59.html#learner">Day 59 learner notebook</a>.</li>
 <li>Then review the <a href="python-59.html#solution-1">Day 59 solution</a>.</li>
-<li>Continue to <a href="python-60.html#guide">Day 60 — Completion and Presentation</a>.</li>
+<li>Continue to <a href="python-60.html#guide">Day 60; Completion and Presentation</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-59` — Day 59 — Capstone Kickoff.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -943,7 +943,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-59-solutions-capstone-kickoff">Day 59 — Solutions: Capstone Kickoff<a class="heading-anchor" href="#solution-1--day-59-solutions-capstone-kickoff" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-59-solutions-capstone-kickoff">Day 59: Solutions: Capstone Kickoff<a class="heading-anchor" href="#solution-1--day-59-solutions-capstone-kickoff" aria-label="Link to this section">#</a></h3>
 <p>We provide concrete templates and examples for scope, metrics, data access, baseline, risks, and milestones.</p>
 <p>Contents</p>
 <ul>
@@ -952,7 +952,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Exercise 3: Baseline metric, risks, milestones</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Problem and hypotheses (template)</p>
+<p>Worked reference for Exercise 1; Problem and hypotheses (template)</p>
 <pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic"># Problem Statement</span>
 We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;business value&gt;.
 
@@ -964,7 +964,7 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
 <span class="syntax-generic">## Success Metrics</span>
 <span class="syntax-keyword">-</span> Primary: AUC ≥ 0.80 on holdout within ±2% over 4 weeks
 - Secondary: Calibration error ≤ 0.02, latency ≤ 50ms P95</code></pre>
-<p>Worked reference for Exercise 2 — Data sources and contracts</p>
+<p>Worked reference for Exercise 2; Data sources and contracts</p>
 <pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Sources</span>
 <span class="syntax-keyword">-</span> Warehouse table analytics.users_daily (owner: data-eng)
 <span class="syntax-keyword">-</span> CRM API /tickets (owner: ops)
@@ -972,7 +972,7 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
 <span class="syntax-generic">## Contracts</span>
 <span class="syntax-keyword">-</span> Schema, freshness (daily by 02:00 UTC), null rate &lt; 1%
 - Access: request via JIRA SEC‑123; principle of least privilege</code></pre>
-<p>Worked reference for Exercise 3 — Baseline, risks, milestones</p>
+<p>Worked reference for Exercise 3; Baseline, risks, milestones</p>
 <pre class="highlighted-code"><code class="language-markdown"><span class="syntax-generic">## Baseline</span>
 <span class="syntax-keyword">-</span> Heuristic: last_30d_activity&gt;0 → non‑churner; baseline AUC ≈ 0.62
 
@@ -1003,42 +1003,42 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write the problem statement and success metric in the notebook.</p>
 <p><strong>How to reason about it:</strong> Define stakeholder decision, prediction unit/time, target, error costs, success metric, minimum practical improvement, and excluded uses before choosing model families.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — capstone scope, decision framing, data contracts, and early stop rules — write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; capstone scope, decision framing, data contracts, and early stop rules; write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create the project skeleton.</p>
 <p><strong>How to reason about it:</strong> Create the skeleton and ignored artifact/data locations before exploratory sprawl. The README and pyproject are active contracts, not end-of-project cleanup.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — capstone scope, decision framing, data contracts, and early stop rules — create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; capstone scope, decision framing, data contracts, and early stop rules; create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a baseline and record metrics.</p>
 <p><strong>How to reason about it:</strong> Use the simplest credible frozen-split baseline, save machine-readable metrics, and explain them. Optional tracking must not make offline completion dependent on a server.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — capstone scope, decision framing, data contracts, and early stop rules — save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.</p>
-<h5 id="solution-1--exercise-4-scope-and-stop-rules">Exercise 4 — Scope and stop rules<a class="heading-anchor" href="#solution-1--exercise-4-scope-and-stop-rules" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; capstone scope, decision framing, data contracts, and early stop rules; save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.</p>
+<h5 id="solution-1--exercise-4-scope-and-stop-rules">Exercise 4: Scope and stop rules<a class="heading-anchor" href="#solution-1--exercise-4-scope-and-stop-rules" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write must-have, should-have, and out-of-scope lists plus kill criteria for unavailable data, inadequate support, unacceptable harm, or missed minimum baseline value.</p>
 <p><strong>Reasoning before implementation:</strong> Time-box discovery and name the evidence that triggers pivot, pause, or stop. Do not make deployment the default capstone requirement.</p>
 <p>The contract should fit the remaining course time on a clean laptop. Kill criteria protect against manufacturing a result when data rights, target quality, group support, or practical value are inadequate.</p>
 <p>Record the decision and date in a log. A well-supported “do not deploy” or “collect better labels” conclusion is a successful analytical outcome.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Scope and stop rules — deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.</p>
-<h5 id="solution-1--exercise-5-capstone-data-contract">Exercise 5 — Capstone data contract<a class="heading-anchor" href="#solution-1--exercise-5-capstone-data-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Scope and stop rules; deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.</p>
+<h5 id="solution-1--exercise-5-capstone-data-contract">Exercise 5: Capstone data contract<a class="heading-anchor" href="#solution-1--exercise-5-capstone-data-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a versioned schema and quality report for your chosen local dataset, including source/license, row unit, target, types, ranges, missingness, duplicates, split keys, and fingerprint.</p>
 <p><strong>Reasoning before implementation:</strong> Use a tiny valid fixture and deliberately invalid fixture to test the validator.</p>
 <p>Validation should run before EDA/modeling and produce actionable failures. Document first-run network/cache behavior if using an allowed Seaborn dataset; otherwise prefer packaged/generated data for a fully offline path.</p>
 <p>Preserve raw inputs and transform into ignored artifacts. Never commit a credential, restricted dataset, or developer-specific absolute path.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Capstone data contract — validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.</p>
-<h5 id="solution-1--exercise-6-decision-log">Exercise 6 — Decision log<a class="heading-anchor" href="#solution-1--exercise-6-decision-log" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Capstone data contract; validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.</p>
+<h5 id="solution-1--exercise-6-decision-log">Exercise 6: Decision log<a class="heading-anchor" href="#solution-1--exercise-6-decision-log" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Record at least five project decisions with date, question, alternatives, evidence, chosen action, consequences, and revisit trigger.</p>
 <p><strong>Reasoning before implementation:</strong> Include split/metric/baseline choices, not only model hyperparameters. Link each result to a reproducible command or notebook cell.</p>
 <p>The log prevents hindsight from turning exploration into a falsely linear story. It also lets a reviewer distinguish a predeclared acceptance rule from one chosen after results.</p>
 <p>Keep rejected alternatives and why they were rejected. A revisit trigger such as new labels, changed prevalence, or a failed slice metric makes the decision operational rather than permanent dogma.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Decision log — record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.</p></div>
+<p><strong>Verify:</strong> Decision log; record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.</p></div>
       </section>
 
 
@@ -1174,16 +1174,16 @@ We aim to predict &lt;target&gt; for &lt;users/stakeholders&gt; to achieve &lt;b
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-59` — Day 59 — Capstone Kickoff.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-59` — Day 59 — Capstone Kickoff.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize capstone scope, decision framing, data contracts, and early stop rules. Use exactly these maintained learner materials:
@@ -1211,7 +1211,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1322,18 +1322,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

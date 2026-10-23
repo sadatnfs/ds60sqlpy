@@ -1,4 +1,4 @@
-# Day 13 — Functional Tools: `itertools` and `functools`
+# Day 13: Functional Tools: `itertools` and `functools`
 
 **Level:** Beginner
 
@@ -64,12 +64,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 13 — functional tools: `itertools` and `functools` to practice functions as values and composable iterable tools
+**Lesson outcome:** use day 13; functional tools: `itertools` and `functools` to practice functions as values and composable iterable tools
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -97,13 +97,13 @@ Avoid `reduce` when a named loop or built-in such as `sum`, `min`, or
 
 ### Syntax anatomy
 
-`map(normalize, names)` receives the function object `normalize`—without
-parentheses—and an iterable. Iteration later calls it for each item.
+`map(normalize, names)` receives the function object `normalize`, without
+parentheses, and an iterable. Iteration later calls it for each item.
 `sorted(records, key=lambda row: row["score"])` calls the key function
 once per row to derive comparison keys; the lambda returns one
 expression.
 
-### Worked example 1 — Pass a named function into a lazy transformation
+### Worked example 1: Pass a named function into a lazy transformation
 
 Keep the operation testable on its own. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -126,7 +126,7 @@ list(normalized_iter)
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Compose lazy filtering and slicing
+### Worked example 2: Compose lazy filtering and slicing
 
 Generate only as many values as the consumer requests. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -274,11 +274,11 @@ callable behaves like the general function with one argument pre-filled.
 
 - [Open the learner notebook](../notebooks/day13_functional_tools.ipynb)
 - [Check the separate solution](../solutions/day13_functional_tools/day13_solutions.md)
-- [Next: Day 14 — Ruff, mypy, and pytest](day14_code_quality_tooling.md)
+- [Next: Day 14; Ruff, mypy, and pytest](day14_code_quality_tooling.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

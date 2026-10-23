@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -445,7 +445,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_svc_01_reliable_http_clients.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
-<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab: two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
 <p>An HTTP transport sends one request and returns one response or raises a transport error. A reliable client wraps that mechanism with policy: time budgets, status classification, bounded retries/backoff, replay safety, correlation/idempotency identities, response validation, pagination bounds, and redacted diagnostics.</p>
 <p>Retry decisions need two gates: the failure may be transient, and the operation must be safe to replay. A POST is not safe merely because a library can resend it. Deadlines bound the whole logical operation, not each attempt independently.</p>
@@ -454,7 +454,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>retry classifier + budget:</strong> allows only documented transient failures while respecting attempts, delay, and remaining deadline.</li>
 <li><strong>response/schema validation:</strong> rejects malformed success bodies before trusted domain code consumes them.</li>
 </ul>
-<h5 id="guide--micro-example-a-apply-both-retryability-and-replay-safety-gates">Micro-example A — apply both retryability and replay-safety gates<a class="heading-anchor" href="#guide--micro-example-a-apply-both-retryability-and-replay-safety-gates" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-a-apply-both-retryability-and-replay-safety-gates">Micro-example A: apply both retryability and replay-safety gates<a class="heading-anchor" href="#guide--micro-example-a-apply-both-retryability-and-replay-safety-gates" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">may_retry</span><span class="syntax-punctuation">(</span>method<span class="syntax-punctuation">,</span> status<span class="syntax-punctuation">,</span> <span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> idempotency_key<span class="syntax-operator">=</span><span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     transient <span class="syntax-operator">=</span> status <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-number">429</span><span class="syntax-punctuation">,</span> <span class="syntax-number">502</span><span class="syntax-punctuation">,</span> <span class="syntax-number">503</span><span class="syntax-punctuation">,</span> <span class="syntax-number">504</span><span class="syntax-punctuation">}</span>
     replay_safe <span class="syntax-operator">=</span> method <span class="syntax-operator">in</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">GET</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">HEAD</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span> <span class="syntax-operator">or</span> idempotency_key <span class="syntax-operator">is</span> <span class="syntax-operator">not</span> <span class="syntax-keyword">None</span>
@@ -472,7 +472,7 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <span class="syntax-keyword">assert</span> decisions <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> A transient status is insufficient for an unsafe mutation without a stable idempotency identity.</p>
 <p><strong>Why it matters:</strong> The server actually enforces the idempotency-key semantics rather than merely accepting the header.</p>
-<h5 id="guide--micro-example-b-reject-a-pagination-cursor-loop">Micro-example B — reject a pagination cursor loop<a class="heading-anchor" href="#guide--micro-example-b-reject-a-pagination-cursor-loop" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-b-reject-a-pagination-cursor-loop">Micro-example B: reject a pagination cursor loop<a class="heading-anchor" href="#guide--micro-example-b-reject-a-pagination-cursor-loop" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">pages <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-keyword">None</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">next_cursor</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">items</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">next_cursor</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -496,36 +496,36 @@ items <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <p><strong>Diagnostic:</strong> Use a scripted fake to record attempt count, request identities, timeouts, delays, response closure, cursor history, and redacted log fields.</p>
 <p><strong>Transfer question:</strong> How would the policy change for a streaming download that may fail after bytes were consumed?</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
-<h5 id="guide--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#guide--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--exercise-1-classify-status">Exercise 1: classify status<a class="heading-anchor" href="#guide--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>classify_status</code>. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values.</p>
 <p>Classification is configurable in real systems. For example, a particular 409 may be retryable only when the API contract says so.</p>
-<p><strong>Verify:</strong> classify status — table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible &lt;100 or &gt;599 values; assert the exact enum/result or ValueError.</p>
-<h5 id="guide--exercise-2-authorize-replay">Exercise 2 — authorize replay<a class="heading-anchor" href="#guide--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> classify status; table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible &lt;100 or &gt;599 values; assert the exact enum/result or ValueError.</p>
+<h5 id="guide--exercise-2-authorize-replay">Exercise 2: authorize replay<a class="heading-anchor" href="#guide--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
 <p>Implement <code>method_can_retry</code>:</p>
 <ul>
 <li>GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics.</li>
 <li>POST and PATCH require a non-empty idempotency key in this lesson.</li>
 </ul>
 <p>An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.</p>
-<p><strong>Verify:</strong> authorize replay — implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.</p>
-<h5 id="guide--exercise-3-add-bounded-backoff">Exercise 3 — add bounded backoff<a class="heading-anchor" href="#guide--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> authorize replay; implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.</p>
+<h5 id="guide--exercise-3-add-bounded-backoff">Exercise 3: add bounded backoff<a class="heading-anchor" href="#guide--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
 <p>For a one-based failed attempt <code>n</code>, start with:</p>
 <pre class="highlighted-code"><code class="language-text">base_delay * 2 ** (n - 1) + base_delay * jitter_fraction</code></pre>
 <p>Cap the result. Inject the jitter source and sleep function so tests record delays without actually waiting. For 429 with numeric <code>Retry-After</code>, wait at least the server value but no longer than the policy cap.</p>
-<p><strong>Verify:</strong> add bounded backoff — with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.</p>
-<h5 id="guide--exercise-4-keep-identities-stable">Exercise 4 — keep identities stable<a class="heading-anchor" href="#guide--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> add bounded backoff; with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.</p>
+<h5 id="guide--exercise-4-keep-identities-stable">Exercise 4: keep identities stable<a class="heading-anchor" href="#guide--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
 <p>Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values.</p>
 <p>Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.</p>
-<p><strong>Verify:</strong> keep identities stable — generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.</p>
-<h5 id="guide--exercise-5-paginate-defensively">Exercise 5 — paginate defensively<a class="heading-anchor" href="#guide--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> keep identities stable; generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.</p>
+<h5 id="guide--exercise-5-paginate-defensively">Exercise 5: paginate defensively<a class="heading-anchor" href="#guide--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
 <p>Collect <code>items</code> until <code>next_cursor</code> is null. Require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count.</p>
 <p>Treat the cursor as opaque. URL-encode it rather than parsing or concatenating it manually.</p>
-<p><strong>Verify:</strong> paginate defensively — collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.</p>
-<h5 id="guide--exercise-6-configure-and-redact-auth">Exercise 6 — configure and redact auth<a class="heading-anchor" href="#guide--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> paginate defensively; collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.</p>
+<h5 id="guide--exercise-6-configure-and-redact-auth">Exercise 6: configure and redact auth<a class="heading-anchor" href="#guide--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
 <p>Read <code>DS60_API_TOKEN</code>, <code>DS60_API_BASE_URL</code>, and a numeric timeout from an injected environment mapping. Make the token field <code>repr=False</code>.</p>
 <p>Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.</p>
-<p><strong>Verify:</strong> configure and redact auth — read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.</p>
-<h5 id="guide--exercise-7-prove-policy-with-scripts">Exercise 7 — prove policy with scripts<a class="heading-anchor" href="#guide--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> configure and redact auth; read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.</p>
+<h5 id="guide--exercise-7-prove-policy-with-scripts">Exercise 7: prove policy with scripts<a class="heading-anchor" href="#guide--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
 <p>Create deterministic scripts for:</p>
 <ul>
 <li>503 then 200 for GET,</li>
@@ -552,37 +552,37 @@ items <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <li>a repeated cursor.</li>
 </ul>
 <p>Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.</p>
-<p><strong>Verify:</strong> prove policy with scripts — run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.</p>
+<p><strong>Verify:</strong> prove policy with scripts; run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
-<h5 id="guide--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8 — allocate an end-to-end timeout budget<a class="heading-anchor" href="#guide--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8: allocate an end-to-end timeout budget<a class="heading-anchor" href="#guide--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
 <p>Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts. Reject a retry when the remaining budget cannot support another useful attempt.</p>
 <p><strong>Progressive hint:</strong> Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.</p>
-<p><strong>Verify:</strong> allocate an end-to-end timeout budget — given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.</p>
-<h5 id="guide--exercise-9-support-retry-after-dates-safely">Exercise 9 — support Retry-After dates safely<a class="heading-anchor" href="#guide--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> allocate an end-to-end timeout budget; given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.</p>
+<h5 id="guide--exercise-9-support-retry-after-dates-safely">Exercise 9: support Retry-After dates safely<a class="heading-anchor" href="#guide--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
 <p>Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
 <p><strong>Progressive hint:</strong> HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.</p>
-<p><strong>Verify:</strong> support Retry-After dates safely — extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
-<h5 id="guide--exercise-10-model-a-circuit-breaker">Exercise 10 — model a circuit breaker<a class="heading-anchor" href="#guide--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> support Retry-After dates safely; extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
+<h5 id="guide--exercise-10-model-a-circuit-breaker">Exercise 10: model a circuit breaker<a class="heading-anchor" href="#guide--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
 <p>Design closed, open, and half-open states around the existing retrying client. Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
 <p><strong>Progressive hint:</strong> A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.</p>
-<p><strong>Verify:</strong> model a circuit breaker — design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
-<h5 id="guide--exercise-11-bound-concurrent-requests">Exercise 11 — bound concurrent requests<a class="heading-anchor" href="#guide--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> model a circuit breaker; design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
+<h5 id="guide--exercise-11-bound-concurrent-requests">Exercise 11: bound concurrent requests<a class="heading-anchor" href="#guide--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
 <p>Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.</p>
 <p><strong>Progressive hint:</strong> The concurrency permit surrounds only the scarce external call. A <code>finally</code> block or context manager owns release.</p>
-<p><strong>Verify:</strong> bound concurrent requests — add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.</p>
-<h5 id="guide--exercise-12-close-streaming-responses">Exercise 12 — close streaming responses<a class="heading-anchor" href="#guide--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> bound concurrent requests; add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.</p>
+<h5 id="guide--exercise-12-close-streaming-responses">Exercise 12: close streaming responses<a class="heading-anchor" href="#guide--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
 <p>Define a streaming-response protocol with explicit close and cancellation semantics. Test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
 <p><strong>Progressive hint:</strong> Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.</p>
-<p><strong>Verify:</strong> close streaming responses — define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
-<h5 id="guide--exercise-13-inject-a-credential-provider">Exercise 13 — inject a credential provider<a class="heading-anchor" href="#guide--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> close streaming responses; define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
+<h5 id="guide--exercise-13-inject-a-credential-provider">Exercise 13: inject a credential provider<a class="heading-anchor" href="#guide--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
 <p>Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.</p>
 <p><strong>Progressive hint:</strong> Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.</p>
-<p><strong>Verify:</strong> inject a credential provider — replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.</p>
-<h5 id="guide--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14 — build an adversarial transport contract suite<a class="heading-anchor" href="#guide--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> inject a credential provider; replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.</p>
+<h5 id="guide--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14: build an adversarial transport contract suite<a class="heading-anchor" href="#guide--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
 <p>Extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
 <p><strong>Progressive hint:</strong> Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.</p>
-<p><strong>Verify:</strong> build an adversarial transport contract suite — extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
+<p><strong>Verify:</strong> build an adversarial transport contract suite; extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Every attempt has a positive timeout.</li>
@@ -620,8 +620,8 @@ items <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <li>Combine this lesson with <code>python-pro-02</code>, using a bounded queue whose workers call the reliable client.</li>
 <li>Continue to Bridge Days 3–4 to compare HTTP value binding, transaction boundaries, retry eligibility, and idempotency with database operations.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-svc-01` — Reliable HTTP clients and external-service boundaries.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1040,104 +1040,104 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-svc-01.html#solution-2"><code>py_svc_01_reliable_http_clients_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
-<h5 id="solution-1--exercise-1-classify-status">Exercise 1 — classify status<a class="heading-anchor" href="#solution-1--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-classify-status">Exercise 1: classify status<a class="heading-anchor" href="#solution-1--exercise-1-classify-status" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>classify_status</code>. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values. Classification is configurable in real systems. For example, a particular 409 may be retryable only when the API contract says so.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> classify status — table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible &lt;100 or &gt;599 values; assert the exact enum/result or ValueError.</p>
-<h5 id="solution-1--exercise-2-authorize-replay">Exercise 2 — authorize replay<a class="heading-anchor" href="#solution-1--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> classify status; table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible &lt;100 or &gt;599 values; assert the exact enum/result or ValueError.</p>
+<h5 id="solution-1--exercise-2-authorize-replay">Exercise 2: authorize replay<a class="heading-anchor" href="#solution-1--exercise-2-authorize-replay" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Implement <code>method_can_retry</code>: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in this lesson. An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> authorize replay — implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.</p>
-<h5 id="solution-1--exercise-3-add-bounded-backoff">Exercise 3 — add bounded backoff<a class="heading-anchor" href="#solution-1--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> authorize replay; implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.</p>
+<h5 id="solution-1--exercise-3-add-bounded-backoff">Exercise 3: add bounded backoff<a class="heading-anchor" href="#solution-1--exercise-3-add-bounded-backoff" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> For one-based failed attempt <code>n</code>, start with <code>base_delay * 2 ** (n - 1) + base_delay * jitter_fraction</code>, then cap the result. Inject jitter and sleep so tests record delays without waiting. For 429 with numeric <code>Retry-After</code>, honor at least the server value without exceeding policy.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> add bounded backoff — with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.</p>
-<h5 id="solution-1--exercise-4-keep-identities-stable">Exercise 4 — keep identities stable<a class="heading-anchor" href="#solution-1--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> add bounded backoff; with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.</p>
+<h5 id="solution-1--exercise-4-keep-identities-stable">Exercise 4: keep identities stable<a class="heading-anchor" href="#solution-1--exercise-4-keep-identities-stable" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values. Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> keep identities stable — generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.</p>
-<h5 id="solution-1--exercise-5-paginate-defensively">Exercise 5 — paginate defensively<a class="heading-anchor" href="#solution-1--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> keep identities stable; generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.</p>
+<h5 id="solution-1--exercise-5-paginate-defensively">Exercise 5: paginate defensively<a class="heading-anchor" href="#solution-1--exercise-5-paginate-defensively" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Collect <code>items</code> until <code>next_cursor</code> is null. Require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor as opaque. URL-encode it rather than parsing or concatenating it manually.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> paginate defensively — collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.</p>
-<h5 id="solution-1--exercise-6-configure-and-redact-auth">Exercise 6 — configure and redact auth<a class="heading-anchor" href="#solution-1--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> paginate defensively; collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.</p>
+<h5 id="solution-1--exercise-6-configure-and-redact-auth">Exercise 6: configure and redact auth<a class="heading-anchor" href="#solution-1--exercise-6-configure-and-redact-auth" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Read <code>DS60_API_TOKEN</code>, <code>DS60_API_BASE_URL</code>, and a numeric timeout from an injected environment mapping. Make the token field <code>repr=False</code>. Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> configure and redact auth — read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.</p>
-<h5 id="solution-1--exercise-7-prove-policy-with-scripts">Exercise 7 — prove policy with scripts<a class="heading-anchor" href="#solution-1--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> configure and redact auth; read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.</p>
+<h5 id="solution-1--exercise-7-prove-policy-with-scripts">Exercise 7: prove policy with scripts<a class="heading-anchor" href="#solution-1--exercise-7-prove-policy-with-scripts" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3. 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with <code>Retry-After</code>, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor. Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.</p>
 <p><strong>Reference reasoning:</strong> Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> prove policy with scripts — run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.</p>
-<h5 id="solution-1--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8 — allocate an end-to-end timeout budget<a class="heading-anchor" href="#solution-1--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> prove policy with scripts; run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.</p>
+<h5 id="solution-1--exercise-8-allocate-an-end-to-end-timeout-budget">Exercise 8: allocate an end-to-end timeout budget<a class="heading-anchor" href="#solution-1--exercise-8-allocate-an-end-to-end-timeout-budget" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts. Reject a retry when the remaining budget cannot support another useful attempt.</p>
 <p><strong>Reasoning path:</strong> Use an injected monotonic clock and compute a deadline once per logical request. Per-attempt timeouts must shrink with remaining time.</p>
 <p>Create <code>deadline = now + total_budget</code> before the attempt loop. Before sleeping or sending, compute remaining time and stop when it cannot cover the minimum attempt budget. Pass bounded connect/read/pool values to the transport rather than one unexamined global timeout.</p>
 <p>The final error should preserve attempts, correlation ID, and whether the deadline or retry count ended the request. Wall-clock time is unsuitable because clock adjustment can move it backward.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> allocate an end-to-end timeout budget — given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.</p>
-<h5 id="solution-1--exercise-9-support-retry-after-dates-safely">Exercise 9 — support Retry-After dates safely<a class="heading-anchor" href="#solution-1--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> allocate an end-to-end timeout budget; given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.</p>
+<h5 id="solution-1--exercise-9-support-retry-after-dates-safely">Exercise 9: support Retry-After dates safely<a class="heading-anchor" href="#solution-1--exercise-9-support-retry-after-dates-safely" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Extend policy reasoning from numeric Retry-After seconds to an HTTP-date. Inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
 <p><strong>Reasoning path:</strong> HTTP-date parsing needs wall time; sleeping and deadline accounting need monotonic time. Invalid server guidance falls back to local backoff.</p>
 <p>Parse only the documented HTTP-date format with a timezone-aware standard library parser. Convert the server date to a nonnegative delay from injected wall time, then combine it with local exponential backoff and cap it by both policy and caller deadline. A past date contributes zero.</p>
 <p>Malformed guidance should be recorded safely and ignored, not crash the client or produce an unbounded sleep. Tests use fixed clocks and recorded sleep; they never wait in real time.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> support Retry-After dates safely — extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
-<h5 id="solution-1--exercise-10-model-a-circuit-breaker">Exercise 10 — model a circuit breaker<a class="heading-anchor" href="#solution-1--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> support Retry-After dates safely; extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.</p>
+<h5 id="solution-1--exercise-10-model-a-circuit-breaker">Exercise 10: model a circuit breaker<a class="heading-anchor" href="#solution-1--exercise-10-model-a-circuit-breaker" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Design closed, open, and half-open states around the existing retrying client. Specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
 <p><strong>Reasoning path:</strong> A breaker protects a dependency across logical requests; it does not replace per-attempt timeout or retry policy.</p>
 <p>In closed state, count only configured dependency failures. Crossing the threshold opens until an injected monotonic deadline. After cooldown, permit a bounded probe; success closes and resets, while failure reopens. Concurrent callers must not all become the half-open probe.</p>
 <p>Expose state transitions as low-cardinality metrics/events. Do not count local validation or caller-cancellation errors as dependency health unless the contract explicitly says so.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> model a circuit breaker — design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
-<h5 id="solution-1--exercise-11-bound-concurrent-requests">Exercise 11 — bound concurrent requests<a class="heading-anchor" href="#solution-1--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> model a circuit breaker; design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.</p>
+<h5 id="solution-1--exercise-11-bound-concurrent-requests">Exercise 11: bound concurrent requests<a class="heading-anchor" href="#solution-1--exercise-11-bound-concurrent-requests" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately. Prove permits release on success, exception, timeout, and cancellation.</p>
 <p><strong>Reasoning path:</strong> The concurrency permit surrounds only the scarce external call. A <code>finally</code> block or context manager owns release.</p>
 <p>Use an injected semaphore/gate with an explicit acquisition policy and maximum queue or wait time. Return a distinct saturation error so callers can distinguish local protection from a remote status. Hold the permit during the transport call, not during unrelated parsing or caller work.</p>
 <p>A bulkhead limits one process; distributed request pressure requires an upstream/shared policy. Avoid unbounded queues that merely move the overload into memory and latency.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> bound concurrent requests — add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.</p>
-<h5 id="solution-1--exercise-12-close-streaming-responses">Exercise 12 — close streaming responses<a class="heading-anchor" href="#solution-1--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> bound concurrent requests; add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.</p>
+<h5 id="solution-1--exercise-12-close-streaming-responses">Exercise 12: close streaming responses<a class="heading-anchor" href="#solution-1--exercise-12-close-streaming-responses" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Define a streaming-response protocol with explicit close and cancellation semantics. Test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
 <p><strong>Reasoning path:</strong> Ownership must say who closes the response. Use a context manager and enforce size while reading chunks, not after buffering everything.</p>
 <p>The transport returns an async or synchronous context-managed byte stream. The client reads bounded chunks, updates a byte count, and closes in <code>finally</code> for normal completion and every failure. Parsing happens after or incrementally within the same ownership boundary.</p>
 <p>Reject oversized or decompression-expanded content before it exhausts memory. Never retry after an unsafe partial side effect merely because stream parsing failed.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> close streaming responses — define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
-<h5 id="solution-1--exercise-13-inject-a-credential-provider">Exercise 13 — inject a credential provider<a class="heading-anchor" href="#solution-1--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> close streaming responses; define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.</p>
+<h5 id="solution-1--exercise-13-inject-a-credential-provider">Exercise 13: inject a credential provider<a class="heading-anchor" href="#solution-1--exercise-13-inject-a-credential-provider" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge. Preserve redaction and prevent refresh loops.</p>
 <p><strong>Reasoning path:</strong> Credential acquisition is a separate boundary. Cache/expiry policy and single-flight refresh belong to the provider.</p>
 <p>Ask the provider for a credential immediately before preparing an attempt. After the API&#x27;s documented expired-token response, invalidate/refresh at most once for the logical request, then replay only when the operation is otherwise safe. Keep token values out of dataclass repr, errors, and logs.</p>
 <p>Concurrent expired requests should share one refresh where practical. Authentication failure is not a reason for unbounded general retries.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> inject a credential provider — replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.</p>
-<h5 id="solution-1--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14 — build an adversarial transport contract suite<a class="heading-anchor" href="#solution-1--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> inject a credential provider; replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.</p>
+<h5 id="solution-1--exercise-14-build-an-adversarial-transport-contract-suite">Exercise 14: build an adversarial transport contract suite<a class="heading-anchor" href="#solution-1--exercise-14-build-an-adversarial-transport-contract-suite" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p>
 <p><strong>Reasoning path:</strong> Assert bounded attempts, exact request identity, closed resources, typed errors, and the absence of secret material in every diagnostic.</p>
 <p>Each script names the expected call count, retry decision, error type, delay, and log projection. Redirect behavior must be explicit because forwarding authorization across origins is dangerous. Validate content type and response shape before using fields.</p>
 <p>Use only local fake transports and placeholder credentials. A contract suite proves client policy independent of any particular HTTP library adapter; each real adapter still needs a small local integration test.</p>
 <p><strong>Common trap:</strong> Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> build an adversarial transport contract suite — extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p></div>
+<p><strong>Verify:</strong> build an adversarial transport contract suite; extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.</p></div>
       </section>
 
 
@@ -1641,16 +1641,16 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-svc-01` — Reliable HTTP clients and external-service boundaries.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-svc-01` — Reliable HTTP clients and external-service boundaries.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize HTTP mechanism versus retry, timeout, pagination, idempotency, and redaction policy. Use exactly these maintained learner materials:
@@ -1678,7 +1678,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1789,18 +1789,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

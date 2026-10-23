@@ -1,4 +1,4 @@
-# Day 32 — Statistical Inference
+# Day 32: Statistical Inference
 
 **Lesson ID:** `python-32` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -103,7 +103,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — sampling uncertainty, confidence intervals, and hypothesis-test evidence
+## Concept deep dive: sampling uncertainty, confidence intervals, and hypothesis-test evidence
 
 ### The mental model
 
@@ -131,7 +131,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — see interval width respond to sample size
+### Focused example A: see interval width respond to sample size
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -160,7 +160,7 @@ assert np.ptp(large_ci) < np.ptp(small_ci)
 
 **Assumption to name:** The observations are independent and the mean's t-based sampling model is reasonable.
 
-### Focused example B — separate statistical detection from practical size
+### Focused example B: separate statistical detection from practical size
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -206,18 +206,18 @@ assert abs(standardized_effect) < 0.05
 1. Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the
    difference in means with Welch's t-test.
 
-**Verify:** Practice 1 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
+**Verify:** Practice 1; sampling uncertainty, confidence intervals, and hypothesis-test evidence; record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
 
 2. Build a contingency table from categorical data and run a chi-square test.
    For a fully offline run, construct a small table directly; a cached Seaborn
    dataset is optional.
 
-**Verify:** Practice 2 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
+**Verify:** Practice 2; sampling uncertainty, confidence intervals, and hypothesis-test evidence; print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
 
 3. Compute 90% and 99% confidence intervals for the same mean and compare their
    widths.
 
-**Verify:** Practice 3 — sampling uncertainty, confidence intervals, and hypothesis-test evidence — from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
+**Verify:** Practice 3; sampling uncertainty, confidence intervals, and hypothesis-test evidence; from one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
 
 ### Progressive hints
 
@@ -238,17 +238,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Prediction:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
    **Progressive hint:** Standard error shrinks approximately with \(\frac1{\sqrt n}\); the underlying standardized effect does not grow merely because more rows were collected.
 
-**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
+**Verify:** Prediction; with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
 
 5. **Implementation:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
    **Progressive hint:** Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.
 
-**Verify:** Implementation — with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.
+**Verify:** Implementation; with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.
 
 6. **Multiple-comparison reasoning:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
    **Progressive hint:** Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.
 
-**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
+**Verify:** Multiple-comparison reasoning; show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -281,12 +281,12 @@ the same shape and total count as the observed contingency table.
 - Work in the [Day 32 learner notebook](../notebooks/day32_statistical_inference.ipynb).
 - Then consult the
   [Day 32 solution](../solutions/day32_statistical_inference/day32_solutions.md).
-- Continue to [Day 33 — Linear Algebra](day33_linear_algebra_matrices.md).
+- Continue to [Day 33; Linear Algebra](day33_linear_algebra_matrices.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-32` — Day 32 — Statistical Inference.

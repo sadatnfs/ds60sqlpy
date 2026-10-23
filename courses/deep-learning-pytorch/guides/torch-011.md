@@ -177,7 +177,7 @@ Tensor state that should move and serialize with the model but is not optimized 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-011, nn.Module, registered parameters and explicit training loops.

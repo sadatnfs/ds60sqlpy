@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-22-advanced-windows-multiple-partitions-named-windows-exclusion-companion-guide">Day 22 — Advanced Windows: Multiple Partitions, Named Windows, Exclusion (Companion Guide)<a class="heading-anchor" href="#guide--day-22-advanced-windows-multiple-partitions-named-windows-exclusion-companion-guide" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-22-advanced-windows-multiple-partitions-named-windows-exclusion-companion-guide">Day 22: Advanced Windows: Multiple Partitions, Named Windows, Exclusion (Companion Guide)<a class="heading-anchor" href="#guide--day-22-advanced-windows-multiple-partitions-named-windows-exclusion-companion-guide" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Intermediate</li>
-<li><strong>Prerequisites:</strong> <a href="sql-21.html#guide">Day 21 — distribution functions</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-21.html#guide">Day 21; distribution functions</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-22.html#learner">learner SQL</a> · <a href="sql-22.html#solution-1">solution reasoning</a> · <a href="sql-22.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-22 — Advanced Windows</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-22; Advanced Windows</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-22/lesson/workspace/sql/postgres-60day/day22_advanced_windows.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -458,7 +458,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day22_advanced_windows.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Named window, Peer exclusion, Mixed grain. Its worked SQL reads or creates <code>order_items</code>, <code>products</code>, <code>orders</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -543,7 +543,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Does an excluded-row calculation handle one-row partitions without dividing by zero?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-23.html#guide">Day 23 — common table expressions</a>.</p>
+<p>Continue to <a href="sql-23.html#guide">Day 23; common table expressions</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <p>Learning objectives</p>
 <ul>
@@ -578,8 +578,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>WINDOW clause: https://www.postgresql.org/docs/current/sql-select.html#SQL-WINDOW</li>
 <li>Exclusion: https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-22 — Advanced Windows.
 
 I have completed the direct catalog prerequisite: `sql-21`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -770,7 +770,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-windows-multiple-partitions-named-windows-exclusion">Day 22 solutions — Advanced Windows: Multiple Partitions, Named Windows, Exclusion<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-windows-multiple-partitions-named-windows-exclusion" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-22-solutions-advanced-windows-multiple-partitions-named-windows-exclusion">Day 22 solutions: Advanced Windows: Multiple Partitions, Named Windows, Exclusion<a class="heading-anchor" href="#solution-1--day-22-solutions-advanced-windows-multiple-partitions-named-windows-exclusion" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -798,7 +798,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Primary pitfall:</strong> Layered window calculations require CTEs because one window result cannot generally be nested directly inside another at the same query level.</li>
 <li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
 </ul>
-<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Use a named window to show each order with customer count, average, first date, and last date.</p>
 <p><strong>Reasoning:</strong> Name a full-partition customer window once and reuse it.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -834,7 +834,7 @@ WINDOW customer_window <span class="syntax-keyword">AS</span> <span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-22 Exercise 1, the chosen form is justified by this lesson-specific rationale: Name a full-partition customer window once and reuse it. Evaluate another form against the concrete expected result (One row per order) and the verification above.</li>
 <li><strong>Edge case:</strong> Tie two rows on <code>o.customer_id</code> and give them different <code>o.order_id</code> values; verify <code>o.customer_id, o.order_date, o.order_id</code> chooses a stable first/last row.</li>
 </ul>
-<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Compare each employee salary with the average of other employees in the department.</p>
 <p><strong>Reasoning:</strong> Use <code>EXCLUDE CURRENT ROW</code>; a one-person partition yields NULL.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -871,7 +871,7 @@ WINDOW customer_window <span class="syntax-keyword">AS</span> <span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-22 Exercise 2, the chosen form is justified by this lesson-specific rationale: Use <code>EXCLUDE CURRENT ROW</code>; a one-person partition yields NULL. Evaluate another form against the concrete expected result (One row per employee with nullable peer average) and the verification above.</li>
 <li><strong>Edge case:</strong> Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.</li>
 </ul>
-<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Show each order&#x27;s distance from its customer&#x27;s average and standard deviation.</p>
 <p><strong>Reasoning:</strong> Compute independent partition windows and guard interpretation when variation is zero.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -907,7 +907,7 @@ WINDOW customer_orders <span class="syntax-keyword">AS</span> <span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-22 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute independent partition windows and guard interpretation when variation is zero. Evaluate another form against the concrete expected result (One row per order) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one source row with a new <code>order_id</code>; verify the result gains exactly one row carrying that <code>order_id</code> value.</li>
 </ul>
-<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Sessionize events using a 30-minute gap and predict why the first event starts a session.</p>
 <p><strong>Reasoning:</strong> Lag event time per customer, flag NULL/large gaps, then cumulative-sum flags in a second layer.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -960,7 +960,7 @@ WINDOW customer_orders <span class="syntax-keyword">AS</span> <span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-22 Exercise 4, the chosen form is justified by this lesson-specific rationale: Lag event time per customer, flag NULL/large gaps, then cumulative-sum flags in a second layer. Evaluate another form against the concrete expected result (One row per event with session number starting at one) and the verification above.</li>
 <li><strong>Edge case:</strong> Use a one-row partition and a partition tied on <code>customer_id</code>; verify <code>event_id</code> and <code>customer_id, event_time, event_id</code> preserve the intended first/last row.</li>
 </ul>
-<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Find consecutive calendar-day islands in customer order dates without nesting windows.</p>
 <p><strong>Reasoning:</strong> Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1010,7 +1010,7 @@ WINDOW customer_orders <span class="syntax-keyword">AS</span> <span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-22 Exercise 5, the chosen form is justified by this lesson-specific rationale: Deduplicate dates, use row number to derive a stable grouping key, then aggregate islands. Evaluate another form against the concrete expected result (One row per customer/date island) and the verification above.</li>
 <li><strong>Edge case:</strong> Add one row to an existing group and one row for a new group; recompute <code>island_start</code>, <code>island_end</code>, and <code>days_in_island</code> for the existing <code>customer_id</code>, and <code>island_key</code> tuple and verify the new tuple appears exactly once.</li>
 </ul>
-<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Summarize sessions from the sessionized event stream with start, end, event count, and duration.</p>
 <p><strong>Reasoning:</strong> Aggregate only after session IDs exist at event grain.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1357,16 +1357,16 @@ WINDOW customer_orders <span class="syntax-keyword">AS</span> <span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-22 — Advanced Windows.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-22 — Advanced Windows.
 
 I have completed the direct catalog prerequisite: `sql-21`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day22_advanced_windows.md
@@ -1393,7 +1393,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1504,18 +1504,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

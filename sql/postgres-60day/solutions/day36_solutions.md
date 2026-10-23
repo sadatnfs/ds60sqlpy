@@ -1,4 +1,4 @@
-# Day 36 — Solutions: Materialized Views
+# Day 36: Solutions: Materialized Views
 
 
 <!-- beginner-solution-enrichment -->
@@ -56,7 +56,7 @@ correctness is established with evidence.
 A materialized view stores query results. Reads can become cheaper, but the
 result is a snapshot and must be refreshed when source data changes.
 
-## Exercise 1 — Weekly revenue by country
+## Exercise 1: Weekly revenue by country
 
 This demonstration is transactional and leaves no materialized view behind.
 
@@ -99,7 +99,7 @@ on Monday under `date_trunc('week', ...)`.
 - **Alternative/trade-off:** For sql-36 Exercise 1, the chosen form is justified by this lesson-specific rationale: This demonstration is transactional and leaves no materialized view behind. Evaluate another form against the concrete expected result (one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Compare base-table and snapshot plans
+## Exercise 2: Compare base-table and snapshot plans
 
 ```sql
 BEGIN;
@@ -162,7 +162,7 @@ buffers as well as execution time.
 - Materialized views duplicate data and add refresh cost; they are not a default
   replacement for indexing or query repair.
 
-## Exercise 3 — Observe stale then refreshed data
+## Exercise 3: Observe stale then refreshed data
 
 The transaction changes one disposable source row after materialization.
 Source and view totals diverge until `REFRESH`, making the freshness contract
@@ -178,7 +178,7 @@ visible instead of merely described.
 - **Alternative/trade-off:** For sql-36 Exercise 3, the chosen form is justified by this lesson-specific rationale: The transaction changes one disposable source row after materialization. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
 - **Edge case:** Add one row for which `(order_id = (SELECT MIN(order_id) FROM orders))` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 4 — Explain concurrent-refresh eligibility
+## Exercise 4: Explain concurrent-refresh eligibility
 
 The unique `(week, country)` index supplies a stable row identity required by
 concurrent refresh. Initial population and this rollback lab still use ordinary
@@ -194,7 +194,7 @@ refresh; concurrent refresh also has transaction restrictions.
 - **Alternative/trade-off:** For sql-36 Exercise 4, the chosen form is justified by this lesson-specific rationale: The unique `(week, country)` index supplies a stable row identity required by concurrent refresh. Evaluate another form against the concrete expected result (one row per `indexdef`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `indexdef`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 5 — Name the revenue definition
+## Exercise 5: Name the revenue definition
 
 The view stores order-header totals. The control query prints header and
 line-item revenue side by side so a consumer must choose a business definition.
@@ -209,7 +209,7 @@ line-item revenue side by side so a consumer must choose a business definition.
 - **Alternative/trade-off:** For sql-36 Exercise 5, the chosen form is justified by this lesson-specific rationale: The view stores order-header totals. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 6 — Materialize missing combinations explicitly
+## Exercise 6: Materialize missing combinations explicitly
 
 A cross-joined week/country spine defines requested combinations. The left join
 and `COALESCE` then implement a deliberate zero-display policy.

@@ -1,4 +1,4 @@
-# Day 58 Solutions — Staging, Cleaning, and Ingestion
+# Day 58 Solutions: Staging, Cleaning, and Ingestion
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ normalization/validation, and a stored procedure that cleans, validates,
 upserts, and returns load counts. The full transaction-safe answer is
 [`day58_solutions.sql`](day58_solutions.sql).
 
-## Exercises 1 and 2 — Dates and phone numbers
+## Exercises 1 and 2: Dates and phone numbers
 
 The staged answer supports these guarded timestamp formats:
 
@@ -88,7 +88,7 @@ Expected shape: one row per raw phone with normalized digits and a Boolean
 validation flag. This regex is a simplified North American course rule, not a
 global phone-number standard.
 
-## Capstone implementation — Exercise 3 ingestion procedure
+## Capstone implementation: Exercise 3 ingestion procedure
 
 The procedure uses an `INOUT` pair because PostgreSQL procedures do not return a
 query result like table-returning functions. `CALL` returns the final parameter
@@ -281,7 +281,7 @@ count. The whole demo rolls back, including the procedure and customer changes.
 - The phone regex is intentionally narrow; use country-aware normalization for
   international data.
 
-## Exercise 1 — Parse multiple datetime formats
+## Exercise 1: Parse multiple datetime formats
 
 Guard each cast with a pattern-specific CASE branch. Unrecognized text maps to
 NULL and an invalid-datetime reason instead of aborting the batch.
@@ -296,7 +296,7 @@ NULL and an invalid-datetime reason instead of aborting the batch.
 - **Alternative/trade-off:** For sql-58 Exercise 1, the chosen form is justified by this lesson-specific rationale: Guard each cast with a pattern-specific CASE branch. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 2 — Normalize phone safely
+## Exercise 2: Normalize phone safely
 
 The answer removes non-digits, then applies a deliberately narrow length check.
 It retains the normalized staging value but does not invent a destination
@@ -312,7 +312,7 @@ column absent from `training.customers`.
 - **Alternative/trade-off:** For sql-58 Exercise 2, the chosen form is justified by this lesson-specific rationale: The answer removes non-digits, then applies a deliberately narrow length check. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 3 — Build the `INOUT` ingestion procedure
+## Exercise 3: Build the `INOUT` ingestion procedure
 
 The complete transaction-safe procedure, its `CALL`, row-level evidence, and
 reasoning appear in the
@@ -321,7 +321,7 @@ Use that runnable implementation to compare your attempt clause by clause,
 including its validation rules, deterministic upsert, returned counts, and
 rollback boundary.
 
-## Exercise 4 — Choose duplicate winners deterministically
+## Exercise 4: Choose duplicate winners deterministically
 
 Normalize email before partitioning. Newest parsed timestamp wins, followed by
 stable name/email tie-breakers; source input order never decides.
@@ -336,7 +336,7 @@ stable name/email tie-breakers; source input order never decides.
 - **Alternative/trade-off:** For sql-58 Exercise 4, the chosen form is justified by this lesson-specific rationale: Normalize email before partitioning. Evaluate another form against the concrete expected result (one row per `make_source_duplicate_winner_selection_determini`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `make_source_duplicate_winner_selection_determini`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 5 — Partition accepted and rejected outcomes
+## Exercise 5: Partition accepted and rejected outcomes
 
 A CASE expression assigns one diagnostic outcome per cleaned row. Grouped counts
 are useful for monitoring, while detail remains available for remediation.
@@ -351,7 +351,7 @@ are useful for monitoring, while detail remains available for remediation.
 - **Alternative/trade-off:** For sql-58 Exercise 5, the chosen form is justified by this lesson-specific rationale: A CASE expression assigns one diagnostic outcome per cleaned row. Evaluate another form against the concrete expected result (one row per `outcome`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `rows` for the existing `outcome` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Normalize before conflict handling
+## Exercise 6: Normalize before conflict handling
 
 The lowercased, trimmed email is both deduplication key and target conflict key.
 Case-only variants therefore compete under one declared identity.
@@ -366,7 +366,7 @@ Case-only variants therefore compete under one declared identity.
 - **Alternative/trade-off:** For sql-58 Exercise 6, the chosen form is justified by this lesson-specific rationale: The lowercased, trimmed email is both deduplication key and target conflict key. Evaluate another form against the concrete expected result (one row per `email`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `candidate_rows` for the existing `email` tuple and verify the new tuple appears exactly once.
 
-## Exercise 7 — Separate missing and unrecognized countries
+## Exercise 7: Separate missing and unrecognized countries
 
 Missing raw text, recognized codes/aliases, and unknown values receive distinct
 states. Raw source text remains alongside its normalized candidate for audit.
@@ -381,7 +381,7 @@ states. Raw source text remains alongside its normalized candidate for audit.
 - **Alternative/trade-off:** For sql-58 Exercise 7, the chosen form is justified by this lesson-specific rationale: Missing raw text, recognized codes/aliases, and unknown values receive distinct states. Evaluate another form against the concrete expected result (one row per `raw_country`) and the verification above.
 - **Edge case:** Add one source row with a new `raw_country`; verify the result gains exactly one row carrying that `raw_country` value.
 
-## Exercise 8 — Make batch replay idempotent
+## Exercise 8: Make batch replay idempotent
 
 `(batch_id, source_row_number)` is a stable source identity. Replaying the same
 batch uses `ON CONFLICT DO NOTHING`; the count remains unchanged.
@@ -396,7 +396,7 @@ batch uses `ON CONFLICT DO NOTHING`; the count remains unchanged.
 - **Alternative/trade-off:** For sql-58 Exercise 8, the chosen form is justified by this lesson-specific rationale: `(batch_id, source_row_number)` is a stable source identity. Evaluate another form against the concrete expected result (one row per `email`) and the verification above.
 - **Edge case:** Add duplicate source candidates for `email`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 9 — Quarantine malformed JSON
+## Exercise 9: Quarantine malformed JSON
 
 PostgreSQL 16's `IS JSON` predicate checks text without raising. Invalid text is
 kept with an `invalid_json` code instead of becoming an unexplained `{}` default.
@@ -411,7 +411,7 @@ kept with an `invalid_json` code instead of becoming an unexplained `{}` default
 - **Alternative/trade-off:** For sql-58 Exercise 9, the chosen form is justified by this lesson-specific rationale: PostgreSQL 16's `IS JSON` predicate checks text without raising. Evaluate another form against the concrete expected result (one row per `email`) and the verification above.
 - **Edge case:** Add one source row with a new `email`; verify the result gains exactly one row carrying that `email` value.
 
-## Exercise 10 — Reconcile every row outcome
+## Exercise 10: Reconcile every row outcome
 
 Staged count must equal accepted plus rejected count. The procedure's affected
 row count does not distinguish inserts from updates, so a production contract

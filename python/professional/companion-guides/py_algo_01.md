@@ -140,7 +140,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [Python Counter](https://docs.python.org/3/library/collections.html#collections.Counter).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-algo-01: Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching.

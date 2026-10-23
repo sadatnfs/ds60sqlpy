@@ -1,4 +1,4 @@
-# Day 51 — Target Encoding and Leakage-Safe Features
+# Day 51: Target Encoding and Leakage-Safe Features
 
 **Lesson ID:** `python-51` · **Level:** advanced · **Dependencies:** `data` · **Network:** first-run Seaborn cache
 
@@ -112,7 +112,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — out-of-fold target encoding, smoothing, and transform-time unknowns
+## Concept deep dive: out-of-fold target encoding, smoothing, and transform-time unknowns
 
 ### The mental model
 
@@ -139,7 +139,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — show why a one-row category leaks perfectly
+### Focused example A: show why a one-row category leaks perfectly
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -161,7 +161,7 @@ assert leaked.iloc[3] == target.iloc[3]
 
 **Assumption to name:** Category identity is available at prediction time, but the current row's target is not.
 
-### Focused example B — smooth known categories and fall back for unknowns
+### Focused example B: smooth known categories and fall back for unknowns
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -213,16 +213,16 @@ assert encoded.iloc[2] == prior and encoded.iloc[3] == prior
 1. Add K-fold target encoding to a scikit-learn pipeline through a custom
    transformer or `FunctionTransformer`.
 
-**Verify:** Practice 1 — out-of-fold target encoding, smoothing, and transform-time unknowns — produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
+**Verify:** Practice 1; out-of-fold target encoding, smoothing, and transform-time unknowns; produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
 2. Add an appropriate prior and smoothing; experiment with `n_splits`.
 
-**Verify:** Practice 2 — out-of-fold target encoding, smoothing, and transform-time unknowns — print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
+**Verify:** Practice 2; out-of-fold target encoding, smoothing, and transform-time unknowns; print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
 3. Compare ROC AUC with one-hot encoding across multiple seeded train/test
    splits.
 
-**Verify:** Practice 3 — out-of-fold target encoding, smoothing, and transform-time unknowns — over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
+**Verify:** Practice 3; out-of-fold target encoding, smoothing, and transform-time unknowns; over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
 ### Progressive hints
 
@@ -248,17 +248,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Out-of-fold invariant:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
    **Progressive hint:** For a category absent from the fold's training partition, there is no valid category statistic; use the fold training prior.
 
-**Verify:** Out-of-fold invariant — on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
+**Verify:** Out-of-fold invariant; on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
 
 5. **Unknown and missing categories:** Define distinct policies for a missing category, an unseen category, and a known category with one observation. Write tests for all three.
    **Progressive hint:** Normalize missing values to an explicit sentinel if missingness is a category; unseen categories generally receive the training global prior.
 
-**Verify:** Unknown and missing categories — assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
+**Verify:** Unknown and missing categories; assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
 
 6. **Temporal leakage:** Design target encoding for timestamped events where later labels cannot inform earlier rows. Compare random K-fold encoding with an expanding-time implementation.
    **Progressive hint:** Sort by event time and compute each row's category statistics from strictly earlier labeled rows; handle ties deliberately.
 
-**Verify:** Temporal leakage — print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.
+**Verify:** Temporal leakage; print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -292,12 +292,12 @@ based on cardinality, leakage risk, runtime, and validated evidence.
 - Work in the [Day 51 learner notebook](../notebooks/day51_advanced_feature_engineering_target_encoding.ipynb).
 - Then consult the
   [Day 51 solution](../solutions/day51_advanced_feature_engineering_target_encoding/day51_solutions.md).
-- Continue to [Day 52 — Dask](day52_scalability_dask.md).
+- Continue to [Day 52; Dask](day52_scalability_dask.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-51` — Day 51 — Target Encoding and Leakage-Safe Features.

@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-31-probability-basics">Day 31 — Probability Basics<a class="heading-anchor" href="#guide--day-31-probability-basics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-31-probability-basics">Day 31: Probability Basics<a class="heading-anchor" href="#guide--day-31-probability-basics" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-31</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Probability gives you a language for uncertainty. This lesson is a practical refresh: simulate distributions, compare samples with theoretical behavior, and reason about a diagnostic test without treating a probability as a certainty.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -455,7 +455,7 @@ running_mean <span class="syntax-operator">=</span> np<span class="syntax-operat
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error">Concept deep dive — probability models, conditional evidence, and simulation error<a class="heading-anchor" href="#guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error">Concept deep dive: probability models, conditional evidence, and simulation error<a class="heading-anchor" href="#guide--concept-deep-dive-probability-models-conditional-evidence-and-simulation-error" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Probability separates a <strong>model</strong> from one observed dataset. A random variable specifies which numeric outcome is recorded; a distribution assigns probability to those outcomes; a sample is one finite set of draws. The expected value is a property of the model, while a sample mean is an estimate that changes across samples.</p>
 <p>Conditional probability changes the denominator. <code>P(A | B)</code> asks what fraction of the cases where <code>B</code> occurred also satisfy <code>A</code>. Bayes&#x27; theorem reverses a condition by accounting for every route into the observed evidence. Simulation is a useful numerical check, but its accuracy depends on the number and independence of simulated runs.</p>
@@ -466,7 +466,7 @@ running_mean <span class="syntax-operator">=</span> np<span class="syntax-operat
 <li><strong><code>event.mean()</code>:</strong> estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-solve-an-at-least-one-event-by-its-complement">Focused example A — solve an at-least-one event by its complement<a class="heading-anchor" href="#guide--focused-example-a-solve-an-at-least-one-event-by-its-complement" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-solve-an-at-least-one-event-by-its-complement">Focused example A: solve an at-least-one event by its complement<a class="heading-anchor" href="#guide--focused-example-a-solve-an-at-least-one-event-by-its-complement" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
@@ -481,7 +481,7 @@ simulated <span class="syntax-operator">=</span> np<span class="syntax-operator"
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>simulated <span class="syntax-operator">-</span> analytic<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">0.02</span></code></pre>
 <p><strong>Expected observation:</strong> Both values are near 0.865; they are close rather than exactly equal.</p>
 <p><strong>Assumption to name:</strong> The 1,000 opportunities are independent and all use the same event probability.</p>
-<h5 id="guide--focused-example-b-make-the-bayes-denominator-visible-with-counts">Focused example B — make the Bayes denominator visible with counts<a class="heading-anchor" href="#guide--focused-example-b-make-the-bayes-denominator-visible-with-counts" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-make-the-bayes-denominator-visible-with-counts">Focused example B: make the Bayes denominator visible with counts<a class="heading-anchor" href="#guide--focused-example-b-make-the-bayes-denominator-visible-with-counts" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python">population <span class="syntax-operator">=</span> <span class="syntax-number">10_000</span>
 prevalence <span class="syntax-operator">=</span> <span class="syntax-number">0.01</span>
@@ -540,15 +540,15 @@ positive_predictive_value <span class="syntax-operator">=</span> true_positives 
 <ol>
 <li>Simulate <code>Binomial(n=10, p=0.3)</code> 10,000 times and plot a histogram.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
+<p><strong>Verify:</strong> Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
 <ol>
 <li>Generate <code>Normal(0, 1)</code> values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
+<p><strong>Verify:</strong> Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
 <ol>
 <li>Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>disease</mtext><mo>∣</mo><mtext>positive</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
+<p><strong>Verify:</strong> Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>A single Binomial draw is already a count from 0 through 10. Choose histogram bins that keep those integer outcomes visually separate.</li>
@@ -561,15 +561,15 @@ positive_predictive_value <span class="syntax-operator">=</span> true_positives 
 <ol>
 <li><strong>Prediction and uncertainty:</strong> For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty. <strong>Progressive hint:</strong> Compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">1-(1-p)^n</annotation></semantics></math> first. Treat each simulated experiment as one Bernoulli outcome and use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mfrac><mrow><mover><mi>p</mi><mo>^</mo></mover><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mover><mi>p</mi><mo>^</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi></mrow></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}</annotation></semantics></math> for its standard error.</li>
 </ol>
-<p><strong>Verify:</strong> Prediction and uncertainty — show the analytic probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mn>0.002</mn><msup><mo stretchy="false">)</mo><mrow><mn>1000</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-(1-0.002)^{1000}</annotation></semantics></math> (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
+<p><strong>Verify:</strong> Prediction and uncertainty; show the analytic probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mn>0.002</mn><msup><mo stretchy="false">)</mo><mrow><mn>1000</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-(1-0.002)^{1000}</annotation></semantics></math> (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
 <ol>
 <li><strong>Implementation:</strong> Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support. <strong>Progressive hint:</strong> Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.</li>
 </ol>
-<p><strong>Verify:</strong> Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
+<p><strong>Verify:</strong> Implementation; for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
 <ol>
 <li><strong>Debugging and boundaries:</strong> Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval. <strong>Progressive hint:</strong> n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.</li>
 </ol>
-<p><strong>Verify:</strong> Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p>
+<p><strong>Verify:</strong> Debugging and boundaries; assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -615,10 +615,10 @@ positive_predictive_value <span class="syntax-operator">=</span> true_positives 
 <ul>
 <li>Work in the <a href="python-31.html#learner">Day 31 learner notebook</a>.</li>
 <li>After attempting every exercise, compare reasoning with the <a href="python-31.html#solution-1">separate solution</a>.</li>
-<li>Continue to <a href="python-32.html#guide">Day 32 — Statistical Inference</a>.</li>
+<li>Continue to <a href="python-32.html#guide">Day 32; Statistical Inference</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-31` — Day 31 — Probability Basics.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -864,7 +864,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-31-solutions-probability-basics">Day 31 — Solutions: Probability Basics<a class="heading-anchor" href="#solution-1--day-31-solutions-probability-basics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-31-solutions-probability-basics">Day 31: Solutions: Probability Basics<a class="heading-anchor" href="#solution-1--day-31-solutions-probability-basics" aria-label="Link to this section">#</a></h3>
 <p>We simulate common distributions, visualize convergence (LLN), and solve a simple Bayes problem.</p>
 <p>Contents</p>
 <ul>
@@ -878,7 +878,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 <span class="syntax-keyword">from</span> math <span class="syntax-keyword">import</span> sqrt<span class="syntax-punctuation">,</span> pi<span class="syntax-punctuation">,</span> exp
 rng <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>random<span class="syntax-operator">.</span>default_rng<span class="syntax-punctuation">(</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — Binomial histogram</p>
+<p>Worked reference for Exercise 1; Binomial histogram</p>
 <pre class="highlighted-code"><code class="language-python">n<span class="syntax-punctuation">,</span> p<span class="syntax-punctuation">,</span> trials <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10_000</span>
 samples <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>binomial<span class="syntax-punctuation">(</span>n<span class="syntax-operator">=</span>n<span class="syntax-punctuation">,</span> p<span class="syntax-operator">=</span>p<span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>trials<span class="syntax-punctuation">)</span>
 
@@ -898,7 +898,7 @@ emp_mean<span class="syntax-punctuation">,</span> th_mean<span class="syntax-pun
 <li>Compare empirical mean/var to theoretical n p and n p (1-p)</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Normal(0,1) stats and PDF overlay</p>
+<p>Worked reference for Exercise 2; Normal(0,1) stats and PDF overlay</p>
 <pre class="highlighted-code"><code class="language-python">x <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>loc<span class="syntax-operator">=</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span><span class="syntax-number">50_000</span><span class="syntax-punctuation">)</span>
 mu<span class="syntax-punctuation">,</span> var <span class="syntax-operator">=</span> x<span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>var<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 
@@ -922,7 +922,7 @@ plt<span class="syntax-operator">.</span>legend<span class="syntax-punctuation">
 <li>For higher fidelity, use SciPy if available to get pdf directly</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Bayes: P(disease | positive) Given sensitivity=0.95, specificity=0.90, prevalence=0.01.</p>
+<p>Worked reference for Exercise 3; Bayes: P(disease | positive) Given sensitivity=0.95, specificity=0.90, prevalence=0.01.</p>
 <pre class="highlighted-code"><code class="language-python">sens <span class="syntax-operator">=</span> <span class="syntax-number">0.95</span>        <span class="syntax-comment"># P(+|D)</span>
 spec <span class="syntax-operator">=</span> <span class="syntax-number">0.90</span>        <span class="syntax-comment"># P(-|~D)</span>
 prev <span class="syntax-operator">=</span> <span class="syntax-number">0.01</span>        <span class="syntax-comment"># P(D)</span>
@@ -955,22 +955,22 @@ posterior</code></pre>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate <code>Binomial(n=10, p=0.3)</code> 10,000 times and plot a histogram.</p>
 <p><strong>How to reason about it:</strong> A Binomial draw is a count, so the possible values are the integers 0 through n. Use integer-centered bins, a seeded generator, and compare the empirical mean and variance with n<em>p and n</em>p*(1-p); a visually smooth histogram alone does not validate the simulation.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Generate <code>Normal(0, 1)</code> values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.</p>
 <p><strong>How to reason about it:</strong> A density histogram must use density=True before its height can be compared with a probability-density curve. Check the sample mean and variance numerically as well, and state whether variance uses the population convention (ddof=0) or an unbiased sample estimate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| &lt; 0.05 and |variance - 1| &lt; 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Given sensitivity <code>0.95</code>, specificity <code>0.90</code>, and prevalence <code>0.01</code>, compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>disease</mtext><mo>∣</mo><mtext>positive</mtext><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">P(\text{disease}\mid\text{positive})</annotation></semantics></math>.</p>
 <p><strong>How to reason about it:</strong> Bayes&#x27; denominator includes both true positives and false positives. Write every term with a conditional-probability label before inserting numbers; this prevents confusing specificity with the false-positive rate.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
-<h5 id="solution-1--exercise-4-prediction-and-uncertainty">Exercise 4 — Prediction and uncertainty<a class="heading-anchor" href="#solution-1--exercise-4-prediction-and-uncertainty" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.</p>
+<h5 id="solution-1--exercise-4-prediction-and-uncertainty">Exercise 4: Prediction and uncertainty<a class="heading-anchor" href="#solution-1--exercise-4-prediction-and-uncertainty" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.</p>
 <p><strong>Reasoning before implementation:</strong> Compute <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mi>p</mi><msup><mo stretchy="false">)</mo><mi>n</mi></msup></mrow><annotation encoding="application/x-tex">1-(1-p)^n</annotation></semantics></math> first. Treat each simulated experiment as one Bernoulli outcome and use <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msqrt><mrow><mfrac><mrow><mover><mi>p</mi><mo>^</mo></mover><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mover><mi>p</mi><mo>^</mo></mover><mo stretchy="false">)</mo></mrow><mrow><mrow><mi mathvariant="normal">r</mi><mi mathvariant="normal">u</mi><mi mathvariant="normal">n</mi><mi mathvariant="normal">s</mi></mrow></mrow></mfrac></mrow></msqrt></mrow><annotation encoding="application/x-tex">\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}</annotation></semantics></math> for its standard error.</p>
 <p>The complement is easier to model: “at least one” is one minus “zero.” Keeping the analytic and simulated calculations separate gives an immediate reasonableness check.</p>
@@ -990,8 +990,8 @@ monte_carlo_se <span class="syntax-operator">=</span> math<span class="syntax-op
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>estimate <span class="syntax-operator">-</span> expected<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">4</span> <span class="syntax-operator">*</span> monte_carlo_se</code></pre>
 <p>The four-standard-error comparison is a simulation diagnostic, not a proof that every seeded run must match the analytic value exactly. Independence is an assumption; clustered events would require another model.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Prediction and uncertainty — show the analytic probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mn>0.002</mn><msup><mo stretchy="false">)</mo><mrow><mn>1000</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-(1-0.002)^{1000}</annotation></semantics></math> (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
-<h5 id="solution-1--exercise-5-implementation">Exercise 5 — Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Prediction and uncertainty; show the analytic probability <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><mn>1</mn><mo>−</mo><mo stretchy="false">(</mo><mn>1</mn><mo>−</mo><mn>0.002</mn><msup><mo stretchy="false">)</mo><mrow><mn>1000</mn></mrow></msup></mrow><annotation encoding="application/x-tex">1-(1-0.002)^{1000}</annotation></semantics></math> (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.</p>
+<h5 id="solution-1--exercise-5-implementation">Exercise 5: Implementation<a class="heading-anchor" href="#solution-1--exercise-5-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.</p>
 <p><strong>Reasoning before implementation:</strong> Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.</p>
 <p>Conditional probability is a ratio over the rows satisfying the condition. Returning support prevents a precise-looking fraction based on almost no data.</p>
@@ -1015,8 +1015,8 @@ estimate<span class="syntax-punctuation">,</span> support <span class="syntax-op
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">(</span>estimate<span class="syntax-punctuation">,</span> support<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Returning NaN is an alternative for vectorized reporting, but silently returning zero would incorrectly claim evidence of no association.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
-<h5 id="solution-1--exercise-6-debugging-and-boundaries">Exercise 6 — Debugging and boundaries<a class="heading-anchor" href="#solution-1--exercise-6-debugging-and-boundaries" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Implementation; for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.</p>
+<h5 id="solution-1--exercise-6-debugging-and-boundaries">Exercise 6: Debugging and boundaries<a class="heading-anchor" href="#solution-1--exercise-6-debugging-and-boundaries" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.</p>
 <p><strong>Reasoning before implementation:</strong> n is a nonnegative integer and p is a finite number in [0, 1]. Remember that bool is a subclass of int in Python.</p>
 <p>The degenerate cases <code>n=0</code>, <code>p=0</code>, and <code>p=1</code> are valid; they should not be rejected merely because their distributions have no spread.</p>
@@ -1036,7 +1036,7 @@ estimate<span class="syntax-punctuation">,</span> support <span class="syntax-op
 <span class="syntax-keyword">assert</span> validate_binomial<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Use targeted exception tests for <code>-1</code>, <code>2.5</code>, <code>True</code>, <code>-1e-9</code>, <code>1.000000001</code>, and NaN. Clipping invalid probabilities would hide upstream data errors.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p></div>
+<p><strong>Verify:</strong> Debugging and boundaries; assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.</p></div>
       </section>
 
 
@@ -1202,16 +1202,16 @@ estimate<span class="syntax-punctuation">,</span> support <span class="syntax-op
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-31` — Day 31 — Probability Basics.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-31` — Day 31 — Probability Basics.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize probability models, conditional evidence, and simulation error. Use exactly these maintained learner materials:
@@ -1239,7 +1239,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1350,18 +1350,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

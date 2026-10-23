@@ -1,11 +1,11 @@
-# Day 16 — Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames (Companion Guide)
+# Day 16: Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Direct prerequisite:** [SQL-FOUND-01 — Relational design, DDL, and integrity
+- **Direct prerequisite:** [SQL-FOUND-01; Relational design, DDL, and integrity
   constraints](../../professional/companion-guides/sql_found_01_relational_design.md).
-  That module follows [Day 15 — Phase 1 project](day15_phase1_project.md), so
+  That module follows [Day 15; Phase 1 project](day15_phase1_project.md), so
   you should already be comfortable with grouped aggregates and declared
   result grain.
 - **Artifacts:** [learner SQL](../day16_window_functions_fundamentals.sql) ·
@@ -40,7 +40,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-16 — Window Functions Fundamentals** and choose
+2. Open **SQL-16; Window Functions Fundamentals** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -74,7 +74,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -231,7 +231,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 17 — ranking functions](day17_rank_functions.md).
+Continue to [Day 17; ranking functions](day17_rank_functions.md).
 
 ## Deep dive and reference
 
@@ -286,11 +286,11 @@ Further reading
 - Postgres windows: https://www.postgresql.org/docs/current/tutorial-window.html
 - Frames: https://www.postgresql.org/docs/current/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-16 — Window Functions Fundamentals.

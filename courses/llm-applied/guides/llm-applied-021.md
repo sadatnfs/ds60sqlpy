@@ -215,7 +215,7 @@ API and mechanism reference: [TRL SFTTrainer 0.24.0](https://huggingface.co/docs
 
 Read the [pretrained recipe](../fixtures/pretrained/README.md) for pinned dependencies, model identity, explicit acquisition, local hash verification, mask checks, bounded training, local inference, resource estimates and a manual container recipe with persistent mounted artifacts. See the recipe execution record for the bounded training/reload results and the observed generation-quality failure. A new learner run needs its own receipt.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-021, Optional pretrained-model adaptation with pinned offline artifacts.

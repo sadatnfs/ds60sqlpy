@@ -175,7 +175,7 @@ When a value should be disconnected from autograd and own storage that later mut
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-007, Leaf tensors, detach, no_grad and gradient accumulation.

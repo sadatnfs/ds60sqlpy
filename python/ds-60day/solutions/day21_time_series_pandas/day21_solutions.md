@@ -1,4 +1,4 @@
-# Day 21 — Solutions: Time Series with Pandas
+# Day 21: Solutions: Time Series with Pandas
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ intervals explicit, and document boundary/label rules.
 For this lesson's **time-aware indexes, timezone policy, resampling, rolling windows, and lag features** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. **Expected behavior:** the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. **Verify:** inspect the earliest/latest instant and demonstrate that conversion preserves the instant.
 
@@ -82,7 +82,7 @@ raise instead of being guessed.
 
 **Verification evidence:** inspect the earliest/latest instant and demonstrate that conversion preserves the instant.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Using deterministic daily sales, compute a three-observation rolling mean and weekly `W-FRI` sums. **Constraints:** sort the index, choose `min_periods`, and document weekly labels/boundaries. **Verify:** trace the first three rolling windows by hand and assert weekly sums preserve the grand total.
 
@@ -112,9 +112,9 @@ additive, and the reconciliation proves no daily value was lost.
 
 **Verification evidence:** trace the first three rolling windows by hand and assert weekly sums preserve the grand total.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict the difference between `tz_localize` and `tz_convert`, and which one applies to a naive timestamp. **Progressive hint:** Localization assigns meaning; conversion changes representation of an instant. **Verify:** Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.
 
@@ -122,7 +122,7 @@ additive, and the reconciliation proves no daily value was lost.
 
 **Evidence to locate in the grouped implementation:** Assert localizing a naive timestamp creates an aware value and converting it to UTC preserves the same instant; show the inappropriate operation raises.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace a three-day rolling mean with `min_periods=1` and identify which observations contribute at the beginning. **Progressive hint:** Early windows contain fewer rows when the minimum allows it. **Verify:** List source dates contributing to the first three outputs and assert their means for `min_periods=1` exactly.
 
@@ -130,7 +130,7 @@ additive, and the reconciliation proves no daily value was lost.
 
 **Evidence to locate in the grouped implementation:** List source dates contributing to the first three outputs and assert their means for `min_periods=1` exactly.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Resample deterministic daily sales to `W-FRI`, then assert the grand total is preserved. **Progressive hint:** Document the weekly label/boundary and use sums for additive measures. **Verify:** Assert weekly bin labels follow `W-FRI`, every source date belongs to one bin, and weekly sums equal the daily grand total.
 
@@ -138,7 +138,7 @@ additive, and the reconciliation proves no daily value was lost.
 
 **Evidence to locate in the grouped implementation:** Assert weekly bin labels follow `W-FRI`, every source date belongs to one bin, and weekly sums equal the daily grand total.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a comparison between naive and timezone-aware timestamps. **Progressive hint:** Normalize both sides to an aware UTC contract. **Verify:** Show the naive/aware comparison failure, normalize both to aware UTC, and assert chronological comparison now reflects the intended instants.
 
@@ -146,7 +146,7 @@ additive, and the reconciliation proves no daily value was lost.
 
 **Evidence to locate in the grouped implementation:** Show the naive/aware comparison failure, normalize both to aware UTC, and assert chronological comparison now reflects the intended instants.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Handle an ambiguous or nonexistent daylight-saving local time and explain why silently guessing may corrupt event order. **Progressive hint:** Use explicit `ambiguous`/`nonexistent` policy or reject the input. **Verify:** Use explicit ambiguous/nonexistent policies on documented DST fixtures and assert the chosen raise/resolve outcome without silently reordering events.
 
@@ -158,14 +158,14 @@ additive, and the reconciliation proves no daily value was lost.
 
 Keep timestamps timezone-aware at system boundaries, declare resampling windows, and reconcile totals whenever frequency changes.
 
-### Shared implementation for Exercises 3–4 — Timezone and rolling-window semantics
+### Shared implementation for Exercises 3–4: Timezone and rolling-window semantics
 
 `tz_localize` assigns a timezone to naive wall-clock values. `tz_convert`
 represents already-aware instants in another timezone. With
 `min_periods=1`, the first rolling mean uses one row, the second uses two, and
 later values use up to three.
 
-### Shared implementation for Exercises 5–7 — Reconciled resampling and explicit DST policy
+### Shared implementation for Exercises 5–7: Reconciled resampling and explicit DST policy
 
 ```python
 import pandas as pd

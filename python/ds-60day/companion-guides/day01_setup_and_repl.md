@@ -1,4 +1,4 @@
-# Day 1 — Setup, REPL, Virtual Environments, and Packages
+# Day 1: Setup, REPL, Virtual Environments, and Packages
 
 **Level:** Beginner
 
@@ -65,12 +65,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 1 — setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment
+**Lesson outcome:** use day 1; setup, repl, virtual environments, and packages to practice execution contexts and a trustworthy course environment
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -105,7 +105,7 @@ interpreter selected by `python`. In a notebook, `sys.executable`
 reveals the kernel's interpreter and `Path.cwd()` reveals its working
 directory.
 
-### Worked example 1 — Ask the running interpreter to identify itself
+### Worked example 1: Ask the running interpreter to identify itself
 
 Inspect evidence rather than guessing which Python is active. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -132,7 +132,7 @@ A dictionary is displayed. The exact paths vary by computer; the course kernel s
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Separate a calculation from presentation
+### Worked example 2: Separate a calculation from presentation
 
 The same Python expressions work in the REPL, a script, and a notebook. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -308,11 +308,11 @@ notebook can import the packages installed by `scripts/setup.*`.
 
 - [Open the learner notebook](../notebooks/day01_setup_and_repl.ipynb)
 - [Check the separate solution after attempting the work](../solutions/day01_setup_and_repl/day01_solutions.md)
-- [Next: Day 2 — Variables and core types](day02_basics_types.md)
+- [Next: Day 2; Variables and core types](day02_basics_types.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

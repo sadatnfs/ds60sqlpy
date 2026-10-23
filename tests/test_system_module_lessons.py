@@ -71,10 +71,10 @@ def test_guides_have_real_teaching_steps_and_six_distinct_tasks(track: str) -> N
             "Self-check",
             "Common pitfalls",
             "Next step",
-            "Ask Codex about this lesson",
+            "Ask an AI tutor about this lesson",
         ):
             assert f"## {heading}" in guide, (item["id"], heading)
-        assert guide.rfind("## Ask Codex about this lesson") > guide.rfind("## Next step")
+        assert guide.rfind("## Ask an AI tutor about this lesson") > guide.rfind("## Next step")
         assert "$guide-ds60sqlpy-learning" in guide
         assert item["guide_path"] in guide
         assert item["source_path"] in guide

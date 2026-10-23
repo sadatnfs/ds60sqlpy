@@ -1,4 +1,4 @@
-# Day 16 — Solutions: NumPy Fundamentals
+# Day 16: Solutions: NumPy Fundamentals
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ still be semantically wrong; always state what each axis represents.
 For this lesson's **NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Create a 3×4 array containing integers 0 through 11, then compute row sums, column means, and the maximum of each row. **Expected behavior:** shapes are `(3, 4)`, `(3,)`, `(4,)`, and `(3,)` for the original and three results. **Constraint:** use vectorized reductions with explicit axes, not Python loops. **Verify:** assert both shapes and exact values.
 
@@ -56,7 +56,7 @@ assert row_maximums.tolist() == [3, 7, 11]
 
 **Verification evidence:** assert both shapes and exact values.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Generate two deterministic arrays with `np.random.default_rng(42)`, perform elementwise addition/multiplication, matrix multiplication where shapes permit, and boolean-mask selection. **Constraints:** write the shape equation before `@` and do not use the legacy global random state. **Verify:** rerunning from a fresh kernel produces identical arrays and results.
 
@@ -81,7 +81,7 @@ Recreating the generator with seed 42 reproduces the fixture.
 
 **Verification evidence:** rerunning from a fresh kernel produces identical arrays and results.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Demonstrate broadcasting by standardizing each column of a small 2-D array. **Expected behavior:** each standardized column has mean approximately 0 and standard deviation approximately 1. **Constraints:** keep means/stds as `(columns,)`, reject zero-standard-deviation columns, and assert the final shape equals the input shape. **Verify:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
 
@@ -108,9 +108,9 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 **Verification evidence:** Assert output shape equals input shape, nonconstant columns have mean near zero and standard deviation near one, and zero-variance input raises or follows the written policy.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the shape and values of a `(2, 3)` array plus a `(3,)` array, then explain broadcasting alignment. **Progressive hint:** Broadcasting compares dimensions from the right. **Verify:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
 
@@ -118,7 +118,7 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 **Evidence to locate in the grouped implementation:** Assert the `(2, 3) + (3,)` result shape and exact values; write which right-aligned dimension proves the broadcast is valid.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace `array.sum(axis=0)` and `array.sum(axis=1)` by naming which dimension is removed and what each output element represents. **Progressive hint:** The named axis is the dimension reduced. **Verify:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
 
@@ -126,7 +126,7 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 **Evidence to locate in the grouped implementation:** Calculate both reductions by hand and assert `axis=0` removes rows into one value per column while `axis=1` removes columns into one per row.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement column standardization that leaves zero-variance columns as zeros instead of dividing by zero. **Progressive hint:** Replace a zero standard deviation with a safe denominator. **Verify:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
 
@@ -134,7 +134,7 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 **Evidence to locate in the grouped implementation:** Assert nonconstant columns standardize near mean 0/std 1, zero-variance columns become exactly zeros, and shape/dtype policy is preserved.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair code that mutates an original array through a slice when an independent working array was intended. **Progressive hint:** Use `.copy()` at the ownership boundary. **Verify:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
 
@@ -142,7 +142,7 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 **Evidence to locate in the grouped implementation:** Record `np.shares_memory` before repair, mutate the working slice, and assert `.copy()` keeps the original array unchanged.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Demonstrate integer overflow with a small integer dtype and prevent it by selecting a wider dtype before arithmetic. **Progressive hint:** The array dtype, not Python's unbounded integer behavior, controls storage. **Verify:** Show the small-dtype wrapped result, repeat after casting to a sufficiently wide dtype, and assert the widened arithmetic matches Python's expected integer.
 
@@ -154,7 +154,7 @@ assert np.allclose(standardized.std(axis=0), 1)
 
 Reason about shape, axis, dtype, and view/copy semantics before applying vectorized operations. Verify results with small arrays.
 
-### Shared implementation for Exercises 4–5 — Shape and axes
+### Shared implementation for Exercises 4–5: Shape and axes
 
 ```python
 import numpy as np
@@ -166,7 +166,7 @@ assert matrix.sum(axis=0).tolist() == [11, 22, 33]  # Reduce rows.
 assert matrix.sum(axis=1).tolist() == [6, 60]       # Reduce columns.
 ```
 
-### Shared implementation for Exercises 6–8 — Stable standardization, copies, and dtype choice
+### Shared implementation for Exercises 6–8: Stable standardization, copies, and dtype choice
 
 ```python
 def standardize_columns(values: np.ndarray) -> np.ndarray:

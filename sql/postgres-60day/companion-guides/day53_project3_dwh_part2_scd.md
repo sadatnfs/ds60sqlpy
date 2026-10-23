@@ -1,10 +1,10 @@
-# Day 53 — Data Warehouse Project, Part 2: SCD Type 2
+# Day 53: Data Warehouse Project, Part 2: SCD Type 2
 
 ## Level and prerequisites
 
 - **Level:** Advanced
 - **Prerequisites:** Run and verify committed
-  [Day 52 — star-schema warehouse](day52_project3_dwh_part1.md) in the same
+  [Day 52; star-schema warehouse](day52_project3_dwh_part1.md) in the same
   database.
 - **Artifacts:** [learner SQL](../day53_project3_dwh_part2_scd.sql) ·
   [solution reasoning](../solutions/day53_solutions.md) ·
@@ -38,7 +38,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-53 — Project3 DWH Part2 SCD** and choose
+2. Open **SQL-53; Project3 DWH Part2 SCD** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -74,7 +74,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -92,7 +92,7 @@ row count. For a normal analytical `SELECT`, use this logical reading order:
 window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
 different physical plan while preserving those semantics.
 
-The worked walkthrough's lesson-specific task is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key—not zero and not two.
+The worked walkthrough's lesson-specific task is: For one changed customer, locate exactly one current row, set its validto to the day before the new version, and insert the successor at CURRENTDATE. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.
 The first runnable example has a concrete contract: Example 1 returns one row per `customer_id`, `full_name`, and `country`, capped at 10 rows with columns `customer_id`, `full_name`, `country`, and `segment` from `training.customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `customer_id`, `full_name`, `country`, and `segment`. Reselect the returned key columns from `training.customers`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
 
 ## Two worked SQL examples
@@ -168,7 +168,7 @@ FROM diffs d;
 For one changed customer, locate exactly one current row, set its `valid_to` to
 the day before the new version, and insert the successor at `CURRENT_DATE`.
 Then as-of join a fact date using inclusive bounds and verify it resolves to one
-surrogate key—not zero and not two.
+surrogate key, not zero and not two.
 
 ## Exercises
 
@@ -224,7 +224,7 @@ Check multiple-current versions, gaps, and overlaps.
 ## Next step
 
 Continue in the same database to
-[Day 54 — warehouse aggregates](day54_project3_dwh_part3_aggregations.md).
+[Day 54; warehouse aggregates](day54_project3_dwh_part3_aggregations.md).
 
 ## Deep dive and reference
 
@@ -266,11 +266,11 @@ Use the numbered **Exercises** section above as the single authoritative practic
 - The course uses date-grain validity. Timestamp-effective changes require a
   different boundary model.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-53 — Project3 DWH Part2 SCD.

@@ -1,4 +1,4 @@
-# Day 34 — Solutions: Query Optimization Techniques
+# Day 34: Solutions: Query Optimization Techniques
 
 
 <!-- beginner-solution-enrichment -->
@@ -56,7 +56,7 @@ correctness is established with evidence.
 Optimization must preserve meaning. Compare plans only after confirming that
 the original and rewritten queries return the same rows at the same grain.
 
-## Exercise 1 — Replace a subquery with a join
+## Exercise 1: Replace a subquery with a join
 
 The first query uses `EXISTS`; the second uses joins. `DISTINCT` is necessary in
 the join form because one order can contain multiple Electronics lines.
@@ -98,7 +98,7 @@ is not automatically faster. Compare final row counts as well as cost and time.
 - **Alternative/trade-off:** For sql-34 Exercise 1, the chosen form is justified by this lesson-specific rationale: The first query uses `EXISTS`; the second uses joins. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Limit rows before enrichment
+## Exercise 2: Limit rows before enrichment
 
 Both forms request the latest 100 orders with customer country. The second form
 makes the bounded order set explicit before the dimension join.
@@ -157,7 +157,7 @@ code, allow PostgreSQL to inline a CTE unless an optimization fence is needed.
 - Faster on one tiny seeded database is not sufficient evidence for a
   production rewrite.
 
-## Exercise 3 — Compare CTE planner boundaries
+## Exercise 3: Compare CTE planner boundaries
 
 `MATERIALIZED` computes/stores the CTE as a boundary. `NOT MATERIALIZED` permits
 folding into the parent query. Compare plans; neither spelling is universally
@@ -173,7 +173,7 @@ faster.
 - **Alternative/trade-off:** For sql-34 Exercise 3, the chosen form is justified by this lesson-specific rationale: `MATERIALIZED` computes/stores the CTE as a boundary. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Pre-aggregate to order grain
+## Exercise 4: Pre-aggregate to order grain
 
 `item_totals` emits one row per order before customer/country joins. This
 reduces fanout while preserving the unit total.
@@ -188,7 +188,7 @@ reduces fanout while preserving the unit total.
 - **Alternative/trade-off:** For sql-34 Exercise 4, the chosen form is justified by this lesson-specific rationale: `item_totals` emits one row per order before customer/country joins. Evaluate another form against the concrete expected result (one row per order before customer/country joins) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `units` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Repair two-many-side fanout
+## Exercise 5: Repair two-many-side fanout
 
 Payments and items are independently many-to-one with orders. Each is grouped
 by `order_id` before their results are joined, so amounts are never multiplied.
@@ -203,7 +203,7 @@ by `order_id` before their results are joined, so amounts are never multiplied.
 - **Alternative/trade-off:** For sql-34 Exercise 5, the chosen form is justified by this lesson-specific rationale: Payments and items are independently many-to-one with orders. Evaluate another form against the concrete expected result (at most 20 rows keyed by `order_id`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
 
-## Exercise 6 — Write a NULL-safe anti-join
+## Exercise 6: Write a NULL-safe anti-join
 
 `NOT EXISTS` asks whether a matching order exists for the current customer.
 Unlike nullable `NOT IN`, one NULL produced by the inner relation cannot turn

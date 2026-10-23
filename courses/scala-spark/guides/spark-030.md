@@ -213,7 +213,7 @@ Continue through the [course route](../README.md). Preserve the written assumpti
 
 - [Spark 4.0.1 Connect architecture](https://spark.apache.org/docs/4.0.1/spark-connect-overview.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-030: Deployment topology and dependency boundaries.

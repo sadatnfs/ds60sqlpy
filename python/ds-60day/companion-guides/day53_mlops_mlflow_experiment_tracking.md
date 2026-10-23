@@ -1,4 +1,4 @@
-# Day 53 — Experiment Tracking with MLflow
+# Day 53: Experiment Tracking with MLflow
 
 **Lesson ID:** `python-53` · **Level:** advanced · **Dependencies:** `production` · **Network:** offline
 
@@ -116,7 +116,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — MLflow run identity, params, metrics, artifacts, and reproducible evidence
+## Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence
 
 ### The mental model
 
@@ -143,7 +143,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — separate comparable configuration from results
+### Focused example A: separate comparable configuration from results
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -174,7 +174,7 @@ print(run_record)
 
 **Assumption to name:** The data snapshot and metric definition are stable enough that two records are actually comparable.
 
-### Focused example B — create and inspect a fully local temporary run
+### Focused example B: create and inspect a fully local temporary run
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -226,15 +226,15 @@ mlflow.set_tracking_uri(original_uri)
 
 1. Log additional parameters such as Logistic Regression `C` and compare runs.
 
-**Verify:** Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
+**Verify:** Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
 2. Save a confusion-matrix PNG and log it as an artifact.
 
-**Verify:** Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
+**Verify:** Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
 3. Try a different classifier, such as Random Forest, and compare ROC AUC.
 
-**Verify:** Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
+**Verify:** Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
 ### Progressive hints
 
@@ -259,17 +259,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Failure-state handling:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
    **Progressive hint:** Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.
 
-**Verify:** Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
+**Verify:** Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
 
 5. **Provenance manifest:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
    **Progressive hint:** Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.
 
-**Verify:** Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
+**Verify:** Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
 
 6. **Reload and signature check:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
    **Progressive hint:** The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.
 
-**Verify:** Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.
+**Verify:** Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -303,12 +303,12 @@ backends, access controls, retention, backup, and an explicit promotion process.
 - Work in the [Day 53 learner notebook](../notebooks/day53_mlops_mlflow_experiment_tracking.ipynb).
 - Then consult the
   [Day 53 solution](../solutions/day53_mlops_mlflow_experiment_tracking/day53_solutions.md).
-- Continue to [Day 54 — Monitoring and Governance](day54_monitoring_model_governance.md).
+- Continue to [Day 54; Monitoring and Governance](day54_monitoring_model_governance.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-53` — Day 53 — Experiment Tracking with MLflow.

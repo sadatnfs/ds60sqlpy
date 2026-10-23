@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-20-merging-and-joins">Day 20 — Merging and Joins<a class="heading-anchor" href="#guide--day-20-merging-and-joins" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-20-merging-and-joins">Day 20: Merging and Joins<a class="heading-anchor" href="#guide--day-20-merging-and-joins" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A join combines tables according to keys and cardinality. Predict which rows should survive and how many rows can be produced before calling <code>merge</code>.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 20 — merging and joins to practice relational keys, join types, cardinality, and reconciliation and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 20; merging and joins to practice relational keys, join types, cardinality, and reconciliation and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A merge combines rows whose key values match. Before code, state each table&#x27;s grain, which columns form the key, and whether that key is unique on each side. Those facts determine expected cardinality: one-to-one, one-to-many, many-to-one, or many-to-many.</p>
 <p>Join type controls preservation: inner keeps matches, left preserves left rows, right preserves right rows, and outer preserves both sides. A join can silently drop unmatched rows or multiply repeated matches. Use <code>validate</code> to enforce cardinality, <code>indicator=True</code> to classify matches/orphans, and row-count/total reconciliation to prove the result has the intended meaning.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>left.merge(right, on=&quot;sku&quot;, how=&quot;left&quot;, validate=&quot;many_to_one&quot;, indicator=True)</code> preserves all left rows, matches equal <code>sku</code> values, asserts that the right key is unique, and adds <code>_merge</code> evidence. The validation wording is from left to right.</p>
-<h5 id="guide--worked-example-1-enrich-many-line-items-from-one-product-row">Worked example 1 — Enrich many line items from one product row<a class="heading-anchor" href="#guide--worked-example-1-enrich-many-line-items-from-one-product-row" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-enrich-many-line-items-from-one-product-row">Worked example 1: Enrich many line items from one product row<a class="heading-anchor" href="#guide--worked-example-1-enrich-many-line-items-from-one-product-row" aria-label="Link to this section">#</a></h5>
 <p>Make many-to-one cardinality executable. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
@@ -435,7 +435,7 @@ priced <span class="syntax-operator">=</span> items<span class="syntax-operator"
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`(3, {&#x27;both&#x27;: 3, ...})`; category counts may include zero-valued labels. No item row was lost or multiplied.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-make-an-orphan-visible">Worked example 2 — Make an orphan visible<a class="heading-anchor" href="#guide--worked-example-2-make-an-orphan-visible" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-make-an-orphan-visible">Worked example 2: Make an orphan visible<a class="heading-anchor" href="#guide--worked-example-2-make-an-orphan-visible" aria-label="Link to this section">#</a></h5>
 <p>A left merge indicator supports reconciliation and anti-joins. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">more_items <span class="syntax-operator">=</span> pd<span class="syntax-operator">.</span>DataFrame<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sku</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">qty</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 checked <span class="syntax-operator">=</span> more_items<span class="syntax-operator">.</span>merge<span class="syntax-punctuation">(</span>
@@ -530,10 +530,10 @@ priced <span class="syntax-operator">=</span> items<span class="syntax-operator"
 <ul>
 <li><a href="python-20.html#learner">Open the learner notebook</a></li>
 <li><a href="python-20.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-21.html#guide">Next: Day 21 — Time series with pandas</a></li>
+<li><a href="python-21.html#guide">Next: Day 21; Time series with pandas</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-20`
 (Day 20 — Merging and Joins). Direct catalog prerequisites: `python-19`.
 I have completed the direct prerequisites: `python-19`. Emphasize relational keys, join types, cardinality, and reconciliation.
@@ -801,7 +801,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-20-solutions-pandas-merging-and-joins">Day 20 — Solutions: Pandas Merging and Joins<a class="heading-anchor" href="#solution-1--day-20-solutions-pandas-merging-and-joins" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-20-solutions-pandas-merging-and-joins">Day 20: Solutions: Pandas Merging and Joins<a class="heading-anchor" href="#solution-1--day-20-solutions-pandas-merging-and-joins" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>relational keys, join types, cardinality, and reconciliation</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A merge combines rows whose key values match. Before code, state each table&#x27;s grain, which columns form the key, and whether that key is unique on each side. Those facts determine expected cardinality: one-to-one, one-to-many, many-to-one, or many-to-many.</p>
@@ -817,8 +817,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>relational keys, join types, cardinality, and reconciliation</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-3-worked-answers">Exercises 1–3: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-3-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Join product, order-item, and customer tables to compute revenue per customer. <strong>Before code:</strong> write each table&#x27;s row grain and key uniqueness. <strong>Sequence:</strong> many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. <strong>Expected behavior:</strong> one output row per customer with orders. <strong>Verify:</strong> assert both merges pass their declared <code>validate</code> relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Join product, order-item, and customer tables to compute revenue per customer. Before code: write each table&#x27;s row grain and key uniqueness. Sequence: many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record. Expected behavior: one output row per customer with orders. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: assert both merges pass their declared <code>validate</code> relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly. That connects the answer to relational keys, join types, cardinality, and reconciliation.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -854,7 +854,7 @@ revenue <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> revenue<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>is_unique
 <span class="syntax-keyword">assert</span> revenue<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">revenue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> items<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">revenue</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Verification evidence:</strong> assert both merges pass their declared <code>validate</code> relationship, customer IDs are unique in the result, and summed customer revenue equals summed line revenue exactly.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. <strong>Expected behavior:</strong> the unmatched right row survives with missing order fields. <strong>Then:</strong> swap table order and reproduce the result with a left join. <strong>Verify:</strong> compare sorted keys and explain why left joins are often easier to read from a chosen primary table.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Demonstrate a right join that preserves every row of a chosen right-side customer table, including a customer with no matching order. Expected behavior: the unmatched right row survives with missing order fields. Then: swap table order and reproduce the result with a left join. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: compare sorted keys and explain why left joins are often easier to read from a chosen primary table. That connects the answer to relational keys, join types, cardinality, and reconciliation.</p>
 <pre class="highlighted-code"><code class="language-python">right_joined <span class="syntax-operator">=</span> order_items<span class="syntax-operator">.</span>merge<span class="syntax-punctuation">(</span>
@@ -872,7 +872,7 @@ unmatched <span class="syntax-operator">=</span> right_joined<span class="syntax
 <span class="syntax-keyword">assert</span> unmatched<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">order_item_id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>all<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The swapped left join is often easier to read because the preserved customer table appears first.</p>
 <p><strong>Verification evidence:</strong> compare sorted keys and explain why left joins are often easier to read from a chosen primary table.</p>
-<h5 id="solution-1--exercise-3-worked-answer">Exercise 3 — worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-worked-answer">Exercise 3: worked answer<a class="heading-anchor" href="#solution-1--exercise-3-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Create data where a supposedly unique dimension key is duplicated, then use the correct <code>validate</code> relationship to raise <code>MergeError</code>. <strong>Constraints:</strong> state which side should be one and which may be many; do not de-duplicate merely to silence the error. <strong>Verify:</strong> repair the fixture or data contract and show the validated merge succeeds without row multiplication.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Create data where a supposedly unique dimension key is duplicated, then use the correct <code>validate</code> relationship to raise <code>MergeError</code>. Constraints: state which side should be one and which may be many; do not de-duplicate merely to silence the error. Preserve that failing case, repair the violated rule, and rerun the evidence named here: repair the fixture or data contract and show the validated merge succeeds without row multiplication. The diagnosis depends on relational keys, join types, cardinality, and reconciliation.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
@@ -897,32 +897,32 @@ repaired <span class="syntax-operator">=</span> order_items<span class="syntax-o
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>repaired<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>order_items<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Verification evidence:</strong> repair the fixture or data contract and show the validated merge succeeds without row multiplication.</p>
-<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-4-8-expanded-mastery-answers">Exercises 4–8: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-4-8-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. <strong>Progressive hint:</strong> A many-to-many match forms every pair: left count × right count. <strong>Verify:</strong> Build the 2-by-3 fixture and assert exactly six rows for that key; compare with <code>validate</code> rejecting the unintended many-to-many relationship.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: One key appears twice on the left and three times on the right. Predict the number of joined rows for that key. Progressive hint: A many-to-many match forms every pair: left count × right count. Then compare the prediction with this proof target: Build the 2-by-3 fixture and assert exactly six rows for that key; compare with <code>validate</code> rejecting the unintended many-to-many relationship. This makes relational keys, join types, cardinality, and reconciliation observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Build the 2-by-3 fixture and assert exactly six rows for that key; compare with <code>validate</code> rejecting the unintended many-to-many relationship.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace an outer merge with <code>indicator=True</code> and classify <code>left_only</code>, <code>right_only</code>, and <code>both</code> rows. <strong>Progressive hint:</strong> The indicator is a compact reconciliation tool. <strong>Verify:</strong> Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace an outer merge with <code>indicator=True</code> and classify <code>left_only</code>, <code>right_only</code>, and <code>both</code> rows. Progressive hint: The indicator is a compact reconciliation tool. Record the named value, shape, label, or iterator position needed to establish: Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count. The trace exposes relational keys, join types, cardinality, and reconciliation directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert one known key lands in each indicator category and reconcile category counts to the full outer-join row count.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement an anti-join returning left rows whose key has no right match. <strong>Progressive hint:</strong> Use a left merge with indicator, then filter <code>left_only</code>. <strong>Verify:</strong> Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement an anti-join returning left rows whose key has no right match. Progressive hint: Use a left merge with indicator, then filter <code>left_only</code>. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat. That connects the answer to relational keys, join types, cardinality, and reconciliation.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the anti-join returns exactly the unmatched left keys, preserves left columns/order, and does not duplicate rows when right keys repeat.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair a merge whose <code>validate=&#x27;one_to_many&#x27;</code> is reversed relative to the actual product-to-order-item relationship. <strong>Progressive hint:</strong> Say which side must have unique keys before choosing <code>1:m</code> or <code>m:1</code>. <strong>Verify:</strong> Assert key uniqueness on each side, choose <code>many_to_one</code> for item-to-product data, and show the reversed validation fails on the duplicate item key.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair a merge whose <code>validate=&#x27;one_to_many&#x27;</code> is reversed relative to the actual product-to-order-item relationship. Progressive hint: Say which side must have unique keys before choosing <code>1:m</code> or <code>m:1</code>. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Assert key uniqueness on each side, choose <code>many_to_one</code> for item-to-product data, and show the reversed validation fails on the duplicate item key. The diagnosis depends on relational keys, join types, cardinality, and reconciliation.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert key uniqueness on each side, choose <code>many_to_one</code> for item-to-product data, and show the reversed validation fails on the duplicate item key.</p>
-<h5 id="solution-1--exercise-8-answer-contract">Exercise 8 — answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-answer-contract">Exercise 8: answer contract<a class="heading-anchor" href="#solution-1--exercise-8-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join. <strong>Progressive hint:</strong> Do not assume pandas null-key behavior matches SQL. <strong>Verify:</strong> Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Investigate how missing keys match in pandas and decide whether to reject, sentinel-fill, or separate them before a business-key join. Progressive hint: Do not assume pandas null-key behavior matches SQL. Values below, at, and above the named boundary must produce the evidence Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match. Those cases show how relational keys, join types, cardinality, and reconciliation behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Test two missing keys under pandas behavior, then assert the chosen reject/separate/sentinel policy prevents them from being mistaken for a business match.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Declare each table&#x27;s grain and key cardinality before merging. Use validation and reconciliation to make row loss or multiplication visible.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-4-5-cardinality-and-reconciliation">Shared implementation for Exercises 4–5 — Cardinality and reconciliation<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-cardinality-and-reconciliation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-4-5-cardinality-and-reconciliation">Shared implementation for Exercises 4–5: Cardinality and reconciliation<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-4-5-cardinality-and-reconciliation" aria-label="Link to this section">#</a></h5>
 <p>Two matching left rows times three matching right rows produce six output rows. An outer merge indicator shows orphans from each side as well as matches.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-6-8-anti-join-and-an-explicit-null-key-policy">Shared implementation for Exercises 6–8 — Anti-join and an explicit null-key policy<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-anti-join-and-an-explicit-null-key-policy" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-6-8-anti-join-and-an-explicit-null-key-policy">Shared implementation for Exercises 6–8: Anti-join and an explicit null-key policy<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-6-8-anti-join-and-an-explicit-null-key-policy" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 
 
@@ -1059,16 +1059,16 @@ priced <span class="syntax-operator">=</span> items<span class="syntax-operator"
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-20`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-20`
 (Day 20 — Merging and Joins). Direct catalog prerequisites: `python-19`.
 I have completed the direct prerequisites: `python-19`. Emphasize relational keys, join types, cardinality, and reconciliation.
 Read `python/ds-60day/companion-guides/day20_pandas_merging_joins.md` and use the learner notebook
@@ -1083,7 +1083,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1194,18 +1194,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

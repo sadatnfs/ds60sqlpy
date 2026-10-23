@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--bridge-day-3-safe-parameterized-psycopg-queries">Bridge Day 3 — Safe parameterized Psycopg queries<a class="heading-anchor" href="#guide--bridge-day-3-safe-parameterized-psycopg-queries" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--bridge-day-3-safe-parameterized-psycopg-queries">Bridge Day 3: Safe parameterized Psycopg queries<a class="heading-anchor" href="#guide--bridge-day-3-safe-parameterized-psycopg-queries" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate <strong>Prerequisite:</strong> <a href="bridge-02.html#guide">Bridge Day 2</a></p>
 <h4 id="guide--why-this-matters">Why this matters<a class="heading-anchor" href="#guide--why-this-matters" aria-label="Link to this section">#</a></h4>
 <p>SQL text and data values are different things. Psycopg 3 sends them separately when you use <code>%s</code> placeholders and a parameter sequence. String interpolation blurs that boundary and can turn an ordinary value into executable SQL. Table and column names are different again: placeholders cannot represent them, so Psycopg provides composable <code>SQL</code> and <code>Identifier</code> objects.</p>
@@ -452,7 +452,7 @@ country <span class="syntax-operator">=</span> <span class="syntax-string">&quot
 cursor<span class="syntax-operator">.</span>execute<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">SELECT 1 WHERE </span><span class="syntax-string">%s</span><span class="syntax-string"> = </span><span class="syntax-string">%s</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span>country<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">US</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> cursor<span class="syntax-operator">.</span>calls<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> country
 <span class="syntax-keyword">assert</span> country <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> cursor<span class="syntax-operator">.</span>calls<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
-<p>Identifiers are different because a table or column name changes SQL grammar. A value placeholder cannot stand for <code>training.customers</code>. If a reusable function truly needs a dynamic identifier, validate it against a small application allowlist and compose it with <code>psycopg.sql.Identifier</code>. The allowlist expresses authorization—what the application permits—while <code>Identifier</code> expresses correct quoting. Both are necessary.</p>
+<p>Identifiers are different because a table or column name changes SQL grammar. A value placeholder cannot stand for <code>training.customers</code>. If a reusable function truly needs a dynamic identifier, validate it against a small application allowlist and compose it with <code>psycopg.sql.Identifier</code>. The allowlist expresses authorization, what the application permits, while <code>Identifier</code> expresses correct quoting. Both are necessary.</p>
 <p>The query result has its own contract. A left join preserves customers without orders; <code>COALESCE</code> gives them exact zero; <code>HAVING</code> filters after aggregation; and a unique tie-breaker makes ordering deterministic. When rows become <code>Customer</code> objects, convert identifiers, text, and money explicitly. Preserve <code>Decimal</code> for money instead of passing through a float. A fake-backed test should assert one execute call, the exact parameter tuple, one fetch, and the mapped objects. The optional PostgreSQL smoke test proves server semantics, but it does not replace these fast boundary tests.</p>
 <h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--practice-contract">Practice contract<a class="heading-anchor" href="#guide--practice-contract" aria-label="Link to this section">#</a></h5>
@@ -562,8 +562,8 @@ cursor<span class="syntax-operator">.</span>execute<span class="syntax-punctuati
 <li><strong>Calling <code>str(Identifier(...))</code> as SQL:</strong> composable objects need a Psycopg connection context to render correctly.</li>
 <li><strong>Assuming row shape forever:</strong> map and validate rows at the adapter boundary.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-02</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-02</code>. The prompt below deliberately names exact paths so a new AI tutoring session can orient itself without guessing.</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through stable lesson ID bridge-03: Safe Psycopg Queries.
 Direct catalog prerequisites: bridge-02. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
@@ -797,7 +797,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--bridge-day-3-solution-notes">Bridge Day 3 — Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-3-solution-notes" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--bridge-day-3-solution-notes">Bridge Day 3: Solution notes<a class="heading-anchor" href="#solution-1--bridge-day-3-solution-notes" aria-label="Link to this section">#</a></h3>
 <p>Start with the <a href="bridge-03.html#learner">learner file</a>. The reference implementation is <a href="bridge-03.html#solution-2">day03_solution.py</a>.</p>
 <h4 id="solution-1--value-binding">Value binding<a class="heading-anchor" href="#solution-1--value-binding" aria-label="Link to this section">#</a></h4>
 <p><code>FIND_CUSTOMERS_SQL</code> contains two <code>%s</code> placeholders. <code>find_customers()</code> supplies the country and minimum <code>Decimal</code> as a separate tuple. A recording fake proves that injection-shaped input is data in <code>params</code>, never text in the query.</p>
@@ -827,52 +827,52 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs align one-for-one with the learner and guide. The executable reference is <code>bridge/solutions/day03_solution.py</code>; use it only after an honest attempt.</p>
 <p><strong>Shared failure rule:</strong> String interpolation, quoted placeholders, and treating identifiers as value parameters all break the security boundary.</p>
-<h5 id="solution-1--exercise-1-sql-implementation">Exercise 1 — SQL implementation<a class="heading-anchor" href="#solution-1--exercise-1-sql-implementation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-sql-implementation">Exercise 1: SQL implementation<a class="heading-anchor" href="#solution-1--exercise-1-sql-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write <code>FIND_CUSTOMERS_SQL</code> for customer ID, name, and lifetime order value by country and minimum total with deterministic ordering.</p>
 <p><strong>Approach:</strong> Group customers after a left join, convert missing totals to exact zero, apply the threshold in <code>HAVING</code>, then order by lifetime value descending and customer ID ascending. Country and threshold remain separate parameters.</p>
 <p><strong>Why this boundary matters:</strong> Left join orders, aggregate at customer grain, and keep two <code>%s</code> placeholders unquoted.</p>
 <p><strong>Verification evidence:</strong> Inspect <code>FIND_CUSTOMERS_SQL</code>: it selects customer ID/name, uses <code>LEFT JOIN</code>, <code>COALESCE</code>, <code>GROUP BY</code>, and <code>HAVING</code>, contains exactly two <code>%s</code> placeholders, and orders by lifetime value descending then customer ID.</p>
-<h5 id="solution-1--exercise-2-implementation">Exercise 2 — Implementation<a class="heading-anchor" href="#solution-1--exercise-2-implementation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-implementation">Exercise 2: Implementation<a class="heading-anchor" href="#solution-1--exercise-2-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>find_customers()</code> with two bound parameters and map rows to <code>Customer</code> while preserving <code>Decimal</code> money.</p>
 <p><strong>Approach:</strong> Call <code>execute(FIND_CUSTOMERS_SQL, (country, minimum_lifetime_value))</code>, then construct one frozen <code>Customer</code> per row with explicit <code>int</code>, <code>str</code>, and <code>Decimal</code> conversion.</p>
 <p><strong>Why this boundary matters:</strong> Execute once, fetch once, and make row conversion explicit at the application boundary.</p>
 <p><strong>Verification evidence:</strong> Configure rows with integer/string/Decimal fields; assert one execute call receives <code>(country, minimum_lifetime_value)</code> and the returned tuple contains exact typed <code>Customer</code> objects with <code>Decimal</code> money.</p>
-<h5 id="solution-1--exercise-3-security-testing">Exercise 3 — Security testing<a class="heading-anchor" href="#solution-1--exercise-3-security-testing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-security-testing">Exercise 3: Security testing<a class="heading-anchor" href="#solution-1--exercise-3-security-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use a recording cursor and an injection-shaped country to prove values never enter SQL text.</p>
 <p><strong>Approach:</strong> Inspect the single recorded call. The query must still contain <code>%s</code>, must not contain the hostile string, and the parameter tuple must contain that string unchanged as data.</p>
 <p><strong>Why this boundary matters:</strong> Assert both halves: placeholder remains in structure and hostile text appears only in parameters.</p>
 <p><strong>Verification evidence:</strong> Use country <code>US&#x27; OR TRUE --</code>; assert that sentinel is absent from SQL text, appears unchanged as the first bound parameter, and cannot add rows to the fake result.</p>
-<h5 id="solution-1--exercise-4-identifier-safety">Exercise 4 — Identifier safety<a class="heading-anchor" href="#solution-1--exercise-4-identifier-safety" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-identifier-safety">Exercise 4: Identifier safety<a class="heading-anchor" href="#solution-1--exercise-4-identifier-safety" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement <code>build_count_query()</code> for only <code>customers</code>, <code>orders</code>, and <code>order_items</code> using <code>psycopg.sql.Identifier</code>.</p>
 <p><strong>Approach:</strong> Reject names outside a frozen allowlist before importing/composing. Build <code>SELECT count(*) FROM {}.{}</code> with separate <code>Identifier(&#x27;training&#x27;)</code> and <code>Identifier(table_name)</code> objects rather than interpolating text.</p>
 <p><strong>Why this boundary matters:</strong> Allowlist first, import Psycopg inside the optional boundary, then compose schema and table identifiers.</p>
 <p><strong>Verification evidence:</strong> Assert each of <code>customers</code>, <code>orders</code>, and <code>order_items</code> composes through <code>sql.Identifier</code>, while <code>users</code> and an injection-shaped name raise <code>ValueError</code> before cursor execution.</p>
-<h5 id="solution-1--exercise-5-reasoning">Exercise 5 — Reasoning<a class="heading-anchor" href="#solution-1--exercise-5-reasoning" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-reasoning">Exercise 5: Reasoning<a class="heading-anchor" href="#solution-1--exercise-5-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why an allowlist remains valuable when <code>Identifier</code> already quotes safely.</p>
 <p><strong>Approach:</strong> <code>Identifier</code> prevents a name from becoming executable SQL, but without an allowlist a caller could still read another legitimately named table. The two controls address injection and object authorization separately.</p>
 <p><strong>Why this boundary matters:</strong> Quoting protects syntax; authorization controls which valid object may be selected.</p>
 <p><strong>Verification evidence:</strong> Show that <code>Identifier</code> quotes a syntactically valid but unauthorized name, whereas the allowlist rejects it; record authorization and quoting as separate guarantees.</p>
-<h5 id="solution-1--exercise-6-prediction">Exercise 6 — Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-prediction">Exercise 6: Prediction<a class="heading-anchor" href="#solution-1--exercise-6-prediction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Predict the result for a customer with no orders and explain the roles of <code>LEFT JOIN</code>, <code>COALESCE</code>, <code>GROUP BY</code>, and <code>HAVING</code>.</p>
 <p><strong>Approach:</strong> The customer survives the left join, its aggregate is NULL until <code>COALESCE</code> turns the documented absence into <code>Decimal(&#x27;0&#x27;)</code>, and it passes only when the bound minimum is at most zero.</p>
 <p><strong>Why this boundary matters:</strong> Track row preservation first, then aggregation, then threshold filtering.</p>
 <p><strong>Verification evidence:</strong> For a customer with no orders and minimum total zero, predict and assert lifetime value <code>Decimal(&#x27;0&#x27;)</code>; explain that the left join retains the row and <code>COALESCE</code> supplies zero before <code>HAVING</code> evaluates it.</p>
-<h5 id="solution-1--exercise-7-boundary-testing">Exercise 7 — Boundary testing<a class="heading-anchor" href="#solution-1--exercise-7-boundary-testing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-boundary-testing">Exercise 7: Boundary testing<a class="heading-anchor" href="#solution-1--exercise-7-boundary-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Test rows containing integer, string, and already-Decimal values plus an empty result; document conversion failures.</p>
 <p><strong>Approach:</strong> The empty fetch maps to <code>[]</code>; valid rows become typed objects; a malformed ID or amount raises at conversion rather than silently changing meaning. Keep that failure outside any secret-bearing log.</p>
 <p><strong>Why this boundary matters:</strong> Mapping is application validation, not a blind cast after trust.</p>
 <p><strong>Verification evidence:</strong> Assert integer, numeric string, and <code>Decimal</code> money rows map predictably, an empty fetch returns <code>()</code>, and malformed ID or money data raises the documented conversion exception.</p>
-<h5 id="solution-1--exercise-8-debugging">Exercise 8 — Debugging<a class="heading-anchor" href="#solution-1--exercise-8-debugging" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-debugging">Exercise 8: Debugging<a class="heading-anchor" href="#solution-1--exercise-8-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Repair queries that use <code>f&quot;...{country}...&quot;</code> or <code>WHERE country = &#x27;%s&#x27;</code> and explain both failures.</p>
 <p><strong>Approach:</strong> Restore static SQL with bare <code>%s</code> and pass <code>(country,)</code> separately. The f-string enables injection; quoted <code>%s</code> is a literal string and prevents driver binding.</p>
 <p><strong>Why this boundary matters:</strong> Placeholders are driver syntax and must not be interpolated or quoted.</p>
 <p><strong>Verification evidence:</strong> Show the f-string version embeds the sentinel and the quoted-placeholder version sends literal <code>%s</code>; after repair, SQL stays static and the sentinel exists only in parameters.</p>
-<h5 id="solution-1--exercise-9-protocol-testing">Exercise 9 — Protocol testing<a class="heading-anchor" href="#solution-1--exercise-9-protocol-testing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-9-protocol-testing">Exercise 9: Protocol testing<a class="heading-anchor" href="#solution-1--exercise-9-protocol-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Verify that <code>find_customers()</code> does not depend on the return value of <code>execute()</code> and calls <code>fetchall()</code> exactly once.</p>
 <p><strong>Approach:</strong> Have the fake <code>execute</code> return an unrelated sentinel and track call counts. The function should ignore that sentinel, fetch from the cursor, and perform one execute/fetch cycle.</p>
 <p><strong>Why this boundary matters:</strong> Model only the cursor behavior the consumer uses.</p>
 <p><strong>Verification evidence:</strong> Use an <code>execute()</code> method that returns <code>None</code>; assert <code>find_customers()</code> still succeeds, <code>execute</code> is called once, and <code>fetchall</code> is called exactly once.</p>
-<h5 id="solution-1--exercise-10-optional-integration">Exercise 10 — Optional integration<a class="heading-anchor" href="#solution-1--exercise-10-optional-integration" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-10-optional-integration">Exercise 10: Optional integration<a class="heading-anchor" href="#solution-1--exercise-10-optional-integration" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a bounded, read-only PostgreSQL smoke test gated by <code>DS60_DATABASE_URL</code> without importing Psycopg during normal fake tests.</p>
 <p><strong>Approach:</strong> Import Psycopg inside the marked integration test, connect only to the disposable course URL, run the parameterized function with a high threshold or small result, assert deterministic shape, and close in a context manager.</p>
 <p><strong>Why this boundary matters:</strong> Skip clearly when the opt-in dependency or variable is absent; never print the URL.</p>
@@ -1002,16 +1002,16 @@ solve the final transfer problem without opening solutions/.</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-03: Safe Psycopg Queries.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through stable lesson ID bridge-03: Safe Psycopg Queries.
 Direct catalog prerequisites: bridge-02. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -1039,7 +1039,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1150,18 +1150,18 @@ solve the final transfer problem without opening solutions/.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

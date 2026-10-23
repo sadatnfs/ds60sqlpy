@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>Add a track without rebuilding the course application · DS60 reference</title>
+  <title>Extend the curriculum · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -158,81 +158,80 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>Add a track without rebuilding the course application</h1>
+      <h1>Extend the curriculum</h1>
       <p class="source-path">Generated from <code>docs/curriculum-extension-playbook.md</code></p>
     </header>
-    <article class="document"><h2 id="add-a-track-without-rebuilding-the-course-application">Add a track without rebuilding the course application<a class="heading-anchor" href="#add-a-track-without-rebuilding-the-course-application" aria-label="Link to this section">#</a></h2>
-<p>The catalog, prerequisite planner, reading library, coding lab, CLI, and MCP tutor share lesson identities. An extension manifest registers new teaching content in that shared system. It does not install a compiler, download a model, create a cluster, or supply an execution command.</p>
-<p>The current course remains usable while a future track is being authored. Keep unfinished material outside <code>curriculum/extensions/</code> until its artifacts, prerequisites, and teaching evidence are ready. The <a href="examples/curriculum-extension.json.html">example manifest</a> is deliberately outside that active directory. It is a schema example, not a claim that its referenced LLM lessons already exist.</p>
-<h3 id="1-start-with-a-learning-gap-and-a-bounded-outcome">1. Start with a learning gap and a bounded outcome<a class="heading-anchor" href="#1-start-with-a-learning-gap-and-a-bounded-outcome" aria-label="Link to this section">#</a></h3>
-<p>Read root <a href="../AGENTS.md.html">AGENTS.md</a>, the <a href="content-authoring.md.html">authoring contract</a>, and the current catalog. Search for existing lessons that teach the same mechanism before adding another one. Record the gap, the learner&#x27;s prerequisites, and an observable finish condition. Choose the smallest useful sequence from beginner practice through a project; do not create sixty empty placeholders to match the original directory names.</p>
-<p>These are possible future subjects, not newly implemented execution features:</p>
+    <article class="document"><h2 id="extend-the-curriculum">Extend the curriculum<a class="heading-anchor" href="#extend-the-curriculum" aria-label="Link to this section">#</a></h2>
+<p>A subject is a learning sequence. A runtime is the tool that executes its code. A lesson can reuse a runtime or be reading-only. All subjects join the same <code>/classroom</code> home, workspace, navigation and saved-work experience.</p>
+<p>Start with the learner&#x27;s goal and a real gap, then choose the existing content contract. Do not register empty lessons just to reach a desired count. The add-learning-path skill turns this playbook into a reusable contributor-agent workflow.</p>
+<h3 id="choose-the-correct-registration-route">Choose the correct registration route<a class="heading-anchor" href="#choose-the-correct-registration-route" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
-<th>Subject</th>
-<th>Appropriate runner</th>
-<th>What an author must establish</th>
+<th>Change</th>
+<th>Durable registration</th>
+<th>Validation</th>
 </tr></thead><tbody>
 <tr>
-<td>C++</td>
-<td><code>cpp</code></td>
-<td>Compiler and language version, deterministic local fixtures, compiler diagnostics, memory/lifetime reasoning, and a future reviewed adapter before in-app runs</td>
+<td>Extend existing Python, SQL or bridge material</td>
+<td>Existing artifacts and <code>catalog_builder.py</code>; additive legacy manifests when appropriate</td>
+<td>Legacy catalog, practice and depth gates</td>
 </tr>
 <tr>
-<td>Kubernetes</td>
-<td><code>kubernetes</code></td>
-<td>A named disposable local cluster/namespace, inspectable manifest outcomes, resource ownership, and cleanup after failure; no implicit current-context deployment</td>
+<td>Add a new subject to the classroom</td>
+<td><code>courses/&lt;subject&gt;/track.json</code> and <code>lessons.json</code></td>
+<td><code>ModuleCatalog</code>, subject tests and browser/runtime checks</td>
 </tr>
 <tr>
-<td>Deep learning</td>
-<td><code>python</code></td>
-<td>Python package group, CPU baseline or explicit GPU need, pinned small data/model assets, leakage checks, and disclosed first downloads</td>
+<td>Extend one of the original five module subjects</td>
+<td>Existing plan under <code>docs/expansion/plans/</code> and its <code>courses/&lt;subject&gt;/lessons.json</code></td>
+<td>Same module gates, existing design checks</td>
 </tr>
 <tr>
-<td>LLM theory</td>
-<td><code>none</code></td>
-<td>Worked reasoning, exact evaluation units, counterexamples, a written evidence rubric, and no invented requirement to call an online model</td>
+<td>Extend the statistics tutorial</td>
+<td><code>courses/statistics-ml/manifest.json</code>, chapters, examples and coverage</td>
+<td>Tutorial coverage, numerical examples and rendering</td>
 </tr>
 <tr>
-<td>Scala/Spark</td>
-<td><code>scala</code></td>
-<td>JVM/Scala/Spark compatibility, a bounded local dataset and local mode, partition/order semantics, and an actual adapter before in-app execution</td>
+<td>Add a new execution language or external operation</td>
+<td>Reviewed backend adapter, profile and image in addition to content</td>
+<td>Actual runtime success, failure, cleanup and persistence evidence</td>
 </tr>
 </tbody></table></div>
-<p>The Python and SQL backends are implemented. C++, Scala, and Kubernetes are registered planned capabilities, so their sources can be read and their work can be preserved while execution remains unavailable. Reading mode (<code>none</code>) has no execution requirement. Check <code>RUNNERS</code> in <code>src/ds60sqlpy/curriculum_framework.py</code> for the actual capability descriptor; do not infer readiness from a file extension or a dropdown label.</p>
-<h3 id="2-author-durable-content-first">2. Author durable content first<a class="heading-anchor" href="#2-author-durable-content-first" aria-label="Link to this section">#</a></h3>
-<p>Use <code>courses/&lt;track&gt;/</code> for a new subject, with a <code>README.md</code> learning plan and a local <code>AGENTS.md</code> explaining its teaching and execution boundaries. A useful layout is <code>guides/</code>, <code>lessons/</code>, <code>solutions/</code>, and <code>fixtures/</code>. Keep all manifest paths relative to the repository, match filename case exactly, and use forward slashes on every OS. Do not register absolute paths, hidden files, <code>.learning</code>, symbolic links, junctions, or another user&#x27;s data.</p>
-<p>Each lesson needs a unique stable ID and a unique day/order value within its track. Historical IDs and existing learner completion names stay unchanged. Its guide and learner artifact must be separate files. Solutions remain closed until an attempt or an explicit reveal request. A reading lesson needs at least one separate explanatory solution; a code or operations lesson needs two solution artifacts, including an explanation.</p>
-<p>Meet the same depth and practice rules as the existing course. Define the mental model, explain syntax or the reasoning process, give at least two worked examples, and provide six distinct progressive exercises with exact inputs, expected observations, and an independent verification. Use actual values, small diagrams, proof steps, or counterexamples in a theory lesson. A generic instruction to inspect evidence is not a useful acceptance check.</p>
-<p>Include common mistakes, retrieval questions, a concrete next step, and the exact <code>## Ask Codex about this lesson</code> block. Name the stable ID, actual guide and learner paths, prerequisites, tutoring skill, solutions boundary, and explain/predict/attempt/hint/evidence/retrieval sequence. Reading-only examples may use fenced <code>text</code>; describe how the learner checks the reasoning instead of pretending that a program runs.</p>
-<h3 id="3-register-the-content-additively">3. Register the content additively<a class="heading-anchor" href="#3-register-the-content-additively" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="examples/curriculum-extension.json.html">example JSON</a> as a field reference. After its real files exist, place your manifest under <code>curriculum/extensions/&lt;subject&gt;.json</code> with <code>schema_version: 1</code>.</p>
-<ul>
-<li><code>tracks</code> maps each new track ID to its title and Markdown plan path.</li>
-<li><code>lessons</code> contains the complete catalog fields plus an explicit <code>runner</code> and optional <code>topics</code> list. Topics are search labels, not execution tools.</li>
-<li><code>learning_paths</code> maps a goal ID to a title, description, and target lesson IDs. The planner expands prerequisites; do not duplicate the whole sequence.</li>
-<li><code>prerequisites</code> can refer to existing Python, SQL, bridge, or extension IDs. Every target must exist, and the combined graph must be acyclic.</li>
-<li><code>network</code> states real download behavior. Keep the default path offline after its disclosed setup. <code>dependency_group</code> must match the actual packaged Python dependencies when relevant; external tools still need explicit run guidance.</li>
-</ul>
-<p>Manifests are additive. Duplicate IDs, replacement tracks, duplicate track/day pairs, missing files, invalid prerequisites, and unsafe paths are errors to fix, not reasons to relax validation. Do not edit <code>curriculum/catalog.json</code> by hand. The manifest has no command, shell, image-pull, or cluster-action field.</p>
-<p>Use a Markdown companion guide. Supported learner source formats follow the runner: Python uses <code>.py</code> or <code>.ipynb</code>, SQL uses <code>.sql</code>, C++ uses <code>.cpp</code>, <code>.cc</code>, <code>.cxx</code>, <code>.h</code>, or <code>.hpp</code>, Scala uses <code>.scala</code>, and Kubernetes uses <code>.yaml</code> or <code>.yml</code>. Only Python notebooks are supported currently; a Scala notebook needs an actual kernel adapter before registration. Reading mode and explanatory artifacts use the supported authored-text formats, including Markdown and text notes. A <code>.txt</code> worksheet uses an explicit <code>## Exercises</code> section with numbered tasks, or plain <code>Exercise 1:</code> labels; repeated labels count once. JSON, TOML, CSV, and shell text can be displayed safely when declared or linked; display support does not enable execution. Keep a Markdown explanatory solution for the app and tutor&#x27;s explicit reveal workflow. See <code>TEXT_ARTIFACT_SUFFIXES</code> and <code>RUNNER_SOURCE_SUFFIXES</code> in the framework for the exact current allowlists.</p>
-<p>Add every new lesson ID to <code>curriculum/practice_expansion.json</code> with <code>{&quot;baseline&quot;: 0, &quot;target&quot;: 6}</code>. Do not modify the historical baseline or let registration automatically waive quality checks. Number C++ and Scala source prompts with <code>// Exercise 1:</code> comments; YAML uses <code># Exercise 1:</code>. A repeated label counts once. Guides and every explanatory solution need the same actual exercise set, not six copies of one task.</p>
-<h3 id="4-verify-the-learner-journey">4. Verify the learner journey<a class="heading-anchor" href="#4-verify-the-learner-journey" aria-label="Link to this section">#</a></h3>
-<p>From the repository root, use the course&#x27;s configured Python interpreter:</p>
-<pre class="highlighted-code"><code class="language-text">python scripts/build_catalog.py
-python scripts/course.py catalog
+<p>The original five module subjects are Kubernetes, TensorFlow, LLM theory, C++ and Scala/Spark. Their plans supply live route metadata; authored admission still comes from <code>lessons.json</code>. Additive subjects use <code>track.json</code>. Do not migrate an existing subject between these contracts as an incidental edit.</p>
+<p>The statistics loader is currently specific to that book. A different tutorial book requires a deliberate loader/schema extension and tests, or a proposal kept outside active registration until supported. Do not assume any arbitrary <code>manifest.json</code> is automatically discovered.</p>
+<h3 id="design-a-useful-progression">Design a useful progression<a class="heading-anchor" href="#design-a-useful-progression" aria-label="Link to this section">#</a></h3>
+<p>Define the starting knowledge, observable independent project and prerequisites. Build the shortest sequence that teaches the mechanisms needed for that project:</p>
+<ol>
+<li>Orient the learner: where code lives, what Run does, where output appears, and how to read an ordinary error.</li>
+<li>Teach values, representations, control flow or query composition with small traces and exact observations.</li>
+<li>Introduce abstraction, data structures, contracts, state and error handling.</li>
+<li>Connect multiple pieces through tests, debugging, files or bounded data.</li>
+<li>Explain performance, concurrency, ownership or distributed semantics where they matter to the subject.</li>
+<li>Finish with an independently designed project and explicit tradeoffs, limitations and recovery behavior.</li>
+</ol>
+<p>A beginner does not need every advanced topic immediately. Cross-subject prerequisites should name stable IDs, not hide a whole language inside a single introductory lesson. See the skill&#x27;s progression reference for Python, SQL, C++, Java, JavaScript/TypeScript and Scala/Spark examples.</p>
+<h3 id="author-and-integrate-a-module">Author and integrate a module<a class="heading-anchor" href="#author-and-integrate-a-module" aria-label="Link to this section">#</a></h3>
+<p>Follow <a href="implementation/ADDING_A_MODULE.md.html">ADDING_A_MODULE.md</a> for exact route, manifest, variant and runtime boundaries. Inspect an existing subject and the loader instead of guessing fields. There is no universal scaffold command in this repository. Create only the files needed for the chosen subject and use an existing subject&#x27;s documented authoring command only for that subject.</p>
+<p>Write the self-contained guide, learner artifact, reference and explanatory solution under <code>courses/&lt;subject&gt;/</code>. Define vocabulary, show worked examples, include expected observations and misconceptions, and provide progressive practice. Reading-only practice uses reasoning and a separate explanation. The statistics tutorial has no exercise quota or hidden answer gate.</p>
+<p>Preserve IDs, variant aliases and state ownership. Add accessible subject colors and a text label to the existing UI; do not add another public page. Review the declared runtime before promising a Run action. A syntax lexer or file extension does not install a compiler.</p>
+<h3 id="legacy-catalog-extensions">Legacy catalog extensions<a class="heading-anchor" href="#legacy-catalog-extensions" aria-label="Link to this section">#</a></h3>
+<p>Use <code>curriculum/extensions/&lt;subject&gt;.json</code> only when deliberately extending the legacy catalog contract. <a href="examples/curriculum-extension.json.html">The inactive example</a> shows its schema. It is not a template for modern <code>track.json</code>/<code>lessons.json</code> module registration and does not assert that its referenced files exist.</p>
+<p>Legacy manifests use <code>schema_version: 1</code>, <code>tracks</code>, complete <code>lessons</code>, and optional <code>learning_paths</code>. Their runner and allowed suffixes come from <code>src/ds60sqlpy/curriculum_framework.py</code>. Preserve historical track/day pairs, IDs and the acyclic prerequisite graph. Add new legacy IDs to <code>curriculum/practice_expansion.json</code> with baseline zero and target six; do not change the historical baseline. Do not add module or tutorial IDs to that registry simply because they are new lessons.</p>
+<p>The legacy capability descriptors can differ from module workers. Existing C++ and Scala module execution does not imply that a legacy extension entry using the same language has its own adapter. Report the capability of the actual route, not the availability of a different route&#x27;s compiler.</p>
+<h3 id="verify-and-publish">Verify and publish<a class="heading-anchor" href="#verify-and-publish" aria-label="Link to this section">#</a></h3>
+<p>From a prepared development environment at the repository root:</p>
+<pre class="highlighted-code"><code class="language-bash">python scripts/check_modules.py
+python scripts/normalize_lesson_prose.py --write
+make generate
+python scripts/normalize_lesson_prose.py
+python scripts/check_content_rendering.py
 python scripts/course.py validate
 python scripts/audit_practice.py
 python scripts/audit_lesson_depth.py
-python scripts/build_course_guide.py
-python scripts/build_lesson_readers.py
 python scripts/build_course_guide.py --check
-python scripts/build_lesson_readers.py --check</code></pre>
-<p>Run the relevant tests after the generators. Verify that search finds the new ID and topic, its goal includes the correct prerequisites, and its declared time estimate is understandable. Open its generated lesson reader, track plan, and linked references both through the app and as static files. The app must describe a planned adapter honestly and preserve notes/work when run is unavailable. Check that the read-only MCP catalog/search/plan/resource/prompt path reaches the same lesson without revealing solutions by default.</p>
-<p>The generated dashboard derives track filters and progress summaries from the catalog. Track plans seed reference generation, so a new plan does not depend on a link from the original three tracks. The original route shortcuts remain useful entry points for the built-in course; all registered tracks remain discoverable through catalog search and filtering.</p>
-<h3 id="5-implement-an-execution-adapter-only-when-needed">5. Implement an execution adapter only when needed<a class="heading-anchor" href="#5-implement-an-execution-adapter-only-when-needed" aria-label="Link to this section">#</a></h3>
-<p>Registering <code>runner: &quot;cpp&quot;</code>, <code>&quot;scala&quot;</code>, or <code>&quot;kubernetes&quot;</code> does not make it runnable. A real adapter belongs in reviewed backend code. Update the central capability descriptor only after implementing a non-shell command boundary, controlled working directory, bounded runtime and output, process termination, invalid-input handling, and learner-file preservation. Test failures and cleanup as carefully as successful execution.</p>
-<p>For operations lessons, require an explicit disposable target and prevent ambient credentials or the user&#x27;s current cluster context from selecting it. For model lessons, verify a small offline/default path and report any optional download separately. Never turn a manifest into an arbitrary shell launcher. Package the authored content in source, native, and Docker distributions, then verify the actual distribution on its target OS before claiming that its tools are installed and ready.</p>
-<p>Finish by reviewing the changed lesson with a beginner&#x27;s perspective: what they should predict, what they can observe, which failure teaches a useful idea, and what they can now explain without the solution.</p></article>
+python scripts/build_lesson_readers.py --check
+node scripts/check_classroom_ui.mjs</code></pre>
+<p>Use the documented subject authoring command before this sequence where one exists. Review all generated changes. Test changed reference programs and misconceptions in the intended worker; use a disposable classroom project for writes. Verify guide rendering, source loading, explicit solution reveal, subject/variant switching, saved drafts, result history and fresh-container restoration. Check read-only tutor discovery when registration changes.</p>
+<p>Keep first-download preparation, offline execution and optional external resources distinct. Record exact checks and unresolved platform limits. <a href="validation.md.html">Validation</a> describes the grouped parallel suite and CI gates. A count check, build or reference execution alone does not establish a complete learning experience or independent learner competence.</p></article>
   </main>
 </body>
 </html>

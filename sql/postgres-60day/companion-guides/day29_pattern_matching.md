@@ -1,9 +1,9 @@
-# Day 29 — Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions (Companion Guide)
+# Day 29: Pattern Matching: LIKE/ILIKE, SIMILAR TO, and Regular Expressions (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Prerequisites:** [Day 28 — JSONB and XML](day28_json_xml.md)
+- **Prerequisites:** [Day 28; JSONB and XML](day28_json_xml.md)
 - **Artifacts:** [learner SQL](../day29_pattern_matching.sql) ·
   [solution reasoning](../solutions/day29_solutions.md) ·
   [executable solution](../solutions/day29_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-29 — Pattern Matching** and choose
+2. Open **SQL-29; Pattern Matching** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -70,7 +70,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -216,7 +216,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 30 — Phase 2 project](day30_phase2_project.md).
+Continue to [Day 30; Phase 2 project](day30_phase2_project.md).
 
 ## Deep dive and reference
 
@@ -263,11 +263,11 @@ Further reading
 - Pattern matching: https://www.postgresql.org/docs/current/functions-matching.html
 - pg_trgm: https://www.postgresql.org/docs/current/pgtrgm.html
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-29 — Pattern Matching.

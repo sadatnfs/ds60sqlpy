@@ -1,4 +1,4 @@
-# Day 02 solutions — Aggregations, GROUP BY, HAVING, Grouping Sets
+# Day 02 solutions: Aggregations, GROUP BY, HAVING, Grouping Sets
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Count customers by country and order countries by count then country.
 
@@ -105,7 +105,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-02 Exercise 1, the chosen form is justified by this lesson-specific rationale: The output grain is one row per country; include a deterministic secondary sort. Evaluate another form against the concrete expected result (One row per country) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `country` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate net revenue and average unit price by product category, keeping categories above 100,000 in revenue.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-02 Exercise 2, the chosen form is justified by this lesson-specific rationale: Join at line grain, aggregate once per category, and place the aggregate predicate in `HAVING`. Evaluate another form against the concrete expected result (One row per qualifying category) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `net_revenue`, and `average_unit_price` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Summarize order count and average total by status, retaining statuses with at least 100 orders.
 
@@ -188,7 +188,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-02 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filter groups after aggregation with `HAVING COUNT(*)`. Evaluate another form against the concrete expected result (One row per qualifying order status) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `average_order_total` for the existing `status` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Show `COUNT(*)`, `COUNT(email)`, and missing-email count together; predict their relationship.
 
@@ -223,7 +223,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-02 Exercise 4, the chosen form is justified by this lesson-specific rationale: `COUNT(email)` ignores NULL, while a filtered count makes missingness explicit. Evaluate another form against the concrete expected result (One row; present plus missing equals total) and the verification above.
 - **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a query that tries to filter `SUM(amount)` in `WHERE` by moving the aggregate condition to the correct clause.
 
@@ -262,7 +262,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-02 Exercise 5, the chosen form is justified by this lesson-specific rationale: `WHERE` filters expense rows before grouping; `HAVING` filters category groups afterward. Evaluate another form against the concrete expected result (One row per expense category over the threshold) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `total_expense` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Produce monthly order count, total revenue, and returned-order count for the last 12 complete or partial months.
 

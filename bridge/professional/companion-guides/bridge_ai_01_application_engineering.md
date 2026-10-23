@@ -1,4 +1,4 @@
-# BRIDGE-AI-01 — Offline AI application engineering
+# BRIDGE-AI-01: Offline AI application engineering
 
 ## Level and prerequisites
 
@@ -218,7 +218,7 @@ lab. If a forbidden fragment appears, the run fails closed.
 Do not treat a blocklist as a general privacy solution. Real systems need data
 classification, authorization, minimization, logging restrictions, retention,
 human review for high-risk actions, and incident response. Logs should record
-safe IDs, counts, timing, outcome, and error type—not prompts, documents, model
+safe IDs, counts, timing, outcome, and error type, not prompts, documents, model
 output, credentials, or private records.
 
 ### 7. Enforce cost and latency budgets
@@ -434,12 +434,12 @@ integration evaluation. None of that belongs in the default offline path.
   external model behavior.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-08`, `python-test-01`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -471,7 +471,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

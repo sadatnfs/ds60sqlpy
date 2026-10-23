@@ -1,4 +1,4 @@
-# Day 60 — Solutions: Capstone Completion and Presentation
+# Day 60: Solutions: Capstone Completion and Presentation
 
 We deliver a presentation outline, packaging checklist, and reproducibility steps.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Slide outline
+Worked reference for Exercise 1; Slide outline
 ```markdown
 1) Context and stakes — the problem and why it matters
 2) Data — sources, quality, challenges; quick EDA visual
@@ -20,7 +20,7 @@ Worked reference for Exercise 1 — Slide outline
 7) Next steps — roadmap and open questions
 ```
 
-Worked reference for Exercise 2 — Packaging
+Worked reference for Exercise 2; Packaging
 ```makefile
 # Makefile
 PYTHON ?= python
@@ -54,7 +54,7 @@ Checklist
 
 ---
 
-Worked reference for Exercise 3 — Demo and smoke tests
+Worked reference for Exercise 3; Demo and smoke tests
 ```python
 # tests/smoke/test_api.py
 import os
@@ -125,7 +125,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Finalize the data and training/evaluation pipeline.
 
@@ -135,9 +135,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — release evidence, cold-start reproducibility, presentation claims, and handoff — from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
+**Verify:** Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Produce a results notebook and README with exact reproduction steps.
 
@@ -147,9 +147,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — release evidence, cold-start reproducibility, presentation claims, and handoff — have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
+**Verify:** Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Save artifacts under an ignored `artifacts/` path and retain dependency metadata/lock.
 
@@ -159,9 +159,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — release evidence, cold-start reproducibility, presentation claims, and handoff — write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
+**Verify:** Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
 
-### Exercise 4 — Original lesson practice
+### Exercise 4: Original lesson practice
 
 **Prompt:** Prepare presentation-ready visuals and the short story above.
 
@@ -171,9 +171,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 4 — release evidence, cold-start reproducibility, presentation claims, and handoff — export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
+**Verify:** Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
 
-### Exercise 5 — Original lesson practice
+### Exercise 5: Original lesson practice
 
 **Prompt:** Write three takeaways and one open question.
 
@@ -183,9 +183,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 5 — release evidence, cold-start reproducibility, presentation claims, and handoff — write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
+**Verify:** Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
 
-### Exercise 6 — Cold-start reproduction
+### Exercise 6: Cold-start reproduction
 
 **Prompt:** Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage.
 
@@ -195,7 +195,7 @@ The acceptance run should create data/artifacts only in documented ignored
 locations, run tests, train/evaluate, and reproduce reported metrics within
 declared tolerance. Record interpreter, dependency lock, and data fingerprint.
 
-Fix the instructions—not the clean environment—when a hidden import, working
+Fix the instructions, not the clean environment, when a hidden import, working
 directory, cache, or absolute path is discovered. Repeat until the run needs no
 undocumented intervention.
 
@@ -203,9 +203,9 @@ undocumented intervention.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Cold-start reproduction — from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.
+**Verify:** Cold-start reproduction; from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.
 
-### Exercise 7 — Claim-to-evidence matrix
+### Exercise 7: Claim-to-evidence matrix
 
 **Prompt:** Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner.
 
@@ -222,16 +222,16 @@ methodology into a confirmed finding.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Claim-to-evidence matrix — for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.
+**Verify:** Claim-to-evidence matrix; for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.
 
-### Exercise 8 — Failure-tolerant demo
+### Exercise 8: Failure-tolerant demo
 
 **Prompt:** Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service.
 
 **Reasoning before implementation:** The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.
 
 Start from a known command and versioned fixture. Keep the live portion short,
-and prepare generated outputs that are clearly labeled as prior evidence—not
+and prepare generated outputs that are clearly labeled as prior evidence, not
 pretended live execution. A failed optional API/UI should not erase the model
 evaluation story.
 
@@ -242,9 +242,9 @@ credentials or sensitive records while troubleshooting on screen.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Failure-tolerant demo — record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.
+**Verify:** Failure-tolerant demo; record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.
 
-### Exercise 9 — Operational handoff
+### Exercise 9: Operational handoff
 
 **Prompt:** Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria.
 
@@ -261,9 +261,9 @@ repository. Use placeholder roles and documented configuration boundaries.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Operational handoff — name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.
+**Verify:** Operational handoff; name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.
 
-### Exercise 10 — Retrospective and next experiment
+### Exercise 10: Retrospective and next experiment
 
 **Prompt:** Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule.
 
@@ -282,4 +282,4 @@ model search.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Retrospective and next experiment — write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment's population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.
+**Verify:** Retrospective and next experiment; write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment's population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.

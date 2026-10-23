@@ -269,7 +269,7 @@ The distinction between rank bound and realized rank also has a geometric interp
 The [original LoRA paper](https://arxiv.org/abs/2106.09685) supplies the adaptation method and scaling convention used here. [QLoRA](https://arxiv.org/abs/2305.14314) adds a quantized frozen base and specific storage/training techniques; it is not equivalent to this unquantized matrix example. The next chapter distinguishes storage codes, dequantized computation, adapter gradients and actual GPU implementation claims. Neither a rank count nor the successful one-step fixture establishes that an adapted assistant follows domain evidence reliably.
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-016, Low-rank adaptation: dimensions, gradients and a real update.

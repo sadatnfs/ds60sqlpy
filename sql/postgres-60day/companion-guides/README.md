@@ -1,4 +1,4 @@
-# Companion Guides — PostgreSQL Advanced SQL 60-Day Curriculum
+# Companion Guides: PostgreSQL Advanced SQL 60-Day Curriculum
 
 This folder contains narrative, text-only companion guides for each daily SQL script in `../`. Use these as pre-reads and references while you run the matching `.sql` files against the `advanced_sql_training` database created by `00_setup.sql`.
 
@@ -8,7 +8,7 @@ Conventions
 - Tables you will commonly see: customers, products, orders, order_items, payments, employees, departments, expenses, budgets, promotions, events (JSONB), xml_docs, and helper views.
 
 Index (high-level)
-- 00_setup — schema and seed data overview
+- 00_setup; schema and seed data overview
 - 01–07 core SQL & joins; 08–15 subqueries, DML, CASE, strings/dates/numerics; week 1 project
 - 16–22 windows; 23–30 CTEs, pivoting, JSON/XML, patterns; week 2 project
 - 31–37 plans, indexes, optimization, partitioning; 38–45 transactions/locks/ops; phase 3 project

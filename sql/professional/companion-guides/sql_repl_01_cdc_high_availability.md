@@ -1,10 +1,10 @@
-# SQL-REPL-01 — Replication, CDC, and High Availability
+# SQL-REPL-01: Replication, CDC, and High Availability
 
 ## Level and prerequisites
 
 - **Level:** Advanced
 - **Catalog prerequisites:** `sql-ops-02`, `sql-prog-01`, and `sql-test-01`
-- **Prerequisites:** [SQL-OPS-02 — recovery](sql_ops_02_backup_restore_recovery.md),
+- **Prerequisites:** [SQL-OPS-02; recovery](sql_ops_02_backup_restore_recovery.md),
   [SQL-PROG-01](sql_prog_01_routines_triggers.md),
   [SQL-TEST-01](sql_test_01_contracts_migrations.md), transactions, locking,
   idempotency, RPO, and RTO.
@@ -50,7 +50,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-REPL-01 — Replication, Change Data Capture, and High Availability** and choose
+2. Open **SQL-REPL-01; Replication, Change Data Capture, and High Availability** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -86,7 +86,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -202,7 +202,7 @@ than using one global `published_at` value as every consumer's position.
 This same-database simulation can atomically combine inbox and projection.
 An external API effect cannot share the transaction. Send the stable event or
 operation ID to an API that durably enforces idempotency, reconcile uncertain
-timeouts, and accept that “exactly once” is an end-to-end property—not a broker
+timeouts, and accept that “exactly once” is an end-to-end property, not a broker
 checkbox.
 
 Aggregate version protects the projection from late older delivery. A consumer
@@ -248,7 +248,7 @@ runbook work:
 1. **Publisher crash:** prove a committed, unacknowledged outbox row is durable.
    **Inputs/evidence:** For sql-repl-01 Exercise 1, Insert business state and its row in `pro_replication_lab.outbox_events` in one transaction, commit, and leave `published_at` NULL to represent a crash before publisher acknowledgement.
    **Expected result/shape:** For sql-repl-01 Exercise 1, One row per unpublished `event_id`, with `event_id`, `aggregate_key`, and `aggregate_version`, ordered by `aggregate_key, aggregate_version, event_id`.
-   **Verify:** For sql-repl-01 Exercise 1, Query only `published_at IS NULL`, require unique `event_id`, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row—not process memory—is what lets a publisher retry after a crash.
+   **Verify:** For sql-repl-01 Exercise 1, Query only `published_at IS NULL`, require unique `event_id`, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row, not process memory, is what lets a publisher retry after a crash.
 2. **Consumer uncertainty:** distinguish database-local idempotency from an
    external side effect and design its key.
    **Inputs/evidence:** For sql-repl-01 Exercise 2, Deliver the same event twice to one consumer. Use `(consumer_name, event_id)` as the inbox key and retain a canonical payload hash; describe a separate idempotency key for any external API effect.
@@ -297,7 +297,7 @@ runbook work:
 11. **DDL sequencing:** build publisher/subscriber/application compatibility
     across additive, validating, contract, and removal phases.
    **Inputs/evidence:** For sql-repl-01 Exercise 11, Encode the required lifecycle order as an inline matrix: expand → deploy → backfill/validate → contract. Include publisher, subscriber, and application compatibility at every phase.
-   **Expected result/shape:** For sql-repl-01 Exercise 11, One row per `step_number`, with `step_number`, `phase`, and `compatibility_gate`, ordered by `step_number`—never lexicographically by phase text.
+   **Expected result/shape:** For sql-repl-01 Exercise 11, One row per `step_number`, with `step_number`, `phase`, and `compatibility_gate`, ordered by `step_number`, never lexicographically by phase text.
    **Verify:** For sql-repl-01 Exercise 11, The numeric sequence is exactly `{1,2,3,4}` and phase array is exactly `{expand,deploy,backfill,contract}`. Test additive columns, defaults, constraints, type changes, indexes, old/new readers/writers, and rollback; logical replication's separate DDL/sequence handling is explicit. Hint ladder, rung 1: Compatibility is a time-ordered protocol, not an alphabetically sorted checklist.
 12. **Failback/reseed:** choose rewind/rebuild safely and verify timelines,
     slots, subscriptions, routing, data, backup, and audit.
@@ -332,15 +332,15 @@ runbook work:
 
 ## Next step
 
-Continue to [SQL-TEMPORAL-01 — temporal and domain modelling](sql_temporal_01_domain_modelling.md).
+Continue to [SQL-TEMPORAL-01; temporal and domain modelling](sql_temporal_01_domain_modelling.md).
 Combine the outbox with SQL-TEST-01 contracts and SQL-OPS-02 recovery rehearsals
 before treating CDC or failover as production-ready.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-repl-01 — Replication, Change Data Capture, and High Availability.

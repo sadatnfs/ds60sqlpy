@@ -248,7 +248,7 @@ API and mechanism reference: [LoRA](https://arxiv.org/abs/2106.09685), reviewed 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-018, Compare full and adapter fine-tuning on frozen tasks.

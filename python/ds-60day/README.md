@@ -152,7 +152,7 @@ After Python Day 15 and SQL Day 15, the optional
 Psycopg queries, transaction and retry design, database testing, ETL,
 concurrency, and production failure handling.
 
-## Learn with Codex
+## Learn with the AI tutor
 
 The repository-local tutor skill can guide the lesson without revealing answers immediately:
 
@@ -160,7 +160,7 @@ The repository-local tutor skill can guide the lesson without revealing answers 
 Use $guide-ds60sqlpy-learning to guide Python Day 1. Check my setup, quiz prerequisites, and give hints before solutions.
 ```
 
-See [Learning with Codex](../../docs/learning-with-codex.md).
+See [Learning with an AI tutor](../../docs/learning-with-an-ai-tutor.md).
 
 ## Validate
 

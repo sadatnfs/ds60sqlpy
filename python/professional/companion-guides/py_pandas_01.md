@@ -138,7 +138,7 @@ Use these mechanisms in the next deepening lesson or return to the original prer
 
 - [pandas nullable Boolean data type](https://pandas.pydata.org/docs/user_guide/boolean.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through python-pandas-01: pandas Label Alignment, Nullable Logic, and Safe Assignment.

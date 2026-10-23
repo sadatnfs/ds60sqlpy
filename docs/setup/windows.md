@@ -290,7 +290,7 @@ repository:
    ```
 
    Save and close Notepad. `pgpass.conf` lives under your Windows profile, not
-   in the Git repository. Never copy, commit, paste into Codex, or share it.
+   in the Git repository. Never copy, commit, paste into an AI assistant, or share it.
    If the password contains `:` or `\`, prefix that character with `\` in this
    file.
 

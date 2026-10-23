@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--bridge-ai-01-offline-ai-application-engineering">BRIDGE-AI-01 — Offline AI application engineering<a class="heading-anchor" href="#guide--bridge-ai-01-offline-ai-application-engineering" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--bridge-ai-01-offline-ai-application-engineering">BRIDGE-AI-01: Offline AI application engineering<a class="heading-anchor" href="#guide--bridge-ai-01-offline-ai-application-engineering" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <p><strong>Level:</strong> Advanced <strong>Stable lesson ID:</strong> <code>bridge-ai-01</code> <strong>Catalog prerequisites:</strong> <code>bridge-08</code> and <code>python-test-01</code> <strong>Prerequisites:</strong> <a href="bridge-08.html#guide">Bridge Day 8</a> and the <a href="python-test-01.html#guide">professional testing module</a>. Python Day 15 and Bridge Day 5 are earlier background within those paths.</p>
 <p>This module teaches the engineering boundaries around a retrieval-augmented assistant without requiring or contacting a hosted model. Both “embedding” and “generation” are deterministic local doubles. There is no model SDK, account, network call, API key, downloaded weight, or hidden usage charge.</p>
@@ -527,7 +527,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The parser does not “repair” invalid output. Silent repair makes evaluation and security behavior hard to see.</p>
 <h5 id="guide--6-add-a-leakage-boundary">6. Add a leakage boundary<a class="heading-anchor" href="#guide--6-add-a-leakage-boundary" aria-label="Link to this section">#</a></h5>
 <p>The strongest protection is preventing unauthorized content from entering retrieval. A case-specific output blocklist is a final backstop in this local lab. If a forbidden fragment appears, the run fails closed.</p>
-<p>Do not treat a blocklist as a general privacy solution. Real systems need data classification, authorization, minimization, logging restrictions, retention, human review for high-risk actions, and incident response. Logs should record safe IDs, counts, timing, outcome, and error type—not prompts, documents, model output, credentials, or private records.</p>
+<p>Do not treat a blocklist as a general privacy solution. Real systems need data classification, authorization, minimization, logging restrictions, retention, human review for high-risk actions, and incident response. Logs should record safe IDs, counts, timing, outcome, and error type, not prompts, documents, model output, credentials, or private records.</p>
 <h5 id="guide--7-enforce-cost-and-latency-budgets">7. Enforce cost and latency budgets<a class="heading-anchor" href="#guide--7-enforce-cost-and-latency-budgets" aria-label="Link to this section">#</a></h5>
 <p>The offline model reports input tokens, output tokens, and latency. The orchestrator checks:</p>
 <ul>
@@ -759,8 +759,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Logging complete prompts and outputs:</strong> observability can become a leakage path.</li>
 <li><strong>Equating a fake with model validation:</strong> doubles validate orchestration, not external model behavior.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-08</code>, <code>python-test-01</code>. The prompt below deliberately names exact paths so a new Codex task can orient itself without guessing.</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Use the checked-in <code>guide-ds60sqlpy-learning</code> skill as a tutor, not as an answer generator. The direct catalog prerequisites are <code>bridge-08</code>, <code>python-test-01</code>. The prompt below deliberately names exact paths so a new AI tutoring session can orient itself without guessing.</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through stable lesson ID bridge-ai-01: AI Application Engineering with Deterministic Test Doubles.
 Direct catalog prerequisites: bridge-08, python-test-01. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
@@ -1169,7 +1169,7 @@ solve the final transfer problem without opening solutions/.</code></pre>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--bridge-ai-01-solution-reasoning">BRIDGE-AI-01 — Solution reasoning<a class="heading-anchor" href="#solution-1--bridge-ai-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--bridge-ai-01-solution-reasoning">BRIDGE-AI-01: Solution reasoning<a class="heading-anchor" href="#solution-1--bridge-ai-01-solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Start with the <a href="bridge-ai-01.html#learner">learner file</a>. The executable reference is <a href="bridge-ai-01.html#solution-2">bridge_ai_01_application_engineering_solution.py</a>.</p>
 <h4 id="solution-1--deterministic-boundaries">Deterministic boundaries<a class="heading-anchor" href="#solution-1--deterministic-boundaries" aria-label="Link to this section">#</a></h4>
 <p><code>EmbeddingModel</code> and <code>TextModel</code> expose only behavior the orchestrator needs. <code>KeywordEmbedding</code> produces fixed term-count vectors, while <code>DeterministicAnswerModel</code> maps the first approved document ID to a reviewed answer. Neither uses networking, a hosted SDK, an account, a credential, or downloaded model weights.</p>
@@ -1216,112 +1216,112 @@ solve the final transfer problem without opening solutions/.</code></pre>
 <h4 id="solution-1--exercise-solutions">Exercise solutions<a class="heading-anchor" href="#solution-1--exercise-solutions" aria-label="Link to this section">#</a></h4>
 <p>These walkthroughs map one-for-one to the answer-free learner artifact and companion guide. The executable reference is <code>bridge/professional/solutions/bridge_ai_01_application_engineering_solution.py</code>.</p>
 <p><strong>Shared failure rule:</strong> Retrieving unauthorized text, trusting model-shaped JSON, or reporting a passing toy evaluation as production safety evidence creates false assurance.</p>
-<h5 id="solution-1--exercise-1-validation">Exercise 1 — Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-validation">Exercise 1: Validation<a class="heading-anchor" href="#solution-1--exercise-1-validation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate every dataclass invariant for IDs, text, audiences, bounds, token/cost budgets, and latency.</p>
 <p><strong>Approach:</strong> Use <code>__post_init__</code> checks for non-blank identifiers/text, non-empty audiences where required, positive limits, finite non-negative scores/latency, and internally consistent token budgets.</p>
 <p><strong>Why:</strong> Fail at construction so invalid state cannot cross later boundaries.</p>
 <p><strong>Verification evidence:</strong> Parameterize every dataclass with blank IDs/text, empty audiences, non-positive bounds, non-finite scores/latency, and inconsistent budgets; assert exact construction failures and one fully valid object per type.</p>
-<h5 id="solution-1--exercise-2-math">Exercise 2 — Math<a class="heading-anchor" href="#solution-1--exercise-2-math" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-math">Exercise 2: Math<a class="heading-anchor" href="#solution-1--exercise-2-math" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement cosine similarity with mismatched-dimension and zero-vector handling.</p>
 <p><strong>Approach:</strong> Require equal non-empty dimensions, compute dot product and Euclidean norms, and reject zero norms instead of emitting NaN. Deterministic float comparison uses an explicit tolerance.</p>
 <p><strong>Why:</strong> Validate shape and norms before division.</p>
 <p><strong>Verification evidence:</strong> Assert identical vectors score <code>1.0</code>, orthogonal vectors <code>0.0</code>, mismatched/empty dimensions and zero norms raise <code>ValueError</code>, and near-equal comparisons use the declared tolerance.</p>
-<h5 id="solution-1--exercise-3-authorization-testing">Exercise 3 — Authorization testing<a class="heading-anchor" href="#solution-1--exercise-3-authorization-testing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-3-authorization-testing">Exercise 3: Authorization testing<a class="heading-anchor" href="#solution-1--exercise-3-authorization-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use a recording embedding double to prove sensitive, unauthorized, and quarantined documents are filtered before embedding.</p>
 <p><strong>Approach:</strong> Filter policy first, then embed only query and approved documents. Assert forbidden document text/IDs are absent from every recorded embed call.</p>
 <p><strong>Why:</strong> Call history is the evidence that prohibited text never crossed the adapter.</p>
 <p><strong>Verification evidence:</strong> Record embedding inputs for a mixed document set; assert the query and only authorized, non-sensitive, non-quarantined documents are embedded and forbidden text/IDs never cross the call boundary.</p>
-<h5 id="solution-1--exercise-4-ranking">Exercise 4 — Ranking<a class="heading-anchor" href="#solution-1--exercise-4-ranking" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-ranking">Exercise 4: Ranking<a class="heading-anchor" href="#solution-1--exercise-4-ranking" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Rank equal-score documents deterministically while enforcing top-k and total context-character bounds.</p>
 <p><strong>Approach:</strong> Sort by score descending then document ID, skip/add excerpts until top-k or context budget is reached, and return an immutable tuple in that order.</p>
 <p><strong>Why:</strong> Use a stable document ID tie-breaker and apply the character budget without splitting trust rules.</p>
 <p><strong>Verification evidence:</strong> Give equal-score documents in reversed input order; assert ranking uses ascending document ID, returns at most <code>top_k</code>, and total selected excerpt characters never exceed the policy limit.</p>
-<h5 id="solution-1--exercise-5-prompt-boundary">Exercise 5 — Prompt boundary<a class="heading-anchor" href="#solution-1--exercise-5-prompt-boundary" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-prompt-boundary">Exercise 5: Prompt boundary<a class="heading-anchor" href="#solution-1--exercise-5-prompt-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Serialize context as untrusted JSON containing only approved document IDs and bounded excerpts.</p>
 <p><strong>Approach:</strong> Create a fixed system prompt that labels the JSON as untrusted evidence, serialize only allowlisted fields, and never concatenate retrieved text into instruction prose.</p>
 <p><strong>Why:</strong> Separate system instructions, user query, and retrieved data structurally.</p>
 <p><strong>Verification evidence:</strong> Parse each serialized context line as JSON; assert exact approved ID/text fields plus the <code>untrusted_document_data</code> label, deterministic order, bounded excerpts, and no unauthorized field.</p>
-<h5 id="solution-1--exercise-6-schema-validation">Exercise 6 — Schema validation<a class="heading-anchor" href="#solution-1--exercise-6-schema-validation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-schema-validation">Exercise 6: Schema validation<a class="heading-anchor" href="#solution-1--exercise-6-schema-validation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement exact structured-answer validation and test all malformed, extra-field, wrong-type, duplicate-citation, and inconsistent-abstention cases.</p>
 <p><strong>Approach:</strong> Require exactly <code>answer</code>, <code>citations</code>, and <code>abstained</code>; validate types, unique strings, allowed citation membership, and consistent empty-answer/citation behavior for abstention.</p>
 <p><strong>Why:</strong> Parsing JSON is only the first step; validate exact shape and semantics.</p>
 <p><strong>Verification evidence:</strong> Parameterize missing/extra fields, wrong types, duplicate/unknown citations, and inconsistent abstention; assert all raise <code>UnsafeModelOutput</code> while one exact valid object is accepted unchanged.</p>
-<h5 id="solution-1--exercise-7-adversarial-testing">Exercise 7 — Adversarial testing<a class="heading-anchor" href="#solution-1--exercise-7-adversarial-testing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-adversarial-testing">Exercise 7: Adversarial testing<a class="heading-anchor" href="#solution-1--exercise-7-adversarial-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use a malicious model double that cites an unretrieved document and prove validation rejects it.</p>
 <p><strong>Approach:</strong> Return valid-looking JSON with a foreign ID, pass only retrieved IDs to the parser, and assert a closed failure before constructing <code>AssistantRun</code>.</p>
 <p><strong>Why:</strong> Citations are authorization claims and must be a subset of retrieved evidence.</p>
 <p><strong>Verification evidence:</strong> Return a citation ID absent from retrieved hits; assert parsing/orchestration raises <code>UnsafeModelOutput</code>, produces no accepted answer, and records the invalid model call once.</p>
-<h5 id="solution-1--exercise-8-leakage">Exercise 8 — Leakage<a class="heading-anchor" href="#solution-1--exercise-8-leakage" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-8-leakage">Exercise 8: Leakage<a class="heading-anchor" href="#solution-1--exercise-8-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Return a blocked private marker from the model and prove the output boundary fails closed without logging the answer.</p>
 <p><strong>Approach:</strong> Scan the parsed answer for configured blocked fragments, raise a safe error, and capture all logs to show neither raw response nor marker is emitted.</p>
 <p><strong>Why:</strong> Leakage inspection occurs after parsing but before return/logging.</p>
 <p><strong>Verification evidence:</strong> Return a configured private marker; assert the run fails closed, the marker is absent from logs and returned objects, and only a bounded error class/outcome is observable.</p>
-<h5 id="solution-1--exercise-9-budgets">Exercise 9 — Budgets<a class="heading-anchor" href="#solution-1--exercise-9-budgets" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-9-budgets">Exercise 9: Budgets<a class="heading-anchor" href="#solution-1--exercise-9-budgets" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Test preflight input, actual input, output, cost-unit, and latency budget failures separately.</p>
 <p><strong>Approach:</strong> Construct one double per boundary that exceeds only that value; require a stable safe error and prove no later adapter/effect runs after a preflight failure.</p>
 <p><strong>Why:</strong> Each limit is independent evidence and needs its own failure case.</p>
 <p><strong>Verification evidence:</strong> Trigger estimated-input, reported-input, output, cost-unit, and latency limits one at a time; assert each raises <code>BudgetExceeded</code> at its named gate and unaffected limits still pass.</p>
-<h5 id="solution-1--exercise-10-evaluation">Exercise 10 — Evaluation<a class="heading-anchor" href="#solution-1--exercise-10-evaluation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-10-evaluation">Exercise 10: Evaluation<a class="heading-anchor" href="#solution-1--exercise-10-evaluation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add deterministic grounded, abstention, injection-document, and unauthorized-private-document cases.</p>
 <p><strong>Approach:</strong> Define checked-in cases with explicit citation sets/abstention flags, run the same offline runner, and calculate citation recall, abstention accuracy, leakage rate, and budget pass rate.</p>
 <p><strong>Why:</strong> Expected citations and forbidden fragments make safety assertions inspectable.</p>
 <p><strong>Verification evidence:</strong> Run grounded, abstention, injection-document, and unauthorized-private cases; compare exact citations/abstention, zero forbidden fragments, expected adapter calls, and per-case budget outcome.</p>
-<h5 id="solution-1--exercise-11-evidence-limits">Exercise 11 — Evidence limits<a class="heading-anchor" href="#solution-1--exercise-11-evidence-limits" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-11-evidence-limits">Exercise 11: Evidence limits<a class="heading-anchor" href="#solution-1--exercise-11-evidence-limits" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain which safety claims deterministic doubles prove and which require a separately authorized real-adapter evaluation.</p>
 <p><strong>Approach:</strong> Doubles prove filtering order, schema/budget/leakage gates, and metric math. They do not prove model quality, provider privacy, latency distribution, token accounting, adversarial coverage, or production authorization configuration.</p>
 <p><strong>Why:</strong> A controlled harness proves orchestration, not provider behavior or real-world robustness.</p>
 <p><strong>Verification evidence:</strong> Provide a two-column claim table: deterministic doubles prove orchestration/call order/schema gates; provider reliability, real model quality, billing, privacy policy, and adversarial robustness remain unproved.</p>
-<h5 id="solution-1--exercise-12-prompt-injection">Exercise 12 — Prompt injection<a class="heading-anchor" href="#solution-1--exercise-12-prompt-injection" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-12-prompt-injection">Exercise 12: Prompt injection<a class="heading-anchor" href="#solution-1--exercise-12-prompt-injection" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Insert retrieved text that says to ignore policy and reveal secrets; prove it stays data and cannot change allowed citations.</p>
 <p><strong>Approach:</strong> Keep the malicious document authorized only for the test, serialize it under the untrusted context field, and require citations/output to satisfy the same parser and blocked-fragment checks.</p>
 <p><strong>Why:</strong> The model double should attempt the attack so downstream validation is exercised.</p>
 <p><strong>Verification evidence:</strong> Insert an instruction-attack document and configure the model to follow it if seen; assert the document is quarantined or serialized only as data and allowed citations/output policy cannot expand.</p>
-<h5 id="solution-1--exercise-13-text-normalization">Exercise 13 — Text normalization<a class="heading-anchor" href="#solution-1--exercise-13-text-normalization" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-13-text-normalization">Exercise 13: Text normalization<a class="heading-anchor" href="#solution-1--exercise-13-text-normalization" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Choose normalization rules for blank IDs, Unicode text, and blocked-fragment matching without silently changing document meaning.</p>
 <p><strong>Approach:</strong> Trim identifiers, preserve original evidence text, and apply a documented case/Unicode normalization only to comparison keys or leakage scans. Test confusable/combining forms explicitly.</p>
 <p><strong>Why:</strong> Normalization can close bypasses but can also merge distinct content.</p>
 <p><strong>Verification evidence:</strong> Test whitespace-only IDs, composed/decomposed Unicode, and case/normalization variants of blocked markers; document which normalize to equality and which remain distinct without altering source meaning.</p>
-<h5 id="solution-1--exercise-14-numeric-determinism">Exercise 14 — Numeric determinism<a class="heading-anchor" href="#solution-1--exercise-14-numeric-determinism" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-14-numeric-determinism">Exercise 14: Numeric determinism<a class="heading-anchor" href="#solution-1--exercise-14-numeric-determinism" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Test equal and nearly equal embedding scores with a declared tolerance and deterministic tie-breaker.</p>
 <p><strong>Approach:</strong> Treat the computed float as the primary key and document exact/tolerance policy; always use document ID as final deterministic ordering evidence.</p>
 <p><strong>Why:</strong> Do not rely on platform-specific incidental sort order.</p>
 <p><strong>Verification evidence:</strong> Rank equal and epsilon-different scores under the declared tolerance; assert deterministic ID tie-breaking and identical order across repeated runs.</p>
-<h5 id="solution-1--exercise-15-token-estimation">Exercise 15 — Token estimation<a class="heading-anchor" href="#solution-1--exercise-15-token-estimation" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-15-token-estimation">Exercise 15: Token estimation<a class="heading-anchor" href="#solution-1--exercise-15-token-estimation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a conservative preflight token estimator and explain why it cannot replace actual adapter accounting.</p>
 <p><strong>Approach:</strong> Estimate from bounded character counts plus fixed prompt overhead with a safety margin; after generation, enforce the model response&#x27;s actual token counts independently.</p>
 <p><strong>Why:</strong> Preflight should fail early on obvious excess and leave headroom.</p>
 <p><strong>Verification evidence:</strong> For representative strings, record the conservative estimated token count and headroom; assert obvious oversize input fails preflight and actual adapter usage remains the authoritative post-call value.</p>
-<h5 id="solution-1--exercise-16-adapter-failure">Exercise 16 — Adapter failure<a class="heading-anchor" href="#solution-1--exercise-16-adapter-failure" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-16-adapter-failure">Exercise 16: Adapter failure<a class="heading-anchor" href="#solution-1--exercise-16-adapter-failure" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Classify embedding/model timeout and provider-like errors without retrying unsafe or permanent failures.</p>
 <p><strong>Approach:</strong> Map only explicitly transient adapter errors to bounded retry owned outside the pure orchestration; schema, authorization, leakage, and budget failures escape immediately.</p>
 <p><strong>Why:</strong> Offline doubles can model exception classes and call order.</p>
 <p><strong>Verification evidence:</strong> Configure timeout/transient/permanent/unsafe-output exceptions; assert only the explicitly retryable adapter class is retried within its bound and permanent or unsafe failures have one call.</p>
-<h5 id="solution-1--exercise-17-abstention">Exercise 17 — Abstention<a class="heading-anchor" href="#solution-1--exercise-17-abstention" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-17-abstention">Exercise 17: Abstention<a class="heading-anchor" href="#solution-1--exercise-17-abstention" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Require abstention when no authorized evidence survives retrieval and test that the text model is not called.</p>
 <p><strong>Approach:</strong> Return or construct the documented abstention with empty citations before request generation, or raise a defined no-evidence result; assert zero model calls.</p>
 <p><strong>Why:</strong> No evidence is a deterministic pre-model decision.</p>
 <p><strong>Verification evidence:</strong> Use a query with no authorized hit; assert an abstaining <code>AssistantRun</code> is returned (or the declared abstention path), citations are empty, and text-model call count is zero.</p>
-<h5 id="solution-1--exercise-18-observability">Exercise 18 — Observability<a class="heading-anchor" href="#solution-1--exercise-18-observability" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-18-observability">Exercise 18: Observability<a class="heading-anchor" href="#solution-1--exercise-18-observability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design safe logs/metrics that exclude user query, context, embeddings, and raw model output.</p>
 <p><strong>Approach:</strong> Log a correlation ID and approved document IDs only if policy allows; metrics use fixed stage/outcome tags and numeric token/latency values. Test sentinels across every omitted content channel.</p>
 <p><strong>Why:</strong> Use bounded stage/outcome/error-class metadata only.</p>
 <p><strong>Verification evidence:</strong> Capture logs and metrics for pass/failure; assert only bounded stage/outcome/error-class/count fields appear and query, context, embeddings, raw output, document IDs, and credentials are absent.</p>
-<h5 id="solution-1--exercise-19-metric-edge-cases">Exercise 19 — Metric edge cases<a class="heading-anchor" href="#solution-1--exercise-19-metric-edge-cases" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-19-metric-edge-cases">Exercise 19: Metric edge cases<a class="heading-anchor" href="#solution-1--exercise-19-metric-edge-cases" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Define evaluation metrics for an empty case set and zero expected citations without divide-by-zero ambiguity.</p>
 <p><strong>Approach:</strong> Reject an empty evaluation suite; treat a case with no expected citations as recall-not-applicable or one only under an explicit convention, then aggregate with documented denominators.</p>
 <p><strong>Why:</strong> Denominators and conventions belong in the metric contract.</p>
 <p><strong>Verification evidence:</strong> Evaluate an empty case set and a case with zero expected citations; assert documented finite metric values with no division error or NaN and retain the denominator in results.</p>
-<h5 id="solution-1--exercise-20-regression-gates">Exercise 20 — Regression gates<a class="heading-anchor" href="#solution-1--exercise-20-regression-gates" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-20-regression-gates">Exercise 20: Regression gates<a class="heading-anchor" href="#solution-1--exercise-20-regression-gates" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Set deterministic pass thresholds for citation recall, abstention accuracy, leakage, and budgets without hiding per-case failures.</p>
 <p><strong>Approach:</strong> Require leakage rate zero and explicit minimums for other metrics; emit failing case IDs/reasons in bounded test output so one regression cannot be averaged away.</p>
 <p><strong>Why:</strong> Aggregate gates complement, not replace, case-level evidence.</p>
 <p><strong>Verification evidence:</strong> Apply explicit citation-recall, abstention, leakage-zero, and budget thresholds; assert one failing case remains visible even if aggregate averages would otherwise pass.</p>
-<h5 id="solution-1--exercise-21-real-adapter-boundary">Exercise 21 — Real adapter boundary<a class="heading-anchor" href="#solution-1--exercise-21-real-adapter-boundary" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-21-real-adapter-boundary">Exercise 21: Real adapter boundary<a class="heading-anchor" href="#solution-1--exercise-21-real-adapter-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design an optional hosted adapter evaluation that keeps credentials external and never weakens the offline default.</p>
 <p><strong>Approach:</strong> Read a provider key only inside the adapter process, gate execution with a separate flag, use synthetic authorized data, bound cost/time, redact outputs, and label results as provider-specific evidence.</p>
 <p><strong>Why:</strong> Network, cost, and data authorization require an explicit opt-in gate.</p>
 <p><strong>Verification evidence:</strong> Specify an opt-in environment flag, external credential source, bounded dataset/cost/time, adapter version record, and cleanup; assert the normal test command cannot import/call the hosted adapter.</p>
-<h5 id="solution-1--exercise-22-threat-model">Exercise 22 — Threat model<a class="heading-anchor" href="#solution-1--exercise-22-threat-model" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-22-threat-model">Exercise 22: Threat model<a class="heading-anchor" href="#solution-1--exercise-22-threat-model" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write residual risks for retrieval poisoning, embedding inversion, model memorization, authorization drift, and evaluator blind spots.</p>
 <p><strong>Approach:</strong> Map each threat to current control, missing evidence, owner, and stop condition. Explicitly state that deterministic local tests cannot establish absence of unknown attacks.</p>
 <p><strong>Why:</strong> Controls reduce specific risks; they do not make a universal safety claim.</p>
@@ -1900,16 +1900,16 @@ solve the final transfer problem without opening solutions/.</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through stable lesson ID bridge-ai-01: AI Application Engineering with Deterministic Test Doubles.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through stable lesson ID bridge-ai-01: AI Application Engineering with Deterministic Test Doubles.
 Direct catalog prerequisites: bridge-08, python-test-01. Assume I completed exactly those
 prerequisites, then begin with one short Retrieval question that connects each
 prerequisite to this lesson.
@@ -1937,7 +1937,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -2048,18 +2048,18 @@ solve the final transfer problem without opening solutions/.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

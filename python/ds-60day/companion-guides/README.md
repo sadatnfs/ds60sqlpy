@@ -13,13 +13,13 @@ Naming matches the notebooks, e.g.:
 - day60_capstone_completion_presentation.md → notebooks/day60_capstone_completion_presentation.ipynb
 
 Index of guides (16–60 added):
-- 16: NumPy fundamentals — arrays, vectorization, broadcasting
-- 17: Pandas intro — Series, DataFrame, Index
+- 16: NumPy fundamentals; arrays, vectorization, broadcasting
+- 17: Pandas intro; Series, DataFrame, Index
 - 18: Pandas I/O and cleaning
 - 19: GroupBy, aggregation, pivoting
 - 20: Merging and joins
 - 21: Time series with pandas
-- 22: Advanced pandas — apply/pipe/query/eval
+- 22: Advanced pandas; apply/pipe/query/eval
 - 23: Data pipelines and generators
 - 24: EDA best practices
 - 25: Viz with Matplotlib/Seaborn

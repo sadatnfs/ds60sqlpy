@@ -247,7 +247,7 @@ API and mechanism reference: [Retrieval-Augmented Generation](https://arxiv.org/
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-024, Capstone: a grounded and evaluated data-science subject assistant.

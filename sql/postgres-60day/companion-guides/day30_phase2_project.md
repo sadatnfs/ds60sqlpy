@@ -1,9 +1,9 @@
-# Day 30 — Phase 2 Project: Cohort Retention and CLV (Companion Guide)
+# Day 30: Phase 2 Project: Cohort Retention and CLV (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Intermediate
-- **Prerequisites:** [Day 29 — pattern matching](day29_pattern_matching.md) and
+- **Prerequisites:** [Day 29; pattern matching](day29_pattern_matching.md) and
   the complete window/CTE sequence from Days 16–29
 - **Artifacts:** [learner SQL](../day30_phase2_project.sql) ·
   [solution reasoning](../solutions/day30_solutions.md) ·
@@ -37,7 +37,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-30 — Phase2 Project** and choose
+2. Open **SQL-30; Phase2 Project** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -71,7 +71,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -337,7 +337,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 31 — EXPLAIN and EXPLAIN ANALYZE](day31_explain_analyze.md).
+Continue to [Day 31; EXPLAIN and EXPLAIN ANALYZE](day31_explain_analyze.md).
 
 ## Deep dive and reference
 
@@ -374,11 +374,11 @@ Quality checklist
 - Cohort definition, active-customer rule, missing-month treatment, and
   projection horizon are stated beside the query.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-30 — Phase2 Project.

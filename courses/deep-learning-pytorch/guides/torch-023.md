@@ -179,7 +179,7 @@ The post-clipped normal one hides how often and how severely the gradient was al
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-023, Debugging custom loops, accumulation and clipping.

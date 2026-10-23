@@ -1,4 +1,4 @@
-# Bridge Day 5 — Solution notes
+# Bridge Day 5: Solution notes
 
 Attempt the [learner file](../lessons/day05_db_testing_fixtures_doubles.py)
 before comparing [day05_solution.py](day05_solution.py).
@@ -64,7 +64,7 @@ reference is `bridge/solutions/day05_solution.py`; use it only after an honest a
 
 **Shared failure rule:** A fake that asserts internally or a fixture that skips cleanup on failure hides ownership and can leave persistent learner data.
 
-### Exercise 1 — Implementation
+### Exercise 1: Implementation
 
 **Prompt:** Implement `customer_order_total()` against `OrderRepository`, reject non-positive
 IDs, and return exact zero for no amounts.
@@ -76,7 +76,7 @@ IDs, and return exact zero for no amounts.
 
 **Verification evidence:** Assert IDs `0` and `-1` raise `ValueError`; an empty repository returns `Decimal('0.00')`; and two configured Decimal amounts sum exactly without float conversion.
 
-### Exercise 2 — Test double
+### Exercise 2: Test double
 
 **Prompt:** Implement `FakeOrderRepository` with configured values and public call history but
 no internal assertions.
@@ -89,7 +89,7 @@ expectations.
 
 **Verification evidence:** Call the fake for configured and missing customer IDs; assert returned sequences and public call history match exactly, with no assertion performed inside the fake.
 
-### Exercise 3 — Testing
+### Exercise 3: Testing
 
 **Prompt:** Test totals, exact zero, invalid IDs, Decimal preservation, and the precise
 repository call sequence.
@@ -101,7 +101,7 @@ should raise before the repository history changes.
 
 **Verification evidence:** Compare exact totals for empty/single/multiple sequences, exact zero type, invalid-ID exceptions, unchanged Decimal values, and one repository call per valid request.
 
-### Exercise 4 — Adapter
+### Exercise 4: Adapter
 
 **Prompt:** Create a cursor-backed repository and test its SQL text and bound customer parameter
 with a recording cursor.
@@ -114,7 +114,7 @@ values.
 
 **Verification evidence:** Use a recording cursor; assert the SQL remains static with one `%s`, the parameter tuple is `(customer_id,)`, one fetch occurs, and rows become `Decimal` values.
 
-### Exercise 5 — Fixture
+### Exercise 5: Fixture
 
 **Prompt:** Implement `rollback_only()` so rollback occurs after a passing or failing body
 without suppressing the body failure.
@@ -126,7 +126,7 @@ catch the body exception unless adding safe context, and never convert it into s
 
 **Verification evidence:** Assert rollback occurs after a passing body and after a body that raises; in the latter case the original exception identity remains visible and no commit occurs.
 
-### Exercise 6 — Live-test gate
+### Exercise 6: Live-test gate
 
 **Prompt:** Require both `DS60_RUN_LIVE_DB_TESTS=1` and `DS60_DATABASE_URL`; skip with a clear
 reason when either is absent.
@@ -139,7 +139,7 @@ requirements.
 
 **Verification evidence:** Parameterize missing flag, missing URL, and both present; assert only `DS60_RUN_LIVE_DB_TESTS=1` plus a URL enables the fixture and every other case skips.
 
-### Exercise 7 — Integration
+### Exercise 7: Integration
 
 **Prompt:** Write one optional test that inserts, queries, and observes a temporary order inside
 a transaction that the fixture rolls back.
@@ -153,7 +153,7 @@ when practical.
 
 **Verification evidence:** In the opt-in database, insert and read one course-owned temporary order, then assert rollback removes it and a second run starts from the same clean state.
 
-### Exercise 8 — Design
+### Exercise 8: Design
 
 **Prompt:** Compare a fake, a recording stub, and a mock for the repository boundary; choose one
 for each test purpose.
@@ -166,7 +166,7 @@ otherwise require excess test code.
 
 **Verification evidence:** Provide a table mapping pure totals to the configured fake, SQL/parameter assertions to the recording stub, and one collaboration-count check to a mock, with one reason each.
 
-### Exercise 9 — Failure analysis
+### Exercise 9: Failure analysis
 
 **Prompt:** Test what happens when rollback itself fails while the test body is already failing
 and document exception chaining.
@@ -179,7 +179,7 @@ swallow either failure.
 
 **Verification evidence:** Raise distinct body and rollback exceptions; inspect chaining/grouping and assert the test report contains evidence of both failures rather than silently replacing one.
 
-### Exercise 10 — Database semantics
+### Exercise 10: Database semantics
 
 **Prompt:** Explain why SQLite is not a PostgreSQL substitute for `ON CONFLICT`, numeric,
 isolation, or driver behavior tests.
@@ -191,9 +191,9 @@ and Psycopg parameter adaptation.
 **Why this boundary matters:** A fast substitute is useful only when it shares the semantics
 under test.
 
-**Verification evidence:** List the PostgreSQL behavior under test—conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls—and mark each as unproved by SQLite.
+**Verification evidence:** List the PostgreSQL behavior under test, conflict handling, exact numeric adaptation, transaction/isolation, and Psycopg calls, and mark each as unproved by SQLite.
 
-### Exercise 11 — Security testing
+### Exercise 11: Security testing
 
 **Prompt:** Pass an injection-shaped value through the cursor adapter and prove it appears only
 in the parameter tuple.
@@ -206,7 +206,7 @@ fields.
 
 **Verification evidence:** Send an injection-shaped customer value through the adapter; assert it is absent from SQL text and present unchanged only in the recorded parameter tuple.
 
-### Exercise 12 — Property reasoning
+### Exercise 12: Property reasoning
 
 **Prompt:** Define invariants for order totals over empty, single, and multiple non-negative
 Decimal sequences.
@@ -220,7 +220,7 @@ domain policy.
 
 **Verification evidence:** For non-negative Decimal sequences, assert totals are non-negative, empty is exact zero, single returns itself, concatenation totals add, and input order does not change the sum.
 
-### Exercise 13 — Sensitive fixtures
+### Exercise 13: Sensitive fixtures
 
 **Prompt:** Design fixture credentials and failure assertions so secret-scan markers remain
 explicit and secrets never enter test IDs or assertion messages.
@@ -233,7 +233,7 @@ repository scanner.
 
 **Verification evidence:** Scan test IDs, exception messages, logs, and snapshots with a sentinel credential; assert the secret never appears while explicit safe markers remain detectable.
 
-### Exercise 14 — Isolation
+### Exercise 14: Isolation
 
 **Prompt:** Run the optional integration case twice and prove rollback makes repetition
 independent.

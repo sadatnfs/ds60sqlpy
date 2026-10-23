@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -432,16 +432,16 @@ all hashes + runtime -&gt; manifest.json
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python python/professional/lessons/py_ml_01_reproducible_delivery.py</code></pre>
 <p>The focused test command is shown in <strong>Self-check</strong> below. The learner module is intentionally answer-free, so <code>TODO</code> output is the expected starting state rather than a setup failure.</p>
-<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab — two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--mechanism-lab-two-small-examples-before-the-full-system">Mechanism lab: two small examples before the full system<a class="heading-anchor" href="#guide--mechanism-lab-two-small-examples-before-the-full-system" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--boundary-and-mental-model">Boundary and mental model<a class="heading-anchor" href="#guide--boundary-and-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Reproducible model delivery links exact data records, feature schema, training configuration, environment, metrics, and artifact bytes. A canonical hash is stable only after row identity/order, field order, numeric special values, encoding, and serialization are defined.</p>
-<p>A delivery bundle contains a safe model representation, schema, and manifest of hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction. Promotion is a policy decision based on tests, thresholds, limitations, ownership, and rollback—not the existence of a model file.</p>
+<p>A delivery bundle contains a safe model representation, schema, and manifest of hashes/versions/evidence. Loading verifies bytes and compatibility before parsing or prediction. Promotion is a policy decision based on tests, thresholds, limitations, ownership, and rollback, not the existence of a model file.</p>
 <ul>
 <li><strong>canonical data hash:</strong> normalizes only declared non-semantic ordering and rejects duplicate/missing identity or unsupported values.</li>
 <li><strong>feature/runtime compatibility:</strong> checks ordered names, types, required fields, schema version, Python and direct package ranges.</li>
 <li><strong>manifest verification before load:</strong> checks every relative path, byte hash, format, and expected metadata before trusting content.</li>
 </ul>
-<h5 id="guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible">Micro-example A — make record order irrelevant but value changes visible<a class="heading-anchor" href="#guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible">Micro-example A: make record order irrelevant but value changes visible<a class="heading-anchor" href="#guide--micro-example-a-make-record-order-irrelevant-but-value-changes-visible" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 
@@ -458,7 +458,7 @@ changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> snapshot<span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">)</span> <span class="syntax-operator">!=</span> snapshot<span class="syntax-punctuation">(</span>changed<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Declared row ordering does not change the identity, while one semantic value change does.</p>
 <p><strong>Why it matters:</strong> Record IDs are unique/nonempty and sorting them is semantically irrelevant for this dataset.</p>
-<h5 id="guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes">Micro-example B — fail a bundle when one artifact byte changes<a class="heading-anchor" href="#guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes">Micro-example B: fail a bundle when one artifact byte changes<a class="heading-anchor" href="#guide--micro-example-b-fail-a-bundle-when-one-artifact-byte-changes" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 
 files <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">model.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">coefficient</span><span class="syntax-string">&quot;</span><span class="syntax-string">:2.0}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">schema.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">b</span><span class="syntax-string">&#x27;</span><span class="syntax-string">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">x</span><span class="syntax-string">&quot;</span><span class="syntax-string">:</span><span class="syntax-string">&quot;</span><span class="syntax-string">float</span><span class="syntax-string">&quot;</span><span class="syntax-string">}</span><span class="syntax-string">&#x27;</span><span class="syntax-punctuation">}</span>
@@ -479,19 +479,19 @@ mismatches <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <h5 id="guide--1-complete-snapshot-hashing">1. Complete snapshot hashing<a class="heading-anchor" href="#guide--1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
 <p>Require a nonempty unique <code>record_id</code>, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed value does not.</p>
 <p>Explain what the hash does <em>not</em> prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
-<p><strong>Verify:</strong> Complete snapshot hashing — require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
+<p><strong>Verify:</strong> Complete snapshot hashing; require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
 <h5 id="guide--2-fit-and-serialize-the-local-model">2. Fit and serialize the local model<a class="heading-anchor" href="#guide--2-fit-and-serialize-the-local-model" aria-label="Link to this section">#</a></h5>
 <p>Fit <code>y = intercept + coefficient*x</code> on three deterministic points. Store only format identifier, feature name, and numeric parameters in JSON. Do not use pickle: loading an untrusted pickle can execute code.</p>
-<p><strong>Verify:</strong> Fit and serialize the local model — fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.</p>
+<p><strong>Verify:</strong> Fit and serialize the local model; fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.</p>
 <h5 id="guide--3-version-the-feature-schema">3. Version the feature schema<a class="heading-anchor" href="#guide--3-version-the-feature-schema" aria-label="Link to this section">#</a></h5>
 <p>Declare feature name, ordered position, dtype, required status, and schema version. Test exact compatibility, reordered input, a renamed feature, and a version change. Decide which future changes could be safely additive for a different consumer contract.</p>
-<p><strong>Verify:</strong> Version the feature schema — declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.</p>
+<p><strong>Verify:</strong> Version the feature schema; declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.</p>
 <h5 id="guide--4-define-runtime-compatibility">4. Define runtime compatibility<a class="heading-anchor" href="#guide--4-define-runtime-compatibility" aria-label="Link to this section">#</a></h5>
 <p>Declare Python 3.11 through below 3.13 and required package major versions. Inject the observed versions into the check rather than dumping a machine-specific environment. Report every incompatibility, not only the first.</p>
-<p><strong>Verify:</strong> Define runtime compatibility — declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.</p>
+<p><strong>Verify:</strong> Define runtime compatibility; declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.</p>
 <h5 id="guide--5-build-and-tamper-with-a-bundle">5. Build and tamper with a bundle<a class="heading-anchor" href="#guide--5-build-and-tamper-with-a-bundle" aria-label="Link to this section">#</a></h5>
 <p>Write model, schema, and manifest into a temporary directory. Verify all hashes. Replace <code>model.json</code> with <code>{}</code> and confirm loading fails before parsing or prediction.</p>
-<p><strong>Verify:</strong> Build and tamper with a bundle — write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.</p>
+<p><strong>Verify:</strong> Build and tamper with a bundle; write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.</p>
 <h5 id="guide--6-promote-with-evidence">6. Promote with evidence<a class="heading-anchor" href="#guide--6-promote-with-evidence" aria-label="Link to this section">#</a></h5>
 <p>Register a candidate with:</p>
 <ul>
@@ -502,50 +502,50 @@ mismatches <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <li>64-character manifest hash.</li>
 </ul>
 <p>Move it to staging and production. Reject a version with missing tests even if its metric is high.</p>
-<p><strong>Verify:</strong> Promote with evidence — assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.</p>
+<p><strong>Verify:</strong> Promote with evidence; assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.</p>
 <h5 id="guide--7-rehearse-rollback">7. Rehearse rollback<a class="heading-anchor" href="#guide--7-rehearse-rollback" aria-label="Link to this section">#</a></h5>
 <p>Promote version 1, then version 2. Record a simulated latency regression and roll back to archived version 1. Confirm one production version remains and the event trail preserves action, target, and reason.</p>
-<p><strong>Verify:</strong> Rehearse rollback — promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.</p>
+<p><strong>Verify:</strong> Rehearse rollback; promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.</p>
 <h5 id="guide--8-relate-the-lab-to-mlflow">8. Relate the lab to MLflow<a class="heading-anchor" href="#guide--8-relate-the-lab-to-mlflow" aria-label="Link to this section">#</a></h5>
 <p>Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day</p>
 <ol>
 <li>MLflow can store evidence; it does not define your compatibility or approval policy automatically.</li>
 </ol>
-<p><strong>Verify:</strong> Relate the lab to MLflow — produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.</p>
+<p><strong>Verify:</strong> Relate the lab to MLflow; produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.</p>
 <h5 id="guide--extended-professional-practice">Extended professional practice<a class="heading-anchor" href="#guide--extended-professional-practice" aria-label="Link to this section">#</a></h5>
 <p>These exercises move from prediction and implementation through debugging, operational trade-offs, and review. Keep the default path deterministic and offline; optional connected behavior must remain explicit.</p>
-<h5 id="guide--exercise-9-rebuild-a-bundle-deterministically">Exercise 9 — rebuild a bundle deterministically<a class="heading-anchor" href="#guide--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--exercise-9-rebuild-a-bundle-deterministically">Exercise 9: rebuild a bundle deterministically<a class="heading-anchor" href="#guide--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
 <p>Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
 <p><strong>Progressive hint:</strong> Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.</p>
-<p><strong>Verify:</strong> rebuild a bundle deterministically — build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
-<h5 id="guide--exercise-10-write-a-claim-bounded-model-card">Exercise 10 — write a claim-bounded model card<a class="heading-anchor" href="#guide--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> rebuild a bundle deterministically; build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
+<h5 id="guide--exercise-10-write-a-claim-bounded-model-card">Exercise 10: write a claim-bounded model card<a class="heading-anchor" href="#guide--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
 <p>Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
 <p><strong>Progressive hint:</strong> Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.</p>
-<p><strong>Verify:</strong> write a claim-bounded model card — create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
-<h5 id="guide--exercise-11-design-shadow-and-canary-evidence">Exercise 11 — design shadow and canary evidence<a class="heading-anchor" href="#guide--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> write a claim-bounded model card; create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
+<h5 id="guide--exercise-11-design-shadow-and-canary-evidence">Exercise 11: design shadow and canary evidence<a class="heading-anchor" href="#guide--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
 <p>Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
 <p><strong>Progressive hint:</strong> Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.</p>
-<p><strong>Verify:</strong> design shadow and canary evidence — specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
-<h5 id="guide--exercise-12-separate-drift-from-compatibility">Exercise 12 — separate drift from compatibility<a class="heading-anchor" href="#guide--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> design shadow and canary evidence; specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
+<h5 id="guide--exercise-12-separate-drift-from-compatibility">Exercise 12: separate drift from compatibility<a class="heading-anchor" href="#guide--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
 <p>Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.</p>
 <p><strong>Progressive hint:</strong> Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.</p>
-<p><strong>Verify:</strong> separate drift from compatibility — create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.</p>
-<h5 id="guide--exercise-13-test-forward-and-backward-compatibility">Exercise 13 — test forward and backward compatibility<a class="heading-anchor" href="#guide--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> separate drift from compatibility; create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.</p>
+<h5 id="guide--exercise-13-test-forward-and-backward-compatibility">Exercise 13: test forward and backward compatibility<a class="heading-anchor" href="#guide--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
 <p>Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
 <p><strong>Progressive hint:</strong> Define compatibility from each consumer&#x27;s contract; semantic changes may be breaking even when JSON types match.</p>
-<p><strong>Verify:</strong> test forward and backward compatibility — build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
-<h5 id="guide--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14 — capture dependency and supply-chain evidence<a class="heading-anchor" href="#guide--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> test forward and backward compatibility; build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
+<h5 id="guide--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14: capture dependency and supply-chain evidence<a class="heading-anchor" href="#guide--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
 <p>Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
 <p><strong>Progressive hint:</strong> Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.</p>
-<p><strong>Verify:</strong> capture dependency and supply-chain evidence — create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
-<h5 id="guide--exercise-15-verify-artifact-trust-before-parsing">Exercise 15 — verify artifact trust before parsing<a class="heading-anchor" href="#guide--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> capture dependency and supply-chain evidence; create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
+<h5 id="guide--exercise-15-verify-artifact-trust-before-parsing">Exercise 15: verify artifact trust before parsing<a class="heading-anchor" href="#guide--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
 <p>Model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.</p>
 <p><strong>Progressive hint:</strong> Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.</p>
-<p><strong>Verify:</strong> verify artifact trust before parsing — model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.</p>
-<h5 id="guide--exercise-16-rehearse-rollback-dependency-failure">Exercise 16 — rehearse rollback dependency failure<a class="heading-anchor" href="#guide--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> verify artifact trust before parsing; model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.</p>
+<h5 id="guide--exercise-16-rehearse-rollback-dependency-failure">Exercise 16: rehearse rollback dependency failure<a class="heading-anchor" href="#guide--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
 <p>Archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.</p>
 <p><strong>Progressive hint:</strong> A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.</p>
-<p><strong>Verify:</strong> rehearse rollback dependency failure — archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.</p>
+<p><strong>Verify:</strong> rehearse rollback dependency failure; archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Snapshot hashes ignore row order but detect content changes.</li>
@@ -577,8 +577,8 @@ mismatches <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Use this verified bundle in <code>python-svc-02</code>. Day 53 can record the same evidence in local MLflow, while Day 54 supplies monitoring and governance decisions.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-ml-01` — Reproducible data and model delivery.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -941,118 +941,118 @@ changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <p>The reference implementation is one defensible contract, not a license to copy internal steps into every system. Preserve the observable guarantees and repeat the failure tests when adapting it.</p>
 <h4 id="solution-1--exercise-by-exercise-reference">Exercise-by-exercise reference<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reference" aria-label="Link to this section">#</a></h4>
 <p>Use this map after an honest attempt. The executable implementation remains <a href="python-ml-01.html#solution-2"><code>py_ml_01_reproducible_delivery_solution.py</code></a>; this section explains the contract, evidence, alternatives, and edge cases behind every numbered task.</p>
-<h5 id="solution-1--exercise-1-complete-snapshot-hashing">Exercise 1 — Complete snapshot hashing<a class="heading-anchor" href="#solution-1--exercise-1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-complete-snapshot-hashing">Exercise 1: Complete snapshot hashing<a class="heading-anchor" href="#solution-1--exercise-1-complete-snapshot-hashing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Require a nonempty unique <code>record_id</code>, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes. Verify reversed rows retain the hash while one changed value does not. Explain what the hash does <em>not</em> prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Complete snapshot hashing — require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
-<h5 id="solution-1--exercise-2-fit-and-serialize-the-local-model">Exercise 2 — Fit and serialize the local model<a class="heading-anchor" href="#solution-1--exercise-2-fit-and-serialize-the-local-model" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Complete snapshot hashing; require a nonempty unique record id, sort by it, serialize with sorted keys, reject NaN, and hash UTF-8 bytes; verify reversed rows retain the hash while one changed value does not; explain what the hash does not prove: source ownership, legality, labeling quality, representativeness, or absence of leakage.</p>
+<h5 id="solution-1--exercise-2-fit-and-serialize-the-local-model">Exercise 2: Fit and serialize the local model<a class="heading-anchor" href="#solution-1--exercise-2-fit-and-serialize-the-local-model" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Fit <code>y = intercept + coefficient*x</code> on three deterministic points. Store only format identifier, feature name, and numeric parameters in JSON. Do not use pickle: loading an untrusted pickle can execute code.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Fit and serialize the local model — fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.</p>
-<h5 id="solution-1--exercise-3-version-the-feature-schema">Exercise 3 — Version the feature schema<a class="heading-anchor" href="#solution-1--exercise-3-version-the-feature-schema" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Fit and serialize the local model; fit the three deterministic points and assert intercept 1, coefficient 2, and prediction 7 for x=3; validate the JSON has only format, feature, intercept, and coefficient fields and round-trips without pickle.</p>
+<h5 id="solution-1--exercise-3-version-the-feature-schema">Exercise 3: Version the feature schema<a class="heading-anchor" href="#solution-1--exercise-3-version-the-feature-schema" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Declare feature name, ordered position, dtype, required status, and schema version. Test exact compatibility, reordered input, a renamed feature, and a version change. Decide which future changes could be safely additive for a different consumer contract.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Version the feature schema — declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.</p>
-<h5 id="solution-1--exercise-4-define-runtime-compatibility">Exercise 4 — Define runtime compatibility<a class="heading-anchor" href="#solution-1--exercise-4-define-runtime-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Version the feature schema; declare feature name, ordered position, dtype, required status, and schema version; test exact compatibility, reordered input, a renamed feature, and a version change; decide which future changes could be safely additive for a different consumer contract.</p>
+<h5 id="solution-1--exercise-4-define-runtime-compatibility">Exercise 4: Define runtime compatibility<a class="heading-anchor" href="#solution-1--exercise-4-define-runtime-compatibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Declare Python 3.11 through below 3.13 and required package major versions. Inject the observed versions into the check rather than dumping a machine-specific environment. Report every incompatibility, not only the first.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Define runtime compatibility — declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.</p>
-<h5 id="solution-1--exercise-5-build-and-tamper-with-a-bundle">Exercise 5 — Build and tamper with a bundle<a class="heading-anchor" href="#solution-1--exercise-5-build-and-tamper-with-a-bundle" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Define runtime compatibility; declare Python 3.11 through below 3.13 and required package major versions; inject the observed versions into the check rather than dumping a machine-specific environment; report every incompatibility, not only the first.</p>
+<h5 id="solution-1--exercise-5-build-and-tamper-with-a-bundle">Exercise 5: Build and tamper with a bundle<a class="heading-anchor" href="#solution-1--exercise-5-build-and-tamper-with-a-bundle" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Write model, schema, and manifest into a temporary directory. Verify all hashes. Replace <code>model.json</code> with <code>{}</code> and confirm loading fails before parsing or prediction.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Build and tamper with a bundle — write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.</p>
-<h5 id="solution-1--exercise-6-promote-with-evidence">Exercise 6 — Promote with evidence<a class="heading-anchor" href="#solution-1--exercise-6-promote-with-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Build and tamper with a bundle; write model, schema, and manifest into a temporary directory; verify all hashes; replace model.json with {} and confirm loading fails before parsing or prediction.</p>
+<h5 id="solution-1--exercise-6-promote-with-evidence">Exercise 6: Promote with evidence<a class="heading-anchor" href="#solution-1--exercise-6-promote-with-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Register a candidate with: - tests passed, - compatibility passed, - named metric and threshold, - metric value, and - 64-character manifest hash. Move it to staging and production. Reject a version with missing tests even if its metric is high.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Promote with evidence — assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.</p>
-<h5 id="solution-1--exercise-7-rehearse-rollback">Exercise 7 — Rehearse rollback<a class="heading-anchor" href="#solution-1--exercise-7-rehearse-rollback" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Promote with evidence; assert the candidate reaches staging/production only when tests and compatibility are true, metric meets its named threshold, and manifest hash has 64 hex characters; a high-metric candidate with tests false must remain rejected.</p>
+<h5 id="solution-1--exercise-7-rehearse-rollback">Exercise 7: Rehearse rollback<a class="heading-anchor" href="#solution-1--exercise-7-rehearse-rollback" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Promote version 1, then version 2. Record a simulated latency regression and roll back to archived version 1. Confirm one production version remains and the event trail preserves action, target, and reason.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Rehearse rollback — promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.</p>
-<h5 id="solution-1--exercise-8-relate-the-lab-to-mlflow">Exercise 8 — Relate the lab to MLflow<a class="heading-anchor" href="#solution-1--exercise-8-relate-the-lab-to-mlflow" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Rehearse rollback; promote version 1, then version 2; record a simulated latency regression and roll back to archived version 1; confirm one production version remains and the event trail preserves action, target, and reason.</p>
+<h5 id="solution-1--exercise-8-relate-the-lab-to-mlflow">Exercise 8: Relate the lab to MLflow<a class="heading-anchor" href="#solution-1--exercise-8-relate-the-lab-to-mlflow" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Map snapshot, manifest, metrics, and stages to local MLflow concepts from Day 53. MLflow can store evidence; it does not define your compatibility or approval policy automatically.</p>
 <p><strong>Reference reasoning:</strong> Model delivery packages data identity, feature schema, model format, runtime compatibility, metrics, promotion evidence, and rollback history into one verifiable contract. The executable module and the focused discussion earlier in this file implement this original exercise. Verify every acceptance condition from the prompt with a normal case, a boundary case, and the documented failure behavior.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> Relate the lab to MLflow — produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.</p>
-<h5 id="solution-1--exercise-9-rebuild-a-bundle-deterministically">Exercise 9 — rebuild a bundle deterministically<a class="heading-anchor" href="#solution-1--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Relate the lab to MLflow; produce a mapping table from snapshot, manifest, metrics, artifacts, and local registry stages to Day 53 MLflow run concepts; mark compatibility approval and promotion policy as explicit external checks, not MLflow guarantees.</p>
+<h5 id="solution-1--exercise-9-rebuild-a-bundle-deterministically">Exercise 9: rebuild a bundle deterministically<a class="heading-anchor" href="#solution-1--exercise-9-rebuild-a-bundle-deterministically" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Build the JSON model bundle twice from canonical records and the same configuration. Compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
 <p><strong>Reasoning path:</strong> Keep build time and machine paths outside content-addressed payloads. Canonical JSON requires sorted keys, stable ordering, and finite values.</p>
 <p>Generate immutable payloads from canonical data/schema/model/config and write them in deterministic order. The content manifest should match across builds; operational metadata such as build time can live in a separate non-hashed attestation if needed.</p>
 <p>On mismatch, compare canonical payloads field by field rather than accepting new hashes. Reproducibility does not prove model quality, but it makes lineage and review significantly stronger.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> rebuild a bundle deterministically — build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
-<h5 id="solution-1--exercise-10-write-a-claim-bounded-model-card">Exercise 10 — write a claim-bounded model card<a class="heading-anchor" href="#solution-1--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> rebuild a bundle deterministically; build the JSON model bundle twice from canonical records and the same configuration; compare manifest/artifact hashes and diagnose any nondeterministic field such as timestamps, path order, or float serialization.</p>
+<h5 id="solution-1--exercise-10-write-a-claim-bounded-model-card">Exercise 10: write a claim-bounded model card<a class="heading-anchor" href="#solution-1--exercise-10-write-a-claim-bounded-model-card" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
 <p><strong>Reasoning path:</strong> Generate measured fields from the same result object and keep policy prose versioned. Do not claim causality or production readiness from offline metrics.</p>
 <p>Every headline value includes dataset/split identity, unit, denominator, and uncertainty where appropriate. The card names populations not represented, known failure modes, human oversight, and what evidence would require rollback or retraining.</p>
 <p>Treat the card as release evidence reviewed with the artifact, not static marketing text. A missing or stale card blocks promotion under the local policy.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> write a claim-bounded model card — create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
-<h5 id="solution-1--exercise-11-design-shadow-and-canary-evidence">Exercise 11 — design shadow and canary evidence<a class="heading-anchor" href="#solution-1--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> write a claim-bounded model card; create a model card from the manifest and evaluation evidence: intended and excluded use, population, metric/threshold, slices/support, data provenance, limitations, monitoring, owners, and stop conditions.</p>
+<h5 id="solution-1--exercise-11-design-shadow-and-canary-evidence">Exercise 11: design shadow and canary evidence<a class="heading-anchor" href="#solution-1--exercise-11-design-shadow-and-canary-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Specify a no-side-effect shadow comparison followed by a bounded canary. Define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
 <p><strong>Reasoning path:</strong> Shadow predictions do not affect decisions; canary output does. Both need versioned request/prediction identity and privacy-safe telemetry.</p>
 <p>Shadow mode compares compatibility, latency, score distribution, and matured outcomes without exposing users to candidate decisions. A canary receives a small controlled share only after shadow gates pass. Predeclared safety, quality, capacity, and error thresholds trigger automatic pause/rollback.</p>
 <p>Do not repeatedly inspect and expand based on ordinary noisy metrics. Preserve assignment and label-maturity windows for valid comparisons.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> design shadow and canary evidence — specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
-<h5 id="solution-1--exercise-12-separate-drift-from-compatibility">Exercise 12 — separate drift from compatibility<a class="heading-anchor" href="#solution-1--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> design shadow and canary evidence; specify a no-side-effect shadow comparison followed by a bounded canary; define routing, success/guardrail metrics, sample/time minimums, stop rules, rollback, and how delayed labels are handled.</p>
+<h5 id="solution-1--exercise-12-separate-drift-from-compatibility">Exercise 12: separate drift from compatibility<a class="heading-anchor" href="#solution-1--exercise-12-separate-drift-from-compatibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation. Route each to reject, monitor/investigate, or rollback/retrain policy.</p>
 <p><strong>Reasoning path:</strong> Compatibility is a hard interface check; drift and quality are statistical evidence with support, reference, and action thresholds.</p>
 <p>Missing/reordered/wrong-type required features fail before prediction. Distribution shift with a valid schema can continue only under the reviewed monitoring policy; report support and reference period. Performance degradation requires matured labels and may trigger rollback even when input drift metrics look stable.</p>
 <p>Do not coerce an incompatible input merely to keep serving, and do not treat a PSI threshold as proof of model failure.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> separate drift from compatibility — create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.</p>
-<h5 id="solution-1--exercise-13-test-forward-and-backward-compatibility">Exercise 13 — test forward and backward compatibility<a class="heading-anchor" href="#solution-1--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> separate drift from compatibility; create examples of schema incompatibility, valid schema with shifted distribution, and stable inputs with performance degradation; route each to reject, monitor/investigate, or rollback/retrain policy.</p>
+<h5 id="solution-1--exercise-13-test-forward-and-backward-compatibility">Exercise 13: test forward and backward compatibility<a class="heading-anchor" href="#solution-1--exercise-13-test-forward-and-backward-compatibility" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Build a matrix of producer/consumer schema and model versions. Test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
 <p><strong>Reasoning path:</strong> Define compatibility from each consumer&#x27;s contract; semantic changes may be breaking even when JSON types match.</p>
 <p>Old readers may ignore an additive optional field only when they select known fields. New readers can supply a documented default for old payloads. Required renames, position changes in ordered models, and unit/meaning changes require a new version or explicit migration.</p>
 <p>Store migrations as tested code and preserve the original payload identity. Never relabel a semantic change as additive because parsing still succeeds.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> test forward and backward compatibility — build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
-<h5 id="solution-1--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14 — capture dependency and supply-chain evidence<a class="heading-anchor" href="#solution-1--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> test forward and backward compatibility; build a matrix of producer/consumer schema and model versions; test an additive optional field, required rename, reordered feature, and changed numeric meaning across old/new readers.</p>
+<h5 id="solution-1--exercise-14-capture-dependency-and-supply-chain-evidence">Exercise 14: capture dependency and supply-chain evidence<a class="heading-anchor" href="#solution-1--exercise-14-capture-dependency-and-supply-chain-evidence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
 <p><strong>Reasoning path:</strong> Keep portable names/versions/hashes; omit credentials and developer paths. An inventory is evidence, not a vulnerability verdict.</p>
 <p>Compatibility checks consume only declared runtime requirements, while the lock/inventory supports reconstruction and security review. Record the exact tool/version that produced each file and fail promotion when required evidence is absent or inconsistent.</p>
 <p>Scanning/signing systems are optional authorized extensions. Do not invent an SBOM standard claim unless output validates against that standard.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> capture dependency and supply-chain evidence — create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
-<h5 id="solution-1--exercise-15-verify-artifact-trust-before-parsing">Exercise 15 — verify artifact trust before parsing<a class="heading-anchor" href="#solution-1--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> capture dependency and supply-chain evidence; create a local release manifest containing reviewed lock hash, direct runtime requirements, Python range, package major versions, artifact hashes, source revision/dirty flag, and a generated component inventory.</p>
+<h5 id="solution-1--exercise-15-verify-artifact-trust-before-parsing">Exercise 15: verify artifact trust before parsing<a class="heading-anchor" href="#solution-1--exercise-15-verify-artifact-trust-before-parsing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing. Reject path traversal, symlink escape, extra required files, and pickle.</p>
 <p><strong>Reasoning path:</strong> Resolve paths under the bundle root without following an escape. Hash bytes first and accept only an allowlisted safe format.</p>
 <p>Validate the manifest structure, normalize relative paths, and ensure resolved files remain beneath the expected root. Reject symlinks or special files under the strict lesson policy. Compare size and digest, then parse flat/canonical JSON and validate schema.</p>
 <p>A hash from an untrusted manifest does not establish trust; the manifest root must arrive through an approved distribution boundary. Pickle/joblib remains unsafe for untrusted content.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> verify artifact trust before parsing — model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.</p>
-<h5 id="solution-1--exercise-16-rehearse-rollback-dependency-failure">Exercise 16 — rehearse rollback dependency failure<a class="heading-anchor" href="#solution-1--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> verify artifact trust before parsing; model a trusted local manifest root and verify every bundle file&#x27;s relative path, size, and SHA-256 before JSON parsing; reject path traversal, symlink escape, extra required files, and pickle.</p>
+<h5 id="solution-1--exercise-16-rehearse-rollback-dependency-failure">Exercise 16: rehearse rollback dependency failure<a class="heading-anchor" href="#solution-1--exercise-16-rehearse-rollback-dependency-failure" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt recap:</strong> Archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable. Define rollback-target readiness, fallback decision, event trail, and prevention.</p>
 <p><strong>Reasoning path:</strong> A registry stage is not enough; periodically load and smoke-test retained rollback bundles in their compatible runtime.</p>
 <p>Before promotion, verify at least one rollback candidate has artifact, manifest, runtime, schema, and representative fixture evidence. If v1 cannot load during incident response, do not mark rollback successful; pause/route to the last verified candidate or safe degraded behavior and record the failure.</p>
 <p>Add scheduled restoration drills and retain required runtime artifacts/locks. The event trail preserves original incident, attempted target, rejection reason, final action, and owner.</p>
 <p><strong>Common trap:</strong> A high metric or artifact hash cannot compensate for leakage, incompatible schema/runtime, untrusted serialization, missing tests, or a rollback target that no longer works.</p>
 <p><strong>Self-check:</strong> State what the result proves, what assumption it relies on, and which input would make the policy reject or choose a different path.</p>
-<p><strong>Verify:</strong> rehearse rollback dependency failure — archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.</p></div>
+<p><strong>Verify:</strong> rehearse rollback dependency failure; archive version 1, promote version 2, then discover that version 1&#x27;s runtime dependency is unavailable; define rollback-target readiness, fallback decision, event trail, and prevention.</p></div>
       </section>
 
 
@@ -1437,16 +1437,16 @@ changed <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-ml-01` — Reproducible data and model delivery.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-ml-01` — Reproducible data and model delivery.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize data/model identity, schema compatibility, safe bundles, and promotion evidence. Use exactly these maintained learner materials:
@@ -1474,7 +1474,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1585,18 +1585,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

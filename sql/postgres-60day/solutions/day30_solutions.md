@@ -1,4 +1,4 @@
-# Day 30 solutions — Phase 2 Project: Cohort Retention and CLV
+# Day 30 solutions: Phase 2 Project: Cohort Retention and CLV
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Calculate original customer count for each UTC signup cohort month.
 
@@ -112,7 +112,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-30 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build the denominator from customers, including customers who never order. Evaluate another form against the concrete expected result (One row per cohort month) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate active customers and net line revenue for each cohort/order month.
 
@@ -169,7 +169,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-30 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate line items to order grain before cohort joins, then count distinct active customers. Evaluate another form against the concrete expected result (One row per observed cohort/order month) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Calculate cohort month offset and retention using original cohort size.
 
@@ -233,7 +233,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-30 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use year-plus-month age components and guard the denominator. Evaluate another form against the concrete expected result (Observed cohort/offset rows with retention from 0 to 1) and the verification above.
 - **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Create a dense cohort/offset spine from offset 0 through 12 and show missing activity as zero.
 
@@ -310,7 +310,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-30 Exercise 4, the chosen form is justified by this lesson-specific rationale: Cross join cohort months with generate_series, then left join observed activity at the same offset grain. Evaluate another form against the concrete expected result (Thirteen rows per cohort) and the verification above.
 - **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Calculate revenue per active customer and a trailing three-observation annualized teaching projection.
 
@@ -397,7 +397,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-30 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps. Evaluate another form against the concrete expected result (One row per observed cohort/month with nullable guarded measures) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0–12.
 

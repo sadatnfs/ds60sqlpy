@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-55-containerizing-a-fastapi-service">Day 55 — Containerizing a FastAPI Service<a class="heading-anchor" href="#guide--day-55-containerizing-a-fastapi-service" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-55-containerizing-a-fastapi-service">Day 55: Containerizing a FastAPI Service<a class="heading-anchor" href="#guide--day-55-containerizing-a-fastapi-service" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-55</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>production</code> · <strong>Network:</strong> offline</p>
 <p>A container image packages application files, runtime dependencies, and startup configuration. It improves portability, but it is not a virtual machine, security boundary, or substitute for tests and observability.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -467,7 +467,7 @@ $body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation"
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics">Concept deep dive — container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics">Concept deep dive: container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A container image is a versioned filesystem plus process configuration; a container is one running process created from that image. Docker builds layers from a <strong>build context</strong>, so <code>.dockerignore</code> controls what can be sent to the builder. Multi-stage or ordered builds copy only the runtime artifacts needed after dependency installation.</p>
 <p>Liveness asks whether the process is functioning; readiness asks whether it should receive traffic. Packaging does not add application security, trusted artifacts, secret management, network policy, or safe defaults automatically.</p>
@@ -478,7 +478,7 @@ $body <span class="syntax-punctuation">=</span> <span class="syntax-punctuation"
 <li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A — audit build-context inclusion before Docker runs<a class="heading-anchor" href="#guide--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A: audit build-context inclusion before Docker runs<a class="heading-anchor" href="#guide--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> fnmatch <span class="syntax-keyword">import</span> fnmatch
 
@@ -498,7 +498,7 @@ included <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">.env</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> included <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> <span class="syntax-builtin">any</span><span class="syntax-punctuation">(</span>p<span class="syntax-operator">.</span>startswith<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">.venv/</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> p <span class="syntax-operator">in</span> included<span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> The environment file and local virtual environment are excluded while explicit runtime assets remain.</p>
 <p><strong>Assumption to name:</strong> This simplified matcher demonstrates review logic; Docker&#x27;s complete ignore semantics and the real context still need inspection.</p>
-<h5 id="guide--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B — distinguish process health from traffic readiness<a class="heading-anchor" href="#guide--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-distinguish-process-health-from-traffic-readiness">Focused example B: distinguish process health from traffic readiness<a class="heading-anchor" href="#guide--focused-example-b-distinguish-process-health-from-traffic-readiness" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">probe</span><span class="syntax-punctuation">(</span><span class="syntax-operator">*</span><span class="syntax-punctuation">,</span> process_running<span class="syntax-punctuation">,</span> model_loaded<span class="syntax-punctuation">,</span> dependency_ready<span class="syntax-punctuation">,</span> draining<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span>
@@ -561,15 +561,15 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <ol>
 <li>Create a slim dependency file containing only direct API runtime needs.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
+<p><strong>Verify:</strong> Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
 <ol>
 <li>Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
+<p><strong>Verify:</strong> Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
 <ol>
 <li>Optionally push the image to a registry if you intentionally use a connected account.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
+<p><strong>Verify:</strong> Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Trace imports from <code>app.py</code> and the serialized pipeline. Rebuild in a clean image and run both endpoints.</li>
@@ -582,15 +582,15 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <ol>
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
 </ol>
-<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
+<p><strong>Verify:</strong> Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
 <ol>
 <li><strong>Least-privilege runtime:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions. <strong>Progressive hint:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</li>
 </ol>
-<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
+<p><strong>Verify:</strong> Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
 <ol>
 <li><strong>Health semantics:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states. <strong>Progressive hint:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</li>
 </ol>
-<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
+<p><strong>Verify:</strong> Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -637,10 +637,10 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <ul>
 <li>Work in the <a href="python-55.html#learner">Day 55 learner notebook</a>.</li>
 <li>Then consult the <a href="python-55.html#solution-1">Day 55 solution</a>.</li>
-<li>Continue to <a href="python-56.html#guide">Day 56 — Prefect</a>.</li>
+<li>Continue to <a href="python-56.html#guide">Day 56; Prefect</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -916,7 +916,7 @@ docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</co
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-55-solutions-apis-and-containerization-with-docker">Day 55 — Solutions: APIs and Containerization with Docker<a class="heading-anchor" href="#solution-1--day-55-solutions-apis-and-containerization-with-docker" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-55-solutions-apis-and-containerization-with-docker">Day 55: Solutions: APIs and Containerization with Docker<a class="heading-anchor" href="#solution-1--day-55-solutions-apis-and-containerization-with-docker" aria-label="Link to this section">#</a></h3>
 <p>We containerize a FastAPI service, add a health endpoint and Docker HEALTHCHECK, and optimize image size via multi‑stage builds.</p>
 <p>Contents</p>
 <ul>
@@ -925,7 +925,7 @@ docker run --rm -p <span class="syntax-number">8000</span>:8000 ds-60day-api</co
 <li>Exercise 3: Optimize image with multi‑stage builds</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Minimal FastAPI app and Dockerfile</p>
+<p>Worked reference for Exercise 1; Minimal FastAPI app and Dockerfile</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># app.py</span>
 <span class="syntax-keyword">from</span> fastapi <span class="syntax-keyword">import</span> FastAPI
 <span class="syntax-keyword">from</span> pydantic <span class="syntax-keyword">import</span> BaseModel
@@ -955,7 +955,7 @@ uvicorn&gt;=0.30,&lt;1</code></pre>
 <pre class="highlighted-code"><code class="language-bash">docker build -t ds-fastapi:latest .
 docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</code></pre>
 <hr>
-<p>Worked reference for Exercise 2 — Health endpoint and HEALTHCHECK</p>
+<p>Worked reference for Exercise 2; Health endpoint and HEALTHCHECK</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># app.py addition</span>
 <span class="syntax-decorator">@app</span><span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">/health</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">def</span> <span class="syntax-function">health</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">dict</span><span class="syntax-punctuation">[</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">:</span>
@@ -973,7 +973,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <li>Keep the endpoint fast and dependency-light; use a separate readiness check when needed</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Multi‑stage build</p>
+<p>Worked reference for Exercise 3; Multi‑stage build</p>
 <pre class="highlighted-code"><code class="language-dockerfile"><span class="syntax-comment"># Stage 1: build dependencies in an isolated virtual environment.</span>
 <span class="syntax-keyword">FROM</span> <span class="syntax-string">python:3.12-slim</span> <span class="syntax-keyword">AS</span> <span class="syntax-string">builder</span>
 <span class="syntax-keyword">ENV</span> VIRTUAL_ENV<span class="syntax-operator">=</span>/opt/venv
@@ -1020,42 +1020,42 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a slim dependency file containing only direct API runtime needs.</p>
 <p><strong>How to reason about it:</strong> Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — container build boundaries, minimal images, and health semantics — build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; container build boundaries, minimal images, and health semantics; build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</p>
 <p><strong>How to reason about it:</strong> A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — container build boundaries, minimal images, and health semantics — with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; container build boundaries, minimal images, and health semantics; with TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally push the image to a registry if you intentionally use a connected account.</p>
 <p><strong>How to reason about it:</strong> Registry upload is optional and networked. Use the registry&#x27;s credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — container build boundaries, minimal images, and health semantics — keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
-<h5 id="solution-1--exercise-4-layer-and-secret-audit">Exercise 4 — Layer and secret audit<a class="heading-anchor" href="#solution-1--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; container build boundaries, minimal images, and health semantics; keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
+<h5 id="solution-1--exercise-4-layer-and-secret-audit">Exercise 4: Layer and secret audit<a class="heading-anchor" href="#solution-1--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent.</p>
 <p><strong>Reasoning before implementation:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</p>
 <p>Allow only the service source, locked dependency metadata, and approved model artifact into the context. Use runtime secret injection for connected extensions; the portable lesson should require no credential.</p>
-<p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it—removing the file from the latest layer is not sufficient.</p>
+<p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it, removing the file from the latest layer is not sufficient.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Layer and secret audit — build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
-<h5 id="solution-1--exercise-5-least-privilege-runtime">Exercise 5 — Least-privilege runtime<a class="heading-anchor" href="#solution-1--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
+<h5 id="solution-1--exercise-5-least-privilege-runtime">Exercise 5: Least-privilege runtime<a class="heading-anchor" href="#solution-1--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.</p>
 <p><strong>Reasoning before implementation:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</p>
 <p>The model artifact and application code should be read-only at runtime. Logging should go to stdout/stderr rather than a mutable file beside source. If a framework requires a cache, configure a bounded writable temp directory and document its lifecycle.</p>
 <p>Bind to an unprivileged port such as 8000. Dropping root reduces impact but does not replace dependency updates, network policy, or input validation.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Least-privilege runtime — inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
-<h5 id="solution-1--exercise-6-health-semantics">Exercise 6 — Health semantics<a class="heading-anchor" href="#solution-1--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
+<h5 id="solution-1--exercise-6-health-semantics">Exercise 6: Health semantics<a class="heading-anchor" href="#solution-1--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states.</p>
 <p><strong>Reasoning before implementation:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</p>
 <p><code>/live</code> should avoid dependency fan-out that could cause restart loops. <code>/ready</code> can require successful artifact load, schema validation, and critical local resources. A malformed artifact should fail startup or keep readiness false, not return an “ok” response with later prediction failures.</p>
 <p>Tests should simulate absent and mismatched artifacts without requiring Docker or a network, then add one container smoke test for the packaged path.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Health semantics — assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></div>
+<p><strong>Verify:</strong> Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></div>
       </section>
 
 
@@ -1239,16 +1239,16 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-55` — Day 55 — Containerizing a FastAPI Service.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize container build boundaries, minimal images, and health semantics. Use exactly these maintained learner materials:
@@ -1276,7 +1276,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1387,18 +1387,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

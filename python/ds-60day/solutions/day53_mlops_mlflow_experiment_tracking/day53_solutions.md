@@ -1,4 +1,4 @@
-# Day 53 — Solutions: MLOps with MLflow Experiment Tracking
+# Day 53: Solutions: MLOps with MLflow Experiment Tracking
 
 We track a scikit‑learn grid search with MLflow, log the best model as an artifact, and load it for reuse.
 
@@ -24,7 +24,7 @@ Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.2, random_state=0, strat
 mlflow.set_experiment('rf-breast-cancer')
 ```
 
-Worked reference for Exercise 1 — Grid search with autologging
+Worked reference for Exercise 1; Grid search with autologging
 ```python
 mlflow.sklearn.autolog()
 
@@ -46,7 +46,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 2 — Log and load best model
+Worked reference for Exercise 2; Log and load best model
 ```python
 with mlflow.start_run(run_name='rf_best_model') as run:
     best = RandomForestClassifier(random_state=0, **cv.best_params_).fit(Xtr, ytr)
@@ -68,7 +68,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Model Registry (concepts)
+Worked reference for Exercise 3; Model Registry (concepts)
 - Register models for stages: Staging → Production
 - Transition approvals and CI checks gate promotions
 - Versioned artifacts allow rollbacks and auditability
@@ -114,7 +114,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Log additional parameters such as Logistic Regression `C` and compare runs.
 
@@ -124,9 +124,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
+**Verify:** Practice 1; MLflow run identity, params, metrics, artifacts, and reproducible evidence; query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Save a confusion-matrix PNG and log it as an artifact.
 
@@ -136,9 +136,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
+**Verify:** Practice 2; MLflow run identity, params, metrics, artifacts, and reproducible evidence; save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Try a different classifier, such as Random Forest, and compare ROC AUC.
 
@@ -148,9 +148,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — MLflow run identity, params, metrics, artifacts, and reproducible evidence — run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
+**Verify:** Practice 3; MLflow run identity, params, metrics, artifacts, and reproducible evidence; run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.
 
-### Exercise 4 — Failure-state handling
+### Exercise 4: Failure-state handling
 
 **Prompt:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
 
@@ -168,9 +168,9 @@ evidence is restricted.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Failure-state handling — query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
+**Verify:** Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.
 
-### Exercise 5 — Provenance manifest
+### Exercise 5: Provenance manifest
 
 **Prompt:** Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.
 
@@ -188,9 +188,9 @@ Keep the source snapshot governed and reproducible.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Provenance manifest — download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
+**Verify:** Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.
 
-### Exercise 6 — Reload and signature check
+### Exercise 6: Reload and signature check
 
 **Prompt:** Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.
 
@@ -208,4 +208,4 @@ as an extension rather than required for the portable course.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Reload and signature check — load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.
+**Verify:** Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.

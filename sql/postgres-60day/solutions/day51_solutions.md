@@ -1,4 +1,4 @@
-# Day 51 Solutions — Cash Flow and Operating Margin
+# Day 51 Solutions: Cash Flow and Operating Margin
 
 
 <!-- beginner-solution-enrichment -->
@@ -56,7 +56,7 @@ correctness is established with evidence.
 The project finishes with monthly operating margin and a three-month seasonal
 cash projection. See [`day51_solutions.sql`](day51_solutions.sql).
 
-## Exercise 1 — Monthly operating margin
+## Exercise 1: Monthly operating margin
 
 The prompt defines operating cost as `COGS + Payroll + Infrastructure + G&A`;
 Marketing is deliberately excluded.
@@ -103,7 +103,7 @@ expenses. Margin is `NULL` when there is no cash-in denominator.
 - **Alternative/trade-off:** For sql-51 Exercise 1, the chosen form is justified by this lesson-specific rationale: The prompt defines operating cost as `COGS + Payroll + Infrastructure + G&A`; Marketing is deliberately excluded. Evaluate another form against the concrete expected result (one row per month appearing in either payments or operating expenses) and the verification above.
 - **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 
-## Exercise 2 — Next three months by matching calendar month
+## Exercise 2: Next three months by matching calendar month
 
 The phrase “matching months” is interpreted as the same calendar month in
 earlier years.
@@ -166,7 +166,7 @@ history supports each estimate; a `NULL` projection means there was none.
   average as a naive forecast and disclose the sample count.
 - Both answers are read-only.
 
-## Exercise 3 — Separate cash and booked revenue
+## Exercise 3: Separate cash and booked revenue
 
 Orders are grouped by order month and payments by payment month. Displaying both
 reveals timing differences; combining them under one unlabeled “revenue” metric
@@ -182,7 +182,7 @@ would be misleading.
 - **Alternative/trade-off:** For sql-51 Exercise 3, the chosen form is justified by this lesson-specific rationale: Orders are grouped by order month and payments by payment month. Evaluate another form against the concrete expected result (one row per `cash_received`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `booked_order_revenue` for the existing `cash_received` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Build a cash balance
+## Exercise 4: Build a cash balance
 
 Payment and expense entries are unioned at month grain. Net flow is accumulated
 with a running SUM, and LAG supplies the next month's beginning balance.
@@ -197,7 +197,7 @@ with a running SUM, and LAG supplies the next month's beginning balance.
 - **Alternative/trade-off:** For sql-51 Exercise 4, the chosen form is justified by this lesson-specific rationale: Payment and expense entries are unioned at month grain. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Preserve one-sided months
+## Exercise 5: Preserve one-sided months
 
 A calendar spine spans both sources, then left joins monthly cash and costs.
 This retains expense-only and payment-only periods with an explicit zero policy.
@@ -212,7 +212,7 @@ This retains expense-only and payment-only periods with an explicit zero policy.
 - **Alternative/trade-off:** For sql-51 Exercise 5, the chosen form is justified by this lesson-specific rationale: A calendar spine spans both sources, then left joins monthly cash and costs. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
 - **Edge case:** Add one source row with a new `month`; verify the result gains exactly one row carrying that `month` value.
 
-## Exercise 6 — Explain undefined margin
+## Exercise 6: Explain undefined margin
 
 `NULLIF(cash_in, 0)` preserves NULL for an undefined ratio. A companion status
 column explains the reason instead of leaving consumers to guess.

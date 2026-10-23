@@ -208,7 +208,7 @@ API and mechanism reference: [Sentence-BERT](https://arxiv.org/abs/1908.10084), 
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-020, Fine-tuning embeddings and a small reranker.

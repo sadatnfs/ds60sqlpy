@@ -1,4 +1,4 @@
-# Day 36 — Solutions: Dimensionality Reduction with PCA
+# Day 36: Solutions: Dimensionality Reduction with PCA
 
 We standardize features, fit PCA, and choose the number of components via cumulative explained variance. We also compare PCA before/after scaling and briefly try SelectKBest.
 
@@ -18,7 +18,7 @@ import numpy as np, matplotlib.pyplot as plt
 X, y = load_iris(return_X_y=True)
 ```
 
-Worked reference for Exercise 1 — Cumulative explained variance (scree)
+Worked reference for Exercise 1; Cumulative explained variance (scree)
 ```python
 sc = StandardScaler()
 Xz = sc.fit_transform(X)
@@ -40,7 +40,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — PCA before vs after scaling
+Worked reference for Exercise 2; PCA before vs after scaling
 ```python
 pca_raw = PCA(n_components=2).fit(X)
 X2_raw = pca_raw.transform(X)
@@ -60,7 +60,7 @@ Observation
 
 ---
 
-Worked reference for Exercise 3 — SelectKBest vs PCA
+Worked reference for Exercise 3; SelectKBest vs PCA
 ```python
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.model_selection import cross_val_score
@@ -125,7 +125,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Plot cumulative explained variance and choose a component count.
 
@@ -135,9 +135,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — PCA geometry, scaling, variance, and reconstruction — fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
+**Verify:** Practice 1; PCA geometry, scaling, variance, and reconstruction; fit PCA on training data only, print cumulative explained variance by component, and choose the smallest count reaching a declared threshold such as 95%; assert transformed train/test column counts match that choice.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Compare PCA before and after feature standardization.
 
@@ -147,9 +147,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — PCA geometry, scaling, variance, and reconstruction — on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
+**Verify:** Practice 2; PCA geometry, scaling, variance, and reconstruction; on one frozen split, report feature scales and PCA explained-variance ratios before and after StandardScaler; verify each scaler/PCA pair is fitted on training rows only.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Try `SelectKBest` on a classification dataset and compare its validated performance with PCA.
 
@@ -159,9 +159,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — PCA geometry, scaling, variance, and reconstruction — evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
+**Verify:** Practice 3; PCA geometry, scaling, variance, and reconstruction; evaluate SelectKBest and scaled PCA with identical folds, component/feature counts, estimator, and metric; print every fold score plus mean/std and keep the final test labels unopened.
 
-### Exercise 4 — Reconstruction analysis
+### Exercise 4: Reconstruction analysis
 
 **Prompt:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
 
@@ -194,9 +194,9 @@ the reduced representation against the actual downstream objective.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Reconstruction analysis — for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.
+**Verify:** Reconstruction analysis; for each retained-component count, print reconstruction MSE and save the labeled curve; assert inverse-transformed shape equals the scaled input shape and MSE is non-increasing up to floating-point tolerance.
 
-### Exercise 5 — Interpretation edge case
+### Exercise 5: Interpretation edge case
 
 **Prompt:** Fit PCA twice to equivalent data and explain why a component and all of its loadings may appear with the opposite sign while the projection remains equivalent.
 
@@ -215,9 +215,9 @@ matrices. Do not interpret a sign flip as learned behavioral drift.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Interpretation edge case — fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.
+**Verify:** Interpretation edge case; fit the equivalent PCA inputs, align component signs by dot product, and assert transformed coordinates/loadings match after sign alignment within 1e-10 while explained-variance ratios are unchanged.
 
-### Exercise 6 — Leakage debugging
+### Exercise 6: Leakage debugging
 
 **Prompt:** Create a dataset with many noise features, run SelectKBest once before cross-validation, and then correctly inside a Pipeline. Explain the expected score difference.
 
@@ -247,4 +247,4 @@ simulation across seeds; one dataset can understate or overstate the leakage.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Leakage debugging — print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.
+**Verify:** Leakage debugging; print fold scores for SelectKBest fitted globally and inside Pipeline on the same seeded noise dataset; assert the pipeline owns fit within each fold and retain the observed optimism gap without promising its exact size.

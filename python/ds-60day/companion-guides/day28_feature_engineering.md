@@ -1,4 +1,4 @@
-# Day 28 — Feature Engineering with scikit-learn
+# Day 28: Feature Engineering with scikit-learn
 
 **Level:** Intermediate
 
@@ -65,12 +65,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 28 — feature engineering with scikit-learn to practice reproducible feature transformations without information leakage
+**Lesson outcome:** use day 28; feature engineering with scikit-learn to practice reproducible feature transformations without information leakage
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -78,7 +78,7 @@ A feature is a model input available at the moment a prediction would be
 made. Feature engineering changes representation to expose useful
 structure: scaling numbers, encoding categories, extracting dates,
 binning, or combining fields. It must preserve the time/knowledge
-boundary—post-outcome data and target-derived values are leakage.
+boundary, post-outcome data and target-derived values are leakage.
 
 A transformer learns parameters during `fit` and applies them during
 `transform`. Split evaluation data before fitting learned means, scales,
@@ -103,7 +103,7 @@ preprocessing step only on the training rows passed to `fit` and passes
 the transformed output to the estimator. `handle_unknown="ignore"`
 defines inference behavior for categories absent during fit.
 
-### Worked example 1 — Fit scaling on training data only
+### Worked example 1: Fit scaling on training data only
 
 The held-out value is transformed with training parameters. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -127,7 +127,7 @@ The training mean is `[2.0]`; the held-out value becomes a large positive standa
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Handle an unseen category explicitly
+### Worked example 2: Handle an unseen category explicitly
 
 The encoder's inference contract belongs inside preprocessing. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -157,7 +157,7 @@ When the output differs from your prediction, use this order:
 1. Write when every candidate feature becomes known relative to prediction time.
 2. Split before fitting any stateful transformation.
 3. Inspect transformed feature names, shape, and output ordering.
-4. Test missing values, unseen categories, and zero variance through the fitted pipeline—not ad hoc notebook fixes.
+4. Test missing values, unseen categories, and zero variance through the fitted pipeline, not ad hoc notebook fixes.
 
 ### Practice ramp
 
@@ -252,8 +252,8 @@ code; these extend rather than replace the original practice above.
    **Progressive hint:** Use separate branches and `handle_unknown='ignore'`.
    **Verify:** Pass an unseen category through the repaired pipeline and assert no failure, expected output shape, and no scaling step applied to one-hot columns.
 7. **Edge case and explanation:** Handle a zero-variance numeric feature, unseen category, and missing value at inference; define tests for each.
-   **Progressive hint:** The fitted pipeline—not ad hoc notebook code—owns these policies.
-   **Verify:** Run three inference fixtures—zero variance, unseen category, missing value—through the same fitted pipeline and assert each documented result.
+   **Progressive hint:** The fitted pipeline, not ad hoc notebook code, owns these policies.
+   **Verify:** Run three inference fixtures, zero variance, unseen category, missing value, through the same fitted pipeline and assert each documented result.
 
 Before opening the reference solution, write one sentence explaining
 which contract or mental model each result confirms.
@@ -285,11 +285,11 @@ category, and compares alternatives on the same evaluation data.
 
 - [Open the learner notebook](../notebooks/day28_feature_engineering.ipynb)
 - [Check the separate solution](../solutions/day28_feature_engineering/day28_solutions.md)
-- [Next: Day 29 — Data validation schemas](day29_data_validation_schemas.md)
+- [Next: Day 29; Data validation schemas](day29_data_validation_schemas.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

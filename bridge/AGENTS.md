@@ -28,9 +28,9 @@ examples, exercises, self-checks, common pitfalls, and a next step. Solution
 notes discuss tradeoffs and failure behavior instead of merely repeating code.
 Every guide must include a novice-safe `## How to run this lesson`, at least
 two runnable topic-specific examples, an explicit Expected/Verify contract for
-each exercise, and a final copy-ready `## Ask Codex about this lesson` prompt
+each exercise, and a final copy-ready `## Ask an AI tutor about this lesson` prompt
 using the exact stable ID and paths. The guide and solution must remain
-self-contained when Codex is unavailable.
+self-contained without an AI tutor.
 Each cataloged bridge module must meet its immutable
 `curriculum/practice_baseline.json` target on learner, guide, and explanatory
 solution surfaces with aligned, distinct numbered prompts.

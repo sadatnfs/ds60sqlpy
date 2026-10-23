@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-13-functional-tools-itertools-and-functools">Day 13 — Functional Tools: <code>itertools</code> and <code>functools</code><a class="heading-anchor" href="#guide--day-13-functional-tools-itertools-and-functools" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-13-functional-tools-itertools-and-functools">Day 13: Functional Tools: <code>itertools</code> and <code>functools</code><a class="heading-anchor" href="#guide--day-13-functional-tools-itertools-and-functools" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Beginner</p>
 <p>The standard library can transform iterables lazily and specialize or cache functions. Use these tools when they make intent clearer than hand-written state.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 13 — functional tools: <code>itertools</code> and <code>functools</code> to practice functions as values and composable iterable tools and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 13; functional tools: <code>itertools</code> and <code>functools</code> to practice functions as values and composable iterable tools and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>Python functions are objects: they can be assigned to names, passed as arguments, and returned. A higher-order function accepts or returns another function. This enables small reusable operations, but an ordinary named function is usually clearer than a dense lambda once logic needs explanation.</p>
 <p><code>map</code> transforms, <code>filter</code> selects, <code>itertools</code> composes lazy iteration, and <code>functools</code> supplies function adapters and caching. List comprehensions often read more naturally for one transformation/filter; lazy tools matter when the input is a stream or too large to materialize. Avoid <code>reduce</code> when a named loop or built-in such as <code>sum</code>, <code>min</code>, or <code>max</code> states the intent better.</p>
@@ -420,8 +420,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>cache:</strong> stored results reused for repeated equivalent calls.</li>
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
-<p><code>map(normalize, names)</code> receives the function object <code>normalize</code>—without parentheses—and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
-<h5 id="guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1 — Pass a named function into a lazy transformation<a class="heading-anchor" href="#guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
+<p><code>map(normalize, names)</code> receives the function object <code>normalize</code>, without parentheses, and an iterable. Iteration later calls it for each item. <code>sorted(records, key=lambda row: row[&quot;score&quot;])</code> calls the key function once per row to derive comparison keys; the lambda returns one expression.</p>
+<h5 id="guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation">Worked example 1: Pass a named function into a lazy transformation<a class="heading-anchor" href="#guide--worked-example-1-pass-a-named-function-into-a-lazy-transformation" aria-label="Link to this section">#</a></h5>
 <p>Keep the operation testable on its own. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">normalize_name</span><span class="syntax-punctuation">(</span>text<span class="syntax-punctuation">:</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span><span class="syntax-operator">&gt;</span> <span class="syntax-builtin">str</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-string">&quot;</span><span class="syntax-string"> </span><span class="syntax-string">&quot;</span><span class="syntax-operator">.</span>join<span class="syntax-punctuation">(</span>text<span class="syntax-operator">.</span>strip<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>title<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>split<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
@@ -432,7 +432,7 @@ normalized_iter <span class="syntax-operator">=</span> <span class="syntax-built
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">`[&#x27;Ada Lovelace&#x27;, &#x27;Grace Hopper&#x27;]`. `map` is lazy; `list` consumes it.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2 — Compose lazy filtering and slicing<a class="heading-anchor" href="#guide--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-compose-lazy-filtering-and-slicing">Worked example 2: Compose lazy filtering and slicing<a class="heading-anchor" href="#guide--worked-example-2-compose-lazy-filtering-and-slicing" aria-label="Link to this section">#</a></h5>
 <p>Generate only as many values as the consumer requests. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> islice
 
@@ -521,10 +521,10 @@ labels <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <ul>
 <li><a href="python-13.html#learner">Open the learner notebook</a></li>
 <li><a href="python-13.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-14.html#guide">Next: Day 14 — Ruff, mypy, and pytest</a></li>
+<li><a href="python-14.html#guide">Next: Day 14; Ruff, mypy, and pytest</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-13`
 (Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
 I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
@@ -775,7 +775,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter">Day 13 — Solutions: Functional Tools (itertools, functools, map/filter)<a class="heading-anchor" href="#solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter">Day 13: Solutions: Functional Tools (itertools, functools, map/filter)<a class="heading-anchor" href="#solution-1--day-13-solutions-functional-tools-itertools-functools-map-filter" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>functions as values and composable iterable tools</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Python functions are objects: they can be assigned to names, passed as arguments, and returned. A higher-order function accepts or returns another function. This enables small reusable operations, but an ordinary named function is usually clearer than a dense lambda once logic needs explanation.</p>
@@ -791,8 +791,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>functions as values and composable iterable tools</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Use <code>itertools.groupby</code> to group records that are already sorted by a category key. <strong>Inputs:</strong> include the same category in separated positions before sorting. <strong>Expected behavior:</strong> after explicit sorting, each category appears once with all of its records. <strong>Constraint:</strong> explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. <strong>Verify:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>itertools.groupby</code> to group records that are already sorted by a category key. Inputs: include the same category in separated positions before sorting. Expected behavior: after explicit sorting, each category appears once with all of its records. Constraint: explain why <code>groupby</code> groups adjacent runs rather than globally collecting unsorted data. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record. That connects the answer to functions as values and composable iterable tools.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> itertools <span class="syntax-keyword">import</span> groupby
@@ -807,7 +807,7 @@ grouped <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> grouped <span class="syntax-operator">==</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">a</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">b</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">}</span></code></pre>
 <p>Sorting is part of the contract because <code>groupby</code> collects adjacent runs rather than searching the entire iterable.</p>
 <p><strong>Verification evidence:</strong> Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. <strong>Then:</strong> implement the same result with a named loop and compare readability. <strong>Verify:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Use <code>functools.reduce</code> to compute a product for <code>[2, 3, 4]</code>, giving an explicit identity so empty input returns <code>1</code>. Then: implement the same result with a named loop and compare readability. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code. That connects the answer to functions as values and composable iterable tools.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> functools <span class="syntax-keyword">import</span> reduce
@@ -829,30 +829,30 @@ grouped <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-keyword">assert</span> product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> loop_product<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span></code></pre>
 <p><code>math.prod(values)</code> is the clearest production alternative; the explicit reduction here makes identity behavior visible.</p>
 <p><strong>Verification evidence:</strong> both return <code>24</code> and both define empty behavior; state why <code>sum</code>/<code>math.prod</code> is preferable in ordinary production code.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. <strong>Progressive hint:</strong> <code>map</code> is a lazy one-shot iterator in Python 3. <strong>Verify:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Predict what remains after calling <code>next</code> on a <code>map</code> object and then converting it to a list. Progressive hint: <code>map</code> is a lazy one-shot iterator in Python 3. Then compare the prediction with this proof target: Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted. This makes functions as values and composable iterable tools observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. <strong>Progressive hint:</strong> Tuple components are compared left to right. <strong>Verify:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace <code>sorted(records, key=lambda row: (row[&#x27;team&#x27;], -row[&#x27;score&#x27;]))</code> and explain the tuple key. Progressive hint: Tuple components are compared left to right. Record the named value, shape, label, or iterator position needed to establish: Compute each tuple key beside its record and assert final order groups team ascending and score descending within team. The trace exposes functions as values and composable iterable tools directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. <strong>Progressive hint:</strong> Apply the reversed function sequence to the current value. <strong>Verify:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement <code>compose(*functions)</code> so <code>compose(f, g)(x)</code> applies <code>g</code> then <code>f</code>, and handle no functions as identity. Progressive hint: Apply the reversed function sequence to the current value. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged. That connects the answer to functions as values and composable iterable tools.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert composition order with noncommutative functions and assert <code>compose()(value)</code> returns the original value unchanged.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair lambdas created in a loop that all use the final loop value. <strong>Progressive hint:</strong> Bind the current value as a default argument or use a factory function. <strong>Verify:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair lambdas created in a loop that all use the final loop value. Progressive hint: Bind the current value as a default argument or use a factory function. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value. The diagnosis depends on functions as values and composable iterable tools.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. <strong>Progressive hint:</strong> Pure stages are easier to test and reuse. <strong>Verify:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Refactor a pipeline that prints inside <code>map</code> into pure transforms plus one explicit presentation step. Progressive hint: Pure stages are easier to test and reuse. Values below, at, and above the named boundary must produce the evidence Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step. Those cases show how functions as values and composable iterable tools behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering">Shared implementation for Exercises 3–4 — Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering">Shared implementation for Exercises 3–4: Lazy iterators and tuple ordering<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-lazy-iterators-and-tuple-ordering" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python">doubled <span class="syntax-operator">=</span> <span class="syntax-builtin">map</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">lambda</span> value<span class="syntax-punctuation">:</span> value <span class="syntax-operator">*</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">next</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span>doubled<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">]</span>
@@ -864,7 +864,7 @@ records <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <span class="syntax-punctuation">]</span>
 ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> <span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">team</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">score</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> ordered<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">]</span></code></pre>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages">Shared implementation for Exercises 5–7 — Composition, binding, and pure stages<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages">Shared implementation for Exercises 5–7: Composition, binding, and pure stages<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-composition-binding-and-pure-stages" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> collections.abc <span class="syntax-keyword">import</span> Callable
 <span class="syntax-keyword">from</span> typing <span class="syntax-keyword">import</span> Any
 
@@ -1026,16 +1026,16 @@ rendered <span class="syntax-operator">=</span> <span class="syntax-string">&quo
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-13`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-13`
 (Day 13 — Functional Tools: `itertools` and `functools`). Direct catalog prerequisites: `python-12`.
 I have completed the direct prerequisites: `python-12`. Emphasize functions as values and composable iterable tools.
 Read `python/ds-60day/companion-guides/day13_functional_tools.md` and use the learner notebook
@@ -1050,7 +1050,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1161,18 +1161,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

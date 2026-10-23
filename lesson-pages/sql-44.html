@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,11 +429,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-44-monitoring-and-diagnostics">Day 44 — Monitoring and Diagnostics<a class="heading-anchor" href="#guide--day-44-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-44-monitoring-and-diagnostics">Day 44: Monitoring and Diagnostics<a class="heading-anchor" href="#guide--day-44-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
-<li><strong>Prerequisites:</strong> <a href="sql-43.html#guide">Day 43 — logical backup and recovery</a></li>
+<li><strong>Prerequisites:</strong> <a href="sql-43.html#guide">Day 43; logical backup and recovery</a></li>
 <li><strong>Artifacts:</strong> <a href="sql-44.html#learner">learner SQL</a> · <a href="sql-44.html#solution-1">solution reasoning</a> · <a href="sql-44.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
@@ -447,7 +447,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-44 — Monitoring Diagnostics</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-44; Monitoring Diagnostics</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-44/lesson/workspace/sql/postgres-60day/day44_monitoring_diagnostics.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
@@ -458,7 +458,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_s
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/day44_monitoring_diagnostics.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Wait event, Backend PID, Normalized statement. Its worked SQL reads or creates <code>order_items</code>, <code>products</code>, <code>orders</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -522,7 +522,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Have you avoided extension installation, statistics resets, cancellation, and termination?</li>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
-<p>Continue to <a href="sql-45.html#guide">Day 45 — optimization project</a>.</p>
+<p>Continue to <a href="sql-45.html#guide">Day 45; optimization project</a>.</p>
 <h4 id="guide--deep-dive-and-reference">Deep dive and reference<a class="heading-anchor" href="#guide--deep-dive-and-reference" aria-label="Link to this section">#</a></h4>
 <h4 id="guide--what-you-will-learn">What you will learn<a class="heading-anchor" href="#guide--what-you-will-learn" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -553,8 +553,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <h4 id="guide--expanded-practice-lab">Expanded practice lab<a class="heading-anchor" href="#guide--expanded-practice-lab" aria-label="Link to this section">#</a></h4>
 <p>Prompts 3–6 build read-only operational judgment. <code>query_start</code> measures the current statement while <code>xact_start</code> measures the enclosing transaction; show both because long idle transactions can retain locks and old snapshots.</p>
 <p>Aggregate connection counts instead of exposing full SQL text in a shared report. For historical workload, examine both <code>mean_exec_time</code> and <code>total_exec_time</code>: one reveals expensive calls, the other cumulative load. Never cancel a session as part of this practice.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-44 — Monitoring Diagnostics.
 
 I have completed the direct catalog prerequisite: `sql-43`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -733,7 +733,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-44-solutions-monitoring-and-diagnostics">Day 44 Solutions — Monitoring and Diagnostics<a class="heading-anchor" href="#solution-1--day-44-solutions-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-44-solutions-monitoring-and-diagnostics">Day 44 Solutions: Monitoring and Diagnostics<a class="heading-anchor" href="#solution-1--day-44-solutions-monitoring-and-diagnostics" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -754,7 +754,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 </ul>
 <p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
 <p>The two deliverables inspect active work and, when available, <code>pg_stat_statements</code>. The solution remains runnable on a fresh PostgreSQL installation where that optional extension is absent or installed without its shared-memory module being loaded at server startup. See <a href="sql-44.html#solution-2"><code>day44_solutions.sql</code></a>.</p>
-<h4 id="solution-1--exercise-1-longest-running-active-statements">Exercise 1 — Longest-running active statements<a class="heading-anchor" href="#solution-1--exercise-1-longest-running-active-statements" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-longest-running-active-statements">Exercise 1: Longest-running active statements<a class="heading-anchor" href="#solution-1--exercise-1-longest-running-active-statements" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">SELECT</span> pid<span class="syntax-punctuation">,</span>
@@ -780,7 +780,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: zero or more currently active sessions, excluding the monitoring query itself. Evaluate another form against the concrete expected result (zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation&#x27;s purpose before intervening) and the verification above.</li>
 <li><strong>Edge case:</strong> A quiet local database can correctly return zero rows. Use a controlled <code>pg_sleep</code> session when you need a positive observation, and never manufacture a row in a system view.</li>
 </ul>
-<h4 id="solution-1--exercise-2-optional-top-statement-statistics">Exercise 2 — Optional top statement statistics<a class="heading-anchor" href="#solution-1--exercise-2-optional-top-statement-statistics" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-optional-top-statement-statistics">Exercise 2: Optional top statement statistics<a class="heading-anchor" href="#solution-1--exercise-2-optional-top-statement-statistics" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">BEGIN</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
@@ -856,7 +856,7 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">ORDER</span> <span class="syntax-keyword">BY</span> ranking<span class="syntax-punctuation">,</span> rank_position<span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">ROLLBACK</span><span class="syntax-punctuation">;</span></code></pre>
-<p>Expected shape: up to twenty rows when <code>pg_stat_statements</code> is installed and loaded—at most ten for each ranking label. Otherwise the block emits an explanatory notice and the final query returns an empty result.</p>
+<p>Expected shape: up to twenty rows when <code>pg_stat_statements</code> is installed and loaded, at most ten for each ranking label. Otherwise the block emits an explanatory notice and the final query returns an empty result.</p>
 <p>An existence check is necessary but not sufficient. PostgreSQL can install the extension&#x27;s view without loading its shared-memory module at server startup. The nested block catches only that documented <code>object_not_in_prerequisite_state</code> condition. PL/pgSQL rolls back either partial ranking inside the nested block, and <code>TRUNCATE</code> makes the empty-result contract explicit. Any unrelated error still propagates.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -875,7 +875,7 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <li>Checking <code>to_regclass</code> avoids a parse-time reference to a missing extension view; dynamic SQL defers that reference until the view is known to exist.</li>
 <li>These are diagnostic reads. Do not cancel or terminate sessions without confirming ownership and operational impact.</li>
 </ul>
-<h4 id="solution-1--exercise-3-separate-query-and-transaction-age">Exercise 3 — Separate query and transaction age<a class="heading-anchor" href="#solution-1--exercise-3-separate-query-and-transaction-age" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-separate-query-and-transaction-age">Exercise 3: Separate query and transaction age<a class="heading-anchor" href="#solution-1--exercise-3-separate-query-and-transaction-age" aria-label="Link to this section">#</a></h4>
 <p><code>query_start</code> belongs to the current statement; <code>xact_start</code> belongs to its transaction. The latter can reveal long-lived snapshots hidden behind a short or currently idle statement.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -887,7 +887,7 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 3, the chosen form is justified by this lesson-specific rationale: <code>query_start</code> belongs to the current statement; <code>xact_start</code> belongs to its transaction. Evaluate another form against the concrete expected result (one row per <code>pid</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> A backend outside an explicit transaction can have a NULL <code>xact_start</code>; preserve that NULL rather than converting it to a misleading zero duration.</li>
 </ul>
-<h4 id="solution-1--exercise-4-summarize-connections-safely">Exercise 4 — Summarize connections safely<a class="heading-anchor" href="#solution-1--exercise-4-summarize-connections-safely" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-summarize-connections-safely">Exercise 4: Summarize connections safely<a class="heading-anchor" href="#solution-1--exercise-4-summarize-connections-safely" aria-label="Link to this section">#</a></h4>
 <p>Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -899,7 +899,7 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report. Evaluate another form against the concrete expected result (one row per <code>datname</code>, <code>usename</code>, and <code>state</code>) and the verification above.</li>
 <li><strong>Edge case:</strong> Background workers can expose NULL database or user values; grouped NULLs are legitimate categories and must survive verification.</li>
 </ul>
-<h4 id="solution-1--exercise-5-retain-mean-and-total-workload-views">Exercise 5 — Retain mean and total workload views<a class="heading-anchor" href="#solution-1--exercise-5-retain-mean-and-total-workload-views" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-retain-mean-and-total-workload-views">Exercise 5: Retain mean and total workload views<a class="heading-anchor" href="#solution-1--exercise-5-retain-mean-and-total-workload-views" aria-label="Link to this section">#</a></h4>
 <p>Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. The answer keeps both rather than declaring one universal “slow query” ranking.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -911,7 +911,7 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 <li><strong>Alternative/trade-off:</strong> For sql-44 Exercise 5, the chosen form is justified by this lesson-specific rationale: Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. Evaluate another form against the concrete statement-within-ranking grain and the verification above.</li>
 <li><strong>Edge case:</strong> The same statement can appear once in each ranking. That is expected because <code>ranking</code> is part of the identity; it is not a duplicate to remove.</li>
 </ul>
-<h4 id="solution-1--exercise-6-identify-idle-in-transaction-sessions">Exercise 6 — Identify idle-in-transaction sessions<a class="heading-anchor" href="#solution-1--exercise-6-identify-idle-in-transaction-sessions" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-identify-idle-in-transaction-sessions">Exercise 6: Identify idle-in-transaction sessions<a class="heading-anchor" href="#solution-1--exercise-6-identify-idle-in-transaction-sessions" aria-label="Link to this section">#</a></h4>
 <p>The read-only diagnostic returns age and wait fields. It does not cancel a backend; ownership and operational impact must be confirmed first.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1108,16 +1108,16 @@ $optional_pg_stat_statements$<span class="syntax-punctuation">;</span>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-44 — Monitoring Diagnostics.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-44 — Monitoring Diagnostics.
 
 I have completed the direct catalog prerequisite: `sql-43`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day44_monitoring_diagnostics.md
@@ -1144,7 +1144,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1255,18 +1255,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

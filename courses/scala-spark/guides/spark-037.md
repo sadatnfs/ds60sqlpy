@@ -216,7 +216,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark4.0.1 streaming deduplication](https://spark.apache.org/docs/4.0.1/streaming/apis-on-dataframes-and-datasets.html#streaming-deduplication)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-037: Deterministic streaming tests without sleep-based guesses.

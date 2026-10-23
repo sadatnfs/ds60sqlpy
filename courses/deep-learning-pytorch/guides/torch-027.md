@@ -175,7 +175,7 @@ It makes the new parameter membership and optimizer-state policy explicit. An ex
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-027, Transfer learning, frozen layers and optimizer membership.

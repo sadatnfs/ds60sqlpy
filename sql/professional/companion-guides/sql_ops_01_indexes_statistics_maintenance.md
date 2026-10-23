@@ -363,11 +363,11 @@ Continue to [SQL-TEST-01 - SQL tests, migration checks, and data contracts](sql_
 Then use [SQL-OPS-02](sql_ops_02_backup_restore_recovery.md) to include index,
 statistics, extension, and post-restore verification in a recovery rehearsal.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-ops-01 - Index Types, Statistics, and Maintenance Lifecycle.

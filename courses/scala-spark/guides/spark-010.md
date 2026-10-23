@@ -149,7 +149,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Spark 4.0.1 RDD laziness and closure semantics](https://spark.apache.org/docs/4.0.1/rdd-programming-guide.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-010: Laziness, iterators, and safe side effects.

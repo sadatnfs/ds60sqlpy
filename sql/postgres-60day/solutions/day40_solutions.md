@@ -1,4 +1,4 @@
-# Day 40 — Solutions: Advanced Analytic Functions
+# Day 40: Solutions: Advanced Analytic Functions
 
 
 <!-- beginner-solution-enrichment -->
@@ -56,7 +56,7 @@ correctness is established with evidence.
 This day combines statistical aggregates with windows and ordered-set
 aggregates. The answers define the input grain before computing statistics.
 
-## Exercise 1 — Fifteen-row rolling z-score for daily revenue
+## Exercise 1: Fifteen-row rolling z-score for daily revenue
 
 ```sql
 SET search_path TO training, public;
@@ -109,7 +109,7 @@ and decide whether missing days mean zero or unknown.
 - **Alternative/trade-off:** For sql-40 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one row per day with orders. Evaluate another form against the concrete expected result (one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it) and the verification above.
 - **Edge case:** Add one source row with a new `day`; verify the result gains exactly one row carrying that `day` value.
 
-## Exercise 2 — Category P50 and P90 of order values
+## Exercise 2: Category P50 and P90 of order values
 
 An order can contain several categories. This answer defines an “order total
 within a category” as the sum of that category's net lines in that order; using
@@ -170,7 +170,7 @@ between observed values, so a percentile need not equal an actual order value.
 - Define the analytical grain before calculating a percentile. Line-level and
   order-level percentiles answer different questions.
 
-## Exercise 3 — Compare discrete and continuous medians
+## Exercise 3: Compare discrete and continuous medians
 
 For four values, the discrete median chooses an observed central value while the
 continuous median interpolates. The runnable `VALUES` fixture makes the
@@ -186,7 +186,7 @@ difference deterministic.
 - **Alternative/trade-off:** For sql-40 Exercise 3, the chosen form is justified by this lesson-specific rationale: For four values, the discrete median chooses an observed central value while the continuous median interpolates. Evaluate another form against the concrete expected result (one row per `discrete_median`) and the verification above.
 - **Edge case:** Add one source row with a new `discrete_median`; verify the result gains exactly one row carrying that `discrete_median` value.
 
-## Exercise 4 — Share and rank within month
+## Exercise 4: Share and rank within month
 
 Revenue is first aggregated to month/category grain. The denominator window
 partitions by month, and `ROW_NUMBER` adds category as a deterministic tie-break.
@@ -201,7 +201,7 @@ partitions by month, and `ROW_NUMBER` adds category as a deterministic tie-break
 - **Alternative/trade-off:** For sql-40 Exercise 4, the chosen form is justified by this lesson-specific rationale: Revenue is first aggregated to month/category grain. Evaluate another form against the concrete expected result (one row per `month`, and `category`) and the verification above.
 - **Edge case:** Give two rows the same `month DESC` value and different `category_rank` values; verify `month DESC, category_rank` produces the intended rank and display order.
 
-## Exercise 5 — Remove forecast leakage
+## Exercise 5: Remove forecast leakage
 
 The corrected frame is `7 PRECEDING` through `1 PRECEDING`. Ending at the current
 row would let the target actual influence its own forecast.
@@ -216,7 +216,7 @@ row would let the target actual influence its own forecast.
 - **Alternative/trade-off:** For sql-40 Exercise 5, the chosen form is justified by this lesson-specific rationale: The corrected frame is `7 PRECEDING` through `1 PRECEDING`. Evaluate another form against the concrete expected result (at most 20 rows keyed by `day`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
 
-## Exercise 6 — Preserve undefined dispersion
+## Exercise 6: Preserve undefined dispersion
 
 The constant fixture has standard deviation zero. `NULLIF(sd, 0)` returns NULL
 for every z-score, accurately distinguishing undefined from normal.

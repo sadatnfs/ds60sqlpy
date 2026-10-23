@@ -1,4 +1,4 @@
-# Day 14 — Code Quality with Ruff, mypy, and pytest
+# Day 14: Code Quality with Ruff, mypy, and pytest
 
 **Level:** Beginner
 
@@ -64,12 +64,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 14 — code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback
+**Lesson outcome:** use day 14; code quality with ruff, mypy, and pytest to practice automated formatting, linting, and static type feedback
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ Ruff module, performs checks, and scopes them to `path`. `ruff format
 annotation such as `def total(values: list[float]) -> float:` gives
 mypy a contract to compare with callers and return statements.
 
-### Worked example 1 — Inspect annotations as documentation
+### Worked example 1: Inspect annotations as documentation
 
 Hints are stored but do not enforce runtime arguments by themselves. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -125,7 +125,7 @@ def total(values: list[float]) -> float:
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Refactor a long expression into named facts
+### Worked example 2: Refactor a long expression into named facts
 
 Formatting cannot choose meaningful names; design still belongs to the author. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -288,11 +288,11 @@ Flake8, or tool-specific cache files to Git.
 
 - [Open the learner notebook](../notebooks/day14_code_quality_tooling.ipynb)
 - [Check the separate solution](../solutions/day14_code_quality_tooling/day14_solutions.md)
-- [Next: Day 15 — CLI data tool project](day15_cli_project.md)
+- [Next: Day 15; CLI data tool project](day15_cli_project.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

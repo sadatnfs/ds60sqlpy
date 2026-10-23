@@ -1,4 +1,4 @@
-# Day 43 — Model Interpretation with SHAP, PDP, and Permutation
+# Day 43: Model Interpretation with SHAP, PDP, and Permutation
 
 **Lesson ID:** `python-43` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
 
@@ -107,7 +107,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — global versus local explanations, perturbation assumptions, and causal limits
+## Concept deep dive: global versus local explanations, perturbation assumptions, and causal limits
 
 ### The mental model
 
@@ -134,7 +134,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — measure one local prediction's sensitivity
+### Focused example A: measure one local prediction's sensitivity
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -165,7 +165,7 @@ print({"baseline": baseline, "one_feature_changed": perturbed,
 
 **Assumption to name:** The changed feature value combined with all unchanged values represents a plausible input.
 
-### Focused example B — give permutation importance an uncertainty interval
+### Focused example B: give permutation importance an uncertainty interval
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -214,11 +214,11 @@ assert all(mean >= -3 * std for _, mean, std in summary)
 
 1. On the first 50 held-out rows, rank features by mean absolute positive-class SHAP value. Report the five names and values, then compare their ordering with held-out permutation importance from the same fitted model, rows, scorer, and five seeded repeats.
 
-**Verify:** Practice 1 — global versus local explanations, perturbation assumptions, and causal limits — assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
+**Verify:** Practice 1; global versus local explanations, perturbation assumptions, and causal limits; assert that the normalized positive-class SHAP matrix has 50 rows and one column per named feature; report both named top-five lists, their numeric means, the fixed permutation seed/repeat count, and their set/rank overlap on the identical held-out rows and scorer.
 
 2. Select the feature ranked first by the held-out permutation calculation in Exercise 1, then plot its one-dimensional PDP. Report its name, ranking value, PDP direction/nonlinearity, and where the displayed deciles show weak data support; do not use causal language.
 
-**Verify:** Practice 2 — global versus local explanations, perturbation assumptions, and causal limits — print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
+**Verify:** Practice 2; global versus local explanations, perturbation assumptions, and causal limits; print the selected feature name, index, and held-out permutation mean; assert that same index enters the PDP call, then retain the labeled curve/deciles plus a numeric direction and sparse-support caveat without causal language.
 
 3. Optionally explain held-out row 0 with LIME and SHAP using the same positive-class output. Repeat LIME with three declared seeds and compare the signs, top-five overlap, and instability; skip only when importing `lime` raises `ModuleNotFoundError`.
 
@@ -226,7 +226,7 @@ LIME is installed by the `ml` dependency group but remains an optional lesson
 extension. Complete the required work with SHAP and scikit-learn before adding a
 second explanation library.
 
-**Verify:** Practice 3 — global versus local explanations, perturbation assumptions, and causal limits — treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
+**Verify:** Practice 3; global versus local explanations, perturbation assumptions, and causal limits; treat only a missing `lime` import as a skip; when installed, record three seed-specific contribution lists and compare sign, top-five overlap, and instability against SHAP for held-out row 0; let every other exception fail visibly.
 
 ### Progressive hints
 
@@ -244,17 +244,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Local-versus-global diagnosis:** Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.
    **Progressive hint:** Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.
 
-**Verify:** Local-versus-global diagnosis — record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
+**Verify:** Local-versus-global diagnosis; record the feature's aggregate importance/rank and its signed contribution for the chosen held-out row; show that the global summary is large while that row's local contribution is near zero, and identify the row-specific baseline.
 
 5. **Explanation leakage:** Explain why selecting the 'most important' features with the final test set and then retraining a smaller model contaminates evaluation.
    **Progressive hint:** The explanation becomes a supervised feature-selection step. Keep the test set unavailable until the complete selection procedure is frozen.
 
-**Verify:** Explanation leakage — draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
+**Verify:** Explanation leakage; draw the data-access timeline and mark final-test explanations as a feature-selection use of test labels; then show the corrected train/validation-only selection boundary with the final test opened once after the feature set and pipeline are frozen.
 
 6. **Correlated-feature and causality check:** Duplicate or strongly correlate one predictor, compare SHAP, PDP, and permutation results, and write a cautious stakeholder explanation.
    **Progressive hint:** Credit can move or split between substitutes; marginal perturbations can create implausible combinations.
 
-**Verify:** Correlated-feature and causality check — report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.
+**Verify:** Correlated-feature and causality check; report the original/duplicate correlation, seeded before-and-after SHAP and permutation ranks, and both PDP curves; state that credit may split between substitutes and that none of the three methods establishes a causal effect.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -289,12 +289,12 @@ reassuring; disagreement is a prompt to investigate assumptions.
 - Work in the [Day 43 learner notebook](../notebooks/day43_model_interpretation_shap_pdp.ipynb).
 - Then consult the
   [Day 43 solution](../solutions/day43_model_interpretation_shap_pdp/day43_solutions.md).
-- Continue to [Day 44 — FastAPI Deployment](day44_model_deployment_fastapi.md).
+- Continue to [Day 44; FastAPI Deployment](day44_model_deployment_fastapi.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-43` — Day 43 — Model Interpretation with SHAP, PDP, and Permutation.

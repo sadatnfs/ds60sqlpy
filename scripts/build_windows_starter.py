@@ -91,10 +91,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     checks = (
+        ("check_public_release.py",),
         ("normalize_lesson_prose.py",),
         ("check_content_rendering.py",),
         ("build_course_guide.py", "--check"),
         ("build_lesson_readers.py", "--check"),
+        ("check_published_links.py",),
         ("check_modules.py",),
     )
     for checker, *options in checks:

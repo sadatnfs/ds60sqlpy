@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-60-capstone-completion-and-presentation">Day 60 — Capstone Completion and Presentation<a class="heading-anchor" href="#guide--day-60-capstone-completion-and-presentation" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-60-capstone-completion-and-presentation">Day 60: Capstone Completion and Presentation<a class="heading-anchor" href="#guide--day-60-capstone-completion-and-presentation" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-60</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>advanced</code> · <strong>Network:</strong> offline</p>
 <p>Completion means another person can reproduce the evidence, understand the limits, and evaluate the claim. A polished slide deck cannot compensate for a leaky split, missing data contract, untested command, or hidden risk.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -501,7 +501,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Evaluation:</strong> split/backtest, baseline, primary metric, and guardrails.</li>
 </ol>
 <ol>
-<li><strong>Result:</strong> final versus baseline with variability—not only the best number.</li>
+<li><strong>Result:</strong> final versus baseline with variability, not only the best number.</li>
 </ol>
 <ol>
 <li><strong>Error analysis:</strong> representative false positives/negatives or residual segments, with privacy-safe examples.</li>
@@ -535,7 +535,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-release-evidence-cold-start-reproducibility-presentation-claims-and-handoff">Concept deep dive — release evidence, cold-start reproducibility, presentation claims, and handoff<a class="heading-anchor" href="#guide--concept-deep-dive-release-evidence-cold-start-reproducibility-presentation-claims-and-handoff" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-release-evidence-cold-start-reproducibility-presentation-claims-and-handoff">Concept deep dive: release evidence, cold-start reproducibility, presentation claims, and handoff<a class="heading-anchor" href="#guide--concept-deep-dive-release-evidence-cold-start-reproducibility-presentation-claims-and-handoff" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Capstone completion is a release review. The release candidate is one exact code, configuration, environment, data identity, and artifact set. A <strong>cold-start reproduction</strong> follows documented commands from a clean environment and proves the critical path without hidden notebook state.</p>
 <p>A presentation is a chain of claims and evidence: decision, data, baseline, evaluation design, result with uncertainty, error analysis, limitations, and next action. A demo fallback keeps the evidence available if live infrastructure fails. Operational handoff names owners, monitoring, rollback, retention, and known gaps.</p>
@@ -546,7 +546,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>handoff/runbook:</strong> defines normal operation, monitoring, failure response, rollback, ownership, and retention.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-reject-unsupported-presentation-claims">Focused example A — reject unsupported presentation claims<a class="heading-anchor" href="#guide--focused-example-a-reject-unsupported-presentation-claims" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-reject-unsupported-presentation-claims">Focused example A: reject unsupported presentation claims<a class="heading-anchor" href="#guide--focused-example-a-reject-unsupported-presentation-claims" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">claims <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">claim</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">candidate beats baseline</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">evidence</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">metrics.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">limitation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">single local dataset</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -561,7 +561,7 @@ unsupported <span class="syntax-operator">=</span> <span class="syntax-punctuati
 <span class="syntax-keyword">assert</span> unsupported <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">works for every population</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> A broad claim without both evidence and a scoped limitation is blocked from the final narrative.</p>
 <p><strong>Assumption to name:</strong> Evidence files are versioned, reproducible, and actually support the wording of their claims.</p>
-<h5 id="guide--focused-example-b-turn-release-readiness-into-a-failing-checklist">Focused example B — turn release readiness into a failing checklist<a class="heading-anchor" href="#guide--focused-example-b-turn-release-readiness-into-a-failing-checklist" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-turn-release-readiness-into-a-failing-checklist">Focused example B: turn release readiness into a failing checklist<a class="heading-anchor" href="#guide--focused-example-b-turn-release-readiness-into-a-failing-checklist" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python">release <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">clean_environment_run</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span>
@@ -576,7 +576,7 @@ unsupported <span class="syntax-operator">=</span> <span class="syntax-punctuati
 missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>name <span class="syntax-keyword">for</span> name<span class="syntax-punctuation">,</span> passed <span class="syntax-operator">in</span> release<span class="syntax-operator">.</span>items<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">if</span> <span class="syntax-operator">not</span> passed<span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">ready</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-operator">not</span> missing<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">missing</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> missing<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> missing</code></pre>
-<p><strong>Expected observation:</strong> Readiness is the conjunction of reproducibility, quality, evidence, safety, and ownership—not slide completion.</p>
+<p><strong>Expected observation:</strong> Readiness is the conjunction of reproducibility, quality, evidence, safety, and ownership, not slide completion.</p>
 <p><strong>Assumption to name:</strong> Every Boolean is backed by a dated command/output or reviewed artifact, not self-attestation.</p>
 <h5 id="guide--from-first-attempt-to-independent-use">From first attempt to independent use<a class="heading-anchor" href="#guide--from-first-attempt-to-independent-use" aria-label="Link to this section">#</a></h5>
 <div class="table-wrap"><table><thead><tr>
@@ -619,28 +619,28 @@ missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li>Finalize the data and training/evaluation pipeline.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — release evidence, cold-start reproducibility, presentation claims, and handoff — from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
+<p><strong>Verify:</strong> Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
 <ol>
 <li>Produce a results notebook and README with exact reproduction steps.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — release evidence, cold-start reproducibility, presentation claims, and handoff — have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
+<p><strong>Verify:</strong> Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
 <ol>
 <li>Save artifacts under an ignored <code>artifacts/</code> path and retain dependency metadata/lock.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — release evidence, cold-start reproducibility, presentation claims, and handoff — write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
+<p><strong>Verify:</strong> Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
 <ol>
 <li>Prepare presentation-ready visuals and the short story above.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 4 — release evidence, cold-start reproducibility, presentation claims, and handoff — export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
+<p><strong>Verify:</strong> Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
 <ol>
 <li>Write three takeaways and one open question.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 5 — release evidence, cold-start reproducibility, presentation claims, and handoff — write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
+<p><strong>Verify:</strong> Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Stop adding model families; rerun the frozen candidate from clean state.</li>
 <li>Generate metrics/plots from the same evaluation module used by tests.</li>
-<li>Ask a peer or Codex tutor to follow only the README; record every ambiguity.</li>
+<li>Ask a peer or AI tutor to follow only the README; record every ambiguity.</li>
 <li>Practice a five-minute version, then prepare deeper appendix evidence.</li>
 </ol>
 <p>The reference solution adds a direct smoke-test and automation template. Use portable direct Python commands as the canonical Windows path; Make is optional.</p>
@@ -650,23 +650,23 @@ missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <ol>
 <li><strong>Cold-start reproduction:</strong> Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage. <strong>Progressive hint:</strong> Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.</li>
 </ol>
-<p><strong>Verify:</strong> Cold-start reproduction — from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
+<p><strong>Verify:</strong> Cold-start reproduction; from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
 <ol>
 <li><strong>Claim-to-evidence matrix:</strong> Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner. <strong>Progressive hint:</strong> Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.</li>
 </ol>
-<p><strong>Verify:</strong> Claim-to-evidence matrix — for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
+<p><strong>Verify:</strong> Claim-to-evidence matrix; for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
 <ol>
 <li><strong>Failure-tolerant demo:</strong> Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service. <strong>Progressive hint:</strong> The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.</li>
 </ol>
-<p><strong>Verify:</strong> Failure-tolerant demo — record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
+<p><strong>Verify:</strong> Failure-tolerant demo; record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
 <ol>
 <li><strong>Operational handoff:</strong> Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria. <strong>Progressive hint:</strong> Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.</li>
 </ol>
-<p><strong>Verify:</strong> Operational handoff — name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
+<p><strong>Verify:</strong> Operational handoff; name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
 <ol>
 <li><strong>Retrospective and next experiment:</strong> Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule. <strong>Progressive hint:</strong> The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.</li>
 </ol>
-<p><strong>Verify:</strong> Retrospective and next experiment — write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p>
+<p><strong>Verify:</strong> Retrospective and next experiment; write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -721,8 +721,8 @@ missing <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <li>Compare your evidence with the <a href="python-60.html#solution-1">Day 60 solution</a>.</li>
 <li>There is no Day 61 in this track. Continue with the <a href="../reference-pages/bridge/README.md.html">Python + PostgreSQL engineering bridge</a> or revisit weak areas identified by the capstone review.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-60` — Day 60 — Capstone Completion and Presentation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -944,7 +944,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <ol>
 <li>Stop adding model families; rerun the frozen candidate from clean state.</li>
 <li>Generate metrics/plots from the same evaluation module used by tests.</li>
-<li>Ask a peer or Codex tutor to follow only the README; record every ambiguity.</li>
+<li>Ask a peer or AI tutor to follow only the README; record every ambiguity.</li>
 <li>Practice a five-minute version, then prepare deeper appendix evidence.</li>
 </ol>
 <p>The reference solution adds a direct smoke-test and automation template. Use portable direct Python commands as the canonical Windows path; Make is optional.</p>
@@ -1024,7 +1024,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-60-solutions-capstone-completion-and-presentation">Day 60 — Solutions: Capstone Completion and Presentation<a class="heading-anchor" href="#solution-1--day-60-solutions-capstone-completion-and-presentation" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-60-solutions-capstone-completion-and-presentation">Day 60: Solutions: Capstone Completion and Presentation<a class="heading-anchor" href="#solution-1--day-60-solutions-capstone-completion-and-presentation" aria-label="Link to this section">#</a></h3>
 <p>We deliver a presentation outline, packaging checklist, and reproducibility steps.</p>
 <p>Contents</p>
 <ul>
@@ -1033,7 +1033,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 <li>Exercise 3: Demo plan and smoke tests</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 1 — Slide outline</p>
+<p>Worked reference for Exercise 1; Slide outline</p>
 <pre class="highlighted-code"><code class="language-markdown">1) Context and stakes — the problem and why it matters
 2) Data — sources, quality, challenges; quick EDA visual
 3) Methods — models, features, validation; why chosen
@@ -1041,7 +1041,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 5) Deployment — how to use; latency, cost, monitoring
 6) Risks and ethics — limitations, mitigation
 7) Next steps — roadmap and open questions</code></pre>
-<p>Worked reference for Exercise 2 — Packaging</p>
+<p>Worked reference for Exercise 2; Packaging</p>
 <pre class="highlighted-code"><code class="language-makefile"><span class="syntax-comment"># Makefile</span>
 PYTHON <span class="syntax-operator">?=</span> python
 
@@ -1067,7 +1067,7 @@ PYTHON <span class="syntax-operator">?=</span> python
 <li>Provide sample inputs/outputs; add smoke tests</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Demo and smoke tests</p>
+<p>Worked reference for Exercise 3; Demo and smoke tests</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># tests/smoke/test_api.py</span>
 <span class="syntax-keyword">import</span> os
 
@@ -1115,66 +1115,66 @@ pytestmark <span class="syntax-operator">=</span> pytest<span class="syntax-oper
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Finalize the data and training/evaluation pipeline.</p>
 <p><strong>How to reason about it:</strong> Freeze the final candidate and rebuild data, training, and evaluation from clean state. Stop adding model families; unresolved issues belong in limitations or future work.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — release evidence, cold-start reproducibility, presentation claims, and handoff — from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; release evidence, cold-start reproducibility, presentation claims, and handoff; from a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce a results notebook and README with exact reproduction steps.</p>
 <p><strong>How to reason about it:</strong> Generate README metrics and plots from the same tested evaluation path, with exact commands, expected outputs, and OS variants. Hand-edited numbers are a drift risk.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — release evidence, cold-start reproducibility, presentation claims, and handoff — have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; release evidence, cold-start reproducibility, presentation claims, and handoff; have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save artifacts under an ignored <code>artifacts/</code> path and retain dependency metadata/lock.</p>
 <p><strong>How to reason about it:</strong> Keep reproducible artifacts under ignored paths, but retain code, schema, manifest, and dependency lock. A reviewer should be able to recreate large/generated files rather than receive hidden local state.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — release evidence, cold-start reproducibility, presentation claims, and handoff — write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
-<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; release evidence, cold-start reproducibility, presentation claims, and handoff; write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.</p>
+<h5 id="solution-1--exercise-4-original-lesson-practice">Exercise 4: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-4-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Prepare presentation-ready visuals and the short story above.</p>
 <p><strong>How to reason about it:</strong> Every visual needs a question, labeled population/metric/unit, readable baseline, and limitation. The short story should fit the audience and avoid causal or production claims unsupported by the evidence.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 4 — release evidence, cold-start reproducibility, presentation claims, and handoff — export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
-<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 4; release evidence, cold-start reproducibility, presentation claims, and handoff; export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.</p>
+<h5 id="solution-1--exercise-5-original-lesson-practice">Exercise 5: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-5-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write three takeaways and one open question.</p>
 <p><strong>How to reason about it:</strong> Three takeaways and one open question should connect directly to results and remaining uncertainty. A takeaway is not &#x27;the model worked&#x27;; it states what the measured evidence supports.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 5 — release evidence, cold-start reproducibility, presentation claims, and handoff — write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
-<h5 id="solution-1--exercise-6-cold-start-reproduction">Exercise 6 — Cold-start reproduction<a class="heading-anchor" href="#solution-1--exercise-6-cold-start-reproduction" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 5; release evidence, cold-start reproducibility, presentation claims, and handoff; write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.</p>
+<h5 id="solution-1--exercise-6-cold-start-reproduction">Exercise 6: Cold-start reproduction<a class="heading-anchor" href="#solution-1--exercise-6-cold-start-reproduction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Clone/copy the project into a fresh temporary directory, follow only the README on Windows or POSIX, and log every ambiguity, manual step, network access, output, and elapsed stage.</p>
 <p><strong>Reasoning before implementation:</strong> Use a clean environment and no notebook state. Verify the documented offline path after the one connected bootstrap.</p>
 <p>The acceptance run should create data/artifacts only in documented ignored locations, run tests, train/evaluate, and reproduce reported metrics within declared tolerance. Record interpreter, dependency lock, and data fingerprint.</p>
-<p>Fix the instructions—not the clean environment—when a hidden import, working directory, cache, or absolute path is discovered. Repeat until the run needs no undocumented intervention.</p>
+<p>Fix the instructions, not the clean environment, when a hidden import, working directory, cache, or absolute path is discovered. Repeat until the run needs no undocumented intervention.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Cold-start reproduction — from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
-<h5 id="solution-1--exercise-7-claim-to-evidence-matrix">Exercise 7 — Claim-to-evidence matrix<a class="heading-anchor" href="#solution-1--exercise-7-claim-to-evidence-matrix" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Cold-start reproduction; from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.</p>
+<h5 id="solution-1--exercise-7-claim-to-evidence-matrix">Exercise 7: Claim-to-evidence matrix<a class="heading-anchor" href="#solution-1--exercise-7-claim-to-evidence-matrix" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a table mapping every headline claim to metric/visual, dataset and split, sample size, uncertainty, reproduction command, limitation, and owner.</p>
 <p><strong>Reasoning before implementation:</strong> Remove or soften claims with no direct evidence. Distinguish predictive association, operational estimate, and causal conclusion.</p>
 <p>The matrix should expose inconsistencies such as a slide using validation metrics while the README quotes test metrics, or a fairness claim without group support. Link each claim to the exact generated artifact and code path.</p>
 <p>If evidence is exploratory, label it. A polished chart cannot upgrade weak methodology into a confirmed finding.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Claim-to-evidence matrix — for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
-<h5 id="solution-1--exercise-8-failure-tolerant-demo">Exercise 8 — Failure-tolerant demo<a class="heading-anchor" href="#solution-1--exercise-8-failure-tolerant-demo" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Claim-to-evidence matrix; for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.</p>
+<h5 id="solution-1--exercise-8-failure-tolerant-demo">Exercise 8: Failure-tolerant demo<a class="heading-anchor" href="#solution-1--exercise-8-failure-tolerant-demo" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Prepare and rehearse a five-minute demo with a preflight check, time budget, local fixtures, screenshots/static fallback, and recovery from one intentionally broken dependency or service.</p>
 <p><strong>Reasoning before implementation:</strong> The core result must not depend on live internet. Demonstrate the reproducible workflow, not a fragile sequence of manual notebook cells.</p>
-<p>Start from a known command and versioned fixture. Keep the live portion short, and prepare generated outputs that are clearly labeled as prior evidence—not pretended live execution. A failed optional API/UI should not erase the model evaluation story.</p>
+<p>Start from a known command and versioned fixture. Keep the live portion short, and prepare generated outputs that are clearly labeled as prior evidence, not pretended live execution. A failed optional API/UI should not erase the model evaluation story.</p>
 <p>Practice the failure transition and state what remains verified. Never expose credentials or sensitive records while troubleshooting on screen.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Failure-tolerant demo — record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
-<h5 id="solution-1--exercise-9-operational-handoff">Exercise 9 — Operational handoff<a class="heading-anchor" href="#solution-1--exercise-9-operational-handoff" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Failure-tolerant demo; record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.</p>
+<h5 id="solution-1--exercise-9-operational-handoff">Exercise 9: Operational handoff<a class="heading-anchor" href="#solution-1--exercise-9-operational-handoff" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write an ownership and maintenance section covering artifact/data refresh, dependency updates, monitoring, incident contact, rollback, known limitations, and end-of-life criteria.</p>
 <p><strong>Reasoning before implementation:</strong> Name roles and cadences, not personal credentials. Connect each maintenance action to a test or acceptance gate.</p>
 <p>Even a portfolio project benefits from explicit “not deployed” status and the conditions that would be required before real use. If deployed, identify who can approve promotion/rollback and how stale data/models are detected.</p>
 <p>Avoid personal email, tokens, or organization-specific secrets in the portable repository. Use placeholder roles and documented configuration boundaries.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Operational handoff — name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
-<h5 id="solution-1--exercise-10-retrospective-and-next-experiment">Exercise 10 — Retrospective and next experiment<a class="heading-anchor" href="#solution-1--exercise-10-retrospective-and-next-experiment" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Operational handoff; name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.</p>
+<h5 id="solution-1--exercise-10-retrospective-and-next-experiment">Exercise 10: Retrospective and next experiment<a class="heading-anchor" href="#solution-1--exercise-10-retrospective-and-next-experiment" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write a retrospective with what changed your belief, strongest and weakest evidence, one discarded path, remaining risk, and one bounded next experiment with a predeclared decision rule.</p>
 <p><strong>Reasoning before implementation:</strong> The next experiment should resolve the highest-value uncertainty, not simply try a more complex model.</p>
 <p>A useful retrospective distinguishes process success from favorable metrics. State what would falsify the current conclusion and what data or design would reduce uncertainty most.</p>
 <p>The next experiment should define population, intervention/change, comparison, metric, minimum practical effect, budget, and stop rule before execution. This turns the capstone ending into a disciplined handoff rather than an endless model search.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Retrospective and next experiment — write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p></div>
+<p><strong>Verify:</strong> Retrospective and next experiment; write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment&#x27;s population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.</p></div>
       </section>
 
 
@@ -1367,16 +1367,16 @@ PYTHON <span class="syntax-operator">?=</span> python
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-60` — Day 60 — Capstone Completion and Presentation.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-60` — Day 60 — Capstone Completion and Presentation.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize release evidence, cold-start reproducibility, presentation claims, and handoff. Use exactly these maintained learner materials:
@@ -1404,7 +1404,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1515,18 +1515,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

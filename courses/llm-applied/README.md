@@ -20,7 +20,7 @@ The default code uses literal local fixtures and prepared NumPy or PyTorch CPU e
 
 ## Study and execution
 
-Each guide contains detailed intuition and design tradeoffs, definitions, syntax or reasoning anatomy, three worked examples, six concrete exercises, failure diagnosis, hints and a lesson-specific Codex prompt. Keep learner attempts separate from the executable and explanatory solutions. A successful reference run checks its assertions, not your independent understanding.
+Each guide contains detailed intuition and design tradeoffs, definitions, syntax or reasoning anatomy, three worked examples, six concrete exercises, failure diagnosis, hints and a lesson-specific the AI tutor prompt. Keep learner attempts separate from the executable and explanatory solutions. A successful reference run checks its assertions, not your independent understanding.
 
 Use the Docker classroom Journeys page and the lesson's declared runtime. `python-core` uses the prepared NumPy/data environment. `llm-torch-cpu` uses the separately prepared PyTorch CPU worker. The optional pretrained recipe is reading mode until you deliberately prepare its separate assets and dependencies. Save work in a learner pad or your own ignored `.learning/` directory; source updates must not overwrite attempts.
 

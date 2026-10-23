@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-38-decision-trees-and-random-forests">Day 38 — Decision Trees and Random Forests<a class="heading-anchor" href="#guide--day-38-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-38-decision-trees-and-random-forests">Day 38: Decision Trees and Random Forests<a class="heading-anchor" href="#guide--day-38-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-38</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>Decision trees divide feature space through a sequence of rules. Random forests average many randomized trees to reduce the instability of a single tree.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -455,7 +455,7 @@ X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punct
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept deep dive — tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept deep dive: tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A decision tree recursively partitions feature space. Each split asks a threshold question chosen to reduce impurity; each leaf stores a local prediction. Deep trees can represent fine interactions but also isolate noise. Depth, leaf size, and pruning control that capacity.</p>
 <p>A random forest trains many trees on bootstrapped rows while considering subsets of features. Averaging decorrelated trees reduces variance. Impurity importance describes split usage inside the fitted forest; held-out permutation importance measures score loss when one feature&#x27;s association is broken. Neither establishes causality.</p>
@@ -466,7 +466,7 @@ X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punct
 <li><strong><code>permutation_importance(model, X_valid, y_valid, ...)</code>:</strong> measures held-out score change under repeated feature shuffles.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A — make the depth-versus-generalization gap visible<a class="heading-anchor" href="#guide--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A: make the depth-versus-generalization gap visible<a class="heading-anchor" href="#guide--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
 <span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
@@ -483,7 +483,7 @@ X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punc
                   <span class="syntax-string">&quot;</span><span class="syntax-string">valid</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_valid<span class="syntax-punctuation">,</span> y_valid<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Training accuracy rises with capacity; validation accuracy need not, revealing overfitting rather than a syntax error.</p>
 <p><strong>Assumption to name:</strong> The validation split represents future cases and was not used to choose unlimited alternatives.</p>
-<h5 id="guide--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B — test a deliberately useless noise feature<a class="heading-anchor" href="#guide--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-test-a-deliberately-useless-noise-feature">Focused example B: test a deliberately useless noise feature<a class="heading-anchor" href="#guide--focused-example-b-test-a-deliberately-useless-noise-feature" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
@@ -546,11 +546,11 @@ importance <span class="syntax-operator">=</span> permutation_importance<span cl
 <ol>
 <li>Plot tree depth versus accuracy.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
+<p><strong>Verify:</strong> Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
 <ol>
 <li>Inspect feature importances and discuss their reliability.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
+<p><strong>Verify:</strong> Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Record training and validation accuracy for each depth. Treat <code>None</code> as an unbounded depth label rather than a numeric x-coordinate.</li>
@@ -562,19 +562,19 @@ importance <span class="syntax-operator">=</span> permutation_importance<span cl
 <ol>
 <li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
 </ol>
-<p><strong>Verify:</strong> Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
+<p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
 <ol>
 <li><strong>Out-of-bag reasoning:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance. <strong>Progressive hint:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</li>
 </ol>
-<p><strong>Verify:</strong> Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
+<p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
 <ol>
 <li><strong>Imbalance debugging:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>. <strong>Progressive hint:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</li>
 </ol>
-<p><strong>Verify:</strong> Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
+<p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
 <ol>
 <li><strong>Correlated-importance edge case:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change. <strong>Progressive hint:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</li>
 </ol>
-<p><strong>Verify:</strong> Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
+<p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -621,10 +621,10 @@ importance <span class="syntax-operator">=</span> permutation_importance<span cl
 <ul>
 <li>Work in the <a href="python-38.html#learner">Day 38 learner notebook</a>.</li>
 <li>Then consult the <a href="python-38.html#solution-1">Day 38 solution</a>.</li>
-<li>Continue to <a href="python-39.html#guide">Day 39 — Gradient Boosting</a>.</li>
+<li>Continue to <a href="python-39.html#guide">Day 39; Gradient Boosting</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -878,7 +878,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-38-solutions-decision-trees-and-random-forests">Day 38 — Solutions: Decision Trees and Random Forests<a class="heading-anchor" href="#solution-1--day-38-solutions-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-38-solutions-decision-trees-and-random-forests">Day 38: Solutions: Decision Trees and Random Forests<a class="heading-anchor" href="#solution-1--day-38-solutions-decision-trees-and-random-forests" aria-label="Link to this section">#</a></h3>
 <p>We train a shallow decision tree and a random forest, control overfitting with depth/leaf parameters, and compare feature importances (impurity vs permutation).</p>
 <p>Contents</p>
 <ul>
@@ -896,7 +896,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 
 X<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> load_breast_cancer<span class="syntax-punctuation">(</span>return_X_y<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
 Xtr<span class="syntax-punctuation">,</span> Xte<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">,</span> yte <span class="syntax-operator">=</span> train_test_split<span class="syntax-punctuation">(</span>X<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — Depth vs accuracy</p>
+<p>Worked reference for Exercise 1; Depth vs accuracy</p>
 <pre class="highlighted-code"><code class="language-python">depths <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">]</span>
 accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">for</span> d <span class="syntax-operator">in</span> depths<span class="syntax-punctuation">:</span>
@@ -913,7 +913,7 @@ accs <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</
 rf<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(</span>Xtr<span class="syntax-punctuation">,</span> ytr<span class="syntax-punctuation">)</span>
 rf_acc <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>Xte<span class="syntax-punctuation">,</span> yte<span class="syntax-punctuation">)</span>
 rf_acc</code></pre>
-<p>Worked reference for Exercise 2 — Feature importances (impurity vs permutation)</p>
+<p>Worked reference for Exercise 2; Feature importances (impurity vs permutation)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Impurity-based (built-in)</span>
 impurity_imp <span class="syntax-operator">=</span> rf<span class="syntax-operator">.</span>feature_importances_
 
@@ -954,44 +954,44 @@ order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot tree depth versus accuracy.</p>
 <p><strong>How to reason about it:</strong> Plot training and validation accuracy together across depth. An unbounded tree is a distinct setting, and one split is not enough to separate true capacity effects from sampling noise.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — tree splits, ensemble variance reduction, and held-out importance — for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; tree splits, ensemble variance reduction, and held-out importance; for a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inspect feature importances and discuss their reliability.</p>
 <p><strong>How to reason about it:</strong> Impurity importance is fast but biased toward high-cardinality and frequently split features. Compare held-out permutation importance, retain names, and discuss correlated-feature masking.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — tree splits, ensemble variance reduction, and held-out importance — report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
-<h5 id="solution-1--exercise-3-pruning-implementation">Exercise 3 — Pruning implementation<a class="heading-anchor" href="#solution-1--exercise-3-pruning-implementation" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; tree splits, ensemble variance reduction, and held-out importance; report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
+<h5 id="solution-1--exercise-3-pruning-implementation">Exercise 3: Pruning implementation<a class="heading-anchor" href="#solution-1--exercise-3-pruning-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation.</p>
 <p><strong>Reasoning before implementation:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</p>
 <p>Call <code>cost_complexity_pruning_path</code> on the current training fold, fit a tree for a bounded subset of alphas, and compare mean plus spread of validation scores. Very small alpha retains a complex tree; sufficiently large alpha collapses it toward the root.</p>
 <p>If the path is computed once using the entire dataset before CV, the candidate set itself has seen validation rows. A nested search or a fixed, documented alpha grid provides the cleanest evaluation.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Pruning implementation — print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
-<h5 id="solution-1--exercise-4-out-of-bag-reasoning">Exercise 4 — Out-of-bag reasoning<a class="heading-anchor" href="#solution-1--exercise-4-out-of-bag-reasoning" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
+<h5 id="solution-1--exercise-4-out-of-bag-reasoning">Exercise 4: Out-of-bag reasoning<a class="heading-anchor" href="#solution-1--exercise-4-out-of-bag-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.</p>
 <p><strong>Reasoning before implementation:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</p>
 <p>OOB evaluation reuses training data efficiently and can support fast iteration, but it is not a final untouched test. Confirm that bootstrapping is enabled and use enough trees so each row receives many OOB votes.</p>
 <p>Large discrepancies between OOB and held-out results can reveal distribution shift, grouping leakage, time ordering, or insufficient forest size. Do not average them into one reassuring number; investigate the boundary mismatch.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Out-of-bag reasoning — print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
-<h5 id="solution-1--exercise-5-imbalance-debugging">Exercise 5 — Imbalance debugging<a class="heading-anchor" href="#solution-1--exercise-5-imbalance-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
+<h5 id="solution-1--exercise-5-imbalance-debugging">Exercise 5: Imbalance debugging<a class="heading-anchor" href="#solution-1--exercise-5-imbalance-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>.</p>
 <p><strong>Reasoning before implementation:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</p>
 <p>Class weights change the fitting objective, not merely the report. They can improve minority recall while reducing precision or overall accuracy. Evaluate both classes and use the metric tied to the real error cost.</p>
 <p>If probability quality matters, assess calibration after weighting. Never oversample or compute weights using the final holdout labels.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Imbalance debugging — on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
-<h5 id="solution-1--exercise-6-correlated-importance-edge-case">Exercise 6 — Correlated-importance edge case<a class="heading-anchor" href="#solution-1--exercise-6-correlated-importance-edge-case" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
+<h5 id="solution-1--exercise-6-correlated-importance-edge-case">Exercise 6: Correlated-importance edge case<a class="heading-anchor" href="#solution-1--exercise-6-correlated-importance-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.</p>
 <p><strong>Reasoning before implementation:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</p>
 <p>Correlated substitutes let the model recover from permuting only one column. Use domain-aware grouped permutation, conditional methods, or report the correlation cluster together. SHAP and impurity scores also require careful interpretation under dependence.</p>
-<p>An importance score answers how this fitted model used available inputs under a particular perturbation—not what would happen if the real-world feature were intervened upon.</p>
+<p>An importance score answers how this fitted model used available inputs under a particular perturbation, not what would happen if the real-world feature were intervened upon.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Correlated-importance edge case — print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p></div>
+<p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p></div>
       </section>
 
 
@@ -1100,16 +1100,16 @@ order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-38` — Day 38 — Decision Trees and Random Forests.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize tree splits, ensemble variance reduction, and held-out importance. Use exactly these maintained learner materials:
@@ -1137,7 +1137,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1248,18 +1248,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

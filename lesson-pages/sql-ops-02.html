@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -429,7 +429,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--sql-ops-02-backup-restore-and-recovery-rehearsals">SQL-OPS-02 — Backup, Restore, and Recovery Rehearsals<a class="heading-anchor" href="#guide--sql-ops-02-backup-restore-and-recovery-rehearsals" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--sql-ops-02-backup-restore-and-recovery-rehearsals">SQL-OPS-02: Backup, Restore, and Recovery Rehearsals<a class="heading-anchor" href="#guide--sql-ops-02-backup-restore-and-recovery-rehearsals" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
@@ -452,19 +452,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>On macOS or Linux, run:</p>
 <pre class="highlighted-code"><code class="language-bash">   .venv/bin/python scripts/learning_portal.py</code></pre>
 <ol>
-<li>Open <strong>SQL-OPS-02 — Backup, Restore, and Recovery Rehearsals</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
+<li>Open <strong>SQL-OPS-02; Backup, Restore, and Recovery Rehearsals</strong> and choose <strong>Create/open guided SQL notebook</strong>. Run its readiness cells from top to bottom. The runner accepts only the local disposable <code>advanced_sql_training</code> database.</li>
 <li>Read the preparation warning. When you are ready to replace only the course-owned training state, set <code>CONFIRM_COURSE_RESET = True</code> and run the cell. It loads deterministic seed rows, verifies them, and prepares any cataloged stateful predecessor.</li>
 <li>Use the <strong>editable-copy link inside the generated notebook</strong>. It opens the ignored learner copy at <code>.learning/sql/sql-ops-02/lesson/workspace/sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql</code>. Save it, then run the notebook&#x27;s full-script cell. It uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>, preserving transaction and <code>psql</code> meta-command behavior.</li>
 <li>Read output directly below the run cell. A <code>SELECT</code> prints column headings, table-shaped rows, and a row count; DDL/DML prints a command tag; <code>NOTICE</code> lines explain intentional checks. Success means no unexpected <code>ERROR</code>, exit code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.</li>
 </ol>
-<p>Backup/restore commands are capability-sensitive and are not hidden inside a transaction. Use only the lesson&#x27;s isolated dump/rehearsal targets, inspect every path first, and treat a successful restore plus verification queries—not merely a created file—as success.</p>
+<p>Backup/restore commands are capability-sensitive and are not hidden inside a transaction. Use only the lesson&#x27;s isolated dump/rehearsal targets, inspect every path first, and treat a successful restore plus verification queries, not merely a created file, as success.</p>
 <p>Manual <code>psql</code> fallback:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-punctuation">=</span>1 -d advanced_sql_training <span class="syntax-operator">-f</span> <span class="syntax-string">&quot;</span><span class="syntax-string">sql\professional\lessons\sql_ops_02_backup_restore_recovery.sql</span><span class="syntax-string">&quot;</span></code></pre>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># macOS/Linux, from the repository root</span>
 psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/professional/lessons/sql_ops_02_backup_restore_recovery.sql</code></pre>
-<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor—never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
+<p>The terminal is then the output surface. If PowerShell says <code>psql</code> is not recognized, restart with <code>START_DS60.cmd</code>; it can discover PostgreSQL for that process. If the database or a relation is missing, return to the notebook preparation cell and explicitly prepare the disposable database. For authentication failures, rerun setup/doctor, never put a password in SQL, a notebook, or Git. With <code>ON_ERROR_STOP</code>, fix the <strong>first</strong> error and rerun the whole file instead of trusting partial output.</p>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
 <p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Logical backup, Custom format, Physical base backup, WAL, PITR, Timeline. Its worked SQL reads or creates <code>pro_recovery_lab.source_accounts</code>, <code>pro_recovery_lab.source_entries</code>, <code>pro_recovery_lab.backup_manifest</code>, <code>pro_recovery_lab.restored_accounts</code>, <code>pro_recovery_lab.restored_entries</code>.</p>
 <p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
@@ -578,8 +578,8 @@ rm -f artifacts/backups/advanced_sql_training.dump</code></pre>
 </ul>
 <h4 id="guide--next-step">Next step<a class="heading-anchor" href="#guide--next-step" aria-label="Link to this section">#</a></h4>
 <p>Use <a href="sql-test-01.html#guide">SQL-TEST-01</a> to turn restore checks into fail-fast contracts, then combine migrations, security grants, indexes, and application smoke tests in a timed local recovery game day. Optional physical/PITR work remains an explicitly approved isolated specialization.</p>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-ops-02 — Backup, Restore, and Recovery Rehearsals.
 
 I have completed the direct catalog prerequisites: `sql-43`, `sql-ops-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -1091,7 +1091,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--sql-ops-02-solutions-backup-and-recovery">SQL-OPS-02 Solutions — Backup and Recovery<a class="heading-anchor" href="#solution-1--sql-ops-02-solutions-backup-and-recovery" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--sql-ops-02-solutions-backup-and-recovery">SQL-OPS-02 Solutions: Backup and Recovery<a class="heading-anchor" href="#solution-1--sql-ops-02-solutions-backup-and-recovery" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -1114,7 +1114,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <p>Run the safe SQL solution:</p>
 <pre class="highlighted-code"><code class="language-text">psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.sql</code></pre>
 <p>It creates no files or databases and rolls back <code>pro_recovery_lab</code>.</p>
-<h4 id="solution-1--exercise-1-structural-fingerprint">Exercise 1 — Structural fingerprint<a class="heading-anchor" href="#solution-1--exercise-1-structural-fingerprint" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-structural-fingerprint">Exercise 1: Structural fingerprint<a class="heading-anchor" href="#solution-1--exercise-1-structural-fingerprint" aria-label="Link to this section">#</a></h4>
 <p>The solution orders information-schema column position/name/type/nullability and catalog constraint type/definition before hashing. Deterministic ordering is essential. Add index definitions, defaults, owners, grants, policies, routines, extensions, and sequence state when those are contractual.</p>
 <p>A data checksum can pass after a restore that omitted a foreign key, privilege, or sequence. Structure and behavior require separate evidence.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
@@ -1123,7 +1123,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 1, expected output: ordered semantic rows with contract side, relation role, object kind, item order/name, and JSON definition, followed by one fingerprint row where source and restored hashes match and <code>mismatch_rows = 0</code>.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 1, compare visible canonical rows before hashes, then alter a default, constraint, and index separately and require each change to produce diagnosable mismatch rows while an OID change remains outside the contract.</li>
 </ul>
-<h4 id="solution-1--exercise-2-corruption-negative-control">Exercise 2 — Corruption negative control<a class="heading-anchor" href="#solution-1--exercise-2-corruption-negative-control" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-corruption-negative-control">Exercise 2: Corruption negative control<a class="heading-anchor" href="#solution-1--exercise-2-corruption-negative-control" aria-label="Link to this section">#</a></h4>
 <p>The source/restored ordered digests initially match. A savepoint update changes one restored amount; the test requires a mismatch. Rolling back to the savepoint must restore equality. This proves the checksum can detect the specific corruption instead of always reporting success.</p>
 <p>MD5 is used as a compact deterministic comparison, not to authenticate a backup against a malicious actor. Authenticity needs trusted cryptographic controls and key management outside this fixture.</p>
 <h5 id="solution-1--reasoning-and-verification-2">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-2" aria-label="Link to this section">#</a></h5>
@@ -1132,16 +1132,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 2, expected output: baseline, corrupted, and after-savepoint-rollback observations; equality is true, false, then true, with row counts unchanged and the intentional mismatch explicitly observed.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 2, supplement digests with row counts and key-level detail, corrupt a second chosen key to prove the detail query identifies it, and require the post-rollback comparison to return to the reviewed baseline.</li>
 </ul>
-<h4 id="solution-1--exercise-3-rpo-rto-strategy">Exercise 3 — RPO/RTO strategy<a class="heading-anchor" href="#solution-1--exercise-3-rpo-rto-strategy" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-rpo-rto-strategy">Exercise 3: RPO/RTO strategy<a class="heading-anchor" href="#solution-1--exercise-3-rpo-rto-strategy" aria-label="Link to this section">#</a></h4>
 <p>The example&#x27;s five-minute RPO cannot be met by a daily logical dump alone. It chooses verified base backups plus continuous WAL for recoverability and a separate replica for availability. The replica does not replace backup because it can replay the same accidental write.</p>
-<p>Measure RTO through timed end-to-end restore, replay, verification, application startup, and controlled cutover—not file copy alone.</p>
+<p>Measure RTO through timed end-to-end restore, replay, verification, application startup, and controlled cutover, not file copy alone.</p>
 <h5 id="solution-1--reasoning-and-verification-3">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-3" aria-label="Link to this section">#</a></h5>
 <ul>
 <li><strong>Inputs/evidence:</strong> For sql-ops-02 Exercise 3, enter explicit service RPO and RTO requirements in <code>pro_recovery_lab.recovery_plan</code>, then choose backup and availability strategies separately with their limits.</li>
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 3, expected output: one row per service with <code>service_name</code>, <code>rpo</code>, <code>rto</code>, <code>backup_strategy</code>, and <code>availability_strategy</code>, ordered by service; the example targets five-minute RPO and thirty-minute RTO.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 3, map RPO to recoverable data age and RTO to restore-through-application-readiness time, then remove replicas and backups in separate thought experiments to prove neither substitutes for the other.</li>
 </ul>
-<h4 id="solution-1--exercise-4-logical-restore-rehearsal">Exercise 4 — Logical restore rehearsal<a class="heading-anchor" href="#solution-1--exercise-4-logical-restore-rehearsal" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-logical-restore-rehearsal">Exercise 4: Logical restore rehearsal<a class="heading-anchor" href="#solution-1--exercise-4-logical-restore-rehearsal" aria-label="Link to this section">#</a></h4>
 <p>Use the exact OS-specific commands in the guide only after peer review. Verify tool versions, artifact exit/checksum/size, target emptiness, restore exit, schema/data/contracts, owners/grants, sequences, extensions, routines, and application smoke queries. Record elapsed time and clean only the exact <code>ds60_restore_rehearsal</code> database/artifact.</p>
 <p><code>--no-owner --no-privileges</code> is appropriate for this local course rehearsal but means ownership/grants are intentionally not reproduced; production recovery must define their restoration.</p>
 <h5 id="solution-1--reasoning-and-verification-4">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-4" aria-label="Link to this section">#</a></h5>
@@ -1150,7 +1150,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 4, expected output: seven ordered rows with <code>phase_number</code>, <code>phase_name</code>, and <code>required_evidence</code>, covering dump, target creation, restore, catalogs/security, data, application checks, and cleanup; no external command runs here.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 4, execute only in a separately created disposable database after peer review, reconcile rows and semantic objects including owners/grants and sequence state, and block completion on any failed phase.</li>
 </ul>
-<h4 id="solution-1--exercise-5-pitr-and-retention">Exercise 5 — PITR and retention<a class="heading-anchor" href="#solution-1--exercise-5-pitr-and-retention" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-pitr-and-retention">Exercise 5: PITR and retention<a class="heading-anchor" href="#solution-1--exercise-5-pitr-and-retention" aria-label="Link to this section">#</a></h4>
 <p>PITR needs a compatible base backup and an unbroken sequence of WAL through the target, plus timeline history after recovery branches. Retain the base backup and every required WAL segment together until a newer verified chain supersedes them. Restore to a separate data directory/instance, replay to the last known good target, verify, then decide promotion/cutover.</p>
 <h5 id="solution-1--reasoning-and-verification-5">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-5" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1158,7 +1158,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 5, expected output: six ordered rows with <code>component_number</code>, <code>component</code>, and <code>required_evidence</code>; the lesson records a recovery plan and does not configure archiving.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 5, remove one required WAL segment and then the usable base backup as separate negative controls, and assert both scenario results mark the target unrecoverable before application validation.</li>
 </ul>
-<h4 id="solution-1--exercise-6-evidence-standard">Exercise 6 — Evidence standard<a class="heading-anchor" href="#solution-1--exercise-6-evidence-standard" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-evidence-standard">Exercise 6: Evidence standard<a class="heading-anchor" href="#solution-1--exercise-6-evidence-standard" aria-label="Link to this section">#</a></h4>
 <p>A zero backup exit code proves only that one command reported success. It does not prove artifact retention, readability, decryption, version compatibility, complete scope, replay continuity, restore time, application behavior, or team ability to execute the runbook. Only repeated isolated restore rehearsals with recorded verification support a recoverability claim.</p>
 <h5 id="solution-1--reasoning-and-verification-6">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-6" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -1166,7 +1166,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 6, expected output: five ordered rows with <code>layer_number</code>, <code>evidence_layer</code>, <code>what_it_proves</code>, and <code>what_it_does_not_prove</code>; exit zero proves only that the backup program reported success.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 6, inject a valid-looking but incomplete artifact or omit one critical restored object, and prove early command evidence can pass while later reconciliation blocks a recoverable decision.</li>
 </ul>
-<h4 id="solution-1--exercise-7-encryption-authenticity-and-custody">Exercise 7 — Encryption, authenticity, and custody<a class="heading-anchor" href="#solution-1--exercise-7-encryption-authenticity-and-custody" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-7-encryption-authenticity-and-custody">Exercise 7: Encryption, authenticity, and custody<a class="heading-anchor" href="#solution-1--exercise-7-encryption-authenticity-and-custody" aria-label="Link to this section">#</a></h4>
 <p>Encrypt artifacts in transit and at rest with approved rotated keys held separately from the backup. Restrict backup/WAL/manifests to recovery roles, audit access, test emergency key retrieval, and preserve old keys for every retained generation. Define immutable retention and verified deletion.</p>
 <p>Database page or dump checksums detect some accidental corruption; they do not authenticate an artifact against malicious replacement. Sign or MAC trusted manifests and verify them before restore without putting secrets in commands, logs, or repository files.</p>
 <h5 id="solution-1--reasoning-and-verification-7">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-7" aria-label="Link to this section">#</a></h5>
@@ -1175,7 +1175,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 7, expected output: three ordered rows with <code>artifact_kind</code>, <code>encrypted</code>, <code>integrity_manifest</code>, <code>key_owner</code>, and <code>restore_role</code>; every restorable artifact is encrypted and has integrity evidence.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 7, verify key custody is distinct from restore authorization, extend the review to manifest/key records, and rehearse rotation and deletion without making retained backups permanently unrestorable.</li>
 </ul>
-<h4 id="solution-1--exercise-8-restore-the-whole-contract">Exercise 8 — Restore the whole contract<a class="heading-anchor" href="#solution-1--exercise-8-restore-the-whole-contract" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-8-restore-the-whole-contract">Exercise 8: Restore the whole contract<a class="heading-anchor" href="#solution-1--exercise-8-restore-the-whole-contract" aria-label="Link to this section">#</a></h4>
 <p>Set sequence/identity state beyond current maxima and test the next insert. Inventory large objects, extension versions, owners, memberships, object/default privileges, RLS policies, security labels, routines, and external configuration. Cluster-global roles/settings may be outside a database dump.</p>
 <p>Classify each component by artifact/source of truth and test it explicitly. A successful SELECT does not prove that a writer can generate a new identity or that a low-privilege caller has intended access.</p>
 <h5 id="solution-1--reasoning-and-verification-8">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-8" aria-label="Link to this section">#</a></h5>
@@ -1184,7 +1184,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 8, expected output: five ordered baseline rows with <code>component</code> and <code>expected_source</code>; the accompanying checklist extends coverage to large objects, default privileges, and security labels when required.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 8, mark each required component as artifact-contained, separately captured, or rebuilt for the chosen backup format, and fail the checklist when any component lacks both a source and validation query.</li>
 </ul>
-<h4 id="solution-1--exercise-9-recover-across-a-major-version">Exercise 9 — Recover across a major version<a class="heading-anchor" href="#solution-1--exercise-9-recover-across-a-major-version" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-9-recover-across-a-major-version">Exercise 9: Recover across a major version<a class="heading-anchor" href="#solution-1--exercise-9-recover-across-a-major-version" aria-label="Link to this section">#</a></h4>
 <p>Logical dump/restore rebuilds objects through SQL and supports transformation but can be slow. <code>pg_upgrade</code> is faster under strict source/target binary and extension requirements; it still needs backup and verification.</p>
 <p>Rehearse exact versions with extensions, drivers, collations, and critical queries. Run post-upgrade checks/ANALYZE, detect collation drift, time cutover, verify applications, and preserve a fenced rollback window before accepting incompatible new writes.</p>
 <h5 id="solution-1--reasoning-and-verification-9">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-9" aria-label="Link to this section">#</a></h5>
@@ -1193,7 +1193,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 9, expected output: exactly one local capability row with <code>server_version</code>, <code>server_version_num</code>, <code>datcollate</code>, and <code>datctype</code>; the broader major-version plan remains explicitly review-only.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 9, capture the same capability row in the isolated target and block cutover on extension incompatibility, collation drift, missing ANALYZE evidence, or failed driver/application tests even when upgrade tooling exits zero.</li>
 </ul>
-<h4 id="solution-1--exercise-10-selective-restore-dependency-boundary">Exercise 10 — Selective restore dependency boundary<a class="heading-anchor" href="#solution-1--exercise-10-selective-restore-dependency-boundary" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-10-selective-restore-dependency-boundary">Exercise 10: Selective restore dependency boundary<a class="heading-anchor" href="#solution-1--exercise-10-selective-restore-dependency-boundary" aria-label="Link to this section">#</a></h4>
 <p>Traverse types, sequences, functions, extensions, foreign keys in both directions, views, triggers, policies, owners/ACLs, and downstream consumers. Decide how external references and intentionally omitted rows remain valid.</p>
 <p>When scope is uncertain, restore the full artifact to an isolated target first and export/reconcile the intended subset. Selective recovery can be syntactically successful but semantically incomplete.</p>
 <h5 id="solution-1--reasoning-and-verification-10">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-10" aria-label="Link to this section">#</a></h5>
@@ -1202,7 +1202,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 10, expected output: one row per semantic constraint dependency with <code>relation_name</code>, <code>constraint_type</code>, and <code>dependency_contract</code>, ordered by all three fields.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 10, prove every referenced and referencing object is restored or deliberately remapped, remove one required dependency in an isolated target, and choose a full isolated restore when closure cannot be established.</li>
 </ul>
-<h4 id="solution-1--exercise-11-capacity-and-rto-test">Exercise 11 — Capacity and RTO test<a class="heading-anchor" href="#solution-1--exercise-11-capacity-and-rto-test" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-11-capacity-and-rto-test">Exercise 11: Capacity and RTO test<a class="heading-anchor" href="#solution-1--exercise-11-capacity-and-rto-test" aria-label="Link to this section">#</a></h4>
 <p>Measure discovery/transfer, decrypt/decompress, CPU, I/O, parallel jobs, WAL, constraint/index creation, statistics, verification, application startup, and routing. Record peak disk/memory/network, locks, throttling, and safety margin.</p>
 <p>Small fixtures miss saturation, random I/O, checkpoint pressure, sort spills, catalog contention, and skew. RTO ends at verified service readiness, not when one restore command exits.</p>
 <h5 id="solution-1--reasoning-and-verification-11">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-11" aria-label="Link to this section">#</a></h5>
@@ -1211,7 +1211,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Expected result/shape:</strong> For sql-ops-02 Exercise 11, expected output: four ordered rows with <code>phase</code>, <code>measured_seconds</code>, <code>peak_bytes</code>, and <code>evidence_note</code>; NULL measurements in the starter matrix are explicit work still to complete, not passing evidence.</li>
 <li><strong>Independent verification:</strong> For sql-ops-02 Exercise 11, sum the measured critical path plus named safety margin against RTO and separately record throughput, CPU, I/O, parallelism, WAL, and free-space headroom instead of linearly extrapolating a tiny fixture.</li>
 </ul>
-<h4 id="solution-1--exercise-12-recovery-game-day-record">Exercise 12 — Recovery game-day record<a class="heading-anchor" href="#solution-1--exercise-12-recovery-game-day-record" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-12-recovery-game-day-record">Exercise 12: Recovery game-day record<a class="heading-anchor" href="#solution-1--exercise-12-recovery-game-day-record" aria-label="Link to this section">#</a></h4>
 <p>Preassign incident commander, operators, owners, observers, and stop authority. Timestamp detection, decisions, commands, artifacts, injected failures, verification, achieved data point/service time, and runbook deviations.</p>
 <p>End with fenced cleanup, protected logs, unresolved risks with owners/dates, runbook changes, and the next rehearsal. A narrative without raw evidence and accountable follow-up is not a recovery control.</p>
 <h5 id="solution-1--reasoning-and-verification-12">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification-12" aria-label="Link to this section">#</a></h5>
@@ -1816,16 +1816,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-ops-02 — Backup, Restore, and Recovery Rehearsals.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-ops-02 — Backup, Restore, and Recovery Rehearsals.
 
 I have completed the direct catalog prerequisites: `sql-43`, `sql-ops-01`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/professional/companion-guides/sql_ops_02_backup_restore_recovery.md
@@ -1852,7 +1852,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1963,18 +1963,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

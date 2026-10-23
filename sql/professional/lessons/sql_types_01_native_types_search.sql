@@ -203,7 +203,7 @@ WHERE e.name = 'pg_trgm';
 --
 --    Inputs: For sql-types-01 Exercise 1, filter `documents` to published rows whose `tags` array contains both `postgresql` and `operations` using one `@>` containment predicate.
 --    Expected result/shape: For sql-types-01 Exercise 1, expected output: exactly one row at document grain with `document_id` and `title`, ordered by `document_id`.
---    Verify: For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
+--    Verify: For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags, not either one, are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
 --    Hint ladder, rung 1: For sql-types-01 Exercise 1, check the tag containment written analysis against `any`.
 -- 2. Find documents available on 2026-08-11 but not inside a blackout window.
 --    State the inclusive/exclusive boundary rule.

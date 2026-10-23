@@ -87,8 +87,8 @@ a failed rendering test.
 ## Before authoring
 
 1. Read the closest `AGENTS.md`.
-2. Inspect the generated `curriculum/catalog.json` and the applicable rules in `src/ds60sqlpy/catalog_builder.py`.
-3. Run `python scripts/course.py catalog`.
+2. Choose the existing authoring contract with the [extension playbook](curriculum-extension-playbook.md). Inspect the legacy catalog or subject plan and manifest as appropriate.
+3. Run `python scripts/course.py catalog` for legacy content and `python scripts/check_modules.py` for authored modules.
 4. Identify the learning gap and prerequisite chain.
 5. Decide whether to revise an existing lesson or add a new stable lesson ID.
 
@@ -101,7 +101,7 @@ foundation, elective, or specialization into a misleading sequential day.
 
 ## Lesson contract
 
-Every lesson should include:
+Practice lessons should include:
 
 1. **Title and level** - beginner, intermediate, or advanced
 2. **Prerequisites** - concepts and environment
@@ -118,8 +118,14 @@ Every lesson should include:
 Prefer “write a query that returns…” or “implement and verify…” over “understand…”.
 For a named professional module, list every direct catalog prerequisite by its
 exact backticked stable ID inside `## Level and prerequisites`. Put transitive
-background and merely helpful material in separately labeled prose so Codex
+background and merely helpful material in separately labeled prose so an AI tutor
 and learners do not mistake it for a hard gate.
+
+The statistics/ML tutorial has a different contract: detailed theory, assumptions,
+worked examples, use cases, failure modes and answered interview discussions.
+It has no exams, problem sets, exercise quota or hidden-solution gate. Its
+coverage and executable-example checks replace practice-count gates. Reading
+markers record reading rather than mastery.
 
 ## Complete-amateur depth standard
 
@@ -243,9 +249,9 @@ Do not hide all examples in one large code cell or all instructions in one
 large Markdown cell. A learner must be able to run top to bottom from a fresh
 kernel without relying on state created out of order.
 
-### Ask Codex about this lesson
+### Ask an AI tutor about this lesson
 
-Every companion guide must end with an optional `## Ask Codex about this
+Every companion guide must end with an optional `## Ask an AI tutor about this
 lesson` section containing a copy-ready fenced `text` prompt. The course prose
 must remain sufficient without it.
 
@@ -479,42 +485,36 @@ python scripts/build_lesson_readers.py --check
 
 ## Extending subjects, languages, and learning modes
 
-Follow [the curriculum extension playbook](curriculum-extension-playbook.md)
-when adding a new track. Add a manifest under `curriculum/extensions/` rather
-than editing the generated catalog or stretching the historical day-number
-scanner. Its schema supports track metadata, complete lesson records,
-cross-track prerequisites, topic tags, and goal targets. An inactive
-[example manifest](examples/curriculum-extension.json) shows the required
-fields; create its authored files and quality evidence before registering it.
+Follow [the extension playbook](curriculum-extension-playbook.md) to choose
+between a legacy catalog extension, an authored module and the tutorial book.
+New classroom subjects normally use `courses/<subject>/track.json` and
+`lessons.json`; the original five modules retain their existing plans. Follow
+[the module contract](implementation/ADDING_A_MODULE.md) for exact admission,
+profile and variant rules. Do not put every new subject into
+`curriculum/extensions/` or count module lessons in legacy practice audits.
 
-The lesson's `runner` describes how a learner works. The `track` and `topics`
-describe what they learn. Deep learning uses Python when its exercise is Python;
-LLM theory can use `none` when its evidence is written reasoning. Planned
-C++, Scala, and Kubernetes runner descriptors allow correctly labeled reading
-and saved work, with execution available only after a real backend adapter is
-implemented and verified. A manifest never grants permission to execute an
-arbitrary command.
+A subject describes what learners study; a runtime describes how its code runs.
+C++, Java, Node, TypeScript, Scala/Spark and framework modules have fixed reviewed
+workers. Use the actual lesson capability report, because legacy descriptors
+and module runtimes are separate routes. A registered profile or highlighted
+source alone does not establish execution readiness.
 
-Every new ID needs an explicit `curriculum/practice_expansion.json` entry with
-baseline zero and target six. Keep the historical baseline unchanged. All
-shared teaching gates remain: self-contained definitions, two worked examples,
-six progressive and bounded exercises on each required surface, inspectable
-expected results and verification, explanations of failure, retrieval questions,
-and the exact lesson-specific Codex block. Reading-only lessons can use fenced
-text examples and reasoned counterexamples; they still need a separate
-explanatory solution and the same minimum teaching depth. Code and operations
-lessons require two solution artifacts, including a written explanation.
+For legacy catalog additions, preserve `curriculum/practice_baseline.json` and
+register new IDs in `curriculum/practice_expansion.json`. Ordinary module
+practice uses the subject's depth and six-exercise contract. Reading-only
+practice still needs worked reasoning and a separate explanation. The tutorial
+book has no practice requirement or answer gate.
 
 For C++/Scala learner sources, label prompts `// Exercise 1:` through the final
-number. For Kubernetes YAML, use `# Exercise 1:` comments. Labels identify
-distinct tasks; repeated labels and answer steps do not increase the audited
-count. Keep guide and solution prompts aligned with the same numbered tasks.
+number. Kubernetes YAML uses `# Exercise 1:` comments. Count distinct learner
+tasks, not repeated labels or answer steps. Keep guide and solution tasks
+aligned. A new execution adapter requires reviewed backend code, bounded runs,
+cleanup, saved-work protection and actual runtime evidence.
 
-Preserve one-click setup and offline behavior. List any compiler, JVM, cluster,
-GPU, model, or first download beside the lesson's run instructions. An
-operations exercise must name its local target and cleanup boundary. A new
-execution adapter also needs timeout, output, cancellation, invalid-input,
-saved-work, and failure-cleanup evidence before its capability becomes runnable.
+List any compiler, JVM, cluster, GPU, model or first download beside the run
+instructions, and distinguish Docker-provided tools from optional host setup.
+External operations need a deliberately owned local target. Keep the default
+path offline after its documented preparation.
 
 ## Accessibility and tone
 
@@ -547,8 +547,9 @@ Run [repository validation](validation.md) before handoff.
 
 ## New-lesson practice evidence
 
-Do not rewrite historical enrichment counts. Register genuinely new lesson IDs
+Do not rewrite historical enrichment counts. Register genuinely new legacy catalog lesson IDs
 in `curriculum/practice_expansion.json` with baseline zero and target six; the
 audit merges this disjoint registry with the immutable historical baseline.
-The new guides still need distinct inspectable exercises, and the depth and
-shared guide-contract checks both apply.
+The new legacy guides still need distinct inspectable exercises, and the depth
+and shared guide-contract checks both apply. Module subjects and tutorial books
+use their separate contracts described above.

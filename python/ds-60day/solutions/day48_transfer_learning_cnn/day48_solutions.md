@@ -1,4 +1,4 @@
-# Day 48 — Solutions: Transfer Learning with CNNs
+# Day 48: Solutions: Transfer Learning with CNNs
 
 We fine-tune a pretrained ResNet on an ImageFolder dataset. We first train a linear head, then unfreeze the last block. We also add data augmentation and use OneCycleLR. Each block is followed by a step‑by‑step explanation.
 
@@ -79,7 +79,7 @@ Explanation
 
 ---
 
-Worked reference for Exercise 1 — Linear head then unfreeze last block
+Worked reference for Exercise 1; Linear head then unfreeze last block
 ```python
 # 1) Reuse cached weights without making a surprise network request
 weights = models.ResNet18_Weights.DEFAULT
@@ -148,7 +148,7 @@ Line‑by‑line
 
 ---
 
-Worked reference for Exercise 2 — Augmentation
+Worked reference for Exercise 2; Augmentation
 ```python
 aug_tfms = transforms.Compose([
     transforms.RandomResizedCrop(64, scale=(0.8, 1.0)),
@@ -188,7 +188,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — OneCycleLR
+Worked reference for Exercise 3; OneCycleLR
 ```python
 # Reset optimizer for OneCycle
 max_lr = 1e-3
@@ -255,7 +255,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Load a small image folder with `ImageFolder` and `DataLoader`.
 
@@ -265,9 +265,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
+**Verify:** Practice 1; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Train only the classifier head for a few epochs.
 
@@ -277,9 +277,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
+**Verify:** Practice 2; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
@@ -289,9 +289,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — offline-safe transfer learning, frozen parameters, and cautious fine-tuning — unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
+**Verify:** Practice 3; offline-safe transfer learning, frozen parameters, and cautious fine-tuning; unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
-### Exercise 4 — Transform mismatch diagnosis
+### Exercise 4: Transform mismatch diagnosis
 
 **Prompt:** Compare predictions when validation images use the training transform with random crop/flip versus a deterministic validation transform. Explain the metric instability.
 
@@ -309,9 +309,9 @@ deterministic inference transform exactly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Transform mismatch diagnosis — evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
+**Verify:** Transform mismatch diagnosis; evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
 
-### Exercise 5 — Frozen-state edge case
+### Exercise 5: Frozen-state edge case
 
 **Prompt:** Freeze a pretrained backbone containing BatchNorm. Explain the difference between `requires_grad=False` and putting frozen modules in evaluation mode.
 
@@ -329,9 +329,9 @@ global `model.train()` and assuming freeze semantics are complete.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Frozen-state edge case — print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
+**Verify:** Frozen-state edge case; print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
 
-### Exercise 6 — Offline fallback design
+### Exercise 6: Offline fallback design
 
 **Prompt:** Make the lesson runnable when pretrained weights are not cached. Detect cache availability, offer an explicit connected preload step, and provide a tiny randomly initialized CNN smoke path.
 
@@ -344,10 +344,10 @@ weight version once and documents the cache location.
 
 On later offline runs, request that exact weight enum rather than an ambiguous
 “latest” default. If absent, fail with a helpful message or select the clearly
-labeled smoke fallback—never silently change the experiment.
+labeled smoke fallback, never silently change the experiment.
 
 **Why this matters:** The result should survive a fresh-kernel rerun and
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Offline fallback design — print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.
+**Verify:** Offline fallback design; print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.

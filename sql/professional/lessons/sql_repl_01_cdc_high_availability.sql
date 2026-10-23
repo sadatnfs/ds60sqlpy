@@ -293,7 +293,7 @@ ORDER BY ci.consumer_name;
 --    publication. Prove the unpublished outbox event remains discoverable.
 --    Inputs: For sql-repl-01 Exercise 1, Insert business state and its row in `pro_replication_lab.outbox_events` in one transaction, commit, and leave `published_at` NULL to represent a crash before publisher acknowledgement.
 --    Expected result/shape: For sql-repl-01 Exercise 1, One row per unpublished `event_id`, with `event_id`, `aggregate_key`, and `aggregate_version`, ordered by `aggregate_key, aggregate_version, event_id`.
---    Verify: For sql-repl-01 Exercise 1, Query only `published_at IS NULL`, require unique `event_id`, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row—not process memory—is what lets a publisher retry after a crash.
+--    Verify: For sql-repl-01 Exercise 1, Query only `published_at IS NULL`, require unique `event_id`, and prove the committed event remains after a new session connects. Mark a different event published in a savepoint and prove it leaves this result. Hint ladder, rung 1: The durable outbox row, not process memory, is what lets a publisher retry after a crash.
 -- 2. Simulate consumer redelivery after an external side effect but before
 --    acknowledgement. Explain why an inbox transaction works only when the
 --    effect shares its database; design an idempotency key for an external API.
@@ -350,7 +350,7 @@ ORDER BY ci.consumer_name;
 --     Sequence additive columns, defaults, constraints, type changes, indexes,
 --     application deployments, validation, and removal without stopping CDC.
 --    Inputs: For sql-repl-01 Exercise 11, Encode the required lifecycle order as an inline matrix: expand → deploy → backfill/validate → contract. Include publisher, subscriber, and application compatibility at every phase.
---    Expected result/shape: For sql-repl-01 Exercise 11, One row per `step_number`, with `step_number`, `phase`, and `compatibility_gate`, ordered by `step_number`—never lexicographically by phase text.
+--    Expected result/shape: For sql-repl-01 Exercise 11, One row per `step_number`, with `step_number`, `phase`, and `compatibility_gate`, ordered by `step_number`, never lexicographically by phase text.
 --    Verify: For sql-repl-01 Exercise 11, The numeric sequence is exactly `{1,2,3,4}` and phase array is exactly `{expand,deploy,backfill,contract}`. Test additive columns, defaults, constraints, type changes, indexes, old/new readers/writers, and rollback; logical replication's separate DDL/sequence handling is explicit. Hint ladder, rung 1: Compatibility is a time-ordered protocol, not an alphabetically sorted checklist.
 -- 12. Write failback/reseed steps after promotion. Cover new-primary backup,
 --     old-primary fencing, timeline divergence, rewind or rebuild choice,

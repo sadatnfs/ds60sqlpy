@@ -1,4 +1,4 @@
-# Day 10 solutions — DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT
+# Day 10 solutions: DML with Subqueries: INSERT/UPDATE/DELETE/UPSERT
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** Materialize category net revenue into a temporary table with `INSERT ... SELECT`.
 
@@ -120,7 +120,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-10 Exercise 1, the chosen form is justified by this lesson-specific rationale: Declare the temporary schema and aggregate source rows before inserting. Evaluate another form against the concrete expected result (One temporary row per product category) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `category` values in both cases.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Give Sales and Engineering employees a 5% demonstration raise and return affected rows.
 
@@ -164,7 +164,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-10 Exercise 2, the chosen form is justified by this lesson-specific rationale: Select departments by key, round exact numeric salary, and inspect `RETURNING`. Evaluate another form against the concrete expected result (Affected employee rows only; no change persists) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `employee_id` values in both cases.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Delete orders older than one year only when no payment exists, returning candidate keys.
 
@@ -208,7 +208,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-10 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use correlated `NOT EXISTS`; foreign-key cascades remain rollback-protected. Evaluate another form against the concrete expected result (Deleted-candidate order rows, then fully restored state) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `order_id` values in both cases.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Run an upsert twice against a temporary key-value table and prove only one row exists for the key.
 
@@ -261,7 +261,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-10 Exercise 4, the chosen form is justified by this lesson-specific rationale: A primary key supplies the conflict target; the second statement updates rather than inserts. Evaluate another form against the concrete expected result (One row for `source_a` with the second value) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `source_key` values in both cases.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Preview and update a bounded product set while reconciling selected and returned key counts.
 
@@ -319,7 +319,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-10 Exercise 5, the chosen form is justified by this lesson-specific rationale: Store candidate keys in a temporary table and update only through that reviewed set. Evaluate another form against the concrete expected result (One summary row with equal candidate and updated counts) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Stage product prices and update only rows whose incoming price is nonnegative and actually differs.
 

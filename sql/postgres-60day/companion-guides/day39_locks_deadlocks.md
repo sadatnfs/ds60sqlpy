@@ -1,9 +1,9 @@
-# Day 39 — Locks, Blocking, and Deadlocks
+# Day 39: Locks, Blocking, and Deadlocks
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 38 — transactions and isolation](day38_transactions_isolation.md)
+- **Prerequisites:** [Day 38; transactions and isolation](day38_transactions_isolation.md)
 - **Artifacts:** [learner SQL](../day39_locks_deadlocks.sql) ·
   [solution reasoning](../solutions/day39_solutions.md) ·
   [executable solution](../solutions/day39_solutions.sql)
@@ -36,7 +36,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-39 — Locks Deadlocks** and choose
+2. Open **SQL-39; Locks Deadlocks** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -72,7 +72,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -202,7 +202,7 @@ Use a disposable queue and prove two workers claim different rows.
 
 ## Next step
 
-Continue to [Day 40 — advanced analytic functions](day40_analytic_functions_advanced.md).
+Continue to [Day 40; advanced analytic functions](day40_analytic_functions_advanced.md).
 
 ## Deep dive and reference
 
@@ -255,11 +255,11 @@ Use `pg_try_advisory_xact_lock` for a non-blocking application lock that release
 automatically at transaction end. Advisory locks work only when every actor
 follows the same key convention.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-39 — Locks Deadlocks.

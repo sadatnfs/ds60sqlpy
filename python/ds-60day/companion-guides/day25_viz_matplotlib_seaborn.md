@@ -1,4 +1,4 @@
-# Day 25 — Visualization with Matplotlib and Seaborn
+# Day 25: Visualization with Matplotlib and Seaborn
 
 **Level:** Intermediate
 
@@ -64,12 +64,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 25 — visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export
+**Lesson outcome:** use day 25; visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ title and labels; `fig.tight_layout()` adjusts spacing; and
 `fig.savefig(path, dpi=..., bbox_inches="tight")` serializes the canvas.
 Save before closing the figure.
 
-### Worked example 1 — Build a labeled distribution plot
+### Worked example 1: Build a labeled distribution plot
 
 Constructed data keeps the lesson offline and deterministic. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -127,7 +127,7 @@ The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed ch
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Make category ordering explicit
+### Worked example 2: Make category ordering explicit
 
 Bar positions should reflect the intended comparison, not accidental input order. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -290,11 +290,11 @@ without the notebook narration, and save to predictable paths.
 
 - [Open the learner notebook](../notebooks/day25_viz_matplotlib_seaborn.ipynb)
 - [Check the separate solution](../solutions/day25_viz_matplotlib_seaborn/day25_solutions.md)
-- [Next: Day 26 — Interactive visualization](day26_viz_plotly_altair.md)
+- [Next: Day 26; Interactive visualization](day26_viz_plotly_altair.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

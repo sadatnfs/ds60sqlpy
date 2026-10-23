@@ -1,4 +1,4 @@
-# Day 37 — Regularization and Linear Models
+# Day 37: Regularization and Linear Models
 
 **Lesson ID:** `python-37` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
 
@@ -104,7 +104,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — regularization strength, coefficient shrinkage, sparsity, and stability
+## Concept deep dive: regularization strength, coefficient shrinkage, sparsity, and stability
 
 ### The mental model
 
@@ -132,7 +132,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — trace Ridge shrinkage as alpha grows
+### Focused example A: trace Ridge shrinkage as alpha grows
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -158,7 +158,7 @@ assert norms[0.01] > norms[1.0] > norms[100.0]
 
 **Assumption to name:** The same scaled design and response are used for every alpha so only regularization changes.
 
-### Focused example B — distinguish Lasso sparsity from stable selection
+### Focused example B: distinguish Lasso sparsity from stable selection
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -206,13 +206,13 @@ for alpha in (0.1, 1.0, 10.0):
 
 1. Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
-**Verify:** Practice 1 — regularization strength, coefficient shrinkage, sparsity, and stability — evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
+**Verify:** Practice 1; regularization strength, coefficient shrinkage, sparsity, and stability; evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
 2. Inspect fitted coefficients and compare their sparsity.
 
 The separate solution also demonstrates Elastic Net as a useful extension.
 
-**Verify:** Practice 2 — regularization strength, coefficient shrinkage, sparsity, and stability — print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
+**Verify:** Practice 2; regularization strength, coefficient shrinkage, sparsity, and stability; print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
 ### Progressive hints
 
@@ -231,22 +231,22 @@ attempt, and record the evidence that would prove your result correct.
 3. **Prediction:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
    **Progressive hint:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
 
-**Verify:** Prediction — print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.
+**Verify:** Prediction; print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.
 
 4. **Elastic Net implementation:** Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.
    **Progressive hint:** Scaling belongs before the estimator; l1_ratio=1 is Lasso-like and 0 is Ridge-like, while alpha controls overall penalty strength.
 
-**Verify:** Elastic Net implementation — print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.
+**Verify:** Elastic Net implementation; print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.
 
 5. **Scaling bug:** Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.
    **Progressive hint:** The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.
 
-**Verify:** Scaling bug — fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.
+**Verify:** Scaling bug; fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.
 
 6. **Stability investigation:** Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.
    **Progressive hint:** Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.
 
-**Verify:** Stability investigation — over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.
+**Verify:** Stability investigation; over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -280,12 +280,12 @@ not proof that a feature is irrelevant or causally unimportant.
 - Work in the [Day 37 learner notebook](../notebooks/day37_regularization_linear_models.ipynb).
 - Then compare with the
   [Day 37 solution](../solutions/day37_regularization_linear_models/day37_solutions.md).
-- Continue to [Day 38 — Trees and Random Forests](day38_tree_models_random_forest.md).
+- Continue to [Day 38; Trees and Random Forests](day38_tree_models_random_forest.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-37` — Day 37 — Regularization and Linear Models.

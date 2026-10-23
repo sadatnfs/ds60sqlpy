@@ -214,7 +214,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark4.0.1 monitoring and event logs](https://spark.apache.org/docs/4.0.1/monitoring.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-038: Observability: plans, progress, event logs and incidents.

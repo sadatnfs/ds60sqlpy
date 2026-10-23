@@ -165,7 +165,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <blockquote><p><strong>One classroom:</strong> the browser opens <code>/classroom</code>, where Python, PostgreSQL, the engineering bridge and every module/book subject share one home and individually themed workspaces. Choose any path and set your own pace. Start with <code>./classroom</code>; see the <a href="classroom-experience.md.html">classroom guide</a> for reading, code, saved work and compatibility bookmarks.</p></blockquote>
 <p>For the current classroom, use the <a href="one-command-classroom.md.html">one-command guide</a>. <code>./classroom</code> builds, starts, checks readiness and opens the browser. Windows uses a normal Ubuntu/WSL 2 distribution with Docker engine integration. The older installation wizard below can prepare an engine without such a user Linux distribution, so complete the one-command guide&#x27;s WSL step before using the new shared launcher. This older walkthrough retains the host-folder <code>.learning</code> route; it does not merge that state into classroom named volumes.</p>
 <p>This guide starts before the terminal commands. You will install a local container engine, download the course, start its Python and PostgreSQL backends, and use the lessons in your browser. You can follow this route without installing a native PostgreSQL server, Jupyter, or the course&#x27;s Python packages on your computer.</p>
-<p>The included PowerShell and Bash launchers open the browser and need no host Python installation. The first build downloads images and packages; ordinary later starts reuse them. Codex is an optional tutor.</p>
+<p>The included PowerShell and Bash launchers open the browser and need no host Python installation. The first build downloads images and packages; ordinary later starts reuse them. An AI tutor is optional.</p>
 <h3 id="1-know-the-few-names-you-will-see">1. Know the few names you will see<a class="heading-anchor" href="#1-know-the-few-names-you-will-see" aria-label="Link to this section">#</a></h3>
 <div class="table-wrap"><table><thead><tr>
 <th>Name</th>
@@ -189,15 +189,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tr>
 <tr>
 <td>Compose</td>
-<td>The <code>docker compose</code> command that starts the app and PostgreSQL together from <code>compose.yaml</code>.</td>
+<td>The <code>docker compose</code> command starts services from a reviewed configuration. The current classroom uses <code>compose.classroom.yaml</code>; the older host-folder route uses <code>compose.yaml</code>.</td>
 </tr>
 <tr>
 <td>Bind mount</td>
-<td>A real folder on your host exposed inside a container. The course uses it for saved learning work.</td>
+<td>A real host folder exposed inside a container, used by the optional older host-folder route.</td>
 </tr>
 <tr>
-<td>Database volume</td>
-<td>Docker-managed storage for PostgreSQL. It is separate from the host folder holding your progress.</td>
+<td>Named volume</td>
+<td>Docker-managed storage kept separately from replaceable containers. The current classroom has separate learning, database and private runtime volumes.</td>
 </tr>
 <tr>
 <td>Port</td>
@@ -207,9 +207,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Commands in a code block are what you type. Do not type the surrounding backticks, the word <code>powershell</code> or <code>bash</code>, or a terminal prompt such as <code>$</code>. Press Enter after a command and wait for it to finish. An error is a reason to inspect that step before continuing, not a reason to delete saved data.</p>
 <h3 id="2-install-one-local-container-engine">2. Install one local container engine<a class="heading-anchor" href="#2-install-one-local-container-engine" aria-label="Link to this section">#</a></h3>
 <p>Choose the instructions for your operating system. You need a working <strong>Docker CLI</strong>, <strong>Docker API</strong>, and <strong>Compose v2</strong>. Docker Desktop bundles these components. Docker Engine users install the Compose plugin separately. <a href="https://docs.docker.com/compose/install/">Docker&#x27;s Compose installation guide</a> explains that distinction.</p>
-<p>Rancher Desktop with <strong>dockerd (moby)</strong> is also suitable. Its Moby engine exposes the Docker API; its containerd choice uses a different command-line workflow. The repository&#x27;s actual macOS container verification used Rancher Desktop with Moby. Other operating-system installation steps below follow vendor documentation and include checks you can perform locally. <a href="https://docs.rancherdesktop.io/ui/preferences/container-engine/general/">Rancher&#x27;s engine documentation</a> explains the engine choices.</p>
-<h4 id="windows-start-with-the-first-run-wizard">Windows: start with the first-run wizard<a class="heading-anchor" href="#windows-start-with-the-first-run-wizard" aria-label="Link to this section">#</a></h4>
-<p>For a new Windows computer, begin with the course ZIP and its launcher. You do not need to install Python or Git, open Ubuntu, or type Docker commands first. The guided fresh installation targets supported <strong>Windows 11 x64</strong> machines. An existing compatible local engine can be reused without reinstalling it. Use an internet connection for initial downloads; other architectures or managed installation policies use the manual vendor/IT route below.</p>
+<p>Rancher Desktop with <strong>dockerd (moby)</strong> is also suitable. Its Moby engine exposes the Docker API; its containerd choice uses a different command-line workflow. The installation steps below follow vendor documentation and include checks you can perform locally. <a href="https://docs.rancherdesktop.io/ui/preferences/container-engine/general/">Rancher&#x27;s engine documentation</a> explains the engine choices.</p>
+<h4 id="optional-legacy-windows-first-run-wizard">Optional legacy Windows first-run wizard<a class="heading-anchor" href="#optional-legacy-windows-first-run-wizard" aria-label="Link to this section">#</a></h4>
+<p>For the optional legacy installation wizard, begin with the course ZIP and its launcher. You do not need to install Python or Git, open Ubuntu, or type Docker commands first. The guided fresh installation targets supported <strong>Windows 11 x64</strong> machines. An existing compatible local engine can be reused without reinstalling it. Use an internet connection for initial downloads; other architectures or managed installation policies use the manual vendor/IT route below.</p>
 <ol>
 <li>Download the supplied <strong><code>DS60LearningLab-0.3.0-Windows-Starter.zip</code></strong>. Alternatively, use <strong>Code</strong>, then <strong>Download ZIP</strong> on a <a href="https://github.com/sadatnfs/ds60sqlpy">repository version</a> that includes <code>START_DOCKER_LAB.cmd</code> and <code>scripts/start_docker_windows.ps1</code>. Sign in if repository access requires it.</li>
 <li>In File Explorer, right-click the ZIP and choose <strong>Extract All</strong>. Extract the complete course into a normal user-owned folder. Open the extracted folder containing <code>README.md</code>, <code>compose.yaml</code>, and <code>scripts</code>.</li>
@@ -426,29 +426,31 @@ LearningRestored<span class="syntax-operator">=</span><span class="syntax-string
 docker compose --project-name ds60sqlpy cp lab:/workspace/.learning work/legacy-learning-export-20261022</code></pre>
 <p>Check that the destination does not exist before copying, and choose a fresh name when needed. This works with a stopped container that still exists. Inspect the exported progress, coaching, and pads before making a separate working copy for <code>--data-dir</code> on Bash or <code>-DataDir</code> on PowerShell. Existing host <code>.learning</code> data wins: do not merge the export into it or overwrite it. Keep the old volume until you have verified the copied files. The detailed database migration in <a href="offline-app.md.html#bootstrap-role-volumes-side-by-side-migration">the application guide</a> is separate from moving learner notes and progress.</p>
 <h3 id="9-recommended-windows-wsl-2-terminal-workflow">9. Recommended Windows WSL 2 terminal workflow<a class="heading-anchor" href="#9-recommended-windows-wsl-2-terminal-workflow" aria-label="Link to this section">#</a></h3>
-<p>For Windows learners working in Ubuntu, the recommended layout is a Linux-local checkout and learning folder. The PowerShell alternative also uses WSL 2 through the engine, but keeps its files in the Windows filesystem. To use the Linux-terminal workflow:</p>
+<p>Use the shared classroom launcher from an Ubuntu terminal. Keep the source checkout in the Linux filesystem for predictable paths and file performance. The current classroom saves learner data in named Docker volumes, separately from that source folder. To begin:</p>
 <ol>
 <li>In PowerShell, confirm the Ubuntu distribution is version 2 with <code>wsl -l -v</code>.</li>
 <li>In Docker Desktop, enable that distribution under WSL Integration. Rancher Desktop users follow its distribution integration settings.</li>
 <li>Open Ubuntu from the Start menu. <code>pwd</code> now reports a Linux path, not a Windows PowerShell location.</li>
-<li>Keep the Linux checkout and its host learning folder in the Linux home filesystem, for example <code>/home/ada/ds60sqlpy</code>. To copy a downloaded/extracted course folder without installing Git, run the following in Ubuntu:</li>
+<li>Keep the checkout under your Linux home, for example <code>$HOME/ds60sqlpy</code>. To copy an extracted course folder without installing Git, run in Ubuntu:</li>
 </ol>
 <pre class="highlighted-code"><code class="language-bash">   <span class="syntax-builtin">cd</span> <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">&quot;</span>
    explorer.exe .</code></pre>
-<p>The File Explorer window now shows your Linux home. Copy the extracted course folder into it, using an unused folder name. If you name it <code>ds60sqlpy</code>, return to Ubuntu and run:</p>
+<p>File Explorer now shows your Linux home. Copy the complete extracted course folder into it, using an unused folder name. If you name it <code>ds60sqlpy</code>, return to Ubuntu and run:</p>
 <pre class="highlighted-code"><code class="language-bash">   <span class="syntax-builtin">cd</span> <span class="syntax-string">&quot;</span>$HOME<span class="syntax-string">/ds60sqlpy</span><span class="syntax-string">&quot;</span>
-   ls compose.yaml
-   bash scripts/docker_lab.sh start</code></pre>
-<p>No Windows <code>.venv</code> or host Python is needed. Use this Linux checkout for later Bash starts, and back up its <code>.learning</code> folder from the same place.</p>
+   ls compose.classroom.yaml
+   ./classroom</code></pre>
+<p>No Windows virtual environment or host Python is needed. Use this checkout and the same project name for future starts. The launcher builds the local images, waits for readiness and prints the actual browser address.</p>
 <ol>
-<li>Open <code>http://127.0.0.1:8765/classroom</code> in the Windows browser if automatic browser opening is unavailable. The launcher also prints its actual ready URL.</li>
+<li>If the browser does not open automatically, copy the exact printed URL into your Windows browser. Host ports are selected automatically unless explicitly configured; do not assume port 8765.</li>
+<li>Preserve the named learning and PostgreSQL volumes. Follow the full-volume backup instructions in <a href="docker-classroom.md.html">the Docker classroom guide</a>. Copying the source folder or exporting completion markers alone does not back up pads, notes, saved results or database data. The older host-folder <code>.learning</code> route described above is a separate storage mode.</li>
 </ol>
-<p>Microsoft recommends keeping files in the filesystem matching the terminal you use. <code>C:\Users\Ada\Documents\ds60sqlpy</code> appears to WSL as <code>/mnt/c/Users/Ada/Documents/ds60sqlpy</code>, while <code>/home/ada/ds60sqlpy</code> is Linux-local. These are different storage locations. Use <code>explorer.exe .</code> from the Ubuntu terminal to inspect its current folder in Windows File Explorer. <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems">Microsoft&#x27;s filesystem guide</a> explains the path translation. Do not point two simultaneous Windows/WSL course instances at one learning folder.</p>
+<p>Microsoft recommends keeping files in the filesystem matching the terminal you use. <code>C:\Users\Ada\Documents\ds60sqlpy</code> appears to WSL as <code>/mnt/c/Users/Ada/Documents/ds60sqlpy</code>, while <code>$HOME/ds60sqlpy</code> is Linux-local. These are different source locations. Use <code>explorer.exe .</code> from Ubuntu to inspect its current folder in Windows File Explorer. <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems">Microsoft&#x27;s filesystem guide</a> explains the path translation. Preserve the same Docker project identity when restarting; a new project creates separate named learning volumes.</p>
 <h3 id="10-ports-and-common-first-start-problems">10. Ports and common first-start problems<a class="heading-anchor" href="#10-ports-and-common-first-start-problems" aria-label="Link to this section">#</a></h3>
-<p>The launcher defaults to browser port <strong>8765</strong> and host database port <strong>55432</strong>. The app still reaches PostgreSQL at port 5432 inside the container network. If a port is already occupied, choose another without stopping an unrelated application:</p>
-<pre class="highlighted-code"><code class="language-powershell">powershell -ExecutionPolicy Bypass <span class="syntax-operator">-File</span> <span class="syntax-punctuation">.</span><span class="syntax-punctuation">\</span>scripts<span class="syntax-punctuation">\</span>docker_lab<span class="syntax-punctuation">.</span>ps1 <span class="syntax-builtin">start </span>-Port 8766 -DatabasePort 55433</code></pre>
-<pre class="highlighted-code"><code class="language-bash">bash scripts/docker_lab.sh start --port <span class="syntax-number">8766</span> --database-port <span class="syntax-number">55433</span></code></pre>
-<p>Open the URL printed for port 8766 in that example, and reuse the same settings on later starts. The local database is <code>advanced_sql_training</code>, with the course login <code>admin</code> and password <code>admin</code> on a fresh installation. Changing Compose credentials does not rewrite accounts in an existing database volume.</p>
+<p>The shared <code>./classroom</code> launcher normally lets Docker select free loopback host ports. The app reaches PostgreSQL at port 5432 inside the container network regardless of those host ports. To request fixed host ports in macOS, Linux or the Windows WSL terminal:</p>
+<pre class="highlighted-code"><code class="language-bash">./classroom --port <span class="syntax-number">8766</span> --database-port <span class="syntax-number">55433</span></code></pre>
+<p>Open the exact printed URL and keep the same project on later starts. If a fixed port is occupied, choose an available one or request automatic selection with <code>--port 0 --database-port 0</code>. Do not stop an unrelated application just to claim its port.</p>
+<p>The optional legacy <code>scripts/docker_lab.sh</code> and <code>scripts/docker_lab.ps1</code> launchers described earlier default to ports 8765 and 55432 and have their own host-folder storage contract. Use the command and backup procedure for the route you actually started; changing routes does not migrate learning data.</p>
+<p>The disposable database is <code>advanced_sql_training</code>, with the course login <code>admin</code> and password <code>admin</code> on a fresh installation. Changing Compose credentials does not rewrite accounts in an existing database volume.</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Symptom</th>
 <th>First useful check</th>

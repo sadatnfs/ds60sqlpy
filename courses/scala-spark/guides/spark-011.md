@@ -191,7 +191,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 NULL semantics](https://spark.apache.org/docs/4.0.1/sql-ref-null-semantics.html).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-011: PySpark bridge: Python values versus Spark Columns.

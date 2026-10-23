@@ -30,7 +30,7 @@ Setup, documentation, and incidental SQL links open generated pages under
 `reference-pages/`, not raw Markdown or SQL. In static mode, use the lesson
 reader's **Track completion on the course dashboard** link and mark the card
 on `START_HERE.html`. The per-lesson completion checkbox appears only in
-private launcher mode, where the dashboard, reader, CLI, and Codex can share
+private launcher mode, where the dashboard, reader, CLI, and the AI tutor can share
 the ignored progress file.
 
 ## Start private launcher mode

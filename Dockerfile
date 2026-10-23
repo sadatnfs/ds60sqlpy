@@ -3,7 +3,7 @@ FROM ${DS60_BASE_IMAGE}
 
 LABEL org.opencontainers.image.title="DS60 Learning Lab" \
     org.opencontainers.image.version="0.3.0" \
-    org.opencontainers.image.description="Local Python and PostgreSQL learning application" \
+    org.opencontainers.image.description="Local classroom for programming, data science and machine learning" \
     org.opencontainers.image.source="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.url="https://github.com/sadatnfs/ds60sqlpy" \
     org.opencontainers.image.licenses="Apache-2.0" \

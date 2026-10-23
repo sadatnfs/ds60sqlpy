@@ -1,4 +1,4 @@
-# Day 58 — Code Review, Refactoring, and Tests
+# Day 58: Code Review, Refactoring, and Tests
 
 **Lesson ID:** `python-58` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
 
@@ -125,7 +125,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — behavior-preserving refactoring, seams, tests, and compatibility review
+## Concept deep dive: behavior-preserving refactoring, seams, tests, and compatibility review
 
 ### The mental model
 
@@ -152,7 +152,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — capture legacy behavior before extraction
+### Focused example A: capture legacy behavior before extraction
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -175,7 +175,7 @@ assert observed == 4.0  # characterization: preserve while restructuring
 
 **Assumption to name:** Rounding only the final total is intended behavior; malformed-row policy still needs a failure test.
 
-### Focused example B — extract a pure boundary with explicit failures
+### Focused example B: extract a pure boundary with explicit failures
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -228,15 +228,15 @@ except ValueError as exc:
 
 1. Move at least two notebook functions into a `src/` package and add tests.
 
-**Verify:** Practice 1 — behavior-preserving refactoring, seams, tests, and compatibility review — import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
+**Verify:** Practice 1; behavior-preserving refactoring, seams, tests, and compatibility review; import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
 2. Add type hints and docstrings, then run mypy.
 
-**Verify:** Practice 2 — behavior-preserving refactoring, seams, tests, and compatibility review — run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
+**Verify:** Practice 2; behavior-preserving refactoring, seams, tests, and compatibility review; run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
 3. Write a short maintainer guide in the project root.
 
-**Verify:** Practice 3 — behavior-preserving refactoring, seams, tests, and compatibility review — write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
+**Verify:** Practice 3; behavior-preserving refactoring, seams, tests, and compatibility review; write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
 ### Progressive hints
 
@@ -253,7 +253,7 @@ locally.
 
 ### Additional mastery practice
 
-Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support—not replace—domain evidence.
+Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support, not replace, domain evidence.
 
 Predict or plan before you run code. Use the hint only after an honest
 attempt, and record the evidence that would prove your result correct.
@@ -261,17 +261,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Characterization testing:** Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.
    **Progressive hint:** Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.
 
-**Verify:** Characterization testing — save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
+**Verify:** Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
 
 5. **Risk-based review:** Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.
    **Progressive hint:** Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.
 
-**Verify:** Risk-based review — complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
+**Verify:** Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
 
 6. **Compatibility change:** Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.
    **Progressive hint:** Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.
 
-**Verify:** Compatibility change — assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.
+**Verify:** Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -305,12 +305,12 @@ navigation cost. Extract around stable concepts and side-effect boundaries.
 - Work in the [Day 58 learner notebook](../notebooks/day58_code_review_refactor_tests.ipynb).
 - Then consult the
   [Day 58 solution](../solutions/day58_code_review_refactor_tests/day58_solutions.md).
-- Continue to [Day 59 — Capstone Kickoff](day59_capstone_kickoff.md).
+- Continue to [Day 59; Capstone Kickoff](day59_capstone_kickoff.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-58` — Day 58 — Code Review, Refactoring, and Tests.

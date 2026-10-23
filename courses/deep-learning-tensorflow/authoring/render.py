@@ -97,7 +97,7 @@ Revisit the direct prerequisite {prereq} if the calculation cannot be reconstruc
 
 API and mechanism reference: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in `docs/implementation/ml-content-status.md`; authored content does not imply that a heavy runtime was executed.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 {prompt}

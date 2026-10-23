@@ -1,4 +1,4 @@
-# Day 35 — Solutions: Avoiding Performance Pitfalls
+# Day 35: Solutions: Avoiding Performance Pitfalls
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ This learner day asks for three rewrites that keep functions off an indexed
 column and one rewrite of a correlated subquery. The examples use half-open
 timestamp ranges because they are precise and B-tree friendly.
 
-## Exercise 1 — Three sargable predicate rewrites
+## Exercise 1: Three sargable predicate rewrites
 
 Each “better” predicate leaves `order_date` bare, allowing an index on that
 column to define a contiguous range.
@@ -116,7 +116,7 @@ because the demonstration index from Day 32 was rolled back.
 - **Alternative/trade-off:** For sql-35 Exercise 1, the chosen form is justified by this lesson-specific rationale: Each “better” predicate leaves `order_date` bare, allowing an index on that column to define a contiguous range. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 2 — Replace a per-customer correlated aggregate
+## Exercise 2: Replace a per-customer correlated aggregate
 
 ```sql
 SET search_path TO training, public;
@@ -167,7 +167,7 @@ the answer.
   assuming every correlated expression runs once per outer row.
 - Do not hide fanout with `DISTINCT`; fix the join grain.
 
-## Exercise 3 — Diagnose wildcard search
+## Exercise 3: Diagnose wildcard search
 
 `LIKE 'A%'` has a fixed starting prefix; `LIKE '%A%'` does not. A normal B-tree
 therefore has a more direct opportunity on the first pattern, subject to
@@ -183,7 +183,7 @@ collation/operator-class details.
 - **Alternative/trade-off:** For sql-35 Exercise 3, the chosen form is justified by this lesson-specific rationale: `LIKE 'A%'` has a fixed starting prefix; `LIKE '%A%'` does not. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
 - **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
 
-## Exercise 4 — Replace OFFSET with a seek tuple
+## Exercise 4: Replace OFFSET with a seek tuple
 
 The boundary tuple comes from `(order_date DESC, order_id DESC)`. The next page
 uses the matching tuple comparison and repeats that deterministic order.
@@ -198,7 +198,7 @@ uses the matching tuple comparison and repeats that deterministic order.
 - **Alternative/trade-off:** For sql-35 Exercise 4, the chosen form is justified by this lesson-specific rationale: The boundary tuple comes from `(order_date DESC, order_id DESC)`. Evaluate another form against the concrete expected result (at most 20 rows keyed by `order_id`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_date DESC, o.order_id DESC`.
 
-## Exercise 5 — Fix payment/item fanout
+## Exercise 5: Fix payment/item fanout
 
 The answer groups each many-side by `order_id` before joining. `DISTINCT` would
 only conceal duplicated output, not repair multiplied sums.
@@ -213,7 +213,7 @@ only conceal duplicated output, not repair multiplied sums.
 - **Alternative/trade-off:** For sql-35 Exercise 5, the chosen form is justified by this lesson-specific rationale: The answer groups each many-side by `order_id` before joining. Evaluate another form against the concrete expected result (at most 20 rows keyed by `order_id`) and the verification above.
 - **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
 
-## Exercise 6 — Define nullable counts
+## Exercise 6: Define nullable counts
 
 `COUNT(*)` measures customer rows; `COUNT(email)` measures customers with a
 non-NULL email. The difference is a useful missingness count, not a discrepancy.

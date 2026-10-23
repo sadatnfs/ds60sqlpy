@@ -1,10 +1,10 @@
-# Day 44 — Model Deployment with FastAPI
+# Day 44: Model Deployment with FastAPI
 
 **Lesson ID:** `python-44` · **Level:** intermediate · **Dependencies:** `production` · **Network:** offline
 
 This lesson turns a fitted scikit-learn model into a local HTTP service. It
-teaches a development baseline—schema validation, serialization, and a request
-contract—not a complete production platform.
+teaches a development baseline, schema validation, serialization, and a request
+contract, not a complete production platform.
 
 ## Learning objectives
 
@@ -132,7 +132,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — validated request contracts, trusted artifacts, and testable inference endpoints
+## Concept deep dive: validated request contracts, trusted artifacts, and testable inference endpoints
 
 ### The mental model
 
@@ -158,7 +158,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — make request validation fail before inference
+### Focused example A: make request validation fail before inference
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -184,7 +184,7 @@ except ValidationError as exc:
 
 **Assumption to name:** Exactly four ordered measurements is the public contract; coercion and range policy are documented.
 
-### Focused example B — check artifact feature compatibility explicitly
+### Focused example B: check artifact feature compatibility explicitly
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -231,15 +231,15 @@ print(model.predict_proba(request_features).tolist())
 
 1. Add input validation and friendly error behavior.
 
-**Verify:** Practice 1 — validated request contracts, trusted artifacts, and testable inference endpoints — with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
+**Verify:** Practice 1; validated request contracts, trusted artifacts, and testable inference endpoints; with TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
 2. Return the class name as well as the numeric class identifier.
 
-**Verify:** Practice 2 — validated request contracts, trusted artifacts, and testable inference endpoints — for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
+**Verify:** Practice 2; validated request contracts, trusted artifacts, and testable inference endpoints; for a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
 3. Create a minimal runtime dependency file for this API.
 
-**Verify:** Practice 3 — validated request contracts, trusted artifacts, and testable inference endpoints — build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
+**Verify:** Practice 3; validated request contracts, trusted artifacts, and testable inference endpoints; build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
 ### Progressive hints
 
@@ -260,17 +260,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Boundary-case testing:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
    **Progressive hint:** Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.
 
-**Verify:** Boundary-case testing — parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
+**Verify:** Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
 
 5. **Batch contract:** Design a `/predict-batch` request and response with stable row IDs, a maximum batch size, ordered results, and per-request model metadata.
    **Progressive hint:** Validate the entire batch before scoring or define explicit partial failure semantics. Never rely only on list position to identify rows.
 
-**Verify:** Batch contract — define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
+**Verify:** Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
 
 6. **Artifact-compatibility check:** At startup, validate model version, expected feature schema, and class metadata before accepting traffic. Explain why loading a pickle from an untrusted source is unsafe.
    **Progressive hint:** Persist a small manifest beside the artifact and compare required fields. Python pickle/joblib loading can execute code.
 
-**Verify:** Artifact-compatibility check — tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.
+**Verify:** Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -304,12 +304,12 @@ lesson and must be designed before Internet-facing deployment.
 - Work in the [Day 44 learner notebook](../notebooks/day44_model_deployment_fastapi.ipynb).
 - Then review the
   [Day 44 solution](../solutions/day44_model_deployment_fastapi/day44_solutions.md).
-- Continue to [Day 45 — End-to-End Project](day45_end_to_end_modeling_project.md).
+- Continue to [Day 45; End-to-End Project](day45_end_to_end_modeling_project.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-44` — Day 44 — Model Deployment with FastAPI.

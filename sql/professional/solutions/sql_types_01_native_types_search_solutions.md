@@ -1,4 +1,4 @@
-# SQL-TYPES-01 Solutions — Native Types and Search
+# SQL-TYPES-01 Solutions: Native Types and Search
 
 
 <!-- beginner-solution-enrichment -->
@@ -61,7 +61,7 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solution
 
 The solution creates and rolls back only `pro_types_lab`.
 
-## Exercise 1 — Multi-tag containment
+## Exercise 1: Multi-tag containment
 
 `tags @> ARRAY['postgresql','operations']` asks whether the stored array
 contains both required values. Two scalar `ANY` predicates can express the same
@@ -75,9 +75,9 @@ sets. If duplicate/order semantics matter, test them explicitly.
 
 - **Inputs/evidence:** For sql-types-01 Exercise 1, filter `documents` to published rows whose `tags` array contains both `postgresql` and `operations` using one `@>` containment predicate.
 - **Expected result/shape:** For sql-types-01 Exercise 1, expected output: exactly one row at document grain with `document_id` and `title`, ordered by `document_id`.
-- **Independent verification:** For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags—not either one—are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
+- **Independent verification:** For sql-types-01 Exercise 1, compare the result with an independent unnest/distinct-tag control, prove both required tags, not either one, are present, and explain that array GIN supports containment while two `= ANY` predicates express separate membership tests.
 
-## Exercise 2 — Availability minus blackout
+## Exercise 2: Availability minus blackout
 
 The predicate combines:
 
@@ -96,7 +96,7 @@ excluded.
 - **Expected result/shape:** For sql-types-01 Exercise 2, expected output: document 202 for 2026-08-11 plus four boundary rows showing availability lower included, blackout lower excluded from use, blackout upper available, and availability upper excluded.
 - **Independent verification:** For sql-types-01 Exercise 2, assert the `[lower, upper)` truth table directly and distinguish an unavailable document from a missing result row; test both range and multirange containment at exact endpoints.
 
-## Exercise 3 — Numeric JSONPath
+## Exercise 3: Numeric JSONPath
 
 The JSONPath predicate checks both JSON number type and value above 30. The
 selected cast is safe because this controlled fixture owns the metadata shape.
@@ -109,7 +109,7 @@ casting; SQL predicate evaluation order is not a universal error guard.
 - **Expected result/shape:** For sql-types-01 Exercise 3, expected output: one row per matching document with `document_id`, `title`, and `minutes_numeric`; the supplied fixture returns documents 201 and 202.
 - **Independent verification:** For sql-types-01 Exercise 3, add string, missing, fractional, and very large numeric values; prove JSONPath excludes nonnumbers, numeric preserves fractional/range values, and no arbitrary JSON value reaches an unsafe integer cast.
 
-## Exercise 4 — Phrase-aware full text
+## Exercise 4: Phrase-aware full text
 
 `websearch_to_tsquery('english', '"schema migration" verify')` builds a query
 requiring the phrase plus `verify`. The generated vector weights titles above
@@ -124,7 +124,7 @@ configuration when generating vectors and queries.
 - **Expected result/shape:** For sql-types-01 Exercise 4, expected output: matching `document_id`, `title`, and `rank_score`, ordered by rank descending then `document_id`; the fixture returns document 201.
 - **Independent verification:** For sql-types-01 Exercise 4, display the parsed tsquery and source lexemes, assert every returned vector satisfies `@@`, and retain the document-ID tie-breaker because equal rank scores are possible.
 
-## Exercise 5 — Index choices
+## Exercise 5: Index choices
 
 - Default `jsonb_ops` supports a wider operator family and indexes keys and
   values.
@@ -143,7 +143,7 @@ do not stack every candidate index.
 - **Expected result/shape:** For sql-types-01 Exercise 5, expected output: four rows with `workload`, `matching_operator`, `candidate_index`, `nonmatching_query`, and `reason`, covering arrays, JSONB, full-text, and ranges.
 - **Independent verification:** For sql-types-01 Exercise 5, inspect operator classes and compare EXPLAIN plans only after representative data exists; distinguish `jsonb_ops` flexibility from `jsonb_path_ops` size/supported-operator trade-offs and treat pg_trgm as optional.
 
-## Exercise 6 — Modelling choices
+## Exercise 6: Modelling choices
 
 Use a domain for a stable reusable scalar rule, an enum for a small
 database-owned closed lifecycle, a reference table when labels need metadata or
@@ -158,12 +158,12 @@ constraints.
 - **Expected result/shape:** For sql-types-01 Exercise 6, expected output: seven deterministic rows with `field_shape`, `candidate_type`, and a concrete `decision_rule`.
 - **Independent verification:** For sql-types-01 Exercise 6, challenge each choice with one evolution/query/integrity counterexample, and prefer the type whose operators and constraints match the domain rather than the most exotic type.
 
-## Exercise 7 — Multirange normalization and gaps
+## Exercise 7: Multirange normalization and gaps
 
 Construct a `datemultirange` from input ranges; PostgreSQL canonicalizes and
 merges overlapping or adjacent discrete date ranges. The August gap is the
 bounded month range minus the normalized availability multirange. Expand only
-for display/testing when the domain is small—range algebra avoids one row per
+for display/testing when the domain is small, range algebra avoids one row per
 day.
 
 Adjacency merging is correct when uninterrupted consecutive dates are one
@@ -177,7 +177,7 @@ canonicalizes them together.
 - **Expected result/shape:** For sql-types-01 Exercise 7, expected output: exactly one row with canonical `normalized_availability` and `august_gaps`; adjacent/overlapping discrete ranges merge.
 - **Independent verification:** For sql-types-01 Exercise 7, independently test every August date for membership in either availability or gaps, require no overlap and complete month coverage, and state whether adjacency should merge in this business domain.
 
-## Exercise 8 — Network containment
+## Exercise 8: Network containment
 
 Store client endpoints as `inet` and rules as `cidr`. Join where the network
 contains the address (`network >>= address`), then rank by
@@ -195,7 +195,7 @@ default rule when no network matches.
 - **Expected result/shape:** For sql-types-01 Exercise 8, expected output: one row per client with `client_id`, `address`, `rule_id`, and `network`; matched clients receive their longest prefix and the unmatched client retains NULL rule fields.
 - **Independent verification:** For sql-types-01 Exercise 8, assert output count equals client count, validate each chosen network contains its address, prove no more-specific candidate exists, and test both IPv4, IPv6, and unmatched addresses.
 
-## Exercise 9 — Monetary representation
+## Exercise 9: Monetary representation
 
 `numeric(p,s)` gives exact decimal arithmetic and a declared scale; validate
 rounding at ingestion and choose capacity from maximum business value. Bigint
@@ -213,7 +213,7 @@ rounding, multiplication, overflow, serialization, and mixed-currency rejection.
 - **Expected result/shape:** For sql-types-01 Exercise 9, expected output: one scalar evidence row plus a three-row storage matrix; the domain cast of NULL remains NULL because NOT NULL belongs on the consuming column.
 - **Independent verification:** For sql-types-01 Exercise 9, reject a negative value, assert exact sum `30.30` and declared rounding `10.13`, test NULL at both domain and NOT NULL column boundaries, and document currency/scale when using minor units.
 
-## Exercise 10 — Promote a JSON property
+## Exercise 10: Promote a JSON property
 
 Validate that the payload property is a JSON number before casting it in a
 generated expression, or constrain accepted payload shape first. Index the
@@ -232,7 +232,7 @@ a validated `CHECK` later, after inventorying old rows and updating writers.
 - **Expected result/shape:** For sql-types-01 Exercise 10, expected output: boundary rows for string, missing, fractional, and out-of-range minutes, all safely classified as NULL; valid integral seed values remain queryable.
 - **Independent verification:** For sql-types-01 Exercise 10, prove all four malformed-for-the-property payloads insert without cast errors, valid 35/45 values materialize, the index exists, and the application policy distinguishes invalid from absent rather than silently treating both as zero.
 
-## Exercise 11 — Language-aware full text
+## Exercise 11: Language-aware full text
 
 `to_tsvector` reveals normalized lexemes and positions after parsing,
 dictionary stop-word removal, and stemming. Weight title/body lexemes before
@@ -249,7 +249,7 @@ labeled corpus, including unsupported/mixed-language fallback.
 - **Expected result/shape:** For sql-types-01 Exercise 11, expected output: one row per document with `document_id` and `lexemes`, ordered by `document_id`.
 - **Independent verification:** For sql-types-01 Exercise 11, inspect stemming and stop-word behavior with known tokens, compare a non-English sample under the English and appropriate configurations, and keep the configured language explicit in stored-vector policy.
 
-## Exercise 12 — Normalize tags
+## Exercise 12: Normalize tags
 
 Create a `tags` vocabulary and a `document_tags(document_id, tag_id)` relation
 with a composite primary key. Containment becomes grouping/HAVING or joins, and

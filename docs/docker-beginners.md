@@ -23,7 +23,7 @@ packages on your computer.
 
 The included PowerShell and Bash launchers open the browser and need no host
 Python installation. The first build downloads images and packages; ordinary
-later starts reuse them. Codex is an optional tutor.
+later starts reuse them. An AI tutor is optional.
 
 ## 1. Know the few names you will see
 
@@ -33,9 +33,9 @@ later starts reuse them. Codex is an optional tutor.
 | Container engine | The local service that runs the course's Linux containers. Start it before starting the course. |
 | Image | The installed recipe containing the course runtime and packages. Building an image does not publish it. |
 | Container | A running instance of an image. You can replace it while retaining separately stored learning data. |
-| Compose | The `docker compose` command that starts the app and PostgreSQL together from `compose.yaml`. |
-| Bind mount | A real folder on your host exposed inside a container. The course uses it for saved learning work. |
-| Database volume | Docker-managed storage for PostgreSQL. It is separate from the host folder holding your progress. |
+| Compose | The `docker compose` command starts services from a reviewed configuration. The current classroom uses `compose.classroom.yaml`; the older host-folder route uses `compose.yaml`. |
+| Bind mount | A real host folder exposed inside a container, used by the optional older host-folder route. |
+| Named volume | Docker-managed storage kept separately from replaceable containers. The current classroom has separate learning, database and private runtime volumes. |
 | Port | A numbered local connection endpoint. The browser and database use different ports. |
 
 Commands in a code block are what you type. Do not type the surrounding
@@ -53,15 +53,14 @@ explains that distinction.
 
 Rancher Desktop with **dockerd (moby)** is also suitable. Its Moby engine
 exposes the Docker API; its containerd choice uses a different command-line
-workflow. The repository's actual macOS container verification used Rancher
-Desktop with Moby. Other operating-system installation steps below follow
+workflow. The installation steps below follow
 vendor documentation and include checks you can perform locally.
 [Rancher's engine documentation](https://docs.rancherdesktop.io/ui/preferences/container-engine/general/)
 explains the engine choices.
 
-### Windows: start with the first-run wizard
+### Optional legacy Windows first-run wizard
 
-For a new Windows computer, begin with the course ZIP and its launcher. You do
+For the optional legacy installation wizard, begin with the course ZIP and its launcher. You do
 not need to install Python or Git, open Ubuntu, or type Docker commands first.
 The guided fresh installation targets supported **Windows 11 x64** machines.
 An existing compatible local engine can be reused without reinstalling it.
@@ -623,10 +622,10 @@ is separate from moving learner notes and progress.
 
 ## 9. Recommended Windows WSL 2 terminal workflow
 
-For Windows learners working in Ubuntu, the recommended layout is a
-Linux-local checkout and learning folder. The PowerShell alternative also uses
-WSL 2 through the engine, but keeps its files in the Windows filesystem.
-To use the Linux-terminal workflow:
+Use the shared classroom launcher from an Ubuntu terminal. Keep the source
+checkout in the Linux filesystem for predictable paths and file performance.
+The current classroom saves learner data in named Docker volumes, separately
+from that source folder. To begin:
 
 1. In PowerShell, confirm the Ubuntu distribution is version 2 with
    `wsl -l -v`.
@@ -634,57 +633,68 @@ To use the Linux-terminal workflow:
    Desktop users follow its distribution integration settings.
 3. Open Ubuntu from the Start menu. `pwd` now reports a Linux path, not a
    Windows PowerShell location.
-4. Keep the Linux checkout and its host learning folder in the Linux home
-   filesystem, for example `/home/ada/ds60sqlpy`. To copy a downloaded/extracted
-   course folder without installing Git, run the following in Ubuntu:
+4. Keep the checkout under your Linux home, for example `$HOME/ds60sqlpy`.
+   To copy an extracted course folder without installing Git, run in Ubuntu:
 
    ```bash
    cd "$HOME"
    explorer.exe .
    ```
 
-   The File Explorer window now shows your Linux home. Copy the extracted
+   File Explorer now shows your Linux home. Copy the complete extracted
    course folder into it, using an unused folder name. If you name it
    `ds60sqlpy`, return to Ubuntu and run:
 
    ```bash
    cd "$HOME/ds60sqlpy"
-   ls compose.yaml
-   bash scripts/docker_lab.sh start
+   ls compose.classroom.yaml
+   ./classroom
    ```
 
-   No Windows `.venv` or host Python is needed. Use this Linux checkout for
-   later Bash starts, and back up its `.learning` folder from the same place.
-5. Open `http://127.0.0.1:8765/classroom` in the Windows browser if automatic browser
-   opening is unavailable. The launcher also prints its actual ready URL.
+   No Windows virtual environment or host Python is needed. Use this checkout
+   and the same project name for future starts. The launcher builds the local
+   images, waits for readiness and prints the actual browser address.
+5. If the browser does not open automatically, copy the exact printed URL
+   into your Windows browser. Host ports are selected automatically unless
+   explicitly configured; do not assume port 8765.
+6. Preserve the named learning and PostgreSQL volumes. Follow the full-volume
+   backup instructions in [the Docker classroom guide](docker-classroom.md).
+   Copying the source folder or exporting completion markers alone does not
+   back up pads, notes, saved results or database data. The older host-folder
+   `.learning` route described above is a separate storage mode.
 
 Microsoft recommends keeping files in the filesystem matching the terminal
 you use. `C:\Users\Ada\Documents\ds60sqlpy` appears to WSL as
-`/mnt/c/Users/Ada/Documents/ds60sqlpy`, while `/home/ada/ds60sqlpy` is Linux-local.
-These are different storage locations. Use `explorer.exe .` from the Ubuntu
-terminal to inspect its current folder in Windows File Explorer.
+`/mnt/c/Users/Ada/Documents/ds60sqlpy`, while `$HOME/ds60sqlpy` is Linux-local.
+These are different source locations. Use `explorer.exe .` from Ubuntu to
+inspect its current folder in Windows File Explorer.
 [Microsoft's filesystem guide](https://learn.microsoft.com/en-us/windows/wsl/filesystems)
-explains the path translation. Do not point two simultaneous Windows/WSL course
-instances at one learning folder.
+explains the path translation. Preserve the same Docker project identity when
+restarting; a new project creates separate named learning volumes.
 
 ## 10. Ports and common first-start problems
 
-The launcher defaults to browser port **8765** and host database port **55432**.
-The app still reaches PostgreSQL at port 5432 inside the container network.
-If a port is already occupied, choose another without stopping an unrelated
-application:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start -Port 8766 -DatabasePort 55433
-```
+The shared `./classroom` launcher normally lets Docker select free loopback
+host ports. The app reaches PostgreSQL at port 5432 inside the container
+network regardless of those host ports. To request fixed host ports in macOS,
+Linux or the Windows WSL terminal:
 
 ```bash
-bash scripts/docker_lab.sh start --port 8766 --database-port 55433
+./classroom --port 8766 --database-port 55433
 ```
 
-Open the URL printed for port 8766 in that example, and reuse the same settings
-on later starts. The local database is `advanced_sql_training`, with the course
-login `admin` and password `admin` on a fresh installation. Changing Compose
+Open the exact printed URL and keep the same project on later starts. If a
+fixed port is occupied, choose an available one or request automatic selection
+with `--port 0 --database-port 0`. Do not stop an unrelated application just to
+claim its port.
+
+The optional legacy `scripts/docker_lab.sh` and `scripts/docker_lab.ps1`
+launchers described earlier default to ports 8765 and 55432 and have their own
+host-folder storage contract. Use the command and backup procedure for the
+route you actually started; changing routes does not migrate learning data.
+
+The disposable database is `advanced_sql_training`, with the course login
+`admin` and password `admin` on a fresh installation. Changing Compose
 credentials does not rewrite accounts in an existing database volume.
 
 | Symptom | First useful check | Next action |

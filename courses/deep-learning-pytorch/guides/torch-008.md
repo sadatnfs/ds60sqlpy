@@ -176,7 +176,7 @@ No. It uses current gradients stored on its parameter objects. Forward calculati
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-008, One optimizer step you can audit.

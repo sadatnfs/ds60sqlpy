@@ -1,4 +1,4 @@
-# Day 56 Solutions — CUBE and Percentiles
+# Day 56 Solutions: CUBE and Percentiles
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ The exercises add payment method to a multidimensional cube and calculate
 category-attributable order-value percentiles by month. See
 [`day56_solutions.sql`](day56_solutions.sql).
 
-## Exercise 1 — Add payment method and measure cube growth
+## Exercise 1: Add payment method and measure cube growth
 
 An order can have more than one payment. The answer defines its primary method
 as the method with the greatest total paid amount, breaking ties by method name.
@@ -116,7 +116,7 @@ Expected shape: one row; `three_dimension_rows` should be larger.
 - **Alternative/trade-off:** For sql-56 Exercise 1, the chosen form is justified by this lesson-specific rationale: An order can have more than one payment. Evaluate another form against the concrete expected result (one row; `three_dimension_rows` should be larger) and the verification above.
 - **Edge case:** Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
 
-## Exercise 2 — Category-month p50 and p90
+## Exercise 2: Category-month p50 and p90
 
 The metric is each category's contribution to an order, not the entire order
 total repeated for every category.
@@ -173,7 +173,7 @@ Expected grain: one row per represented `(month, category)`.
 - Percentiles need enough observations. Always accompany production percentiles
   with sample counts.
 
-## Exercise 3 — Measure raw fanout
+## Exercise 3: Measure raw fanout
 
 The raw payment/item join reports joined rows and distinct source keys. Orders
 with several rows on both sides demonstrate the multiplication risk.
@@ -188,7 +188,7 @@ with several rows on both sides demonstrate the multiplication risk.
 - **Alternative/trade-off:** For sql-56 Exercise 3, the chosen form is justified by this lesson-specific rationale: The raw payment/item join reports joined rows and distinct source keys. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 4 — Attribute at order grain
+## Exercise 4: Attribute at order grain
 
 Payment policy reduces methods to one order-level label; line revenue also
 reduces to one order row. The windowed grand total reconciles attribution.
@@ -203,7 +203,7 @@ reduces to one order row. The windowed grand total reconciles attribution.
 - **Alternative/trade-off:** For sql-56 Exercise 4, the chosen form is justified by this lesson-specific rationale: Payment policy reduces methods to one order-level label; line revenue also reduces to one order row. Evaluate another form against the concrete expected result (one row per `payment_id`) and the verification above.
 - **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
 
-## Exercise 5 — Match percentile grain
+## Exercise 5: Match percentile grain
 
 `category_order` emits one observation per category/order before calculating
 P50. A line-item percentile would answer a different question.
@@ -218,7 +218,7 @@ P50. A line-item percentile would answer a different question.
 - **Alternative/trade-off:** For sql-56 Exercise 5, the chosen form is justified by this lesson-specific rationale: `category_order` emits one observation per category/order before calculating P50. Evaluate another form against the concrete expected result (one row per `category`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `p50` for the existing `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 6 — Compare percentile definitions
+## Exercise 6: Compare percentile definitions
 
 Continuous P50 can interpolate; discrete P50 is an observed order value. The
 observation count is retained so even-sized groups can be interpreted.

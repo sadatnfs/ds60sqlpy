@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-39-gradient-boosting-xgboost-and-lightgbm">Day 39 — Gradient Boosting, XGBoost, and LightGBM<a class="heading-anchor" href="#guide--day-39-gradient-boosting-xgboost-and-lightgbm" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-39-gradient-boosting-xgboost-and-lightgbm">Day 39: Gradient Boosting, XGBoost, and LightGBM<a class="heading-anchor" href="#guide--day-39-gradient-boosting-xgboost-and-lightgbm" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-39</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>ml</code> · <strong>Network:</strong> offline</p>
 <p>Gradient boosting builds trees sequentially so each new tree reduces the current model&#x27;s loss. XGBoost and LightGBM add efficient implementations and regularization choices; neither is automatically best for every dataset.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -460,7 +460,7 @@ auc <span class="syntax-operator">=</span> roc_auc_score<span class="syntax-punc
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-sequential-boosting-learning-rate-budgets-and-validation-control">Concept deep dive — sequential boosting, learning-rate budgets, and validation control<a class="heading-anchor" href="#guide--concept-deep-dive-sequential-boosting-learning-rate-budgets-and-validation-control" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-sequential-boosting-learning-rate-budgets-and-validation-control">Concept deep dive: sequential boosting, learning-rate budgets, and validation control<a class="heading-anchor" href="#guide--concept-deep-dive-sequential-boosting-learning-rate-budgets-and-validation-control" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Boosting builds an additive model one weak learner at a time. Each new learner is chosen to reduce the current loss, so later trees focus on mistakes left by earlier trees. The learning rate shrinks each tree&#x27;s contribution; the estimator count controls how many correction steps are available.</p>
 <p>XGBoost and LightGBM implement optimized, regularized variants with different tree-growth and histogram strategies. Backend names do not replace experiment design: use the same split, feature contract, metric, compute budget, and early-stopping boundary when comparing them.</p>
@@ -471,7 +471,7 @@ auc <span class="syntax-operator">=</span> roc_auc_score<span class="syntax-punc
 <li><strong>validation/early stopping:</strong> uses a training-external validation boundary to choose round count; the final test remains untouched.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-watch-staged-predictions-reduce-residual-error">Focused example A — watch staged predictions reduce residual error<a class="heading-anchor" href="#guide--focused-example-a-watch-staged-predictions-reduce-residual-error" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-watch-staged-predictions-reduce-residual-error">Focused example A: watch staged predictions reduce residual error<a class="heading-anchor" href="#guide--focused-example-a-watch-staged-predictions-reduce-residual-error" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> GradientBoostingRegressor
@@ -490,7 +490,7 @@ staged_mse <span class="syntax-operator">=</span> <span class="syntax-punctuatio
 <span class="syntax-keyword">assert</span> staged_mse<span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&lt;</span> staged_mse<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected observation:</strong> Training loss falls as additive correction stages are added; this alone does not prove validation improvement.</p>
 <p><strong>Assumption to name:</strong> The squared-error loss and shallow trees are suitable for this smooth synthetic relationship.</p>
-<h5 id="guide--focused-example-b-compare-two-learning-rate-and-round-count-budgets">Focused example B — compare two learning-rate and round-count budgets<a class="heading-anchor" href="#guide--focused-example-b-compare-two-learning-rate-and-round-count-budgets" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-compare-two-learning-rate-and-round-count-budgets">Focused example B: compare two learning-rate and round-count budgets<a class="heading-anchor" href="#guide--focused-example-b-compare-two-learning-rate-and-round-count-budgets" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
 <span class="syntax-keyword">from</span> sklearn.ensemble <span class="syntax-keyword">import</span> GradientBoostingClassifier
@@ -550,15 +550,15 @@ X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punc
 <ol>
 <li>Tune <code>learning_rate</code> and <code>n_estimators</code> with a simple loop.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.</p>
+<p><strong>Verify:</strong> Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.</p>
 <ol>
 <li>Compare XGBoost with LightGBM if the <code>ml</code> dependency group is installed.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.</p>
+<p><strong>Verify:</strong> Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>Use a small grid, hold <code>max_depth</code> constant, and evaluate all combinations with identical folds or an explicit validation set. Record runtime too.</li>
-<li>Match the split, metric, approximate capacity, and random seed. For LightGBM, <code>num_leaves</code> plays a related—but not identical—complexity role to depth.</li>
+<li>Match the split, metric, approximate capacity, and random seed. For LightGBM, <code>num_leaves</code> plays a related, but not identical, complexity role to depth.</li>
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Control boosting capacity with honest validation, early stopping, and reproducible optional backends. Ranking, calibration, and runtime are separate outcomes.</p>
@@ -566,19 +566,19 @@ X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punc
 <ol>
 <li><strong>Early-stopping design:</strong> Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score. <strong>Progressive hint:</strong> The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.</li>
 </ol>
-<p><strong>Verify:</strong> Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.</p>
+<p><strong>Verify:</strong> Early-stopping design; record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.</p>
 <ol>
 <li><strong>Calibration check:</strong> Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident. <strong>Progressive hint:</strong> AUC depends on ordering; log loss and calibration depend on the numeric probabilities. Use a separate calibration boundary.</li>
 </ol>
-<p><strong>Verify:</strong> Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.</p>
+<p><strong>Verify:</strong> Calibration check; print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.</p>
 <ol>
 <li><strong>Portable backend contract:</strong> Design a comparison helper that uses scikit-learn&#x27;s HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly. <strong>Progressive hint:</strong> Detect availability with importlib, keep the baseline unconditional, and never convert a missing optional package into a silent pass.</li>
 </ol>
-<p><strong>Verify:</strong> Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.</p>
+<p><strong>Verify:</strong> Portable backend contract; return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.</p>
 <ol>
 <li><strong>Overfitting diagnosis:</strong> Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising. <strong>Progressive hint:</strong> The iteration at minimum validation loss is the candidate stopping point. Also test depth, minimum leaf support, subsampling, and learning rate.</li>
 </ol>
-<p><strong>Verify:</strong> Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.</p>
+<p><strong>Verify:</strong> Overfitting diagnosis; save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -625,10 +625,10 @@ X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punc
 <ul>
 <li>Work in the <a href="python-39.html#learner">Day 39 learner notebook</a>.</li>
 <li>Then review the <a href="python-39.html#solution-1">Day 39 solution</a>.</li>
-<li>Continue to <a href="python-40.html#guide">Day 40 — SearchCV</a>.</li>
+<li>Continue to <a href="python-40.html#guide">Day 40; SearchCV</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-39` — Day 39 — Gradient Boosting, XGBoost, and LightGBM.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -880,7 +880,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-39-solutions-gradient-boosting-sklearn-xgboost-lightgbm">Day 39 — Solutions: Gradient Boosting (sklearn, XGBoost, LightGBM)<a class="heading-anchor" href="#solution-1--day-39-solutions-gradient-boosting-sklearn-xgboost-lightgbm" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-39-solutions-gradient-boosting-sklearn-xgboost-lightgbm">Day 39: Solutions: Gradient Boosting (sklearn, XGBoost, LightGBM)<a class="heading-anchor" href="#solution-1--day-39-solutions-gradient-boosting-sklearn-xgboost-lightgbm" aria-label="Link to this section">#</a></h3>
 <p>We train gradient-boosted tree models, tune key hyperparameters, and use early stopping when supported.</p>
 <p>Contents</p>
 <ul>
@@ -909,7 +909,7 @@ X_train<span class="syntax-punctuation">,</span> X_valid<span class="syntax-punc
     random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">,</span>
     stratify<span class="syntax-operator">=</span>y_development<span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — Sweep learning_rate and n_estimators (sklearn)</p>
+<p>Worked reference for Exercise 1; Sweep learning_rate and n_estimators (sklearn)</p>
 <pre class="highlighted-code"><code class="language-python">learning_rates <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0.03</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.05</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.1</span><span class="syntax-punctuation">]</span>
 n_estimators_grid <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-number">250</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">]</span>
 cv <span class="syntax-operator">=</span> StratifiedKFold<span class="syntax-punctuation">(</span>n_splits<span class="syntax-operator">=</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> shuffle<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> random_state<span class="syntax-operator">=</span><span class="syntax-number">42</span><span class="syntax-punctuation">)</span>
@@ -974,7 +974,7 @@ top_settings</code></pre>
         <span class="syntax-string">&quot;</span><span class="syntax-string">xgb_best_iteration</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> xgb_model<span class="syntax-operator">.</span>best_iteration<span class="syntax-punctuation">,</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">xgb_test_auc</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> xgb_auc<span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">}</span></code></pre>
-<p>Worked reference for Exercise 2 — LightGBM comparison (if installed)</p>
+<p>Worked reference for Exercise 2; LightGBM comparison (if installed)</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">try</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">import</span> lightgbm <span class="syntax-keyword">as</span> lgb
 <span class="syntax-keyword">except</span> ImportError<span class="syntax-punctuation">:</span>
@@ -1025,44 +1025,44 @@ top_settings</code></pre>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Tune <code>learning_rate</code> and <code>n_estimators</code> with a simple loop.</p>
 <p><strong>How to reason about it:</strong> Learning rate and estimator count interact: smaller steps usually need more trees. Use identical data boundaries, record runtime, and examine validation curves rather than selecting from training loss.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — sequential boosting, learning-rate budgets, and validation control — evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; sequential boosting, learning-rate budgets, and validation control; evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare XGBoost with LightGBM if the <code>ml</code> dependency group is installed.</p>
 <p><strong>How to reason about it:</strong> XGBoost and LightGBM have related but non-identical parameters and tree growth strategies. Match the split, metric, seed, and approximate capacity; label the comparison optional when dependencies are unavailable.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — sequential boosting, learning-rate budgets, and validation control — first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.</p>
-<h5 id="solution-1--exercise-3-early-stopping-design">Exercise 3 — Early-stopping design<a class="heading-anchor" href="#solution-1--exercise-3-early-stopping-design" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; sequential boosting, learning-rate budgets, and validation control; first print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.</p>
+<h5 id="solution-1--exercise-3-early-stopping-design">Exercise 3: Early-stopping design<a class="heading-anchor" href="#solution-1--exercise-3-early-stopping-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.</p>
 <p><strong>Reasoning before implementation:</strong> The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.</p>
 <p>Fit on the training partition, monitor validation loss, retain the best iteration, and evaluate that frozen procedure once on the test partition. Record the best iteration because it is part of the fitted artifact.</p>
 <p>For limited data, perform early stopping inside outer validation folds or use a fixed iteration count selected during development. Calling the test set “eval_set” does not change its statistical role.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Early-stopping design — record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.</p>
-<h5 id="solution-1--exercise-4-calibration-check">Exercise 4 — Calibration check<a class="heading-anchor" href="#solution-1--exercise-4-calibration-check" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Early-stopping design; record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.</p>
+<h5 id="solution-1--exercise-4-calibration-check">Exercise 4: Calibration check<a class="heading-anchor" href="#solution-1--exercise-4-calibration-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare ROC AUC, log loss, and a reliability diagram for a boosting classifier. Construct an example where ranking is good but probability estimates are overconfident.</p>
 <p><strong>Reasoning before implementation:</strong> AUC depends on ordering; log loss and calibration depend on the numeric probabilities. Use a separate calibration boundary.</p>
 <p>A monotonic transformation of scores can preserve ranking and therefore AUC while making probabilities badly calibrated. Plot predicted-probability bins against observed event rates and include bin support.</p>
 <p>If calibration is needed, wrap the selected estimator with <code>CalibratedClassifierCV</code> using folds or a held-out calibration set. Evaluate the calibrated result on data used for neither fitting nor calibration.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Calibration check — print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.</p>
-<h5 id="solution-1--exercise-5-portable-backend-contract">Exercise 5 — Portable backend contract<a class="heading-anchor" href="#solution-1--exercise-5-portable-backend-contract" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Calibration check; print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.</p>
+<h5 id="solution-1--exercise-5-portable-backend-contract">Exercise 5: Portable backend contract<a class="heading-anchor" href="#solution-1--exercise-5-portable-backend-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a comparison helper that uses scikit-learn&#x27;s HistGradientBoostingClassifier offline and adds XGBoost/LightGBM only when installed. It must report skipped backends explicitly.</p>
 <p><strong>Reasoning before implementation:</strong> Detect availability with importlib, keep the baseline unconditional, and never convert a missing optional package into a silent pass.</p>
 <p>Return structured records such as <code>{name, status, metric, seconds, version}</code>. The scikit-learn baseline should always run with course dependencies. Optional imports belong inside their branches, and an unavailable library should produce <code>status=&quot;skipped&quot;</code> plus the dependency group needed.</p>
 <p>This makes the notebook reproducible on a USB/offline machine without pretending all implementations ran. Match random seeds and evaluation data, but document parameters that do not map exactly between libraries.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Portable backend contract — return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.</p>
-<h5 id="solution-1--exercise-6-overfitting-diagnosis">Exercise 6 — Overfitting diagnosis<a class="heading-anchor" href="#solution-1--exercise-6-overfitting-diagnosis" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Portable backend contract; return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.</p>
+<h5 id="solution-1--exercise-6-overfitting-diagnosis">Exercise 6: Overfitting diagnosis<a class="heading-anchor" href="#solution-1--exercise-6-overfitting-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot training and validation loss by boosting iteration and diagnose a curve where training loss falls continuously while validation loss starts rising.</p>
 <p><strong>Reasoning before implementation:</strong> The iteration at minimum validation loss is the candidate stopping point. Also test depth, minimum leaf support, subsampling, and learning rate.</p>
 <p>The diverging curves indicate increasing capacity is fitting training-specific patterns. Early stopping is one response; regularizing tree depth/leaves, adding row or feature subsampling, or collecting better data may also help.</p>
 <p>Do not inspect the final test curve iteration by iteration. That would turn the test set into another tuning set. Preserve both curves and selected iteration as training evidence.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Overfitting diagnosis — save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.</p></div>
+<p><strong>Verify:</strong> Overfitting diagnosis; save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.</p></div>
       </section>
 
 
@@ -1273,16 +1273,16 @@ top_settings</code></pre>
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-39` — Day 39 — Gradient Boosting, XGBoost, and LightGBM.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-39` — Day 39 — Gradient Boosting, XGBoost, and LightGBM.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize sequential boosting, learning-rate budgets, and validation control. Use exactly these maintained learner materials:
@@ -1310,7 +1310,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1421,18 +1421,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

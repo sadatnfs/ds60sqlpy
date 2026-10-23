@@ -1,4 +1,4 @@
-# Day 16 — NumPy Arrays, Vectorization, and Broadcasting
+# Day 16: NumPy Arrays, Vectorization, and Broadcasting
 
 **Level:** Intermediate
 
@@ -64,12 +64,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 16 — numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting
+**Lesson outcome:** use day 16; numpy arrays, vectorization, and broadcasting to practice NumPy arrays, shapes, dtypes, vectorization, axes, and broadcasting
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ returns one mean per row. In `matrix - column_means`, shapes `(r, c)`
 and `(c,)` align from the right, so the one-dimensional vector is used
 across every row.
 
-### Worked example 1 — Inspect shape before calculating
+### Worked example 1: Inspect shape before calculating
 
 Give each dimension a meaning and compare axis reductions. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -127,7 +127,7 @@ scores = np.array([[8, 6, 10], [4, 9, 8]])
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Center every column through broadcasting
+### Worked example 2: Center every column through broadcasting
 
 A length-three vector applies to the three columns of every row. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -277,11 +277,11 @@ columns have minimum 0 and maximum 1, and copy mutation leaves the source alone.
 
 - [Open the learner notebook](../notebooks/day16_numpy_fundamentals.ipynb)
 - [Check the separate solution](../solutions/day16_numpy_fundamentals/day16_solutions.md)
-- [Next: Day 17 — pandas fundamentals](day17_pandas_intro.md)
+- [Next: Day 17; pandas fundamentals](day17_pandas_intro.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

@@ -164,6 +164,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="python-curriculum-guidance">Python curriculum guidance<a class="heading-anchor" href="#python-curriculum-guidance" aria-label="Link to this section">#</a></h2>
 <p>This file extends the root <a href="../AGENTS.md.html">AGENTS.md</a> for <code>python/</code>.</p>
 <h3 id="runtime-and-commands">Runtime and commands<a class="heading-anchor" href="#runtime-and-commands" aria-label="Link to this section">#</a></h3>
+<p>Lead learner instructions with the Docker classroom. The host interpreter commands below apply to optional native development and notebook workflows. Windows Docker instructions use WSL 2 rather than native PowerShell.</p>
 <ul>
 <li>Target Python 3.11–3.12; use Python 3.12 for canonical examples and CI.</li>
 <li>Run from the repository root.</li>
@@ -177,7 +178,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Prefer small, purposeful cells. Introduce one idea at a time.</li>
 <li>Historical Day 1–60 learner notebooks must contain at least eight purposeful cells, including at least three runnable code cells and enough explanatory Markdown to teach the lesson without an agent. These are minimums, not a reason to split prose or add filler.</li>
 <li>A lesson must contain objectives, a mental model and vocabulary, syntax anatomy, at least two runnable examples with predicted and observed behavior, guided and independent exercises, explicit expected/verify lines, common-error diagnosis, self-checks, and next steps.</li>
-<li>End every companion guide with the copy-ready, lesson-specific <code>## Ask Codex about this lesson</code> contract defined in <code>docs/content-authoring.md</code>. The material before it must remain self-sufficient.</li>
+<li>End every companion guide with the copy-ready, lesson-specific <code>## Ask an AI tutor about this lesson</code> contract defined in <code>docs/content-authoring.md</code>. The material before it must remain self-sufficient.</li>
 <li>Each cataloged lesson must meet its immutable <code>curriculum/practice_baseline.json</code> target on the learner notebook, guide, and explanatory solution. Count distinct numbered prompts, not hint or answer-step inflation.</li>
 <li>Keep full worked answers in <code>solutions/</code>, not directly below learner exercises.</li>
 <li>Clear incidental execution outputs before committing unless an output is intentionally instructional.</li>

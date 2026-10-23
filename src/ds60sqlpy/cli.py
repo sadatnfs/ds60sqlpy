@@ -1,4 +1,4 @@
-"""Command-line interface for learners, maintainers, and Codex."""
+"""Command-line interface for learners, maintainers, and coding agents."""
 
 from __future__ import annotations
 

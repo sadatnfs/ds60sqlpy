@@ -333,7 +333,7 @@ Close the manifests and explain: which controller replaces a deleted Pod, which 
 
 Score 0,1 or 2 for prediction; explicit target/ownership; desired-state/backend/client evidence; fault diagnosis; and scoped cleanup/transfer. Readiness for the next lesson needs at least 8/10, every applicable live check passing, no ambient/admin target use and an explanation that distinguishes an all-unready fixture from a rolling update. If only transcripts were studied, record a reasoning result, not live runtime acceptance. The owned kind profile, HTTP/client image, broker, token lifecycle and OS/architecture matrix are all pending implementation/qualification here. No actual Kubernetes command is claimed executed by this design.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach planned k8s-008, Running, ready and reachable are different.

@@ -1,4 +1,4 @@
-# Day 03 — Solutions: Control Flow, Truthiness, and Exceptions
+# Day 03: Solutions: Control Flow, Truthiness, and Exceptions
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ every exception hides programming bugs. `else` runs after a successful
 For this lesson's **branch selection, loop decisions, and narrow exception boundaries** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Print FizzBuzz for every integer from 1 through 30 inclusive. **Rules:** multiples of both 3 and 5 print `FizzBuzz`; only 3 prints `Fizz`; only 5 prints `Buzz`; all others print the number. **Constraints:** use one ordered `if`/`elif`/`else` chain. **Verify:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
 
@@ -63,7 +63,7 @@ first true condition.
 
 **Verification evidence:** capture the output lines, assert there are exactly 30, and assert positions 3, 5, 15, 16, and 30 equal `Fizz`, `Buzz`, `FizzBuzz`, `16`, and `FizzBuzz`.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Write `parse_age(text)` that returns an integer for valid integer text and returns `None` only when conversion raises `ValueError`. **Constraints:** put only `int(text)` inside `try`; do not use a bare `except`. **Verify:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
 
@@ -89,7 +89,7 @@ mislabeled as invalid user input.
 
 **Verification evidence:** test `'42'`, `' 7 '`, and `'seven'`, then explain which path uses `else`.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Define `NegativeMeasurementError` as a subclass of `ValueError`, then write `validate_measurement(value)` that returns non-negative values unchanged and raises your exception for `-0.1`. **Verify:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
 
@@ -117,9 +117,9 @@ else:
 
 **Verification evidence:** show one normal return and catch the exact custom type in a small demonstration; do not catch it inside the validator.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict which branch handles 0, 9, and 12 when checks are ordered as `x % 2 == 0`, `x % 3 == 0`, then both. Explain the bug. **Progressive hint:** Only the first true branch runs; test the most specific rule first. **Verify:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
 
@@ -127,7 +127,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Record the branch selected for `0`, `9`, and `12` before/after reordering; confirm the repaired `12` reaches the combined rule.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace `try/except/else/finally` for a successful integer parse and for invalid text. Which clauses run in each path? **Progressive hint:** `else` follows success; `finally` runs in both cases. **Verify:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
 
@@ -135,7 +135,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Use a four-column trace for `try`, `except`, `else`, and `finally` on valid/invalid text; each clause's executed flag must match the language rules.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement `classify_score(score)` returning fail/pass/distinction and reject scores outside 0–100 with `ValueError`. **Progressive hint:** Validate the domain before choosing a result branch. **Verify:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
 
@@ -143,7 +143,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Assert representative scores return `fail`, `pass`, and `distinction`, then assert `-1` and `101` each raise `ValueError`.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Replace a bare `except:` around parsing and calculation with the narrowest useful handler, while allowing programming errors to surface. **Progressive hint:** Keep only the conversion inside the protected block. **Verify:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
 
@@ -151,7 +151,7 @@ else:
 
 **Evidence to locate in the grouped implementation:** Show invalid integer text is handled while a deliberate unrelated `TypeError` still reaches the test; keep only conversion inside `try`.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
 **Learner contract:** **Edge case and explanation:** Design `safe_ratio(numerator, denominator)` for a zero denominator. Choose between raising, returning `None`, or a default and justify it. **Progressive hint:** A reusable library function usually should not invent a numeric result. **Verify:** Test a nonzero ratio and a zero denominator; assert the chosen zero policy exactly and explain why no fabricated numeric answer leaks through.
 
@@ -163,13 +163,13 @@ else:
 
 Make branch order and exception boundaries deliberate. Catch only the failure that the current layer can interpret or repair.
 
-### Shared implementation for Exercises 4–5 — Branch and exception traces
+### Shared implementation for Exercises 4–5: Branch and exception traces
 
 The combined-divisibility check must come first; otherwise values such as 12
 are consumed by the even branch. On successful parsing, `else` and `finally`
 run. On `ValueError`, `except` and `finally` run.
 
-### Shared implementation for Exercises 6–8 — Explicit contracts
+### Shared implementation for Exercises 6–8: Explicit contracts
 
 ```python
 def classify_score(score: float) -> str:

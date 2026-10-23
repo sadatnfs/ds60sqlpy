@@ -1,4 +1,4 @@
-# Day 03 solutions — INNER JOINs: Relational Linking and Predicate Placement
+# Day 03 solutions: INNER JOINs: Relational Linking and Predicate Placement
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List orders with customer names and countries.
 
@@ -110,7 +110,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-03 Exercise 1, the chosen form is justified by this lesson-specific rationale: Join the order foreign key to the customer primary key and qualify every selected column. Evaluate another form against the concrete expected result (One row per order) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Calculate each order item's net line revenue with the product name and category.
 
@@ -153,7 +153,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-03 Exercise 2, the chosen form is justified by this lesson-specific rationale: Remain at one row per order item; do not aggregate until the desired grain changes. Evaluate another form against the concrete expected result (One row per order item) and the verification above.
 - **Edge case:** Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** List payments with order status and customer name.
 
@@ -198,7 +198,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-03 Exercise 3, the chosen form is justified by this lesson-specific rationale: Follow payments → orders → customers using each declared foreign key. Evaluate another form against the concrete expected result (One row per payment) and the verification above.
 - **Edge case:** Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Predict the row count from joining one order with three items and two payments directly, then write a safe per-order reconciliation.
 
@@ -253,7 +253,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-03 Exercise 4, the chosen form is justified by this lesson-specific rationale: Aggregate items and payments separately to one row per order before joining those aggregates. Evaluate another form against the concrete expected result (One row per order; no six-row multiplication) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** Repair a customer/order join whose `ON` clause compares unrelated IDs.
 
@@ -289,7 +289,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-03 Exercise 5, the chosen form is justified by this lesson-specific rationale: Join `orders.customer_id` to `customers.customer_id`; verify output cannot exceed the order count for an inner many-to-one join. Evaluate another form against the concrete expected result (Exactly one customer match per order) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Calculate net line revenue by customer country without double-counting order totals.
 

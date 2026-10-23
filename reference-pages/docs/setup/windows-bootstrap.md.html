@@ -208,7 +208,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">&amp;</span> $CoursePython scripts<span class="syntax-punctuation">\</span>course<span class="syntax-punctuation">.</span>py doctor
 psql <span class="syntax-punctuation">-</span>-version
 <span class="syntax-punctuation">&amp;</span> $CoursePython -m jupyter lab</code></pre>
-<p>In VS Code, select the interpreter path printed by the bootstrapper—normally <code>.venv\Scripts\python.exe</code>, or <code>.venv\python.exe</code> for the conda-prefix fallback—and <code>Python (ds60sqlpy)</code> as the notebook kernel.</p>
+<p>In VS Code, select the interpreter path printed by the bootstrapper, normally <code>.venv\Scripts\python.exe</code>, or <code>.venv\python.exe</code> for the conda-prefix fallback, and <code>Python (ds60sqlpy)</code> as the notebook kernel.</p>
 <p>The <code>psql</code> command above works in the same PowerShell process used to invoke the script. In a new terminal it requires <code>-PersistUserPath</code> or the full <code>psql.exe</code> path printed by the bootstrapper.</p>
 <h3 id="install-every-optional-course-profile">Install every optional course profile<a class="heading-anchor" href="#install-every-optional-course-profile" aria-label="Link to this section">#</a></h3>
 <p>The advanced profile can be large and may take a long time because it includes deep-learning, NLP, geospatial, production, and specialized ML packages:</p>

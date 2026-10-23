@@ -1,4 +1,4 @@
-# Day 18 — Solutions: Pandas I/O and Cleaning
+# Day 18: Solutions: Pandas I/O and Cleaning
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -32,9 +32,9 @@ data should not keep changing it.
 For this lesson's **pandas input boundaries, explicit cleaning, and reproducible output** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–3 — Worked answers
+## Exercises 1–3: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything. **Expected behavior:** produce a compact profile, not a full data dump. **Constraint:** use repository-relative `Path` objects and no network source. **Verify:** save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.
 
@@ -91,7 +91,7 @@ printing all source rows.
 
 **Verification evidence:** save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Implement `clean_frame(raw)` that trims selected text, converts documented numeric/date fields, handles missing values by written policy, resolves duplicates by a stated key, and returns a new DataFrame. **Constraints:** do not mutate `raw` or use broad `dropna`; record conversion failures. **Verify:** assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract.
 
@@ -144,7 +144,7 @@ assert not once.duplicated(["name", "event_time"]).any()
 
 **Verification evidence:** assert raw preservation and `clean_frame(clean_frame(raw)).equals(clean_frame(raw))` for this contract.
 
-### Exercise 3 — worked answer
+### Exercise 3: worked answer
 
 **Learner contract:** Save only the cleaned frame under an ignored learner artifact directory, then read it back. **Expected behavior:** reloaded row count, columns, and key totals match the in-memory clean frame. **Constraints:** create parent folders with `Path.mkdir`, avoid absolute paths, and do not overwrite raw input. **Verify:** Read the saved file back and assert row count, ordered columns, dtypes/normalization policy, and selected key totals match the cleaned in-memory frame.
 
@@ -173,9 +173,9 @@ round-trip.
 
 **Verification evidence:** Read the saved file back and assert row count, ordered columns, dtypes/normalization policy, and selected key totals match the cleaned in-memory frame.
 
-## Exercises 4–8 — Expanded mastery answers
+## Exercises 4–8: Expanded mastery answers
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Prediction:** Predict the results of `pd.to_datetime(..., errors='coerce', utc=True)` for valid text, invalid text, and a timestamp with an offset. **Progressive hint:** Invalid text becomes `NaT`; valid values normalize to UTC. **Verify:** Create three input rows and assert valid/offset timestamps normalize to the expected UTC instants while invalid text becomes `NaT` and is counted.
 
@@ -183,7 +183,7 @@ round-trip.
 
 **Evidence to locate in the grouped implementation:** Create three input rows and assert valid/offset timestamps normalize to the expected UTC instants while invalid text becomes `NaT` and is counted.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Tracing:** Trace conversion from object strings to pandas nullable `Int64`, including an empty value. **Progressive hint:** Nullable integer dtype can represent `<NA>` without becoming float. **Verify:** Record value and dtype before/after conversion; assert numeric strings become integers, empty input becomes `<NA>`, and dtype is nullable `Int64`.
 
@@ -191,7 +191,7 @@ round-trip.
 
 **Evidence to locate in the grouped implementation:** Record value and dtype before/after conversion; assert numeric strings become integers, empty input becomes `<NA>`, and dtype is nullable `Int64`.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Implementation:** Implement a cleaner that normalizes column names, parses an event time, converts quantity, and returns a copy plus a quality summary. **Progressive hint:** Record invalid counts before dropping or imputing anything. **Verify:** Assert the cleaner leaves raw unchanged, returns expected normalized columns/dtypes, and reports exact invalid timestamp/quantity counts.
 
@@ -199,7 +199,7 @@ round-trip.
 
 **Evidence to locate in the grouped implementation:** Assert the cleaner leaves raw unchanged, returns expected normalized columns/dtypes, and reports exact invalid timestamp/quantity counts.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Debugging:** Repair an in-place operation performed on a chained selection. **Progressive hint:** Use assignment on the owned copy and avoid `inplace=True` on a temporary object. **Verify:** Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation.
 
@@ -207,11 +207,11 @@ round-trip.
 
 **Evidence to locate in the grouped implementation:** Reproduce the warning/failure, then assert explicit owned-copy assignment changes only the intended frame and uses no `inplace` temporary mutation.
 
-### Exercise 8 — answer contract
+### Exercise 8: answer contract
 
-**Learner contract:** **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing—and justify. **Progressive hint:** A statistical fallback cannot be computed from zero observations. **Verify:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
+**Learner contract:** **Edge case and explanation:** Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing, and justify. **Progressive hint:** A statistical fallback cannot be computed from zero observations. **Verify:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
 
-**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing—and justify. Progressive hint: A statistical fallback cannot be computed from zero observations. Values below, at, and above the named boundary must produce the evidence Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available. Those cases show how pandas input boundaries, explicit cleaning, and reproducible output behaves at its edge.
+**Reasoning:** Make this boundary unambiguous in code: Edge case and explanation: Choose behavior for an all-missing numeric column whose median is also missing. Reject, use a domain default, or preserve missing, and justify. Progressive hint: A statistical fallback cannot be computed from zero observations. Values below, at, and above the named boundary must produce the evidence Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available. Those cases show how pandas input boundaries, explicit cleaning, and reproducible output behaves at its edge.
 
 **Evidence to locate in the grouped implementation:** Run an all-missing fixture and assert the exact chosen reject/default/preserve policy; document why no sample median was available.
 
@@ -219,7 +219,7 @@ round-trip.
 
 Profile before cleaning, preserve raw input, and make every conversion, imputation, and rejection rule observable and testable.
 
-### Shared implementation for Exercises 4–5 — Explicit conversions
+### Shared implementation for Exercises 4–5: Explicit conversions
 
 ```python
 import pandas as pd
@@ -236,7 +236,7 @@ quantities = pd.to_numeric(pd.Series(["2", "", "7"]), errors="coerce").astype("I
 assert quantities.astype("string").tolist() == ["2", pd.NA, "7"]
 ```
 
-### Shared implementation for Exercises 6–8 — Cleaner plus evidence
+### Shared implementation for Exercises 6–8: Cleaner plus evidence
 
 ```python
 def clean_events(source: pd.DataFrame) -> tuple[pd.DataFrame, dict[str, int]]:

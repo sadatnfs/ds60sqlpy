@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-33-linear-algebra-and-matrices">Day 33 — Linear Algebra and Matrices<a class="heading-anchor" href="#guide--day-33-linear-algebra-and-matrices" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-33-linear-algebra-and-matrices">Day 33: Linear Algebra and Matrices<a class="heading-anchor" href="#guide--day-33-linear-algebra-and-matrices" aria-label="Link to this section">#</a></h3>
 <p><strong>Lesson ID:</strong> <code>python-33</code> · <strong>Level:</strong> intermediate · <strong>Dependencies:</strong> <code>data</code> · <strong>Network:</strong> offline</p>
 <p>This lesson connects NumPy operations with the geometry underneath linear models. The goal is practical intuition and reliable computation, not a complete linear-algebra course.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -453,7 +453,7 @@ w_hat<span class="syntax-punctuation">,</span> residuals<span class="syntax-punc
 <p>macOS/Linux:</p>
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
 <p>If the Windows environment uses the documented conda-prefix fallback, use <code>.\.venv\python.exe</code> in place of <code>.\.venv\Scripts\python.exe</code>.</p>
-<h4 id="guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares">Concept deep dive — matrix shapes, linear transformations, rank, and stable least squares<a class="heading-anchor" href="#guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares" aria-label="Link to this section">#</a></h4>
+<h4 id="guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares">Concept deep dive: matrix shapes, linear transformations, rank, and stable least squares<a class="heading-anchor" href="#guide--concept-deep-dive-matrix-shapes-linear-transformations-rank-and-stable-least-squares" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A vector or matrix is both stored numbers and a transformation with a shape contract. For <code>A @ B</code>, the inner dimensions must agree; the outer dimensions determine the result. In a design matrix, rows represent observations and columns represent features. Coefficients map feature space to predictions.</p>
 <p>Least squares chooses coefficients that minimize squared residuals. Full column rank gives a unique coefficient solution, but near collinearity can make that solution numerically sensitive. Prediction may remain stable even while individual coefficients swing, which is why rank and condition number belong in the diagnostic story.</p>
@@ -464,7 +464,7 @@ w_hat<span class="syntax-punctuation">,</span> residuals<span class="syntax-punc
 <li><strong><code>np.linalg.lstsq(X, y, rcond=None)</code>:</strong> solves least squares directly and reports rank without explicitly forming an unstable inverse.</li>
 </ul>
 <p>Read an API call from the inside out: identify the data entering the operation, the state learned (if any), the value returned, and the evidence that would make the result trustworthy. A method returning without an exception proves only that the syntax and immediate runtime path worked.</p>
-<h5 id="guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand">Focused example A — trace a matrix product by shape and by hand<a class="heading-anchor" href="#guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand">Focused example A: trace a matrix product by shape and by hand<a class="heading-anchor" href="#guide--focused-example-a-trace-a-matrix-product-by-shape-and-by-hand" aria-label="Link to this section">#</a></h5>
 <p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
@@ -476,7 +476,7 @@ predictions <span class="syntax-operator">=</span> observations <span class="syn
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>array_equal<span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">8.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">26.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">44.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> A <code>(3, 2)</code> matrix multiplied by a <code>(2,)</code> vector returns one prediction for each of three rows.</p>
 <p><strong>Assumption to name:</strong> Columns of the matrix and positions in the coefficient vector use the same feature order.</p>
-<h5 id="guide--focused-example-b-observe-coefficient-instability-under-collinearity">Focused example B — observe coefficient instability under collinearity<a class="heading-anchor" href="#guide--focused-example-b-observe-coefficient-instability-under-collinearity" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--focused-example-b-observe-coefficient-instability-under-collinearity">Focused example B: observe coefficient instability under collinearity<a class="heading-anchor" href="#guide--focused-example-b-observe-coefficient-instability-under-collinearity" aria-label="Link to this section">#</a></h5>
 <p>This second example changes one important condition. Compare it with Example A instead of reading it as unrelated syntax.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
@@ -531,15 +531,15 @@ max_prediction_error <span class="syntax-operator">=</span> np<span class="synta
 <ol>
 <li>Add an intercept column of ones and recompute the coefficients.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
+<p><strong>Verify:</strong> Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
 <ol>
 <li>Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
+<p><strong>Verify:</strong> Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
 <ol>
 <li>Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</li>
 </ol>
-<p><strong>Verify:</strong> Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
+<p><strong>Verify:</strong> Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
 <h5 id="guide--progressive-hints">Progressive hints<a class="heading-anchor" href="#guide--progressive-hints" aria-label="Link to this section">#</a></h5>
 <ol>
 <li>The augmented matrix has one more column. Decide whether the first or last coefficient will represent the intercept before inspecting the result.</li>
@@ -552,15 +552,15 @@ max_prediction_error <span class="syntax-operator">=</span> np<span class="synta
 <ol>
 <li><strong>Shape tracing:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1). <strong>Progressive hint:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</li>
 </ol>
-<p><strong>Verify:</strong> Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
+<p><strong>Verify:</strong> Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
 <ol>
 <li><strong>Rank-deficiency debugging:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank. <strong>Progressive hint:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</li>
 </ol>
-<p><strong>Verify:</strong> Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
+<p><strong>Verify:</strong> Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
 <ol>
 <li><strong>Robust vector operation:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector. <strong>Progressive hint:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</li>
 </ol>
-<p><strong>Verify:</strong> Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>
+<p><strong>Verify:</strong> Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p>
 <p>Before opening the reference solution, explain the relevant assumption, failure mode, and validation check for every answer.</p>
 <h4 id="guide--self-check">Self-check<a class="heading-anchor" href="#guide--self-check" aria-label="Link to this section">#</a></h4>
 <ul>
@@ -607,10 +607,10 @@ max_prediction_error <span class="syntax-operator">=</span> np<span class="synta
 <ul>
 <li>Work in the <a href="python-33.html#learner">Day 33 learner notebook</a>.</li>
 <li>Compare only after attempting the exercises: <a href="python-33.html#solution-1">Day 33 solution</a>.</li>
-<li>Continue to <a href="python-34.html#guide">Day 34 — scikit-learn Pipelines</a>.</li>
+<li>Continue to <a href="python-34.html#guide">Day 34; scikit-learn Pipelines</a>.</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into Codex while the repository root is open:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -850,7 +850,7 @@ merely ran is not evidence of mastery.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition">Day 33 — Solutions: Linear Algebra &amp; Matrices for ML Intuition<a class="heading-anchor" href="#solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition">Day 33: Solutions: Linear Algebra &amp; Matrices for ML Intuition<a class="heading-anchor" href="#solution-1--day-33-solutions-linear-algebra-matrices-for-ml-intuition" aria-label="Link to this section">#</a></h3>
 <p>We implement the normal equation (closed-form least squares), add an intercept, and compare to scikit-learn. We also discuss numerical stability and when to prefer iterative methods.</p>
 <p>Contents</p>
 <ul>
@@ -867,7 +867,7 @@ n<span class="syntax-punctuation">,</span> d <span class="syntax-operator">=</sp
 X <span class="syntax-operator">=</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>size<span class="syntax-operator">=</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> d<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 true_w <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.5</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 y <span class="syntax-operator">=</span> X <span class="syntax-operator">@</span> true_w <span class="syntax-operator">+</span> rng<span class="syntax-operator">.</span>normal<span class="syntax-punctuation">(</span>scale<span class="syntax-operator">=</span><span class="syntax-number">0.5</span><span class="syntax-punctuation">,</span> size<span class="syntax-operator">=</span>n<span class="syntax-punctuation">)</span></code></pre>
-<p>Worked reference for Exercise 1 — Add intercept and recompute w</p>
+<p>Worked reference for Exercise 1; Add intercept and recompute w</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Add a column of ones for intercept</span>
 X1 <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>c_<span class="syntax-punctuation">[</span>np<span class="syntax-operator">.</span>ones<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> X<span class="syntax-punctuation">]</span>   <span class="syntax-comment"># shape (n, d+1)</span>
 
@@ -880,7 +880,7 @@ w_hat</code></pre>
 <li>pinv (Moore–Penrose) is numerically safer than explicit inverse</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 2 — Compare to sklearn LinearRegression</p>
+<p>Worked reference for Exercise 2; Compare to sklearn LinearRegression</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LinearRegression
 
 lr <span class="syntax-operator">=</span> LinearRegression<span class="syntax-punctuation">(</span>fit_intercept<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
@@ -896,7 +896,7 @@ w0<span class="syntax-punctuation">,</span> w</code></pre>
 <li>Expect close agreement between (w = 0, w) and the closed-form solution above</li>
 </ul>
 <hr>
-<p>Worked reference for Exercise 3 — Stability and iterative methods</p>
+<p>Worked reference for Exercise 3; Stability and iterative methods</p>
 <ul>
 <li>Normal equation inverts <math xmlns="http://www.w3.org/1998/Math/MathML" display="inline"><semantics><mrow><msup><mi>X</mi><mrow><mi mathvariant="sans-serif">T</mi></mrow></msup><mi>X</mi></mrow><annotation encoding="application/x-tex">X^{\mathsf T}X</annotation></semantics></math> (or solves a system); if X has multicollinearity or large condition number, numerical errors grow</li>
 <li>Use np.linalg.lstsq or pinv to mitigate; better yet, rely on QR/SVD inside libraries</li>
@@ -924,29 +924,29 @@ w0<span class="syntax-punctuation">,</span> w</code></pre>
 <p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
 <p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
-<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add an intercept column of ones and recompute the coefficients.</p>
 <p><strong>How to reason about it:</strong> Adding a ones column changes X from (rows, features) to (rows, features+1). Decide which coefficient is the intercept and verify predictions by multiplying the augmented matrix by the full coefficient vector.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 1 — matrix shapes, linear transformations, rank, and stable least squares — assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
-<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 1; matrix shapes, linear transformations, rank, and stable least squares; assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.</p>
+<h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare the closed-form result with scikit-learn&#x27;s <code>LinearRegression</code> on the same data.</p>
 <p><strong>How to reason about it:</strong> scikit-learn stores intercept_ separately when fit_intercept=True. Compare both predictions and aligned coefficients on the same inputs; matching rounded coefficients alone can hide a column-order error.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 2 — matrix shapes, linear transformations, rank, and stable least squares — fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
-<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3 — Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 2; matrix shapes, linear transformations, rank, and stable least squares; fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.</p>
+<h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.</p>
 <p><strong>How to reason about it:</strong> The normal equation magnifies numerical problems when columns are nearly dependent and requires a costly inverse. Use condition number as a warning and <code>lstsq</code>/QR/SVD-based solvers as the default.</p>
 <p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
-<p><strong>Verify:</strong> Practice 3 — matrix shapes, linear transformations, rank, and stable least squares — construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
-<h5 id="solution-1--exercise-4-shape-tracing">Exercise 4 — Shape tracing<a class="heading-anchor" href="#solution-1--exercise-4-shape-tracing" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Practice 3; matrix shapes, linear transformations, rank, and stable least squares; construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.</p>
+<h5 id="solution-1--exercise-4-shape-tracing">Exercise 4: Shape tracing<a class="heading-anchor" href="#solution-1--exercise-4-shape-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).</p>
 <p><strong>Reasoning before implementation:</strong> Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.</p>
 <p><code>X.T</code> is <code>(8, 120)</code>, <code>X.T @ X</code> is <code>(8, 8)</code>, <code>X @ beta</code> is <code>(120,)</code>, and <code>(X @ beta) - y</code> is <code>(120,)</code>. With <code>beta</code> shaped <code>(8, 1)</code>, the prediction is <code>(120, 1)</code>. Subtracting a <code>(120,)</code> target from it broadcasts to <code>(120, 120)</code>, a severe bug that can still produce numeric output.</p>
 <p>Use <code>assert prediction.shape == y.shape</code> at the modeling boundary. Reshape deliberately with <code>ravel()</code> only when a one-dimensional target is truly the contract.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Shape tracing — print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
-<h5 id="solution-1--exercise-5-rank-deficiency-debugging">Exercise 5 — Rank-deficiency debugging<a class="heading-anchor" href="#solution-1--exercise-5-rank-deficiency-debugging" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.</p>
+<h5 id="solution-1--exercise-5-rank-deficiency-debugging">Exercise 5: Rank-deficiency debugging<a class="heading-anchor" href="#solution-1--exercise-5-rank-deficiency-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Construct a design matrix whose third column equals the sum of the first two. Compare <code>np.linalg.solve(X.T @ X, X.T @ y)</code> with <code>np.linalg.lstsq(X, y, rcond=None)</code> and interpret the rank.</p>
 <p><strong>Reasoning before implementation:</strong> The dependent column makes X.T @ X singular. <code>lstsq</code> returns a minimum-norm solution plus rank information without forming an inverse.</p>
 <p>An exact linear dependency means multiple coefficient vectors make identical predictions. A direct solve can raise <code>LinAlgError</code> or become unstable, while least squares reports the deficient rank.</p>
@@ -963,8 +963,8 @@ coefficients<span class="syntax-punctuation">,</span> residuals<span class="synt
 <span class="syntax-keyword">assert</span> np<span class="syntax-operator">.</span>allclose<span class="syntax-punctuation">(</span>X <span class="syntax-operator">@</span> coefficients<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The coefficient values are not uniquely identifiable. Remove redundant features, regularize with a documented purpose, or interpret predictions rather than inventing meaning for unstable individual coefficients.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Rank-deficiency debugging — use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
-<h5 id="solution-1--exercise-6-robust-vector-operation">Exercise 6 — Robust vector operation<a class="heading-anchor" href="#solution-1--exercise-6-robust-vector-operation" aria-label="Link to this section">#</a></h5>
+<p><strong>Verify:</strong> Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve&#x27;s singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.</p>
+<h5 id="solution-1--exercise-6-robust-vector-operation">Exercise 6: Robust vector operation<a class="heading-anchor" href="#solution-1--exercise-6-robust-vector-operation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement cosine similarity for two one-dimensional vectors. Validate equal shapes and define behavior for a zero vector.</p>
 <p><strong>Reasoning before implementation:</strong> Compute dot(a,b)/(norm(a)*norm(b)); a zero norm makes the angle undefined, so do not quietly add an epsilon without documenting it.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
@@ -983,7 +983,7 @@ coefficients<span class="syntax-punctuation">,</span> residuals<span class="synt
 <span class="syntax-punctuation">)</span></code></pre>
 <p>Clipping a computed result into <code>[-1, 1]</code> can protect a later <code>arccos</code> from tiny floating-point overshoot, but it must not conceal incorrect shapes or a zero denominator.</p>
 <p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Robust vector operation — assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p></div>
+<p><strong>Verify:</strong> Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.</p></div>
       </section>
 
 
@@ -1110,16 +1110,16 @@ coefficients<span class="syntax-punctuation">,</span> residuals<span class="synt
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through `python-33` — Day 33 — Linear Algebra and Matrices.
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
 Emphasize matrix shapes, linear transformations, rank, and stable least squares. Use exactly these maintained learner materials:
@@ -1147,7 +1147,7 @@ verification evidence from a clean run, answer the retrieval questions,
 and explain how the transfer task changes the assumptions. A cell that
 merely ran is not evidence of mastery.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1258,18 +1258,18 @@ merely ran is not evidence of mastery.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

@@ -1,9 +1,9 @@
-# Day 15 — Phase 1 Project: Multi-Dimensional Revenue Report (Companion Guide)
+# Day 15: Phase 1 Project: Multi-Dimensional Revenue Report (Companion Guide)
 
 ## Level and prerequisites
 
 - **Level:** Foundation (beginner)
-- **Prerequisites:** [Day 14 — numeric types and casting](day14_numeric_and_casting.md)
+- **Prerequisites:** [Day 14; numeric types and casting](day14_numeric_and_casting.md)
   and the complete Day 01–14 foundation sequence
 - **Artifacts:** [learner SQL](../day15_phase1_project.sql) ·
   [solution reasoning](../solutions/day15_solutions.md) ·
@@ -37,7 +37,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-15 — Phase1 Project** and choose
+2. Open **SQL-15; Phase1 Project** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -71,7 +71,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -257,7 +257,7 @@ For every result, write its row grain and expected shape first.
 
 ## Next step
 
-Continue to [Day 16 — window-function fundamentals](day16_window_functions_fundamentals.md).
+Continue to [Day 16; window-function fundamentals](day16_window_functions_fundamentals.md).
 
 ## Deep dive and reference
 
@@ -289,11 +289,11 @@ Current practice map
   Complete all six outputs and document grain, missing-side behavior, UTC
   boundaries, money definitions, and reconciliation evidence.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-15 — Phase1 Project.

@@ -174,7 +174,7 @@ They process the same number of records but may perform different numbers of upd
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-009, Batches, zero_grad and repeated updates.

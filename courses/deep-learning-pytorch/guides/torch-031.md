@@ -175,7 +175,7 @@ It makes graph capture and guard behavior observable without adding a native-com
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-031, Profiling, torch.compile and honest performance measurement.

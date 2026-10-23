@@ -1,4 +1,4 @@
-# SQL-OPS-02 — Backup, Restore, and Recovery Rehearsals
+# SQL-OPS-02: Backup, Restore, and Recovery Rehearsals
 
 ## Level and prerequisites
 
@@ -50,7 +50,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-OPS-02 — Backup, Restore, and Recovery Rehearsals** and choose
+2. Open **SQL-OPS-02; Backup, Restore, and Recovery Rehearsals** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -67,7 +67,7 @@ ignored working copy, and complete `psql` transcript remain together.
    lines explain intentional checks. Success means no unexpected `ERROR`, exit
    code 0, the final cleanup/transaction boundary completes as documented, and the following verification cell passes.
 
-Backup/restore commands are capability-sensitive and are not hidden inside a transaction. Use only the lesson's isolated dump/rehearsal targets, inspect every path first, and treat a successful restore plus verification queries—not merely a created file—as success.
+Backup/restore commands are capability-sensitive and are not hidden inside a transaction. Use only the lesson's isolated dump/rehearsal targets, inspect every path first, and treat a successful restore plus verification queries, not merely a created file, as success.
 
 Manual `psql` fallback:
 
@@ -86,7 +86,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -339,11 +339,11 @@ into fail-fast contracts, then combine migrations, security grants, indexes,
 and application smoke tests in a timed local recovery game day. Optional
 physical/PITR work remains an explicitly approved isolated specialization.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-ops-02 — Backup, Restore, and Recovery Rehearsals.

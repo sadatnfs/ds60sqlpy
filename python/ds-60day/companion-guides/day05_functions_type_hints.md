@@ -1,4 +1,4 @@
-# Day 5 — Functions, Docstrings, and Type Hints
+# Day 5: Functions, Docstrings, and Type Hints
 
 **Level:** Beginner
 
@@ -63,12 +63,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 5 — functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints
+**Lesson outcome:** use day 5; functions, docstrings, and type hints to practice function contracts, parameters, return values, scope, and type hints
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -102,7 +102,7 @@ The colon starts the indented body. A docstring is the first string in
 that body and should state behavior that the signature cannot fully
 express, especially errors and edge cases.
 
-### Worked example 1 — Make validation part of the contract
+### Worked example 1: Make validation part of the contract
 
 Reject an invalid domain before doing the calculation. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -126,7 +126,7 @@ mean([2.0, 4.0, 9.0])
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Use keyword-only parameters to make calls readable
+### Worked example 2: Use keyword-only parameters to make calls readable
 
 A signature can prevent ambiguous positional calls. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -219,7 +219,7 @@ assertion or inspection and explain what it proves.
    **Expected result:** `(5.0, 2.0)`. **Constraints:** compute the mean once, use squared distances, and do not import a statistics helper that performs the whole task.
    **Verify:** Use `math.isclose` to confirm mean `5.0` and population standard deviation `2.0`, then show empty input follows the documented failure path.
 
-2. Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior—this lesson's reference raises `ValueError`.
+2. Add a docstring to `describe` that states accepted input, the two tuple fields in order, and the empty-input policy. **Constraint:** choose and document one explicit behavior, this lesson's reference raises `ValueError`.
    **Verify:** capture `help(describe)` output and assert it names the accepted input, mean, population standard deviation, tuple order, and empty-input `ValueError` without reading the body.
 
 3. Validate `describe` near its boundary: reject an empty list and any non-finite value such as `float('nan')` with a useful `ValueError`.
@@ -278,11 +278,11 @@ matches the docstring, and invalid values fail with a useful message.
 
 - [Open the learner notebook](../notebooks/day05_functions_type_hints.ipynb)
 - [Check the separate solution](../solutions/day05_functions_type_hints/day05_solutions.md)
-- [Next: Day 6 — Core data structures](day06_data_structures.md)
+- [Next: Day 6; Core data structures](day06_data_structures.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

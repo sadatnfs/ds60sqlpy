@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -589,8 +589,8 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li>Postgres pattern matching: https://www.postgresql.org/docs/current/functions-matching.html</li>
 <li>NULLs and three-valued logic: https://www.postgresql.org/docs/current/functions-comparison.html</li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in Codex:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-01 - Select Where Orderby.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -780,7 +780,7 @@ transfer task that I answer without looking back. Done when I can explain the ro
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-01-solutions-select-where-order-by-limit-offset">Day 01 solutions — SELECT, WHERE, ORDER BY, LIMIT/OFFSET<a class="heading-anchor" href="#solution-1--day-01-solutions-select-where-order-by-limit-offset" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-01-solutions-select-where-order-by-limit-offset">Day 01 solutions: SELECT, WHERE, ORDER BY, LIMIT/OFFSET<a class="heading-anchor" href="#solution-1--day-01-solutions-select-where-order-by-limit-offset" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
 <p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
 <pre class="highlighted-code"><code class="language-powershell"><span class="syntax-comment"># Windows PowerShell, from the repository root</span>
@@ -808,7 +808,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Primary pitfall:</strong> Never use <code>= NULL</code>, depend on implicit row order, or apply <code>LIMIT</code> without first defining which rows are first.</li>
 <li><strong>Safety:</strong> all writes are bounded and rollback-protected; read-only queries still use deterministic ordering whenever row order is claimed.</li>
 </ul>
-<h4 id="solution-1--exercise-1-query-writing">Exercise 1 — Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-1-query-writing">Exercise 1: Query writing<a class="heading-anchor" href="#solution-1--exercise-1-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> List the 20 newest orders with customer ID and total amount.</p>
 <p><strong>Reasoning:</strong> Sort by <code>order_date DESC</code> and add <code>order_id DESC</code> as a unique tie-breaker before applying <code>LIMIT</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -837,7 +837,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: Sort by <code>order_date DESC</code> and add <code>order_id DESC</code> as a unique tie-breaker before applying <code>LIMIT</code>. Evaluate another form against the concrete expected result (At most 20 rows; one row per order, newest first) and the verification above.</li>
 <li><strong>Edge case:</strong> Give two rows the same <code>o.order_date DESC</code> value and different <code>o.order_id DESC</code> values; verify <code>o.order_date DESC, o.order_id DESC</code> produces the intended rank and display order.</li>
 </ul>
-<h4 id="solution-1--exercise-2-query-writing">Exercise 2 — Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-2-query-writing">Exercise 2: Query writing<a class="heading-anchor" href="#solution-1--exercise-2-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Find the 10 most expensive products created in the last 90 days.</p>
 <p><strong>Reasoning:</strong> Filter the timestamp directly, then sort by price and a stable product key.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -868,7 +868,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: Filter the timestamp directly, then sort by price and a stable product key. Evaluate another form against the concrete expected result (At most 10 product rows; every row is in the 90-day window) and the verification above.</li>
 <li><strong>Edge case:</strong> Tie two rows on <code>p.price DESC</code> and give them different <code>p.product_id</code> values; verify <code>p.price DESC, p.product_id</code> chooses a stable first/last row.</li>
 </ul>
-<h4 id="solution-1--exercise-3-query-writing">Exercise 3 — Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-3-query-writing">Exercise 3: Query writing<a class="heading-anchor" href="#solution-1--exercise-3-query-writing" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Show customers from GB or DE created in the last year, newest first.</p>
 <p><strong>Reasoning:</strong> Use <code>IN</code> for the country set, combine the time condition with <code>AND</code>, and break timestamp ties.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -898,7 +898,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use <code>IN</code> for the country set, combine the time condition with <code>AND</code>, and break timestamp ties. Evaluate another form against the concrete expected result (Only GB/DE customers from the declared window) and the verification above.</li>
 <li><strong>Edge case:</strong> Give two rows the same <code>c.created_at DESC</code> value and different <code>c.customer_id</code> values; verify <code>c.created_at DESC, c.customer_id</code> produces the intended rank and display order.</li>
 </ul>
-<h4 id="solution-1--exercise-4-prediction">Exercise 4 — Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-4-prediction">Exercise 4: Prediction<a class="heading-anchor" href="#solution-1--exercise-4-prediction" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Predict which rows survive <code>email = NULL</code>, then write a query that counts missing and present emails correctly.</p>
 <p><strong>Reasoning:</strong> Comparisons with <code>NULL</code> are unknown; use <code>IS NULL</code> and <code>IS NOT NULL</code>.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -923,7 +923,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: Comparisons with <code>NULL</code> are unknown; use <code>IS NULL</code> and <code>IS NOT NULL</code>. Evaluate another form against the concrete expected result (Exactly one summary row with counts whose sum equals all customers) and the verification above.</li>
 <li><strong>Edge case:</strong> Repeat with <code>NULL</code> in <code>email</code> and state whether the row is kept, rejected, or classified.</li>
 </ul>
-<h4 id="solution-1--exercise-5-debugging">Exercise 5 — Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-5-debugging">Exercise 5: Debugging<a class="heading-anchor" href="#solution-1--exercise-5-debugging" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Repair a top-price query that uses <code>LIMIT 10</code> without <code>ORDER BY</code> and explain why the original is nondeterministic.</p>
 <p><strong>Reasoning:</strong> Define the business ranking first; use a unique final key for tied prices.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -951,7 +951,7 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Alternative/trade-off:</strong> For sql-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Define the business ranking first; use a unique final key for tied prices. Evaluate another form against the concrete expected result (At most 10 rows, highest prices first, stable across repeated runs on unchanged data) and the verification above.</li>
 <li><strong>Edge case:</strong> Give two rows the same <code>p.price DESC</code> value and different <code>p.product_id</code> values; verify <code>p.price DESC, p.product_id</code> produces the intended rank and display order.</li>
 </ul>
-<h4 id="solution-1--exercise-6-extension">Exercise 6 — Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
+<h4 id="solution-1--exercise-6-extension">Exercise 6: Extension<a class="heading-anchor" href="#solution-1--exercise-6-extension" aria-label="Link to this section">#</a></h4>
 <p><strong>Prompt:</strong> Return the second page of 10 newest orders using a keyset cursor derived from the first page rather than <code>OFFSET</code>.</p>
 <p><strong>Reasoning:</strong> Use the last <code>(order_date, order_id)</code> pair from page one and compare row values in the same descending order.</p>
 <p><strong>Clause-by-clause reading:</strong></p>
@@ -1207,16 +1207,16 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Tutor me through sql-01 - Select Where Orderby.
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Tutor me through sql-01 - Select Where Orderby.
 
 I am a beginner who completed the direct catalog prerequisite sql-start-03. Reuse its small-stage debugging workflow and explain new clauses before relying on them. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
 - Guide: sql/postgres-60day/companion-guides/day01_select_where_orderby.md
@@ -1243,7 +1243,7 @@ than assuming a completion declaration proves mastery. Explain the first error
 before changing later code. Finish with 2-3 retrieval questions and one small
 transfer task that I answer without looking back. Done when I can explain the row grain and clause order, produce a passing transcript for the current exercise, justify its verification evidence, and answer the retrieval questions without copying the solution.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1354,18 +1354,18 @@ transfer task that I answer without looking back. Done when I can explain the ro
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

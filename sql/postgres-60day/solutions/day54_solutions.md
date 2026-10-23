@@ -1,4 +1,4 @@
-# Day 54 Solutions — Warehouse Aggregates and Refresh Procedure
+# Day 54 Solutions: Warehouse Aggregates and Refresh Procedure
 
 
 <!-- beginner-solution-enrichment -->
@@ -58,7 +58,7 @@ Day 54 creates and tests aggregate objects inside a transaction, then rolls
 everything back. The complete runnable answer is
 [`day54_solutions.sql`](day54_solutions.sql).
 
-## Exercise 1 — `agg_sales_product_month`
+## Exercise 1: `agg_sales_product_month`
 
 The answer uses this grain and schema:
 
@@ -124,7 +124,7 @@ fanout. Expected `difference` is zero for every built month.
 - **Alternative/trade-off:** For sql-54 Exercise 1, the chosen form is justified by this lesson-specific rationale: The answer uses this grain and schema: The two sides are aggregated independently before joining, preventing join fanout. Evaluate another form against the concrete expected result (one row per `year`, `month`, and `product_sk`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
 
-## Exercise 2 — Refresh all aggregates for `(year, month)`
+## Exercise 2: Refresh all aggregates for `(year, month)`
 
 The executable solution creates:
 
@@ -180,7 +180,7 @@ solutions and roll back. Day 54 does not require Day 53 changes to persist.
 - Reconcile independently aggregated sides; joining aggregates to detail rows
   before summing can fan out both measures.
 
-## Exercise 3 — Account for late facts
+## Exercise 3: Account for late facts
 
 The period inventory identifies every loaded month. A late fact requires
 refreshing its own affected period, not merely the newest month.
@@ -195,7 +195,7 @@ refreshing its own affected period, not merely the newest month.
 - **Alternative/trade-off:** For sql-54 Exercise 3, the chosen form is justified by this lesson-specific rationale: The period inventory identifies every loaded month. Evaluate another form against the concrete expected result (one row per `year`, and `month`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Refresh atomically
+## Exercise 4: Refresh atomically
 
 Delete and all aggregate inserts run in one transaction through the procedure.
 Failure rolls back the whole period instead of leaving partial tables.
@@ -210,7 +210,7 @@ Failure rolls back the whole period instead of leaving partial tables.
 - **Alternative/trade-off:** For sql-54 Exercise 4, the chosen form is justified by this lesson-specific rationale: Delete and all aggregate inserts run in one transaction through the procedure. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `year`, and `month` values) and the verification above.
 - **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.
 
-## Exercise 5 — Make reconciliation NULL-safe
+## Exercise 5: Make reconciliation NULL-safe
 
 FULL JOIN preserves a period missing on either side, and coalesced arithmetic
 turns that absence into a visible nonzero difference.
@@ -225,7 +225,7 @@ turns that absence into a visible nonzero difference.
 - **Alternative/trade-off:** For sql-54 Exercise 5, the chosen form is justified by this lesson-specific rationale: FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference. Evaluate another form against the concrete expected result (one row per `year`, and `month`) and the verification above.
 - **Edge case:** Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.
 
-## Exercise 6 — Prove idempotency
+## Exercise 6: Prove idempotency
 
 The answer snapshots category aggregates, reruns the same latest period, and
 uses two-way `EXCEPT`. Both difference sets must be empty.

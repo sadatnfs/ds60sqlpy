@@ -1,4 +1,4 @@
-# Day 13 — Solutions: Functional Tools (itertools, functools, map/filter)
+# Day 13: Solutions: Functional Tools (itertools, functools, map/filter)
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -33,9 +33,9 @@ Avoid `reduce` when a named loop or built-in such as `sum`, `min`, or
 For this lesson's **functions as values and composable iterable tools** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Use `itertools.groupby` to group records that are already sorted by a category key. **Inputs:** include the same category in separated positions before sorting. **Expected behavior:** after explicit sorting, each category appears once with all of its records. **Constraint:** explain why `groupby` groups adjacent runs rather than globally collecting unsorted data. **Verify:** Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.
 
@@ -59,7 +59,7 @@ runs rather than searching the entire iterable.
 
 **Verification evidence:** Show the unsorted input produces separated runs, then assert the sorted grouping has one entry per category and preserves every record.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Use `functools.reduce` to compute a product for `[2, 3, 4]`, giving an explicit identity so empty input returns `1`. **Then:** implement the same result with a named loop and compare readability. **Verify:** both return `24` and both define empty behavior; state why `sum`/`math.prod` is preferable in ordinary production code.
 
@@ -90,9 +90,9 @@ explicit reduction here makes identity behavior visible.
 
 **Verification evidence:** both return `24` and both define empty behavior; state why `sum`/`math.prod` is preferable in ordinary production code.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict what remains after calling `next` on a `map` object and then converting it to a list. **Progressive hint:** `map` is a lazy one-shot iterator in Python 3. **Verify:** Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.
 
@@ -100,7 +100,7 @@ explicit reduction here makes identity behavior visible.
 
 **Evidence to locate in the grouped implementation:** Assert the first mapped value and exact remaining list, then confirm another pass is empty because the map iterator is exhausted.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace `sorted(records, key=lambda row: (row['team'], -row['score']))` and explain the tuple key. **Progressive hint:** Tuple components are compared left to right. **Verify:** Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.
 
@@ -108,7 +108,7 @@ explicit reduction here makes identity behavior visible.
 
 **Evidence to locate in the grouped implementation:** Compute each tuple key beside its record and assert final order groups team ascending and score descending within team.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement `compose(*functions)` so `compose(f, g)(x)` applies `g` then `f`, and handle no functions as identity. **Progressive hint:** Apply the reversed function sequence to the current value. **Verify:** Assert composition order with noncommutative functions and assert `compose()(value)` returns the original value unchanged.
 
@@ -116,7 +116,7 @@ explicit reduction here makes identity behavior visible.
 
 **Evidence to locate in the grouped implementation:** Assert composition order with noncommutative functions and assert `compose()(value)` returns the original value unchanged.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair lambdas created in a loop that all use the final loop value. **Progressive hint:** Bind the current value as a default argument or use a factory function. **Verify:** Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.
 
@@ -124,7 +124,7 @@ explicit reduction here makes identity behavior visible.
 
 **Evidence to locate in the grouped implementation:** Call every produced function and show the faulty results share the final loop value; assert the factory/default-binding repair preserves each intended value.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Refactor a pipeline that prints inside `map` into pure transforms plus one explicit presentation step. **Progressive hint:** Pure stages are easier to test and reuse. **Verify:** Assert transformed values are identical before/after refactoring and capture presentation output only in the final explicit step.
 
@@ -136,7 +136,7 @@ explicit reduction here makes identity behavior visible.
 
 Use functional tools when they make data flow clearer. Preserve laziness intentionally and keep side effects at explicit boundaries.
 
-### Shared implementation for Exercises 3–4 — Lazy iterators and tuple ordering
+### Shared implementation for Exercises 3–4: Lazy iterators and tuple ordering
 
 ```python
 doubled = map(lambda value: value * 2, [1, 2, 3])
@@ -152,7 +152,7 @@ ordered = sorted(records, key=lambda row: (row["team"], -row["score"]))
 assert [row["score"] for row in ordered] == [9, 7, 8]
 ```
 
-### Shared implementation for Exercises 5–7 — Composition, binding, and pure stages
+### Shared implementation for Exercises 5–7: Composition, binding, and pure stages
 
 ```python
 from collections.abc import Callable

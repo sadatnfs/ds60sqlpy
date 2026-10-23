@@ -132,7 +132,7 @@
     .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
     .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
     .coach-card p { max-width: 78ch; color: var(--muted); }
-    .codex-prompt {
+    .tutor-prompt {
       width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
       border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
       font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
@@ -369,7 +369,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           </div>
         </header>
 
-        <div class="artifact-content"><h3 id="guide--day-25-visualization-with-matplotlib-and-seaborn">Day 25 — Visualization with Matplotlib and Seaborn<a class="heading-anchor" href="#guide--day-25-visualization-with-matplotlib-and-seaborn" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="guide--day-25-visualization-with-matplotlib-and-seaborn">Day 25: Visualization with Matplotlib and Seaborn<a class="heading-anchor" href="#guide--day-25-visualization-with-matplotlib-and-seaborn" aria-label="Link to this section">#</a></h3>
 <p><strong>Level:</strong> Intermediate</p>
 <p>A chart is an encoding of data into position, color, shape, and size. Choose the encoding for the question, then make the figure legible and reproducible.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -405,8 +405,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Restart the kernel and run from the first cell downward. Before every example, write a prediction; after it runs, compare the actual value, type, shape, or side effect with the stated observation.</li>
 <li>Attempt each numbered exercise in its own work cell. Use the explicit verification as part of the task. Keep <code>solutions/</code> closed until you have a tested attempt or deliberately ask for help.</li>
 </ol>
-<p><strong>Lesson outcome:</strong> use day 25 — visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export and explain the evidence produced by your code.</p>
-<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive — build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
+<p><strong>Lesson outcome:</strong> use day 25; visualization with matplotlib and seaborn to practice static chart choice, figure/axes ownership, labeling, and reproducible export and explain the evidence produced by your code.</p>
+<h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
 <p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
 <p>Matplotlib separates a <strong>Figure</strong> (the full canvas) from one or more <strong>Axes</strong> (plot regions). Prefer the object-oriented API: <code>fig, ax = plt.subplots()</code>, plot onto <code>ax</code>, label the axes, then save through <code>fig</code>. State units and denominators, use ordering intentionally, and never encode meaning through color alone.</p>
@@ -421,7 +421,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h5 id="guide--syntax-anatomy">Syntax anatomy<a class="heading-anchor" href="#guide--syntax-anatomy" aria-label="Link to this section">#</a></h5>
 <p><code>fig, ax = plt.subplots()</code> creates and returns both ownership objects. <code>ax.hist(values, bins=...)</code> adds marks to the axes; <code>ax.set(...)</code> sets title and labels; <code>fig.tight_layout()</code> adjusts spacing; and <code>fig.savefig(path, dpi=..., bbox_inches=&quot;tight&quot;)</code> serializes the canvas. Save before closing the figure.</p>
-<h5 id="guide--worked-example-1-build-a-labeled-distribution-plot">Worked example 1 — Build a labeled distribution plot<a class="heading-anchor" href="#guide--worked-example-1-build-a-labeled-distribution-plot" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-1-build-a-labeled-distribution-plot">Worked example 1: Build a labeled distribution plot<a class="heading-anchor" href="#guide--worked-example-1-build-a-labeled-distribution-plot" aria-label="Link to this section">#</a></h5>
 <p>Constructed data keeps the lesson offline and deterministic. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
 
@@ -434,7 +434,7 @@ fig<span class="syntax-operator">.</span>tight_layout<span class="syntax-punctua
 <p><strong>Expected observation</strong></p>
 <pre class="highlighted-code"><code class="language-text">The tuple identifies `Figure`, `Axes`, and five histogram bins. The displayed chart has units on both axes.</code></pre>
 <p>Do not memorize the surface syntax. Point from the input, through each transformation or decision, to the final evidence.</p>
-<h5 id="guide--worked-example-2-make-category-ordering-explicit">Worked example 2 — Make category ordering explicit<a class="heading-anchor" href="#guide--worked-example-2-make-category-ordering-explicit" aria-label="Link to this section">#</a></h5>
+<h5 id="guide--worked-example-2-make-category-ordering-explicit">Worked example 2: Make category ordering explicit<a class="heading-anchor" href="#guide--worked-example-2-make-category-ordering-explicit" aria-label="Link to this section">#</a></h5>
 <p>Bar positions should reflect the intended comparison, not accidental input order. Before running it, predict the final displayed value and identify which line creates each intermediate object.</p>
 <pre class="highlighted-code"><code class="language-python">categories <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">bronze</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">silver</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gold</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
 counts <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
@@ -536,10 +536,10 @@ plt<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(
 <ul>
 <li><a href="python-25.html#learner">Open the learner notebook</a></li>
 <li><a href="python-25.html#solution-1">Check the separate solution</a></li>
-<li><a href="python-26.html#guide">Next: Day 26 — Interactive visualization</a></li>
+<li><a href="python-26.html#guide">Next: Day 26; Interactive visualization</a></li>
 </ul>
-<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Codex coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-25`
 (Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
 I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
@@ -799,7 +799,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
           </div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
-        <div class="artifact-content"><h3 id="solution-1--day-25-solutions-visualization-with-matplotlib-seaborn">Day 25 — Solutions: Visualization with Matplotlib &amp; Seaborn<a class="heading-anchor" href="#solution-1--day-25-solutions-visualization-with-matplotlib-seaborn" aria-label="Link to this section">#</a></h3>
+        <div class="artifact-content"><h3 id="solution-1--day-25-solutions-visualization-with-matplotlib-seaborn">Day 25: Solutions: Visualization with Matplotlib &amp; Seaborn<a class="heading-anchor" href="#solution-1--day-25-solutions-visualization-with-matplotlib-seaborn" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>A visualization maps data fields to visual encodings such as position, length, color, shape, or size. Choose a chart from the analytical question and variable types: bars compare categories, histograms show a numeric distribution, lines emphasize ordered/time trends, and scatter plots show relationships between two numeric variables.</p>
@@ -815,8 +815,8 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
 </ul>
 <h5 id="solution-1--how-to-compare-an-answer">How to compare an answer<a class="heading-anchor" href="#solution-1--how-to-compare-an-answer" aria-label="Link to this section">#</a></h5>
 <p>For this lesson&#x27;s <strong>static chart choice, figure/axes ownership, labeling, and reproducible export</strong> model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.</p>
-<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2 — Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-1-worked-answer">Exercise 1 — worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-1-2-worked-answers">Exercises 1–2: Worked answers<a class="heading-anchor" href="#solution-1--exercises-1-2-worked-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-worked-answer">Exercise 1: worked answer<a class="heading-anchor" href="#solution-1--exercise-1-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Recreate two Day 24 plots and improve their communication. <strong>For each:</strong> write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. <strong>Expected behavior:</strong> a reader can state the intended comparison without reading surrounding code. <strong>Verify:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Recreate two Day 24 plots and improve their communication. For each: write the question and reader, choose the mark/encoding, label units and denominator, order categories deliberately, and add accessible non-color cues where needed. Expected behavior: a reader can state the intended comparison without reading surrounding code. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: reconcile plotted counts/summary values to the source DataFrame. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
@@ -863,7 +863,7 @@ histogram_total <span class="syntax-operator">=</span> <span class="syntax-built
 <span class="syntax-keyword">assert</span> <span class="syntax-punctuation">[</span>bar<span class="syntax-operator">.</span>get_height<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> bar <span class="syntax-operator">in</span> bars<span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> category_counts<span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The operations reader can now answer two written questions: “How are task durations distributed?” and “How many tasks belong to each segment?” Units, denominators, labels, outlines, hatches, and deliberate category order make both comparisons readable without color alone.</p>
 <p><strong>Verification evidence:</strong> reconcile plotted counts/summary values to the source DataFrame.</p>
-<h5 id="solution-1--exercise-2-worked-answer">Exercise 2 — worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-2-worked-answer">Exercise 2: worked answer<a class="heading-anchor" href="#solution-1--exercise-2-worked-answer" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. <strong>Constraints:</strong> use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. <strong>Verify:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Export both figures under an ignored learner artifact directory with consistent dimensions, style, filename, and resolution. Constraints: use <code>Path</code>, create parents, call <code>fig.tight_layout()</code>, and save through the figure before display/close. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
@@ -893,32 +893,32 @@ exports <span class="syntax-operator">=</span> <span class="syntax-punctuation">
     plt<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(</span>figure<span class="syntax-punctuation">)</span></code></pre>
 <p>Both figures use the same 5-by-3-inch dimensions, 150 DPI, naming convention, and ignored artifact directory. Titles and axes are checked before saving; Pillow then proves each nonempty PNG can be reopened.</p>
 <p><strong>Verification evidence:</strong> files exist, are nonempty, reopen successfully, and contain the expected title/axes rather than a blank canvas.</p>
-<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7 — Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
-<h5 id="solution-1--exercise-3-answer-contract">Exercise 3 — answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
+<h4 id="solution-1--exercises-3-7-expanded-mastery-answers">Exercises 3–7: Expanded mastery answers<a class="heading-anchor" href="#solution-1--exercises-3-7-expanded-mastery-answers" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-3-answer-contract">Exercise 3: answer contract<a class="heading-anchor" href="#solution-1--exercise-3-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Prediction:</strong> Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. <strong>Progressive hint:</strong> Match the mark and axes to the analytical question. <strong>Verify:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</p>
 <p><strong>Reasoning:</strong> Predict this named state change before running it: Prediction: Choose among bar, histogram, line, and scatter plots for category comparison, distribution, time trend, and two-number relationship. Progressive hint: Match the mark and axes to the analytical question. Then compare the prediction with this proof target: Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason. This makes static chart choice, figure/axes ownership, labeling, and reproducible export observable instead of relying on intuition.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Create a question-to-chart table and assert each of the four questions maps to the intended mark and axis variable types with a one-sentence reason.</p>
-<h5 id="solution-1--exercise-4-answer-contract">Exercise 4 — answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-4-answer-contract">Exercise 4: answer contract<a class="heading-anchor" href="#solution-1--exercise-4-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Tracing:</strong> Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. <strong>Progressive hint:</strong> The figure owns the canvas; the axes owns one plot region. <strong>Verify:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</p>
 <p><strong>Reasoning:</strong> Trace the concrete values in this contract one step at a time: Tracing: Trace figure and axes ownership when using <code>fig, ax = plt.subplots()</code> and explain where title, labels, and save operations belong. Progressive hint: The figure owns the canvas; the axes owns one plot region. Record the named value, shape, label, or iterator position needed to establish: Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists. The trace exposes static chart choice, figure/axes ownership, labeling, and reproducible export directly.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Assert the title/x/y labels live on <code>ax</code>, the canvas saves through <code>fig</code>, and the expected number of axes/marks exists.</p>
-<h5 id="solution-1--exercise-5-answer-contract">Exercise 5 — answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-5-answer-contract">Exercise 5: answer contract<a class="heading-anchor" href="#solution-1--exercise-5-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Implementation:</strong> Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. <strong>Progressive hint:</strong> Returning the axes makes composition and testing easier. <strong>Verify:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</p>
 <p><strong>Reasoning:</strong> Implement this exact contract as written: Implementation: Implement a reusable distribution function accepting an axes object, units, and title without calling <code>show</code>. Progressive hint: Returning the axes makes composition and testing easier. Keep the prompt&#x27;s named data and constraints visible in the code, then establish this specific result: Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called. That connects the answer to static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Call the function on a supplied axes, assert it returns that same axes, labels/units are set, expected marks exist, and no global <code>show</code> is called.</p>
-<h5 id="solution-1--exercise-6-answer-contract">Exercise 6 — answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-6-answer-contract">Exercise 6: answer contract<a class="heading-anchor" href="#solution-1--exercise-6-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Debugging:</strong> Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. <strong>Progressive hint:</strong> Save through the figure before display/close. <strong>Verify:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</p>
 <p><strong>Reasoning:</strong> Reproduce the exact failure described here before changing code: Debugging: Repair an export that calls <code>show()</code> or closes the figure before <code>savefig</code>, producing a blank file in some environments. Progressive hint: Save through the figure before display/close. Preserve that failing case, repair the violated rule, and rerun the evidence named here: Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order. The diagnosis depends on static chart choice, figure/axes ownership, labeling, and reproducible export.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Save before close and assert the output file is nonempty/reopenable; reproduce the old blank path once as evidence of operation order.</p>
-<h5 id="solution-1--exercise-7-answer-contract">Exercise 7 — answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--exercise-7-answer-contract">Exercise 7: answer contract<a class="heading-anchor" href="#solution-1--exercise-7-answer-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Learner contract:</strong> <strong>Edge case and explanation:</strong> Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. <strong>Progressive hint:</strong> Do not communicate meaning through color alone. <strong>Verify:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</p>
 <p><strong>Reasoning:</strong> Make this boundary unambiguous in code: Edge case and explanation: Adapt a chart for long category labels, color-vision differences, missing groups, and a very skewed distribution. Progressive hint: Do not communicate meaning through color alone. Values below, at, and above the named boundary must produce the evidence Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible. Those cases show how static chart choice, figure/axes ownership, labeling, and reproducible export behaves at its edge.</p>
 <p><strong>Evidence to locate in the grouped implementation:</strong> Inspect a fixture containing all four challenges and assert labels are readable, groups remain distinguishable without color, and skew/missingness policy is visible.</p>
 <h4 id="solution-1--expanded-mastery-lab-solutions">Expanded mastery lab solutions<a class="heading-anchor" href="#solution-1--expanded-mastery-lab-solutions" aria-label="Link to this section">#</a></h4>
 <p>Choose a chart from the question and data types, then make units, denominators, ordering, uncertainty, and accessibility explicit.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership">Shared implementation for Exercises 3–4 — Chart choice and object ownership<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership">Shared implementation for Exercises 3–4: Chart choice and object ownership<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-3-4-chart-choice-and-object-ownership" aria-label="Link to this section">#</a></h5>
 <p>Use bars for category comparisons, histograms for distributions, lines for ordered time trends, and scatterplots for relationships between two numeric variables. <code>Axes</code> owns labels and marks; <code>Figure</code> owns layout and saving.</p>
-<h5 id="solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting">Shared implementation for Exercises 5–7 — Reusable, testable plotting<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting" aria-label="Link to this section">#</a></h5>
+<h5 id="solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting">Shared implementation for Exercises 5–7: Reusable, testable plotting<a class="heading-anchor" href="#solution-1--shared-implementation-for-exercises-5-7-reusable-testable-plotting" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 
 <span class="syntax-keyword">import</span> matplotlib.pyplot <span class="syntax-keyword">as</span> plt
@@ -1080,16 +1080,16 @@ plt<span class="syntax-operator">.</span>close<span class="syntax-punctuation">(
 
       <section class="coach-card" aria-labelledby="coach-heading">
         <p class="eyebrow">Optional learning coach · after reading the guide</p>
-        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <h2 id="coach-heading">Ask an AI tutor about this lesson</h2>
         <p>
-          The lesson is complete without Codex. If this repository is open in Codex,
+          The lesson is complete without an AI tutor. If this repository is open in an AI coding assistant,
           copy the prompt below to get a context-aware explanation, progressive hints,
           and evidence-based review without opening the official solution too early.
         </p>
         <div class="coach-grid">
           <label>
             <span class="cell-label">Copy-ready lesson prompt</span>
-            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-25`
+            <textarea class="tutor-prompt" id="tutor-prompt" readonly>Use $guide-ds60sqlpy-learning to tutor me through `python-25`
 (Day 25 — Visualization with Matplotlib and Seaborn). Direct catalog prerequisites: `python-24`.
 I have completed the direct prerequisites: `python-24`. Emphasize static chart choice, figure/axes ownership, labeling, and reproducible export.
 Read `python/ds-60day/companion-guides/day25_viz_matplotlib_seaborn.md` and use the learner notebook
@@ -1104,7 +1104,7 @@ retrieval questions and one next step. Done when I can explain the mental
 model without the guide, complete one independent exercise, and show the
 prompt&#x27;s verification evidence from my notebook.</textarea>
           </label>
-          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+          <button class="button" type="button" id="copy-tutor-prompt">Copy tutor prompt</button>
         </div>
         <p class="copy-status" id="copy-status" aria-live="polite"></p>
       </section>
@@ -1215,18 +1215,18 @@ prompt&#x27;s verification evidence from my notebook.</textarea>
       }
     });
 
-    const codexPrompt = document.querySelector("#codex-prompt");
+    const tutorPrompt = document.querySelector("#tutor-prompt");
     const copyStatus = document.querySelector("#copy-status");
-    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
-      codexPrompt.focus();
-      codexPrompt.select();
+    document.querySelector("#copy-tutor-prompt").addEventListener("click", async () => {
+      tutorPrompt.focus();
+      tutorPrompt.select();
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          await navigator.clipboard.writeText(codexPrompt.value);
+          await navigator.clipboard.writeText(tutorPrompt.value);
         } else if (!document.execCommand("copy")) {
           throw new Error("copy command was unavailable");
         }
-        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+        copyStatus.textContent = "Prompt copied. Paste it into an assistant conversation with this repository open.";
       } catch {
         copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
       }

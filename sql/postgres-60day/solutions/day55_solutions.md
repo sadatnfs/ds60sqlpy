@@ -1,4 +1,4 @@
-# Day 55 Solutions — BI Drill-down and Subtotals
+# Day 55 Solutions: BI Drill-down and Subtotals
 
 
 <!-- beginner-solution-enrichment -->
@@ -57,7 +57,7 @@ The two exercises compare `ROLLUP` and `CUBE`, then add order status to a
 country/category/product top-five drill-down. See
 [`day55_solutions.sql`](day55_solutions.sql).
 
-## Exercise 1 — Compare row counts
+## Exercise 1: Compare row counts
 
 ```sql
 SET search_path TO training, public;
@@ -97,7 +97,7 @@ is greater on this seed.
 - **Alternative/trade-off:** For sql-55 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one comparison row. Evaluate another form against the concrete expected result (one comparison row. `CUBE(country, category)` adds category-only subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count is greater on this seed) and the verification above.
 - **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
 
-## Exercise 2 — Status-aware top five
+## Exercise 2: Status-aware top five
 
 ```sql
 SET search_path TO training, public;
@@ -164,7 +164,7 @@ Expected grain: up to five rows per `(country, category, status)`.
 - `ROW_NUMBER` plus `product_id` yields exactly five deterministic rows when at
   least five products exist; `RANK` can return more because of ties.
 
-## Exercise 3 — Enumerate ROLLUP levels
+## Exercise 3: Enumerate ROLLUP levels
 
 PostgreSQL's `GROUPING(country, category)` returns a bit mask: detail, country
 subtotal, and grand total have stable numeric identities.
@@ -179,7 +179,7 @@ subtotal, and grand total have stable numeric identities.
 - **Alternative/trade-off:** For sql-55 Exercise 3, the chosen form is justified by this lesson-specific rationale: PostgreSQL's `GROUPING(country, category)` returns a bit mask: detail, country subtotal, and grand total have stable numeric identities. Evaluate another form against the concrete expected result (one row per `country`, and `category`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
 
-## Exercise 4 — Label levels from the bit mask
+## Exercise 4: Label levels from the bit mask
 
 The display label is derived from that mask, not from `column IS NULL`. This
 keeps machine-readable level identity beside human-readable text.
@@ -194,7 +194,7 @@ keeps machine-readable level identity beside human-readable text.
 - **Alternative/trade-off:** For sql-55 Exercise 4, the chosen form is justified by this lesson-specific rationale: The display label is derived from that mask, not from `column IS NULL`. Evaluate another form against the concrete expected result (one row per `level_id`) and the verification above.
 - **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `level_id` tuple and verify the new tuple appears exactly once.
 
-## Exercise 5 — Return exactly five products
+## Exercise 5: Return exactly five products
 
 Revenue aggregates before ranking. `ROW_NUMBER` with `product_id` as final key
 limits every partition deterministically even when revenue ties.
@@ -209,7 +209,7 @@ limits every partition deterministically even when revenue ties.
 - **Alternative/trade-off:** For sql-55 Exercise 5, the chosen form is justified by this lesson-specific rationale: Revenue aggregates before ranking. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
 - **Edge case:** Add one row for which `(position <= 5)` is true and one for which it is false; verify only the matching `order_id` value is returned.
 
-## Exercise 6 — Preserve unknown versus ALL
+## Exercise 6: Preserve unknown versus ALL
 
 The stored member label and generated-total flag are separate fields. A real
 NULL/unknown member retains flag zero; ALL has flag one.

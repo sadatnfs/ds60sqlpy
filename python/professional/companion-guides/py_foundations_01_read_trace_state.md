@@ -213,7 +213,7 @@ Continue with Day 2, where you add conversions, Boolean values, comparisons,
 and formatting. Keep the trace habit for branches and loops. It remains
 useful when a future program has many more lines.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-foundations-01.

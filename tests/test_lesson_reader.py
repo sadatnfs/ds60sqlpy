@@ -91,8 +91,8 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
     assert "START_DS60.cmd" in sql_reader
     assert "Create/open guided SQL notebook" in sql_reader
     assert 'action: "jupyter-sql"' in sql_reader
-    assert "Ask Codex about this lesson" in python_reader
-    assert "Copy Codex prompt" in python_reader
+    assert "Ask an AI tutor about this lesson" in python_reader
+    assert "Copy tutor prompt" in python_reader
     assert "guide-ds60sqlpy-learning" in python_reader
     assert "python-01" in python_reader
     assert "python/ds-60day/notebooks/day01_setup_and_repl.ipynb" in python_reader
@@ -231,7 +231,7 @@ def test_license_has_a_safe_text_reference(tmp_path: Path, monkeypatch: pytest.M
     assert "&lt;authored&gt;" in references[reference_relative_path("LICENSE")]
 
 
-def test_reader_uses_the_guides_lesson_specific_codex_prompt() -> None:
+def test_reader_uses_the_guides_lesson_specific_tutor_prompt() -> None:
     catalog = Catalog.load(REPO_ROOT)
     rendered = build_lesson_html(catalog, catalog.get("python-04"))
 

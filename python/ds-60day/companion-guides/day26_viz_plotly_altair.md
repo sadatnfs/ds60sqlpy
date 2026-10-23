@@ -1,9 +1,9 @@
-# Day 26 — Interactive Visualization with Plotly and Altair
+# Day 26: Interactive Visualization with Plotly and Altair
 
 **Level:** Intermediate
 
-Interaction should answer a reader question—inspect a point, filter a segment,
-or adjust a meaningful parameter—not decorate a chart.
+Interaction should answer a reader question, inspect a point, filter a segment,
+or adjust a meaningful parameter, not decorate a chart.
 
 ## Learning objectives
 
@@ -64,16 +64,16 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 26 — interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export
+**Lesson outcome:** use day 26; interactive visualization with plotly and altair to practice interactive visual encodings, bounded interaction, and portable HTML export
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
-Interaction is useful when it helps a reader answer a question—inspect a
+Interaction is useful when it helps a reader answer a question, inspect a
 point, filter a segment, zoom a dense range, or compare parameter
 choices. It is not a substitute for a clear initial view. The chart
 still needs an honest title, visible axes/legend, sensible defaults,
@@ -103,7 +103,7 @@ smaller file that needs network access. In Altair, a chart combines a
 mark with encoded fields whose type declarations affect scales and
 aggregation.
 
-### Worked example 1 — Build an inspectable Plotly figure
+### Worked example 1: Build an inspectable Plotly figure
 
 Return the figure so construction remains separate from export. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -133,7 +133,7 @@ Two traces (one per team) and the `hours`/`tasks` axis titles are reported. The 
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Inspect a self-contained HTML representation
+### Worked example 2: Inspect a self-contained HTML representation
 
 Embedding removes a runtime dependency on a remote CDN. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -292,11 +292,11 @@ and the exported file still renders with networking disabled.
 
 - [Open the learner notebook](../notebooks/day26_viz_plotly_altair.ipynb)
 - [Check the separate solution](../solutions/day26_viz_plotly_altair/day26_solutions.md)
-- [Next: Day 27 — Geospatial/domain visualization](day27_geospatial_or_domain_viz.md)
+- [Next: Day 27; Geospatial/domain visualization](day27_geospatial_or_domain_viz.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

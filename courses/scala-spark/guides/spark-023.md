@@ -187,7 +187,7 @@ Use the [course route](../README.md) to continue. Paired-language agreement is u
 
 - [Spark 4.0.1 join syntax](https://spark.apache.org/docs/4.0.1/sql-ref-syntax-qry-select-join.html)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-023: Broadcast joins, statistics and strategy evidence.

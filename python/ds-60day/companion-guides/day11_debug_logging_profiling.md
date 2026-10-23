@@ -290,9 +290,9 @@ identifies a measured bottleneck, and tests still pass after optimization.
 - [Check the separate solution](../solutions/day11_debug_logging_profiling/day11_solutions.md)
 - [Next: Day 12 - OOP and dataclasses](day12_oop_dataclasses.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 

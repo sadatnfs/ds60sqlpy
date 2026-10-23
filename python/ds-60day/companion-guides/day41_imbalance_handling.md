@@ -1,4 +1,4 @@
-# Day 41 — Handling Class Imbalance
+# Day 41: Handling Class Imbalance
 
 **Lesson ID:** `python-41` · **Level:** intermediate · **Dependencies:** `ml` · **Network:** offline
 
@@ -108,7 +108,7 @@ If the Windows environment uses the documented conda-prefix fallback,
 use `.\.venv\python.exe` in place of
 `.\.venv\Scripts\python.exe`.
 
-## Concept deep dive — rare-class metrics, training interventions, and threshold policy
+## Concept deep dive: rare-class metrics, training interventions, and threshold policy
 
 ### The mental model
 
@@ -135,7 +135,7 @@ evidence that would make the result trustworthy. A method returning
 without an exception proves only that the syntax and immediate runtime
 path worked.
 
-### Focused example A — expose the majority-class accuracy trap
+### Focused example A: expose the majority-class accuracy trap
 
 Before running the example, predict the shape, type, or direction of the
 result. Write the prediction down so that a surprise becomes evidence
@@ -160,7 +160,7 @@ assert recall_score(y_true, always_negative) == 0.0
 
 **Assumption to name:** Positive cases are the operational focus; missing all of them is unacceptable.
 
-### Focused example B — choose a threshold from an explicit recall constraint
+### Focused example B: choose a threshold from an explicit recall constraint
 
 This second example changes one important condition. Compare it with
 Example A instead of reading it as unrelated syntax.
@@ -209,15 +209,15 @@ print({"threshold": chosen[0], "precision": chosen[1], "recall": chosen[2]})
 
 1. Compare `class_weight="balanced"` with a SMOTE strategy.
 
-**Verify:** Practice 1 — rare-class metrics, training interventions, and threshold policy — compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
+**Verify:** Practice 1; rare-class metrics, training interventions, and threshold policy; compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
 2. Tune the threshold to maximize minority-class F1.
 
-**Verify:** Practice 2 — rare-class metrics, training interventions, and threshold policy — choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
+**Verify:** Practice 2; rare-class metrics, training interventions, and threshold policy; choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
 3. Plot precision–recall curves and discuss the tradeoff.
 
-**Verify:** Practice 3 — rare-class metrics, training interventions, and threshold policy — save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
+**Verify:** Practice 3; rare-class metrics, training interventions, and threshold policy; save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
 ### Progressive hints
 
@@ -238,17 +238,17 @@ attempt, and record the evidence that would prove your result correct.
 4. **Prevalence-shift reasoning:** Hold sensitivity and specificity fixed while changing event prevalence from 20% to 2%. Predict how precision changes and verify it with Bayes' rule.
    **Progressive hint:** Precision depends on the base rate: TP/(TP+FP). Use a hypothetical population such as 10,000 to make the counts visible.
 
-**Verify:** Prevalence-shift reasoning — choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
+**Verify:** Prevalence-shift reasoning; choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
 
 5. **Grouped imbalance split:** Create a cross-validation plan for rare outcomes with multiple rows per account. Assert both group separation and acceptable positive support in each fold.
    **Progressive hint:** Use StratifiedGroupKFold when feasible. Print group overlap, positive count, negative count, and prevalence per validation fold.
 
-**Verify:** Grouped imbalance split — print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
+**Verify:** Grouped imbalance split; print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
 
 6. **Calibration after resampling:** Explain why probabilities from a model trained on oversampled data may not match real prevalence. Design a calibration evaluation using unresampled validation data.
    **Progressive hint:** Oversampling changes the class distribution seen during fitting. Fit/calibrate inside development data and assess reliability on natural prevalence.
 
-**Verify:** Calibration after resampling — fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.
+**Verify:** Calibration after resampling; fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.
@@ -284,12 +284,12 @@ simple and often a strong first comparison.
 - Work in the [Day 41 learner notebook](../notebooks/day41_imbalance_handling.ipynb).
 - Then consult the
   [Day 41 solution](../solutions/day41_imbalance_handling/day41_solutions.md).
-- Continue to [Day 42 — Unsupervised Learning](day42_unsupervised_kmeans_anomaly.md).
+- Continue to [Day 42; Unsupervised Learning](day42_unsupervised_kmeans_anomaly.md).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into Codex while the repository root is open:
+coaching, copy this prompt into the AI tutor while the repository root is open:
 
 ```text
 Tutor me through `python-41` — Day 41 — Handling Class Imbalance.

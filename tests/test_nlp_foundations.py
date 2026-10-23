@@ -40,7 +40,7 @@ def test_foundation_contract_and_runnable_examples(
     assert "\u2014" not in guide
     assert len(re.findall(r"^\d\. \*\*", guide, re.MULTILINE)) == 6
     assert entry["guide_path"] in guide and entry["source_path"] in guide
-    assert "## Ask Codex about this lesson" in guide
+    assert "## Ask an AI tutor about this lesson" in guide
     namespace: dict[str, Any] = {}
     examples = re.findall(r"```python\n(.*?)\n```", guide, re.DOTALL)
     assert len(examples) >= 2

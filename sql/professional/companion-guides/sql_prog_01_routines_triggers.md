@@ -1,10 +1,10 @@
-# SQL-PROG-01 — Functions, Procedures, and Triggers
+# SQL-PROG-01: Functions, Procedures, and Triggers
 
 ## Level and prerequisites
 
 - **Level:** Advanced
 - **Catalog prerequisite:** `sql-found-02`
-- **Prerequisites:** [SQL-FOUND-02 — versioned migrations](sql_found_02_versioned_migrations.md),
+- **Prerequisites:** [SQL-FOUND-02; versioned migrations](sql_found_02_versioned_migrations.md),
   transactions, constraints, and multirow `UPDATE`.
 - **Artifacts:** [learner SQL](../lessons/sql_prog_01_routines_triggers.sql) ·
   [solution reasoning](../solutions/sql_prog_01_routines_triggers_solutions.md) ·
@@ -47,7 +47,7 @@ ignored working copy, and complete `psql` transcript remain together.
    .venv/bin/python scripts/learning_portal.py
    ```
 
-2. Open **SQL-PROG-01 — Functions, Procedures, and Triggers** and choose
+2. Open **SQL-PROG-01; Functions, Procedures, and Triggers** and choose
    **Create/open guided SQL notebook**. Run its readiness cells from top to
    bottom. The runner accepts only the local disposable
    `advanced_sql_training` database.
@@ -81,7 +81,7 @@ The terminal is then the output surface. If PowerShell says `psql` is not
 recognized, restart with `START_DS60.cmd`; it can discover PostgreSQL for that
 process. If the database or a relation is missing, return to the notebook
 preparation cell and explicitly prepare the disposable database. For
-authentication failures, rerun setup/doctor—never put a password in SQL, a
+authentication failures, rerun setup/doctor, never put a password in SQL, a
 notebook, or Git. With `ON_ERROR_STOP`, fix the **first** error and rerun the
 whole file instead of trusting partial output.
 
@@ -289,15 +289,15 @@ input contract, output grain, side effects, and failure behavior:
 
 ## Next step
 
-Continue to [SQL-TYPES-01 — PostgreSQL-native types and searchable documents](sql_types_01_native_types_search.md).
+Continue to [SQL-TYPES-01; PostgreSQL-native types and searchable documents](sql_types_01_native_types_search.md).
 Later, combine routines with the migration and contract-test modules so their
 signatures, owners, grants, triggers, and side effects are release-tested.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex is optional; the guide, learner SQL, PostgreSQL, and expected checks are
+An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
 enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in Codex:
+prompt after opening the repository in the AI tutor:
 
 ```text
 Tutor me through sql-prog-01 — Functions, Procedures, and Triggers.

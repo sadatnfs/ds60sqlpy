@@ -1,4 +1,4 @@
-# Day 35 — Solutions: Model Evaluation and Cross-Validation
+# Day 35: Solutions: Model Evaluation and Cross-Validation
 
 We evaluate models with appropriate metrics, perform k-fold CV, and discuss bias/variance and leakage.
 
@@ -9,7 +9,7 @@ Contents
 
 ---
 
-Worked reference for Exercise 1 — Metrics with CV
+Worked reference for Exercise 1; Metrics with CV
 ```python
 from sklearn.datasets import load_breast_cancer
 from sklearn.linear_model import LogisticRegression
@@ -41,7 +41,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 2 — 5-fold vs 10-fold
+Worked reference for Exercise 2; 5-fold vs 10-fold
 ```python
 cv5  = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
 cv10 = StratifiedKFold(n_splits=10, shuffle=True, random_state=0)
@@ -54,7 +54,7 @@ Observation
 
 ---
 
-Worked reference for Exercise 3 — Leakage and pipelines
+Worked reference for Exercise 3; Leakage and pipelines
 - Scaling and other preprocessing must be fit within each CV fold to avoid peeking at test fold
 - Pipelines ensure transform.fit is applied only on training split; transforms then apply to held-out split via transform
 
@@ -102,7 +102,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 
@@ -112,9 +112,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — metrics, resampling design, and honest generalization estimates — on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores—not hard labels—for ROC AUC.
+**Verify:** Practice 1; metrics, resampling design, and honest generalization estimates; on the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Compare the variability from 5-fold and 10-fold cross-validation.
 
@@ -124,9 +124,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — metrics, resampling design, and honest generalization estimates — use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
+**Verify:** Practice 2; metrics, resampling design, and honest generalization estimates; use identical data, estimator, scorer, shuffle policy, and seed for 5 and 10 folds; print both score vectors, means, and standard deviations, and confirm every row appears in validation exactly once per run.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Explain leakage risks and how placing preprocessing in a pipeline helps.
 
@@ -136,9 +136,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — metrics, resampling design, and honest generalization estimates — show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
+**Verify:** Practice 3; metrics, resampling design, and honest generalization estimates; show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
-### Exercise 4 — Threshold analysis
+### Exercise 4: Threshold analysis
 
 **Prompt:** Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.
 
@@ -157,9 +157,9 @@ they consume the thresholded labels.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Threshold analysis — for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
+**Verify:** Threshold analysis; for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
 
-### Exercise 5 — Grouped resampling
+### Exercise 5: Grouped resampling
 
 **Prompt:** Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.
 
@@ -190,9 +190,9 @@ split may be appropriate; align the split with that real decision explicitly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Grouped resampling — print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
+**Verify:** Grouped resampling; print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
 
-### Exercise 6 — Selection-bias debugging
+### Exercise 6: Selection-bias debugging
 
 **Prompt:** Explain why reporting `GridSearchCV.best_score_` as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.
 
@@ -213,4 +213,4 @@ outer loop is what repeats selection honestly.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Selection-bias debugging — print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.
+**Verify:** Selection-bias debugging; print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.

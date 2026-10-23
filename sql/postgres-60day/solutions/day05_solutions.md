@@ -1,4 +1,4 @@
-# Day 05 solutions — CROSS and SELF JOINs: Combinatorics and Relationships to Self
+# Day 05 solutions: CROSS and SELF JOINs: Combinatorics and Relationships to Self
 
 
 <!-- beginner-solution-enrichment -->
@@ -68,7 +68,7 @@ executable companion when you want a self-contained check.
 - **Safety:** all writes are bounded and rollback-protected; read-only
   queries still use deterministic ordering whenever row order is claimed.
 
-## Exercise 1 — Query writing
+## Exercise 1: Query writing
 
 **Prompt:** List every employee with their direct manager when present.
 
@@ -108,7 +108,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-05 Exercise 1, the chosen form is justified by this lesson-specific rationale: Self join employees and use a left join so top-level employees remain visible. Evaluate another form against the concrete expected result (One row per employee) and the verification above.
 - **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
 
-## Exercise 2 — Query writing
+## Exercise 2: Query writing
 
 **Prompt:** Find employees who manage nobody.
 
@@ -148,7 +148,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-05 Exercise 2, the chosen form is justified by this lesson-specific rationale: Left join candidate managers to reports and retain managers with no right-side match. Evaluate another form against the concrete expected result (One row per leaf employee) and the verification above.
 - **Edge case:** Add one row for which `(report.employee_id IS NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
 
-## Exercise 3 — Query writing
+## Exercise 3: Query writing
 
 **Prompt:** Build a complete grid of six recent months and all expense categories.
 
@@ -197,7 +197,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-05 Exercise 3, the chosen form is justified by this lesson-specific rationale: Cross join two small declared dimensions; do not cross join raw fact tables. Evaluate another form against the concrete expected result (Six rows per distinct expense category) and the verification above.
 - **Edge case:** Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
 
-## Exercise 4 — Prediction
+## Exercise 4: Prediction
 
 **Prompt:** Predict the count from crossing six departments with twelve months, then verify it without materializing extra columns.
 
@@ -235,7 +235,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-05 Exercise 4, the chosen form is justified by this lesson-specific rationale: Cross-join cardinality is the product of input row counts. Evaluate another form against the concrete expected result (One row containing 72) and the verification above.
 - **Edge case:** Add one source row with a new `department_id`; verify the result gains exactly one row carrying that `department_id` value.
 
-## Exercise 5 — Debugging
+## Exercise 5: Debugging
 
 **Prompt:** List unique employee pairs in the same department without self-pairs or mirrored duplicates.
 
@@ -277,7 +277,7 @@ cardinality contract.
 - **Alternative/trade-off:** For sql-05 Exercise 5, the chosen form is justified by this lesson-specific rationale: Use `left.employee_id < right.employee_id` as both the join condition and uniqueness rule. Evaluate another form against the concrete expected result (One row per unordered same-department pair) and the verification above.
 - **Edge case:** Add duplicate source candidates for `department_id`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
 
-## Exercise 6 — Extension
+## Exercise 6: Extension
 
 **Prompt:** Show each employee, their manager, and their manager's manager.
 

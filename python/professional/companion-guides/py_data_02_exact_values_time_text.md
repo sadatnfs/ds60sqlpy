@@ -227,7 +227,7 @@ Use these explicit instants in leakage-resistant evaluation. Bring the same
 currency, identity, and time policies to dataframe and SQL boundaries rather
 than assuming a library default matches your intended meaning.
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning for python-data-02.

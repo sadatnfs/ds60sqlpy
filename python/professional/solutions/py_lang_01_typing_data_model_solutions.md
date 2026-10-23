@@ -91,7 +91,7 @@ Use this map after an honest attempt. The executable implementation remains
 [`py_lang_01_typing_data_model_solution.py`](py_lang_01_typing_data_model_solution.py); this section explains the
 contract, evidence, alternatives, and edge cases behind every numbered task.
 
-### Exercise 1 — Complete and type the overloaded parser
+### Exercise 1: Complete and type the overloaded parser
 
 **Prompt recap:** Implement the three promised return behaviors. Reject boolean text other than `true` and `false`. In VS Code, inspect the inferred types of `parse_scalar("12", "int")` and `parse_scalar("true", "bool")`. A variable typed as arbitrary `str` needs a broader overload or prior narrowing; overloads do not inspect future runtime text.
 
@@ -105,9 +105,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Complete and type the overloaded parser — assert parse_scalar('12','int') returns int 12, parse_scalar('true','bool') returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.
+**Verify:** Complete and type the overloaded parser; assert parse_scalar('12','int') returns int 12, parse_scalar('true','bool') returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.
 
-### Exercise 2 — Implement the iterator protocol
+### Exercise 2: Implement the iterator protocol
 
 **Prompt recap:** Complete `Batches.__next__`. Return tuples, advance the offset, and raise `StopIteration` only after exhaustion. Test empty input and a final partial batch.
 
@@ -121,9 +121,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Implement the iterator protocol — assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.
+**Verify:** Implement the iterator protocol; assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.
 
-### Exercise 3 — Reason about variance
+### Exercise 3: Reason about variance
 
 **Prompt recap:** Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers only read. Explain why a mutable repository of strings cannot be treated as a repository of objects: a caller might store an integer into it.
 
@@ -137,9 +137,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Reason about variance — save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.
+**Verify:** Reason about variance; save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.
 
-### Exercise 4 — Model events with TypedDict
+### Exercise 4: Model events with TypedDict
 
 **Prompt recap:** Add a third event with a unique literal `kind`. Update `describe_event` and let the checker identify unhandled or invalid fields. Add runtime validation at the JSON boundary; TypedDict alone does not validate decoded data.
 
@@ -153,9 +153,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Model events with TypedDict — mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.
+**Verify:** Model events with TypedDict; mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.
 
-### Exercise 5 — Exercise context-manager failure
+### Exercise 5: Exercise context-manager failure
 
 **Prompt recap:** Append inside `Transaction`, then raise. Verify the target remains unchanged and the exception propagates. Returning true from `__exit__` would suppress it; this implementation deliberately returns false.
 
@@ -169,9 +169,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Exercise context-manager failure — start with target ['before'], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains ['before'] and the same exception object/message reaches the caller.
+**Verify:** Exercise context-manager failure; start with target ['before'], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains ['before'] and the same exception object/message reaches the caller.
 
-### Exercise 6 — Trace descriptor lookup
+### Exercise 6: Trace descriptor lookup
 
 **Prompt recap:** Compare `Customer.name` with `Customer("Ada").name`. Explain why the descriptor returns itself for class access. Corrupt the private field deliberately and observe the runtime type guard.
 
@@ -185,9 +185,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Trace descriptor lookup — assert Customer.name returns the descriptor object, Customer('Ada').name returns 'Ada', and corrupting the private storage with a non-string makes instance access raise the declared TypeError.
+**Verify:** Trace descriptor lookup; assert Customer.name returns the descriptor object, Customer('Ada').name returns 'Ada', and corrupting the private storage with a non-string makes instance access raise the declared TypeError.
 
-### Exercise 7 — Draw the MRO
+### Exercise 7: Draw the MRO
 
 **Prompt recap:** Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses cooperative `super()`; directly naming a parent would skip or duplicate work.
 
@@ -201,9 +201,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Draw the MRO — record the predicted label and ApiRecord.__mro__ before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.
+**Verify:** Draw the MRO; record the predicted label and ApiRecord.__mro__ before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.
 
-### Exercise 8 — Bound metaclass use
+### Exercise 8: Bound metaclass use
 
 **Prompt recap:** Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
 
@@ -217,9 +217,9 @@ normal case, a boundary case, and the documented failure behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** Bound metaclass use — add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
+**Verify:** Bound metaclass use; add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
 
-### Exercise 9 — design a structural Protocol
+### Exercise 9: design a structural Protocol
 
 **Prompt recap:** Define a minimal generic `Serializer[T]` Protocol and implement JSON and text serializers without inheritance. Add a consumer and let mypy reject one incompatible implementation.
 
@@ -238,9 +238,9 @@ checks attribute presence, not full generic signatures or semantic behavior.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** design a structural Protocol — run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.
+**Verify:** design a structural Protocol; run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.
 
-### Exercise 10 — preserve signatures with ParamSpec
+### Exercise 10: preserve signatures with ParamSpec
 
 **Prompt recap:** Write a timing decorator that preserves arbitrary positional/keyword parameters and return type, injects a log sink/clock for tests, and re-raises the wrapped exception unchanged.
 
@@ -259,9 +259,9 @@ same signature and return type at decorated call sites.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** preserve signatures with ParamSpec — mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.
+**Verify:** preserve signatures with ParamSpec; mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.
 
-### Exercise 11 — narrow decoded data safely
+### Exercise 11: narrow decoded data safely
 
 **Prompt recap:** Implement a `TypeGuard` that validates a decoded JSON object as a specific TypedDict, including exact required keys, value types, and the bool-versus-int edge case.
 
@@ -280,9 +280,9 @@ runtime validation.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** narrow decoded data safely — assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.
+**Verify:** narrow decoded data safely; assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.
 
-### Exercise 12 — choose frozen, slots, and hash semantics
+### Exercise 12: choose frozen, slots, and hash semantics
 
 **Prompt recap:** Create a small value-object dataclass and compare mutable, frozen, slotted, and `unsafe_hash` choices. Use it as a dictionary key and show which combinations preserve hash invariants.
 
@@ -302,9 +302,9 @@ carefully documented normalization.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** choose frozen, slots, and hash semantics — print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.
+**Verify:** choose frozen, slots, and hash semantics; print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.
 
-### Exercise 13 — implement cooperative equality
+### Exercise 13: implement cooperative equality
 
 **Prompt recap:** Implement `__eq__` for a value type so unrelated types receive `NotImplemented`, subclasses behave deliberately, and hashing remains consistent. Contrast this with returning `False` immediately.
 
@@ -323,9 +323,9 @@ raising merely because comparison is unsupported.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** implement cooperative equality — assert equal values have equal hashes, unequal values compare false, direct __eq__ with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.
+**Verify:** implement cooperative equality; assert equal values have equal hashes, unequal values compare false, direct __eq__ with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.
 
-### Exercise 14 — evolve a typed serialization boundary
+### Exercise 14: evolve a typed serialization boundary
 
 **Prompt recap:** Version a discriminated TypedDict union, add an optional field to one event, and parse old/new payloads into immutable domain objects. Define unknown-version and unknown-kind failures.
 
@@ -344,9 +344,9 @@ variant, but it cannot replace validation of arbitrary decoded JSON.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** evolve a typed serialization boundary — parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.
+**Verify:** evolve a typed serialization boundary; parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.
 
-### Exercise 15 — trace weak references and caches
+### Exercise 15: trace weak references and caches
 
 **Prompt recap:** Compare a normal dictionary cache with `WeakValueDictionary` for objects that support weak references. Drop strong references, force collection only as an observation, and state when cache disappearance is acceptable.
 
@@ -365,9 +365,9 @@ bounded LRU/TTL policy is preferable for resources and deterministic eviction.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** trace weak references and caches — after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.
+**Verify:** trace weak references and caches; after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.
 
-### Exercise 16 — review typing compatibility
+### Exercise 16: review typing compatibility
 
 **Prompt recap:** Change a public function from accepting `Sequence[str]` to `list[str]`, and another return from `list[str]` to `Sequence[str]`. Analyze source compatibility for callers and implement a deprecation-safe alternative.
 
@@ -387,4 +387,4 @@ must both be preserved.
 **Self-check:** State what the result proves, what assumption it relies on,
 and which input would make the policy reject or choose a different path.
 
-**Verify:** review typing compatibility — save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.
+**Verify:** review typing compatibility; save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.

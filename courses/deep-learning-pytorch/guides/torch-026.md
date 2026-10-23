@@ -186,7 +186,7 @@ It does not prove behavior on every branch, shape or nondifferentiable point. Ad
 
 
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use the checked-in $guide-ds60sqlpy-learning skill for torch-026, Custom modules, residual paths, buffers and autograd checks.

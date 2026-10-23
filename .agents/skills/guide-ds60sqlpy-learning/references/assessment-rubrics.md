@@ -38,7 +38,7 @@ Check whether the learner can:
 - communicate limitations, uncertainty, and reproducibility requirements.
 
 Readiness for advanced production lessons requires Independent pipeline,
-evaluation, and testing evidence—not merely a model that runs.
+evaluation, and testing evidence. Running a model alone is insufficient.
 
 ## PostgreSQL
 
@@ -96,7 +96,7 @@ Check whether the learner can:
 - attach data, environment, model, service, and migration evidence to a release.
 
 Transfer evidence requires a new local case, deterministic tests, and an
-explanation of tradeoffs—not merely running the reference implementation.
+explanation of tradeoffs. Running the reference implementation alone is insufficient.
 
 ## Interactive PostgreSQL notebooks
 
@@ -108,6 +108,48 @@ Check whether the learner can:
 - bound result retrieval and reason about JupySQL autocommit;
 - move a result into pandas without changing its grain; and
 - name what a notebook proves versus what application-level Psycopg tests prove.
+
+## Compiled languages and JavaScript/TypeScript
+
+Check whether the learner can:
+
+- explain source, compilation or type checking, execution and diagnostics as
+  distinct steps;
+- satisfy the classroom entrypoint and filename contract without guessing;
+- choose representations and abstractions, test boundaries and explain failures;
+- reason about ownership and lifetime in C++, or reference/resource behavior
+  and concurrency in Java;
+- distinguish TypeScript's static checking from runtime validation; and
+- separate browser APIs from Node behavior, including asynchronous cancellation
+  and cleanup.
+
+Independent evidence includes a new bounded program, a diagnosed defect and an
+explanation of why its tests cover the important behavior. Successful reference
+compilation alone does not establish readiness for larger projects.
+
+## Scala, Spark and systems
+
+Check Scala language foundations before distributed Spark work. Ask the learner
+to explain schema, row grain, lazy evaluation, partitioning, shuffles, ordering,
+null semantics and bounded collection. A local job does not prove cluster scale.
+
+For Kubernetes, review desired versus observed state, resource identity,
+readiness, failure diagnosis and cleanup in an explicitly owned disposable
+target. Do not use production access or a completed apply command as evidence
+of understanding. Availability of a local tool is separate from runtime proof.
+
+## Statistics, ML and language-model tutorials
+
+For practice routes, assess whether the learner can define notation and units,
+state assumptions, prevent leakage, select meaningful evaluation, inspect error
+cases and explain limitations. Distinguish a toy mechanism, a trained model and
+a useful system. For RAG or fine-tuning, require evidence about retrieval or
+adaptation and held-out task quality rather than only fluent output.
+
+The statistics/ML book is a tutorial without exams or problem sets. If a learner
+asks for a discussion of readiness, use their explanations and volunteered
+examples. Do not impose a hidden test or withhold its worked answers. Reading
+markers remain personal progress rather than certification.
 
 ## Review format
 

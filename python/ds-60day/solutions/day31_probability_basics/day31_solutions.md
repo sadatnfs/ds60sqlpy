@@ -1,4 +1,4 @@
-# Day 31 — Solutions: Probability Basics
+# Day 31: Solutions: Probability Basics
 
 We simulate common distributions, visualize convergence (LLN), and solve a simple Bayes problem.
 
@@ -17,7 +17,7 @@ from math import sqrt, pi, exp
 rng = np.random.default_rng(42)
 ```
 
-Worked reference for Exercise 1 — Binomial histogram
+Worked reference for Exercise 1; Binomial histogram
 ```python
 n, p, trials = 10, 0.3, 10_000
 samples = rng.binomial(n=n, p=p, size=trials)
@@ -39,7 +39,7 @@ Line-by-line
 
 ---
 
-Worked reference for Exercise 2 — Normal(0,1) stats and PDF overlay
+Worked reference for Exercise 2; Normal(0,1) stats and PDF overlay
 ```python
 x = rng.normal(loc=0.0, scale=1.0, size=50_000)
 mu, var = x.mean(), x.var()
@@ -65,7 +65,7 @@ Notes
 
 ---
 
-Worked reference for Exercise 3 — Bayes: P(disease | positive)
+Worked reference for Exercise 3; Bayes: P(disease | positive)
 Given sensitivity=0.95, specificity=0.90, prevalence=0.01.
 ```python
 sens = 0.95        # P(+|D)
@@ -122,7 +122,7 @@ explanation before copying code: the goal is to understand the assumptions,
 the evidence that validates the result, and the edge cases that can make an
 apparently correct implementation fail.
 
-### Exercise 1 — Original lesson practice
+### Exercise 1: Original lesson practice
 
 **Prompt:** Simulate `Binomial(n=10, p=0.3)` 10,000 times and plot a histogram.
 
@@ -132,9 +132,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 1 — probability models, conditional evidence, and simulation error — with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
+**Verify:** Practice 1; probability models, conditional evidence, and simulation error; with seed 731, produce exactly 10,000 integer draws in [0, 10]; assert the sample mean is within 0.08 of 3.0, and save a labeled 11-bin histogram whose counts sum to 10,000.
 
-### Exercise 2 — Original lesson practice
+### Exercise 2: Original lesson practice
 
 **Prompt:** Generate `Normal(0, 1)` values, compute their mean and variance, and overlay the probability density function. The standard-library formula is enough; SciPy is optional.
 
@@ -144,9 +144,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 2 — probability models, conditional evidence, and simulation error — with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
+**Verify:** Practice 2; probability models, conditional evidence, and simulation error; with a declared seed and 10,000 draws, print sample size, mean, and population variance; require |mean| < 0.05 and |variance - 1| < 0.08, and overlay the labeled standard-normal PDF on a density-scaled histogram.
 
-### Exercise 3 — Original lesson practice
+### Exercise 3: Original lesson practice
 
 **Prompt:** Given sensitivity `0.95`, specificity `0.90`, and prevalence `0.01`, compute \(P(\text{disease}\mid\text{positive})\).
 
@@ -156,9 +156,9 @@ Use the worked reference earlier in this file, then change one boundary
 condition and rerun the stated checks. A copied output is not evidence
 unless you can explain why that output follows from the inputs.
 
-**Verify:** Practice 3 — probability models, conditional evidence, and simulation error — show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
+**Verify:** Practice 3; probability models, conditional evidence, and simulation error; show the Bayes numerator 0.95 × 0.01, denominator 0.95 × 0.01 + 0.10 × 0.99, and posterior 0.0876 (about 8.76%); verify the false-positive term is included.
 
-### Exercise 4 — Prediction and uncertainty
+### Exercise 4: Prediction and uncertainty
 
 **Prompt:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
 
@@ -193,9 +193,9 @@ an assumption; clustered events would require another model.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Prediction and uncertainty — show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
+**Verify:** Prediction and uncertainty; show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
 
-### Exercise 5 — Implementation
+### Exercise 5: Implementation
 
 **Prompt:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
 
@@ -232,9 +232,9 @@ returning zero would incorrectly claim evidence of no association.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Implementation — for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.
+**Verify:** Implementation; for A=[True, True, False, True] and B=[True, False, True, True], return estimate 2/3 and denominator 3; assert unequal lengths fail and a zero-true B denominator raises the documented exception.
 
-### Exercise 6 — Debugging and boundaries
+### Exercise 6: Debugging and boundaries
 
 **Prompt:** Design and test a Binomial-parameter validator. Include n=0, p=0, p=1, a negative n, a fractional n, and probabilities just outside the valid interval.
 
@@ -267,4 +267,4 @@ and NaN. Clipping invalid probabilities would hide upstream data errors.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Debugging and boundaries — assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.
+**Verify:** Debugging and boundaries; assert (n,p) values (0,0), (0,1), and (10,0.5) pass; negative/fractional n and p just below 0 or above 1 must raise named ValueErrors, while booleans are rejected as integer/probability inputs.

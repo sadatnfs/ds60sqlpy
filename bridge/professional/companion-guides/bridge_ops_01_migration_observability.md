@@ -1,4 +1,4 @@
-# BRIDGE-OPS-01 — Migration delivery and application observability
+# BRIDGE-OPS-01: Migration delivery and application observability
 
 ## Level and prerequisites
 
@@ -293,7 +293,7 @@ checksums. Resetting `training` through the course setup removes the lab state.
    happen before injected retry delay.
    - **Progressive hint:** One attempt must acquire, lock, re-check, apply, verify, record,
      commit, close, then report.
-   - **Verify:** Record the nine delivery stages—open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report—and in failure assert rollback and close occur before the sleeper.
+   - **Verify:** Record the nine delivery stages, open, bootstrap/lock, re-check, commands, verify, metadata, commit, close, report, and in failure assert rollback and close occur before the sleeper.
 6. **Commit uncertainty:** Simulate an uncertain commit whose retry sees a matching metadata row
    and prove commands are not applied twice.
    - **Progressive hint:** Re-check immutable metadata under lock before every attempt.
@@ -408,12 +408,12 @@ checksums. Resetting `training` through the course setup removes the lab state.
   SQLSTATEs, locks, or Psycopg binding.
 
 
-<!-- BEGIN BRIDGE ENRICHMENT: ASK CODEX -->
-## Ask Codex about this lesson
+<!-- BEGIN BRIDGE ENRICHMENT: ASK AI TUTOR -->
+## Ask an AI tutor about this lesson
 
 Use the checked-in `guide-ds60sqlpy-learning` skill as a tutor, not as an
 answer generator. The direct catalog prerequisites are `bridge-08`, `sql-found-02`. The
-prompt below deliberately names exact paths so a new Codex task can orient
+prompt below deliberately names exact paths so a new AI tutoring session can orient
 itself without guessing.
 
 ```text
@@ -445,7 +445,7 @@ Done when every numbered exercise has its own evidence, normal/edge/failure
 behavior is explained in my words, the relevant offline tests pass, and I can
 solve the final transfer problem without opening solutions/.
 ```
-<!-- END BRIDGE ENRICHMENT: ASK CODEX -->
+<!-- END BRIDGE ENRICHMENT: ASK AI TUTOR -->
 
 ## Next step
 

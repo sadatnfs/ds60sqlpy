@@ -145,7 +145,7 @@ Continue to the next lesson only after you can explain the boundary behavior. Th
 
 - [Java17 Math.addExact](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Math.html#addExact(long,long)).
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
 ```text
 Use $guide-ds60sqlpy-learning to coach me through spark-008: Assertions, numeric boundaries, and independent oracles.

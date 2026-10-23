@@ -1,4 +1,4 @@
-# Day 19 — Solutions: GroupBy, Aggregation, Pivoting
+# Day 19: Solutions: GroupBy, Aggregation, Pivoting
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->
 ## Concept review before comparing answers
@@ -31,9 +31,9 @@ and after.
 For this lesson's **split-apply-combine, grouped summaries, and reshaping** model, follow the exact values from each learner contract through its function or expression to the assertion that proves the expected behavior; then change one boundary input and make that assertion fail once before accepting the answer.
 <!-- END BEGINNER SOLUTION REVIEW -->
 
-## Exercises 1–2 — Worked answers
+## Exercises 1–2: Worked answers
 
-### Exercise 1 — worked answer
+### Exercise 1: worked answer
 
 **Learner contract:** Group the lesson data by two categorical columns and compute named count, sum, mean, and median outputs. **Before code:** state the output grain and whether missing group keys are included. **Constraints:** use named `.agg`, avoid ambiguous MultiIndex columns, and distinguish row count from unique-entity count. **Verify:** assert group-key uniqueness and reconcile the summed additive measure to the input total.
 
@@ -76,7 +76,7 @@ The output grain is one row per observed `(day, smoker)` pair.
 
 **Verification evidence:** assert group-key uniqueness and reconcile the summed additive measure to the input total.
 
-### Exercise 2 — worked answer
+### Exercise 2: worked answer
 
 **Learner contract:** Create a pivot table and then return it to long form with `melt` or `stack`. **Contract:** choose explicit index, column, value, aggregation, and missing-cell policy. **Expected behavior:** the long form clearly identifies every dimension and measurement. **Verify:** reconcile non-missing values/totals and explain any rows introduced or removed.
 
@@ -117,9 +117,9 @@ unobserved day/time cells when returning to long form; removing
 
 **Verification evidence:** reconcile non-missing values/totals and explain any rows introduced or removed.
 
-## Exercises 3–7 — Expanded mastery answers
+## Exercises 3–7: Expanded mastery answers
 
-### Exercise 3 — answer contract
+### Exercise 3: answer contract
 
 **Learner contract:** **Prediction:** Predict whether rows with a missing group key are included by default and compare `dropna=True` with `dropna=False`. **Progressive hint:** Missing group keys are normally excluded unless requested. **Verify:** Group the same fixture both ways; assert totals differ exactly by the missing-key rows and state which output matches the intended policy.
 
@@ -127,7 +127,7 @@ unobserved day/time cells when returning to long form; removing
 
 **Evidence to locate in the grouped implementation:** Group the same fixture both ways; assert totals differ exactly by the missing-key rows and state which output matches the intended policy.
 
-### Exercise 4 — answer contract
+### Exercise 4: answer contract
 
 **Learner contract:** **Tracing:** Trace a wide table through `melt` and back through `pivot_table`; name the identifier, variable, and value columns. **Progressive hint:** Reshaping changes layout, not the underlying measures. **Verify:** Assert the long table has identifier/variable/value columns and that pivoting back preserves the original labeled values and additive total.
 
@@ -135,7 +135,7 @@ unobserved day/time cells when returning to long form; removing
 
 **Evidence to locate in the grouped implementation:** Assert the long table has identifier/variable/value columns and that pivoting back preserves the original labeled values and additive total.
 
-### Exercise 5 — answer contract
+### Exercise 5: answer contract
 
 **Learner contract:** **Implementation:** Implement grouped weighted means without using a simple mean of group means. **Progressive hint:** Aggregate weighted numerators and denominators at the same grain. **Verify:** For two groups, compute numerator and denominator explicitly and assert the grouped weighted means, including the chosen zero-weight behavior.
 
@@ -143,7 +143,7 @@ unobserved day/time cells when returning to long form; removing
 
 **Evidence to locate in the grouped implementation:** For two groups, compute numerator and denominator explicitly and assert the grouped weighted means, including the chosen zero-weight behavior.
 
-### Exercise 6 — answer contract
+### Exercise 6: answer contract
 
 **Learner contract:** **Debugging:** Repair a calculation that joins a customer-level total back to line items and then sums it, multiplying totals by line count. **Progressive hint:** Do not re-aggregate a measure after broadcasting it to a finer grain. **Verify:** Show the inflated total after summing broadcast customer totals, then assert the repaired grain-aware calculation matches the original customer-level total.
 
@@ -151,7 +151,7 @@ unobserved day/time cells when returning to long form; removing
 
 **Evidence to locate in the grouped implementation:** Show the inflated total after summing broadcast customer totals, then assert the repaired grain-aware calculation matches the original customer-level total.
 
-### Exercise 7 — answer contract
+### Exercise 7: answer contract
 
 **Learner contract:** **Edge case and explanation:** Handle groups whose total weight is zero and categories with no observed rows; state whether they appear in output. **Progressive hint:** Make zero-denominator and categorical `observed` behavior explicit. **Verify:** Test a zero-weight group and an unobserved categorical level; assert their value/presence follows the documented denominator and `observed` policy.
 
@@ -163,7 +163,7 @@ unobserved day/time cells when returning to long form; removing
 
 Write the input and output grain before grouping or reshaping. Reconcile row counts and totals at equivalent grains.
 
-### Shared implementation for Exercises 3–4 — Missing groups and reversible shape
+### Shared implementation for Exercises 3–4: Missing groups and reversible shape
 
 ```python
 import pandas as pd
@@ -180,7 +180,7 @@ round_trip = long.pivot_table(index="id", columns="month", values="amount", aggf
 assert round_trip.loc[1, "jan"] == 10
 ```
 
-### Shared implementation for Exercises 5–7 — Weighted aggregation at one grain
+### Shared implementation for Exercises 5–7: Weighted aggregation at one grain
 
 ```python
 scores = pd.DataFrame(

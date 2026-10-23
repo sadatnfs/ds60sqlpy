@@ -59,7 +59,7 @@ def test_guides_scaffolds_and_explanations_are_complete(record: dict[str, Any]) 
     assert guide.count("**Interview:") >= 3
     assert "$guide-ds60sqlpy-learning" in guide
     assert record["source_path"] in guide and record["guide_path"] in guide
-    assert guide.rfind("## Ask Codex about this lesson") > guide.rfind("## Exercises")
+    assert guide.rfind("## Ask an AI tutor about this lesson") > guide.rfind("## Exercises")
     learner = (ROOT / record["source_path"]).read_text()
     assert "NotImplementedError" in learner
     assert re.findall(r"# Exercise ([1-6]):", learner) == list("123456")

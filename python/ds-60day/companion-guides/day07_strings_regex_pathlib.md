@@ -1,4 +1,4 @@
-# Day 7 — Strings, Regular Expressions, and `pathlib`
+# Day 7: Strings, Regular Expressions, and `pathlib`
 
 **Level:** Beginner
 
@@ -62,12 +62,12 @@ preview; execute the real notebook in VS Code or JupyterLab.
    verification as part of the task. Keep `solutions/` closed until you
    have a tested attempt or deliberately ask for help.
 
-**Lesson outcome:** use day 7 — strings, regular expressions, and `pathlib` to practice text normalization, bounded pattern matching, and portable paths
+**Lesson outcome:** use day 7; strings, regular expressions, and `pathlib` to practice text normalization, bounded pattern matching, and portable paths
 and explain the evidence produced by your code.
 <!-- END HOW TO RUN -->
 
 <!-- BEGIN BEGINNER DEEP DIVE -->
-## Beginner deep dive — build the idea before the syntax
+## Beginner deep dive: build the idea before the syntax
 
 ### Start with one mental picture
 
@@ -99,7 +99,7 @@ collisions.
 `r"\d{4}"` preserves backslashes for the regex engine. In
 `folder / "report.csv"`, `/` is `Path` joining syntax, not division.
 
-### Worked example 1 — Extract named fields from a bounded filename
+### Worked example 1: Extract named fields from a bounded filename
 
 Use `fullmatch` when extra text must be rejected. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -123,7 +123,7 @@ match.groupdict() if match else None
 Do not memorize the surface syntax. Point from the input, through
 each transformation or decision, to the final evidence.
 
-### Worked example 2 — Build a path without platform-specific separators
+### Worked example 2: Build a path without platform-specific separators
 
 Let `Path` own path joining and filename fields. Before running it, predict the final displayed value and
 identify which line creates each intermediate object.
@@ -271,11 +271,11 @@ rename plan does not modify files.
 
 - [Open the learner notebook](../notebooks/day07_strings_regex_pathlib.ipynb)
 - [Check the separate solution](../solutions/day07_strings_regex_pathlib/day07_solutions.md)
-- [Next: Day 8 — Files, JSON, and CSV](day08_files_json_csv_context.md)
+- [Next: Day 8; Files, JSON, and CSV](day08_files_json_csv_context.md)
 
-## Ask Codex about this lesson
+## Ask an AI tutor about this lesson
 
-Codex coaching is optional; the guide and notebook above contain the full
+AI coaching is optional; the guide and notebook above contain the full
 lesson. If you want a patient tutor, copy this prompt from the repository
 root:
 
