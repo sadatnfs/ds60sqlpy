@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-021",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Name the units",
+      "input_or_change": "Compare Cents{125} with item count 125.",
+      "expected": "Equal representation, different domain meaning."
+    },
+    {
+      "exercise": 2,
+      "task": "Test identity",
+      "input_or_change": "Add zero to Cents{125}.",
+      "expected": "Cents{125}."
+    },
+    {
+      "exercise": 3,
+      "task": "Construct a separate type",
+      "input_or_change": "Add struct ItemCount and avoid mixed addition.",
+      "expected": "Cents+ItemCount has no valid overload."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair implicit conversion",
+      "input_or_change": "Review a non-explicit raw integer constructor.",
+      "expected": "Use explicit construction at the domain boundary."
+    },
+    {
+      "exercise": 5,
+      "task": "Check equality laws",
+      "input_or_change": "Compare a=125,b=125,c=125.",
+      "expected": "Reflexive, symmetric and transitive equality for these values."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer safety",
+      "input_or_change": "Specify checked addition when values approach LLONG_MAX.",
+      "expected": "Reject overflow before calculating a+b."
+    }
+  ]
+}

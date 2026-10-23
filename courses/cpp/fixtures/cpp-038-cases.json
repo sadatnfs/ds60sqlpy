@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-038",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Keep exact units",
+      "input_or_change": "Add 100 and 25 integer cents.",
+      "expected": "Exactly 125 cents."
+    },
+    {
+      "exercise": 2,
+      "task": "Reject overflow",
+      "input_or_change": "Try INT_MAX plus 1.",
+      "expected": "Absent result without evaluating overflow."
+    },
+    {
+      "exercise": 3,
+      "task": "Inspect rounding",
+      "input_or_change": "Print 0.1+0.2 with sufficient precision.",
+      "expected": "Possible difference from 0.3 is recorded with a suitable tolerance."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair one-size tolerance",
+      "input_or_change": "Explain why epsilon=0.1 is poor for both tiny and huge measurements.",
+      "expected": "A scale-aware absolute/relative policy stated."
+    },
+    {
+      "exercise": 5,
+      "task": "Check zero boundary",
+      "input_or_change": "Run safe_add(0,0) and safe_add(-1,2).",
+      "expected": "Present 0 and rejected negative input."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer stability",
+      "input_or_change": "Compare sums [1e16,1,-1e16] under different groupings.",
+      "expected": "Floating sums can differ; exact expected mathematical total is 1."
+    }
+  ]
+}

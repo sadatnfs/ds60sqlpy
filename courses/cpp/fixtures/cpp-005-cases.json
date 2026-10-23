@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-005",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict the contract",
+      "input_or_change": "Evaluate -3,5,12 for bounds [0,10].",
+      "expected": "Results [0,5,10]."
+    },
+    {
+      "exercise": 2,
+      "task": "Check parameter isolation",
+      "input_or_change": "Call with variable x=12 and inspect x afterward.",
+      "expected": "Result 10; caller x still 12."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a predicate",
+      "input_or_change": "Write inside(x,low,high) with inclusive bounds.",
+      "expected": "inside(0,0,10) true; inside(11,0,10) false."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair an invalid contract",
+      "input_or_change": "Remove the reversed-bounds check and explain the lost guarantee.",
+      "expected": "clamp(5,10,0) must be rejected after repair."
+    },
+    {
+      "exercise": 5,
+      "task": "Check a one-point interval",
+      "input_or_change": "Evaluate x=2,3,4 with bounds [3,3].",
+      "expected": "All return 3."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer to money",
+      "input_or_change": "Clamp a cents amount of 1250 to [0,1000].",
+      "expected": "1000 integer cents, without floating conversion."
+    }
+  ]
+}

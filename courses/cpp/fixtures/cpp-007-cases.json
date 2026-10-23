@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-007",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict sorting",
+      "input_or_change": "Sort [3,1,3,0] on paper.",
+      "expected": "[0,1,3,3], size 4."
+    },
+    {
+      "exercise": 2,
+      "task": "Preserve evidence",
+      "input_or_change": "Sort a copy and compare the original.",
+      "expected": "Original remains [3,1,3,0]."
+    },
+    {
+      "exercise": 3,
+      "task": "Count a boundary",
+      "input_or_change": "Use count_if to count >=3.",
+      "expected": "2 matching elements."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair a wrong total",
+      "input_or_change": "Replace accumulate start 0LL with 10LL, then repair.",
+      "expected": "Wrong total 17; correct total 7."
+    },
+    {
+      "exercise": 5,
+      "task": "Check an empty vector",
+      "input_or_change": "Sort, count and sum an empty vector.",
+      "expected": "Size 0, count 0, sum 0; no dereference."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer to ordered unique values",
+      "input_or_change": "Sort [3,1,3,0], then erase the unique tail.",
+      "expected": "[0,1,3], size 3."
+    }
+  ]
+}

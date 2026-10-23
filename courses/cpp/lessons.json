@@ -41,6 +41,71 @@
       "verification_id": null
     },
     {
+      "id": "cpp-004",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-004.md",
+      "source_path": "courses/cpp/lessons/cpp-004.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-004_solution.cpp",
+        "courses/cpp/solutions/cpp-004_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-005",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-005.md",
+      "source_path": "courses/cpp/lessons/cpp-005.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-005_solution.cpp",
+        "courses/cpp/solutions/cpp-005_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-006",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-006.md",
+      "source_path": "courses/cpp/lessons/cpp-006.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-006_solution.cpp",
+        "courses/cpp/solutions/cpp-006_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-007",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-007.md",
+      "source_path": "courses/cpp/lessons/cpp-007.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-007_solution.cpp",
+        "courses/cpp/solutions/cpp-007_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-008",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-008.md",
+      "source_path": "courses/cpp/lessons/cpp-008.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-008_solution.cpp",
+        "courses/cpp/solutions/cpp-008_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
       "id": "cpp-009",
       "status": "authored",
       "language": "cpp",
@@ -52,6 +117,435 @@
         "courses/cpp/solutions/cpp-009_solutions.md"
       ],
       "verification_id": "cpp-ownership-v1"
+    },
+    {
+      "id": "cpp-010",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-010.md",
+      "source_path": "courses/cpp/lessons/cpp-010.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-010_solution.cpp",
+        "courses/cpp/solutions/cpp-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-011",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-011.md",
+      "source_path": "courses/cpp/lessons/cpp-011.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-011_solution.cpp",
+        "courses/cpp/solutions/cpp-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-012",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-012.md",
+      "source_path": "courses/cpp/lessons/cpp-012.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-012_solution.cpp",
+        "courses/cpp/solutions/cpp-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-013",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-013.md",
+      "source_path": "courses/cpp/lessons/cpp-013.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-013_solution.cpp",
+        "courses/cpp/solutions/cpp-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-014",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-014.md",
+      "source_path": "courses/cpp/lessons/cpp-014.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-014_solution.cpp",
+        "courses/cpp/solutions/cpp-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-015",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-015.md",
+      "source_path": "courses/cpp/lessons/cpp-015.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-015_solution.cpp",
+        "courses/cpp/solutions/cpp-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-016",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-016.md",
+      "source_path": "courses/cpp/lessons/cpp-016.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-016_solution.cpp",
+        "courses/cpp/solutions/cpp-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-017",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-017.md",
+      "source_path": "courses/cpp/lessons/cpp-017.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-017_solution.cpp",
+        "courses/cpp/solutions/cpp-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-018",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-018.md",
+      "source_path": "courses/cpp/lessons/cpp-018.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-018_solution.cpp",
+        "courses/cpp/solutions/cpp-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-019",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-019.md",
+      "source_path": "courses/cpp/lessons/cpp-019.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-019_solution.cpp",
+        "courses/cpp/solutions/cpp-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-020",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-020.md",
+      "source_path": "courses/cpp/lessons/cpp-020.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-020_solution.cpp",
+        "courses/cpp/solutions/cpp-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-021",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-021.md",
+      "source_path": "courses/cpp/lessons/cpp-021.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-021_solution.cpp",
+        "courses/cpp/solutions/cpp-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-022",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-022.md",
+      "source_path": "courses/cpp/lessons/cpp-022.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-022_solution.cpp",
+        "courses/cpp/solutions/cpp-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-023",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-023.md",
+      "source_path": "courses/cpp/lessons/cpp-023.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-023_solution.cpp",
+        "courses/cpp/solutions/cpp-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-024",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-024.md",
+      "source_path": "courses/cpp/lessons/cpp-024.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-024_solution.cpp",
+        "courses/cpp/solutions/cpp-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-025",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-025.md",
+      "source_path": "courses/cpp/lessons/cpp-025.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-025_solution.cpp",
+        "courses/cpp/solutions/cpp-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-026",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-026.md",
+      "source_path": "courses/cpp/lessons/cpp-026.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-026_solution.cpp",
+        "courses/cpp/solutions/cpp-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-027",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-027.md",
+      "source_path": "courses/cpp/lessons/cpp-027.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-027_solution.cpp",
+        "courses/cpp/solutions/cpp-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-028",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-028.md",
+      "source_path": "courses/cpp/lessons/cpp-028.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-028_solution.cpp",
+        "courses/cpp/solutions/cpp-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-029",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-029.md",
+      "source_path": "courses/cpp/lessons/cpp-029.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-029_solution.cpp",
+        "courses/cpp/solutions/cpp-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-030",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-030.md",
+      "source_path": "courses/cpp/lessons/cpp-030.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-030_solution.cpp",
+        "courses/cpp/solutions/cpp-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-031",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-031.md",
+      "source_path": "courses/cpp/lessons/cpp-031.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-031_solution.cpp",
+        "courses/cpp/solutions/cpp-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-032",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-032.md",
+      "source_path": "courses/cpp/lessons/cpp-032.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-032_solution.cpp",
+        "courses/cpp/solutions/cpp-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-033",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-033.md",
+      "source_path": "courses/cpp/lessons/cpp-033.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-033_solution.cpp",
+        "courses/cpp/solutions/cpp-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-034",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-034.md",
+      "source_path": "courses/cpp/lessons/cpp-034.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-034_solution.cpp",
+        "courses/cpp/solutions/cpp-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-035",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-035.md",
+      "source_path": "courses/cpp/lessons/cpp-035.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-035_solution.cpp",
+        "courses/cpp/solutions/cpp-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-036",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-036.md",
+      "source_path": "courses/cpp/lessons/cpp-036.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-036_solution.cpp",
+        "courses/cpp/solutions/cpp-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-037",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-037.md",
+      "source_path": "courses/cpp/lessons/cpp-037.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-037_solution.cpp",
+        "courses/cpp/solutions/cpp-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-038",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-038.md",
+      "source_path": "courses/cpp/lessons/cpp-038.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-038_solution.cpp",
+        "courses/cpp/solutions/cpp-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-039",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-039.md",
+      "source_path": "courses/cpp/lessons/cpp-039.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-039_solution.cpp",
+        "courses/cpp/solutions/cpp-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-040",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-040.md",
+      "source_path": "courses/cpp/lessons/cpp-040.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-040_solution.cpp",
+        "courses/cpp/solutions/cpp-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-041",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-041.md",
+      "source_path": "courses/cpp/lessons/cpp-041.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-041_solution.cpp",
+        "courses/cpp/solutions/cpp-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "cpp-042",
+      "status": "authored",
+      "language": "cpp",
+      "runtime_profile": "cpp20",
+      "guide_path": "courses/cpp/guides/cpp-042.md",
+      "source_path": "courses/cpp/lessons/cpp-042.cpp",
+      "solution_paths": [
+        "courses/cpp/solutions/cpp-042_solution.cpp",
+        "courses/cpp/solutions/cpp-042_solutions.md"
+      ],
+      "verification_id": null
     }
   ]
 }

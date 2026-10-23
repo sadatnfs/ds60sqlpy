@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-015",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Trace ownership",
+      "input_or_change": "Draw p and q before and after moving unique_ptr<int>(7).",
+      "expected": "One live allocation; exactly one owner at each point."
+    },
+    {
+      "exercise": 2,
+      "task": "Check normal cleanup",
+      "input_or_change": "Run the Tracked scoped case.",
+      "expected": "live=1 inside and 0 afterward."
+    },
+    {
+      "exercise": 3,
+      "task": "Check exceptional cleanup",
+      "input_or_change": "Throw after constructing Tracked and catch outside.",
+      "expected": "live=0 after catch."
+    },
+    {
+      "exercise": 4,
+      "task": "Reject accidental copy",
+      "input_or_change": "Try auto q=p with unique_ptr.",
+      "expected": "Compile failure; move only when ownership should change."
+    },
+    {
+      "exercise": 5,
+      "task": "Handle empty owner",
+      "input_or_change": "Default-construct unique_ptr<int> and inspect Boolean state.",
+      "expected": "false, with no dereference."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer to a collection",
+      "input_or_change": "Own three unique_ptr<int> values in a vector then leave scope.",
+      "expected": "All three allocations released; no manual delete loop."
+    }
+  ]
+}

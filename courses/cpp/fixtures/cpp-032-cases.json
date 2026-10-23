@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-032",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Set a budget",
+      "input_or_change": "Define maximum workers 2 and queued tasks 4.",
+      "expected": "Both bounds documented independently."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare serial results",
+      "input_or_change": "Square 3 and 4 serially and in two futures.",
+      "expected": "Exact total 25 in both paths."
+    },
+    {
+      "exercise": 3,
+      "task": "Propagate a failure",
+      "input_or_change": "Include task -1 and call get.",
+      "expected": "invalid_argument reaches the owner."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair fire-and-forget",
+      "input_or_change": "Review discarded futures and missing result accounting.",
+      "expected": "Observe every result or exception and join owned work."
+    },
+    {
+      "exercise": 5,
+      "task": "Test empty workload",
+      "input_or_change": "Run no tasks through the serial/reference contract.",
+      "expected": "Empty results and total 0."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer backpressure",
+      "input_or_change": "Sketch a capacity-4 queue for ten tasks and two consumers.",
+      "expected": "At most 2 running plus 4 queued, remaining producer work blocked."
+    }
+  ]
+}

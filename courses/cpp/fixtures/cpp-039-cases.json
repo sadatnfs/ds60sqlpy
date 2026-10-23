@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-039",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Document ownership",
+      "input_or_change": "Name who destroys a successfully created handle.",
+      "expected": "Caller invokes analyzer_destroy exactly once."
+    },
+    {
+      "exercise": 2,
+      "task": "Wrap safely",
+      "input_or_change": "Use unique_ptr with analyzer_destroy as deleter.",
+      "expected": "Scope exit calls the provider destructor once."
+    },
+    {
+      "exercise": 3,
+      "task": "Reject null arguments",
+      "input_or_change": "Test null handle and null output independently.",
+      "expected": "Status 1 for either, no pointer dereference."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair cross-boundary throw",
+      "input_or_change": "Review a create function that throws bad_alloc across C.",
+      "expected": "Catch inside and return null or a documented status."
+    },
+    {
+      "exercise": 5,
+      "task": "Version the interface",
+      "input_or_change": "Add a provider ABI-version query returning 1.",
+      "expected": "Caller rejects unsupported version before using handles."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer real loading",
+      "input_or_change": "Build and load a shared provider in a separate owned host project.",
+      "expected": "Record exported symbols, architecture, compiler and create/destroy test."
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+# cpp-023: explanations and reference observations
+
+Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+
+## Mechanism
+
+An API is the source-level interface callers use. An ABI is the compiled calling, layout and symbol convention needed to link binaries. C++ standard library objects are risky across independently compiled boundaries. A narrow C interface uses fixed-width values, explicit ownership and status codes to reduce coupling.
+
+## Worked example 1
+
+```cpp
+int out=0; assert(add_checked(2,3,&out)==0 && out==5);
+```
+
+Expected: Status 0 publishes value 5 through the caller-owned pointer.
+
+## Worked example 2
+
+```cpp
+assert(add_checked(2,3,nullptr)==1);
+```
+
+Expected: Null output pointer returns status 1 without dereferencing it.
+
+## Exercise 1: Separate interfaces
+
+List the add_checked source contract and binary assumptions.
+
+**Expected:** Names/types/statuses versus compiler/platform/linkage distinguished.
+
+**Reasoning:** An ABI includes details the header alone cannot prove.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+
+## Exercise 2: Call a valid boundary
+
+Pass 2,3 and a writable output integer.
+
+**Expected:** Status 0 and output 5.
+
+**Reasoning:** Caller owns the destination storage.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+
+## Exercise 3: Reject null output
+
+Pass nullptr for out.
+
+**Expected:** Status 1, no invalid access.
+
+**Reasoning:** Validate pointers before dereference.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+
+## Exercise 4: Repair exception leakage
+
+Review a C wrapper that lets std::runtime_error escape.
+
+**Expected:** Catch inside wrapper and map to a documented status.
+
+**Reasoning:** Foreign callers cannot assume a compatible exception runtime.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+
+## Exercise 5: Check overflow
+
+Call INT_MAX plus 1.
+
+**Expected:** Status 2; no overflowing addition.
+
+**Reasoning:** Check arithmetic before evaluating it.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.
+
+## Exercise 6: Transfer a shared library
+
+Build the wrapper separately in an owned host project and record compiler/architecture.
+
+**Expected:** Real link/load receipt plus matching header, no inferred portability.
+
+**Reasoning:** The browser single-file run does not exercise a shared-library ABI.
+
+**Verify:** Compare your saved evidence with the stated value or field and explain the difference before editing an expectation.

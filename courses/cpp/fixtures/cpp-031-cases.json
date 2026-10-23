@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-031",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Count atomic work",
+      "input_or_change": "Run two workers with 1000 increments each.",
+      "expected": "Final count 2000 after both joins."
+    },
+    {
+      "exercise": 2,
+      "task": "Explain relaxed",
+      "input_or_change": "State why relaxed suffices for the isolated counter.",
+      "expected": "No payload publication relies on counter ordering."
+    },
+    {
+      "exercise": 3,
+      "task": "Trace publication",
+      "input_or_change": "Draw payload write, release store, acquire load and payload read.",
+      "expected": "A synchronization chain orders the payload access."
+    },
+    {
+      "exercise": 4,
+      "task": "Reject a data race",
+      "input_or_change": "Review plain shared int increments without synchronization.",
+      "expected": "Reject as undefined behavior; do not normalize a lucky total."
+    },
+    {
+      "exercise": 5,
+      "task": "Test zero workers",
+      "input_or_change": "Set work count to zero and inspect the counter.",
+      "expected": "0 without a publication claim."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer multiple fields",
+      "input_or_change": "Publish two fields behind one ready release/acquire pair.",
+      "expected": "Both earlier writes visible after the matching acquire."
+    }
+  ]
+}

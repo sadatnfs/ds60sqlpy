@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-012",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Separate declaration",
+      "input_or_change": "Split add declaration, definition and caller using the supplied host-project recipe.",
+      "expected": "math.hpp, math.cpp and main.cpp build one executable returning 5."
+    },
+    {
+      "exercise": 2,
+      "task": "Compile one object",
+      "input_or_change": "Compile main.cpp with -c before linking.",
+      "expected": "main.o exists even though the function body is in math.cpp."
+    },
+    {
+      "exercise": 3,
+      "task": "Link the complete set",
+      "input_or_change": "Link main.o and math.o.",
+      "expected": "Executable runs, exit 0 and value 5."
+    },
+    {
+      "exercise": 4,
+      "task": "Diagnose missing object",
+      "input_or_change": "Omit math.o deliberately.",
+      "expected": "Nonzero link status naming an unresolved add symbol."
+    },
+    {
+      "exercise": 5,
+      "task": "Diagnose duplicate definition",
+      "input_or_change": "Put a non-inline add body in a header included by both files.",
+      "expected": "A duplicate-definition link failure; restore one source definition."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a library boundary",
+      "input_or_change": "Add subtract declaration and definition and a caller test 5-3.",
+      "expected": "Result 2 with one definition and matching signature."
+    }
+  ]
+}

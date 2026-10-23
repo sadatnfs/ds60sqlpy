@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-006",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Trace consumption",
+      "input_or_change": "Parse 42 and 12x and inspect pointer distance.",
+      "expected": "42 consumes 2; 12x consumes 2 of 3 and is rejected."
+    },
+    {
+      "exercise": 2,
+      "task": "Retain zero",
+      "input_or_change": "Parse 0 and -7 through optional<int>.",
+      "expected": "Both are present values."
+    },
+    {
+      "exercise": 3,
+      "task": "Build a ledger",
+      "input_or_change": "Classify [12,12x,empty,0] as raw strings.",
+      "expected": "Two accepted values [12,0], two rejected records."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair prefix acceptance",
+      "input_or_change": "Change the condition to check only ec in a scratch copy.",
+      "expected": "12x is incorrectly accepted until ptr==end is restored."
+    },
+    {
+      "exercise": 5,
+      "task": "Reject overflow",
+      "input_or_change": "Parse 21 decimal nines.",
+      "expected": "Absent result with out-of-range conversion, never a wrapped integer."
+    },
+    {
+      "exercise": 6,
+      "task": "Define whitespace policy",
+      "input_or_change": "Compare literal space-42-space with a deliberately trimmed copy.",
+      "expected": "Strict parser rejects original; explicit trim accepts 42."
+    }
+  ]
+}

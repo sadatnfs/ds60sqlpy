@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-028",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Write public contracts",
+      "input_or_change": "Document parse_record input grammar and result ownership.",
+      "expected": "Two nonnegative integer fields, full consumption, owned success."
+    },
+    {
+      "exercise": 2,
+      "task": "Build independent fixture",
+      "input_or_change": "Use [7,125;0,0;7,125x;7,-1] as four records.",
+      "expected": "Two accepted and two rejected."
+    },
+    {
+      "exercise": 3,
+      "task": "Package a consumer",
+      "input_or_change": "Split header, implementation and CLI into the host project.",
+      "expected": "Separate library and executable targets build and link."
+    },
+    {
+      "exercise": 4,
+      "task": "Inject a regression",
+      "input_or_change": "Remove the full-consumption check in a scratch implementation.",
+      "expected": "7,125x must fail the golden test."
+    },
+    {
+      "exercise": 5,
+      "task": "Check boundary ownership",
+      "input_or_change": "Return a parsed record after input string goes out of scope.",
+      "expected": "Record fields remain valid copied integers."
+    },
+    {
+      "exercise": 6,
+      "task": "Deliver compatibility evidence",
+      "input_or_change": "Run a consumer against current public header and library.",
+      "expected": "Compiler/platform identity, test output and source inventory retained."
+    }
+  ]
+}

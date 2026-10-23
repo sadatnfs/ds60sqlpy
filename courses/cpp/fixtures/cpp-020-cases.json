@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-020",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Read deduction",
+      "input_or_change": "Call identity_sum with int values and long long values.",
+      "expected": "Result types int and long long respectively."
+    },
+    {
+      "exercise": 2,
+      "task": "Reject a category",
+      "input_or_change": "Try identity_sum with two strings in a scratch file.",
+      "expected": "Constraint-related compile failure."
+    },
+    {
+      "exercise": 3,
+      "task": "Add a concept",
+      "input_or_change": "Constrain a function to signed_integral.",
+      "expected": "int accepted; unsigned rejected."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair mixed deduction",
+      "input_or_change": "Call identity_sum(2,3LL), then choose a deliberate common type.",
+      "expected": "Mixed call fails deduction; explicit long long arguments succeed."
+    },
+    {
+      "exercise": 5,
+      "task": "Inspect numeric boundary",
+      "input_or_change": "Explain why INT_MAX+1 is still unsafe for integral T=int.",
+      "expected": "Concept accepts int but cannot make overflow valid."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer a generic test",
+      "input_or_change": "Run zero-identity tests for int and long long.",
+      "expected": "sum(x,0)==x for bounded x=7 in both types."
+    }
+  ]
+}

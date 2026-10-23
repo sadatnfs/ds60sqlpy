@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-040",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Write the grammar",
+      "input_or_change": "Specify accepted identifier characters and length.",
+      "expected": "1 to 16 lowercase ASCII letters, digits or underscore."
+    },
+    {
+      "exercise": 2,
+      "task": "Test normal input",
+      "input_or_change": "Validate batch_7 and 0.",
+      "expected": "Both accepted."
+    },
+    {
+      "exercise": 3,
+      "task": "Reject traversal shapes",
+      "input_or_change": "Test ../secret, a/b and a backslash-separated path.",
+      "expected": "All rejected before filesystem access."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair overclaim",
+      "input_or_change": "Explain why this is not a general symlink-safe path sandbox.",
+      "expected": "No claim of arbitrary path containment; scope remains identifiers."
+    },
+    {
+      "exercise": 5,
+      "task": "Enforce size",
+      "input_or_change": "Test empty, 16-character and 17-character strings.",
+      "expected": "Reject, accept, reject."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer row budgets",
+      "input_or_change": "Set max 100 rows and 256 bytes per row before parsing a file.",
+      "expected": "Oversized input rejected with counts and no partial publication."
+    }
+  ]
+}

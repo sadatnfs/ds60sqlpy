@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-027",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Inventory inputs",
+      "input_or_change": "List compiler, C++ level, dependency source and build generator.",
+      "expected": "Four concrete identities, including dependency content hash."
+    },
+    {
+      "exercise": 2,
+      "task": "Build offline",
+      "input_or_change": "Build the supplied local target in a fresh owned directory without network.",
+      "expected": "Configure/build/test complete without downloads."
+    },
+    {
+      "exercise": 3,
+      "task": "Expose target requirements",
+      "input_or_change": "Create a CMake interface target with cxx_std_20.",
+      "expected": "Consumer inherits the required language feature."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair hidden fetch",
+      "input_or_change": "Review a configure script that downloads latest.zip.",
+      "expected": "Replace with checked local source and pinned reviewed identity."
+    },
+    {
+      "exercise": 5,
+      "task": "Check licensing",
+      "input_or_change": "Package the dependency license with the source inventory.",
+      "expected": "License path present in the delivery tree."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer another platform",
+      "input_or_change": "Record an untested architecture as unqualified.",
+      "expected": "Separate built platform from planned platforms."
+    }
+  ]
+}

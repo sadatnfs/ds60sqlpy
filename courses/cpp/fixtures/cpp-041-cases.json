@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-041",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Inventory the release",
+      "input_or_change": "Record source revision or content hashes plus compiler/architecture.",
+      "expected": "All identities present without machine-specific source paths."
+    },
+    {
+      "exercise": 2,
+      "task": "Compare build modes",
+      "input_or_change": "Run always-active checks in Debug and Release host builds.",
+      "expected": "Both report rows=3,total=6 and actual executed test count."
+    },
+    {
+      "exercise": 3,
+      "task": "Bound a benchmark",
+      "input_or_change": "Declare row count, repeats and output checksum before timing.",
+      "expected": "Units, variability and same-work evidence retained."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair platform claims",
+      "input_or_change": "Review a packet tested only on arm64 Linux but claiming Windows.",
+      "expected": "Windows remains unqualified until actual execution."
+    },
+    {
+      "exercise": 5,
+      "task": "Check offline replay",
+      "input_or_change": "Rebuild in a fresh owned directory using prepared dependencies.",
+      "expected": "No network access needed and tests reproduce."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer rollback",
+      "input_or_change": "Keep a previous known-good binary and compatible input contract.",
+      "expected": "A reviewer can identify rollback artifact and acceptance test."
+    }
+  ]
+}

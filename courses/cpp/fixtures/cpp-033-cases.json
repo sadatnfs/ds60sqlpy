@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-033",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Identify the schedule point",
+      "input_or_change": "Name the purpose of the ready handshake.",
+      "expected": "It proves worker startup, not worker completion."
+    },
+    {
+      "exercise": 2,
+      "task": "Run bounded stress",
+      "input_or_change": "Repeat the 200-count scenario 20 times.",
+      "expected": "20 exact invariant passes, no sleeps."
+    },
+    {
+      "exercise": 3,
+      "task": "Add a timeout contract",
+      "input_or_change": "Wrap the host test process in a finite supervisor deadline.",
+      "expected": "A deadlock is reported as timeout rather than hanging indefinitely."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair timing assumptions",
+      "input_or_change": "Replace a fixed sleep used to infer startup with a promise.",
+      "expected": "Test proceeds only after the readiness event."
+    },
+    {
+      "exercise": 5,
+      "task": "Qualify TSan separately",
+      "input_or_change": "Use an existing supported compiler with -fsanitize=thread on an owned host copy.",
+      "expected": "Actual build/run receipt or explicit unavailable status."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer negative control",
+      "input_or_change": "Introduce a plain counter race only in a separately instrumented scratch test.",
+      "expected": "TSan finding expected; production example stays race-free."
+    }
+  ]
+}

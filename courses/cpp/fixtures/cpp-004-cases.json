@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-004",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Trace state",
+      "input_or_change": "Trace [4,-2,0,6] with a row for each input.",
+      "expected": "Totals [4,4,4,10], four visits."
+    },
+    {
+      "exercise": 2,
+      "task": "Change the threshold",
+      "input_or_change": "Count retained values for >=0 and >0 on [4,-2,0,6].",
+      "expected": "Counts 3 and 2; both sums 10."
+    },
+    {
+      "exercise": 3,
+      "task": "Construct a bounded loop",
+      "input_or_change": "Sum integers 1 through 4 with an index loop.",
+      "expected": "10 from exactly four iterations."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair a reset",
+      "input_or_change": "Move total=0 into the loop, predict, then repair the scratch copy.",
+      "expected": "Broken final total 6; repaired total 10."
+    },
+    {
+      "exercise": 5,
+      "task": "Test the empty boundary",
+      "input_or_change": "Run empty and all-negative vectors.",
+      "expected": "Both totals 0; no element access."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer the predicate",
+      "input_or_change": "Keep readings in [0,5] from [-1,0,4,5,6].",
+      "expected": "Values [0,4,5], total 9."
+    }
+  ]
+}

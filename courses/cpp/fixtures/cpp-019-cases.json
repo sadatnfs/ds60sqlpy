@@ -1,0 +1,41 @@
+{
+  "lesson_id": "cpp-019",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Predict lazy output",
+      "input_or_change": "Filter >=0 then double [-1,0,3].",
+      "expected": "[0,6]."
+    },
+    {
+      "exercise": 2,
+      "task": "Change composition",
+      "input_or_change": "Double first, then filter >0.",
+      "expected": "[6]; zero is excluded by the new predicate."
+    },
+    {
+      "exercise": 3,
+      "task": "Materialize ownership",
+      "input_or_change": "Collect the view into vector<int>.",
+      "expected": "Stored [0,6] remains independent of later source changes."
+    },
+    {
+      "exercise": 4,
+      "task": "Repair dangling view",
+      "input_or_change": "Review a view returned over a local vector.",
+      "expected": "Reject; keep the owner outside or return a vector."
+    },
+    {
+      "exercise": 5,
+      "task": "Sort records",
+      "input_or_change": "Sort scores (id1,9),(id2,4) by points.",
+      "expected": "ID order [2,1]."
+    },
+    {
+      "exercise": 6,
+      "task": "Transfer stable ties",
+      "input_or_change": "Add (id3,4) and define deterministic ordering by points then ID.",
+      "expected": "ID order [2,3,1]."
+    }
+  ]
+}
