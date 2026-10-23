@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>4. Probability Distributions You Should Recognize · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>4. Probability Distributions You Should Recognize</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/04-probability-distributions-you-should-recognize.md</code></p>
+    </header>
+    <article class="document"><h2 id="4-probability-distributions-you-should-recognize">4. Probability Distributions You Should Recognize<a class="heading-anchor" href="#4-probability-distributions-you-should-recognize" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-004</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A distribution is a claim about support, shape and how observations arise. Start with the outcome type and mechanism: one binary trial, repeated trials, event counts, waiting times, bounded proportions or extreme events. Then ask whether heterogeneity, dependence, truncation or excess zeros invalidate the simplest family.</p>
+<p>Parameters are not interchangeable across libraries. For example, a gamma distribution can be specified with shape and rate, while SciPy&#x27;s scale is the inverse rate. A distribution&#x27;s fitted mean may look plausible while its tails badly misrepresent operational risk. Use simulations and probability calculations to inspect consequences before trusting a name.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-04-01">Bernoulli distribution<a class="heading-anchor" href="#stat-04-01" aria-label="Link to this section">#</a></h4>
+<p>A Bernoulli variable has support zero and one, mean p and variance p(1-p). It models a single trial. Repeated events for one customer usually need a dependence model beyond separate Bernoulli assumptions.</p>
+<h4 id="stat-04-02">Binomial distribution<a class="heading-anchor" href="#stat-04-02" aria-label="Link to this section">#</a></h4>
+<p>The sum of n independent Bernoulli trials with common p has mean np and variance np(1-p). Varying probabilities or correlated trials produce different count distributions and can make binomial intervals too narrow.</p>
+<h4 id="stat-04-03">Beta-binomial distribution<a class="heading-anchor" href="#stat-04-03" aria-label="Link to this section">#</a></h4>
+<p>Mix binomial probabilities over a beta distribution to represent group heterogeneity. The extra uncertainty induces positive dependence within a group and overdispersion. It should not replace investigation of omitted systematic group predictors.</p>
+<h4 id="stat-04-04">Categorical distribution<a class="heading-anchor" href="#stat-04-04" aria-label="Link to this section">#</a></h4>
+<p>A categorical draw selects one of K outcomes with probabilities summing to one. Numerical category codes have no implied distance. The last probability is constrained by the others, which matters for parameter counts.</p>
+<h4 id="stat-04-05">Multinomial distribution<a class="heading-anchor" href="#stat-04-05" aria-label="Link to this section">#</a></h4>
+<p>Counts of K categories across n independent categorical draws sum to n. That constraint creates negative covariance between categories. Modeling each count independently can assign impossible totals and incorrect uncertainty.</p>
+<h4 id="stat-04-06">Poisson distribution<a class="heading-anchor" href="#stat-04-06" aria-label="Link to this section">#</a></h4>
+<p>A Poisson count has mean and variance lambda. It suits independent events with a stable exposure-adjusted rate. Different exposure durations require offsets or rate normalization; overdispersion calls for further modeling.</p>
+<h4 id="stat-04-07">Negative binomial distribution<a class="heading-anchor" href="#stat-04-07" aria-label="Link to this section">#</a></h4>
+<p>A negative binomial permits variance above the mean, often through gamma mixing of a Poisson rate. Parameterizations differ. Overdispersion may reflect heterogeneity, but this model alone does not identify its scientific cause.</p>
+<h4 id="stat-04-08">Geometric distribution<a class="heading-anchor" href="#stat-04-08" aria-label="Link to this section">#</a></h4>
+<p>Geometric waiting counts arise from independent trials with constant success probability. Some conventions count failures before success and others include the successful trial. State the convention before comparing means or API outputs.</p>
+<h4 id="stat-04-09">Hypergeometric distribution<a class="heading-anchor" href="#stat-04-09" aria-label="Link to this section">#</a></h4>
+<p>Sampling without replacement from a finite population produces a hypergeometric count. Its variance is smaller than the corresponding with-replacement binomial variance because sampled successes deplete the remaining population.</p>
+<h4 id="stat-04-10">Normal distribution<a class="heading-anchor" href="#stat-04-10" aria-label="Link to this section">#</a></h4>
+<p>A normal distribution has symmetric bell-shaped density with mean mu and variance sigma-squared. It is often an approximation for averages. Unbounded support makes it unsuitable for some raw positive or bounded measurements.</p>
+<h4 id="stat-04-11">Multivariate normal distribution<a class="heading-anchor" href="#stat-04-11" aria-label="Link to this section">#</a></h4>
+<p>A mean vector and covariance matrix determine a joint Gaussian law. Linear combinations remain Gaussian. Zero covariance then implies independence, a special property that does not extend to arbitrary multivariate distributions.</p>
+<h4 id="stat-04-12">Student’s t distribution<a class="heading-anchor" href="#stat-04-12" aria-label="Link to this section">#</a></h4>
+<p>The t distribution has heavier tails controlled by degrees of freedom. It describes a normal mean standardized using an independently estimated variance. Very low degrees of freedom can make means or variances undefined.</p>
+<h4 id="stat-04-13">Chi-square distribution<a class="heading-anchor" href="#stat-04-13" aria-label="Link to this section">#</a></h4>
+<p>Adding squared independent standard normal variables gives chi-square degrees of freedom equal to the number of terms. It appears in variance inference and likelihood approximations; the asymptotic use needs regularity conditions.</p>
+<h4 id="stat-04-14">F distribution<a class="heading-anchor" href="#stat-04-14" aria-label="Link to this section">#</a></h4>
+<p>An F variable is a ratio of independent chi-square variables divided by their degrees of freedom. ANOVA uses this structure under its error assumptions. Unequal variances can undermine the classical calibration.</p>
+<h4 id="stat-04-15">Uniform distribution<a class="heading-anchor" href="#stat-04-15" aria-label="Link to this section">#</a></h4>
+<p>Uniform density is constant over a chosen interval, but uniformity depends on parameterization. A prior uniform on a scale is not uniform on its logarithm. Explicit bounds determine its consequences.</p>
+<h4 id="stat-04-16">Exponential distribution<a class="heading-anchor" href="#stat-04-16" aria-label="Link to this section">#</a></h4>
+<p>Exponential waiting time has constant hazard and the memoryless property. Its mean is scale=1/rate. Aging hardware or customer learning violates constant hazard even if average waiting time matches.</p>
+<h4 id="stat-04-17">Gamma distribution<a class="heading-anchor" href="#stat-04-17" aria-label="Link to this section">#</a></h4>
+<p>Gamma distributions model positive skew and sum independent exponential waits with common rate. Shape controls dispersion and behavior near zero. Check the rate-versus-scale convention in every calculation.</p>
+<h4 id="stat-04-18">Beta distribution<a class="heading-anchor" href="#stat-04-18" aria-label="Link to this section">#</a></h4>
+<p>A beta distribution lives between zero and one, with mean alpha/(alpha+beta). It can represent uncertainty about a probability. Observed values exactly zero or one need special treatment in continuous beta regression.</p>
+<h4 id="stat-04-19">Dirichlet distribution<a class="heading-anchor" href="#stat-04-19" aria-label="Link to this section">#</a></h4>
+<p>The Dirichlet places probability mass on vectors of nonnegative proportions summing to one. It is conjugate to multinomial counts. Its standard dependence structure may be too restrictive for complex compositional data.</p>
+<h4 id="stat-04-20">Lognormal distribution<a class="heading-anchor" href="#stat-04-20" aria-label="Link to this section">#</a></h4>
+<p>Exponentiating a normal variable creates a lognormal variable with mean exp(mu+sigma-squared/2), not exp(mu). Multiplicative mechanisms motivate it. Large log-scale variance produces a long right tail and unstable arithmetic averages.</p>
+<h4 id="stat-04-21">Weibull distribution<a class="heading-anchor" href="#stat-04-21" aria-label="Link to this section">#</a></h4>
+<p>A Weibull shape below one gives decreasing hazard, above one increasing hazard, and one the exponential case. This flexibility helps lifetime modeling; extrapolating beyond observed follow-up remains assumption-sensitive.</p>
+<h4 id="stat-04-22">Pareto distribution<a class="heading-anchor" href="#stat-04-22" aria-label="Link to this section">#</a></h4>
+<p>Pareto tails decay as a power law. Depending on the tail index, the mean or variance may not exist. Log-log plots alone are weak evidence of a power law because several alternatives mimic short ranges.</p>
+<h4 id="stat-04-23">Generalized extreme value distribution<a class="heading-anchor" href="#stat-04-23" aria-label="Link to this section">#</a></h4>
+<p>The GEV family describes limiting normalized block maxima under suitable tail and dependence conditions. Block size trades approximation quality against sample count. SciPy&#x27;s shape convention requires particular care when comparing literature formulas.</p>
+<h4 id="stat-04-24">Generalized Pareto distribution<a class="heading-anchor" href="#stat-04-24" aria-label="Link to this section">#</a></h4>
+<p>The generalized Pareto approximates exceedances over a sufficiently high threshold. Raising the threshold improves tail approximation but reduces data. Threshold stability and dependence diagnostics are essential for return-level claims.</p>
+<h4 id="stat-04-25">Mixture distributions<a class="heading-anchor" href="#stat-04-25" aria-label="Link to this section">#</a></h4>
+<p>A mixture averages component distributions with nonnegative weights summing to one. A mixture of normal groups need not be normal. Component labels are interchangeable, and inferred components need not be real populations.</p>
+<h4 id="stat-04-26">Truncated distributions<a class="heading-anchor" href="#stat-04-26" aria-label="Link to this section">#</a></h4>
+<p>Truncation conditions on inclusion within a range and renormalizes the density. Ignoring unobserved values outside the range biases inference. Censoring instead retains a record with partial knowledge and has a different likelihood.</p>
+<h4 id="stat-04-27">Zero-inflated distributions<a class="heading-anchor" href="#stat-04-27" aria-label="Link to this section">#</a></h4>
+<p>A zero-inflated model gives probability pi to structural zeros plus 1-pi to a count distribution that can itself generate zeros. A hurdle model excludes zeros from its positive component. Excess zeros alone do not prove a structural-zero mechanism.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-use-support-and-mechanism-to-shortlist-distributions">Case study: use support and mechanism to shortlist distributions<a class="heading-anchor" href="#case-study-use-support-and-mechanism-to-shortlist-distributions" aria-label="Link to this section">#</a></h4>
+<p>A single conversion is binary, so a Bernoulli model is a natural starting point. Ten independent opportunities with a common probability produce a binomial count. If different customers have different probabilities shared across their repeated opportunities, a beta-binomial mixture can model extra variation. The same observed count mean can therefore correspond to materially different uncertainty.</p>
+<p>A count of incidents over an exposure interval suggests a Poisson starting point if independent increments and rate assumptions are plausible. Doubling exposure doubles the expected count, so exposure must travel with the observation. A negative-binomial model adds rate heterogeneity and overdispersion. Neither automatically accounts for serial contagion or changes in the measurement process.</p>
+<p>A positive duration can be exponential, gamma, Weibull or lognormal depending on the mechanism and desired hazard behavior. The exponential has constant hazard; Weibull can increase or decrease hazard; lognormal behavior arises naturally from multiplicative variation. Compare survival or tail probabilities relevant to operations, not only whether the central histogram looks acceptable.</p>
+<h4 id="case-study-why-t-chi-square-and-f-appear-together">Case study: why t, chi-square and F appear together<a class="heading-anchor" href="#case-study-why-t-chi-square-and-f-appear-together" aria-label="Link to this section">#</a></h4>
+<p>If Z is standard normal and U is independent chi-square with nu degrees of freedom, then T=Z/sqrt(U/nu) has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.</p>
+<p>A normal sample&#x27;s residual sum of squares divided by sigma-squared has a chi-square distribution with the appropriate residual degrees of freedom. Ratios of independent scaled chi-square quantities produce F distributions, which underlie classical variance comparisons and ANOVA. Independence, normal errors and correct degrees of freedom are doing the work; the named reference distribution is not a universal property of every ratio statistic.</p>
+<p>As degrees of freedom increase, the t distribution approaches normal behavior. But replacing t by normal in a tiny sample can drastically narrow an interval. The three-point regression example in chapter11 has only one residual degree of freedom, which explains its large t critical value even though the fitted line looks compelling.</p>
+<h4 id="case-study-mixture-variation-can-imitate-heavy-tails">Case study: mixture variation can imitate heavy tails<a class="heading-anchor" href="#case-study-mixture-variation-can-imitate-heavy-tails" aria-label="Link to this section">#</a></h4>
+<p>Suppose most requests come from a fast regime but a small fraction come from an overloaded regime. Each regime may have modest, roughly symmetric variation. The pooled distribution can become skewed, heavy-tailed or multimodal because it mixes different means and variances. Fitting one heavy-tailed family might approximate it, but conditioning on regime could explain the mechanism more usefully.</p>
+<p>Conversely, fitting several Gaussian components does not prove the existence of discrete regimes. A mixture can approximate one skewed continuous population. Distinguish density approximation from latent-class interpretation by using external mechanism information, stability and predictive checks. Component labels can permute without changing the mixture distribution.</p>
+<p>Zero inflation makes a particular mixture claim: one mechanism produces structural zeros and another produces a count that may also equal zero. In a hurdle model, the positive component is zero-truncated, so every zero belongs to the hurdle mechanism. A low-rate ordinary Poisson already produces many zeros; excess relative to a poorly fitted mean model is not sufficient evidence for structural inactivity.</p>
+<h4 id="case-study-truncation-and-censoring-yield-different-likelihoods">Case study: truncation and censoring yield different likelihoods<a class="heading-anchor" href="#case-study-truncation-and-censoring-yield-different-likelihoods" aria-label="Link to this section">#</a></h4>
+<p>If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by P(Y&gt;10). This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.</p>
+<p>If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is P(Y&lt;10), not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.</p>
+<p>A simple imputation such as replacing every censored value by the boundary creates artificial point masses and distorts means, variances and regression relationships. If the decision depends on the tail, model the observation mechanism directly or present bounds and sensitivity assumptions.</p>
+<h4 id="case-study-extreme-value-inference-trades-approximation-against-data">Case study: extreme-value inference trades approximation against data<a class="heading-anchor" href="#case-study-extreme-value-inference-trades-approximation-against-data" aria-label="Link to this section">#</a></h4>
+<p>Block-maxima analysis fits the distribution of maxima over fixed periods, while peaks-over-threshold analysis models exceedances above a high cutoff. The first discards nonmaximal observations in each block; the second uses more tail observations but requires a threshold choice and attention to dependent exceedance clusters.</p>
+<p>A lower threshold provides more observations but may violate the generalized-Pareto tail approximation. A higher threshold improves the asymptotic motivation while leaving fewer data and wider uncertainty. Examine stability over plausible thresholds, dependence, uncertainty in return levels and the exposure horizon. Extrapolating a once-in-a-century level from a few years of data is highly assumption-sensitive, even if the fitted line on a diagnostic plot looks straight.</p>
+<p>Heavy-tail parameters can determine whether moments exist. A Pareto model with an infinite variance undermines conventional mean-SE approximations; an infinite mean changes the target itself. Report these implications rather than merely naming the fitted family. Distribution choice is part of the scientific claim about rare outcomes.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_04.py.html">chapter_04.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_04.py</code></pre>
+<h4 id="same-mean-different-uncertainty">Same mean, different uncertainty<a class="heading-anchor" href="#same-mean-different-uncertainty" aria-label="Link to this section">#</a></h4>
+<p>Binomial and beta-binomial counts both have mean two in this fixture, but the beta-binomial variance is larger. Heterogeneous success probabilities change uncertainty even when the average matches. The tail assertion also verifies that a t distribution with three degrees of freedom assigns more mass beyond three than a standard normal.</p>
+<h4 id="transformation-and-observation-mechanisms">Transformation and observation mechanisms<a class="heading-anchor" href="#transformation-and-observation-mechanisms" aria-label="Link to this section">#</a></h4>
+<p>A lognormal with log mean zero has median one but mean about 1.6487. The truncated-normal calculation explicitly divides by the probability of inclusion. The exponential survival ratio verifies memorylessness: already waiting three units does not change the next two units&#x27; survival probability under that particular model.</p>
+<h4 id="similar-means-can-hide-a-different-generating-process">Similar means can hide a different generating process<a class="heading-anchor" href="#similar-means-can-hide-a-different-generating-process" aria-label="Link to this section">#</a></h4>
+<p>Mixing two unit-variance groups with means one and six produces mean two and variance five. A separate zero-inflated Poisson adds structural zero probability .3 to a Poisson rate two, giving mean 1.4 and a larger zero probability than the Poisson component alone. The formulas make the mixture assumptions explicit instead of diagnosing a mechanism from zeros alone.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+from scipy import stats
+
+def counts_and_tails():
+    n, p = 10, .2
+    assert np.isclose(stats.binom.mean(n, p), 2)
+    poisson_var = stats.poisson.var(2)
+    beta_binomial_var = stats.betabinom.var(n, 2, 8)
+    assert beta_binomial_var &gt; stats.binom.var(n, p)
+    print(&quot;Binomial variance:&quot;, stats.binom.var(n,p), &quot;beta-binomial variance:&quot;, beta_binomial_var)
+    assert poisson_var == 2
+    assert stats.t.sf(3, df=3) &gt; stats.norm.sf(3)
+
+def positive_and_truncated():
+    mu, sigma = 0., 1.
+    arithmetic = stats.lognorm.mean(s=sigma, scale=np.exp(mu))
+    median = stats.lognorm.median(s=sigma, scale=np.exp(mu))
+    assert arithmetic &gt; median == 1
+    conditional = (stats.norm.cdf(1)-stats.norm.cdf(0))/(1-stats.norm.cdf(0))
+    assert np.isclose(conditional, stats.truncnorm.cdf(1, 0, np.inf))
+    assert np.isclose(stats.expon.sf(5, scale=2)/stats.expon.sf(3, scale=2), stats.expon.sf(2, scale=2))
+    print(&quot;Lognormal mean/median:&quot;, round(arithmetic,4), median, &quot;P(Z&lt;=1 | Z&gt;0):&quot;, round(conditional,4))
+
+def mixtures_and_zeros():
+    weight=np.array([.8,.2]);means=np.array([1.,6.]);variances=np.array([1.,1.])
+    mean=weight@means
+    variance=weight@variances+weight@(means-mean)**2
+    assert np.isclose(mean,2) and np.isclose(variance,5)
+    structural_zero=.3;rate=2.
+    zero_probability=structural_zero+(1-structural_zero)*stats.poisson.pmf(0,rate)
+    assert zero_probability&gt;stats.poisson.pmf(0,rate)
+    assert np.isclose((1-structural_zero)*rate,1.4)
+    print(&quot;Mixture mean/variance:&quot;,mean,variance,&quot;zero-inflated P(0):&quot;,zero_probability)
+
+def main():
+    mixtures_and_zeros()
+    counts_and_tails()
+    positive_and_truncated()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: A count outcome has variance much larger than its mean. What do you do?</strong> First inspect exposure, repeated units and omitted groups. A negative binomial or quasi-likelihood model can represent extra variance, but neither repairs a wrong time denominator or dependent observation design automatically.</p>
+<p><strong>Interview: Is zero-inflated Poisson always better for many zeros?</strong> No. A low-rate Poisson naturally contains many zeros, and unmodeled heterogeneity can also generate them. Compare predictive checks and plausible mechanisms before introducing a separate latent structural-zero state.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://docs.scipy.org/doc/scipy/reference/stats.html">SciPy continuous and discrete distribution reference</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.itl.nist.gov/div898/handbook/eda/section3/eda366.htm">NIST distribution gallery</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="03-probability-fundamentals-and-stochastic-processes.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="05-sampling-surveys-and-data-collection.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

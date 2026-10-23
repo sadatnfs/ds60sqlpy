@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-004: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-004: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-004_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-004-explanatory-solutions">llm-applied-004: explanatory solutions<a class="heading-anchor" href="#llm-applied-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A domain corpus is a versioned dataset. Each document needs a stable identity, source, permission basis, version, scope and content fingerprint. The same topic may have several versions, and the newest is not necessarily the version appropriate for a historical question. Retrieval should not mix contradictory versions without explaining which one applies. Evaluation isolation also operates at the document-family level: a paraphrase or revision of a test answer can leak into training or prompt selection even when its exact hash differs.</p>
+<p>This lesson uses six authored snippets about data-science methods. One is restricted, and one contains hostile-looking instructions. Neither receives special execution power from its text. A manifest stores source metadata beside content identity. Hashing detects byte changes; it does not prove permission, semantic independence or correctness. Keep the actual source and policy record available for review. A corpus update should produce a new versioned artifact and trigger evaluation of retrieval and citation behavior before replacing a served index.</p>
+<p><strong>Corpus manifest:</strong> A record of source identities, versions and admission metadata.</p>
+<p><strong>Content hash:</strong> A fingerprint of exact bytes under a stated encoding.</p>
+<p><strong>Document family:</strong> Related versions or derivatives treated as one evaluation unit.</p>
+<p><strong>Scope:</strong> The audience or authorization class permitted to read a document.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Canonical JSON with sorted keys makes manifest hashing stable across dictionary insertion order. SHA256 fingerprints UTF-8 text. Compare family sets across partitions and validate one active version perfamily under a simple current-only policy. A missing permission field is an admission failure, not an invitation to infer permission. Do not strip or normalize text before hashing unless that normalization policy is declared and separately recorded.</p>
+<h3 id="exercise-1-fingerprint-authored-sources">Exercise 1: Fingerprint authored sources<a class="heading-anchor" href="#exercise-1-fingerprint-authored-sources" aria-label="Link to this section">#</a></h3>
+<p>The question is: Add source=course-authored, permission=course-fixture and SHA256 to each local document.</p>
+<p>The fixture explicitly supplies its provenance. In a real corpus those fields need evidence from the source owner or governing policy, not autogenerated guesses.</p>
+<pre><code class="language-python">manifest=[{**doc,&#x27;source&#x27;:&#x27;course-authored&#x27;,&#x27;permission&#x27;:&#x27;course-fixture&#x27;,&#x27;sha256&#x27;:fingerprint(doc[&#x27;text&#x27;])} for doc in DOCUMENTS]
+assert len(manifest)==6 and all(len(d[&#x27;sha256&#x27;])==64 for d in manifest)</code></pre>
+<p><strong>Expected:</strong> 6 complete records; all hashes contain64 characters.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with 6 complete records; all hashes contain64 characters.</p>
+<h3 id="exercise-2-detect-a-changed-definition">Exercise 2: Detect a changed definition<a class="heading-anchor" href="#exercise-2-detect-a-changed-definition" aria-label="Link to this section">#</a></h3>
+<p>The question is: Create metric-v2 with changed text and compare content hashes to metric-v1.</p>
+<p>A denominator change is a semantic change, not a formatting update. Retaining both versions supports historical questions and exposes stale-index risks.</p>
+<pre><code class="language-python">old=manifest[0]; new={**old,&#x27;id&#x27;:&#x27;metric-v2&#x27;,&#x27;version&#x27;:2,&#x27;text&#x27;:&#x27;Conversion rate equals purchases divided by eligible accounts.&#x27;}; new[&#x27;sha256&#x27;]=fingerprint(new[&#x27;text&#x27;])
+assert new[&#x27;sha256&#x27;]!=old[&#x27;sha256&#x27;] and new[&#x27;family&#x27;]==old[&#x27;family&#x27;] and new[&#x27;version&#x27;]==2</code></pre>
+<p><strong>Expected:</strong> hash differs; family remains metric; version is2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with hash differs; family remains metric; version is2.</p>
+<h3 id="exercise-3-choose-an-active-version-explicitly">Exercise 3: Choose an active version explicitly<a class="heading-anchor" href="#exercise-3-choose-an-active-version-explicitly" aria-label="Link to this section">#</a></h3>
+<p>The question is: Select the highest version per family from metric-v1, metric-v2 and trial-v1.</p>
+<p>This current-only policy is simple and explicit. A historical assistant would need effective dates and a question-time policy rather than always selecting the maximum version.</p>
+<pre><code class="language-python">active={}
+for doc in [old,new,manifest[1]]:
+    if doc[&#x27;family&#x27;] not in active or doc[&#x27;version&#x27;]&gt;active[doc[&#x27;family&#x27;]][&#x27;version&#x27;]: active[doc[&#x27;family&#x27;]]=doc
+assert {d[&#x27;id&#x27;] for d in active.values()}=={&#x27;metric-v2&#x27;,&#x27;trial-v1&#x27;}</code></pre>
+<p><strong>Expected:</strong> active IDs metric-v2 and trial-v1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with active IDs metric-v2 and trial-v1.</p>
+<h3 id="exercise-4-detect-family-leakage">Exercise 4: Detect family leakage<a class="heading-anchor" href="#exercise-4-detect-family-leakage" aria-label="Link to this section">#</a></h3>
+<p>The question is: Place metric-v1 in training and metric-v2 in testing, then compare their families.</p>
+<p>Hash disjointness alone cannot establish evaluation independence. A revised definition can reveal the same task structure or answer family.</p>
+<pre><code class="language-python">assert {old[&#x27;family&#x27;]}&amp;{new[&#x27;family&#x27;]}=={&#x27;metric&#x27;} and old[&#x27;sha256&#x27;]!=new[&#x27;sha256&#x27;]</code></pre>
+<p><strong>Expected:</strong> family intersection contains metric despite different hashes.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with family intersection contains metric despite different hashes.</p>
+<h3 id="exercise-5-refuse-incomplete-admission-metadata">Exercise 5: Refuse incomplete admission metadata<a class="heading-anchor" href="#exercise-5-refuse-incomplete-admission-metadata" aria-label="Link to this section">#</a></h3>
+<p>The question is: Remove permission from one record and validate admission.</p>
+<p>An unresolved permission field remains unresolved. A pipeline should quarantine the record or request evidence rather than filling a plausible value.</p>
+<pre><code class="language-python">candidate=dict(manifest[0]); del candidate[&#x27;permission&#x27;]
+try: admit(candidate)
+except ValueError: pass
+else: raise AssertionError(&#x27;unknown permission admitted&#x27;)</code></pre>
+<p><strong>Expected:</strong> ValueError for missing permission.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with ValueError for missing permission.</p>
+<h3 id="exercise-6-keep-instruction-like-documents-inert">Exercise 6: Keep instruction-like documents inert<a class="heading-anchor" href="#exercise-6-keep-instruction-like-documents-inert" aria-label="Link to this section">#</a></h3>
+<p>The question is: Inspect attack-v1 and confirm its text does not alter the manifest validator or access metadata.</p>
+<p>Content admission and instruction authority are separate. A document can be retained as adversarial test data without being allowed to change access rules.</p>
+<pre><code class="language-python">attack=next(d for d in manifest if d[&#x27;id&#x27;]==&#x27;attack-v1&#x27;); private=next(d for d in manifest if d[&#x27;id&#x27;]==&#x27;private-v1&#x27;)
+assert &#x27;Ignore&#x27; in attack[&#x27;text&#x27;] and private[&#x27;scope&#x27;]==&#x27;restricted&#x27;
+admit(attack); assert private[&#x27;scope&#x27;]==&#x27;restricted&#x27;</code></pre>
+<p><strong>Expected:</strong> attack text remains data; restricted record remains restricted.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with attack text remains data; restricted record remains restricted.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

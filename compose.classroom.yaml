@@ -57,7 +57,7 @@ services:
       DS60_GID: "1000"
       DS60_ROOTLESS: "0"
       DS60_MODULE_TOKEN_FILE: /run/ds60/worker-token/token
-      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081"}'
+      DS60_MODULE_ENDPOINTS: '{"python-core":"http://python-core-worker:8081","cpp20":"http://cpp-worker:8081","tensorflow-cpu":"http://tensorflow-worker:8081","scala-jvm":"http://scala-worker:8081","spark-local-scala":"http://spark-scala-worker:8081","spark-local-python":"http://spark-python-worker:8081","llm-torch-cpu":"http://llm-worker:8081","java21":"http://java-worker:8081","javascript-node":"http://javascript-worker:8081","typescript-node":"http://typescript-worker:8081"}'
     volumes:
       - type: volume
         source: classroom-learning
@@ -102,6 +102,10 @@ services:
   spark-python-worker:
     <<: *classroom-worker
     extends: {file: compose.modules.yaml, service: spark-python-worker}
+
+  llm-worker:
+    <<: *classroom-worker
+    extends: {file: compose.modules.yaml, service: llm-worker}
 
   java-worker:
     <<: *classroom-worker

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-023: Domain assistant boundaries: freshness, injection, budgets and traces · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-023: Domain assistant boundaries: freshness, injection, budgets and traces</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/guides/llm-applied-023.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-023-domain-assistant-boundaries-freshness-injection-budgets-and-traces">llm-applied-023: Domain assistant boundaries: freshness, injection, budgets and traces<a class="heading-anchor" href="#llm-applied-023-domain-assistant-boundaries-freshness-injection-budgets-and-traces" aria-label="Link to this section">#</a></h2>
+<p>Status: authored applied LLM content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 240 minutes. Direct prerequisites: <code>llm-applied-022</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>A production-oriented domain assistant needs controls around the model as well as a good prompt. The central investigation is concrete: Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit. The finish condition is freshTrue. answer admissionFalse; reasonstale evidence. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A production-oriented domain assistant needs controls around the model as well as a good prompt. Evidence can become stale, access can change, caches can outlive their source version, and tool proposals can exceed work budgets. Observability should explain which stage failed without logging secrets or unrestricted source text. A trace can record request ID, policy fingerprint, corpus/index/model versions, admitted document IDs, tool counts and named failure categories. It should not become a second unprotected corpus.</p>
+<p>This lesson implements deterministic freshness and budget checks using an injected clock. No server, deployment or live identity integration is started. A timestamp comparison establishes whether a document meets the declared freshness window; it does not prove the source is correct. A call counter enforces a bounded operation budget; it does not substitute for actual process timeouts in a serving system. Hostile text remains data under the same access and tool policies established earlier. The goal is to make each boundary and its evidence explicit before scaling the assistant.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use explicit boundary tests before exposing an assistant to real users or sensitive sources. Test access revocation, corpus updates, stale indexes, cache partitioning, malformed tool output, timeout and partial failure. An application should return a named failure or abstention rather than quietly substituting old evidence. Define what logs retain, who can read them and how long they remain available.</p>
+<p>Do not call these local checks a production acceptance test. This fixture does not exercise a real authentication provider, network timeout, distributed cache or incident response. Those need separate integration and operational evidence. The useful contribution here is a concrete contract and deterministic failure cases that a real service can preserve. Measure latency, token use, tool calls and quality together, with privacy-aware traces that explain which boundary stopped the request.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Freshness policy:</strong> A declared maximum age for evidence under a task contract.</p>
+<p><strong>Injected clock:</strong> A supplied time value making temporal behavior deterministic in tests.</p>
+<p><strong>Work budget:</strong> A maximum number of admitted operations before refusal.</p>
+<p><strong>Safe trace:</strong> Diagnostic metadata selected without copying sensitive content.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>python-core</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-applied-023/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/llm-applied/lessons/llm-applied-023.py</code>. For macOS/Linux use <code>.venv/bin/python courses/llm-applied/lessons/llm-applied-023.py</code> from the repository root.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Use timezone-aware UTC datetimes and reject naive timestamps. Compareage=now-published with a nonnegative maximum age, also rejecting future publication times. A Budget object increments only for admitted operations and raises before exceeding its limit. Cache identity includes policy and corpus versions. Trace construction uses an allowlist of metadata fields and excludes source text, credentials and raw private queries.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-check-evidence-freshness">Example A: Check evidence freshness<a class="heading-anchor" href="#example-a-check-evidence-freshness" aria-label="Link to this section">#</a></h4>
+<p>The clock is supplied rather than read globally, so the test is reproducible. The result concerns the declared age policy, not the truth of the content.</p>
+<pre><code class="language-python">from datetime import datetime,timedelta,timezone
+def fresh(published,now,maximum_age):
+    if published.tzinfo is None or now.tzinfo is None or published.utcoffset() is None or now.utcoffset() is None: raise ValueError(&#x27;aware timestamps required&#x27;)
+    if maximum_age&lt;timedelta(0): raise ValueError(&#x27;nonnegative age limit&#x27;)
+    age=now-published
+    return timedelta(0)&lt;=age&lt;=maximum_age
+class Budget:
+    def __init__(self,limit):
+        if type(limit) is not int or limit&lt;0: raise ValueError(&#x27;nonnegative integer limit&#x27;)
+        self.limit=limit; self.used=0
+    def consume(self):
+        if self.used&gt;=self.limit: raise RuntimeError(&#x27;operation budget exhausted&#x27;)
+        self.used+=1
+def trace_record(value):
+    return {key:value[key] for key in [&#x27;request_id&#x27;,&#x27;corpus_version&#x27;,&#x27;policy&#x27;,&#x27;result&#x27;]}
+now=datetime(2026,10,22,tzinfo=timezone.utc); published=now-timedelta(days=1)
+assert fresh(published,now,timedelta(days=2))</code></pre>
+<p><strong>Expected:</strong> freshTrue.</p>
+<h4 id="example-b-reject-stale-and-future-evidence">Example B: Reject stale and future evidence<a class="heading-anchor" href="#example-b-reject-stale-and-future-evidence" aria-label="Link to this section">#</a></h4>
+<p>Future timestamps can indicate clock or metadata errors. Accepting them as indefinitely fresh would conceal that data-quality problem.</p>
+<pre><code class="language-python">assert not fresh(now-timedelta(days=3),now,timedelta(days=2))
+assert not fresh(now+timedelta(hours=1),now,timedelta(days=2))</code></pre>
+<p><strong>Expected:</strong> both fail freshness admission.</p>
+<h4 id="example-c-enforce-a-three-call-budget">Example C: Enforce a three-call budget<a class="heading-anchor" href="#example-c-enforce-a-three-call-budget" aria-label="Link to this section">#</a></h4>
+<p>The failing request does not perform work first and report the overrun afterward. Real execution also needs bounded duration and cancellation, which this counter does not implement.</p>
+<pre><code class="language-python">budget=Budget(3)
+for _ in range(3): budget.consume()
+try: budget.consume()
+except RuntimeError: pass
+else: raise AssertionError(&#x27;budget exceeded&#x27;)
+assert budget.used==3</code></pre>
+<p><strong>Expected:</strong> used3; fourth raisesRuntimeError before increment.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: freshTrue. answer admissionFalse; reasonstale evidence. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Check evidence freshness.</strong> Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit. <strong>Expected:</strong> freshTrue. <strong>Verify:</strong> Save the assertion results for exercise 1, including freshTrue.</li>
+</ol>
+<ol>
+<li><strong>Reject stale and future evidence.</strong> Test a three-day-old document and a document dated one hour in the future. <strong>Expected:</strong> both fail freshness admission. <strong>Verify:</strong> Save the assertion results for exercise 2, including both fail freshness admission.</li>
+</ol>
+<ol>
+<li><strong>Enforce a three-call budget.</strong> Consume exactly3 operations, then attempt a fourth. <strong>Expected:</strong> used3; fourth raisesRuntimeError before increment. <strong>Verify:</strong> Save the assertion results for exercise 3, including used3; fourth raisesRuntimeError before increment.</li>
+</ol>
+<ol>
+<li><strong>Reject naive timestamp assumptions.</strong> Pass a datetime without timezone information. <strong>Expected:</strong> ValueError. <strong>Verify:</strong> Save the assertion results for exercise 4, including ValueError.</li>
+</ol>
+<ol>
+<li><strong>Build an allowlisted trace.</strong> Create a trace from metadata plussecret/source_text fields and inspect the output. <strong>Expected:</strong> only request_id, corpus_version, policy, result fields retained. <strong>Verify:</strong> Save the assertion results for exercise 5, including only request_id, corpus_version, policy, result fields retained.</li>
+</ol>
+<ol>
+<li><strong>Make stale evidence produce abstention.</strong> Combine authorizedTrue withfreshFalse and require both before answering. <strong>Expected:</strong> answer admissionFalse; reasonstale evidence. <strong>Verify:</strong> Save the assertion results for exercise 6, including answer admissionFalse; reasonstale evidence.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Freshness policy, Injected clock, Work budget using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-applied-022</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.python.org/3.12/library/datetime.html">Python datetime documentation</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-023, Domain assistant boundaries: freshness, injection, budgets and traces.
+Read courses/llm-applied/guides/llm-applied-023.md and courses/llm-applied/lessons/llm-applied-023.py. Direct prerequisites: `llm-applied-022`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-applied/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

@@ -144,6 +144,44 @@ Selecting the largest observed effect also selects positive noise. Independent r
 
 Run defensible analysis specifications and display their full result distribution or decision pattern. A multiverse reveals analytical fragility; it is not permission to report only the most favorable branch.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: the probability of at least one lucky result
+
+If 100 independent true null hypotheses are each tested at .05, the probability of no false rejection is .95^100, about .0059. The chance of at least one false rejection is therefore about .994. Independence is used for this exact calculation; dependence changes the number, but it does not eliminate the need to define the family of opportunities.
+
+Bonferroni instead allocates .05/100 to each valid test and uses the union bound to control family-wise error without assuming independence. Holm retains that broad protection while using ordered thresholds more efficiently. These procedures answer a different question from FDR control, which permits some false discoveries in a screening list while controlling an expected proportion.
+
+Under the global null, every discovery is false, so FDR equals the probability of any discovery. In mixed null/alternative families, the distinction becomes important. A discovery list controlled at 5% FDR does not mean each selected item has a 5% posterior probability of being false or that exactly 5% of this particular list is wrong.
+
+### Case study: monitoring changes the experiment
+
+An analyst checks an ordinary fixed-sample p-value every day and stops the first time it falls below .05. On paths where noise fluctuates toward a promising result, the study stops and preserves the favorable fluctuation. Paths with unfavorable fluctuations continue. The final reported sample size is therefore related to the observed evidence, changing the procedure's operating characteristics.
+
+A group sequential design calibrates boundaries for planned information times. Alpha-spending methods specify how cumulative Type I error can be used as information grows. Confidence sequences and e-processes provide other frameworks for permitted ongoing monitoring. They are not interchangeable labels for rerunning a fixed-sample test.
+
+The conservative spending construction alpha_t=alpha/[t(t+1)] is instructive because the sum telescopes to alpha. If each time-specific interval misses with probability at most alpha_t, the probability of any miss is at most alpha. This proves simultaneous protection through a union bound, though more refined methods can be much tighter. The guarantee still depends on each constituent bound's assumptions.
+
+### Case study: likelihood-ratio evidence and optional stopping
+
+For independent Bernoulli observations, compare a specified alternative p1 with null p0. Multiply p1/p0 after a success and (1-p1)/(1-p0) after a failure. Under the null, the expected one-step multiplier is one, so the accumulated likelihood ratio is a nonnegative martingale under the stated model. A threshold crossing can then be controlled using a martingale inequality.
+
+This construction works because the full process, not only its final value, has the required expectation property. Multiplying arbitrary dependent e-values or selecting the most favorable among many unaccounted-for processes can destroy validity. Composite nulls, adaptive alternatives and dependent observations need appropriately designed constructions.
+
+The evidence ratio is not itself a posterior odds statement unless prior model odds and the Bayesian model comparison framework are supplied. Nor is crossing a statistical threshold equivalent to a deployment decision. Effect size, practical consequences and integrity checks remain necessary.
+
+### Case study: selecting a model selects favorable noise
+
+A team screens 500 features, retains the ten with strongest associations, fits a regression and reports ordinary coefficient p-values as if those ten had been prespecified. The selection step already used the same outcomes. Those coefficients were chosen partly because their noise looked favorable, so ordinary post-selection inference can be misleading.
+
+One transparent remedy is sample splitting: use one sample to select features and an independent sample to estimate the prespecified selected model. It sacrifices information but separates the roles. Selective-inference methods model or condition on the selection event; knockoff methods create valid synthetic competitors under specific feature-distribution conditions. Neither is a generic adjustment for undocumented analyst exploration.
+
+A multiverse analysis can reveal how conclusions change across reasonable definitions, controls and exclusions. Show the whole defensible range and explain dependencies among specifications. Reporting only the most favorable branch turns sensitivity analysis into another selection mechanism. The purpose is to expose decision fragility and identify which assumptions deserve more evidence.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_10.py](../examples/chapter_10.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

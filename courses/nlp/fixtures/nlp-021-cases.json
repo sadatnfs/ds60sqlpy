@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-021",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Hash the two router variants after the declared normalization.",
+      "expected": "Equal normalized hashes while original strings remain unchanged."
+    },
+    {
+      "exercise": 2,
+      "task": "Compute token-set Jaccard for ready versus not ready.",
+      "expected": "Similarity.75 despite a contradictory status claim."
+    },
+    {
+      "exercise": 3,
+      "task": "Apply cutoff2 and exclude future families already seen in training.",
+      "expected": "Train[a1,a2,b1],test[c1],excluded[b2]."
+    },
+    {
+      "exercise": 4,
+      "task": "Check temporal ordering and family disjointness, then list train-only learned transforms.",
+      "expected": "Both invariants hold; vocabulary/IDF/calibration/tuning are explicitly inside training/development."
+    },
+    {
+      "exercise": 5,
+      "task": "Average the supplied differences by family and compare with flattened rows.",
+      "expected": "Equal-family2/15 versus row-weighted.2."
+    },
+    {
+      "exercise": 6,
+      "task": "Run the seeded family bootstrap twice and explain the small-family limit.",
+      "expected": "Identical quantiles under the same seed; support within[-.1,.3]; no strong population claim from three families."
+    }
+  ]
+}

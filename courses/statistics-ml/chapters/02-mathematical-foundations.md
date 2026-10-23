@@ -118,6 +118,50 @@ A differential equation specifies a rate of change, such as dN/dt=rN. Its soluti
 
 Entropy averages negative log probabilities; KL divergence averages a log density ratio and is directional. Coding or predictive log loss provides an operational interpretation. Zero model probability for a possible event can make KL infinite.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: projections connect geometry to regression
+
+A vector in R^n can be understood as n numbers describing one quantity across observations. Each column of X is such a vector. The possible predictions X beta form the column space of X, a set closed under addition and scalar multiplication. Least squares finds the point in that space closest to y under squared Euclidean distance.
+
+At the closest point, any small movement along a feature column cannot improve squared distance. Differentiating in each column direction gives X-transpose(y-X beta)=0. This is why residuals are orthogonal to every fitted direction. If an intercept is present, the all-ones vector is one of those directions, so residuals sum to zero. Without an intercept, that property need not hold.
+
+When columns are redundant, the closest prediction can still be unique although coefficients are not. Adding a vector from the null space of X to beta leaves X beta unchanged. A pseudoinverse chooses one convention, often a minimum-norm coefficient solution, but that convention does not make separate redundant effects scientifically identified. Rank and null-space reasoning explain this before any software is run.
+
+### Case study: SVD explains regularization and conditioning
+
+Write X=U S V-transpose. In a full-rank least-squares solution, coordinates of y along left singular directions are divided by the singular values. A tiny singular value therefore amplifies a small perturbation in the corresponding data direction into a large coefficient change. This is an information-sensitivity problem, not merely a bug in the solver.
+
+Ridge regression replaces the reciprocal singular-value factor 1/s with s/(s-squared+lambda). Large singular directions remain influential, while tiny directions are suppressed. Truncated SVD takes a harder approach by dropping directions below a threshold. Both stabilize the solution by changing the estimation problem and introducing bias relative to unpenalized coefficients.
+
+The condition number compares the largest and smallest relevant singular values. Forming X-transpose X squares this ratio, which can worsen numerical behavior. QR or SVD solves the least-squares problem without explicitly taking that path. Stable algorithms limit added arithmetic error, but they cannot recover information absent from nearly indistinguishable predictors.
+
+### Case study: gradients, curvature and step size
+
+For f(beta)=one-half*||X beta-y||^2, the gradient is X-transpose(X beta-y) and the Hessian is X-transpose X. The Hessian is positive semidefinite because v-transpose X-transpose X v equals ||Xv||^2, which cannot be negative. It is positive definite exactly when X has full column rank. Thus the objective is convex, and strict convexity determines coefficient uniqueness.
+
+Gradient descent updates beta by subtracting eta times the gradient. For a quadratic, a step size below two divided by the largest Hessian eigenvalue gives the usual stable convergence condition in the positive-definite case. If feature scales differ wildly, the Hessian eigenvalues can span a wide range, forcing small steps along steep directions and slow progress along shallow ones. Standardization or preconditioning changes that geometry.
+
+Newton's method uses inverse curvature to rescale the gradient. It can solve an unconstrained full-rank quadratic in one exact step, but evaluating or solving with curvature can be expensive or unstable in more complex models. Quasi-Newton methods approximate curvature; stochastic gradients trade exactness for cheaper updates. These are computational choices layered on the statistical objective.
+
+### Case study: expectations are integrals, not informal averages
+
+For a discrete variable, E[g(X)] sums g(x)P(X=x). For a continuous variable, it integrates g(x)f(x) over support. A probability density can exceed one because probability is area, not point height. For example, a uniform distribution on an interval of width .1 has density ten and total probability one.
+
+The law of the unconscious statistician allows computing E[g(X)] from X's distribution without first deriving g(X)'s density. This is useful for transformed outcomes, utility and moment calculations. But exchanging integrals, derivatives and limits requires conditions. A familiar algebraic manipulation can fail when tails are too heavy or convergence lacks an integrable bound.
+
+Measure-theoretic language formalizes which events and functions can be assigned probabilities and integrated. Conditional expectation is a projection onto available information in an appropriate function space. This connects abstract probability back to regression: a conditional mean is the squared-loss optimal prediction among functions of the observed information, even when no finite linear model represents it exactly.
+
+### Case study: information and nonlinear transformation
+
+Entropy measures expected surprise under a distribution, and cross-entropy measures expected negative log probability assigned by another distribution. Their difference is KL divergence when the relevant densities exist. This gives log loss a practical interpretation: a model pays for assigning low probability to outcomes that actually occur.
+
+Jensen's inequality explains why E[exp(X)] is generally larger than exp(E[X]). For a normal X with mean mu and variance sigma-squared, the exact lognormal mean is exp(mu+sigma-squared/2). Back-transforming a fitted log mean without accounting for variability can therefore underestimate an arithmetic mean. The mathematical distinction becomes an operational bias in cost forecasts.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_02.py](../examples/chapter_02.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -133,6 +177,10 @@ The three observations do not lie exactly on a line. `lstsq` produces coefficien
 ### Verify a derivative before trusting optimization
 
 Central finite differences perturb one coordinate at a time. Agreement with the analytic gradient validates the derivative at the chosen point, not global optimizer correctness. The KL calculation then shows why assigning probability 0.1 to a half-probability event incurs a predictive penalty.
+
+### Curvature determines a stable step
+
+For one-half times the squared distance to three, curvature is one. A step size .5 decreases loss every iteration and approaches three. A step size 2.5 overshoots and diverges. The numerical assertion links the derivative to the stability condition, rather than treating learning rate as an unexplained tuning knob.
 
 ### Complete executable example
 
@@ -162,7 +210,22 @@ def gradients_and_information():
     assert kl > 0
     print("Gradient:", analytic, "KL in nats:", round(float(kl), 4))
 
+def curvature_and_steps():
+    # f(b)=0.5*(b-3)^2 has gradient b-3 and curvature one.
+    b=0.
+    losses=[]
+    for _ in range(12):
+        losses.append(.5*(b-3)**2)
+        b-=.5*(b-3)
+    assert np.all(np.diff(losses)<0) and abs(b-3)<.001
+    unstable=0.
+    for _ in range(5):
+        unstable-=2.5*(unstable-3)
+    assert abs(unstable-3)>3
+    print("Stable gradient iterate:",b,"oversized-step iterate:",unstable)
+
 def main():
+    curvature_and_steps()
     projection_and_rank()
     gradients_and_information()
 

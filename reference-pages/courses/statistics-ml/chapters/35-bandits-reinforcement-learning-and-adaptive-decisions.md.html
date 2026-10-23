@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>35. Bandits, Reinforcement Learning, and Adaptive Decisions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>35. Bandits, Reinforcement Learning, and Adaptive Decisions</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md</code></p>
+    </header>
+    <article class="document"><h2 id="35-bandits-reinforcement-learning-and-adaptive-decisions">35. Bandits, Reinforcement Learning, and Adaptive Decisions<a class="heading-anchor" href="#35-bandits-reinforcement-learning-and-adaptive-decisions" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-035</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Adaptive decisions differ from ordinary prediction because the chosen action changes both outcomes and the information observed next. A recommender learns mostly from items it exposes. A maintenance policy changes which failures are observed. A support assistant that chooses a tool can affect the state it is trying to understand. The central question is therefore which policy to follow while learning, subject to operational constraints and uncertainty.</p>
+<h4 id="bandits-and-long-horizon-control">Bandits and long-horizon control<a class="heading-anchor" href="#bandits-and-long-horizon-control" aria-label="Link to this section">#</a></h4>
+<p>A bandit chooses an action and receives a reward without modeling a lasting state transition relevant to later decisions. A contextual bandit conditions that choice on observed context. A Markov decision process adds a state transition: today&#x27;s action can change tomorrow&#x27;s opportunities and rewards. If those consequences matter, optimizing immediate reward can be shortsighted. If they do not, a full reinforcement-learning system may add unnecessary complexity.</p>
+<p>For policy pi, discounted return is G_t=sum_(k&gt;=0) gamma^k R_(t+k+1), with discount factor gamma between zero and one in an infinite-horizon discounted formulation. Value V_pi(s) is the expected return starting in state s and following pi. The Bellman equation separates immediate reward from discounted next-state value. It is a consistency relation under the environment model, not a guarantee that a learned estimate is correct.</p>
+<h4 id="exploration-buys-information-at-a-cost">Exploration buys information at a cost<a class="heading-anchor" href="#exploration-buys-information-at-a-cost" aria-label="Link to this section">#</a></h4>
+<p>Always choosing the current best estimated action can lock the system into an early mistake because rejected alternatives receive little new evidence. Randomized exploration, confidence bonuses and posterior sampling provide different ways to gather information. Their guarantees depend on stationarity, reward distributions, support and action constraints. An exploration action can affect real people or consume real resources, so the experiment must operate within the allowed action set and decision authority.</p>
+<h4 id="logged-data-do-not-identify-every-new-policy">Logged data do not identify every new policy<a class="heading-anchor" href="#logged-data-do-not-identify-every-new-policy" aria-label="Link to this section">#</a></h4>
+<p>Offline policy evaluation compares a target policy with the behavior policy that generated data. Importance weights pi(a|x)/b(a|x) correct action-selection differences only where the behavior probability b is positive and credible. For trajectories, products of ratios can produce extreme variance. A model-based or doubly robust estimator adds outcome structure, but it cannot create direct evidence for actions never tried without extrapolation assumptions.</p>
+<p>The same principle applies to agents built around language models. A high final-answer score does not excuse an unauthorized tool action, and a reward for finishing quickly can encourage skipping evidence. Define allowed actions and constraints outside the learned reward whenever they are mandatory. Evaluate trajectories, failures and recovery as well as final text.</p>
+<h4 id="diagnose-before-deploying-adaptation">Diagnose before deploying adaptation<a class="heading-anchor" href="#diagnose-before-deploying-adaptation" aria-label="Link to this section">#</a></h4>
+<p>Specify the state and observation boundary, action set, reward timing, horizon, logging policy and constraints. Test a simple nonadaptive baseline and a small simulator whose limitations are explicit. Separate reward improvement in that simulator from evidence of real-world value. Use held-out logs or controlled experiments for policy evaluation, and preserve rollback and stopping rules. The worked examples show exact Bellman arithmetic, a Q update, importance weighting and a reward-hacking counterexample without running an online policy.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-35-01">Multi-armed bandits<a class="heading-anchor" href="#stat-35-01" aria-label="Link to this section">#</a></h4>
+<p>Multi-armed bandits repeatedly choose among actions with uncertain reward distributions. The learner observes only the reward of the selected action, creating partial feedback. A classical stationary model assumes each action&#x27;s distribution remains stable. This fits repeated short-term decisions better than actions with important delayed state effects. The action set, reward definition and exploration budget must be explicit before comparing algorithms.</p>
+<h4 id="stat-35-02">Exploration–exploitation tradeoffs<a class="heading-anchor" href="#stat-35-02" aria-label="Link to this section">#</a></h4>
+<p>The exploration-exploitation tradeoff balances immediate expected reward against learning that improves later choices. The value of information depends on remaining horizon and uncertainty, so a poorly known action is not automatically worth trying. Operational constraints can rule out otherwise informative actions. Evaluate cumulative reward and learning cost under the same horizon rather than celebrating fast convergence after ignoring early harmful decisions.</p>
+<h4 id="stat-35-03">Epsilon-greedy policies<a class="heading-anchor" href="#stat-35-03" aria-label="Link to this section">#</a></h4>
+<p>An epsilon-greedy policy chooses a random action with probability epsilon and an estimated-best action otherwise. It is simple and provides support when every action can be explored, but spreads exploration without considering which alternatives are most informative. A fixed epsilon keeps paying exploration cost indefinitely in a stationary environment. Decay schedules require assumptions about horizon and changing rewards.</p>
+<h4 id="stat-35-04">Upper confidence bound methods<a class="heading-anchor" href="#stat-35-04" aria-label="Link to this section">#</a></h4>
+<p>Upper confidence bound methods add an uncertainty bonus to estimated reward and choose the largest optimistic value. The bonus depends on observation counts and a reward/concentration model. This targets underexplored promising actions more deliberately than uniform random exploration. Misspecified bounds, heavy tails or nonstationarity can undermine guarantees; the displayed upper confidence value is conditional on the mathematical assumptions.</p>
+<h4 id="stat-35-05">Thompson sampling<a class="heading-anchor" href="#stat-35-05" aria-label="Link to this section">#</a></h4>
+<p>Thompson sampling draws a plausible reward model from a posterior and acts optimally under that draw. Repeated posterior sampling naturally balances uncertainty and estimated value. Priors and likelihoods determine what uncertainty means, and approximate inference can change behavior. A posterior is not automatically calibrated under model misspecification, so performance should be evaluated under plausible departures and operational constraints.</p>
+<h4 id="stat-35-06">Contextual bandits<a class="heading-anchor" href="#stat-35-06" aria-label="Link to this section">#</a></h4>
+<p>Contextual bandits choose actions based on observed features of the current situation, then observe a reward for the chosen action. They can personalize decisions while retaining a one-step reward focus. Contexts must be available before the action, and logged propensities are important for evaluation. If actions change future contexts in ways that matter, the contextual-bandit simplification may omit important long-term effects.</p>
+<h4 id="stat-35-07">Combinatorial bandits<a class="heading-anchor" href="#stat-35-07" aria-label="Link to this section">#</a></h4>
+<p>Combinatorial bandits choose a set or structured combination of actions, such as a slate of recommendations or a resource allocation. Feedback may reveal only the combined reward or component rewards, leading to different learning difficulty. The action space can grow exponentially, so optimization or approximation becomes part of the policy. Interactions among selected components invalidate a simple sum-of-independent-rewards assumption.</p>
+<h4 id="stat-35-08">Nonstationary bandits<a class="heading-anchor" href="#stat-35-08" aria-label="Link to this section">#</a></h4>
+<p>Nonstationary bandits allow reward distributions to change, using mechanisms such as sliding windows, discounting or change detection. Forgetting old data improves responsiveness but increases variance. Define a benchmark that can change at a plausible rate; comparison with a clairvoyant action changing every instant may be unattainable. Separate real reward shifts from changes in user mix or measurement.</p>
+<h4 id="stat-35-09">Regret analysis<a class="heading-anchor" href="#stat-35-09" aria-label="Link to this section">#</a></h4>
+<p>Regret is cumulative loss relative to a specified benchmark policy, often the best fixed action under a stationary bandit model. Dynamic regret uses a changing comparator and needs additional assumptions. Expected regret and realized reward differ, and constants can matter at operational sample sizes. A theoretical rate should not be interpreted as a guaranteed outcome on one finite run.</p>
+<h4 id="stat-35-10">Markov decision processes<a class="heading-anchor" href="#stat-35-10" aria-label="Link to this section">#</a></h4>
+<p>A Markov decision process specifies states, actions, transition probabilities, rewards and a horizon or discount. The Markov property means the state contains enough information for future dynamics given the action. A convenient feature vector may fail that property. Define terminal states and reward timing carefully, because an off-by-one transition or omitted state variable changes the control problem.</p>
+<h4 id="stat-35-11">Partially observable decision processes<a class="heading-anchor" href="#stat-35-11" aria-label="Link to this section">#</a></h4>
+<p>A partially observable process has hidden state observed through noisy or incomplete signals. A belief distribution over hidden states can serve as an information state when the model is known. Recurrent policies approximate history dependence but do not guarantee correct belief inference. Uncertainty about the environment and uncertainty about the current hidden state are distinct and may require different exploration or sensing actions.</p>
+<h4 id="stat-35-12">Bellman equations<a class="heading-anchor" href="#stat-35-12" aria-label="Link to this section">#</a></h4>
+<p>Bellman equations express value as expected immediate reward plus discounted value of the next state. Policy evaluation fixes the policy, while optimality equations maximize over actions. Solving them requires a valid model or suitable data-based estimates. A small residual in an approximate function class does not automatically bound decision error everywhere, especially in states poorly covered by training data.</p>
+<h4 id="stat-35-13">Dynamic programming<a class="heading-anchor" href="#stat-35-13" aria-label="Link to this section">#</a></h4>
+<p>Dynamic programming solves structured sequential problems by reusing values of subproblems, as in finite-horizon backward induction or policy/value iteration. It assumes access to transition and reward information in the standard model-based form. State-space size can make exact computation infeasible. Approximation errors must be considered when using reduced states or learned models.</p>
+<h4 id="stat-35-14">Q-learning<a class="heading-anchor" href="#stat-35-14" aria-label="Link to this section">#</a></h4>
+<p>Q-learning updates Q(s,a) toward r+gamma*max_a_prime Q(s_prime,a_prime) using a temporal-difference error. It is off-policy in its tabular formulation because the target uses a greedy next action while behavior may explore. Convergence needs appropriate conditions on visits and step sizes. Function approximation, bootstrapping and off-policy data can create instability beyond the simple tabular guarantee.</p>
+<h4 id="stat-35-15">Policy gradients<a class="heading-anchor" href="#stat-35-15" aria-label="Link to this section">#</a></h4>
+<p>Policy gradients optimize parameters of a stochastic policy using reward-weighted derivatives of log action probability. A baseline can reduce variance without changing the expected gradient when used appropriately. The sampled returns and advantage estimates determine variance and bias. A larger training return is not proof of safe or robust policy behavior, particularly when the reward proxy can be exploited.</p>
+<h4 id="stat-35-16">Actor–critic methods<a class="heading-anchor" href="#stat-35-16" aria-label="Link to this section">#</a></h4>
+<p>Actor-critic methods combine an actor policy with a critic estimating value or advantage. The critic can reduce gradient variance but introduces approximation error and coupled training dynamics. Bootstrapping and off-policy corrections need care. Monitor value estimation, policy entropy and actual task outcomes separately so a critic that becomes confidently wrong does not masquerade as policy improvement.</p>
+<h4 id="stat-35-17">Model-based reinforcement learning<a class="heading-anchor" href="#stat-35-17" aria-label="Link to this section">#</a></h4>
+<p>Model-based reinforcement learning plans using a known or learned transition/reward model. It can use data efficiently when the model captures relevant dynamics, but planning may exploit model errors in poorly observed regions. Short model rollouts, uncertainty penalties or real-data validation can limit this effect. Simulator success should be reported separately from real-environment acceptance.</p>
+<h4 id="stat-35-18">Offline reinforcement learning<a class="heading-anchor" href="#stat-35-18" aria-label="Link to this section">#</a></h4>
+<p>Offline reinforcement learning learns from a fixed interaction dataset without collecting new actions during training. The policy must avoid overestimating unsupported actions that look attractive under function approximation. Conservative objectives, behavior constraints and uncertainty methods address this challenge under different assumptions. Dataset coverage is central: a large log can still contain little evidence for the actions a proposed policy wants to take.</p>
+<h4 id="stat-35-19">Importance-sampling policy evaluation<a class="heading-anchor" href="#stat-35-19" aria-label="Link to this section">#</a></h4>
+<p>Importance-sampling evaluation reweights logged rewards by target-policy probability divided by behavior-policy probability. For trajectories the ratios multiply over time, often causing high variance. Support and correct propensities are essential. Clipping or self-normalization can stabilize estimates but change bias or estimand properties, so report those choices rather than hiding them inside an evaluation helper.</p>
+<h4 id="stat-35-20">Doubly robust policy evaluation<a class="heading-anchor" href="#stat-35-20" aria-label="Link to this section">#</a></h4>
+<p>Doubly robust policy evaluation combines a reward/value model with propensity-weighted residual corrections. Under suitable assumptions it can retain consistency if one nuisance component is correct, but sequential settings require careful definitions and regularity. Both components can fail in the same unsupported region. Cross-fitting and diagnostics reduce some overfitting issues without eliminating the need for action coverage.</p>
+<h4 id="stat-35-21">Constrained reinforcement learning<a class="heading-anchor" href="#stat-35-21" aria-label="Link to this section">#</a></h4>
+<p>Constrained reinforcement learning optimizes reward subject to limits on costs, risk or resource use. Expected cumulative constraints differ from per-step or high-probability guarantees. A penalty in the reward may encourage compliance without guaranteeing a mandatory boundary. Define feasibility and enforcement separately, and evaluate constraint violations under uncertainty rather than reporting reward alone.</p>
+<h4 id="stat-35-22">Reward design<a class="heading-anchor" href="#stat-35-22" aria-label="Link to this section">#</a></h4>
+<p>Reward design maps the actual operational goal into a measurable training signal. Immediate engagement, completion speed or textual preference may be convenient but incomplete proxies. Include delayed consequences and specify how competing objectives are handled. Mandatory permissions and safety boundaries should not depend solely on a learned scalar reward. Review whether optimizing the proxy can change the meaning of the data collected later.</p>
+<h4 id="stat-35-23">Reward hacking<a class="heading-anchor" href="#stat-35-23" aria-label="Link to this section">#</a></h4>
+<p>Reward hacking occurs when a policy improves the measured reward while failing the intended objective, such as producing persuasive unsupported answers for a judge that rewards style. The failure can arise without malicious intent from the optimizer. Use adversarial examples, independent outcome checks and constraint enforcement to expose proxy exploitation. A higher reward curve is therefore a diagnostic input, not final proof of task success.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_35.py.html">chapter_35.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_35.py</code></pre>
+<h4 id="separate-a-bellman-value-from-one-learning-update">Separate a Bellman value from one learning update<a class="heading-anchor" href="#separate-a-bellman-value-from-one-learning-update" aria-label="Link to this section">#</a></h4>
+<p>A two-step deterministic path earns one now and two next, with discount 0.9, so its value is 1+0.9*2=2.8. A Q estimate initially zero with learning rate one-half moves only to 1.4 after one update toward that target. The value equation and the finite learning procedure are different objects.</p>
+<h4 id="correct-a-logging-policy-mixture">Correct a logging-policy mixture<a class="heading-anchor" href="#correct-a-logging-policy-mixture" aria-label="Link to this section">#</a></h4>
+<p>The log contains equally probable actions zero and one, with rewards zero and one. Its raw reward mean is one-half. A target policy always choosing action one gives weights [0,2,0,2], and the weighted estimate is one. This exact balanced fixture illustrates the ratio; real finite samples need variance analysis and credible propensity logging.</p>
+<h4 id="expose-a-reward-proxy-that-selects-the-wrong-behavior">Expose a reward proxy that selects the wrong behavior<a class="heading-anchor" href="#expose-a-reward-proxy-that-selects-the-wrong-behavior" aria-label="Link to this section">#</a></h4>
+<p>Action one has proxy score 0.99 but actual utility 0.1, while action zero has proxy 0.6 and utility 0.7. Maximizing the proxy chooses the worse action. In a language assistant, analogous behavior could be a verbose unsupported answer that pleases a weak judge. An independent utility check is therefore necessary.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+
+def bellman_and_q():
+    terminal=0.;v_second=2.+.9*terminal;v_first=1.+.9*v_second
+    assert np.isclose(v_first,2.8)
+    old_q=0.;alpha=.5;target=1.+.9*2.
+    updated=old_q+alpha*(target-old_q)
+    assert np.isclose(updated,1.4)
+    print(&quot;Two-step value:&quot;,v_first,&quot;one Q update:&quot;,updated)
+
+def importance_weighting():
+    action=np.array([0,1,0,1]);reward=np.array([0.,1.,0.,1.])
+    behavior=np.full(4,.5);target=(action==1).astype(float)
+    weights=target/behavior;estimate=np.mean(weights*reward)
+    assert weights.tolist()==[0.,2.,0.,2.] and estimate==1.
+    assert np.all(behavior&gt;0)
+    print(&quot;Logged mean:&quot;,reward.mean(),&quot;target-policy estimate:&quot;,estimate)
+
+def reward_proxy():
+    proxy=np.array([.6,.99]);real_utility=np.array([.7,.1])
+    selected=int(np.argmax(proxy));best=int(np.argmax(real_utility))
+    assert selected==1 and best==0 and real_utility[selected]&lt;real_utility[best]
+    print(&quot;Proxy selects action&quot;,selected,&quot;but true-utility best is&quot;,best)
+
+def main():
+    bellman_and_q();importance_weighting();reward_proxy()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: When is a bandit preferable to reinforcement learning?</strong> When actions mainly affect immediate reward and do not materially change future state opportunities. The simpler problem can be easier to evaluate and control. If long-term consequences matter, document them rather than assuming a one-step approximation is harmless.</p>
+<p><strong>Interview: Why is offline policy evaluation sometimes impossible?</strong> If the logging policy never takes an action in a relevant context, observed data do not identify that action&#x27;s reward without extra modeling assumptions. Importance weights cannot divide by zero support and create missing evidence.</p>
+<p><strong>Interview: Does reward improvement establish agent reliability?</strong> No. The policy may exploit a proxy, violate a constraint or fail under distribution shift. Evaluate actual task outcomes, allowed tool trajectories, failure handling and constraint adherence independently from the training reward.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://mitpress.mit.edu/9780262039246/reinforcement-learning/">Sutton and Barto, Reinforcement Learning: An Introduction, publisher page</a></li>
+</ul>
+<ul>
+<li><a href="https://web.stanford.edu/class/cs234/modules.html">Stanford CS234 lecture materials</a></li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="34-generative-ai-and-language-model-evaluation.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="36-optimization-and-operations-research.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

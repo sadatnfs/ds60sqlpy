@@ -69,14 +69,17 @@ The question is: Launch the existing interpreter with fresh variable/Adam object
 A subprocess has no access to the parent live optimizer objects. Successful parity therefore tests reconstruction from disk. The strict restore check detects omitted variables rather than silently accepting partial state.
 
 ```python
-program="""import json,sys,tensorflow as tf
+program=textwrap.dedent("""
+import json,sys,tensorflow as tf
 w=tf.Variable(0.,dtype=tf.float32); opt=tf.keras.optimizers.Adam(.1); opt.build([w])
 c=tf.train.Checkpoint(weight=w,optimizer=opt); c.restore(sys.argv[1]).assert_consumed()
 with tf.GradientTape() as tape: loss=(w-2)**2
 opt.apply_gradients([(tape.gradient(loss,w),w)])
 print(json.dumps({'weight':float(w),'iterations':int(opt.iterations)}))
-"""
-result=subprocess.run([sys.executable,'-c',program,prefix],check=True,capture_output=True,text=True,timeout=60)
+""")
+compile(program, "checkpoint-child", "exec")
+result=subprocess.run([sys.executable,'-c',program,prefix],check=False,capture_output=True,text=True,timeout=60)
+if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 restored=json.loads(result.stdout.strip().splitlines()[-1])
 np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['iterations']==3
 ```

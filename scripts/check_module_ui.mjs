@@ -236,4 +236,67 @@ await test('recovery that reconnects a live job does not claim operator recovery
   assert.match(e.element('status').textContent,/No manual recovery was recorded/);
   assert.equal(e.requests.some(r=>r.body.action==='module-run'),false);
 });
+await test('Java and Node diagnostics point only to the submitted source',async()=>{
+  const e=environment();e.current('java-001','java');e.element('source').value='one\ntwo';
+  e.context.job={lesson_id:'java-001',source:'one\ntwo',output:'Main.java:2: error: fixture'};
+  assert.equal(e.run('sourceErrorLine(job)'),2);
+  e.context.job.output='at Main.main(Main.java:2)';assert.equal(e.run('sourceErrorLine(job)'),2);
+  e.current('js-001','javascript');e.context.job.lesson_id='js-001';
+  e.context.job.output='file:///tmp/job/main.mjs:2:4';assert.equal(e.run('sourceErrorLine(job)'),2);
+  e.context.job.output='file:///tmp/job/notmain.mjs:2:4';assert.equal(e.run('sourceErrorLine(job)'),null);
+});
+await test('TypeScript does not confuse emitted JavaScript lines with source lines',async()=>{
+  const e=environment();e.current('js-019','typescript');e.element('source').value='one\ntwo';
+  e.context.job={lesson_id:'js-019',source:'one\ntwo',output:'main.mts(2,7): error TS2322: fixture'};
+  assert.equal(e.run('sourceErrorLine(job)'),2);
+  e.context.job.output='file:///tmp/job/compiled/main.mjs:2:4';assert.equal(e.run('sourceErrorLine(job)'),null);
+});
+await test('tutorial reading markers save explicitly without prediction or solution gates',async()=>{
+  const e=environment();
+  const chapter={id:'statistics-001',title:'Inference',level:'beginner',outcome:'Understand inference',prerequisites:[],status:'authored',concepts:['bootstrap'],variants:[]};
+  e.context.plan={tracks:[{id:'statistics-ml',lessons:[chapter]}]};e.run("index=plan;trackId='statistics-ml';");
+  const opened=e.run("openLesson('statistics-001',false)");await settle();
+  e.resolve(e.next('module-lesson'),{...chapter,learning_mode:'tutorial',language:'python',runtime_profile:'python-core',source:'print(42)',guide_html:'chapter',session:{review:'read'},history:[],capability:{profile:'python-core',ready:true,detail:'Fixture'}});
+  await opened;
+  assert.equal(e.element('solution-section').hidden,true);assert.equal(e.element('prediction').hidden,true);
+  assert.equal(e.element('chapter-read-label').hidden,false);assert.equal(e.element('read-chapter').checked,true);
+  e.element('read-chapter').checked=false;await e.event('read-chapter','input');
+  const saved=e.run('queueSave()');await settle();assert.equal(e.next('module-save').body.fields.review,'');
+  e.resolve(e.next('module-save'),{session:{review:''}});await saved;
+  assert.equal(e.requests.some(r=>r.body.action==='module-run'),false);
+});
+await test('topic search finds method names across stages within the chosen journey',async()=>{
+  const e=environment();e.context.plan={tracks:[{id:'statistics-ml',lessons:[
+    {id:'statistics-001',title:'Reasoning',level:'beginner',status:'authored',concepts:['estimand']},
+    {id:'statistics-019',title:'Supervised models',level:'advanced',status:'authored',concepts:['Random forest','Boosted trees']}
+  ]}]};e.run("index=plan;trackId='statistics-ml';");
+  e.element('lesson-query').value='random forest';await e.event('lesson-query','input');
+  assert.equal(e.element('stage').value,'all');assert.equal(e.element('lessons').children.length,1);
+  assert.equal(e.element('lessons').children[0].id,'lesson-statistics-019');
+});
+
+await test('reading view keeps source and notes intact while changing layout',async()=>{
+  const e=environment();e.current('statistics-001');e.element('source').value='retained source';e.element('explanation').value='retained notes';
+  await e.event('reading-toggle');assert.match(e.element('authored').className,/reading-focus/);
+  assert.equal(e.element('reading-toggle')['aria-pressed'],'true');
+  await e.event('reading-toggle');assert.equal(e.element('authored').className,'panes');
+  assert.equal(e.element('source').value,'retained source');assert.equal(e.element('explanation').value,'retained notes');
+  assert.equal(e.requests.filter(r=>r.body.action!=='module-index').length,0);
+});
+await test('section navigation includes nested rendered chapter headings',async()=>{
+  const e=environment();const headings=[{id:'module-guide--section',textContent:'Mechanism#',querySelector:()=>({textContent:'#'})},{id:'module-guide--stat-01-01',textContent:'Descriptive analysis#',querySelector:()=>({textContent:'#'})}];
+  e.element('guide').querySelectorAll=selector=>{assert.match(selector,/h4/);assert.match(selector,/h5/);return headings;};
+  e.run('renderSections()');assert.equal(e.element('section-jump').children.length,3);
+  assert.equal(e.element('section-jump').children[1].textContent,'Mechanism');
+  assert.equal(e.element('section-jump').children[2].value,'module-guide--stat-01-01');
+});
+await test('journey progression respects canonical variants and planned boundaries',async()=>{
+  const e=environment();const rows=[{id:'spark-013',title:'Rows',level:'beginner',status:'authored',variants:[{id:'spark-013@pyspark',title:'Python'}]},{id:'spark-014',title:'Next topic',level:'intermediate',status:'planned',prerequisites:['spark-013'],lab:'Future lab',verification:'Future check'}];
+  e.context.plan={tracks:[{id:'scala-spark',lessons:rows}]};e.run("index=plan;trackId='scala-spark';lessonId='spark-013@pyspark';current=null;renderPager();");
+  assert.equal(e.element('journey-position').textContent,'1 of 2');assert.equal(e.element('previous-lesson').disabled,true);
+  await e.event('next-lesson');assert.equal(e.run('lessonId'),'spark-014');
+  assert.equal(e.element('journey-position').textContent,'2 of 2');assert.equal(e.element('next-lesson').disabled,true);
+  assert.equal(e.element('authored').hidden,true);assert.equal(e.element('planned').hidden,false);
+  assert.equal(e.requests.some(r=>r.body.action==='module-run'),false);
+});
 console.log(JSON.stringify({checks,passed:true,final:true}));

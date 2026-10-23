@@ -192,6 +192,46 @@ Vary the strength or structure of hidden common causes and identify decision tip
 
 Infer candidate graphs from conditional independences, functional restrictions or interventions. Markov equivalence often leaves directions unresolved. Hidden variables, selection and faithfulness violations limit what observational discovery can establish.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: trace an AIPW score by hand
+
+For one treated observation with outcome eight, estimated treatment probability .5, predicted treated outcome six and predicted control outcome three, the score is 6-3+(8-6)/.5=7. For one control observation with outcome four and the same nuisance predictions, the score is 6-3-(4-3)/.5=1. Their average is four. The outcome model contributes a baseline contrast three, and observed residuals adjust that contrast using assignment probabilities.
+
+Each score is not an individual treatment effect. It can lie outside the outcome range and can be noisy because inverse probabilities amplify residuals. Averaging many appropriately sampled scores estimates the population target under assumptions. Treating a large score as proof that one person benefits greatly would confuse an estimating-equation contribution with a personal causal quantity.
+
+With true propensity e and estimated propensity e_hat, let delta_a=m_hat_a-m_a be outcome-model error. Conditional bias in the AIPW score can be written as (e_hat-e)*[delta_1/e_hat+delta_0/(1-e_hat)]. This product structure explains double robustness: either correct nuisance component makes this expression zero. It also explains failure when both errors are substantial, especially near propensity boundaries.
+
+Cross-fitting helps control the relationship between learned nuisance errors and evaluation noise. It does not make arbitrary slow or inconsistent learners satisfy the asymptotic conditions. In a practical report, include overlap, effective weight behavior, nuisance diagnostics, score tails and sensitivity to modeling choices. A standard error computed from the score's sample variability is meaningful only when the assumptions supporting that approximation hold.
+
+### Case study: overlap changes the population you can answer for
+
+A treatment is almost universal among high-risk units and rare among low-risk units. An ATE estimator weights the unusual high-risk controls and low-risk treated units heavily. Those few records can dominate the comparison. Trimming them may stabilize the calculation but discards the very observations used to represent unsupported counterfactuals.
+
+Overlap weighting targets units whose treatment probabilities are nearer equipoise. That can be a sensible decision population, particularly when the real choice is uncertain only for such units. But its effect need not equal the full-population ATE. State the new target population explicitly and quantify which units lost influence. A more stable number is not automatically a better estimate of the original question.
+
+Matching has a similar target issue. Calipers, replacement and unmatched exclusions alter which treated or control units are represented. Balance diagnostics should inspect meaningful distributions and nonlinear terms, not just average propensity scores. Since the propensity is one-dimensional, similar scores do not guarantee every finite-sample covariate is balanced without checking.
+
+### Case study: time-varying confounding affected by prior treatment
+
+A system receives preventive maintenance each week. Current wear predicts both next week's maintenance and failure, but previous maintenance also reduces wear. Adjusting for current wear in an ordinary regression may block part of previous treatment's effect while trying to control confounding for current treatment.
+
+Marginal structural models use sequential treatment probabilities to construct a weighted comparison of treatment histories under specified regimes. The identifying assumption is sequential exchangeability given the observed history, together with sequential positivity and consistency. Long treatment histories can make products of inverse probabilities extremely variable, revealing that some sustained regimes have little support.
+
+The g-formula takes another route: model how wear and outcomes evolve under each history, simulate the proposed regime and average. Structural nested models and g-estimation target causal contrasts through different modeling restrictions. These methods answer related longitudinal questions but do not eliminate the need to observe the confounding history or define feasible treatment strategies.
+
+### Case study: evaluating a learned policy without rewarding overfitting
+
+A flexible effect model assigns the highest estimated benefit to a small segment. Selecting that segment using noisy effects creates a winner's-curse problem. Evaluating the same segment on the same data can produce an impressive uplift curve even when the true effect is constant.
+
+Use separate policy-learning and evaluation observations, ideally randomized with logged probabilities. Evaluate net value against treating none, treating all where feasible, and a simple targeting rule. Include treatment cost and any capacity constraint. If the policy changes who receives labels or who remains observable, future training data become policy-dependent and need feedback-loop management.
+
+Off-policy evaluation requires that the historical policy sometimes chose every action the new policy would choose in relevant contexts. A deterministic logger can leave no support for alternate actions. Importance weighting cannot estimate an unobserved action's value from zero-probability logs. Model-based extrapolation may still be considered, but its assumptions must be visible and uncertainty should reflect that evidence gap.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_17.py](../examples/chapter_17.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

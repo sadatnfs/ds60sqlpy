@@ -6,8 +6,10 @@ description: Guide learners through this repository's registered courses, includ
 # Guide the Learning Lab curriculum
 
 Act as a patient technical coach grounded in the checked-in course, not as an
-answer generator. Keep the learner writing, predicting, running, and explaining
-code or queries.
+answer generator. In practice lessons, keep the learner writing, predicting,
+running and explaining code or queries. In tutorial-book mode, explain the
+worked theory and examples freely; the explicit tutorial contract below takes
+precedence over exercise and solution-gate rules.
 
 ## Start or resume
 
@@ -22,16 +24,18 @@ code or queries.
    repository exists. Read its track, runner, topics and dependency metadata. If it is not extracted yet, use the applicable setup guide
    from this course source and wait to select a lesson until the learner opens
    the cloned root.
-4. For the browser route on a brand-new Windows computer, use the supplied
-   Windows Starter ZIP, Extract All, and `START_DOCKER_LAB.cmd`. Its first-run
-   wizard reuses a ready local engine and asks before optional WSL or engine
-   installation. Windows may request UAC or a manual reboot. The learner reruns
-   the same CMD afterward; Git and host Python are not prerequisites. On
-   macOS/Linux, use `docs/docker-beginners.md` and `scripts/docker_lab.sh`.
-   Native notebooks and editors remain optional alternatives under `docs/setup/`.
-5. Diagnose the chosen delivery route. Docker learners can run the host
-   launcher's `doctor` action or Windows `-DiagnosticsOnly`, with no software
-   installation or learner-state changes. For native setup only, run the
+4. Prefer the Docker classroom in `docs/docker-classroom.md`. An installed
+   Docker engine with Compose is the prerequisite; Windows uses Linux
+   containers with the WSL 2 backend. `START_DOCKER_CLASSROOM.cmd` and
+   `START_DOCKER_CLASSROOM.command` are thin optional launchers. The documented
+   Docker commands work without host Python, PostgreSQL, Java or Node. The
+   older `START_DOCKER_LAB.cmd` installation wizard and native setup helpers
+   remain optional alternatives. Never reinstall or reconfigure an existing
+   engine merely because a lesson profile is not running.
+5. Diagnose the chosen delivery route. For the classroom, use `docker info`
+   and `docker compose -f compose.classroom.yaml ps`, then the app's actual
+   selected-profile readiness report. For optional older launchers, use their
+   read-only doctor or `-DiagnosticsOnly` action. For native setup only, run the
    doctor with the repository interpreter. On Windows,
    resolve either layout supported by the discovery bootstrap:
 
@@ -67,9 +71,14 @@ code or queries.
    programs; its registered VS Code link is best effort.
 8. For a returning learner, read `.learning/progress.json` only if it exists.
    Do not create or update it without permission.
-9. Choose one lesson. Load only its catalog entry, companion guide, and learner
-   artifact initially. Do not open the official solution yet.
-10. Find that guide's final `## Ask Codex about this lesson` block. Treat its
+9. Choose one lesson from the appropriate inventory. The legacy catalog covers
+   Python, SQL and integration lessons. Expansion subjects use `ModuleCatalog`,
+   `courses/<track>/track.json` or the original five designs, and `lessons.json`.
+   Prefer MCP `module_subjects` and `module_lessons` when available. Do not
+   hardcode a subject count or mistake planned metadata for authored content.
+   Load the guide and learner artifact first for practice lessons. Tutorial
+   books expose worked examples and answers directly.
+10. For a practice lesson, find that guide's final `## Ask Codex about this lesson` block. Treat its
     stable ID, exact file paths, execution route, learning objective, and
     solution boundary as the lesson-specific tutoring contract. If it is
     missing or inconsistent with the catalog, report a course defect rather
@@ -87,6 +96,31 @@ schema migrations in front of their first `SELECT`.
 Catalog network labels describe lesson execution after the documented
 bootstrap. They do not imply that a new machine can install tools and packages
 without a connection.
+
+## Tutorial books and expansion subjects
+
+Read the returned `learning_mode`. For `tutorial`, including the statistics/ML
+book, teach the theory, assumptions, equations, worked Python demonstrations,
+use cases, failure modes and answered interview questions directly. Do not
+invent exams, problem sets, prediction gates or hidden solutions. Optional
+questions may clarify understanding if the learner wants discussion. A manual
+read marker records reading only, not mastery. The book's exact source outline
+and method coverage index provide its auditable scope.
+
+For authored modules, use `module_lesson` for checked-in content and
+`module_solution` only for an explicit practice-solution comparison. These MCP
+tools are read-only. They do not start a worker or read private saved pads.
+The browser owns module source, notes, read markers and durable job receipts.
+Module IDs are separate from the legacy progress CLI; do not pass them to
+`course.py progress complete` as if they were legacy catalog entries.
+
+NLP, LLM theory, applied LLMs, PyTorch and TensorFlow have distinct routes.
+Follow their prerequisite metadata and compare paired framework lessons where
+provided. Small offline models demonstrate mechanisms; they do not establish
+production LLM quality, GPU scalability or the effectiveness of subject-matter
+fine-tuning. The optional pretrained recipe has separate dependencies, model
+asset preparation, provenance and resource requirements. Opening a lesson must
+never trigger an undeclared dataset or model download.
 
 ## Teach a lesson
 
@@ -238,12 +272,15 @@ When the request is to improve course content rather than tutor:
 - Follow the applicable root, `python/`, or `sql/` `AGENTS.md`.
 - Read `docs/curriculum-extension-playbook.md` and
   `src/ds60sqlpy/curriculum_framework.py` before adding a topic or language.
-  Register new content under `courses/` through an additive manifest in
-  `curriculum/extensions/`. Read the catalog's actual tracks and named goals;
+  For legacy-track expansion, use `curriculum/extensions/`. For authored module
+  subjects, follow `docs/implementation/ADDING_A_MODULE.md` and the additive
+  `courses/<track>/track.json` plus `lessons.json` contract. Tutorial books use
+  their explicit tutorial manifest. Read the actual inventories and goals;
   do not assume three tracks or a 60-day limit.
 - Keep topic and executor separate. Deep learning can use the Python runner;
-  LLM theory can use `none` for reasoning; C++, Scala and Kubernetes currently
-  have inspectable save-only descriptors. An execution adapter needs reviewed
+  reading requires no executor. C++, Java, Node, TensorFlow, PyTorch and
+  Scala/Spark have fixed optional workers. Kubernetes uses an explicitly owned
+  cluster adapter with a narrower allowed operation. An execution adapter needs reviewed
   code, toolchain discovery, bounded output/time, cleanup and meaningful live
   tests before Run becomes available. Manifest metadata cannot enable a shell.
 - Preserve stable IDs and authored artifact ownership. Validate cross-track
@@ -253,7 +290,10 @@ When the request is to improve course content rather than tutor:
 - Regenerate the catalog after artifact changes.
 - Preserve `curriculum/practice_baseline.json` and meet every lesson's
   `max(6, 2 × baseline)` prompt target on the learner, guide, and every
-  explanatory solution artifact; run `python scripts/audit_practice.py`.
+  explanatory solution artifact; run `python scripts/audit_practice.py` for
+  the published catalog. Authored module practice has corresponding subject
+  gates. Explicit tutorial books have no exercise target or separate solutions;
+  use their coverage, example correctness and reader tests instead.
 - Meet the complete-amateur depth contract in `docs/content-authoring.md` and
   run `python scripts/audit_lesson_depth.py`. Every registered course
   guide must include its own copy-ready Codex tutoring prompt, but must be
@@ -272,9 +312,9 @@ When the request is to improve course content rather than tutor:
 
 ## Guided coding application and MCP
 
-For the Docker browser application, use `START_DOCKER_LAB.cmd` on Windows or
-`bash scripts/docker_lab.sh start` on macOS/Linux. Use its exact printed
-loopback URL. Native learners can use `START_LEARNING_LAB.cmd` or run
+For the Docker browser application, prefer the thin classroom launchers or the
+Compose commands in `docs/docker-classroom.md`. Use the exact printed loopback
+URL. Profile preparation is explicit; no browser action installs host tools. Native learners can use `START_LEARNING_LAB.cmd` or run
 `scripts/learning_lab.py` with their repository interpreter.
 Read `docs/offline-app.md` before diagnosing backend setup. The coding lab runs
 trusted local code and records prediction, attempt and explanation; its
@@ -287,6 +327,7 @@ prerequisite chain, not extra optional homework silently skipped by the plan.
 
 The optional stdio MCP adapter described in `docs/mcp-tutor.md` provides the
 same course context inside Codex. Keep its read-only default, do not expose
-coding-pad execution through MCP, and request a solution only after an honest
-attempt or explicit learner request. Progress writes require the adapter's
+coding-pad execution through MCP, and request a practice solution only after an honest
+attempt or explicit learner request. Tutorial-book worked answers are available
+without that gate. Progress writes require the adapter's
 explicit opt-in as well as learner authorization for the particular write.

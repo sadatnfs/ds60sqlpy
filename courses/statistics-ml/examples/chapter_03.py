@@ -21,7 +21,19 @@ def markov_and_jensen():
     assert np.mean(x*x) > np.mean(x)**2
     print("Long-run state probabilities:", distribution, "variance gap:", np.mean(x*x)-np.mean(x)**2)
 
+def central_limit_simulation():
+    rng=np.random.default_rng(303)
+    samples=rng.exponential(size=(6000,32))
+    standardized=np.sqrt(32)*(samples.mean(axis=1)-1)
+    assert abs(standardized.mean())<.06
+    assert abs(standardized.var(ddof=1)-1)<.08
+    raw_skew=np.mean((samples[:,0]-samples[:,0].mean())**3)/samples[:,0].std()**3
+    mean_skew=np.mean((standardized-standardized.mean())**3)/standardized.std()**3
+    assert abs(mean_skew)<abs(raw_skew)
+    print("CLT standardized mean/variance:",standardized.mean(),standardized.var(ddof=1),"raw/mean skew:",raw_skew,mean_skew)
+
 def main():
+    central_limit_simulation()
     bayes_and_total_variance()
     markov_and_jensen()
 

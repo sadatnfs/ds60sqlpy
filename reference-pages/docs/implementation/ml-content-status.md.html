@@ -8,7 +8,7 @@
     http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
   >
-  <title>ML course implementation checkpoint · DS60 reference</title>
+  <title>ML content completion and verification checkpoint · DS60 reference</title>
   <style>
     :root {
       --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
@@ -112,47 +112,48 @@
   <main class="shell">
     <header class="hero">
       <p class="eyebrow">Rendered course document</p>
-      <h1>ML course implementation checkpoint</h1>
+      <h1>ML content completion and verification checkpoint</h1>
       <p class="source-path">Generated from <code>docs/implementation/ml-content-status.md</code></p>
     </header>
-    <article class="document"><h2 id="ml-course-implementation-checkpoint">ML course implementation checkpoint<a class="heading-anchor" href="#ml-course-implementation-checkpoint" aria-label="Link to this section">#</a></h2>
-<p>Updated <strong>2026-10-22</strong>. All durable authoring took place directly in the original repository. This checkpoint separates authored lessons, host content checks and actual worker qualification.</p>
-<h3 id="completed-teaching-slice">Completed teaching slice<a class="heading-anchor" href="#completed-teaching-slice" aria-label="Link to this section">#</a></h3>
+    <article class="document"><h2 id="ml-content-completion-and-verification-checkpoint">ML content completion and verification checkpoint<a class="heading-anchor" href="#ml-content-completion-and-verification-checkpoint" aria-label="Link to this section">#</a></h2>
+<p>Updated 2026-10-22. This checkpoint records authored source and actual checks separately from runtime qualification and learner mastery.</p>
+<h3 id="authored-inventory">Authored inventory<a class="heading-anchor" href="#authored-inventory" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="../../courses/deep-learning-tensorflow/README.md.html">TensorFlow foundations</a>: <code>tf-001</code> through <code>tf-008</code>, with every direct entry prerequisite authored.</li>
-<li><a href="../../courses/llm-theory/README.md.html">LLM foundations</a>: <code>llm-001</code> through <code>llm-009</code>, with every direct entry prerequisite authored. The attention pilot uses NumPy and does not require PyTorch or TensorFlow.</li>
-<li>Each of the 17 lessons has a guide, a learner artifact, an executable Python reference and a separate explanatory solution. The orientation worksheets <code>tf-001</code> and <code>llm-001</code> use reading mode, with written evidence and no job.</li>
-<li>Each guide provides definitions, syntax/reasoning anatomy, two focused worked examples, six distinct Expected/Verify exercises, diagnosis, three hints, retrieval, an evidence rubric and its exact Codex tutoring prompt.</li>
-<li>Both course directories include README, local AGENTS, and valid incremental <code>lessons.json</code> inventories. Publication in the active catalog is managed separately; metadata and a source file do not install a runtime.</li>
+<li>TensorFlow: <strong>36 of36 reviewed IDs</strong>, <code>tf-001</code> through <code>tf-036</code>.</li>
+<li>LLM mechanisms: <strong>42 of42 reviewed IDs</strong>, <code>llm-001</code> through <code>llm-042</code>.</li>
+<li>This pass completed the previously missing <code>tf-009</code> through <code>tf-036</code> and <code>llm-010</code> through <code>llm-042</code>,61 lesson bundles.</li>
+<li>Each guide includes a mechanism explanation, definitions, syntax or reasoning anatomy, two worked examples, six concrete exercises with Expected/Verify contracts, diagnosis, hints, retrieval and a copy-ready Codex prompt. Every code lesson has an answer-free learner worksheet, an executable reference with assertions, and a separate explanatory solution. Reading lessons have separate worksheets and explanations.</li>
+<li>Guide word counts across the complete inventory range from1360 to2757. Counts are structural evidence; the per-topic calculations, counterexamples and independent assertions carry the teaching evidence.</li>
+<li>The reviewed IDs, prerequisites and runtime profiles are preserved. Authored registration alone does not publish the active catalog or qualify a runtime.</li>
 </ul>
-<h3 id="fixed-pilot-verifier-contracts">Fixed pilot verifier contracts<a class="heading-anchor" href="#fixed-pilot-verifier-contracts" aria-label="Link to this section">#</a></h3>
-<p><code>tf-gradient-v1</code> calls <code>gradient_step(rate=0.1, initial_weight=0.0)</code> and compares four numeric fields: <code>loss_before</code>, <code>gradient</code>, <code>weight_after</code>, <code>loss_after</code>. The typed fixture also covers overshoot and the optimum. It lives at <a href="../../courses/deep-learning-tensorflow/fixtures/tf-gradient-v1.json.html">courses/deep-learning-tensorflow/fixtures/tf-gradient-v1.json</a>.</p>
-<p><code>llm-causal-attention-v1</code> calls <code>attention(q,k,v,allowed)</code> using NumPy float64 arrays and an include-True boolean mask, returning output and weight matrices. Its <a href="../../courses/llm-theory/fixtures/llm-causal-attention-v1.json.html">typed fixture</a> contains the beginner equal-score case, a future-value change, malformed inputs, and four nonuniform cases. The nonuniform goldens are derived from explicit scalar exp formulas for known scaled score rows, independently of the candidate helper. They expose ignored queries/keys, missing square-root scaling, wrong normalization axis and swapped query/key calculations. Prefixes and future-only perturbations retain the causal boundary.</p>
-<p>Both runnable worked implementations may already pass a fixed verifier. A successful check is evidence about that function, not completion of all six exercises or proof of language-model quality. Predictions, owned attempts and fresh transfer explanations remain separate evidence.</p>
-<h3 id="completed-host-validation">Completed host validation<a class="heading-anchor" href="#completed-host-validation" aria-label="Link to this section">#</a></h3>
-<p>Using an existing prepared Python/NumPy environment, without installing any package:</p>
-<ul>
-<li><code>tests/test_ml_module_lessons.py</code>: <strong>34 passed, 1 skipped</strong>. The single skip is the explicitly opt-in qualified TensorFlow execution test.</li>
-<li>All 15 standard-library/NumPy references execute their exercise checks. Their guide examples and Python learner files also execute from fresh namespaces.</li>
-<li>All 17 lessons pass the shared <code>audit_lesson_depth</code> and practice-count gates through an isolated in-memory catalog, without publishing new active IDs.</li>
-<li>All source Python parses, all local authored Markdown links resolve, and no em dashes occur in the owned course artifacts.</li>
-<li>Ruff check passes for both complete course directories and the focused test file. All Python and Markdown code fences are formatted consistently.</li>
-<li>Independent <code>fractions.Fraction</code> arithmetic verifies every TensorFlow pilot oracle, including large-step failure, fresh repeated updates, the broadcast gradient and the bias/held-out transfer.</li>
-</ul>
-<p>TensorFlow was <strong>not imported or executed on the host authoring interpreter</strong>. The runtime team separately qualifies actual worker execution and records it in <a href="../modules-runtime.md.html">the runtime documentation</a>. Python parsing and Fraction math do not establish framework, platform, memory or elapsed-time acceptance. This content work installed no TensorFlow/PyTorch package, downloaded no model or dataset and built no image.</p>
-<h3 id="reproduce-the-focused-checks">Reproduce the focused checks<a class="heading-anchor" href="#reproduce-the-focused-checks" aria-label="Link to this section">#</a></h3>
-<p>From the repository root, using the prepared quality environment:</p>
-<pre><code class="language-text">python -m pytest tests/test_ml_module_lessons.py
-python -m ruff check --no-cache courses/deep-learning-tensorflow courses/llm-theory tests/test_ml_module_lessons.py</code></pre>
-<p>Only in an already qualified TensorFlow environment, the optional reference execution test can be selected explicitly. Windows PowerShell:</p>
-<pre><code class="language-powershell">$env:DS60_TEST_TENSORFLOW = &quot;1&quot;
-&amp; $CoursePython -m pytest tests/test_ml_module_lessons.py -k qualified_runtime</code></pre>
-<p>macOS/Linux:</p>
-<pre><code class="language-bash">DS60_TEST_TENSORFLOW=1 &quot;$DS60_COURSE_PYTHON&quot; -m pytest tests/test_ml_module_lessons.py -k qualified_runtime</code></pre>
-<p>The selected interpreter must already contain the required packages; these commands perform no environment setup. The optional test checks both tape semantics in <code>tf-007</code> and all six reference exercises plus typed calls in <code>tf-008</code>. Preserve learner state and report unavailable qualification honestly.</p>
-<h3 id="remaining-content-and-publication-gates">Remaining content and publication gates<a class="heading-anchor" href="#remaining-content-and-publication-gates" aria-label="Link to this section">#</a></h3>
-<p>The reviewed design still plans <code>tf-009</code> through <code>tf-036</code> and <code>llm-010</code> through <code>llm-042</code>: 61 later lesson bodies are not implicitly implemented. Start next with batches/optimizer steps and positions/tokenwise normalization. Keep the optional TensorFlow comparison out of the required LLM capstone path.</p>
-<p>Before any wider publication, confirm actual worker readiness on each claimed platform, save/cancel/timeout/output behavior, learner-work preservation, prerequisite navigation, and explicit solution reveal in the UI. Register only completed teaching artifacts and retain the immutable historical practice baseline. Do not create placeholder lessons merely to make an entire course appear available.</p></article>
+<h3 id="actual-checks-in-this-pass">Actual checks in this pass<a class="heading-anchor" href="#actual-checks-in-this-pass" aria-label="Link to this section">#</a></h3>
+<p>Command from the repository root, using the existing prepared Python environment:</p>
+<pre><code class="language-text">python -m pytest tests/test_ml_module_lessons.py -q --disable-warnings</code></pre>
+<p>Result: <strong>58 passed,42 skipped</strong>. Skips are explicit optional heavy-runtime tests:1 existing TensorFlow foundation test,25 newly completed TensorFlow reference tests,15 PyTorch reference tests and1 additional decoder/cache negative-control test. The latest focused run completed without warnings. Three additional regressions compile embedded child programs without importing heavy frameworks.</p>
+<p>The complete78-entry inventory passed the shared lesson depth and practice checks inside the focused test suite. All authored Python files parsed. Existing behavior tests were preserved; new tests cover full planned-ID coverage, core reference execution, tool proposal failures, retrieval tie behavior, tokenwise normalization and optional decoder/cache boundaries.</p>
+<p>All30 <code>python-core</code> executable reference <code>verify()</code> functions were also executed directly and passed:</p>
+<p><code>tf-002</code>, <code>tf-003</code>, <code>tf-004</code>, <code>tf-005</code>, <code>tf-006</code>, <code>tf-010</code>, <code>tf-034</code>, <code>tf-035</code>, <code>llm-002</code>, <code>llm-003</code>, <code>llm-004</code>, <code>llm-005</code>, <code>llm-006</code>, <code>llm-007</code>, <code>llm-008</code>, <code>llm-009</code>, <code>llm-010</code>, <code>llm-011</code>, <code>llm-012</code>, <code>llm-013</code>, <code>llm-014</code>, <code>llm-021</code>, <code>llm-025</code>, <code>llm-027</code>, <code>llm-033</code>, <code>llm-034</code>, <code>llm-036</code>, <code>llm-037</code>, <code>llm-038</code>, <code>llm-040</code></p>
+<h3 id="explicitly-unexecuted-surfaces-in-this-pass">Explicitly unexecuted surfaces in this pass<a class="heading-anchor" href="#explicitly-unexecuted-surfaces-in-this-pass" aria-label="Link to this section">#</a></h3>
+<p>The27 TensorFlow and15 PyTorch lesson references require the corresponding prepared CPU runtime. They were authored and structurally checked, but were not executed in the host environment during this authoring pass. No host package installation, model download, data download, database action or Docker mutation occurred here. Root integration owns the prepared-image execution receipts.</p>
+<p>Heavy-runtime IDs awaiting that execution receipt:</p>
+<p><code>tf-007</code>, <code>tf-008</code>, <code>tf-009</code>, <code>tf-011</code>, <code>tf-012</code>, <code>tf-013</code>, <code>tf-014</code>, <code>tf-015</code>, <code>tf-016</code>, <code>tf-017</code>, <code>tf-018</code>, <code>tf-019</code>, <code>tf-020</code>, <code>tf-021</code>, <code>tf-022</code>, <code>tf-023</code>, <code>tf-024</code>, <code>tf-025</code>, <code>tf-026</code>, <code>tf-027</code>, <code>tf-028</code>, <code>tf-029</code>, <code>tf-030</code>, <code>tf-031</code>, <code>tf-032</code>, <code>tf-033</code>, <code>tf-036</code>, <code>llm-015</code>, <code>llm-016</code>, <code>llm-017</code>, <code>llm-018</code>, <code>llm-019</code>, <code>llm-020</code>, <code>llm-022</code>, <code>llm-023</code>, <code>llm-024</code>, <code>llm-026</code>, <code>llm-028</code>, <code>llm-031</code>, <code>llm-032</code>, <code>llm-035</code>, <code>llm-042</code></p>
+<p>Reading-only IDs require written reasoning rather than a fabricated execution receipt:</p>
+<p><code>tf-001</code>, <code>llm-001</code>, <code>llm-029</code>, <code>llm-030</code>, <code>llm-039</code>, <code>llm-041</code></p>
+<p><code>tf-028</code>, <code>tf-032</code> and <code>llm-022</code> include same-interpreter fresh-process persistence checks with60-second subprocess bounds and owned TemporaryDirectory cleanup. Their source intentionally distinguishes prediction parity from next-update parity. <code>llm-024</code>, <code>llm-035</code> and <code>llm-042</code> compare full-prefix and incremental KV-cache outputs. The capstones permit a no-go decision and distinguish fixed saved answer records from actual model-generated outputs.</p>
+<h3 id="continue-without-losing-authoring-state">Continue without losing authoring state<a class="heading-anchor" href="#continue-without-losing-authoring-state" aria-label="Link to this section">#</a></h3>
+<p>The portable original specifications and renderer are checked in under <code>courses/deep-learning-tensorflow/authoring/</code>. Run:</p>
+<pre><code class="language-text">python courses/deep-learning-tensorflow/authoring/build.py</code></pre>
+<p>The renderer preserves the earlier first8 TensorFlow and first9 LLM bundles and regenerates the61 completed bundles from topic-specific source. Edit the specifications when changing generated lesson text, then rerun the renderer and checks. It does not touch shared catalog generators, runtime adapters, learner state or the practice expansion registry.</p>
+<p>Prepared runtime test switches:</p>
+<pre><code class="language-text">DS60_TEST_TENSORFLOW=1 python -m pytest tests/test_ml_module_lessons.py -q
+DS60_TEST_TORCH=1 python -m pytest tests/test_ml_module_lessons.py -q</code></pre>
+<p>Those are POSIX environment-prefix forms. In PowerShell set <code>$env:DS60_TEST_TENSORFLOW = &quot;1&quot;</code> or <code>$env:DS60_TEST_TORCH = &quot;1&quot;</code> before invoking the selected interpreter, then remove the temporary environment setting afterward. Use only a runtime whose dependencies were already deliberately prepared.</p>
+<h3 id="remaining-integration-work">Remaining integration work<a class="heading-anchor" href="#remaining-integration-work" aria-label="Link to this section">#</a></h3>
+<p>Run the full heavy reference suites in prepared containers, record failures and repairs, regenerate the shared dashboard/readers after root catalog integration, and inspect the actual browser lesson/solution flow. Current content completion must not be described as a live-runtime or production-quality acceptance result. Additional Python/SQL deepening remains a separate queued workstream owned by root; no such lesson was claimed complete by this ML pass.</p>
+<h3 id="fresh-process-repair-checkpoint">Fresh-process repair checkpoint<a class="heading-anchor" href="#fresh-process-repair-checkpoint" aria-label="Link to this section">#</a></h3>
+<p>Root prepared-container execution reported25 of27 TensorFlow references passing and indentation failures in the embedded child programs of <code>tf-028</code> and <code>tf-032</code>. The authoring specifications and generated artifacts now use <code>textwrap.dedent</code> with a leading newline, compile the child source before launching it, and include child stderr in a failure. The same defect was proactively repaired in <code>llm-022</code>. Static child-source compilation regressions pass. Root will rerun the actual prepared-runtime cases; this paragraph does not claim the repaired subprocesses have executed.</p>
+<h3 id="prepared-runtime-acceptance-readback">Prepared-runtime acceptance readback<a class="heading-anchor" href="#prepared-runtime-acceptance-readback" aria-label="Link to this section">#</a></h3>
+<p>Root integration subsequently executed all27 TensorFlow reference programs and all15 PyTorch reference programs successfully in the prepared Linux arm64 Docker images. Initial failures in TensorFlow028/032 and PyTorch022 were repaired and individually rerun. TensorFlow032 additionally retains the loaded SavedModel owner so its captured variables remain alive during serve. Receipts are the local implementation files <code>work/tensorflow-all-lessons-acceptance.jsonl</code>, <code>work/tensorflow-repaired-lessons-acceptance.jsonl</code>, <code>work/tensorflow-export-lifetime-acceptance.jsonl</code>, <code>work/torch-all-lessons-acceptance.jsonl</code> and <code>work/torch-repaired-lessons-acceptance.jsonl</code>. These establish bounded CPU reference execution on that image/architecture, not Windows-native, x86, GPU, production-quality or learner-mastery acceptance. Earlier unexecuted statements above describe the authoring pass before this integration run.</p></article>
   </main>
 </body>
 </html>

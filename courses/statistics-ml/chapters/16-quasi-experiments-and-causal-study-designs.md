@@ -152,6 +152,44 @@ Randomize an offer or encouragement when actual uptake cannot be forced. ITT is 
 
 Test outcomes, times or thresholds where no effect should occur and examine covariate continuity or pretrends. Failure challenges the design; success leaves untested assumptions and should not be oversold as proof.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: a policy change with a concurrent shock
+
+A city adopts a transport policy and travel time falls from 40 to 30 minutes. A comparison city falls from 35 to 30. The before-after treated change is minus ten, while DiD is minus five. The comparison trend attributes half the reduction to changes that would have happened anyway. That attribution is the design assumption, not a fact produced by subtraction.
+
+If the treated city also opens a major rail line at the same time, the remaining five-minute reduction may mix both interventions. Adding more historical periods helps describe pretrends but cannot isolate perfectly simultaneous shocks without additional variation or assumptions. Placebo dates and unaffected outcomes can challenge the story, while a second comparison region may reveal that the original control followed an unusual path.
+
+For an event study, plot effects with uncertainty by event time and use a consistent reference. Preperiod coefficients can detect some anticipation or differential trends, but selecting the study because its pretrend p-values exceed .05 can itself create selection problems. Report the pattern, power to detect consequential violations, and sensitivity of the postperiod conclusion to plausible trend departures.
+
+### Case study: staggered treatment creates changing controls
+
+Suppose one group adopts in January and another in July. Before July, the later group may be an untreated comparison for the early group. After July, a standard two-way fixed-effects regression can also compare changes in the newly treated group with the already treated group. If the early group's treatment effect grows over time, its continued improvement is not an untreated counterfactual trend.
+
+A single coefficient can therefore mix valid-looking early comparisons with contaminated later ones, sometimes through negative weights. This is not merely a standard-error problem. Cohort-time effects make the target explicit, with comparison groups chosen according to the identification assumptions. Aggregation can weight cohorts by population, calendar time or exposure duration, each answering a different question.
+
+Choose the policy question before selecting an aggregate. A rollout forecast may care about effects by time since adoption, while an annual budget decision may care about calendar-time totals. Heterogeneity that is inconvenient for one summary can be the central information needed for the decision.
+
+### Case study: a synthetic control with excellent prefit but weak evidence
+
+Two untreated donor units have preperiod outcomes ten and fourteen, while the treated unit has twelve. Equal weights match the preperiod exactly. After intervention, donor outcomes become twelve and eighteen, giving a synthetic counterfactual fifteen. If treated outcome is nineteen, the estimated effect is four.
+
+With only one preperiod, exact matching is easy and proves little. Many weight combinations or models may fit a short history. Longer preperiods, relevant predictors, donor plausibility and placebo comparisons help assess whether the synthetic combination reproduces the treated unit's untreated dynamics. Spillovers from the treatment into donor units invalidate their role as untreated references.
+
+Augmentation can correct imperfect prefit using an outcome model, but a large correction signals that the result relies more heavily on extrapolation. Report donor weights, effective donor support, prefit quality, postperiod shocks and sensitivity to leaving donors out. A polished counterfactual line should not conceal that only a few units carry the estimate.
+
+### Case study: strong relevance is not a valid instrument
+
+A randomized email encourages use of a planning tool. It increases uptake and improves project completion. The email also contains practical planning advice. The advice supplies a direct path from encouragement to outcome, violating the exclusion restriction for tool usage. Randomizing the email identifies the effect of the email policy, but does not automatically identify the effect of tool use.
+
+If the email affects uptake by only one percentage point, the Wald ratio divides by .01 and magnifies both noise and any small exclusion violation. Weak-instrument diagnostics identify limited first-stage information, but a strong first stage would not remove the direct advice pathway. Separate relevance, independence, exclusion and monotonicity in the argument.
+
+Report the reduced-form outcome effect and first stage alongside any IV estimate. Describe who the compliers plausibly are and why the result may differ under another encouragement or population. Avoid calling a local effect the universal treatment effect merely because its units resemble an ATE.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_16.py](../examples/chapter_16.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

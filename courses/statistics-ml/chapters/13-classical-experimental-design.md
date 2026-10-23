@@ -168,6 +168,42 @@ Conceal assignment from participants, operators or assessors where feasible to r
 
 Prespecify estimands, metrics, exclusions, sample size, stopping and multiplicity before outcomes are inspected. Amendments can be valid when transparently dated and justified; concealment of outcome-informed changes undermines confirmation.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: optimize a process without confounding factors
+
+A manufacturing team can change temperature and pressure, each at two settings. Changing temperature first at low pressure, then pressure at high temperature, confounds the pressure comparison with the changed temperature setting. A full two-by-two factorial measures all combinations, allowing a direct interaction contrast: the temperature effect at high pressure minus its effect at low pressure.
+
+Suppose the four means at (low,low), (high,low), (low,high), (high,high) are 10,12,13,23. Temperature adds two at low pressure but ten at high pressure, so the interaction contrast is eight. Averaging temperature over equal pressure weights gives a main effect six. A one-factor-at-a-time conclusion that temperature adds two would miss the operating region with the largest benefit. Whether that region is safe and feasible remains an engineering constraint, not a statistical property of the fitted surface.
+
+Replication at the same setting estimates noise, while varying settings identifies response structure. Repeating one corner 100 times does not identify a quadratic response over the entire region. Center points help reveal curvature, and a response-surface design adds settings to estimate it. If extreme corners are unsafe, a Box-Behnken design may be attractive, but conclusions about those omitted extremes remain limited. Optimal design should include the feasible region explicitly rather than suggest settings the process cannot tolerate.
+
+### Case study: randomize at the level where intervention acts
+
+Suppose a training program is delivered to whole teams. Team members share instructors, managers and communication, so an individual's outcome may depend on teammates' exposure. Randomizing individuals inside a team can contaminate the comparison. Randomizing teams preserves a cleaner delivery contrast but reduces the number of independent assignments.
+
+If only eight teams exist, collecting hundreds of measurements per member cannot create dozens of independently randomized teams. Block teams on a few strong pretreatment predictors if justified, preserve the assignment scheme, and consider design-based inference or small-sample methods appropriate to the cluster count. Power calculations must include plausible intraclass correlation and unequal team sizes. A precise member-level regression that ignores those facts reports imaginary information.
+
+The estimand also needs a weight choice. An average team effect weights small and large teams equally; an average employee effect weights by team size. If team size is associated with treatment effect, the answers differ. State the operational decision before choosing a convenient aggregate. Attrition at team and member level can further change which population remains observed.
+
+### Case study: crossover efficiency and carryover risk
+
+A crossover can compare two interfaces within the same participants, reducing stable participant-level variation. Randomizing sequence separates some treatment and period effects. But learning the first interface may change how a participant uses the second, and no short washout can necessarily remove learned skill. The potential outcome then depends on treatment history rather than only current treatment.
+
+A paired analysis of final scores assumes away relevant carryover if it treats the two periods as interchangeable conditions. A larger sample narrows its interval around that wrong comparison. Alternatives include a parallel-arm design, a carefully modeled period/history estimand, or an intervention where carryover is scientifically negligible. Decide using the mechanism before calculating the efficiency benefit of pairing.
+
+Stepped-wedge designs similarly combine treatment rollout with calendar time. They may be operationally appealing because all clusters eventually receive treatment, but later-treated clusters experience a different calendar environment. Secular trends, implementation learning and varying time since adoption need explicit modeling. A phased schedule is not automatically a well-randomized stepped-wedge study.
+
+### From planning numbers to a defensible experiment
+
+Sample-size formulas require an effect worth detecting, not merely the effect that makes the available sample look sufficient. Translate the smallest useful benefit into the measurement scale, estimate variance from relevant historical information, and include realistic attrition. If an outcome is rare or heavy-tailed, simulate plausible generating processes and evaluate the exact planned analysis.
+
+A simulation-based design report should show power, false-positive behavior, bias, interval coverage and failure frequency across favorable and adverse scenarios. Report Monte Carlo uncertainty: estimating power from 100 replications is itself noisy. A design that works only when every assumption is exactly true may need a simpler estimand, better measurements or a larger independent sample rather than a more elaborate estimator.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_13.py](../examples/chapter_13.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

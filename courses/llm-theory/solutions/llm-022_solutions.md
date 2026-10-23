@@ -70,14 +70,17 @@ The question is: Load the trusted checkpoint into fresh weight and Adam objects,
 The child has no live parent optimizer. Agreement therefore depends on reconstructing saved state, rather than on an accidental in-memory reference.
 
 ```python
-program="""import torch,json,sys
+program=textwrap.dedent("""
+import torch,json,sys
 from torch import nn
 state=torch.load(sys.argv[1],map_location='cpu',weights_only=True)
 w=nn.Parameter(state['weight'].clone()); opt=torch.optim.Adam([w],lr=.1); opt.load_state_dict(state['optimizer'])
 opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
 print(json.dumps({'weight':w.item()}))
-"""
-result=subprocess.run([sys.executable,'-c',program,str(path)],check=True,capture_output=True,text=True,timeout=60)
+""")
+compile(program, "checkpoint-child", "exec")
+result=subprocess.run([sys.executable,'-c',program,str(path)],check=False,capture_output=True,text=True,timeout=60)
+if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0)
 ```
 

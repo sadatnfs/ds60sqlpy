@@ -148,6 +148,44 @@ Neyman allocation gives more samples to large, variable strata; unequal costs mo
 
 Plan instrument resolution, repeat measurements, timing and validation samples before collection. Repeated measurements separate within-unit noise from between-unit variability only when the repeat process itself is stable.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: prove an inverse-probability total by enumeration
+
+Consider a finite population with values ten and thirty. The first unit is included independently with probability .5 and the second with probability .25. The Horvitz-Thompson total is I1*10/.5+I2*30/.25, where each I indicates inclusion. The four possible samples yield totals zero, twenty, 120 and 140 with probabilities .375,.375,.125 and .125. Their probability-weighted average is forty, the true population total.
+
+The estimator can be very variable even though it is design unbiased. Its variance in this example is 2,800, because a rarely included high-value unit receives a large weight. Unbiasedness alone is therefore not enough to choose an estimator or sampling plan. Improving inclusion of influential units, stratifying or collecting useful auxiliary information can reduce uncertainty before analysis.
+
+The Hajek ratio divides the weighted outcome total by the estimated population count. It often stabilizes a mean but is not exactly the same as dividing a Horvitz-Thompson total by a known population size. Ratio normalization changes finite-sample properties, and an empty sample creates a denominator problem. State which estimator is used rather than referring vaguely to a weighted average.
+
+### Case study: survey calibration cannot repair an absent population
+
+An online survey matches known population margins for age and region after raking. This corrects those margins, but users without internet access are absent. If their outcomes differ after conditioning on age and region, the weighted survey remains biased for the full population. A large weighted sample can have a narrow interval around the wrong target.
+
+Joint distributions matter as well. Matching age and region margins does not ensure that every age-by-region cell is represented correctly. Poststratification on joint cells can help when cell totals are known and sample information exists. Empty cells require a model, pooling or a narrower target. Weighting cannot manufacture observed outcomes for a cell with zero support.
+
+Report weight ranges, effective sample information and sensitivity to trimming. Trimming extreme weights can reduce variance but introduces bias relative to the original design correction. That tradeoff should be visible, especially when extreme weights represent small or underserved groups. A stable dashboard is not sufficient justification for silently removing their population influence.
+
+### Case study: sampling costs and precision targets
+
+A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because 800*1 equals 200*4. Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.
+
+If the high-variability stratum costs four times as much per observation, a cost-constrained allocation adjusts for the square root of cost. If the objective is instead a precise estimate for the small stratum, the optimal allocation changes again. There is no universally optimal sample independent of the target and budget.
+
+Adaptive sampling can improve discovery of rare clusters, but the selection process changes as observations arrive. Retain the design history and inclusion probabilities needed for valid estimation. Treating the final adaptively selected set as a simple random sample overstates representativeness. Design-based and model-based analyses can both be useful, but their assumptions should not be mixed silently.
+
+### Case study: capture-recapture and list dependence
+
+Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is 100*80/20=400 entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.
+
+If the second search deliberately avoids entities found by the first, overlap can be too small and the estimate can be exaggerated. Heterogeneous capture probabilities and list dependence are therefore central assumptions, not minor corrections. Use additional lists, covariates or sensitivity analysis where appropriate, and communicate uncertainty when overlap is sparse.
+
+A measurement study can sometimes be more valuable than more ordinary observations. Repeated measurements, gold-standard validation or targeted collection in missing strata can identify error mechanisms that routine large-volume logging cannot. Choose additional data by the uncertainty it can reduce in the actual decision.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_05.py](../examples/chapter_05.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

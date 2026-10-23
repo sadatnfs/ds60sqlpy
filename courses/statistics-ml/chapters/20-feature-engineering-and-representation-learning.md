@@ -152,6 +152,50 @@ Repeat selection or representation fitting under resampling and compare retained
 
 Probe whether representations encode labels, future information or sensitive identities unavailable or inappropriate at deployment. A downstream train-test split cannot repair representations trained with leaked evaluation information.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: derive the first principal component numerically
+
+For rows (1,2),(2,4),(3,6),(4,8), the column means are (2.5,5). The sample covariance is [[5/3,10/3],[10/3,20/3]]. Its trace is 25/3, the total sample variance. The vector (1,2)/sqrt(5) is an eigenvector with eigenvalue 25/3, and its orthogonal direction has eigenvalue zero. Every centered observation lies on the first direction, so one component reconstructs the data exactly.
+
+The loading vector tells how original coordinates combine into a component. The score is each row's projection onto that direction. A sign-flipped loading and sign-flipped scores reconstruct the same matrix, so component signs have no intrinsic meaning. With two nearly equal eigenvalues, even orientations within their shared subspace can rotate substantially across samples. Compare subspaces or align components before interpreting instability as a changed phenomenon.
+
+If the second column's units are changed from meters to millimeters, its raw variance grows by a million and raw PCA changes accordingly. Standardizing both columns uses a correlation-scale geometry instead. Neither is automatically correct: raw-unit PCA might be appropriate if physical magnitude defines reconstruction cost, while standardized PCA gives each variable equal initial variance. State the loss implicit in the scaling decision.
+
+### Case study: high explained variance can discard the target
+
+Imagine one feature with large random variation unrelated to the outcome and another with tiny variation that almost perfectly determines the outcome. PCA ranks the first feature highly because it explains input variance. A one-component representation can therefore preserve nearly all input variance while destroying most predictive information.
+
+Selecting the number of components by a variance threshold is a compression rule, not a supervised performance guarantee. If prediction is the goal, tune the PCA-plus-model pipeline inside development validation. Partial least squares uses outcome relationships when constructing components, but that makes leakage prevention even more important. Fit every supervised transformation using only the appropriate training labels.
+
+Feature selection has the same selection-boundary issue. A univariate correlation screen performed before cross-validation has already used held-out labels, even if the downstream regression is fit separately in every fold. Nested validation must include the screen, transformation and model choice. An apparently harmless feature-engineering notebook can be the true source of a surprisingly high model score.
+
+### Case study: rare categories and target encoding
+
+A category with 100 observations provides a more stable outcome mean than a category with one. A simple smoothed encoding is (sum of category outcomes + lambda*global_mean)/(category_count+lambda). Lambda controls shrinkage toward the training population mean. This addresses variance, but if a row contributes its own label to its encoding, direct leakage remains, especially when category_count is small.
+
+Use fold-wise encodings for training rows, fitting category summaries on other folds, then fit a final encoder on all training data for future observations. Keep customer or time groups intact when constructing folds. New categories need an explicit fallback, often the training global mean or a hierarchical parent category. Do not recompute encodings from validation or test labels to avoid missing-category errors.
+
+The target statistic itself may drift. A product category's historical conversion rate can change after a pricing intervention, and a category name can indirectly identify a customer or event. Check point-in-time correctness and label availability. Cross-fitting prevents one form of leakage but does not turn an unstable behavioral summary into a timeless feature.
+
+### Case study: embeddings for semantic retrieval
+
+A text embedding maps a document or query to a vector learned under a representation objective. Cosine similarity can support candidate retrieval for a subject-matter assistant, but similarity is not factual entailment. A passage that shares vocabulary may contradict the requested claim, describe an obsolete version or refer to a different entity. Retrieval quality must be measured with relevant judgments and downstream answer support.
+
+For supervised classification, frozen embeddings can be a useful baseline before fine-tuning a large model. Split documents by source, author, customer or time where those relationships matter, and remove near duplicates across boundaries. A representation trained on the evaluation corpus can expose future or target information even if the classifier itself is fit cleanly.
+
+For retrieval-augmented generation, provenance and access controls must travel with the retrieved chunk. The feature pipeline should preserve document identity, version, section boundaries and retrieval timestamps. A model-generated narrative about the retrieved data does not establish a statistical relationship; numerical claims should come from a verified calculation with a defined denominator and analysis design.
+
+### Choose a representation by its invariances
+
+PCA retains large linear variation. ICA seeks independent non-Gaussian sources under a mixing model. NMF favors additive nonnegative parts. An autoencoder learns what its reconstruction objective rewards, while contrastive learning defines similarity through positive pairs, negative sampling and augmentations. These are different assumptions about which changes should matter.
+
+If an image augmentation removes a small defect, a contrastive objective may learn to ignore the very signal the inspection task needs. If text chunks are paired by document rather than factual content, the embedding may encode style or source identity. Inspect the data construction and evaluate useful invariances directly. A compact representation is valuable only when it preserves the information the decision requires.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_20.py](../examples/chapter_20.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -222,6 +266,10 @@ if __name__ == "__main__":
 **Interview: Why can target encoding create a perfect training model?** Rare categories can encode their own labels. Cross-fitting and smoothing reduce that direct leakage, while independent validation measures whether the category relationship generalizes.
 
 **Interview: When is standardization inappropriate?** It is not always necessary for tree splits and can obscure meaningful absolute scales. The choice should follow the model geometry and question. If used, fit it only on training data and preserve its parameters for serving.
+
+## Applied LLM companion
+
+For implementation of text representations and domain assistants, continue with the [applied LLM course](../../llm-applied/guides/llm-applied-001.md). Representation similarity supports retrieval; it does not itself establish factual support or causal effects.
 
 ## Primary sources and official APIs
 

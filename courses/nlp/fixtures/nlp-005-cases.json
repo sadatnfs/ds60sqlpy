@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-005",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Implement the four explicit lemma mappings and preserve raw/POS/lemma records.",
+      "expected": "saw/VERB -> see; saw/NOUN -> saw; studies/NOUN -> study; better/ADJ -> good."
+    },
+    {
+      "exercise": 2,
+      "task": "Implement the one-token determiner rule for saw in the first two sentences.",
+      "expected": "I saw her gives VERB; the saw broke gives NOUN."
+    },
+    {
+      "exercise": 3,
+      "task": "Run the old saw and compare with an independently stated NOUN label.",
+      "expected": "The rule returns VERB, and the error is recorded rather than relabeled as correct."
+    },
+    {
+      "exercise": 4,
+      "task": "Check one-root, range and cycle rules on the supplied arrays.",
+      "expected": "Accept [1,-1,1]; reject [1,0,-1],[-1,-1],[2,-1] and empty input."
+    },
+    {
+      "exercise": 5,
+      "task": "Compare [1,-1,1] and [1,-1,0] for I saw her.",
+      "expected": "Both structurally valid; only the first matches the intended head assignment."
+    },
+    {
+      "exercise": 6,
+      "task": "Explain whether tense and number should be collapsed for search versus event extraction.",
+      "expected": "A concrete policy preserves raw text and names at least one lost distinction for each transformation."
+    }
+  ]
+}

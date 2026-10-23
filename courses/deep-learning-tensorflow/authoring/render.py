@@ -7,7 +7,7 @@ def ex(title,prompt,expected,code,why):
 def add(id,mental,anatomy,terms,exercises,source,imports='import numpy as np',helper=''):
     assert len(exercises)==6, id
     SPECS[id]=dict(mental=mental,anatomy=anatomy,terms=terms,exercises=exercises,source=source,imports=imports,helper=textwrap.dedent(helper).strip())
-def write_all():
+def write_all(only=None):
  for track in ['deep-learning-tensorflow','llm-theory']:
   base=ROOT/'courses'/track
   plan=json.loads((ROOT/'docs/expansion/plans'/f'{track}.json').read_text())
@@ -15,7 +15,7 @@ def write_all():
   existing={x['id'] for x in inventory['lessons']}
   for p in plan['lessons']:
    id=p['id']
-   if id not in SPECS: continue
+   if id not in SPECS or (only is not None and id not in only): continue
    s=SPECS[id]; reading=p['runtime']=='reading'; ext='md' if reading else 'py'
    prefix=f'courses/{track}'
    guide=f'{prefix}/guides/{id}.md'; learner=f'{prefix}/lessons/{id}.{ext}'

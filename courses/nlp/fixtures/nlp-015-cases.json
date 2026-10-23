@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-015",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compute scaled scores, row-normalized weights and contextual outputs for both bank contexts.",
+      "expected": "Bank's second output coordinate changes sign with river versus money."
+    },
+    {
+      "exercise": 2,
+      "task": "Append [99,99] with an invalid mask and compare valid outputs.",
+      "expected": "Original valid outputs unchanged; padded-key weights zero; padded query output zero."
+    },
+    {
+      "exercise": 3,
+      "task": "Fit the tiny logistic head on four pooled contextual fixtures.",
+      "expected": "Loss decreases from log2 to below.1 and training predictions [0,1,0,1]."
+    },
+    {
+      "exercise": 4,
+      "task": "Compute tagging cross-entropy with labels[0,-100,1,-100].",
+      "expected": "Loss log(1+exp(-2)); changing ignored logits does not alter it."
+    },
+    {
+      "exercise": 5,
+      "task": "Test all-padding encoder input and all-ignored tagging labels.",
+      "expected": "Both raise clear ValueError instead of returning a meaningless average."
+    },
+    {
+      "exercise": 6,
+      "task": "Specify held-out families, exact tokenizer/pooling identity and ambiguous bank probes.",
+      "expected": "A written plan separates training fit, lexical baseline, contextual task quality and subgroup/truncation errors."
+    }
+  ]
+}

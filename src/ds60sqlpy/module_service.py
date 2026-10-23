@@ -7,32 +7,34 @@ from typing import Any
 
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
-from ds60sqlpy.module_jobs import ModuleJobs, profile_readiness
+from ds60sqlpy.module_jobs import SERVICES, ModuleJobs, profile_readiness
 from ds60sqlpy.modules import ModuleCatalog, ModuleState
 from ds60sqlpy.worker_operations import PROFILES
 
 RUNTIME_GUIDANCE = {
-    ("cpp20"): (
+    "cpp20": (
         "The pad is saved as main.cpp in a fresh job folder. The worker "
         "compiles with g++ -std=c++20 -pthread -O0 -g -Wall -Wextra "
         "-Wconversion -Wpedantic main.cpp -o program, then runs ./program. A "
         "failed compile stops before execution. Multi-file CMake projects "
         "use the separate Docker instructions in the guide."
     ),
-    ("java21"): (
+    "java21": (
         "Use public class Main with public static void main(String[] args), "
         "without a package declaration. The worker saves Main.java, runs "
-        "javac --release 21 -encoding UTF-8 -Xlint:all -d classes Main.java, "
-        "then java -ea -Xmx512m -cp classes Main. Extra helper classes may "
-        "share this source file. Java assertions are enabled."
+        "javac --release 21 -encoding UTF-8 -Xlint:all -cp "
+        "/opt/course-libs/h2-2.5.252.jar -d classes Main.java, then java -ea "
+        "-Xmx512m -cp classes:/opt/course-libs/h2-2.5.252.jar Main inside Linux Docker. "
+        "Extra helper classes may share this source file. Java assertions are "
+        "enabled. The fixed H2 jar supports offline embedded JDBC lessons."
     ),
-    ("javascript-node"): (
+    "javascript-node": (
         "The pad is main.mjs, an ES module executed by Node 24. Built-in "
         "node: modules are available offline. Browser document and window "
         "APIs are not part of Node. Use the browser-specific examples and "
         "instructions where those APIs are taught."
     ),
-    ("typescript-node"): (
+    "typescript-node": (
         "The pad is main.mts. TypeScript checks strict types with NodeNext "
         "module resolution before emitting compiled/main.mjs for Node 24. A "
         "type error prevents execution. The fixed compiler and Node types "
@@ -80,6 +82,17 @@ class ModuleService:
                 "source_filename": PROFILES[lesson.runtime_profile].filename
                 if lesson.runtime_profile in PROFILES
                 else "notes.md",
+                "setup_commands": (
+                    [
+                        "docker compose --progress plain -f compose.classroom.yaml "
+                        f"--profile {lesson.runtime_profile} --parallel 1 build",
+                        "docker compose -f compose.classroom.yaml "
+                        f"--profile {lesson.runtime_profile} up -d --no-build "
+                        f"--pull never --wait {SERVICES[lesson.runtime_profile]}",
+                    ]
+                    if lesson.runtime_profile in SERVICES and lesson.runtime_profile != "k8s-kind"
+                    else []
+                ),
                 "runtime_guidance": RUNTIME_GUIDANCE.get(
                     lesson.runtime_profile,
                     (

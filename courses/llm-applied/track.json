@@ -1,0 +1,469 @@
+{
+  "schema_version": 1,
+  "id": "llm-applied",
+  "title": "Applied LLMs: subject assistants, retrieval and adaptation",
+  "summary": "A detailed24-lesson path from task choice to grounded data-science assistants, with offline retrieval, actual tiny-model training and separately gated pretrained-model recipes.",
+  "lessons": [
+    {
+      "id": "llm-applied-001",
+      "title": "The subject assistant decision: prompts, retrieval or fine-tuning",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-014"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Subject assistant",
+        "RAG",
+        "SFT",
+        "Task contract"
+      ],
+      "outcome": "A subject assistant is a system that helps someone perform a bounded task using a defined body of knowledge.",
+      "lab": "Describe a request for the current conversion-rate definition requiring a citation.",
+      "verification": "route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split."
+    },
+    {
+      "id": "llm-applied-002",
+      "title": "Data-science task contracts and structured extraction",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-001"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Schema validity",
+        "Semantic validity",
+        "Provenance span",
+        "Abstention"
+      ],
+      "outcome": "Structured extraction turns text into typed records, but valid JSON is only the first boundary.",
+      "lab": "Validate visits 10, purchases 3 and assignment_unit account.",
+      "verification": "conversion rate 0.3. invalid unit rejected; account remains explicit."
+    },
+    {
+      "id": "llm-applied-003",
+      "title": "Prompt and context engineering with measurable boundaries",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-002"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Prompt template",
+        "Context budget",
+        "Few-shot example",
+        "Injection boundary"
+      ],
+      "outcome": "Prompt engineering defines a task and the information presented to a model.",
+      "lab": "Build a prompt with one metric evidence item and a conversion-rate question.",
+      "verification": "separate instruction, evidence and question fields, with template subject-v1. ValueError before context selection."
+    },
+    {
+      "id": "llm-applied-004",
+      "title": "Corpus provenance, versions and evaluation isolation",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-003"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Corpus manifest",
+        "Content hash",
+        "Document family",
+        "Scope"
+      ],
+      "outcome": "A domain corpus is a versioned dataset.",
+      "lab": "Add source=course-authored, permission=course-fixture and SHA256 to each local document.",
+      "verification": "6 complete records; all hashes contain64 characters. attack text remains data; restricted record remains restricted."
+    },
+    {
+      "id": "llm-applied-005",
+      "title": "Chunking, overlap, offsets and context budgets",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-004"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Chunk",
+        "Overlap",
+        "Source offset",
+        "Context budget"
+      ],
+      "outcome": "Chunking divides documents into retrieval units.",
+      "lab": "Chunk one two three four five six seven with size 3 and overlap 1.",
+      "verification": "chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source."
+    },
+    {
+      "id": "llm-applied-006",
+      "title": "Lexical retrieval and BM25 from first principles",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-005"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Term frequency",
+        "Document frequency",
+        "IDF",
+        "BM25"
+      ],
+      "outcome": "Lexical retrieval ranks documents using observed terms.",
+      "lab": "Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.",
+      "verification": "a ranks first with a positive score; the other scores are0. empty result for no documents; finite zero score for an empty document."
+    },
+    {
+      "id": "llm-applied-007",
+      "title": "Embedding retrieval, similarity and representation limits",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-006"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Embedding",
+        "Cosine similarity",
+        "Embedding space",
+        "Semantic retrieval"
+      ],
+      "outcome": "Embedding retrieval maps queries and documents to vectors and compares their geometry.",
+      "lab": "Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].",
+      "verification": "purchase ranks first, mixed second, geometry last. top-ranked IDwrong is outside the authored relevant set."
+    },
+    {
+      "id": "llm-applied-008",
+      "title": "Hybrid retrieval, reciprocal-rank fusion and reranking",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-007"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Hybrid retrieval",
+        "RRF",
+        "Reranker",
+        "Candidate recall"
+      ],
+      "outcome": "Hybrid retrieval combines complementary candidate generators.",
+      "lab": "Fuse lexical[a, b, c] and dense[b, d, a] with constant60.",
+      "verification": "b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID."
+    },
+    {
+      "id": "llm-applied-009",
+      "title": "Metadata filtering and access-controlled retrieval",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-008"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Authorization filter",
+        "Metadata filter",
+        "Policy fingerprint",
+        "Cache partition"
+      ],
+      "outcome": "Access-controlled retrieval must prevent unauthorized material from entering candidate selection, answer context, caches and logs.",
+      "lab": "Give a public-only request the six-document corpus and inspect admitted IDs.",
+      "verification": "private-v1 absent before ranking. trace contains only public document IDs."
+    },
+    {
+      "id": "llm-applied-010",
+      "title": "Query rewriting and bounded multi-hop retrieval",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-009"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Query rewrite",
+        "Multi-hop retrieval",
+        "Bridge evidence",
+        "Stopping rule"
+      ],
+      "outcome": "Query rewriting can translate a user's phrasing into terms that a retriever understands.",
+      "lab": "Rewritebuy rate usingbuy->purchase while preserving the original question.",
+      "verification": "rewrittenpurchase rate; original unchanged. restricted document never appears."
+    },
+    {
+      "id": "llm-applied-011",
+      "title": "Grounded claims, citations and evidence-based abstention",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-010"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Grounded claim",
+        "Citation integrity",
+        "Entailment",
+        "Abstention policy"
+      ],
+      "outcome": "Grounded answering requires a connection between each substantive claim and supporting evidence.",
+      "lab": "Answer the conversion-definition question from the metric document and its first sentence.",
+      "verification": "statusanswered; one claim; citation slices the exact sentence. rate.3 with input counts preserved."
+    },
+    {
+      "id": "llm-applied-012",
+      "title": "Evaluating retrieval and answers with oracle controls",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-011"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Retrieval recall",
+        "Reciprocal rank",
+        "Oracle-context control",
+        "Failure taxonomy"
+      ],
+      "outcome": "A RAG evaluation should identify where the pipeline failed.",
+      "lab": "Use relevant IDs a, c and retrieved b, c, a.",
+      "verification": "recall1; reciprocal rank.5. duplicate ID detected."
+    },
+    {
+      "id": "llm-applied-013",
+      "title": "Paired reliability studies and family-aware uncertainty",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-012"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Paired evaluation",
+        "Family unit",
+        "Bootstrap estimate",
+        "Selective accuracy"
+      ],
+      "outcome": "Reliability comparisons require an explicit unit of independence.",
+      "lab": "Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.",
+      "verification": "differences[-1, -1, 1] by sortedID. test-based selection rejected."
+    },
+    {
+      "id": "llm-applied-014",
+      "title": "Supervised fine-tuning data and answer-target masks",
+      "level": "intermediate",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-applied-013"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "SFT record",
+        "Answer target mask",
+        "Chat template",
+        "Training denominator"
+      ],
+      "outcome": "Supervised fine-tuning data specifies the behavior a model is asked to imitate.",
+      "lab": "Use promptIDs[1, 2] andanswerIDs[5, 6, 3].",
+      "verification": "inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays."
+    },
+    {
+      "id": "llm-applied-015",
+      "title": "Full supervised fine-tuning of a tiny causal decoder",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-014",
+        "llm-028"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Full SFT",
+        "Answer-only objective",
+        "Forgetting",
+        "Held-out transfer"
+      ],
+      "outcome": "Full supervised fine-tuning updates all trainable model parameters on governed target examples.",
+      "lab": "Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.",
+      "verification": "inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says20 updates, 4 active training targets and no natural-language competence claim."
+    },
+    {
+      "id": "llm-applied-016",
+      "title": "Low-rank adaptation: dimensions, gradients and a real update",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-015",
+        "llm-032"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Adapter rank",
+        "LoRA scale",
+        "Frozen base",
+        "Merged inference"
+      ],
+      "outcome": "Low-rank adaptation freezes a base weight matrix and learns a smaller additive update.",
+      "lab": "ConstructW=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2, alpha 4.",
+      "verification": "base64 entries; adapter32; scale2. rank at most2; delta atalpha4 is twice delta atalpha2."
+    },
+    {
+      "id": "llm-applied-017",
+      "title": "Quantized frozen bases, adapter gradients and QLoRA limits",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-016",
+        "llm-034"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Quantized base",
+        "Nibble packing",
+        "Dequantization",
+        "QLoRA boundary"
+      ],
+      "outcome": "QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters.",
+      "lab": "QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.",
+      "verification": "codes[[0, -4], [7, -1]]. all four unimplemented claims explicitlyFalse."
+    },
+    {
+      "id": "llm-applied-018",
+      "title": "Compare full and adapter fine-tuning on frozen tasks",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-017"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Controlled adaptation comparison",
+        "Target module",
+        "Frozen-state proof",
+        "Task transfer metric"
+      ],
+      "outcome": "A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks.",
+      "lab": "Create a seed 31 decoder and copy its state into full and adapted candidates.",
+      "verification": "all initial base parameters equal. adapter96 entries; 20 updates each; scope literal-token task."
+    },
+    {
+      "id": "llm-applied-019",
+      "title": "Preference optimization, DPO and the RLHF distinction",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-018"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Preference margin",
+        "DPO-style loss",
+        "Reference policy",
+        "RLHF distinction"
+      ],
+      "outcome": "Preference optimization uses labels describing which of two responses is preferred.",
+      "lab": "Set policy difference0, reference difference0, beta.5.",
+      "verification": "losslog2. offline updateTrue; reward_model_trainedFalse; online_rlFalse."
+    },
+    {
+      "id": "llm-applied-020",
+      "title": "Fine-tuning embeddings and a small reranker",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-019"
+      ],
+      "runtime": "llm-torch-cpu",
+      "concepts": [
+        "Bi-encoder",
+        "Contrastive objective",
+        "False negative",
+        "Pairwise reranker"
+      ],
+      "outcome": "Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation.",
+      "lab": "Use queries anddocuments equal to the2x2identity matrix, withpositive labels0, 1.",
+      "verification": "score shape(2, 2); one positive perquery. actual gradient updatesTrue; pretrained_semantic_encoderFalse."
+    },
+    {
+      "id": "llm-applied-021",
+      "title": "Optional pretrained-model adaptation with pinned offline artifacts",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-020"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "Pinned revision",
+        "Offline asset manifest",
+        "Chat-template alignment",
+        "Completion-only loss"
+      ],
+      "outcome": "A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs.",
+      "lab": "Read the supplied model manifest and identify model ID, revision and license note before any download.",
+      "verification": "exact40-character revision and Apache-2.0 card note are present. pretrained executionunverified; no generated success receipt."
+    },
+    {
+      "id": "llm-applied-022",
+      "title": "Structured tools for extraction, aggregation and data-science work",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-021"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Tool proposal",
+        "Dispatcher",
+        "Deterministic analysis artifact",
+        "Interpretation boundary"
+      ],
+      "outcome": "An LLM can help propose data-science operations, but the application should execute only typed, bounded operations whose semantics are understood.",
+      "lab": "Use rowsA1, A3, B10 and the admittedgroup_mean request.",
+      "verification": "A count 2 mean2; B count 1 mean10. descriptive statisticavailable; causal claimnot established."
+    },
+    {
+      "id": "llm-applied-023",
+      "title": "Domain assistant boundaries: freshness, injection, budgets and traces",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-022"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "Freshness policy",
+        "Injected clock",
+        "Work budget",
+        "Safe trace"
+      ],
+      "outcome": "A production-oriented domain assistant needs controls around the model as well as a good prompt.",
+      "lab": "Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.",
+      "verification": "freshTrue. answer admissionFalse; reasonstale evidence."
+    },
+    {
+      "id": "llm-applied-024",
+      "title": "Capstone: a grounded and evaluated data-science subject assistant",
+      "level": "advanced",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-applied-020",
+        "llm-applied-022",
+        "llm-applied-023"
+      ],
+      "runtime": "python-core",
+      "concepts": [
+        "End-to-end evidence path",
+        "Extractive baseline",
+        "Acceptance gate",
+        "Subject-assistant artifact"
+      ],
+      "outcome": "A subject-assistant capstone should demonstrate an entire evidence path: task admission, authorized retrieval, versioned source selection, grounded output, deterministic data-science computation and independent evaluation.",
+      "lab": "Ask the public assistant forconversion_definition.",
+      "verification": "answered withmetric-v1 citation and source text. local_fixture_passTrue; production_gono-go."
+    }
+  ]
+}

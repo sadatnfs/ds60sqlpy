@@ -142,6 +142,44 @@ Change defensible assumptions systematically, such as attrition effects or cost 
 
 Seek evidence with different failure modes, such as randomized assignment, operational logs and qualitative investigations. Agreement is stronger when the sources do not share the same measurement error or selection mechanism.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: turn a vague performance question into an analysis contract
+
+A service owner says the new routing rule makes things faster. Start by identifying the decision: whether to deploy the rule to all eligible requests next month. Define the outcome as elapsed time from accepted request to completed response, specify timeout handling, and decide whether retries belong to the original request or create new events. A mean that excludes timeouts measures speed among completions, not the overall customer experience.
+
+Next specify the population and unit. A typical request gives heavy users more influence because they generate more requests. A typical customer gives each customer equal weight after summarizing their experience. A typical site can weight a small site as much as a large one. These are different estimands, not alternate coding styles. If assignment is by site, the independent treatment variation also occurs by site even if the outcome is request-level.
+
+Choose the time horizon and practical margin. A two-millisecond improvement can be statistically detectable with huge traffic but irrelevant if deployment adds maintenance cost. A ten-second reduction in rare timeouts may matter greatly even if the median is unchanged. The primary estimand might be average latency, a tail quantile, failure probability, or expected cost combining delay and failures. Each requires its own estimator and uncertainty treatment.
+
+Finally define what would change the decision. A point estimate alone does not specify whether to act under uncertainty. A conservative rollout policy might require evidence that expected benefit exceeds cost with an acceptable downside probability, plus guardrails on failures. The analysis should expose the assumptions controlling that choice, not simply produce a favorable metric.
+
+### Case study: distinguish identification from estimation
+
+Suppose treatment and outcome are strongly associated in a million records. More data can reduce uncertainty about the observational association. It cannot by itself determine whether treatment caused the outcome, whether the outcome influenced treatment, or whether a common cause generated both. If those mechanisms imply the same observed distribution but different intervention effects, the causal target is not identified by that distribution alone.
+
+Estimation begins after assumptions connect the target to observables. Randomization can supply an assignment argument; a justified adjustment set can supply another. Once the target is identified, finite samples, model fitting and numerical errors determine how precisely it is estimated. Reporting a tiny regression standard error addresses estimation variability under a model, not the prior identification gap.
+
+Parameter identifiability is a related but distinct concept. If two predictor columns are identical, separate coefficients cannot be distinguished even under a fully specified regression model. Their sum may remain identifiable and predictions can be unique. This distinction helps avoid demanding a unique scientific interpretation from a model that contains redundant parameterizations.
+
+### Case study: communicate uncertainty that a confidence interval omits
+
+An analysis estimates a benefit of five units with a narrow interval from four to six. That interval may represent repeated-sample uncertainty conditional on a fixed outcome definition, model, population and measurement process. If a different reasonable timeout rule changes the estimate to minus two, substantive uncertainty dominates the narrow interval.
+
+A useful sensitivity analysis changes consequential assumptions: outcome definitions, missing-outcome scenarios, unmeasured-confounding strength, target population weights or decision costs. It identifies where the conclusion reverses and explains why the examined range is plausible. Changing graph colors or an optimizer's irrelevant tolerance is not meaningful robustness analysis.
+
+Triangulation compares evidence that fails differently. A randomized pilot, a carefully designed observational study and qualitative operational evidence may reinforce or challenge one another. Their agreement is less informative if they share the same erroneous logging table or exclude the same affected population. Describe the dependence between evidence sources rather than counting them as independent votes.
+
+### An analyst's explanation to a decision owner
+
+A clear report can say: the assignment-defined study estimates a mean reduction of five units for existing eligible customers over seven days; uncertainty from the randomized comparison is four to six units; the result excludes new customers and assumes the missing outcomes are comparable after adjustment; plausible adverse missing-outcome scenarios reduce the estimated benefit to one; deployment cost corresponds to two units of benefit. This statement makes the remaining decision tension visible.
+
+The same evidence should not be compressed into the model says deploy. Decision ownership belongs to the person or process accountable for consequences. Statistical work supplies a well-defined target, defensible evidence, uncertainty and a transparent connection to the available actions.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_01.py](../examples/chapter_01.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

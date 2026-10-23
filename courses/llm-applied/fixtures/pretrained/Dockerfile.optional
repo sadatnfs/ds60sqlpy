@@ -1,0 +1,10 @@
+# Optional connected image preparation only. Supply a reviewed, digest-pinned
+# Python3.12 base image. This file is not used by the default classroom Compose.
+ARG PYTHON_BASE_IMAGE
+FROM ${PYTHON_BASE_IMAGE}
+WORKDIR /recipe
+COPY requirements.txt /recipe/requirements.txt
+RUN python -m pip install --no-cache-dir -r /recipe/requirements.txt
+COPY . /recipe/
+ENV HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 HF_DATASETS_OFFLINE=1
+ENTRYPOINT ["python"]

@@ -150,6 +150,46 @@ Use exposures or outcomes expected to have no specified causal effect to reveal 
 
 Specify eligibility, treatment strategies, assignment, follow-up, outcomes, estimand and analysis as if designing a trial, then map observational data to it. Align time zero to avoid immortal-time and selection biases.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: a retention model is not an offer policy
+
+A company observes that customers receiving retention discounts churn more frequently than customers receiving none. One explanation is that the discounts are harmful. Another is that support agents preferentially offer discounts to customers already planning to leave. Both explanations can agree with the same observed comparison. A prediction model can accurately identify high-risk customers while leaving the discount's effect unidentified.
+
+Define treatment as a particular offer, delivered through a specified channel within a specified time window, and define churn over a fixed follow-up horizon. Eligibility must be determined before treatment. The ATE asks what would happen if all eligible customers received that offer versus none. The ATT asks about those who actually received it. A targeting decision may instead need a conditional effect or the value of a policy under a budget. These targets are related but not interchangeable.
+
+An observational analysis needs adequate pretreatment common causes of offer assignment and churn, such as past engagement and documented cancellation intent. A post-offer support interaction is not automatically a legitimate control. It might be a mediator, an effect of both dissatisfaction and treatment, or a measurement influenced by the offer. Drawing these pathways makes adjustment choices accountable.
+
+Suppose the available variables do not capture cancellation intent. A propensity model can balance every recorded feature perfectly and still leave this hidden confounder. An outcome model can predict churn well because intent is partly reflected in other signals, but predictive accuracy does not prove that the residual treatment comparison is exchangeable. Randomizing eligible offers or finding a credible alternative design may be more valuable than switching to a more flexible estimator.
+
+### Case study: why the individual treatment effect remains unseen
+
+In a randomized trial, each customer supplies either Y(1) or Y(0). Randomization identifies the marginal distributions of the two potential outcomes and their mean difference under the design. It does not reveal their within-person pairing. One world could have everyone improve slightly; another could have half benefit greatly and half be harmed, with the same observed marginal distributions and average effect.
+
+Consequently, a CATE model estimates an average for units sharing recorded characteristics. It does not recover the literal individual counterfactual difference merely because its output is one number per customer. Fine-grained predictions can look personal while resting on group-level comparisons and strong smoothness assumptions. Interpret heterogeneity as estimated conditional structure, with uncertainty and support diagnostics.
+
+This distinction matters for fairness and harm. A positive average effect does not establish no one is harmed. A subgroup analysis can identify some heterogeneity when covariates and sample size support it, but unrecorded effect modifiers may remain. If the decision requires a bound on individual harm, stronger assumptions or a different design and measurement strategy may be necessary.
+
+### Case study: front-door reasoning and its fragile boundaries
+
+Imagine an exposure A affects a mediator M, which then affects outcome Y. An unobserved variable confounds A and Y. A front-door strategy can sometimes recover the total effect by learning the A-to-M distribution and the M-to-Y relationship after an appropriate adjustment for A. The crucial assumptions include that M intercepts all directed A-to-Y paths, no unblocked backdoor path confounds A-to-M, and conditioning on A blocks relevant M-to-Y backdoor paths.
+
+The familiar front-door formula averages over mediator values and an inner observed-treatment distribution. Its mechanism differs from simply adding M as a regression covariate. Ordinary mediator adjustment can remove the effect of interest. Front-door identification instead reconstructs an intervention distribution through a specific graphical argument.
+
+In practice, the assumptions are demanding. A direct A-to-Y pathway, measurement error in M, or an unmeasured cause of both M and Y can defeat the argument. A graph drawn to make a formula available is weak science. State each missing arrow in ordinary language and ask domain experts whether it is defensible. Identification should be challenged before fitting, because excellent model fit cannot repair a false graph.
+
+### Case study: align time zero in an observational target trial
+
+Suppose treated patients are defined as those who eventually begin a therapy within 30 days, while controls include everyone else from initial diagnosis. A person must survive long enough to enter the treated group. Counting those pre-treatment survival days as treated creates immortal-time bias. The problem is not cured by a sophisticated survival model if the treatment definition already uses future information.
+
+Target trial emulation forces eligibility, assignment strategy and follow-up to align. It may require sequential trial emulation, cloning/censoring/weighting for sustained strategies, or another explicitly defined design. The correct choice follows the treatment strategy and available data. The lesson applies equally to software rollout, hiring programs and customer retention: do not define baseline groups using outcomes or treatment events that occur later.
+
+A defensible report states which assumptions are design-supported, which are model-based and which remain untestable. Partial identification or sensitivity analysis can communicate limits honestly when a point effect is not recoverable. That is useful decision evidence, not an analytical failure.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_15.py](../examples/chapter_15.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

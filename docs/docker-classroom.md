@@ -248,3 +248,41 @@ package bytes. npm lifecycle scripts are disabled during installation. Network
 access is needed while building; examples run offline after those images exist.
 Java and Node run in separate private workers with the same bounded output,
 scratch, deadline and cancellation rules as the other language profiles.
+
+
+## NLP, fine-tuning and RAG classroom
+
+Most NLP, retrieval, evaluation and statistics examples use `python-core`.
+The small neural training, LoRA, preference and embedding-adaptation examples
+use the CPU `llm-torch-cpu` profile. Build them with visible logs:
+
+```console
+docker compose --progress plain -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu --parallel 1 build
+```
+
+After the initial database-image preparation above, start both profiles:
+
+```console
+docker compose -f compose.classroom.yaml --profile python-core --profile llm-torch-cpu up -d --no-build --pull never --wait
+```
+
+These default examples use small authored data, no paid API and no model-weight
+download. They expose mechanisms on CPU, with explicit limits on what tiny
+models demonstrate. The applied course's optional pretrained-model chapter
+has a separate download, artifact verification and offline training workflow.
+Its model assets and training outputs need the documented user-mounted folder;
+temporary classroom job files are discarded after each run. Source drafts,
+notes, read markers and job receipts persist in the learning volume.
+
+To build every ordinary profile locally, including Java, Node, TensorFlow and
+Spark, use this single-line command in any supported shell:
+
+```console
+docker compose --progress plain -f compose.classroom.yaml --profile "*" --parallel 1 build
+```
+
+This can download several gigabytes on a fresh engine. It builds local images
+and does not push to a registry. Kubernetes retains its separate explicit owned
+cluster preparation. You can keep the initial classroom small and add profiles
+when a lesson needs them. The optional Makefile accepts, for example,
+`make classroom-build CLASSROOM_PROFILES="python-core llm-torch-cpu"`.

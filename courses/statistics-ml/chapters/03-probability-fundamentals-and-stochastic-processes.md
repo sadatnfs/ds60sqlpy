@@ -160,6 +160,54 @@ Ergodic behavior permits appropriate time averages to recover ensemble averages.
 
 A copula couples marginal distributions into a joint distribution. Matching ordinary correlation does not guarantee matching tail dependence. Joint extreme-risk decisions require checking the selected dependence family explicitly.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: calculate a diagnostic alert with a population table
+
+Imagine 10,000 cases with event prevalence 1%. There are 100 events and 9,900 nonevents. A detector with sensitivity .9 flags 90 events. At false-positive rate .05 it also flags 495 nonevents. Among 585 total alerts, 90 are real events, giving positive predictive value 90/585, about .154.
+
+The calculation is Bayes' rule written as counts. It makes clear why P(alert|event) and P(event|alert) differ: their denominators refer to different populations. Improving sensitivity without reducing false-positive rate may leave precision disappointing when events are rare. Changing the deployment prevalence changes alert meaning even if the detector's class-conditional behavior remains fixed.
+
+Conditional probability also clarifies selection. Restricting a table to logged or reviewed cases changes the denominator and potentially the distribution. If review is triggered by both severity and model confidence, performance estimated only among reviewed cases may not describe all cases. The observation mechanism belongs in the probability model.
+
+### Case study: derive total variance from a decomposition
+
+Write X-E[X] as [X-E[X|G]]+[E[X|G]-E[X]]. Squaring and taking expectations yields two squared terms and a cross term. The cross term vanishes because E[X-E[X|G]|G]=0. The remaining terms are E[Var(X|G)]+Var(E[X|G]). This derivation shows exactly why between-group mean differences add variability even when every group's internal noise is small.
+
+Suppose two equally frequent environments have means zero and ten and each has variance one. The overall mean is five. Within-environment variance contributes one, while variance of environment means contributes 25, giving total variance 26. A model using the environment label can explain much of that variability. A model omitting it may interpret the same pattern as irreducible noise.
+
+The identity applies to predictive uncertainty as well. Averaging conditional variances alone omits uncertainty in which condition will occur. Simulation must draw the group or shared latent state before drawing within-group noise when the downstream decision depends on total variability or simultaneous outcomes.
+
+### Case study: what the central limit theorem actually says
+
+Let X_i be independent identically distributed observations with mean mu and finite variance sigma-squared. The central limit theorem states that sqrt(n)*(mean(X)-mu)/sigma converges in distribution to a standard normal. It does not say the raw observations become normal, and it does not say every sample mean is accurate. The standardization changes with n because the mean's variance is sigma-squared/n.
+
+For exponential observations with mean and variance one, the raw distribution is right-skewed. Means of 32 such observations are less skewed, and their standardized fluctuations approximate a normal distribution. A simulation can compare means, variances and quantiles across repeated samples. The approximation improves in a model-dependent way; there is no universal sample size at which n is large enough for every tail probability.
+
+A Cauchy distribution supplies a useful warning. Its mean and variance do not exist, and the average of independent identically distributed standard Cauchy variables remains standard Cauchy. Taking more observations does not concentrate that average around a finite population mean. The usual law-of-large-numbers and CLT arguments are inapplicable, even though software can always print a finite average for a finite sample.
+
+Dependence creates another limitation. If every recorded value repeats the same random draw, a thousand rows contain only one random piece of information. Weak-dependence central limit theorems can apply to some time series, but their variance includes autocovariances. Count independent information rather than assuming every new row reduces SE by the familiar square-root factor.
+
+### Case study: concentration bounds trade precision for assumptions
+
+For a nonnegative variable, Markov's inequality bounds P(X>=a) by E[X]/a. Applying it to squared deviations gives Chebyshev's inequality, P(|X-mu|>=t)<=sigma-squared/t-squared. These bounds use little distributional information and can be conservative.
+
+For independent variables bounded between zero and one, Hoeffding bounds the sample-mean tail by 2*exp(-2*n*epsilon-squared). To make that bound at most alpha, choose epsilon=sqrt(log(2/alpha)/(2*n)). This bound supports explicit finite-sample guarantees for bounded observations, but it does not apply unchanged to unbounded durations or correlated repeated events.
+
+A bound that is numerically loose can still be valuable when a distributional approximation is unreliable. Conversely, a tighter normal approximation may be practically useful when its assumptions are well supported. State whether an interval is an exact finite-sample result, an asymptotic approximation or a simulation-based assessment.
+
+### Case study: stationarity, mixing and long-run averages
+
+A Markov chain's transition matrix describes one-step conditional behavior. A stationary distribution satisfies pi P=pi, but starting the chain in another distribution creates a transient period. Irreducibility and aperiodicity in a finite-state chain support convergence to the stationary law; reducible or periodic chains can fail to mix in the expected way.
+
+Ergodicity concerns whether time averages along one sufficiently long trajectory represent the relevant distributional averages. A process can have a stationary distribution while remaining trapped in one component. This matters for MCMC, service-state models and simulation: a long log file is not necessarily representative of all operating regimes.
+
+Poisson arrivals assume independent increments and a constant rate in the homogeneous case. Real incidents may cluster after a common failure or trigger further failures. Renewal models relax exponential waiting times, while self-exciting or regime models address other mechanisms. A histogram of counts cannot by itself validate the independence and timing assumptions needed for queueing or reliability decisions.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_03.py](../examples/chapter_03.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -175,6 +223,10 @@ The alert detects 90% of events but also fires for 5% of non-events. With 1% pre
 ### Dynamics and nonlinear averages
 
 The two-state transition matrix moves toward probabilities two-thirds and one-third. The code verifies invariance and a finite-step approximation separately. Squaring values 1 and 3 gives an average of 5, while squaring their average gives 4. That gap is the variance, an exact instance of Jensen's inequality.
+
+### Simulate the central limit theorem's standardized quantity
+
+Six thousand independent samples each contain 32 exponential observations. Their means are centered at the known mean one and multiplied by sqrt(32), because the population SD is one. The resulting mean is near zero and variance near one, with less skew than the raw observations. This demonstrates the CLT for this finite-variance independent model; it does not validate a universal sample-size rule.
 
 ### Complete executable example
 
@@ -202,7 +254,19 @@ def markov_and_jensen():
     assert np.mean(x*x) > np.mean(x)**2
     print("Long-run state probabilities:", distribution, "variance gap:", np.mean(x*x)-np.mean(x)**2)
 
+def central_limit_simulation():
+    rng=np.random.default_rng(303)
+    samples=rng.exponential(size=(6000,32))
+    standardized=np.sqrt(32)*(samples.mean(axis=1)-1)
+    assert abs(standardized.mean())<.06
+    assert abs(standardized.var(ddof=1)-1)<.08
+    raw_skew=np.mean((samples[:,0]-samples[:,0].mean())**3)/samples[:,0].std()**3
+    mean_skew=np.mean((standardized-standardized.mean())**3)/standardized.std()**3
+    assert abs(mean_skew)<abs(raw_skew)
+    print("CLT standardized mean/variance:",standardized.mean(),standardized.var(ddof=1),"raw/mean skew:",raw_skew,mean_skew)
+
 def main():
+    central_limit_simulation()
     bayes_and_total_variance()
     markov_and_jensen()
 

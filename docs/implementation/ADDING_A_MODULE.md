@@ -8,7 +8,8 @@ are separate changes, with separate acceptance evidence.
 ## Add a lesson to an existing subject
 
 1. Read `courses/<track>/AGENTS.md`. Add the complete prerequisite-aware plan
-   entry under `docs/expansion/plans/`, retaining a stable lesson ID.
+   entry in its existing `docs/expansion/plans/` plan or additive
+   `courses/<track>/track.json`, retaining a stable lesson ID.
 2. Author a substantial guide, learner source or worksheet, separate executable
    solution and explanation, and deterministic small fixtures. Define vocabulary,
    explain the mechanism, show worked examples, and progress from observation
@@ -37,12 +38,26 @@ the original progress file or the learner source in `courses/`.
 
 ## Add a subject or execution backend
 
-Subject admission currently uses explicit registries. Do not assume adding a
-JSON file enables arbitrary languages. Update and test these deliberate gates:
+New subject routes use `courses/<track>/track.json` with schema version 1,
+ID matching the directory, title, summary and lesson rows. Each row supplies a
+stable ID, title, stage, duration, prerequisites, one registered runtime,
+concepts, outcome, lab description and verification explanation. The loader
+checks all three stages and the combined prerequisite graph. These are metadata,
+not commands. Authored file admission still uses `lessons.json` and the exact
+reviewed schema. New subjects appear in the UI and read-only MCP discovery
+without editing a second subject list.
+
+The statistics book uses `courses/statistics-ml/manifest.json` and tutorial mode.
+Its complete chapter/example pairs are exposed directly, with no exams, problem
+sets, verifier or solution gate. Its manual read marker records reading only.
+The exact source outline and method coverage index remain separately auditable.
+
+Do not assume adding a JSON file enables arbitrary languages. New execution
+backends still require updating and testing these deliberate gates:
 
 | Layer | Implementation |
 | --- | --- |
-| Planned route and prerequisite graph | `journey_design.py`: `TRACK_IDS`, profiles and plan validation |
+| Planned route and prerequisite graph | `journey_design.py` for the original five designs; `module_extensions.py` for additive subjects and tutorial books |
 | Authored file admission | `modules.py`: languages, profile pairs, verifiers and manifests |
 | App-to-worker routing | `module_jobs.py`: fixed `SERVICES` and endpoint validation |
 | Worker operation | `worker_operations.py`: fixed `PROFILES`, argv, preparation and typed verifier |

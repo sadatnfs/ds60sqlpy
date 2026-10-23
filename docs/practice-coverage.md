@@ -7,12 +7,12 @@ cataloged lesson, the target is `max(6, 2 × audited baseline)` and must
 be visible in the learner artifact, companion guide, and every
 explanatory solution artifact.
 
-- Lessons passing all three surfaces: **168/168**
+- Lessons passing all three surfaces: **180/180**
 - Audited baseline prompts: **534**
-- Required prompts per surface: **1312**
-- Current learner-artifact prompts: **1370**
-- Current companion-guide prompts: **1367**
-- Current explanatory-solution prompts: **1367**
+- Required prompts per surface: **1384**
+- Current learner-artifact prompts: **1442**
+- Current companion-guide prompts: **1439**
+- Current explanatory-solution prompts: **1439**
 
 | Lesson | Baseline | Target | Learner | Guide | Solution minimum | Status |
 | --- | ---: | ---: | ---: | ---: | ---: | --- |
@@ -93,6 +93,18 @@ explanatory solution artifact.
 | `python-data-02` | 0 | 6 | 9 | 8 | 8 | PASS |
 | `python-ml-02` | 0 | 6 | 8 | 8 | 8 | PASS |
 | `python-pro-03` | 0 | 6 | 8 | 8 | 8 | PASS |
+| `python-numpy-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-03` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-numpy-04` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-03` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-pandas-04` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-01` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-02` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-03` | 0 | 6 | 6 | 6 | 6 | PASS |
+| `python-algo-04` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-01` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-02` | 0 | 6 | 6 | 6 | 6 | PASS |
 | `sql-start-03` | 0 | 6 | 6 | 6 | 6 | PASS |

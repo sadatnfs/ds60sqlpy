@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Applied LLMs: subject assistants, retrieval and adaptation · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Applied LLMs: subject assistants, retrieval and adaptation</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="applied-llms-subject-assistants-retrieval-and-adaptation">Applied LLMs: subject assistants, retrieval and adaptation<a class="heading-anchor" href="#applied-llms-subject-assistants-retrieval-and-adaptation" aria-label="Link to this section">#</a></h2>
+<p>Build a subject assistant by specifying its task, sources, computation and evaluation before choosing a model update. This24-lesson route complements the <a href="../llm-theory/README.md.html">language-model mechanisms course</a>, the <a href="../nlp/README.md.html">NLP foundations route</a> and the <a href="../statistics-ml/README.md.html">statistics book</a>. It covers data-science extraction and analysis, grounded retrieval, actual tiny-model fine-tuning, low-rank adapters and a bounded assistant capstone.</p>
+<p>The <a href="lessons.json.html">authored manifest</a> is the source of truth for available lesson artifacts. The <a href="track.json.html">route plan</a> preserves stable IDs and prerequisites. There are currently24 authored lesson bundles. Authored content and runtime acceptance are separate: consult the <a href="../../docs/implementation/llm-applied-status.md.html">execution checkpoint</a> for the exact references that have run.</p>
+<h3 id="choose-the-right-mechanism">Choose the right mechanism<a class="heading-anchor" href="#choose-the-right-mechanism" aria-label="Link to this section">#</a></h3>
+<p>Use prompts to specify behavior and examples, retrieval to supply current and attributable knowledge, deterministic tools for exact computation, and fine-tuning for a stable measured behavior gap supported by governed examples. These mechanisms can be combined. Fine-tuning does not replace citations, per-user access control or a statistical study design. A fluent explanation cannot validate a causal conclusion or invent a missing measurement.</p>
+<p>The default code uses literal local fixtures and prepared NumPy or PyTorch CPU environments. It does not call a paid API, fetch a dataset, download a model or start a deployment. Lexical and extractive baselines are labelled as such. The tiny decoder and adapter chapters perform actual gradient updates but do not claim pretrained natural-language competence. The quantized-base chapter implements explicit uniform4-bit packing and adapter gradients; it does not claim NF4, paged optimizers or GPU-memory measurements.</p>
+<h3 id="study-and-execution">Study and execution<a class="heading-anchor" href="#study-and-execution" aria-label="Link to this section">#</a></h3>
+<p>Each guide contains detailed intuition and design tradeoffs, definitions, syntax or reasoning anatomy, three worked examples, six concrete exercises, failure diagnosis, hints and a lesson-specific Codex prompt. Keep learner attempts separate from the executable and explanatory solutions. A successful reference run checks its assertions, not your independent understanding.</p>
+<p>Use the Docker classroom Journeys page and the lesson&#x27;s declared runtime. <code>python-core</code> uses the prepared NumPy/data environment. <code>llm-torch-cpu</code> uses the separately prepared PyTorch CPU worker. The optional pretrained recipe is reading mode until you deliberately prepare its separate assets and dependencies. Save work in a learner pad or your own ignored <code>.learning/</code> directory; source updates must not overwrite attempts.</p>
+<p>For a prepared native environment, run your copied Python file with the selected interpreter. On PowerShell use <code>&amp; $CoursePython path\to\practice.py</code>; on POSIX use <code>&quot;$DS60_COURSE_PYTHON&quot; path/to/practice.py</code>. These variables denote paths supplied by setup, not automatic installers. Read the profile notice before interpreting an import error as a lesson failure.</p>
+<h3 id="route">Route<a class="heading-anchor" href="#route" aria-label="Link to this section">#</a></h3>
+<div class="table-wrap"><table><thead><tr>
+<th>Lesson</th>
+<th>Topic</th>
+<th>Profile</th>
+<th>Content</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="guides/llm-applied-001.md.html">llm-applied-001</a></td>
+<td>The subject assistant decision: prompts, retrieval or fine-tuning</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-002.md.html">llm-applied-002</a></td>
+<td>Data-science task contracts and structured extraction</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-003.md.html">llm-applied-003</a></td>
+<td>Prompt and context engineering with measurable boundaries</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-004.md.html">llm-applied-004</a></td>
+<td>Corpus provenance, versions and evaluation isolation</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-005.md.html">llm-applied-005</a></td>
+<td>Chunking, overlap, offsets and context budgets</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-006.md.html">llm-applied-006</a></td>
+<td>Lexical retrieval and BM25 from first principles</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-007.md.html">llm-applied-007</a></td>
+<td>Embedding retrieval, similarity and representation limits</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-008.md.html">llm-applied-008</a></td>
+<td>Hybrid retrieval, reciprocal-rank fusion and reranking</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-009.md.html">llm-applied-009</a></td>
+<td>Metadata filtering and access-controlled retrieval</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-010.md.html">llm-applied-010</a></td>
+<td>Query rewriting and bounded multi-hop retrieval</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-011.md.html">llm-applied-011</a></td>
+<td>Grounded claims, citations and evidence-based abstention</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-012.md.html">llm-applied-012</a></td>
+<td>Evaluating retrieval and answers with oracle controls</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-013.md.html">llm-applied-013</a></td>
+<td>Paired reliability studies and family-aware uncertainty</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-014.md.html">llm-applied-014</a></td>
+<td>Supervised fine-tuning data and answer-target masks</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-015.md.html">llm-applied-015</a></td>
+<td>Full supervised fine-tuning of a tiny causal decoder</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-016.md.html">llm-applied-016</a></td>
+<td>Low-rank adaptation: dimensions, gradients and a real update</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-017.md.html">llm-applied-017</a></td>
+<td>Quantized frozen bases, adapter gradients and QLoRA limits</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-018.md.html">llm-applied-018</a></td>
+<td>Compare full and adapter fine-tuning on frozen tasks</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-019.md.html">llm-applied-019</a></td>
+<td>Preference optimization, DPO and the RLHF distinction</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-020.md.html">llm-applied-020</a></td>
+<td>Fine-tuning embeddings and a small reranker</td>
+<td>llm-torch-cpu</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-021.md.html">llm-applied-021</a></td>
+<td>Optional pretrained-model adaptation with pinned offline artifacts</td>
+<td>reading</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-022.md.html">llm-applied-022</a></td>
+<td>Structured tools for extraction, aggregation and data-science work</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-023.md.html">llm-applied-023</a></td>
+<td>Domain assistant boundaries: freshness, injection, budgets and traces</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+<tr>
+<td><a href="guides/llm-applied-024.md.html">llm-applied-024</a></td>
+<td>Capstone: a grounded and evaluated data-science subject assistant</td>
+<td>python-core</td>
+<td>Authored</td>
+</tr>
+</tbody></table></div>
+<h3 id="optional-realistic-pretrained-experiment">Optional realistic pretrained experiment<a class="heading-anchor" href="#optional-realistic-pretrained-experiment" aria-label="Link to this section">#</a></h3>
+<p>Lesson021 links a complete <a href="fixtures/pretrained/README.md.html">separate pretrained recipe</a>, including direct dependency pins, a model revision and license note, an explicit connected acquisition script, local hash verification, template/mask checks, bounded full or LoRA SFT and local inference. No weights were downloaded and no pretrained training was executed during authoring. The recipe must not be counted as runtime-accepted until its own actual receipts exist.</p>
+<h3 id="evidence-to-retain">Evidence to retain<a class="heading-anchor" href="#evidence-to-retain" aria-label="Link to this section">#</a></h3>
+<p>Keep corpus and chunk versions, access policy, prompt/template identity, tokenizer/model/adapter revisions, training and evaluation family manifests, exact tool inputs/outputs, citations, failures and execution receipts. Evaluate retrieval and answer quality separately, include oracle-context controls, preserve paired question identities and report independent family counts. A no-go with a precise missing-evidence list is a valid capstone result.</p></article>
+  </main>
+</body>
+</html>

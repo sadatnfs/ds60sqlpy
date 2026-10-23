@@ -270,19 +270,22 @@ torch.save({'weight':w.detach().clone(),'optimizer':opt.state_dict()},path)
 assert path.is_file(); saved=w.item()''','The file is created by this lesson and loaded only for this local test. Loading arbitrary untrusted serialized objects is outside the fixture.'),
 ex('Calculate the uninterrupted next step','Take one more update and save the expected weight.','step3 and changed weight.', '''opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step(); expected=w.item()
 assert opt.state[w]['step'].item()==3 and expected!=saved''','The control uses the same objective and optimizer settings. A different batch or learning-rate schedule would make the comparison uninterpretable.'),
-ex('Restore in a new interpreter','Load the trusted checkpoint into fresh weight and Adam objects, then take one step.','child weight agrees within1e-6.', '''program="""import torch,json,sys
+ex('Restore in a new interpreter','Load the trusted checkpoint into fresh weight and Adam objects, then take one step.','child weight agrees within1e-6.', '''program=textwrap.dedent("""
+import torch,json,sys
 from torch import nn
 state=torch.load(sys.argv[1],map_location='cpu',weights_only=True)
 w=nn.Parameter(state['weight'].clone()); opt=torch.optim.Adam([w],lr=.1); opt.load_state_dict(state['optimizer'])
 opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
 print(json.dumps({'weight':w.item()}))
-"""
-result=subprocess.run([sys.executable,'-c',program,str(path)],check=True,capture_output=True,text=True,timeout=60)
+""")
+compile(program, "checkpoint-child", "exec")
+result=subprocess.run([sys.executable,'-c',program,str(path)],check=False,capture_output=True,text=True,timeout=60)
+if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0)''','The child has no live parent optimizer. Agreement therefore depends on reconstructing saved state, rather than on an accidental in-memory reference.'),
 ex('Expose weights-only continuation','Initialize a fresh optimizer at the saved weight and compare its next update.','weight differs from full-state continuation.', '''fresh_w=nn.Parameter(torch.tensor(saved)); fresh_opt=torch.optim.Adam([fresh_w],lr=.1)
 (fresh_w-2).square().backward(); fresh_opt.step(); assert abs(fresh_w.item()-expected)>1e-6''','The weight alone gives the same immediate scalar prediction but a different future training trajectory. Prediction parity and restart parity are distinct tests.'),
 ex('Verify evaluation and cleanup','Use Dropout(.5) in eval mode on ones and remove only the owned temporary checkpoint.','dropout returns ones; temporary path absent.', '''drop=nn.Dropout(.5); drop.eval(); ones=torch.ones(8)
-assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists()''','Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.')],('PyTorch saving and loading','https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html'),TORCH_IMPORT+'\nimport tempfile,json,subprocess,sys\nfrom pathlib import Path')
+assert torch.equal(drop(ones),ones); temporary.cleanup(); assert not path.exists()''','Evaluation mode disables this stochastic layer. Cleanup is confined to the temporary fixture and never deletes learner checkpoints or progress.')],('PyTorch saving and loading','https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html'),TORCH_IMPORT+'\nimport tempfile,json,subprocess,sys,textwrap\nfrom pathlib import Path')
 add('llm-023',
 '''Top-p decoding retains the smallest probability-ranked prefix whose cumulative mass reaches a threshold, including the token that crosses it. With probabilities.5,.3,.2 andp=.6, retaining only the first token would leave mass.5 and fail the rule; the first two tokens provide mass.8. Renormalize the retained mass before sampling. Termination is a separate control: stop immediately after an end-of-sequence token and also impose a maximum generated-token count. Zero-temperature greedy selection should be a distinct branch, because dividing by zero is not a sampling algorithm. None of these policies establishes factual correctness.''',
 '''Sort probabilities descending with a stable tie policy, compute cumulative sums and retain each token whose preceding cumulative mass is belowp. This formulation keeps the crossing token. torch.Generator(device='cpu') with a fixed seed makes repeated sampling locally reproducible. Generation loops check EOS after appending a chosen token and before requesting another token.''',

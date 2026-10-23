@@ -2,7 +2,7 @@
 
 import numpy as np
 import tensorflow as tf
-import tempfile,json,subprocess,sys
+import tempfile,json,subprocess,sys,textwrap
 from pathlib import Path
 
 
@@ -25,13 +25,17 @@ def verify():
     np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(),expected,atol=1e-6,rtol=0)
 
     # Exercise 4: Check both in a fresh process
-    program="""import json,sys,tensorflow as tf
+    program=textwrap.dedent("""
+    import json,sys,tensorflow as tf
     x=tf.constant([[1.],[3.]])
     a=tf.keras.models.load_model(sys.argv[1])(x).numpy().tolist()
-    b=tf.saved_model.load(sys.argv[2]).serve(x).numpy().tolist()
+    exported=tf.saved_model.load(sys.argv[2])
+    b=exported.serve(x).numpy().tolist()
     print(json.dumps([a,b]))
-    """
-    result=subprocess.run([sys.executable,'-c',program,str(keras_path),str(export_path)],capture_output=True,text=True,check=True,timeout=60)
+    """)
+    compile(program, "checkpoint-child", "exec")
+    result=subprocess.run([sys.executable,'-c',program,str(keras_path),str(export_path)],capture_output=True,text=True,check=False,timeout=60)
+    if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
     a,b=json.loads(result.stdout.strip().splitlines()[-1])
     np.testing.assert_allclose(a,expected,atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected,atol=1e-6,rtol=0)
 

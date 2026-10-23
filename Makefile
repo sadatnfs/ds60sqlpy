@@ -72,18 +72,15 @@ modules-check:
 	$(PYTHON) scripts/check_modules.py
 	node scripts/check_module_ui.mjs
 
+CLASSROOM_PROFILES ?= python-core cpp20 tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python java21 javascript-node typescript-node
+CLASSROOM_FLAGS = $(foreach profile,$(CLASSROOM_PROFILES),--profile $(profile))
+
 classroom-build:
 	docker image inspect postgres:17 >/dev/null 2>&1 || docker compose -f compose.classroom.yaml pull postgres
-	docker compose -f compose.classroom.yaml build lab
-	docker compose -f compose.classroom.yaml --profile python-core build python-core-worker
-	docker compose -f compose.classroom.yaml --profile cpp20 build cpp-worker
-	docker compose -f compose.classroom.yaml --profile tensorflow-cpu build tensorflow-worker
-	docker compose -f compose.classroom.yaml --profile scala-jvm build scala-worker
-	docker compose -f compose.classroom.yaml --profile spark-local-scala build spark-scala-worker
-	docker compose -f compose.classroom.yaml --profile spark-local-python build spark-python-worker
+	docker compose --progress plain -f compose.classroom.yaml $(CLASSROOM_FLAGS) --parallel 1 build
 
 classroom-start:
-	docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 --profile tensorflow-cpu --profile scala-jvm --profile spark-local-scala --profile spark-local-python up -d --no-build --pull never --wait
+	docker compose -f compose.classroom.yaml $(CLASSROOM_FLAGS) up -d --no-build --pull never --wait
 
 classroom-stop:
-	docker compose -f compose.classroom.yaml --profile python-core --profile cpp20 --profile tensorflow-cpu --profile scala-jvm --profile spark-local-scala --profile spark-local-python stop
+	docker compose -f compose.classroom.yaml $(CLASSROOM_FLAGS) stop

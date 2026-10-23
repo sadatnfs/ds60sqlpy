@@ -156,6 +156,42 @@ Compare two estimators consistent under a null but differently robust under alte
 
 Fit hierarchical outcome models over demographic or geographic cells, then average predictions using population cell counts. MRP depends on model adequacy and accurate target composition, especially for sparsely sampled or empty cells.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: repeated customer measurements
+
+Assume a customer contributes four weekly outcomes. A useful decomposition is y_ij=mu+b_j+epsilon_ij, with Var(b_j)=9 and Var(epsilon_ij)=1. A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer's four-week mean has variance 9+1/4=9.25, not 10/4=2.5. Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.
+
+For m equal observations per group, the familiar design-effect expression 1+(m-1)*ICC follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.
+
+The model also defines what prediction means. For an existing customer with observed history, a random-intercept estimate can adapt to that customer's baseline. For a new customer, that baseline is unknown and must be integrated over its population distribution. Evaluating new-customer predictions while allowing the model to use that customer's other weeks leaks the very information deployment lacks. Grouped validation distinguishes those questions.
+
+### Case study: pooling a small region responsibly
+
+A national rate is .10. A small region has one event in two observations, giving raw rate .50. A large region has 500 events in 1,000 observations, also giving .50. Treating both estimates as equally precise creates unstable rankings and incentives. A hierarchical model combines local likelihood information with a distribution of regional rates, generally shrinking the small region more.
+
+The prior or random-effects distribution should reflect relevant comparability. If the small region uses a different measurement rule or serves a different population, shrinkage toward the national mean can conceal a structural difference. Include plausible predictors, check posterior or fitted predictive distributions, and inspect whether the group variance is near a boundary. A singular mixed-model fit can indicate insufficient data for the proposed random-slope covariance, not merely an optimizer inconvenience.
+
+Report both the target and uncertainty. A shrunk region estimate is a model-based estimate for that region, not a raw observed rate. If the purpose is to allocate investigation, posterior exceedance probability or expected loss may be more appropriate than sorting point estimates. For public comparison, explain how group sizes and pooling affect the result so small regions are not mistaken for having proven exceptional performance.
+
+### Case study: fixed effects remove some confounding, not every problem
+
+Consider a panel of stores with stable location quality. High-quality stores may both spend more on advertising and sell more. A pooled sales-advertising coefficient combines between-store quality differences with within-store spending changes. Store fixed effects remove time-invariant quality by demeaning within each store. Calendar effects can remove shocks common to all stores.
+
+But a manager may increase advertising after observing an unrecorded local demand opportunity. That time-varying confounder survives store and calendar demeaning. Lagged sales may be jointly determined with current errors, and a short panel containing a lagged dependent variable introduces additional estimation bias. Fixed effects are a precise transformation of variation, not a universal causal label.
+
+If the scientific question concerns a time-invariant store characteristic, a within-store estimator cannot identify its coefficient because demeaning removes it. Random effects or between-store models can retain that variation but need assumptions about relationships between unobserved store effects and predictors. A Hausman comparison can reveal disagreement between estimators under their assumptions; it cannot explain all possible reasons for disagreement.
+
+### Diagnostic reasoning in a review
+
+When residuals show increasing spread, ask whether variance changes or the mean curve is wrong. When residuals correlate over time, ask whether a missing trend, seasonality, group effect or serial process explains the pattern. When one record is influential, verify its provenance and scientific relevance before deleting it. A legitimate extreme operating condition may be precisely the case the model must support.
+
+Use the simplest covariance structure that captures the decision-relevant dependence with available information. An unstructured repeated-measures covariance grows quickly in parameter count, while compound symmetry assumes equal pairwise correlation. Random slopes allow trajectory heterogeneity but require within-group predictor variation. Explain the tradeoff as a claim about the data-generating process and supported precision, not a contest among increasingly complex formulas.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_12.py](../examples/chapter_12.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

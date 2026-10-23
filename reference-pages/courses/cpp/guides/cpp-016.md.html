@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cpp-016: Move semantics and the rule of zero · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cpp-016: Move semantics and the rule of zero</h1>
+      <p class="source-path">Generated from <code>courses/cpp/guides/cpp-016.md</code></p>
+    </header>
+    <article class="document"><h2 id="cpp-016-move-semantics-and-the-rule-of-zero">cpp-016: Move semantics and the rule of zero<a class="heading-anchor" href="#cpp-016-move-semantics-and-the-rule-of-zero" aria-label="Link to this section">#</a></h2>
+<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Intermediate; 105 minutes. Direct prerequisites: <code>cpp-015</code>.</p>
+<p>Learner artifact: <a href="../lessons/cpp-016.cpp.html">cpp-016.cpp</a>. Keep <a href="../solutions/cpp-016_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-016-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Choose copying, moving or borrowing from an ownership contract.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>Move semantics lets a value transfer expensive internal resources. An rvalue reference marks a candidate for transfer, while std::move is a cast that permits a move overload. The rule of zero means letting standard members manage their own copy, move and destruction behavior. A moved-from vector remains valid but its contents are unspecified.</p>
+<h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
+<p><code>auto target=std::move(source)</code> can call a move constructor. Do not assert source.empty() for all standard types after moving; use only operations allowed by their post-move contract. Defining a destructor unnecessarily can interfere with automatically generated move operations.</p>
+<h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
+<p>std::move changes which overloads may be selected; it does not move bytes by itself. The type&#x27;s move constructor performs the transfer. Standard library members let Batch use compiler-generated special members, so ownership behavior composes without custom cleanup code. After the transfer the receiver has the old value; the source remains an object that can be assigned a new value. Testing one implementation&#x27;s empty moved-from vector would overstate the portable contract.</p>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-cpp">Batch a{{1,2},&quot;A&quot;}; Batch b=a; b.values[0]=9;</code></pre>
+<p><strong>Expected:</strong> a remains [1,2]; b becomes [9,2].</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-cpp">Batch b=std::move(a); a=Batch{{4},&quot;new&quot;};</code></pre>
+<p><strong>Expected:</strong> b receives the old values; assigning a new valid value to a is safe.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-contrast-copy-and-move">Exercise 1: Contrast copy and move<a class="heading-anchor" href="#exercise-1-contrast-copy-and-move" aria-label="Link to this section">#</a></h4>
+<p>Copy a Batch and mutate the copy.</p>
+<p><strong>Expected result/shape:</strong> Original values unchanged.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Original values unchanged.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The vector member owns its own copied storage.</p>
+<h4 id="exercise-2-inspect-the-receiver">Exercise 2: Inspect the receiver<a class="heading-anchor" href="#exercise-2-inspect-the-receiver" aria-label="Link to this section">#</a></h4>
+<p>Move Batch([1,2,3]) into a new owner.</p>
+<p><strong>Expected result/shape:</strong> Receiver values exactly [1,2,3].</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Receiver values exactly [1,2,3].</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: The target has a specified transferred value.</p>
+<h4 id="exercise-3-reuse-the-source">Exercise 3: Reuse the source<a class="heading-anchor" href="#exercise-3-reuse-the-source" aria-label="Link to this section">#</a></h4>
+<p>Assign Batch([4]) to the moved-from source.</p>
+<p><strong>Expected result/shape:</strong> Source is safely usable with value [4].</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Source is safely usable with value [4].</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Valid but unspecified permits reassignment.</p>
+<h4 id="exercise-4-repair-an-invalid-assumption">Exercise 4: Repair an invalid assumption<a class="heading-anchor" href="#exercise-4-repair-an-invalid-assumption" aria-label="Link to this section">#</a></h4>
+<p>Remove a test requiring every moved-from vector to be empty.</p>
+<p><strong>Expected result/shape:</strong> Test verifies receiver and source validity only.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Test verifies receiver and source validity only.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: An implementation observation is not a portable postcondition.</p>
+<h4 id="exercise-5-keep-rule-of-zero">Exercise 5: Keep rule of zero<a class="heading-anchor" href="#exercise-5-keep-rule-of-zero" aria-label="Link to this section">#</a></h4>
+<p>List special members needed for Batch.</p>
+<p><strong>Expected result/shape:</strong> No custom destructor/copy/move needed.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: No custom destructor/copy/move needed.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Standard fields already express ownership.</p>
+<h4 id="exercise-6-transfer-to-return-values">Exercise 6: Transfer to return values<a class="heading-anchor" href="#exercise-6-transfer-to-return-values" aria-label="Link to this section">#</a></h4>
+<p>Return Batch from a factory and store it.</p>
+<p><strong>Expected result/shape:</strong> Correct owned vector after factory scope ends.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Correct owned vector after factory scope ends.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Return by value allows elision or moves without a dangling reference.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain why this observation follows from the mechanism: a remains [1,2]; b becomes [9,2]. Then explain the changed condition in example 2 without opening the answer.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p><code>auto target=std::move(source)</code> can call a move constructor. Do not assert source.empty() for all standard types after moving; use only operations allowed by their post-move contract. Defining a destructor unnecessarily can interfere with automatically generated move operations.</p>
+<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. An implementation observation is not a portable postcondition.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer to return values. Explain which assumptions would fail on a larger input or another runtime.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue with <a href="cpp-017.md.html">cpp-017</a> after saving the six observations.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-016.
+Read courses/cpp/guides/cpp-016.md and courses/cpp/lessons/cpp-016.cpp.
+Direct prerequisites: `cpp-015`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Do not read courses/cpp/solutions/ until I attempt the exercise or explicitly request a reveal.
+Use the exact case ledger and distinguish source review from actual execution.
+Do not install tools or choose an ambient cluster.</code></pre></article>
+  </main>
+</body>
+</html>

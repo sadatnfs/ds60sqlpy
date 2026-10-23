@@ -22,7 +22,19 @@ def bootstrap_and_delta():
     assert log_se == .125
     print("Bootstrap SE:", means.std(ddof=1), "delta log SE:", log_se)
 
+def repeated_sample_coverage():
+    rng=np.random.default_rng(808)
+    samples=rng.normal(loc=3.,scale=2.,size=(5000,20))
+    means=samples.mean(axis=1)
+    halfwidth=stats.norm.ppf(.975)*2/np.sqrt(20)
+    coverage=np.mean(np.abs(means-3)<=halfwidth)
+    monte_carlo_se=np.sqrt(.95*.05/len(means))
+    assert abs(coverage-.95)<4*monte_carlo_se
+    assert halfwidth<stats.norm.ppf(.975)*2
+    print("Repeated-sample coverage:",coverage,"Monte Carlo SE near target:",monte_carlo_se)
+
 def main():
+    repeated_sample_coverage()
     mean_and_prediction()
     bootstrap_and_delta()
 

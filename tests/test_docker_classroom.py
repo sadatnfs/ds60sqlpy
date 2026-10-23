@@ -369,6 +369,7 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     expected = {
         "python-core": "python-core-worker",
         "cpp20": "cpp-worker",
+        "llm-torch-cpu": "llm-worker",
         "java21": "java-worker",
         "javascript-node": "javascript-worker",
         "typescript-node": "typescript-worker",

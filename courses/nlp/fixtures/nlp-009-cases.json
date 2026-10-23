@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-009",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Implement a stable sigmoid and evaluate the stated two-feature score.",
+      "expected": "Logit 2.5 and probability approximately 0.92414182; finite outputs at logits +/-1000."
+    },
+    {
+      "exercise": 2,
+      "task": "Fit the six-message classifier and transform escalation urgent without refitting.",
+      "expected": "Exactly six learned vocabulary terms; escalation absent; two stated probes predicted [1,0]."
+    },
+    {
+      "exercise": 3,
+      "task": "Fit the same corpus with C=0.1 and C=10 using the same solver/settings.",
+      "expected": "The C=0.1 coefficient norm is smaller; record both norms and do not call either universally best."
+    },
+    {
+      "exercise": 4,
+      "task": "Apply thresholds 0.5 and 0.3 to [0.2,0.4,0.8] with >= semantics.",
+      "expected": "Actions [false,false,true] and [false,true,true]."
+    },
+    {
+      "exercise": 5,
+      "task": "Compute both Brier scores for the four labels and reject probabilities outside [0,1].",
+      "expected": "Scores 0.41 and 0.26; invalid 1.2 raises ValueError."
+    },
+    {
+      "exercise": 6,
+      "task": "Compare frozen unigram features for urgent and not urgent, then inspect an isolated bigram representation.",
+      "expected": "The frozen unigram rows match; a separately fitted demonstration contains the not urgent bigram."
+    }
+  ]
+}

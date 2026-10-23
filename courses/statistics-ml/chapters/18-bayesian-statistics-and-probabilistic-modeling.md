@@ -198,6 +198,50 @@ A Dirichlet process is a random probability measure with concentration and base 
 
 Specify a joint Gaussian law for function values through a mean and kernel. Conditioning gives predictions and uncertainty. Kernel choice encodes smoothness and structure, while standard exact fitting has cubic training cost in sample size.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: conjugacy reveals what the prior contributes
+
+The Beta(2,2) prior has mean .5 and concentration four. Eight successes in ten trials yield Beta(10,4), with posterior mean 10/14. Algebraically this is [4/(4+10)]*.5+[10/(4+10)]*.8. The prior receives weight four-fourteenths, and the observed success proportion receives ten-fourteenths. This convenient pseudo-count interpretation is specific to the beta-binomial model and should not be transferred mechanically to arbitrary priors.
+
+For the next binary trial, the posterior predictive success probability equals the posterior mean. For several future trials, integrating over the common unknown p induces dependence among their outcomes and produces a beta-binomial count distribution. Plugging in p=10/14 and pretending it is known gives a binomial predictive count with too little parameter uncertainty. The distinction matters when forecasting aggregate incidents or conversions over a new period.
+
+Before fitting, ask whether one common p is plausible. Different customers, time periods or machines may have systematically different probabilities. A narrow posterior for one pooled p can fit the total success count while missing group variation. A hierarchical beta-binomial or regression model can represent some heterogeneity, but it introduces another model whose predictive implications need checking.
+
+### Case study: normal-normal updating as precision weighting
+
+Suppose a measurement mean y_bar has known sampling variance v, and the unknown mean theta has prior N(mu0,tau-squared). The posterior precision is 1/tau-squared+1/v, and the posterior mean is (mu0/tau-squared+y_bar/v) divided by that precision. Precision is inverse variance, so the more informative source receives more weight.
+
+If mu0=0, tau-squared=4, y_bar=3 and v=1, posterior precision is 1.25, posterior variance .8 and posterior mean 2.4. This update does not average the prior and observation equally. If the measurement variance falls to .25, the posterior mean moves closer to three because the likelihood contributes more precision. If the prior variance shrinks dramatically, the prior dominates.
+
+The calculation assumes the measurement variance is known and the observation model is credible. Unknown noise variance, correlated measurements and selection into observation require additional modeling. A prior concentrated at zero can suppress a real effect in weak data; a broad prior can place mass on implausible outcomes. Prior predictive simulation translates these abstract scales into consequences people can inspect.
+
+### Case study: a good posterior fit can coexist with a prior-sensitive Bayes factor
+
+Compare a null theta=0 with an alternative theta~N(0,tau-squared), observing one y~N(theta,1). Under the alternative, the marginal distribution is N(0,1+tau-squared). The Bayes factor for alternative versus null is [1/sqrt(1+tau-squared)]*exp[y-squared*tau-squared/(2*(1+tau-squared))]. This follows by integrating the normal likelihood over the normal prior.
+
+At y=2 and tau=1, the factor is about 1.92. At tau=100, it is about .074. The diffuse alternative wastes prior predictive mass on enormous observations that were not seen, so its marginal likelihood falls. This is not an arithmetic paradox. It shows that model comparison asks how well each model predicted the observation before seeing it, averaged over its parameter prior.
+
+A posterior interval for theta under the alternative and a Bayes factor comparing models answer different questions. Neither should be reported without its prior assumptions. Sensitivity analysis should use scientifically defensible prior scales, not search for the one that gives a desired evidential conclusion.
+
+### Case study: diagnose a chain that looks calm
+
+A random-walk chain can remain near one mode for thousands of steps, producing a stable trace and a small within-chain standard deviation. If every chain starts in that same mode, between-chain comparisons can also look reassuring while a distant mode remains unexplored. Overdispersed initialization and knowledge of model geometry help reveal such failure, but no finite diagnostic proves global exploration.
+
+Autocorrelation reduces effective sample size. Ten thousand stored draws are not ten thousand independent posterior draws. Monte Carlo standard errors quantify numerical uncertainty in estimated posterior means, quantiles or tail probabilities; they are separate from posterior uncertainty itself. Rare-event decisions can need adequate tail effective sample size even when the posterior mean is estimated precisely.
+
+HMC divergences signal difficulty following the posterior geometry at the chosen discretization. More iterations can reproduce the same biased exploration. Reparameterization, better scaling or a scientifically justified prior may help. Raising an acceptance target can reduce discretization problems but does not replace understanding a funnel or nonidentifiable parameterization. Keep computational diagnostics and substantive model checks separate in the report.
+
+### Case study: simulation-based calibration checks the pipeline
+
+Draw theta from the prior, draw data from the likelihood, fit the posterior, and rank the true theta among posterior draws. Repeating this process should produce appropriate rank behavior if simulation and inference are correctly calibrated under the model. Systematic rank patterns can reveal biased computation, inadequate posterior exploration or implementation mistakes.
+
+SBC validates a pipeline on data generated from its own model. A perfectly calibrated pipeline can still fit the real world poorly because the likelihood omits selection, dependence or changing mechanisms. Posterior predictive checks address observable consequences in the actual dataset, while external validation probes a new setting. These evidence layers complement rather than replace one another.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_18.py](../examples/chapter_18.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

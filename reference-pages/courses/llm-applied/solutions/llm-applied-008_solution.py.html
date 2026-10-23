@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Llm Applied 008 Solution · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Llm Applied 008 Solution</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-008_solution.py</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;llm-applied-008: bounded local reference checks. No network or persistent data writes.&quot;&quot;&quot;</span>
+<span> </span>
+<span>from collections import defaultdict</span>
+<span> </span>
+<span>def rrf(rankings,constant=60):</span>
+<span>    if constant&lt;=0: raise ValueError(&#x27;positive fusion constant required&#x27;)</span>
+<span>    scores=defaultdict(float)</span>
+<span>    for ranking in rankings:</span>
+<span>        unique=[]; seen=set()</span>
+<span>        for key in ranking:</span>
+<span>            if not isinstance(key,str): raise TypeError(&#x27;string document ID required&#x27;)</span>
+<span>            if key not in seen: unique.append(key); seen.add(key)</span>
+<span>        for position,key in enumerate(unique,1): scores[key]+=1/(constant+position)</span>
+<span>    return sorted(scores.items(),key=lambda row:(-row[1],row[0]))</span>
+<span> </span>
+<span> </span>
+<span>def verify():</span>
+<span>    # Exercise 1: Fuse two rankings</span>
+<span>    ranked=rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;],[&#x27;b&#x27;,&#x27;d&#x27;,&#x27;a&#x27;]],60)</span>
+<span>    assert [key for key,score in ranked][:2]==[&#x27;b&#x27;,&#x27;a&#x27;]</span>
+<span> </span>
+<span>    # Exercise 2: Inspect one exact contribution</span>
+<span>    scores=dict(ranked)</span>
+<span>    assert abs(scores[&#x27;b&#x27;]-(1/62+1/61))&lt;1e-12</span>
+<span> </span>
+<span>    # Exercise 3: Prevent duplicate votes</span>
+<span>    assert rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)==rrf([[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]],60)</span>
+<span> </span>
+<span>    # Exercise 4: Rerank a bounded candidate set</span>
+<span>    features={&#x27;a&#x27;:0,&#x27;b&#x27;:2,&#x27;c&#x27;:1}; candidates=[&#x27;a&#x27;,&#x27;b&#x27;,&#x27;c&#x27;]</span>
+<span>    reranked=sorted(candidates,key=lambda key:(-features[key],key))</span>
+<span>    assert reranked==[&#x27;b&#x27;,&#x27;c&#x27;,&#x27;a&#x27;]</span>
+<span> </span>
+<span>    # Exercise 5: Expose a candidate-recall ceiling</span>
+<span>    relevant={&#x27;d&#x27;}; assert not set(candidates)&amp;relevant</span>
+<span>    assert &#x27;d&#x27; not in reranked</span>
+<span> </span>
+<span>    # Exercise 6: Reject invalid fusion policy</span>
+<span>    for rankings,k,kind in [([[&#x27;a&#x27;]],0,ValueError),([[1]],60,TypeError)]:</span>
+<span>        try: rrf(rankings,k)</span>
+<span>        except kind: pass</span>
+<span>        else: raise AssertionError(&#x27;invalid fusion input&#x27;)</span>
+<span>    return {&quot;checks&quot;: 6, &quot;status&quot;: &quot;passed&quot;}</span>
+<span> </span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    print(verify())</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

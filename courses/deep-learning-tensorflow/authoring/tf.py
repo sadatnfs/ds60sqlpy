@@ -429,19 +429,22 @@ checkpoint=tf.train.Checkpoint(weight=w,optimizer=opt); prefix=checkpoint.save(s
 assert Path(prefix+'.index').is_file()''','The returned prefix includes a save counter. Keep the exact prefix rather than guessing a filename. Temporary ownership confines the example to disposable local files.'),
 ex('Calculate the uninterrupted control','Snapshot the saved weight and take one further step without restoring.','iteration count3; weight changes.', '''saved=float(w); step(w,opt); expected=float(w)
 assert int(opt.iterations)==3 and expected!=saved''','The control defines the next-step behavior before the restart comparison. It uses the same target, rate and optimizer configuration as the child process.'),
-ex('Restore in a fresh process','Launch the existing interpreter with fresh variable/Adam objects, restore the saved prefix and take one step.','child weight matches control within1e-6; child iterations3.', '''program="""import json,sys,tensorflow as tf
+ex('Restore in a fresh process','Launch the existing interpreter with fresh variable/Adam objects, restore the saved prefix and take one step.','child weight matches control within1e-6; child iterations3.', '''program=textwrap.dedent("""
+import json,sys,tensorflow as tf
 w=tf.Variable(0.,dtype=tf.float32); opt=tf.keras.optimizers.Adam(.1); opt.build([w])
 c=tf.train.Checkpoint(weight=w,optimizer=opt); c.restore(sys.argv[1]).assert_consumed()
 with tf.GradientTape() as tape: loss=(w-2)**2
 opt.apply_gradients([(tape.gradient(loss,w),w)])
 print(json.dumps({'weight':float(w),'iterations':int(opt.iterations)}))
-"""
-result=subprocess.run([sys.executable,'-c',program,prefix],check=True,capture_output=True,text=True,timeout=60)
+""")
+compile(program, "checkpoint-child", "exec")
+result=subprocess.run([sys.executable,'-c',program,prefix],check=False,capture_output=True,text=True,timeout=60)
+if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 restored=json.loads(result.stdout.strip().splitlines()[-1])
 np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['iterations']==3''','A subprocess has no access to the parent live optimizer objects. Successful parity therefore tests reconstruction from disk. The strict restore check detects omitted variables rather than silently accepting partial state.'),
 ex('Expose a weights-only restart','Set a fresh Adam variable to the saved weight without restoring optimizer moments, then take one step.','next weight differs from the full-state control by more than1e-6.', '''weights_only,fresh=make_state(); weights_only.assign(saved); step(weights_only,fresh)
 assert abs(float(weights_only)-expected)>1e-6 and int(fresh.iterations)==1''','The reset update counter and moments change Adam update even though the initial weight matches. This is why a model prediction parity does not establish training-resumption parity.'),
-ex('Verify cleanup','Remove the owned temporary checkpoint directory and verify it no longer exists.','temporary checkpoint directory absent.', '''temporary.cleanup(); assert not folder.exists()''','Cleanup affects only the directory created by this lesson. A real learner checkpoint should be stored deliberately under learner-owned artifacts and should never be removed by a course update.')],('TensorFlow Checkpoint','https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint'),'import numpy as np\nimport tensorflow as tf\nimport tempfile,json,subprocess,sys\nfrom pathlib import Path', '''def make_state():
+ex('Verify cleanup','Remove the owned temporary checkpoint directory and verify it no longer exists.','temporary checkpoint directory absent.', '''temporary.cleanup(); assert not folder.exists()''','Cleanup affects only the directory created by this lesson. A real learner checkpoint should be stored deliberately under learner-owned artifacts and should never be removed by a course update.')],('TensorFlow Checkpoint','https://www.tensorflow.org/api_docs/python/tf/train/Checkpoint'),'import numpy as np\nimport tensorflow as tf\nimport tempfile,json,subprocess,sys,textwrap\nfrom pathlib import Path', '''def make_state():
     w=tf.Variable(0.,dtype=tf.float32); opt=tf.keras.optimizers.Adam(.1); opt.build([w]); return w,opt
 def step(w,opt):
     with tf.GradientTape() as tape: loss=(w-2)**2
@@ -535,18 +538,22 @@ np.testing.assert_allclose(loaded(x).numpy(),expected,atol=1e-6,rtol=0)''','Reco
 ex('Export an inference endpoint','Call model.export into a different temporary subdirectory and load SavedModel.','serve returns the same predictions.', '''export_path=folder/'inference'; model.export(export_path)
 exported=tf.saved_model.load(str(export_path))
 np.testing.assert_allclose(exported.serve(tf.constant(x)).numpy(),expected,atol=1e-6,rtol=0)''','The export exposes inference behavior. Treating it as interchangeable with a resumable training object would overstate what the endpoint contains.'),
-ex('Check both in a fresh process','Load the .keras model and exported endpoint in a child interpreter and compare their outputs.','both child outputs[[2],[6]].', '''program="""import json,sys,tensorflow as tf
+ex('Check both in a fresh process','Load the .keras model and exported endpoint in a child interpreter and compare their outputs.','both child outputs[[2],[6]].', '''program=textwrap.dedent("""
+import json,sys,tensorflow as tf
 x=tf.constant([[1.],[3.]])
 a=tf.keras.models.load_model(sys.argv[1])(x).numpy().tolist()
-b=tf.saved_model.load(sys.argv[2]).serve(x).numpy().tolist()
+exported=tf.saved_model.load(sys.argv[2])
+b=exported.serve(x).numpy().tolist()
 print(json.dumps([a,b]))
-"""
-result=subprocess.run([sys.executable,'-c',program,str(keras_path),str(export_path)],capture_output=True,text=True,check=True,timeout=60)
+""")
+compile(program, "checkpoint-child", "exec")
+result=subprocess.run([sys.executable,'-c',program,str(keras_path),str(export_path)],capture_output=True,text=True,check=False,timeout=60)
+if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 a,b=json.loads(result.stdout.strip().splitlines()[-1])
-np.testing.assert_allclose(a,expected,atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected,atol=1e-6,rtol=0)''','The child cannot reuse live model state from the parent. This makes the test sensitive to missing configuration, weights or exported signatures.'),
+np.testing.assert_allclose(a,expected,atol=1e-6,rtol=0); np.testing.assert_allclose(b,expected,atol=1e-6,rtol=0)''','The child cannot reuse live model state from the parent. Keep the object returned by tf.saved_model.load in a named variable while calling serve: the exported function references resource variables owned by that object. Chaining load(...).serve(...) can let the owner disappear before its variables are used. Prediction parity therefore depends on both reconstructed state and correct object lifetime, not only a readable file.'),
 ex('Check a new batch length','Use three valid rows instead of two with the restored model.','output shape(3,1), predictions0,4,8.', '''new=loaded(np.array([[0.],[2.],[4.]],dtype='float32')).numpy()
 assert new.shape==(3,1); np.testing.assert_array_equal(new[:,0],[0,4,8])''','The feature width stays fixed while batch length varies. This confirms the intended leading-axis flexibility, not support for arbitrary feature dimensions.'),
-ex('Remove only owned artifacts','Clean the temporary directory and check both artifacts are absent.','temporary directory absent.', '''temporary.cleanup(); assert not folder.exists()''','The example has no persistent model output by design. A real release should choose an explicit learner-owned artifact destination and retain a rollback version instead.')],('Keras saving and export','https://keras.io/guides/serialization_and_saving/'),'import numpy as np\nimport tensorflow as tf\nimport tempfile,json,subprocess,sys\nfrom pathlib import Path')
+ex('Remove only owned artifacts','Clean the temporary directory and check both artifacts are absent.','temporary directory absent.', '''temporary.cleanup(); assert not folder.exists()''','The example has no persistent model output by design. A real release should choose an explicit learner-owned artifact destination and retain a rollback version instead.')],('Keras saving and export','https://keras.io/guides/serialization_and_saving/'),'import numpy as np\nimport tensorflow as tf\nimport tempfile,json,subprocess,sys,textwrap\nfrom pathlib import Path')
 add('tf-033',
 '''Inference is a function with a data contract, not just a call to model.predict. The model expects a nonempty batch of two finite float32 features per record and accepts at most four records. Inputs outside that boundary should receive named failures rather than silent coercion. Batching should preserve record identity: predicting one record alone or alongside others should give the same result for this stateless model. This local contract does not start a server or claim security isolation. It establishes a small, reviewable boundary that an eventual service would need to enforce consistently.''',
 '''np.asarray inspects the incoming data without automatically changing its dtype. Check rank, feature width, batch limit and finiteness before converting to a tensor. A fixed coefficient vector[2,-1] gives an independent expected output. Returning a new array prevents a caller from mutating stored input through a shared view. Validation order should make errors predictable enough to diagnose.''',

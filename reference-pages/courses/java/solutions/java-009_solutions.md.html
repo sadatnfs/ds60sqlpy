@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>java-009: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>java-009: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/java/solutions/java-009_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="java-009-explanatory-solutions">java-009: explanatory solutions<a class="heading-anchor" href="#java-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as <code>Main.java</code>. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Exceptions separate normal return values from failure. A checked exception is declared or handled by callers; an unchecked exception often signals an invalid argument or programming error. Resource lifetime is a different concern: a resource must close whether the body succeeds or fails. try-with-resources closes resources in reverse declaration order. If the body throws and closing also throws, the body exception remains primary and close failures are attached as suppressed exceptions. Catching everything and returning a default would erase that information. This lesson uses tiny in-memory AutoCloseable probes to make lifetime order and suppression observable without opening external files.</p>
+<p><strong>Checked exception:</strong> A failure type that callers must declare or handle.</p>
+<p><strong>Resource lifetime:</strong> The interval during which an owned resource is usable.</p>
+<p><strong>Suppressed exception:</strong> A secondary close failure retained beside a primary exception.</p>
+<h3 id="reading-the-reference">Reading the reference<a class="heading-anchor" href="#reading-the-reference" aria-label="Link to this section">#</a></h3>
+<p>A try(resource declarations) block owns the declared resources until control exits. AutoCloseable.close may throwException. getSuppressed exposes secondary close failures. Use a specific catch when a failure is expected, and preserve the original cause when translating to a domain exception. A finally block is useful for cleanup patterns not covered by resources, but throwing fromfinally can replace an important earlier failure.</p>
+<h3 id="exercise-1-close-on-normal-completion">Exercise 1: Close on normal completion<a class="heading-anchor" href="#exercise-1-close-on-normal-completion" aria-label="Link to this section">#</a></h3>
+<p>Task: Open a Probe resource,recordbody,then inspect closure order.</p>
+<p>Leaving the block triggers close even without an explicit call in the body. Ownership is visible in the block structure.</p>
+<pre><code class="language-java">List&lt;String&gt; events = new ArrayList&lt;&gt;();
+try (Probe resource = new Probe(&quot;A&quot;, events, false)) { events.add(&quot;body&quot;); }
+assert events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;));</code></pre>
+<p><strong>Expected:</strong> eventsbody,closeA.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with eventsbody,closeA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-2-close-in-reverse-order">Exercise 2: Close in reverse order<a class="heading-anchor" href="#exercise-2-close-in-reverse-order" aria-label="Link to this section">#</a></h3>
+<p>Task: Declare resourcesA thenB and leave the block.</p>
+<p>Later resources often depend on earlier ones, so reverse closure is deliberate. The event trace proves the actual order for this fixture.</p>
+<pre><code class="language-java">events.clear();
+try (Probe a = new Probe(&quot;A&quot;, events, false); Probe b = new Probe(&quot;B&quot;, events, false)) { events.add(&quot;body&quot;); }
+assert events.equals(List.of(&quot;body&quot;, &quot;closeB&quot;, &quot;closeA&quot;));</code></pre>
+<p><strong>Expected:</strong> closeB beforecloseA.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with closeB beforecloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-3-close-after-body-failure">Exercise 3: Close after body failure<a class="heading-anchor" href="#exercise-3-close-after-body-failure" aria-label="Link to this section">#</a></h3>
+<p>Task: ThrowIllegalStateException in the body and inspect events after catching it.</p>
+<p>Exceptional control flow does not skip resource closure. A manually placedclose after the body statement would never execute in this case.</p>
+<pre><code class="language-java">events.clear(); boolean bodyFailed = false;
+try (Probe a = new Probe(&quot;A&quot;, events, false)) { throw new IllegalStateException(&quot;body&quot;); }
+catch (IllegalStateException expected) { bodyFailed = true; }
+assert bodyFailed &amp;&amp; events.equals(List.of(&quot;closeA&quot;));</code></pre>
+<p><strong>Expected:</strong> closeA stillrecorded.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with closeA stillrecorded. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-4-preserve-suppressed-close-failure">Exercise 4: Preserve suppressed close failure<a class="heading-anchor" href="#exercise-4-preserve-suppressed-close-failure" aria-label="Link to this section">#</a></h3>
+<p>Task: Make the body throw and the resource close throw too.</p>
+<p>The primary failure is not lost. Suppressed exceptions retain cleanup diagnostics without pretending they were the original cause.</p>
+<pre><code class="language-java">events.clear();
+try (Probe a = new Probe(&quot;A&quot;, events, true)) { throw new IllegalStateException(&quot;body&quot;); }
+catch (IllegalStateException expected) {
+    assert expected.getMessage().equals(&quot;body&quot;);
+    assert expected.getSuppressed().length == 1;
+    assert expected.getSuppressed()[0].getMessage().equals(&quot;closeA&quot;);
+}</code></pre>
+<p><strong>Expected:</strong> primary messagebody;one suppressed exceptioncloseA.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with primary messagebody;one suppressed exceptioncloseA. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-5-observe-close-only-failure">Exercise 5: Observe close-only failure<a class="heading-anchor" href="#exercise-5-observe-close-only-failure" aria-label="Link to this section">#</a></h3>
+<p>Task: Let the body succeed butclose throwIOException.</p>
+<p>When there is no body exception, a close failure becomes the primary failure. Resource cleanup is part of the operation outcome.</p>
+<pre><code class="language-java">boolean closeFailed = false;
+try (Probe a = new Probe(&quot;A&quot;, events, true)) { }
+catch (java.io.IOException expected) { closeFailed = expected.getMessage().equals(&quot;closeA&quot;); }
+assert closeFailed;</code></pre>
+<p><strong>Expected:</strong> IOExceptioncloseA is primary.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with IOExceptioncloseA is primary. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="exercise-6-retain-a-translated-cause">Exercise 6: Retain a translated cause<a class="heading-anchor" href="#exercise-6-retain-a-translated-cause" aria-label="Link to this section">#</a></h3>
+<p>Task: Wrap anIOException inIllegalStateException with a domain message and inspectcause.</p>
+<p>A useful translation adds context while preserving diagnostic ancestry. Creating a new exception with only the old message would discard type and stack information.</p>
+<pre><code class="language-java">var original = new java.io.IOException(&quot;read failed&quot;);
+var translated = new IllegalStateException(&quot;Cannot load lesson fixture&quot;, original);
+assert translated.getCause() == original &amp;&amp; translated.getMessage().contains(&quot;fixture&quot;);</code></pre>
+<p><strong>Expected:</strong> cause remains the originalIOException.</p>
+<p><strong>Verify:</strong> Compare the program values or named exception with cause remains the originalIOException. Keep the input that distinguishes this case from the preceding exercise. The assertion must be capable of failing when that condition is broken.</p>
+<h3 id="after-comparing-the-answer">After comparing the answer<a class="heading-anchor" href="#after-comparing-the-answer" aria-label="Link to this section">#</a></h3>
+<p>Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.</p></article>
+  </main>
+</body>
+</html>

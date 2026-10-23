@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>5. Sampling, Surveys, and Data Collection · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>5. Sampling, Surveys, and Data Collection</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md</code></p>
+    </header>
+    <article class="document"><h2 id="5-sampling-surveys-and-data-collection">5. Sampling, Surveys, and Data Collection<a class="heading-anchor" href="#5-sampling-surveys-and-data-collection" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-005</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Sampling determines which population statements are defensible. Imagine a fleet with many small sites and a few large sites. Sampling equal numbers of sites estimates a different raw average from sampling equal numbers of machines. Inclusion probabilities connect the realized sample to a specified population total or mean.</p>
+<p>Weights address known selection mechanisms, not arbitrary gaps in coverage. Variance must reflect the design, including clustering and stratification. The number of stored records is not the effective amount of independent information. Always retain sampling strata, primary sampling units, inclusion probabilities and population totals alongside measurements.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-05-01">Simple random sampling<a class="heading-anchor" href="#stat-05-01" aria-label="Link to this section">#</a></h4>
+<p>Select every size-n subset with equal probability. The sample mean estimates the finite-population mean without design bias. Sorting then taking the first n records is not random sampling.</p>
+<h4 id="stat-05-02">Stratified sampling<a class="heading-anchor" href="#stat-05-02" aria-label="Link to this section">#</a></h4>
+<p>Partition the population into nonoverlapping strata and sample within each. Combine stratum estimates using population weights. Oversampling rare strata improves subgroup precision but requires weighting for population summaries.</p>
+<h4 id="stat-05-03">Cluster sampling<a class="heading-anchor" href="#stat-05-03" aria-label="Link to this section">#</a></h4>
+<p>Select whole groups, then observe their members. Operational cost decreases, but similar members provide redundant information. Variance estimation must preserve clusters instead of treating every member as independently sampled.</p>
+<h4 id="stat-05-04">Multistage sampling<a class="heading-anchor" href="#stat-05-04" aria-label="Link to this section">#</a></h4>
+<p>Sample sites, then teams, then people. An individual&#x27;s inclusion probability depends on all stages. Retain stage-specific identifiers because a single final weight does not describe all covariance induced by the design.</p>
+<h4 id="stat-05-05">Systematic sampling<a class="heading-anchor" href="#stat-05-05" aria-label="Link to this section">#</a></h4>
+<p>Choose a random starting position and every kth record thereafter. This is easy operationally but vulnerable to periodic ordering aligned with k. A daily cycle can make the selected sample unrepresentative.</p>
+<h4 id="stat-05-06">Probability-proportional-to-size sampling<a class="heading-anchor" href="#stat-05-06" aria-label="Link to this section">#</a></h4>
+<p>Give larger clusters higher selection probabilities, often then sample a fixed number inside each. Some designs approximately equalize individual inclusion probabilities; with-replacement draws and without-replacement inclusion probabilities require different calculations.</p>
+<h4 id="stat-05-07">Unequal-probability sampling<a class="heading-anchor" href="#stat-05-07" aria-label="Link to this section">#</a></h4>
+<p>Selection probabilities may differ to improve efficiency or cover rare groups. Distinguish a per-draw probability from the probability of appearing at least once; unbiased total estimators require the appropriate inclusion probability.</p>
+<h4 id="stat-05-08">Survey weights<a class="heading-anchor" href="#stat-05-08" aria-label="Link to this section">#</a></h4>
+<p>Base weights invert inclusion probabilities; later adjustments may address nonresponse or known population composition. Large weights increase variance and sensitivity. Trimming reduces instability but changes bias and must be reported.</p>
+<h4 id="stat-05-09">Horvitz–Thompson estimation<a class="heading-anchor" href="#stat-05-09" aria-label="Link to this section">#</a></h4>
+<p>Estimate a finite population total by summing observed y_i/pi_i. Design unbiasedness follows because E[I_i]=pi_i. Zero inclusion probability for some population units prevents identification of their contribution.</p>
+<h4 id="stat-05-10">Hájek estimation<a class="heading-anchor" href="#stat-05-10" aria-label="Link to this section">#</a></h4>
+<p>Normalize inverse-probability weights and compute sum(w*y)/sum(w). This ratio often stabilizes mean estimation but is generally not exactly design unbiased. It differs from dividing a Horvitz-Thompson total by a known population size.</p>
+<h4 id="stat-05-11">Poststratification<a class="heading-anchor" href="#stat-05-11" aria-label="Link to this section">#</a></h4>
+<p>Use known population cell counts to reweight sample cell means. Empty sampled cells cannot be repaired by weighting alone and require pooling or modeling, with additional assumptions.</p>
+<h4 id="stat-05-12">Raking<a class="heading-anchor" href="#stat-05-12" aria-label="Link to this section">#</a></h4>
+<p>Iteratively adjust weights to match separate population margins, such as age and region. Matching each margin does not guarantee their joint distribution matches. Extreme or incompatible margins can cause unstable weights.</p>
+<h4 id="stat-05-13">Calibration weighting<a class="heading-anchor" href="#stat-05-13" aria-label="Link to this section">#</a></h4>
+<p>Choose weights close to base weights while satisfying known auxiliary totals. Useful auxiliaries predict the outcome or response mechanism. Calibration constraints do not create information about unmeasured selection drivers.</p>
+<h4 id="stat-05-14">Design effects<a class="heading-anchor" href="#stat-05-14" aria-label="Link to this section">#</a></h4>
+<p>Compare the design-based variance with simple-random-sampling variance for the same nominal sample size. For equal clusters, 1+(m-1)*ICC is a useful approximation, not a universal formula for every design.</p>
+<h4 id="stat-05-15">Finite population correction<a class="heading-anchor" href="#stat-05-15" aria-label="Link to this section">#</a></h4>
+<p>Without-replacement sampling reduces uncertainty as the sampled fraction grows. The variance correction is approximately 1-n/N; use only for an appropriate finite target and design, not an unlimited superpopulation claim.</p>
+<h4 id="stat-05-16">Coverage error<a class="heading-anchor" href="#stat-05-16" aria-label="Link to this section">#</a></h4>
+<p>A frame omitting offline customers excludes part of the target population. No adjustment based solely on included customers verifies their missing outcomes. Audit frame construction and define the reachable population explicitly.</p>
+<h4 id="stat-05-17">Nonresponse bias<a class="heading-anchor" href="#stat-05-17" aria-label="Link to this section">#</a></h4>
+<p>Response bias arises when response probabilities and outcomes remain related after adjustment. High response rate does not ensure absence of bias, nor does low response necessarily imply severe bias.</p>
+<h4 id="stat-05-18">Convenience sampling<a class="heading-anchor" href="#stat-05-18" aria-label="Link to this section">#</a></h4>
+<p>Available respondents may differ from the target population in unmeasured ways. Describe their selection and limit claims. A large convenience sample can have tiny standard errors around a systematically wrong target.</p>
+<h4 id="stat-05-19">Selection bias<a class="heading-anchor" href="#stat-05-19" aria-label="Link to this section">#</a></h4>
+<p>Conditioning on inclusion can distort associations when inclusion depends on causes of multiple variables. Drawing a selection diagram helps distinguish missing population coverage from collider-induced association bias.</p>
+<h4 id="stat-05-20">Capture–recapture estimation<a class="heading-anchor" href="#stat-05-20" aria-label="Link to this section">#</a></h4>
+<p>Two lists with sizes n1 and n2 and overlap m suggest population size near n1*n2/m. Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.</p>
+<h4 id="stat-05-21">Adaptive sampling<a class="heading-anchor" href="#stat-05-21" aria-label="Link to this section">#</a></h4>
+<p>Sampling may expand around detected rare events or high-value regions. Retain the adaptive design probabilities and stopping rules. Ordinary fixed-design estimators can become biased when discovery changes who is observed.</p>
+<h4 id="stat-05-22">Optimal allocation<a class="heading-anchor" href="#stat-05-22" aria-label="Link to this section">#</a></h4>
+<p>Neyman allocation gives more samples to large, variable strata; unequal costs modify that balance. Optimize for the actual target, since precise population means and precise rare-subgroup contrasts require different allocation.</p>
+<h4 id="stat-05-23">Measurement study design<a class="heading-anchor" href="#stat-05-23" aria-label="Link to this section">#</a></h4>
+<p>Plan instrument resolution, repeat measurements, timing and validation samples before collection. Repeated measurements separate within-unit noise from between-unit variability only when the repeat process itself is stable.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-prove-an-inverse-probability-total-by-enumeration">Case study: prove an inverse-probability total by enumeration<a class="heading-anchor" href="#case-study-prove-an-inverse-probability-total-by-enumeration" aria-label="Link to this section">#</a></h4>
+<p>Consider a finite population with values ten and thirty. The first unit is included independently with probability .5 and the second with probability .25. The Horvitz-Thompson total is I1<em>10/.5+I2</em>30/.25, where each I indicates inclusion. The four possible samples yield totals zero, twenty, 120 and 140 with probabilities .375,.375,.125 and .125. Their probability-weighted average is forty, the true population total.</p>
+<p>The estimator can be very variable even though it is design unbiased. Its variance in this example is 2,800, because a rarely included high-value unit receives a large weight. Unbiasedness alone is therefore not enough to choose an estimator or sampling plan. Improving inclusion of influential units, stratifying or collecting useful auxiliary information can reduce uncertainty before analysis.</p>
+<p>The Hajek ratio divides the weighted outcome total by the estimated population count. It often stabilizes a mean but is not exactly the same as dividing a Horvitz-Thompson total by a known population size. Ratio normalization changes finite-sample properties, and an empty sample creates a denominator problem. State which estimator is used rather than referring vaguely to a weighted average.</p>
+<h4 id="case-study-survey-calibration-cannot-repair-an-absent-population">Case study: survey calibration cannot repair an absent population<a class="heading-anchor" href="#case-study-survey-calibration-cannot-repair-an-absent-population" aria-label="Link to this section">#</a></h4>
+<p>An online survey matches known population margins for age and region after raking. This corrects those margins, but users without internet access are absent. If their outcomes differ after conditioning on age and region, the weighted survey remains biased for the full population. A large weighted sample can have a narrow interval around the wrong target.</p>
+<p>Joint distributions matter as well. Matching age and region margins does not ensure that every age-by-region cell is represented correctly. Poststratification on joint cells can help when cell totals are known and sample information exists. Empty cells require a model, pooling or a narrower target. Weighting cannot manufacture observed outcomes for a cell with zero support.</p>
+<p>Report weight ranges, effective sample information and sensitivity to trimming. Trimming extreme weights can reduce variance but introduces bias relative to the original design correction. That tradeoff should be visible, especially when extreme weights represent small or underserved groups. A stable dashboard is not sufficient justification for silently removing their population influence.</p>
+<h4 id="case-study-sampling-costs-and-precision-targets">Case study: sampling costs and precision targets<a class="heading-anchor" href="#case-study-sampling-costs-and-precision-targets" aria-label="Link to this section">#</a></h4>
+<p>A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because 800<em>1 equals 200</em>4. Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.</p>
+<p>If the high-variability stratum costs four times as much per observation, a cost-constrained allocation adjusts for the square root of cost. If the objective is instead a precise estimate for the small stratum, the optimal allocation changes again. There is no universally optimal sample independent of the target and budget.</p>
+<p>Adaptive sampling can improve discovery of rare clusters, but the selection process changes as observations arrive. Retain the design history and inclusion probabilities needed for valid estimation. Treating the final adaptively selected set as a simple random sample overstates representativeness. Design-based and model-based analyses can both be useful, but their assumptions should not be mixed silently.</p>
+<h4 id="case-study-capture-recapture-and-list-dependence">Case study: capture-recapture and list dependence<a class="heading-anchor" href="#case-study-capture-recapture-and-list-dependence" aria-label="Link to this section">#</a></h4>
+<p>Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is 100*80/20=400 entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.</p>
+<p>If the second search deliberately avoids entities found by the first, overlap can be too small and the estimate can be exaggerated. Heterogeneous capture probabilities and list dependence are therefore central assumptions, not minor corrections. Use additional lists, covariates or sensitivity analysis where appropriate, and communicate uncertainty when overlap is sparse.</p>
+<p>A measurement study can sometimes be more valuable than more ordinary observations. Repeated measurements, gold-standard validation or targeted collection in missing strata can identify error mechanisms that routine large-volume logging cannot. Choose additional data by the uncertainty it can reduce in the actual decision.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_05.py.html">chapter_05.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_05.py</code></pre>
+<h4 id="weighting-defines-the-population-contribution">Weighting defines the population contribution<a class="heading-anchor" href="#weighting-defines-the-population-contribution" aria-label="Link to this section">#</a></h4>
+<p>An observed value 10 with inclusion probability 0.5 contributes 20 to a population total; a value 30 with probability 0.25 contributes 120. Their normalized weighted mean is 23.3333. In another population, combining cell means 2 and 8 with population shares 0.8 and 0.2 gives 3.2, not the unweighted cell average 5.</p>
+<h4 id="count-independent-information-and-allocate-deliberately">Count independent information and allocate deliberately<a class="heading-anchor" href="#count-independent-information-and-allocate-deliberately" aria-label="Link to this section">#</a></h4>
+<p>With cluster size 10 and intraclass correlation 0.2, a design-effect approximation is 2.8, so 100 records have roughly the precision of 35.7 independent records for that comparison. Neyman allocation assigns equal samples to a large low-variance stratum and a small high-variance stratum in this fixture.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+
+def weights_and_population():
+    values = np.array([10., 30.])
+    inclusion = np.array([.5, .25])
+    total = np.sum(values/inclusion)
+    hajek = np.sum(values/inclusion)/np.sum(1/inclusion)
+    assert total == 140 and np.isclose(hajek, 70/3)
+    sample_cell_mean, population_share = np.array([2., 8.]), np.array([.8, .2])
+    standardized = sample_cell_mean @ population_share
+    assert np.isclose(standardized, 3.2)
+    print(&quot;HT total:&quot;, total, &quot;Hajek mean:&quot;, round(hajek, 4), &quot;poststratified mean:&quot;, standardized)
+
+def design_and_allocation():
+    cluster_size, icc, nominal_n = 10, .2, 100
+    deff = 1+(cluster_size-1)*icc
+    effective_n = nominal_n/deff
+    assert np.isclose(deff, 2.8) and effective_n &lt; nominal_n
+    population = np.array([800., 200.])
+    sd = np.array([1., 4.])
+    allocation = population*sd/(population @ sd)*100
+    assert np.allclose(allocation, [50, 50])
+    print(&quot;Design effect:&quot;, deff, &quot;effective n:&quot;, round(effective_n,2), &quot;allocation:&quot;, allocation)
+
+def main():
+    weights_and_population()
+    design_and_allocation()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Can weighting fix an unrepresentative sample?</strong> It can correct specified inclusion or response mechanisms when positivity holds and the relevant adjustment information is adequate. It cannot establish outcomes for a group that never appears or remove unmeasured selection bias by itself.</p>
+<p><strong>Interview: Why might a smaller stratified sample outperform a larger clustered one?</strong> Stratification can remove composition uncertainty, while clustering repeats similar information. Compare estimator variances under each design and the actual collection budget, not only raw record counts.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://www150.statcan.gc.ca/n1/en/catalogue/12-587-X">Statistics Canada, Survey Methods and Practices</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="04-probability-distributions-you-should-recognize.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="06-measurement-exploratory-analysis-and-data-quality.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

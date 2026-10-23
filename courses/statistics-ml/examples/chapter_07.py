@@ -26,7 +26,17 @@ def imputation_uncertainty():
     assert np.allclose(sensitivity, [1.4,2.,2.6])
     print("Pooled estimate/SE:", estimates.mean(), np.sqrt(total), "MNAR scenarios:", sensitivity)
 
+def measurement_error_attenuation():
+    x=np.array([-1.,-1.,1.,1.])
+    error=np.array([-1.,1.,-1.,1.])
+    observed=x+error;y=2*x
+    slope=np.sum((observed-observed.mean())*(y-y.mean()))/np.sum((observed-observed.mean())**2)
+    reliability=np.var(x)/(np.var(x)+np.var(error))
+    assert np.isclose(slope,1.) and np.isclose(slope,2*reliability)
+    print("True slope 2; noisy-predictor slope:",slope,"reliability ratio:",reliability)
+
 def main():
+    measurement_error_attenuation()
     robust_location()
     imputation_uncertainty()
 

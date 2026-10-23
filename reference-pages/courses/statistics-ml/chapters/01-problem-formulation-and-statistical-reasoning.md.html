@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>1. Problem Formulation and Statistical Reasoning · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>1. Problem Formulation and Statistical Reasoning</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/01-problem-formulation-and-statistical-reasoning.md</code></p>
+    </header>
+    <article class="document"><h2 id="1-problem-formulation-and-statistical-reasoning">1. Problem Formulation and Statistical Reasoning<a class="heading-anchor" href="#1-problem-formulation-and-statistical-reasoning" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-001</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>A service team asks whether a new routing rule will reduce delay. Three different questions hide inside that sentence: what delays occurred, which requests will be late, and what delay would occur if the rule changed. The first is descriptive, the second predictive, and the third causal. A model can answer one well while being uninformative about another.</p>
+<p>Begin with an analysis contract: action, outcome, population, unit, time horizon, estimand and loss. For example, estimate the difference in mean seven-day delay per assigned customer, with all eligible customers retained. The contract determines aggregation, assignment, missing-data handling and validation. A narrow interval around the wrong quantity is precise evidence for the wrong decision.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-01-01">Descriptive analysis<a class="heading-anchor" href="#stat-01-01" aria-label="Link to this section">#</a></h4>
+<p>Compute a clearly denominated summary such as total delay divided by eligible requests. This describes the recorded population; changing the denominator from requests to customers changes the question even with identical events.</p>
+<h4 id="stat-01-02">Exploratory analysis<a class="heading-anchor" href="#stat-01-02" aria-label="Link to this section">#</a></h4>
+<p>Use plots and subgroup summaries to discover candidate mechanisms. Because the same observations suggest the hypothesis, apparent extremes require fresh validation before they become confirmed findings. Record discoveries separately from prespecified comparisons.</p>
+<h4 id="stat-01-03">Confirmatory analysis<a class="heading-anchor" href="#stat-01-03" aria-label="Link to this section">#</a></h4>
+<p>Freeze the outcome, exclusions, estimator and decision threshold before inspecting treatment differences. Confirmation concerns the entire procedure, including planned comparisons; a small p-value after many unreported attempts does not restore that procedure.</p>
+<h4 id="stat-01-04">Predictive modeling<a class="heading-anchor" href="#stat-01-04" aria-label="Link to this section">#</a></h4>
+<p>Estimate an outcome using information available at prediction time, then evaluate on deployment-like held-out observations. A predictor can exploit a symptom of a cause without revealing an intervention that would improve outcomes.</p>
+<h4 id="stat-01-05">Causal inference<a class="heading-anchor" href="#stat-01-05" aria-label="Link to this section">#</a></h4>
+<p>Compare potential outcomes under explicit interventions. Randomization or justified adjustment connects observed comparisons to that target. Similar treated and untreated averages can hide treatment effects when selection into treatment differs.</p>
+<h4 id="stat-01-06">Prescriptive analytics<a class="heading-anchor" href="#stat-01-06" aria-label="Link to this section">#</a></h4>
+<p>Convert evidence into actions using feasible options, resource limits and a stated objective. A staffing recommendation must account for capacity and intervention consequences; a forecast of high demand alone is not an optimal staffing rule.</p>
+<h4 id="stat-01-07">Statistical decision theory<a class="heading-anchor" href="#stat-01-07" aria-label="Link to this section">#</a></h4>
+<p>For each action a, average its loss L(a,theta) over uncertainty about theta and choose the smallest expected loss. Asymmetric harms imply asymmetric decision thresholds, even when a probability model is perfectly calibrated.</p>
+<h4 id="stat-01-08">Data-generating processes<a class="heading-anchor" href="#stat-01-08" aria-label="Link to this section">#</a></h4>
+<p>Specify how entities enter the sample, receive treatment, generate measurements and leave observation. A plausible simulation of this mechanism reveals which dependencies or censoring rules an analysis must preserve.</p>
+<h4 id="stat-01-09">Estimands<a class="heading-anchor" href="#stat-01-09" aria-label="Link to this section">#</a></h4>
+<p>Write the target as a mathematical quantity, such as E[Y(1)-Y(0)] for eligible customers at day seven. An estimator is the recipe used to approximate it, not the estimand itself.</p>
+<h4 id="stat-01-10">Target populations<a class="heading-anchor" href="#stat-01-10" aria-label="Link to this section">#</a></h4>
+<p>Define eligibility and the time/place scope before generalizing. A model evaluated on existing customers does not automatically describe prospective customers, who may have different behavior and no history.</p>
+<h4 id="stat-01-11">Units of observation<a class="heading-anchor" href="#stat-01-11" aria-label="Link to this section">#</a></h4>
+<p>A row might be a request, an account-day or a labeler judgment. Repeated rows from one customer are not independent customers. Identify the record key before computing uncertainty.</p>
+<h4 id="stat-01-12">Units of analysis<a class="heading-anchor" href="#stat-01-12" aria-label="Link to this section">#</a></h4>
+<p>The entity summarized in conclusions may differ from the row. Average customer-level means to estimate a typical customer&#x27;s experience; average requests to estimate a typical request&#x27;s experience. Heavy users receive different influence.</p>
+<h4 id="stat-01-13">Units of assignment<a class="heading-anchor" href="#stat-01-13" aria-label="Link to this section">#</a></h4>
+<p>If entire teams receive a change, team assignment determines independent treatment variation. Treating every team member as independently randomized understates uncertainty even when millions of member records exist.</p>
+<h4 id="stat-01-14">Identification<a class="heading-anchor" href="#stat-01-14" aria-label="Link to this section">#</a></h4>
+<p>Ask whether the observable distribution and assumptions uniquely determine the estimand. No amount of flexible fitting identifies an intervention effect if uncontrolled common causes can explain the observed association equally well.</p>
+<h4 id="stat-01-15">Identifiability<a class="heading-anchor" href="#stat-01-15" aria-label="Link to this section">#</a></h4>
+<p>In a model with two identical predictor columns, their coefficient sum is estimable while the separate coefficients are not. Distinct parameter values make identical predictions, so more optimization cannot resolve the ambiguity.</p>
+<h4 id="stat-01-16">Internal validity<a class="heading-anchor" href="#stat-01-16" aria-label="Link to this section">#</a></h4>
+<p>Check whether assignment, attrition, measurement and analysis support the intended inference inside the study. Randomization at enrollment does not protect a comparison restricted to a treatment-affected subset of survivors.</p>
+<h4 id="stat-01-17">External validity<a class="heading-anchor" href="#stat-01-17" aria-label="Link to this section">#</a></h4>
+<p>Transporting evidence requires relevant effect modifiers and context to align, or a justified adjustment. A laboratory efficiency gain may disappear under production load even if the laboratory experiment was internally valid.</p>
+<h4 id="stat-01-18">Construct validity<a class="heading-anchor" href="#stat-01-18" aria-label="Link to this section">#</a></h4>
+<p>A count of clicks is an operational measure, not automatically satisfaction. Validate the connection with user research or independent outcomes; optimizing a convenient proxy can degrade the underlying construct.</p>
+<h4 id="stat-01-19">Practical significance<a class="heading-anchor" href="#stat-01-19" aria-label="Link to this section">#</a></h4>
+<p>Compare the effect and its uncertainty with an operational threshold. A 0.01% improvement may be detectable with huge traffic but insufficient to pay implementation cost or justify rollout risk.</p>
+<h4 id="stat-01-20">Statistical versus substantive uncertainty<a class="heading-anchor" href="#stat-01-20" aria-label="Link to this section">#</a></h4>
+<p>Sampling uncertainty shrinks with additional independent observations. Ambiguous labels, unobserved confounding and disputed objectives may not. Report these uncertainties separately instead of compressing them into one standard error.</p>
+<h4 id="stat-01-21">Sensitivity analysis<a class="heading-anchor" href="#stat-01-21" aria-label="Link to this section">#</a></h4>
+<p>Change defensible assumptions systematically, such as attrition effects or cost ratios, and locate the point where the decision reverses. A stable estimate across cosmetic settings does not establish robustness to the important untestable assumption.</p>
+<h4 id="stat-01-22">Triangulation<a class="heading-anchor" href="#stat-01-22" aria-label="Link to this section">#</a></h4>
+<p>Seek evidence with different failure modes, such as randomized assignment, operational logs and qualitative investigations. Agreement is stronger when the sources do not share the same measurement error or selection mechanism.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-turn-a-vague-performance-question-into-an-analysis-contract">Case study: turn a vague performance question into an analysis contract<a class="heading-anchor" href="#case-study-turn-a-vague-performance-question-into-an-analysis-contract" aria-label="Link to this section">#</a></h4>
+<p>A service owner says the new routing rule makes things faster. Start by identifying the decision: whether to deploy the rule to all eligible requests next month. Define the outcome as elapsed time from accepted request to completed response, specify timeout handling, and decide whether retries belong to the original request or create new events. A mean that excludes timeouts measures speed among completions, not the overall customer experience.</p>
+<p>Next specify the population and unit. A typical request gives heavy users more influence because they generate more requests. A typical customer gives each customer equal weight after summarizing their experience. A typical site can weight a small site as much as a large one. These are different estimands, not alternate coding styles. If assignment is by site, the independent treatment variation also occurs by site even if the outcome is request-level.</p>
+<p>Choose the time horizon and practical margin. A two-millisecond improvement can be statistically detectable with huge traffic but irrelevant if deployment adds maintenance cost. A ten-second reduction in rare timeouts may matter greatly even if the median is unchanged. The primary estimand might be average latency, a tail quantile, failure probability, or expected cost combining delay and failures. Each requires its own estimator and uncertainty treatment.</p>
+<p>Finally define what would change the decision. A point estimate alone does not specify whether to act under uncertainty. A conservative rollout policy might require evidence that expected benefit exceeds cost with an acceptable downside probability, plus guardrails on failures. The analysis should expose the assumptions controlling that choice, not simply produce a favorable metric.</p>
+<h4 id="case-study-distinguish-identification-from-estimation">Case study: distinguish identification from estimation<a class="heading-anchor" href="#case-study-distinguish-identification-from-estimation" aria-label="Link to this section">#</a></h4>
+<p>Suppose treatment and outcome are strongly associated in a million records. More data can reduce uncertainty about the observational association. It cannot by itself determine whether treatment caused the outcome, whether the outcome influenced treatment, or whether a common cause generated both. If those mechanisms imply the same observed distribution but different intervention effects, the causal target is not identified by that distribution alone.</p>
+<p>Estimation begins after assumptions connect the target to observables. Randomization can supply an assignment argument; a justified adjustment set can supply another. Once the target is identified, finite samples, model fitting and numerical errors determine how precisely it is estimated. Reporting a tiny regression standard error addresses estimation variability under a model, not the prior identification gap.</p>
+<p>Parameter identifiability is a related but distinct concept. If two predictor columns are identical, separate coefficients cannot be distinguished even under a fully specified regression model. Their sum may remain identifiable and predictions can be unique. This distinction helps avoid demanding a unique scientific interpretation from a model that contains redundant parameterizations.</p>
+<h4 id="case-study-communicate-uncertainty-that-a-confidence-interval-omits">Case study: communicate uncertainty that a confidence interval omits<a class="heading-anchor" href="#case-study-communicate-uncertainty-that-a-confidence-interval-omits" aria-label="Link to this section">#</a></h4>
+<p>An analysis estimates a benefit of five units with a narrow interval from four to six. That interval may represent repeated-sample uncertainty conditional on a fixed outcome definition, model, population and measurement process. If a different reasonable timeout rule changes the estimate to minus two, substantive uncertainty dominates the narrow interval.</p>
+<p>A useful sensitivity analysis changes consequential assumptions: outcome definitions, missing-outcome scenarios, unmeasured-confounding strength, target population weights or decision costs. It identifies where the conclusion reverses and explains why the examined range is plausible. Changing graph colors or an optimizer&#x27;s irrelevant tolerance is not meaningful robustness analysis.</p>
+<p>Triangulation compares evidence that fails differently. A randomized pilot, a carefully designed observational study and qualitative operational evidence may reinforce or challenge one another. Their agreement is less informative if they share the same erroneous logging table or exclude the same affected population. Describe the dependence between evidence sources rather than counting them as independent votes.</p>
+<h4 id="an-analyst-s-explanation-to-a-decision-owner">An analyst&#x27;s explanation to a decision owner<a class="heading-anchor" href="#an-analyst-s-explanation-to-a-decision-owner" aria-label="Link to this section">#</a></h4>
+<p>A clear report can say: the assignment-defined study estimates a mean reduction of five units for existing eligible customers over seven days; uncertainty from the randomized comparison is four to six units; the result excludes new customers and assumes the missing outcomes are comparable after adjustment; plausible adverse missing-outcome scenarios reduce the estimated benefit to one; deployment cost corresponds to two units of benefit. This statement makes the remaining decision tension visible.</p>
+<p>The same evidence should not be compressed into the model says deploy. Decision ownership belongs to the person or process accountable for consequences. Statistical work supplies a well-defined target, defensible evidence, uncertainty and a transparent connection to the available actions.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_01.py.html">chapter_01.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
+<h4 id="a-denominator-changes-the-estimand">A denominator changes the estimand<a class="heading-anchor" href="#a-denominator-changes-the-estimand" aria-label="Link to this section">#</a></h4>
+<p>Three fast requests belong to one customer and one slow request to another. The request mean is 3; the customer mean is 5. Neither arithmetic result is defective. They answer different questions because the first weights customers by activity. The assertion fixes that distinction in a tiny auditable table.</p>
+<h4 id="a-probability-is-not-an-action">A probability is not an action<a class="heading-anchor" href="#a-probability-is-not-an-action" aria-label="Link to this section">#</a></h4>
+<p>With false-alarm cost 2 and missed-event cost 8, intervening costs <code>2*(1-p)</code> in expectation while doing nothing costs <code>8*p</code>. Equating them gives a threshold of 0.2, so probabilities 0.3 and 0.8 trigger action. A default threshold of 0.5 would ignore the stated consequences.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+
+def compare_units():
+    delays = np.array([1., 1., 1., 9.])
+    customer = np.array([0, 0, 0, 1])
+    per_request = delays.mean()
+    per_customer = np.mean([delays[customer == k].mean() for k in [0, 1]])
+    assert per_request == 3 and per_customer == 5
+    print(&quot;Request mean:&quot;, per_request, &quot;customer mean:&quot;, per_customer)
+
+def choose_action():
+    probability = np.array([0.1, 0.3, 0.8])
+    false_alarm_cost, miss_cost = 2., 8.
+    threshold = false_alarm_cost / (false_alarm_cost + miss_cost)
+    intervene = probability &gt; threshold
+    assert intervene.tolist() == [False, True, True]
+    assert np.all(np.minimum(2*(1-probability), 8*probability) &lt;= 8*probability)
+    print(&quot;Loss-derived threshold:&quot;, threshold, &quot;intervene:&quot;, intervene.tolist())
+
+def main():
+    compare_units()
+    choose_action()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Why can an accurate churn model fail to improve retention?</strong> It identifies likely departures, not necessarily customers whose departure an offer can prevent. Some high-risk customers cannot be retained; some low-risk customers would accept discounts unnecessarily. Estimate incremental treatment effects and evaluate net value under the actual offer policy.</p>
+<p><strong>Interview: What would you clarify before analyzing an experiment?</strong> Ask what was randomized, who was eligible, what outcome and horizon define success, and which decision the evidence will inform. These facts determine the estimand and independent variation before any significance test is selected.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://miguelhernan.org/whatifbook">Hernán and Robins, Causal Inference: What If, author-maintained text</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.itl.nist.gov/div898/handbook/dtoc.htm">NIST statistical methods handbook</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="../README.md.html">Book contents</a> | <a href="02-mathematical-foundations.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

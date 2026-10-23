@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-010: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-010: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-010_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-010-explanatory-solutions">llm-010: explanatory solutions<a class="heading-anchor" href="#llm-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Attention without positions or a causal boundary is equivariant to a joint permutation of tokens: changing input order simply changes output order. A decoder needs information about order, supplied by positional representations and by the causal mask. Those mechanisms have different roles. Position embeddings attach vectors to locations, while a causal mask restricts accessible locations. Normalization can accidentally defeat causality if it computes statistics across the whole sequence. Tokenwise LayerNorm reduces feature values within each position, so future tokens cannot alter an earlier token through that reduction. The fixture separates these effects instead of attributing every order dependency to position embeddings.</p>
+<p><strong>Equivariance:</strong> A transformation of inputs produces the corresponding transformation of outputs.</p>
+<p><strong>Position embedding:</strong> A vector associated with a token location.</p>
+<p><strong>Tokenwise normalization:</strong> Statistics calculated across features of one position.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>A joint permutation must be applied to Q,K,V together. Compare the permuted output with the same permutation of the original result. Tokenwise normalization uses axis=-1 with keepdims=True; sequence-wide normalization uses axis=0 and couples token rows. Add a fixed position table to content vectors before attention to break pure content permutation equivariance.</p>
+<h3 id="exercise-1-permute-content-only-attention">Exercise 1: Permute content-only attention<a class="heading-anchor" href="#exercise-1-permute-content-only-attention" aria-label="Link to this section">#</a></h3>
+<p>The question is: Use Q=K[[1,0],[0,1],[1,1]],V[[1,2],[3,4],[5,6]]; jointly permute rows2,0,1.</p>
+<p>The scores and value mixtures move with the token identities. This comparison uses unmasked attention; a causal mask itself introduces an order boundary.</p>
+<pre><code class="language-python">q=np.array([[1.,0.],[0.,1.],[1.,1.]]); v=np.array([[1.,2.],[3.,4.],[5.,6.]]); order=[2,0,1]
+out=attention(q,q,v); changed=attention(q[order],q[order],v[order])
+np.testing.assert_allclose(changed,out[order],atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> permuted output equals original output rows2,0,1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with permuted output equals original output rows2,0,1.</p>
+<h3 id="exercise-2-normalize-each-token">Exercise 2: Normalize each token<a class="heading-anchor" href="#exercise-2-normalize-each-token" aria-label="Link to this section">#</a></h3>
+<p>The question is: Normalize rows[1,3] and[10,20] independently, then alter only the second row.</p>
+<p>The first row uses only its own feature mean and variance. A future token has no opportunity to influence those quantities.</p>
+<pre><code class="language-python">x=np.array([[1.,3.],[10.,20.]]); changed=x.copy(); changed[1]=[1000,2000]
+np.testing.assert_allclose(layer_norm(x)[0],layer_norm(changed)[0],atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> first normalized row unchanged.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with first normalized row unchanged.</p>
+<h3 id="exercise-3-expose-sequence-wide-leakage">Exercise 3: Expose sequence-wide leakage<a class="heading-anchor" href="#exercise-3-expose-sequence-wide-leakage" aria-label="Link to this section">#</a></h3>
+<p>The question is: Center each feature across both token rows, then repeat after changing the future row.</p>
+<p>Reducing across time mixes future values into the statistics used by an earlier position. A correct attention mask cannot repair information already leaked by another component.</p>
+<pre><code class="language-python">assert not np.allclose((x-x.mean(0))[0],(changed-changed.mean(0))[0])</code></pre>
+<p><strong>Expected:</strong> first centered row changes.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with first centered row changes.</p>
+<h3 id="exercise-4-attach-fixed-positions">Exercise 4: Attach fixed positions<a class="heading-anchor" href="#exercise-4-attach-fixed-positions" aria-label="Link to this section">#</a></h3>
+<p>The question is: Add position vectors[[0,0],[1,0],[0,2]]; permute content but keep positions fixed.</p>
+<p>Moving content to a new location changes its positional representation. Permuting both content and position vectors together would instead move the whole annotated token and test a different condition.</p>
+<pre><code class="language-python">pos=np.array([[0.,0.],[1.,0.],[0.,2.]])
+a=attention(q+pos,q+pos,v); b=attention(q[order]+pos,q[order]+pos,v[order])
+assert not np.allclose(b,a[order])</code></pre>
+<p><strong>Expected:</strong> outputs no longer follow a pure token permutation.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with outputs no longer follow a pure token permutation.</p>
+<h3 id="exercise-5-check-feature-centering">Exercise 5: Check feature centering<a class="heading-anchor" href="#exercise-5-check-feature-centering" aria-label="Link to this section">#</a></h3>
+<p>The question is: Inspect tokenwise normalized row means for the original fixture.</p>
+<p>The per-row mean is the relevant invariant. A global mean of zero could also be produced by a leaking sequence-wide operation, so it is too weak by itself.</p>
+<pre><code class="language-python">np.testing.assert_allclose(layer_norm(x).mean(-1),[0,0],atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> each row mean approximately0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with each row mean approximately0.</p>
+<h3 id="exercise-6-handle-constant-tokens">Exercise 6: Handle constant tokens<a class="heading-anchor" href="#exercise-6-handle-constant-tokens" aria-label="Link to this section">#</a></h3>
+<p>The question is: Normalize[5,5] with epsilon1e-5.</p>
+<p>Epsilon handles a zero variance without introducing future-token information. The constant row becomes zero before any learned scale or offset is applied.</p>
+<pre><code class="language-python">np.testing.assert_array_equal(layer_norm(np.array([[5.,5.]])),[[0,0]])</code></pre>
+<p><strong>Expected:</strong> finite vector[0,0].</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with finite vector[0,0].</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

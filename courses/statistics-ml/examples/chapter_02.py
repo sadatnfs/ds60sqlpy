@@ -23,7 +23,22 @@ def gradients_and_information():
     assert kl > 0
     print("Gradient:", analytic, "KL in nats:", round(float(kl), 4))
 
+def curvature_and_steps():
+    # f(b)=0.5*(b-3)^2 has gradient b-3 and curvature one.
+    b=0.
+    losses=[]
+    for _ in range(12):
+        losses.append(.5*(b-3)**2)
+        b-=.5*(b-3)
+    assert np.all(np.diff(losses)<0) and abs(b-3)<.001
+    unstable=0.
+    for _ in range(5):
+        unstable-=2.5*(unstable-3)
+    assert abs(unstable-3)>3
+    print("Stable gradient iterate:",b,"oversized-step iterate:",unstable)
+
 def main():
+    curvature_and_steps()
     projection_and_rank()
     gradients_and_information()
 

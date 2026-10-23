@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-016: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-016: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/solutions/llm-applied-016_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-016-explanatory-solutions">llm-applied-016: explanatory solutions<a class="heading-anchor" href="#llm-applied-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Low-rank adaptation freezes a base weight matrix and learns a smaller additive update. Under the row-vector convention used here, the effective matrix isW+(alpha/r)A@B, withW8x8, A8x2 andB2x8. Rankr2 gives32 trainable adapter entries compared with 64 base entries. The scaling factoralpha/r is part of the function and changes gradients. Some libraries store Linear weights transposed relative to this equation, so shapes must be translated explicitly.</p>
+<p>InitializeA to small nonzero values andB to zero. The initial delta is zero, preserving the base function. On the first step, the gradient ofA is zero because it containsB, whileB receives a gradient throughA. This is a connected zero gradient, not a missing path. AfterB changes, later updates can changeA too. The chapter performs actual PyTorch SGD updates and checks frozen-base identity, parameter counts and merged inference parity. It demonstrates LoRA mechanics on a small matrix, not the quality of adapting a pretrained assistant.</p>
+<p><strong>Adapter rank:</strong> The inner dimension limiting the rank of the update matrix.</p>
+<p><strong>LoRA scale:</strong> The multiplieralpha/r applied to the low-rank product.</p>
+<p><strong>Frozen base:</strong> Weights excluded from gradient updates during adaptation.</p>
+<p><strong>Merged inference:</strong> An equivalent matrix with the adapter delta added for serving.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>CreateW as a nontrainable tensor andA/B asParameters. Pass onlyA andB to the optimizer. Compute output=x@(W+scale*A@B). SnapshotW before training and assert exact equality afterward. Merge into a new matrix for inference and compare with the unmerged computation. Do not mutate the original base when creating the merged artifact, because that would change other adapters sharing it.</p>
+<h3 id="exercise-1-count-and-orient-parameters">Exercise 1: Count and orient parameters<a class="heading-anchor" href="#exercise-1-count-and-orient-parameters" aria-label="Link to this section">#</a></h3>
+<p>The question is: ConstructW=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2, alpha 4.</p>
+<p>The orientation is chosen for row-vector inputs. A framework Linear layer storing(out, in) weights would require a transposed formulation rather than copying these shapes blindly.</p>
+<pre><code class="language-python">w=torch.eye(8); a=nn.Parameter(torch.ones((8,2))/8); b=nn.Parameter(torch.zeros((2,8))); rank=2; alpha=4; scale=alpha/rank; x=torch.ones((1,8))
+assert w.numel()==64 and a.numel()+b.numel()==32 and scale==2</code></pre>
+<p><strong>Expected:</strong> base64 entries; adapter32; scale2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with base64 entries; adapter32; scale2.</p>
+<h3 id="exercise-2-prove-zero-delta-initialization">Exercise 2: Prove zero-delta initialization<a class="heading-anchor" href="#exercise-2-prove-zero-delta-initialization" aria-label="Link to this section">#</a></h3>
+<p>The question is: Compare the effective output with the frozen base before updating.</p>
+<p>The initial adapter does not perturb the base. This is useful for controlled comparisons and explains why one factor starts at zero.</p>
+<pre><code class="language-python">initial=x@(w+scale*(a@b)); saved=w.clone()
+assert torch.equal(initial,x@w) and torch.equal(a@b,torch.zeros((8,8)))</code></pre>
+<p><strong>Expected:</strong> outputs exactly equalones(1, 8).</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with outputs exactly equalones(1, 8).</p>
+<h3 id="exercise-3-inspect-the-first-gradients">Exercise 3: Inspect the first gradients<a class="heading-anchor" href="#exercise-3-inspect-the-first-gradients" aria-label="Link to this section">#</a></h3>
+<p>The question is: Minimize mean squared output towardzero and backpropagate once.</p>
+<p>The zero derivative ofA follows algebraically fromB=0. Treating it as a disconnected parameter would be a mistaken diagnosis.</p>
+<pre><code class="language-python">loss=initial.square().mean(); loss.backward()
+assert torch.count_nonzero(a.grad).item()==0 and torch.count_nonzero(b.grad).item()&gt;0 and w.grad is None</code></pre>
+<p><strong>Expected:</strong> A gradientzero; B gradientnonzero; W has no gradient.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with A gradientzero; B gradientnonzero; W has no gradient.</p>
+<h3 id="exercise-4-take-an-adapter-only-step">Exercise 4: Take an adapter-only step<a class="heading-anchor" href="#exercise-4-take-an-adapter-only-step" aria-label="Link to this section">#</a></h3>
+<p>The question is: UseSGD.1 onA/B and recalculate the objective.</p>
+<p>The optimizer receives only adapter parameters. The direct base comparison catches accidental updates outside that optimizer list.</p>
+<pre><code class="language-python">before_b=b.detach().clone(); opt=torch.optim.SGD([a,b],lr=.1); opt.step(); after=x@(w+scale*(a@b))
+assert not torch.equal(before_b,b) and after.square().mean()&lt;loss and torch.equal(w,saved)</code></pre>
+<p><strong>Expected:</strong> B changes; loss decreases; W remains byte-identical.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with B changes; loss decreases; W remains byte-identical.</p>
+<h3 id="exercise-5-merge-without-changing-the-base">Exercise 5: Merge without changing the base<a class="heading-anchor" href="#exercise-5-merge-without-changing-the-base" aria-label="Link to this section">#</a></h3>
+<p>The question is: Create a detached merged matrix and compare predictions with the unmerged expression.</p>
+<p>Merging is an inference representation change. Preserve adapter and base identities so the artifact can be reconstructed or replaced without contaminating shared state.</p>
+<pre><code class="language-python">merged=w.detach().clone()+scale*(a@b).detach()
+torch.testing.assert_close(x@merged,after.detach(),atol=1e-6,rtol=0)
+assert torch.equal(w,saved)</code></pre>
+<p><strong>Expected:</strong> parity within1e-6; originalW unchanged.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with parity within1e-6; originalW unchanged.</p>
+<h3 id="exercise-6-inspect-rank-and-scaling-consequences">Exercise 6: Inspect rank and scaling consequences<a class="heading-anchor" href="#exercise-6-inspect-rank-and-scaling-consequences" aria-label="Link to this section">#</a></h3>
+<p>The question is: Check the numerical rank of the update and comparealpha4 withalpha2 using the same factors.</p>
+<p>Rank limits the update space, while scaling changes its magnitude. They are different hyperparameters and should not be conflated when comparing adapters.</p>
+<pre><code class="language-python">delta=(a@b).detach(); assert int(torch.linalg.matrix_rank(delta))&lt;=2
+torch.testing.assert_close((4/rank)*delta,2*((2/rank)*delta),atol=1e-6,rtol=0)</code></pre>
+<p><strong>Expected:</strong> rank at most2; delta atalpha4 is twice delta atalpha2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with rank at most2; delta atalpha4 is twice delta atalpha2.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

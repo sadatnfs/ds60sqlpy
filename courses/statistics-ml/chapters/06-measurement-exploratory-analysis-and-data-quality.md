@@ -160,6 +160,44 @@ Agreement metrics compare labelers beyond or alongside raw agreement. Cohen's ka
 
 Repeated measurement should yield consistent scores when the construct is stable. High correlation can coexist with a systematic shift between tests; examine differences and agreement as well as rank stability.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: audit a metric before interpreting its movement
+
+A weekly failure rate rises from 2% to 3%. Begin with the numerator definition: are retries counted as separate failures, are canceled attempts included, and did an error-code mapping change? Then inspect the denominator: eligible attempts, completed attempts, customers or active devices? A new logging release can change either side without a change in underlying reliability.
+
+Reconcile counts at each transformation step. Validate uniqueness of event keys, check foreign-key coverage, and compare join cardinality with the intended grain. If a one-to-many dimension join duplicates numerator events, a final aggregation can produce plausible but inflated rates. A deduplication rule should identify the underlying event, not merely drop rows whose current displayed fields happen to match.
+
+Version the operational definition and retain provenance. A metric trend spanning two definitions should either be reconstructed consistently or clearly labeled. Otherwise a statistical model may confidently detect a structural break created by the measurement pipeline. Data quality and statistical interpretation are one continuous responsibility.
+
+### Case study: use several views of a skewed distribution
+
+A service-duration distribution has a central mass near one second and rare multi-minute delays. A histogram with wide bins can hide the central structure; narrow bins can make random noise look multimodal. A log scale reveals multiplicative spread but changes visual emphasis. An ECDF supports direct statements about the fraction below a service threshold without selecting bins.
+
+Compare median, upper quantiles, mean and tail exceedance probability because they answer different operational questions. The mean reflects aggregate resource consumption and is sensitive to long delays. A high quantile describes a service-level target, but its sample uncertainty can be large when few observations populate the tail. A maximum is especially sample-size dependent and should not be compared across periods with radically different exposure without context.
+
+A QQ plot compares ordered quantiles to a reference family. Straight central behavior with tail departures suggests that a normal approximation may describe typical values while missing rare risk. A normality-test rejection with millions of records can be statistically certain but operationally unimportant for a robust mean estimate. Conversely, a small sample may fail to reject a tail misspecification that matters greatly. Diagnose the method's sensitivity to the departure.
+
+### Case study: aggregation creates and removes associations
+
+A region-level scatterplot shows higher customer spending in regions with higher average income. This does not imply that higher-income individuals within each region spend more. Region composition, prices, availability and demographics can generate the aggregate association. An ecological conclusion becomes an individual claim only with additional data or assumptions.
+
+Likewise, a pooled treatment comparison can reverse after stratification because group proportions differ. The numerical reversal should trigger a causal and estimand review, not an automatic instruction to use whichever result seems intuitive. A pretreatment confounder can justify adjustment; a treatment-affected mediator or selection variable may not.
+
+Partial correlation removes linear relationships with selected controls. It does not remove arbitrary nonlinear confounding and can introduce bias if the controls include a collider. The word adjusted describes a computation, not a guarantee of a scientifically improved comparison. State which variable roles justify the adjustment.
+
+### Case study: labels produced by people or models need a measurement study
+
+Two reviewers label incident severity. High raw agreement can occur simply because almost all incidents are low severity, so compare class-specific disagreements and a chance-adjusted statistic where useful. Cohen's kappa depends on marginal prevalences, making comparisons across populations delicate. Weighted agreement can reflect the ordering and consequence of disagreements, but its weights embed judgments.
+
+A language model used as a labeler is also a measurement instrument. Evaluate it on representative, independently reviewed examples, including ambiguous cases and source formats. Preserve supporting text spans and abstain when the evidence is insufficient. Agreement with one noisy reviewer is not automatically ground truth, and repeated prompting does not create independent labels if the same model repeats the same bias.
+
+Test-retest reliability asks whether the same construct remains stable under repeated measurement, while construct validity asks whether the measurement represents the intended concept. A perfectly repeatable extraction rule can consistently measure the wrong date. Validate both the implementation and the meaning before using the resulting labels in regression or causal analysis.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_06.py](../examples/chapter_06.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

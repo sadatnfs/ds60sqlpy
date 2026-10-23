@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.nn import functional as F
-import tempfile,json,subprocess,sys
+import tempfile,json,subprocess,sys,textwrap
 from pathlib import Path
 
 
@@ -26,14 +26,17 @@ def verify():
     assert opt.state[w]['step'].item()==3 and expected!=saved
 
     # Exercise 4: Restore in a new interpreter
-    program="""import torch,json,sys
+    program=textwrap.dedent("""
+    import torch,json,sys
     from torch import nn
     state=torch.load(sys.argv[1],map_location='cpu',weights_only=True)
     w=nn.Parameter(state['weight'].clone()); opt=torch.optim.Adam([w],lr=.1); opt.load_state_dict(state['optimizer'])
     opt.zero_grad(set_to_none=True); (w-2).square().backward(); opt.step()
     print(json.dumps({'weight':w.item()}))
-    """
-    result=subprocess.run([sys.executable,'-c',program,str(path)],check=True,capture_output=True,text=True,timeout=60)
+    """)
+    compile(program, "checkpoint-child", "exec")
+    result=subprocess.run([sys.executable,'-c',program,str(path)],check=False,capture_output=True,text=True,timeout=60)
+    if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
     restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0)
 
     # Exercise 5: Expose weights-only continuation

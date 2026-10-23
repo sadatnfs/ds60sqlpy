@@ -200,6 +200,44 @@ Compute per-unit loss differences for models tested on the same observations. Th
 
 Quantify sample variability through appropriate intervals or resampling, plus scenario variability for changed settings. A narrow test-sample interval does not cover unknown future distribution shifts or label-definition errors.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: rare events expose the limits of accuracy and ROC
+
+A detector operates on 100,000 requests with 1% true incidents. At sensitivity .9 it catches 900 of 1,000 incidents. At false-positive rate .01 it also flags 990 of 99,000 nonincidents. Precision is 900/(900+990), about .476. The false-positive rate sounds small, yet more than half the alerts are false because the negative population is large.
+
+If prevalence falls to .1% while sensitivity and false-positive rate remain unchanged, the system catches 90 of 100 incidents and generates 999 false alerts. Precision falls to about .083. Ranking and class-conditional rates may be unchanged, but the operational workload and meaning of an alert change substantially. Calibration and threshold policy should be reassessed for the new prevalence rather than inferred from the original ROC curve.
+
+A precision-recall curve highlights positive retrieval, but its baseline and interpretation also depend on prevalence. Compare models on the same representative evaluation population. If an enriched case-control test set is used for efficient labeling, retain sampling probabilities and avoid presenting its raw precision as production precision. Explicitly reconstruct the deployment denominator when justified.
+
+### Case study: nested validation measures the procedure
+
+Suppose ten model settings are evaluated on one validation set and the best is selected. Each score contains noise, so the winner tends to have favorable noise. Reporting that winning validation score as final performance overestimates the selected procedure's expected generalization. The issue exists even if every individual model fit is implemented correctly.
+
+Nested cross-validation creates outer held-out folds. Within each outer training set, all tuning, feature selection, imputation and preprocessing occur using inner folds. The selected pipeline is then evaluated on the untouched outer fold. The collection of outer results estimates the procedure that includes selection. A final model can be fit on all development data using the chosen selection process, with any final external test kept separate.
+
+If observations are grouped or temporal, both loops must honor those boundaries. Random inner folds can still leak future information even when the outer split is temporal. The tuning budget should be comparable across candidate families, and repeated manual revisions informed by outer results eventually turn the outer layer into another development resource. Record what was tried and reserve truly independent evidence for consequential decisions.
+
+### Case study: evaluate an LLM extraction stage as a measurement instrument
+
+A language model extracts incident start time, affected service and failure category from support notes. Those fields become inputs to a downstream reliability analysis. Evaluate the extractor against a human-reviewed sample with an explicit rubric, including ambiguous and missing cases. Field accuracy, abstention rate, consistency and subgroup error are more informative than whether the generated JSON parses.
+
+Extraction error can be differential. Severe incidents may have longer notes and clearer timestamps, while routine incidents are terse. If the model misses routine records more often, the derived duration distribution and category rates can be biased even when average extraction accuracy is high. Preserve source spans, model/version settings and correction history so each derived field can be audited.
+
+Validate the statistical pipeline separately from the extraction stage. A correct regression on incorrectly extracted labels remains a scientifically flawed result. Use sensitivity analysis or a measurement-error model where appropriate, and route uncertain fields for review. A generated explanation should cite the verified calculations and distinguish measured facts from hypotheses. This is where applied LLM evaluation connects directly to construct validity and data provenance.
+
+### Case study: a small metric gain may not be a useful model gain
+
+Two models are evaluated on the same 5,000 customers. Model A improves average squared error by 1%, but the gain is concentrated in frequent low-value transactions while rare high-cost failures worsen. A single average does not reveal whether the new model improves the decision. Examine paired loss differences, tail behavior, subgroup support and action consequences.
+
+Resample customers, not individual transactions, if transactions within a customer are dependent. If the evaluation horizon is a future month, preserve calendar blocks or use multiple rolling origins. An interval around the paired average estimates sampling uncertainty under that resampling model; it does not account automatically for an unobserved future policy change.
+
+Compare with operational baselines, including the current model and a simple rule. Measure latency, missing-feature behavior, calibration and cost of maintaining additional dependencies. Complexity is justified by reliable decision value, not by the prestige of the algorithm family. Report what the evidence supports and the conditions under which the comparison should be repeated.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_22.py](../examples/chapter_22.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -274,6 +312,10 @@ if __name__ == "__main__":
 **Interview: Why nested cross-validation?** Hyperparameter selection exploits validation noise. Outer folds estimate the performance of that entire selection process using observations not used for tuning. Group and time boundaries still apply in both loops.
 
 **Interview: Which error metric should forecast staffing demand?** Tie the metric to consequences. MAE targets a median, MSE a mean, and asymmetric under-staffing costs may call for a quantile or direct utility loss. Compare the resulting decisions, not just interchangeable numerical scores.
+
+## Applied LLM companion
+
+The [structured extraction and contract lesson](../../llm-applied/guides/llm-applied-002.md) applies these measurement boundaries to model-produced fields. The [applied LLM course](../../llm-applied/guides/llm-applied-001.md) develops retrieval, answer evaluation and adaptation. Keep statistical calculations and analysis designs independently verifiable.
 
 ## Primary sources and official APIs
 

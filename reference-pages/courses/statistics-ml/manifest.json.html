@@ -1,0 +1,1954 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Manifest · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Manifest</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/manifest.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;schema_version&quot;: 1,</span>
+<span>  &quot;id&quot;: &quot;statistics-ml&quot;,</span>
+<span>  &quot;title&quot;: &quot;Statistics and Machine Learning for Data Scientists End To End&quot;,</span>
+<span>  &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>  &quot;source&quot;: {</span>
+<span>    &quot;path&quot;: &quot;courses/statistics-ml/source-outline.md&quot;,</span>
+<span>    &quot;sha256&quot;: &quot;146945b484305436b8cdee1fd3eb90b6689c3b32397321f20b2a77b15ae1f938&quot;,</span>
+<span>    &quot;section_count&quot;: 40,</span>
+<span>    &quot;topic_count&quot;: 1005</span>
+<span>  },</span>
+<span>  &quot;chapters&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;Problem Formulation and Statistical Reasoning&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/01-problem-formulation-and-statistical-reasoning.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_01.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-01-01&quot;,</span>
+<span>        &quot;stat-01-02&quot;,</span>
+<span>        &quot;stat-01-03&quot;,</span>
+<span>        &quot;stat-01-04&quot;,</span>
+<span>        &quot;stat-01-05&quot;,</span>
+<span>        &quot;stat-01-06&quot;,</span>
+<span>        &quot;stat-01-07&quot;,</span>
+<span>        &quot;stat-01-08&quot;,</span>
+<span>        &quot;stat-01-09&quot;,</span>
+<span>        &quot;stat-01-10&quot;,</span>
+<span>        &quot;stat-01-11&quot;,</span>
+<span>        &quot;stat-01-12&quot;,</span>
+<span>        &quot;stat-01-13&quot;,</span>
+<span>        &quot;stat-01-14&quot;,</span>
+<span>        &quot;stat-01-15&quot;,</span>
+<span>        &quot;stat-01-16&quot;,</span>
+<span>        &quot;stat-01-17&quot;,</span>
+<span>        &quot;stat-01-18&quot;,</span>
+<span>        &quot;stat-01-19&quot;,</span>
+<span>        &quot;stat-01-20&quot;,</span>
+<span>        &quot;stat-01-21&quot;,</span>
+<span>        &quot;stat-01-22&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Mathematical Foundations&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/02-mathematical-foundations.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_02.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-02-01&quot;,</span>
+<span>        &quot;stat-02-02&quot;,</span>
+<span>        &quot;stat-02-03&quot;,</span>
+<span>        &quot;stat-02-04&quot;,</span>
+<span>        &quot;stat-02-05&quot;,</span>
+<span>        &quot;stat-02-06&quot;,</span>
+<span>        &quot;stat-02-07&quot;,</span>
+<span>        &quot;stat-02-08&quot;,</span>
+<span>        &quot;stat-02-09&quot;,</span>
+<span>        &quot;stat-02-10&quot;,</span>
+<span>        &quot;stat-02-11&quot;,</span>
+<span>        &quot;stat-02-12&quot;,</span>
+<span>        &quot;stat-02-13&quot;,</span>
+<span>        &quot;stat-02-14&quot;,</span>
+<span>        &quot;stat-02-15&quot;,</span>
+<span>        &quot;stat-02-16&quot;,</span>
+<span>        &quot;stat-02-17&quot;,</span>
+<span>        &quot;stat-02-18&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-001&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Probability Fundamentals and Stochastic Processes&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/03-probability-fundamentals-and-stochastic-processes.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_03.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-03-01&quot;,</span>
+<span>        &quot;stat-03-02&quot;,</span>
+<span>        &quot;stat-03-03&quot;,</span>
+<span>        &quot;stat-03-04&quot;,</span>
+<span>        &quot;stat-03-05&quot;,</span>
+<span>        &quot;stat-03-06&quot;,</span>
+<span>        &quot;stat-03-07&quot;,</span>
+<span>        &quot;stat-03-08&quot;,</span>
+<span>        &quot;stat-03-09&quot;,</span>
+<span>        &quot;stat-03-10&quot;,</span>
+<span>        &quot;stat-03-11&quot;,</span>
+<span>        &quot;stat-03-12&quot;,</span>
+<span>        &quot;stat-03-13&quot;,</span>
+<span>        &quot;stat-03-14&quot;,</span>
+<span>        &quot;stat-03-15&quot;,</span>
+<span>        &quot;stat-03-16&quot;,</span>
+<span>        &quot;stat-03-17&quot;,</span>
+<span>        &quot;stat-03-18&quot;,</span>
+<span>        &quot;stat-03-19&quot;,</span>
+<span>        &quot;stat-03-20&quot;,</span>
+<span>        &quot;stat-03-21&quot;,</span>
+<span>        &quot;stat-03-22&quot;,</span>
+<span>        &quot;stat-03-23&quot;,</span>
+<span>        &quot;stat-03-24&quot;,</span>
+<span>        &quot;stat-03-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-002&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Probability Distributions You Should Recognize&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/04-probability-distributions-you-should-recognize.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_04.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-04-01&quot;,</span>
+<span>        &quot;stat-04-02&quot;,</span>
+<span>        &quot;stat-04-03&quot;,</span>
+<span>        &quot;stat-04-04&quot;,</span>
+<span>        &quot;stat-04-05&quot;,</span>
+<span>        &quot;stat-04-06&quot;,</span>
+<span>        &quot;stat-04-07&quot;,</span>
+<span>        &quot;stat-04-08&quot;,</span>
+<span>        &quot;stat-04-09&quot;,</span>
+<span>        &quot;stat-04-10&quot;,</span>
+<span>        &quot;stat-04-11&quot;,</span>
+<span>        &quot;stat-04-12&quot;,</span>
+<span>        &quot;stat-04-13&quot;,</span>
+<span>        &quot;stat-04-14&quot;,</span>
+<span>        &quot;stat-04-15&quot;,</span>
+<span>        &quot;stat-04-16&quot;,</span>
+<span>        &quot;stat-04-17&quot;,</span>
+<span>        &quot;stat-04-18&quot;,</span>
+<span>        &quot;stat-04-19&quot;,</span>
+<span>        &quot;stat-04-20&quot;,</span>
+<span>        &quot;stat-04-21&quot;,</span>
+<span>        &quot;stat-04-22&quot;,</span>
+<span>        &quot;stat-04-23&quot;,</span>
+<span>        &quot;stat-04-24&quot;,</span>
+<span>        &quot;stat-04-25&quot;,</span>
+<span>        &quot;stat-04-26&quot;,</span>
+<span>        &quot;stat-04-27&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-003&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Sampling, Surveys, and Data Collection&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/05-sampling-surveys-and-data-collection.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_05.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-05-01&quot;,</span>
+<span>        &quot;stat-05-02&quot;,</span>
+<span>        &quot;stat-05-03&quot;,</span>
+<span>        &quot;stat-05-04&quot;,</span>
+<span>        &quot;stat-05-05&quot;,</span>
+<span>        &quot;stat-05-06&quot;,</span>
+<span>        &quot;stat-05-07&quot;,</span>
+<span>        &quot;stat-05-08&quot;,</span>
+<span>        &quot;stat-05-09&quot;,</span>
+<span>        &quot;stat-05-10&quot;,</span>
+<span>        &quot;stat-05-11&quot;,</span>
+<span>        &quot;stat-05-12&quot;,</span>
+<span>        &quot;stat-05-13&quot;,</span>
+<span>        &quot;stat-05-14&quot;,</span>
+<span>        &quot;stat-05-15&quot;,</span>
+<span>        &quot;stat-05-16&quot;,</span>
+<span>        &quot;stat-05-17&quot;,</span>
+<span>        &quot;stat-05-18&quot;,</span>
+<span>        &quot;stat-05-19&quot;,</span>
+<span>        &quot;stat-05-20&quot;,</span>
+<span>        &quot;stat-05-21&quot;,</span>
+<span>        &quot;stat-05-22&quot;,</span>
+<span>        &quot;stat-05-23&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-004&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;Measurement, Exploratory Analysis, and Data Quality&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/06-measurement-exploratory-analysis-and-data-quality.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_06.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-06-01&quot;,</span>
+<span>        &quot;stat-06-02&quot;,</span>
+<span>        &quot;stat-06-03&quot;,</span>
+<span>        &quot;stat-06-04&quot;,</span>
+<span>        &quot;stat-06-05&quot;,</span>
+<span>        &quot;stat-06-06&quot;,</span>
+<span>        &quot;stat-06-07&quot;,</span>
+<span>        &quot;stat-06-08&quot;,</span>
+<span>        &quot;stat-06-09&quot;,</span>
+<span>        &quot;stat-06-10&quot;,</span>
+<span>        &quot;stat-06-11&quot;,</span>
+<span>        &quot;stat-06-12&quot;,</span>
+<span>        &quot;stat-06-13&quot;,</span>
+<span>        &quot;stat-06-14&quot;,</span>
+<span>        &quot;stat-06-15&quot;,</span>
+<span>        &quot;stat-06-16&quot;,</span>
+<span>        &quot;stat-06-17&quot;,</span>
+<span>        &quot;stat-06-18&quot;,</span>
+<span>        &quot;stat-06-19&quot;,</span>
+<span>        &quot;stat-06-20&quot;,</span>
+<span>        &quot;stat-06-21&quot;,</span>
+<span>        &quot;stat-06-22&quot;,</span>
+<span>        &quot;stat-06-23&quot;,</span>
+<span>        &quot;stat-06-24&quot;,</span>
+<span>        &quot;stat-06-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;pandas&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Missing Data, Measurement Error, and Robust Statistics&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/07-missing-data-measurement-error-and-robust-statistics.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_07.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-07-01&quot;,</span>
+<span>        &quot;stat-07-02&quot;,</span>
+<span>        &quot;stat-07-03&quot;,</span>
+<span>        &quot;stat-07-04&quot;,</span>
+<span>        &quot;stat-07-05&quot;,</span>
+<span>        &quot;stat-07-06&quot;,</span>
+<span>        &quot;stat-07-07&quot;,</span>
+<span>        &quot;stat-07-08&quot;,</span>
+<span>        &quot;stat-07-09&quot;,</span>
+<span>        &quot;stat-07-10&quot;,</span>
+<span>        &quot;stat-07-11&quot;,</span>
+<span>        &quot;stat-07-12&quot;,</span>
+<span>        &quot;stat-07-13&quot;,</span>
+<span>        &quot;stat-07-14&quot;,</span>
+<span>        &quot;stat-07-15&quot;,</span>
+<span>        &quot;stat-07-16&quot;,</span>
+<span>        &quot;stat-07-17&quot;,</span>
+<span>        &quot;stat-07-18&quot;,</span>
+<span>        &quot;stat-07-19&quot;,</span>
+<span>        &quot;stat-07-20&quot;,</span>
+<span>        &quot;stat-07-21&quot;,</span>
+<span>        &quot;stat-07-22&quot;,</span>
+<span>        &quot;stat-07-23&quot;,</span>
+<span>        &quot;stat-07-24&quot;,</span>
+<span>        &quot;stat-07-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-006&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;Estimation and Statistical Inference&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/08-estimation-and-statistical-inference.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_08.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-08-01&quot;,</span>
+<span>        &quot;stat-08-02&quot;,</span>
+<span>        &quot;stat-08-03&quot;,</span>
+<span>        &quot;stat-08-04&quot;,</span>
+<span>        &quot;stat-08-05&quot;,</span>
+<span>        &quot;stat-08-06&quot;,</span>
+<span>        &quot;stat-08-07&quot;,</span>
+<span>        &quot;stat-08-08&quot;,</span>
+<span>        &quot;stat-08-09&quot;,</span>
+<span>        &quot;stat-08-10&quot;,</span>
+<span>        &quot;stat-08-11&quot;,</span>
+<span>        &quot;stat-08-12&quot;,</span>
+<span>        &quot;stat-08-13&quot;,</span>
+<span>        &quot;stat-08-14&quot;,</span>
+<span>        &quot;stat-08-15&quot;,</span>
+<span>        &quot;stat-08-16&quot;,</span>
+<span>        &quot;stat-08-17&quot;,</span>
+<span>        &quot;stat-08-18&quot;,</span>
+<span>        &quot;stat-08-19&quot;,</span>
+<span>        &quot;stat-08-20&quot;,</span>
+<span>        &quot;stat-08-21&quot;,</span>
+<span>        &quot;stat-08-22&quot;,</span>
+<span>        &quot;stat-08-23&quot;,</span>
+<span>        &quot;stat-08-24&quot;,</span>
+<span>        &quot;stat-08-25&quot;,</span>
+<span>        &quot;stat-08-26&quot;,</span>
+<span>        &quot;stat-08-27&quot;,</span>
+<span>        &quot;stat-08-28&quot;,</span>
+<span>        &quot;stat-08-29&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-007&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;Hypothesis Tests and Group Comparisons&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/09-hypothesis-tests-and-group-comparisons.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_09.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-09-01&quot;,</span>
+<span>        &quot;stat-09-02&quot;,</span>
+<span>        &quot;stat-09-03&quot;,</span>
+<span>        &quot;stat-09-04&quot;,</span>
+<span>        &quot;stat-09-05&quot;,</span>
+<span>        &quot;stat-09-06&quot;,</span>
+<span>        &quot;stat-09-07&quot;,</span>
+<span>        &quot;stat-09-08&quot;,</span>
+<span>        &quot;stat-09-09&quot;,</span>
+<span>        &quot;stat-09-10&quot;,</span>
+<span>        &quot;stat-09-11&quot;,</span>
+<span>        &quot;stat-09-12&quot;,</span>
+<span>        &quot;stat-09-13&quot;,</span>
+<span>        &quot;stat-09-14&quot;,</span>
+<span>        &quot;stat-09-15&quot;,</span>
+<span>        &quot;stat-09-16&quot;,</span>
+<span>        &quot;stat-09-17&quot;,</span>
+<span>        &quot;stat-09-18&quot;,</span>
+<span>        &quot;stat-09-19&quot;,</span>
+<span>        &quot;stat-09-20&quot;,</span>
+<span>        &quot;stat-09-21&quot;,</span>
+<span>        &quot;stat-09-22&quot;,</span>
+<span>        &quot;stat-09-23&quot;,</span>
+<span>        &quot;stat-09-24&quot;,</span>
+<span>        &quot;stat-09-25&quot;,</span>
+<span>        &quot;stat-09-26&quot;,</span>
+<span>        &quot;stat-09-27&quot;,</span>
+<span>        &quot;stat-09-28&quot;,</span>
+<span>        &quot;stat-09-29&quot;,</span>
+<span>        &quot;stat-09-30&quot;,</span>
+<span>        &quot;stat-09-31&quot;,</span>
+<span>        &quot;stat-09-32&quot;,</span>
+<span>        &quot;stat-09-33&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-008&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;Multiple Testing, Sequential Inference, and Selective Inference&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/10-multiple-testing-sequential-inference-and-selective-inference.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_10.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-10-01&quot;,</span>
+<span>        &quot;stat-10-02&quot;,</span>
+<span>        &quot;stat-10-03&quot;,</span>
+<span>        &quot;stat-10-04&quot;,</span>
+<span>        &quot;stat-10-05&quot;,</span>
+<span>        &quot;stat-10-06&quot;,</span>
+<span>        &quot;stat-10-07&quot;,</span>
+<span>        &quot;stat-10-08&quot;,</span>
+<span>        &quot;stat-10-09&quot;,</span>
+<span>        &quot;stat-10-10&quot;,</span>
+<span>        &quot;stat-10-11&quot;,</span>
+<span>        &quot;stat-10-12&quot;,</span>
+<span>        &quot;stat-10-13&quot;,</span>
+<span>        &quot;stat-10-14&quot;,</span>
+<span>        &quot;stat-10-15&quot;,</span>
+<span>        &quot;stat-10-16&quot;,</span>
+<span>        &quot;stat-10-17&quot;,</span>
+<span>        &quot;stat-10-18&quot;,</span>
+<span>        &quot;stat-10-19&quot;,</span>
+<span>        &quot;stat-10-20&quot;,</span>
+<span>        &quot;stat-10-21&quot;,</span>
+<span>        &quot;stat-10-22&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;foundation&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;statsmodels&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Regression and Generalized Linear Models&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_11.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-11-01&quot;,</span>
+<span>        &quot;stat-11-02&quot;,</span>
+<span>        &quot;stat-11-03&quot;,</span>
+<span>        &quot;stat-11-04&quot;,</span>
+<span>        &quot;stat-11-05&quot;,</span>
+<span>        &quot;stat-11-06&quot;,</span>
+<span>        &quot;stat-11-07&quot;,</span>
+<span>        &quot;stat-11-08&quot;,</span>
+<span>        &quot;stat-11-09&quot;,</span>
+<span>        &quot;stat-11-10&quot;,</span>
+<span>        &quot;stat-11-11&quot;,</span>
+<span>        &quot;stat-11-12&quot;,</span>
+<span>        &quot;stat-11-13&quot;,</span>
+<span>        &quot;stat-11-14&quot;,</span>
+<span>        &quot;stat-11-15&quot;,</span>
+<span>        &quot;stat-11-16&quot;,</span>
+<span>        &quot;stat-11-17&quot;,</span>
+<span>        &quot;stat-11-18&quot;,</span>
+<span>        &quot;stat-11-19&quot;,</span>
+<span>        &quot;stat-11-20&quot;,</span>
+<span>        &quot;stat-11-21&quot;,</span>
+<span>        &quot;stat-11-22&quot;,</span>
+<span>        &quot;stat-11-23&quot;,</span>
+<span>        &quot;stat-11-24&quot;,</span>
+<span>        &quot;stat-11-25&quot;,</span>
+<span>        &quot;stat-11-26&quot;,</span>
+<span>        &quot;stat-11-27&quot;,</span>
+<span>        &quot;stat-11-28&quot;,</span>
+<span>        &quot;stat-11-29&quot;,</span>
+<span>        &quot;stat-11-30&quot;,</span>
+<span>        &quot;stat-11-31&quot;,</span>
+<span>        &quot;stat-11-32&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-010&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scikit-learn&quot;,</span>
+<span>        &quot;scipy&quot;,</span>
+<span>        &quot;statsmodels&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Regression Diagnostics, Multilevel Models, and Longitudinal Analysis&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_12.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-12-01&quot;,</span>
+<span>        &quot;stat-12-02&quot;,</span>
+<span>        &quot;stat-12-03&quot;,</span>
+<span>        &quot;stat-12-04&quot;,</span>
+<span>        &quot;stat-12-05&quot;,</span>
+<span>        &quot;stat-12-06&quot;,</span>
+<span>        &quot;stat-12-07&quot;,</span>
+<span>        &quot;stat-12-08&quot;,</span>
+<span>        &quot;stat-12-09&quot;,</span>
+<span>        &quot;stat-12-10&quot;,</span>
+<span>        &quot;stat-12-11&quot;,</span>
+<span>        &quot;stat-12-12&quot;,</span>
+<span>        &quot;stat-12-13&quot;,</span>
+<span>        &quot;stat-12-14&quot;,</span>
+<span>        &quot;stat-12-15&quot;,</span>
+<span>        &quot;stat-12-16&quot;,</span>
+<span>        &quot;stat-12-17&quot;,</span>
+<span>        &quot;stat-12-18&quot;,</span>
+<span>        &quot;stat-12-19&quot;,</span>
+<span>        &quot;stat-12-20&quot;,</span>
+<span>        &quot;stat-12-21&quot;,</span>
+<span>        &quot;stat-12-22&quot;,</span>
+<span>        &quot;stat-12-23&quot;,</span>
+<span>        &quot;stat-12-24&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-011&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Classical Experimental Design&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/13-classical-experimental-design.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_13.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-13-01&quot;,</span>
+<span>        &quot;stat-13-02&quot;,</span>
+<span>        &quot;stat-13-03&quot;,</span>
+<span>        &quot;stat-13-04&quot;,</span>
+<span>        &quot;stat-13-05&quot;,</span>
+<span>        &quot;stat-13-06&quot;,</span>
+<span>        &quot;stat-13-07&quot;,</span>
+<span>        &quot;stat-13-08&quot;,</span>
+<span>        &quot;stat-13-09&quot;,</span>
+<span>        &quot;stat-13-10&quot;,</span>
+<span>        &quot;stat-13-11&quot;,</span>
+<span>        &quot;stat-13-12&quot;,</span>
+<span>        &quot;stat-13-13&quot;,</span>
+<span>        &quot;stat-13-14&quot;,</span>
+<span>        &quot;stat-13-15&quot;,</span>
+<span>        &quot;stat-13-16&quot;,</span>
+<span>        &quot;stat-13-17&quot;,</span>
+<span>        &quot;stat-13-18&quot;,</span>
+<span>        &quot;stat-13-19&quot;,</span>
+<span>        &quot;stat-13-20&quot;,</span>
+<span>        &quot;stat-13-21&quot;,</span>
+<span>        &quot;stat-13-22&quot;,</span>
+<span>        &quot;stat-13-23&quot;,</span>
+<span>        &quot;stat-13-24&quot;,</span>
+<span>        &quot;stat-13-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Online Experimentation and A/B Testing&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/14-online-experimentation-and-a-b-testing.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_14.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-14-01&quot;,</span>
+<span>        &quot;stat-14-02&quot;,</span>
+<span>        &quot;stat-14-03&quot;,</span>
+<span>        &quot;stat-14-04&quot;,</span>
+<span>        &quot;stat-14-05&quot;,</span>
+<span>        &quot;stat-14-06&quot;,</span>
+<span>        &quot;stat-14-07&quot;,</span>
+<span>        &quot;stat-14-08&quot;,</span>
+<span>        &quot;stat-14-09&quot;,</span>
+<span>        &quot;stat-14-10&quot;,</span>
+<span>        &quot;stat-14-11&quot;,</span>
+<span>        &quot;stat-14-12&quot;,</span>
+<span>        &quot;stat-14-13&quot;,</span>
+<span>        &quot;stat-14-14&quot;,</span>
+<span>        &quot;stat-14-15&quot;,</span>
+<span>        &quot;stat-14-16&quot;,</span>
+<span>        &quot;stat-14-17&quot;,</span>
+<span>        &quot;stat-14-18&quot;,</span>
+<span>        &quot;stat-14-19&quot;,</span>
+<span>        &quot;stat-14-20&quot;,</span>
+<span>        &quot;stat-14-21&quot;,</span>
+<span>        &quot;stat-14-22&quot;,</span>
+<span>        &quot;stat-14-23&quot;,</span>
+<span>        &quot;stat-14-24&quot;,</span>
+<span>        &quot;stat-14-25&quot;,</span>
+<span>        &quot;stat-14-26&quot;,</span>
+<span>        &quot;stat-14-27&quot;,</span>
+<span>        &quot;stat-14-28&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;Causal Inference Foundations&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/15-causal-inference-foundations.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_15.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-15-01&quot;,</span>
+<span>        &quot;stat-15-02&quot;,</span>
+<span>        &quot;stat-15-03&quot;,</span>
+<span>        &quot;stat-15-04&quot;,</span>
+<span>        &quot;stat-15-05&quot;,</span>
+<span>        &quot;stat-15-06&quot;,</span>
+<span>        &quot;stat-15-07&quot;,</span>
+<span>        &quot;stat-15-08&quot;,</span>
+<span>        &quot;stat-15-09&quot;,</span>
+<span>        &quot;stat-15-10&quot;,</span>
+<span>        &quot;stat-15-11&quot;,</span>
+<span>        &quot;stat-15-12&quot;,</span>
+<span>        &quot;stat-15-13&quot;,</span>
+<span>        &quot;stat-15-14&quot;,</span>
+<span>        &quot;stat-15-15&quot;,</span>
+<span>        &quot;stat-15-16&quot;,</span>
+<span>        &quot;stat-15-17&quot;,</span>
+<span>        &quot;stat-15-18&quot;,</span>
+<span>        &quot;stat-15-19&quot;,</span>
+<span>        &quot;stat-15-20&quot;,</span>
+<span>        &quot;stat-15-21&quot;,</span>
+<span>        &quot;stat-15-22&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-014&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Quasi-Experiments and Causal Study Designs&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/16-quasi-experiments-and-causal-study-designs.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_16.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-16-01&quot;,</span>
+<span>        &quot;stat-16-02&quot;,</span>
+<span>        &quot;stat-16-03&quot;,</span>
+<span>        &quot;stat-16-04&quot;,</span>
+<span>        &quot;stat-16-05&quot;,</span>
+<span>        &quot;stat-16-06&quot;,</span>
+<span>        &quot;stat-16-07&quot;,</span>
+<span>        &quot;stat-16-08&quot;,</span>
+<span>        &quot;stat-16-09&quot;,</span>
+<span>        &quot;stat-16-10&quot;,</span>
+<span>        &quot;stat-16-11&quot;,</span>
+<span>        &quot;stat-16-12&quot;,</span>
+<span>        &quot;stat-16-13&quot;,</span>
+<span>        &quot;stat-16-14&quot;,</span>
+<span>        &quot;stat-16-15&quot;,</span>
+<span>        &quot;stat-16-16&quot;,</span>
+<span>        &quot;stat-16-17&quot;,</span>
+<span>        &quot;stat-16-18&quot;,</span>
+<span>        &quot;stat-16-19&quot;,</span>
+<span>        &quot;stat-16-20&quot;,</span>
+<span>        &quot;stat-16-21&quot;,</span>
+<span>        &quot;stat-16-22&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-015&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Causal Estimation, Heterogeneous Effects, and Policy Learning&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/17-causal-estimation-heterogeneous-effects-and-policy-learning.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_17.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-17-01&quot;,</span>
+<span>        &quot;stat-17-02&quot;,</span>
+<span>        &quot;stat-17-03&quot;,</span>
+<span>        &quot;stat-17-04&quot;,</span>
+<span>        &quot;stat-17-05&quot;,</span>
+<span>        &quot;stat-17-06&quot;,</span>
+<span>        &quot;stat-17-07&quot;,</span>
+<span>        &quot;stat-17-08&quot;,</span>
+<span>        &quot;stat-17-09&quot;,</span>
+<span>        &quot;stat-17-10&quot;,</span>
+<span>        &quot;stat-17-11&quot;,</span>
+<span>        &quot;stat-17-12&quot;,</span>
+<span>        &quot;stat-17-13&quot;,</span>
+<span>        &quot;stat-17-14&quot;,</span>
+<span>        &quot;stat-17-15&quot;,</span>
+<span>        &quot;stat-17-16&quot;,</span>
+<span>        &quot;stat-17-17&quot;,</span>
+<span>        &quot;stat-17-18&quot;,</span>
+<span>        &quot;stat-17-19&quot;,</span>
+<span>        &quot;stat-17-20&quot;,</span>
+<span>        &quot;stat-17-21&quot;,</span>
+<span>        &quot;stat-17-22&quot;,</span>
+<span>        &quot;stat-17-23&quot;,</span>
+<span>        &quot;stat-17-24&quot;,</span>
+<span>        &quot;stat-17-25&quot;,</span>
+<span>        &quot;stat-17-26&quot;,</span>
+<span>        &quot;stat-17-27&quot;,</span>
+<span>        &quot;stat-17-28&quot;,</span>
+<span>        &quot;stat-17-29&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-016&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;Bayesian Statistics and Probabilistic Modeling&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/18-bayesian-statistics-and-probabilistic-modeling.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_18.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-18-01&quot;,</span>
+<span>        &quot;stat-18-02&quot;,</span>
+<span>        &quot;stat-18-03&quot;,</span>
+<span>        &quot;stat-18-04&quot;,</span>
+<span>        &quot;stat-18-05&quot;,</span>
+<span>        &quot;stat-18-06&quot;,</span>
+<span>        &quot;stat-18-07&quot;,</span>
+<span>        &quot;stat-18-08&quot;,</span>
+<span>        &quot;stat-18-09&quot;,</span>
+<span>        &quot;stat-18-10&quot;,</span>
+<span>        &quot;stat-18-11&quot;,</span>
+<span>        &quot;stat-18-12&quot;,</span>
+<span>        &quot;stat-18-13&quot;,</span>
+<span>        &quot;stat-18-14&quot;,</span>
+<span>        &quot;stat-18-15&quot;,</span>
+<span>        &quot;stat-18-16&quot;,</span>
+<span>        &quot;stat-18-17&quot;,</span>
+<span>        &quot;stat-18-18&quot;,</span>
+<span>        &quot;stat-18-19&quot;,</span>
+<span>        &quot;stat-18-20&quot;,</span>
+<span>        &quot;stat-18-21&quot;,</span>
+<span>        &quot;stat-18-22&quot;,</span>
+<span>        &quot;stat-18-23&quot;,</span>
+<span>        &quot;stat-18-24&quot;,</span>
+<span>        &quot;stat-18-25&quot;,</span>
+<span>        &quot;stat-18-26&quot;,</span>
+<span>        &quot;stat-18-27&quot;,</span>
+<span>        &quot;stat-18-28&quot;,</span>
+<span>        &quot;stat-18-29&quot;,</span>
+<span>        &quot;stat-18-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Statistical Learning and Classical Supervised Models&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_19.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-19-01&quot;,</span>
+<span>        &quot;stat-19-02&quot;,</span>
+<span>        &quot;stat-19-03&quot;,</span>
+<span>        &quot;stat-19-04&quot;,</span>
+<span>        &quot;stat-19-05&quot;,</span>
+<span>        &quot;stat-19-06&quot;,</span>
+<span>        &quot;stat-19-07&quot;,</span>
+<span>        &quot;stat-19-08&quot;,</span>
+<span>        &quot;stat-19-09&quot;,</span>
+<span>        &quot;stat-19-10&quot;,</span>
+<span>        &quot;stat-19-11&quot;,</span>
+<span>        &quot;stat-19-12&quot;,</span>
+<span>        &quot;stat-19-13&quot;,</span>
+<span>        &quot;stat-19-14&quot;,</span>
+<span>        &quot;stat-19-15&quot;,</span>
+<span>        &quot;stat-19-16&quot;,</span>
+<span>        &quot;stat-19-17&quot;,</span>
+<span>        &quot;stat-19-18&quot;,</span>
+<span>        &quot;stat-19-19&quot;,</span>
+<span>        &quot;stat-19-20&quot;,</span>
+<span>        &quot;stat-19-21&quot;,</span>
+<span>        &quot;stat-19-22&quot;,</span>
+<span>        &quot;stat-19-23&quot;,</span>
+<span>        &quot;stat-19-24&quot;,</span>
+<span>        &quot;stat-19-25&quot;,</span>
+<span>        &quot;stat-19-26&quot;,</span>
+<span>        &quot;stat-19-27&quot;,</span>
+<span>        &quot;stat-19-28&quot;,</span>
+<span>        &quot;stat-19-29&quot;,</span>
+<span>        &quot;stat-19-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scikit-learn&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;Feature Engineering and Representation Learning&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/20-feature-engineering-and-representation-learning.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_20.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-20-01&quot;,</span>
+<span>        &quot;stat-20-02&quot;,</span>
+<span>        &quot;stat-20-03&quot;,</span>
+<span>        &quot;stat-20-04&quot;,</span>
+<span>        &quot;stat-20-05&quot;,</span>
+<span>        &quot;stat-20-06&quot;,</span>
+<span>        &quot;stat-20-07&quot;,</span>
+<span>        &quot;stat-20-08&quot;,</span>
+<span>        &quot;stat-20-09&quot;,</span>
+<span>        &quot;stat-20-10&quot;,</span>
+<span>        &quot;stat-20-11&quot;,</span>
+<span>        &quot;stat-20-12&quot;,</span>
+<span>        &quot;stat-20-13&quot;,</span>
+<span>        &quot;stat-20-14&quot;,</span>
+<span>        &quot;stat-20-15&quot;,</span>
+<span>        &quot;stat-20-16&quot;,</span>
+<span>        &quot;stat-20-17&quot;,</span>
+<span>        &quot;stat-20-18&quot;,</span>
+<span>        &quot;stat-20-19&quot;,</span>
+<span>        &quot;stat-20-20&quot;,</span>
+<span>        &quot;stat-20-21&quot;,</span>
+<span>        &quot;stat-20-22&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-019&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;Unsupervised Learning and Multivariate Analysis&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/21-unsupervised-learning-and-multivariate-analysis.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_21.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-21-01&quot;,</span>
+<span>        &quot;stat-21-02&quot;,</span>
+<span>        &quot;stat-21-03&quot;,</span>
+<span>        &quot;stat-21-04&quot;,</span>
+<span>        &quot;stat-21-05&quot;,</span>
+<span>        &quot;stat-21-06&quot;,</span>
+<span>        &quot;stat-21-07&quot;,</span>
+<span>        &quot;stat-21-08&quot;,</span>
+<span>        &quot;stat-21-09&quot;,</span>
+<span>        &quot;stat-21-10&quot;,</span>
+<span>        &quot;stat-21-11&quot;,</span>
+<span>        &quot;stat-21-12&quot;,</span>
+<span>        &quot;stat-21-13&quot;,</span>
+<span>        &quot;stat-21-14&quot;,</span>
+<span>        &quot;stat-21-15&quot;,</span>
+<span>        &quot;stat-21-16&quot;,</span>
+<span>        &quot;stat-21-17&quot;,</span>
+<span>        &quot;stat-21-18&quot;,</span>
+<span>        &quot;stat-21-19&quot;,</span>
+<span>        &quot;stat-21-20&quot;,</span>
+<span>        &quot;stat-21-21&quot;,</span>
+<span>        &quot;stat-21-22&quot;,</span>
+<span>        &quot;stat-21-23&quot;,</span>
+<span>        &quot;stat-21-24&quot;,</span>
+<span>        &quot;stat-21-25&quot;,</span>
+<span>        &quot;stat-21-26&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scikit-learn&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Model Validation and Predictive Performance&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/22-model-validation-and-predictive-performance.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_22.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-22-01&quot;,</span>
+<span>        &quot;stat-22-02&quot;,</span>
+<span>        &quot;stat-22-03&quot;,</span>
+<span>        &quot;stat-22-04&quot;,</span>
+<span>        &quot;stat-22-05&quot;,</span>
+<span>        &quot;stat-22-06&quot;,</span>
+<span>        &quot;stat-22-07&quot;,</span>
+<span>        &quot;stat-22-08&quot;,</span>
+<span>        &quot;stat-22-09&quot;,</span>
+<span>        &quot;stat-22-10&quot;,</span>
+<span>        &quot;stat-22-11&quot;,</span>
+<span>        &quot;stat-22-12&quot;,</span>
+<span>        &quot;stat-22-13&quot;,</span>
+<span>        &quot;stat-22-14&quot;,</span>
+<span>        &quot;stat-22-15&quot;,</span>
+<span>        &quot;stat-22-16&quot;,</span>
+<span>        &quot;stat-22-17&quot;,</span>
+<span>        &quot;stat-22-18&quot;,</span>
+<span>        &quot;stat-22-19&quot;,</span>
+<span>        &quot;stat-22-20&quot;,</span>
+<span>        &quot;stat-22-21&quot;,</span>
+<span>        &quot;stat-22-22&quot;,</span>
+<span>        &quot;stat-22-23&quot;,</span>
+<span>        &quot;stat-22-24&quot;,</span>
+<span>        &quot;stat-22-25&quot;,</span>
+<span>        &quot;stat-22-26&quot;,</span>
+<span>        &quot;stat-22-27&quot;,</span>
+<span>        &quot;stat-22-28&quot;,</span>
+<span>        &quot;stat-22-29&quot;,</span>
+<span>        &quot;stat-22-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-021&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scikit-learn&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Uncertainty Quantification and Distribution Shift&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/23-uncertainty-quantification-and-distribution-shift.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_23.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-23-01&quot;,</span>
+<span>        &quot;stat-23-02&quot;,</span>
+<span>        &quot;stat-23-03&quot;,</span>
+<span>        &quot;stat-23-04&quot;,</span>
+<span>        &quot;stat-23-05&quot;,</span>
+<span>        &quot;stat-23-06&quot;,</span>
+<span>        &quot;stat-23-07&quot;,</span>
+<span>        &quot;stat-23-08&quot;,</span>
+<span>        &quot;stat-23-09&quot;,</span>
+<span>        &quot;stat-23-10&quot;,</span>
+<span>        &quot;stat-23-11&quot;,</span>
+<span>        &quot;stat-23-12&quot;,</span>
+<span>        &quot;stat-23-13&quot;,</span>
+<span>        &quot;stat-23-14&quot;,</span>
+<span>        &quot;stat-23-15&quot;,</span>
+<span>        &quot;stat-23-16&quot;,</span>
+<span>        &quot;stat-23-17&quot;,</span>
+<span>        &quot;stat-23-18&quot;,</span>
+<span>        &quot;stat-23-19&quot;,</span>
+<span>        &quot;stat-23-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-022&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Explainability, Fairness, and Model Robustness&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/24-explainability-fairness-and-model-robustness.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_24.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-24-01&quot;,</span>
+<span>        &quot;stat-24-02&quot;,</span>
+<span>        &quot;stat-24-03&quot;,</span>
+<span>        &quot;stat-24-04&quot;,</span>
+<span>        &quot;stat-24-05&quot;,</span>
+<span>        &quot;stat-24-06&quot;,</span>
+<span>        &quot;stat-24-07&quot;,</span>
+<span>        &quot;stat-24-08&quot;,</span>
+<span>        &quot;stat-24-09&quot;,</span>
+<span>        &quot;stat-24-10&quot;,</span>
+<span>        &quot;stat-24-11&quot;,</span>
+<span>        &quot;stat-24-12&quot;,</span>
+<span>        &quot;stat-24-13&quot;,</span>
+<span>        &quot;stat-24-14&quot;,</span>
+<span>        &quot;stat-24-15&quot;,</span>
+<span>        &quot;stat-24-16&quot;,</span>
+<span>        &quot;stat-24-17&quot;,</span>
+<span>        &quot;stat-24-18&quot;,</span>
+<span>        &quot;stat-24-19&quot;,</span>
+<span>        &quot;stat-24-20&quot;,</span>
+<span>        &quot;stat-24-21&quot;,</span>
+<span>        &quot;stat-24-22&quot;,</span>
+<span>        &quot;stat-24-23&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-023&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-025&quot;,</span>
+<span>      &quot;title&quot;: &quot;Time-Series Foundations and Diagnostics&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/25-time-series-foundations-and-diagnostics.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_25.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-25-01&quot;,</span>
+<span>        &quot;stat-25-02&quot;,</span>
+<span>        &quot;stat-25-03&quot;,</span>
+<span>        &quot;stat-25-04&quot;,</span>
+<span>        &quot;stat-25-05&quot;,</span>
+<span>        &quot;stat-25-06&quot;,</span>
+<span>        &quot;stat-25-07&quot;,</span>
+<span>        &quot;stat-25-08&quot;,</span>
+<span>        &quot;stat-25-09&quot;,</span>
+<span>        &quot;stat-25-10&quot;,</span>
+<span>        &quot;stat-25-11&quot;,</span>
+<span>        &quot;stat-25-12&quot;,</span>
+<span>        &quot;stat-25-13&quot;,</span>
+<span>        &quot;stat-25-14&quot;,</span>
+<span>        &quot;stat-25-15&quot;,</span>
+<span>        &quot;stat-25-16&quot;,</span>
+<span>        &quot;stat-25-17&quot;,</span>
+<span>        &quot;stat-25-18&quot;,</span>
+<span>        &quot;stat-25-19&quot;,</span>
+<span>        &quot;stat-25-20&quot;,</span>
+<span>        &quot;stat-25-21&quot;,</span>
+<span>        &quot;stat-25-22&quot;,</span>
+<span>        &quot;stat-25-23&quot;,</span>
+<span>        &quot;stat-25-24&quot;,</span>
+<span>        &quot;stat-25-25&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-024&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-026&quot;,</span>
+<span>      &quot;title&quot;: &quot;Classical Forecasting Methods&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/26-classical-forecasting-methods.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_26.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-26-01&quot;,</span>
+<span>        &quot;stat-26-02&quot;,</span>
+<span>        &quot;stat-26-03&quot;,</span>
+<span>        &quot;stat-26-04&quot;,</span>
+<span>        &quot;stat-26-05&quot;,</span>
+<span>        &quot;stat-26-06&quot;,</span>
+<span>        &quot;stat-26-07&quot;,</span>
+<span>        &quot;stat-26-08&quot;,</span>
+<span>        &quot;stat-26-09&quot;,</span>
+<span>        &quot;stat-26-10&quot;,</span>
+<span>        &quot;stat-26-11&quot;,</span>
+<span>        &quot;stat-26-12&quot;,</span>
+<span>        &quot;stat-26-13&quot;,</span>
+<span>        &quot;stat-26-14&quot;,</span>
+<span>        &quot;stat-26-15&quot;,</span>
+<span>        &quot;stat-26-16&quot;,</span>
+<span>        &quot;stat-26-17&quot;,</span>
+<span>        &quot;stat-26-18&quot;,</span>
+<span>        &quot;stat-26-19&quot;,</span>
+<span>        &quot;stat-26-20&quot;,</span>
+<span>        &quot;stat-26-21&quot;,</span>
+<span>        &quot;stat-26-22&quot;,</span>
+<span>        &quot;stat-26-23&quot;,</span>
+<span>        &quot;stat-26-24&quot;,</span>
+<span>        &quot;stat-26-25&quot;,</span>
+<span>        &quot;stat-26-26&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-025&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-027&quot;,</span>
+<span>      &quot;title&quot;: &quot;Advanced Forecasting and Forecast Evaluation&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/27-advanced-forecasting-and-forecast-evaluation.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_27.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-27-01&quot;,</span>
+<span>        &quot;stat-27-02&quot;,</span>
+<span>        &quot;stat-27-03&quot;,</span>
+<span>        &quot;stat-27-04&quot;,</span>
+<span>        &quot;stat-27-05&quot;,</span>
+<span>        &quot;stat-27-06&quot;,</span>
+<span>        &quot;stat-27-07&quot;,</span>
+<span>        &quot;stat-27-08&quot;,</span>
+<span>        &quot;stat-27-09&quot;,</span>
+<span>        &quot;stat-27-10&quot;,</span>
+<span>        &quot;stat-27-11&quot;,</span>
+<span>        &quot;stat-27-12&quot;,</span>
+<span>        &quot;stat-27-13&quot;,</span>
+<span>        &quot;stat-27-14&quot;,</span>
+<span>        &quot;stat-27-15&quot;,</span>
+<span>        &quot;stat-27-16&quot;,</span>
+<span>        &quot;stat-27-17&quot;,</span>
+<span>        &quot;stat-27-18&quot;,</span>
+<span>        &quot;stat-27-19&quot;,</span>
+<span>        &quot;stat-27-20&quot;,</span>
+<span>        &quot;stat-27-21&quot;,</span>
+<span>        &quot;stat-27-22&quot;,</span>
+<span>        &quot;stat-27-23&quot;,</span>
+<span>        &quot;stat-27-24&quot;,</span>
+<span>        &quot;stat-27-25&quot;,</span>
+<span>        &quot;stat-27-26&quot;,</span>
+<span>        &quot;stat-27-27&quot;,</span>
+<span>        &quot;stat-27-28&quot;,</span>
+<span>        &quot;stat-27-29&quot;,</span>
+<span>        &quot;stat-27-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-026&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-028&quot;,</span>
+<span>      &quot;title&quot;: &quot;Survival Analysis, Duration Models, and Reliability&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/28-survival-analysis-duration-models-and-reliability.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_28.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-28-01&quot;,</span>
+<span>        &quot;stat-28-02&quot;,</span>
+<span>        &quot;stat-28-03&quot;,</span>
+<span>        &quot;stat-28-04&quot;,</span>
+<span>        &quot;stat-28-05&quot;,</span>
+<span>        &quot;stat-28-06&quot;,</span>
+<span>        &quot;stat-28-07&quot;,</span>
+<span>        &quot;stat-28-08&quot;,</span>
+<span>        &quot;stat-28-09&quot;,</span>
+<span>        &quot;stat-28-10&quot;,</span>
+<span>        &quot;stat-28-11&quot;,</span>
+<span>        &quot;stat-28-12&quot;,</span>
+<span>        &quot;stat-28-13&quot;,</span>
+<span>        &quot;stat-28-14&quot;,</span>
+<span>        &quot;stat-28-15&quot;,</span>
+<span>        &quot;stat-28-16&quot;,</span>
+<span>        &quot;stat-28-17&quot;,</span>
+<span>        &quot;stat-28-18&quot;,</span>
+<span>        &quot;stat-28-19&quot;,</span>
+<span>        &quot;stat-28-20&quot;,</span>
+<span>        &quot;stat-28-21&quot;,</span>
+<span>        &quot;stat-28-22&quot;,</span>
+<span>        &quot;stat-28-23&quot;,</span>
+<span>        &quot;stat-28-24&quot;,</span>
+<span>        &quot;stat-28-25&quot;,</span>
+<span>        &quot;stat-28-26&quot;,</span>
+<span>        &quot;stat-28-27&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-029&quot;,</span>
+<span>      &quot;title&quot;: &quot;Anomaly Detection, Changepoints, and Statistical Process Control&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/29-anomaly-detection-changepoints-and-statistical-process-control.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_29.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-29-01&quot;,</span>
+<span>        &quot;stat-29-02&quot;,</span>
+<span>        &quot;stat-29-03&quot;,</span>
+<span>        &quot;stat-29-04&quot;,</span>
+<span>        &quot;stat-29-05&quot;,</span>
+<span>        &quot;stat-29-06&quot;,</span>
+<span>        &quot;stat-29-07&quot;,</span>
+<span>        &quot;stat-29-08&quot;,</span>
+<span>        &quot;stat-29-09&quot;,</span>
+<span>        &quot;stat-29-10&quot;,</span>
+<span>        &quot;stat-29-11&quot;,</span>
+<span>        &quot;stat-29-12&quot;,</span>
+<span>        &quot;stat-29-13&quot;,</span>
+<span>        &quot;stat-29-14&quot;,</span>
+<span>        &quot;stat-29-15&quot;,</span>
+<span>        &quot;stat-29-16&quot;,</span>
+<span>        &quot;stat-29-17&quot;,</span>
+<span>        &quot;stat-29-18&quot;,</span>
+<span>        &quot;stat-29-19&quot;,</span>
+<span>        &quot;stat-29-20&quot;,</span>
+<span>        &quot;stat-29-21&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-030&quot;,</span>
+<span>      &quot;title&quot;: &quot;Spatial and Spatiotemporal Statistics&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/30-spatial-and-spatiotemporal-statistics.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_30.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-30-01&quot;,</span>
+<span>        &quot;stat-30-02&quot;,</span>
+<span>        &quot;stat-30-03&quot;,</span>
+<span>        &quot;stat-30-04&quot;,</span>
+<span>        &quot;stat-30-05&quot;,</span>
+<span>        &quot;stat-30-06&quot;,</span>
+<span>        &quot;stat-30-07&quot;,</span>
+<span>        &quot;stat-30-08&quot;,</span>
+<span>        &quot;stat-30-09&quot;,</span>
+<span>        &quot;stat-30-10&quot;,</span>
+<span>        &quot;stat-30-11&quot;,</span>
+<span>        &quot;stat-30-12&quot;,</span>
+<span>        &quot;stat-30-13&quot;,</span>
+<span>        &quot;stat-30-14&quot;,</span>
+<span>        &quot;stat-30-15&quot;,</span>
+<span>        &quot;stat-30-16&quot;,</span>
+<span>        &quot;stat-30-17&quot;,</span>
+<span>        &quot;stat-30-18&quot;,</span>
+<span>        &quot;stat-30-19&quot;,</span>
+<span>        &quot;stat-30-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-031&quot;,</span>
+<span>      &quot;title&quot;: &quot;Network and Graph Analysis&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/31-network-and-graph-analysis.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_31.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-31-01&quot;,</span>
+<span>        &quot;stat-31-02&quot;,</span>
+<span>        &quot;stat-31-03&quot;,</span>
+<span>        &quot;stat-31-04&quot;,</span>
+<span>        &quot;stat-31-05&quot;,</span>
+<span>        &quot;stat-31-06&quot;,</span>
+<span>        &quot;stat-31-07&quot;,</span>
+<span>        &quot;stat-31-08&quot;,</span>
+<span>        &quot;stat-31-09&quot;,</span>
+<span>        &quot;stat-31-10&quot;,</span>
+<span>        &quot;stat-31-11&quot;,</span>
+<span>        &quot;stat-31-12&quot;,</span>
+<span>        &quot;stat-31-13&quot;,</span>
+<span>        &quot;stat-31-14&quot;,</span>
+<span>        &quot;stat-31-15&quot;,</span>
+<span>        &quot;stat-31-16&quot;,</span>
+<span>        &quot;stat-31-17&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-030&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-032&quot;,</span>
+<span>      &quot;title&quot;: &quot;Recommendation, Information Retrieval, and Ranking&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/32-recommendation-information-retrieval-and-ranking.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_32.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-32-01&quot;,</span>
+<span>        &quot;stat-32-02&quot;,</span>
+<span>        &quot;stat-32-03&quot;,</span>
+<span>        &quot;stat-32-04&quot;,</span>
+<span>        &quot;stat-32-05&quot;,</span>
+<span>        &quot;stat-32-06&quot;,</span>
+<span>        &quot;stat-32-07&quot;,</span>
+<span>        &quot;stat-32-08&quot;,</span>
+<span>        &quot;stat-32-09&quot;,</span>
+<span>        &quot;stat-32-10&quot;,</span>
+<span>        &quot;stat-32-11&quot;,</span>
+<span>        &quot;stat-32-12&quot;,</span>
+<span>        &quot;stat-32-13&quot;,</span>
+<span>        &quot;stat-32-14&quot;,</span>
+<span>        &quot;stat-32-15&quot;,</span>
+<span>        &quot;stat-32-16&quot;,</span>
+<span>        &quot;stat-32-17&quot;,</span>
+<span>        &quot;stat-32-18&quot;,</span>
+<span>        &quot;stat-32-19&quot;,</span>
+<span>        &quot;stat-32-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-031&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-033&quot;,</span>
+<span>      &quot;title&quot;: &quot;Deep Learning, Language, and Generative Modeling&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/33-deep-learning-language-and-generative-modeling.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_33.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-33-01&quot;,</span>
+<span>        &quot;stat-33-02&quot;,</span>
+<span>        &quot;stat-33-03&quot;,</span>
+<span>        &quot;stat-33-04&quot;,</span>
+<span>        &quot;stat-33-05&quot;,</span>
+<span>        &quot;stat-33-06&quot;,</span>
+<span>        &quot;stat-33-07&quot;,</span>
+<span>        &quot;stat-33-08&quot;,</span>
+<span>        &quot;stat-33-09&quot;,</span>
+<span>        &quot;stat-33-10&quot;,</span>
+<span>        &quot;stat-33-11&quot;,</span>
+<span>        &quot;stat-33-12&quot;,</span>
+<span>        &quot;stat-33-13&quot;,</span>
+<span>        &quot;stat-33-14&quot;,</span>
+<span>        &quot;stat-33-15&quot;,</span>
+<span>        &quot;stat-33-16&quot;,</span>
+<span>        &quot;stat-33-17&quot;,</span>
+<span>        &quot;stat-33-18&quot;,</span>
+<span>        &quot;stat-33-19&quot;,</span>
+<span>        &quot;stat-33-20&quot;,</span>
+<span>        &quot;stat-33-21&quot;,</span>
+<span>        &quot;stat-33-22&quot;,</span>
+<span>        &quot;stat-33-23&quot;,</span>
+<span>        &quot;stat-33-24&quot;,</span>
+<span>        &quot;stat-33-25&quot;,</span>
+<span>        &quot;stat-33-26&quot;,</span>
+<span>        &quot;stat-33-27&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-034&quot;,</span>
+<span>      &quot;title&quot;: &quot;Generative AI and Language-Model Evaluation&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/34-generative-ai-and-language-model-evaluation.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_34.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-34-01&quot;,</span>
+<span>        &quot;stat-34-02&quot;,</span>
+<span>        &quot;stat-34-03&quot;,</span>
+<span>        &quot;stat-34-04&quot;,</span>
+<span>        &quot;stat-34-05&quot;,</span>
+<span>        &quot;stat-34-06&quot;,</span>
+<span>        &quot;stat-34-07&quot;,</span>
+<span>        &quot;stat-34-08&quot;,</span>
+<span>        &quot;stat-34-09&quot;,</span>
+<span>        &quot;stat-34-10&quot;,</span>
+<span>        &quot;stat-34-11&quot;,</span>
+<span>        &quot;stat-34-12&quot;,</span>
+<span>        &quot;stat-34-13&quot;,</span>
+<span>        &quot;stat-34-14&quot;,</span>
+<span>        &quot;stat-34-15&quot;,</span>
+<span>        &quot;stat-34-16&quot;,</span>
+<span>        &quot;stat-34-17&quot;,</span>
+<span>        &quot;stat-34-18&quot;,</span>
+<span>        &quot;stat-34-19&quot;,</span>
+<span>        &quot;stat-34-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-033&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-035&quot;,</span>
+<span>      &quot;title&quot;: &quot;Bandits, Reinforcement Learning, and Adaptive Decisions&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_35.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-35-01&quot;,</span>
+<span>        &quot;stat-35-02&quot;,</span>
+<span>        &quot;stat-35-03&quot;,</span>
+<span>        &quot;stat-35-04&quot;,</span>
+<span>        &quot;stat-35-05&quot;,</span>
+<span>        &quot;stat-35-06&quot;,</span>
+<span>        &quot;stat-35-07&quot;,</span>
+<span>        &quot;stat-35-08&quot;,</span>
+<span>        &quot;stat-35-09&quot;,</span>
+<span>        &quot;stat-35-10&quot;,</span>
+<span>        &quot;stat-35-11&quot;,</span>
+<span>        &quot;stat-35-12&quot;,</span>
+<span>        &quot;stat-35-13&quot;,</span>
+<span>        &quot;stat-35-14&quot;,</span>
+<span>        &quot;stat-35-15&quot;,</span>
+<span>        &quot;stat-35-16&quot;,</span>
+<span>        &quot;stat-35-17&quot;,</span>
+<span>        &quot;stat-35-18&quot;,</span>
+<span>        &quot;stat-35-19&quot;,</span>
+<span>        &quot;stat-35-20&quot;,</span>
+<span>        &quot;stat-35-21&quot;,</span>
+<span>        &quot;stat-35-22&quot;,</span>
+<span>        &quot;stat-35-23&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-034&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-036&quot;,</span>
+<span>      &quot;title&quot;: &quot;Optimization and Operations Research&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/36-optimization-and-operations-research.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_36.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-36-01&quot;,</span>
+<span>        &quot;stat-36-02&quot;,</span>
+<span>        &quot;stat-36-03&quot;,</span>
+<span>        &quot;stat-36-04&quot;,</span>
+<span>        &quot;stat-36-05&quot;,</span>
+<span>        &quot;stat-36-06&quot;,</span>
+<span>        &quot;stat-36-07&quot;,</span>
+<span>        &quot;stat-36-08&quot;,</span>
+<span>        &quot;stat-36-09&quot;,</span>
+<span>        &quot;stat-36-10&quot;,</span>
+<span>        &quot;stat-36-11&quot;,</span>
+<span>        &quot;stat-36-12&quot;,</span>
+<span>        &quot;stat-36-13&quot;,</span>
+<span>        &quot;stat-36-14&quot;,</span>
+<span>        &quot;stat-36-15&quot;,</span>
+<span>        &quot;stat-36-16&quot;,</span>
+<span>        &quot;stat-36-17&quot;,</span>
+<span>        &quot;stat-36-18&quot;,</span>
+<span>        &quot;stat-36-19&quot;,</span>
+<span>        &quot;stat-36-20&quot;,</span>
+<span>        &quot;stat-36-21&quot;,</span>
+<span>        &quot;stat-36-22&quot;,</span>
+<span>        &quot;stat-36-23&quot;,</span>
+<span>        &quot;stat-36-24&quot;,</span>
+<span>        &quot;stat-36-25&quot;,</span>
+<span>        &quot;stat-36-26&quot;,</span>
+<span>        &quot;stat-36-27&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-035&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;scipy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-037&quot;,</span>
+<span>      &quot;title&quot;: &quot;Simulation and Computational Statistics&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/37-simulation-and-computational-statistics.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_37.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-37-01&quot;,</span>
+<span>        &quot;stat-37-02&quot;,</span>
+<span>        &quot;stat-37-03&quot;,</span>
+<span>        &quot;stat-37-04&quot;,</span>
+<span>        &quot;stat-37-05&quot;,</span>
+<span>        &quot;stat-37-06&quot;,</span>
+<span>        &quot;stat-37-07&quot;,</span>
+<span>        &quot;stat-37-08&quot;,</span>
+<span>        &quot;stat-37-09&quot;,</span>
+<span>        &quot;stat-37-10&quot;,</span>
+<span>        &quot;stat-37-11&quot;,</span>
+<span>        &quot;stat-37-12&quot;,</span>
+<span>        &quot;stat-37-13&quot;,</span>
+<span>        &quot;stat-37-14&quot;,</span>
+<span>        &quot;stat-37-15&quot;,</span>
+<span>        &quot;stat-37-16&quot;,</span>
+<span>        &quot;stat-37-17&quot;,</span>
+<span>        &quot;stat-37-18&quot;,</span>
+<span>        &quot;stat-37-19&quot;,</span>
+<span>        &quot;stat-37-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-036&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-038&quot;,</span>
+<span>      &quot;title&quot;: &quot;Product, Customer, Marketing, and Business Analytics&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/38-product-customer-marketing-and-business-analytics.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_38.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-38-01&quot;,</span>
+<span>        &quot;stat-38-02&quot;,</span>
+<span>        &quot;stat-38-03&quot;,</span>
+<span>        &quot;stat-38-04&quot;,</span>
+<span>        &quot;stat-38-05&quot;,</span>
+<span>        &quot;stat-38-06&quot;,</span>
+<span>        &quot;stat-38-07&quot;,</span>
+<span>        &quot;stat-38-08&quot;,</span>
+<span>        &quot;stat-38-09&quot;,</span>
+<span>        &quot;stat-38-10&quot;,</span>
+<span>        &quot;stat-38-11&quot;,</span>
+<span>        &quot;stat-38-12&quot;,</span>
+<span>        &quot;stat-38-13&quot;,</span>
+<span>        &quot;stat-38-14&quot;,</span>
+<span>        &quot;stat-38-15&quot;,</span>
+<span>        &quot;stat-38-16&quot;,</span>
+<span>        &quot;stat-38-17&quot;,</span>
+<span>        &quot;stat-38-18&quot;,</span>
+<span>        &quot;stat-38-19&quot;,</span>
+<span>        &quot;stat-38-20&quot;,</span>
+<span>        &quot;stat-38-21&quot;,</span>
+<span>        &quot;stat-38-22&quot;,</span>
+<span>        &quot;stat-38-23&quot;,</span>
+<span>        &quot;stat-38-24&quot;,</span>
+<span>        &quot;stat-38-25&quot;,</span>
+<span>        &quot;stat-38-26&quot;,</span>
+<span>        &quot;stat-38-27&quot;,</span>
+<span>        &quot;stat-38-28&quot;,</span>
+<span>        &quot;stat-38-29&quot;,</span>
+<span>        &quot;stat-38-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-037&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-039&quot;,</span>
+<span>      &quot;title&quot;: &quot;Research Synthesis and Specialized Statistical Methodologies&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/39-research-synthesis-and-specialized-statistical-methodologies.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_39.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-39-01&quot;,</span>
+<span>        &quot;stat-39-02&quot;,</span>
+<span>        &quot;stat-39-03&quot;,</span>
+<span>        &quot;stat-39-04&quot;,</span>
+<span>        &quot;stat-39-05&quot;,</span>
+<span>        &quot;stat-39-06&quot;,</span>
+<span>        &quot;stat-39-07&quot;,</span>
+<span>        &quot;stat-39-08&quot;,</span>
+<span>        &quot;stat-39-09&quot;,</span>
+<span>        &quot;stat-39-10&quot;,</span>
+<span>        &quot;stat-39-11&quot;,</span>
+<span>        &quot;stat-39-12&quot;,</span>
+<span>        &quot;stat-39-13&quot;,</span>
+<span>        &quot;stat-39-14&quot;,</span>
+<span>        &quot;stat-39-15&quot;,</span>
+<span>        &quot;stat-39-16&quot;,</span>
+<span>        &quot;stat-39-17&quot;,</span>
+<span>        &quot;stat-39-18&quot;,</span>
+<span>        &quot;stat-39-19&quot;,</span>
+<span>        &quot;stat-39-20&quot;,</span>
+<span>        &quot;stat-39-21&quot;,</span>
+<span>        &quot;stat-39-22&quot;,</span>
+<span>        &quot;stat-39-23&quot;,</span>
+<span>        &quot;stat-39-24&quot;,</span>
+<span>        &quot;stat-39-25&quot;,</span>
+<span>        &quot;stat-39-26&quot;,</span>
+<span>        &quot;stat-39-27&quot;,</span>
+<span>        &quot;stat-39-28&quot;,</span>
+<span>        &quot;stat-39-29&quot;,</span>
+<span>        &quot;stat-39-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-038&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;statistics-040&quot;,</span>
+<span>      &quot;title&quot;: &quot;Production Methodology, Governance, and Senior Scientific Judgment&quot;,</span>
+<span>      &quot;chapter_path&quot;: &quot;courses/statistics-ml/chapters/40-production-methodology-governance-and-senior-scientific-judgment.md&quot;,</span>
+<span>      &quot;example_paths&quot;: [</span>
+<span>        &quot;courses/statistics-ml/examples/chapter_40.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;topic_ids&quot;: [</span>
+<span>        &quot;stat-40-01&quot;,</span>
+<span>        &quot;stat-40-02&quot;,</span>
+<span>        &quot;stat-40-03&quot;,</span>
+<span>        &quot;stat-40-04&quot;,</span>
+<span>        &quot;stat-40-05&quot;,</span>
+<span>        &quot;stat-40-06&quot;,</span>
+<span>        &quot;stat-40-07&quot;,</span>
+<span>        &quot;stat-40-08&quot;,</span>
+<span>        &quot;stat-40-09&quot;,</span>
+<span>        &quot;stat-40-10&quot;,</span>
+<span>        &quot;stat-40-11&quot;,</span>
+<span>        &quot;stat-40-12&quot;,</span>
+<span>        &quot;stat-40-13&quot;,</span>
+<span>        &quot;stat-40-14&quot;,</span>
+<span>        &quot;stat-40-15&quot;,</span>
+<span>        &quot;stat-40-16&quot;,</span>
+<span>        &quot;stat-40-17&quot;,</span>
+<span>        &quot;stat-40-18&quot;,</span>
+<span>        &quot;stat-40-19&quot;,</span>
+<span>        &quot;stat-40-20&quot;,</span>
+<span>        &quot;stat-40-21&quot;,</span>
+<span>        &quot;stat-40-22&quot;,</span>
+<span>        &quot;stat-40-23&quot;,</span>
+<span>        &quot;stat-40-24&quot;,</span>
+<span>        &quot;stat-40-25&quot;,</span>
+<span>        &quot;stat-40-26&quot;,</span>
+<span>        &quot;stat-40-27&quot;,</span>
+<span>        &quot;stat-40-28&quot;,</span>
+<span>        &quot;stat-40-29&quot;,</span>
+<span>        &quot;stat-40-30&quot;</span>
+<span>      ],</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;statistics-039&quot;</span>
+<span>      ],</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;dependencies&quot;: [</span>
+<span>        &quot;numpy&quot;</span>
+<span>      ],</span>
+<span>      &quot;mode&quot;: &quot;tutorial&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

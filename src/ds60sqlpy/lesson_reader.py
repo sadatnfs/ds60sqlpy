@@ -658,13 +658,28 @@ def render_markdown(
             level = min(6, len(heading.group(1)) + heading_offset)
             heading_text = heading.group(2)
             heading_id = id_prefix + heading_ids.next(heading_text)
+            # Book coverage IDs stay stable while the visible heading uses its
+            # following human-readable method label. Do not render that label twice.
+            next_index = index + 1
+            if re.fullmatch(r"stat-\d{2}-\d{2,3}", heading_text):
+                label_index = next_index
+                while label_index < len(lines) and not lines[label_index].strip():
+                    label_index += 1
+                label = (
+                    re.fullmatch(r"\*\*(.+)\*\*", lines[label_index].strip())
+                    if label_index < len(lines)
+                    else None
+                )
+                if label:
+                    heading_text = label.group(1)
+                    next_index = label_index + 1
             output.append(
                 f'<h{level} id="{heading_id}">'
                 f"{render_inline(heading_text, resolver)}"
                 f'<a class="heading-anchor" href="#{heading_id}" aria-label="Link to this section">#</a>'
                 f"</h{level}>"
             )
-            index += 1
+            index = next_index
             continue
 
         if line.strip() in {"---", "***", "___"}:

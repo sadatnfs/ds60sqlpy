@@ -1,25 +1,43 @@
 # Statistics book implementation status
 
-Updated 22 October 2026. Work occurs directly in the user repository; no staging, commits, pushes, Docker operations or changes to the original supplied outline.
+Updated 22 October 2026. Agent work occurred directly in the user repository without staging, commits, pushes, Docker operations or modification of the original supplied outline.
 
-## Current checkpoint
+## Authored result
 
-The source outline has 40 numbered sections and 1,005 bold method bullets. `courses/statistics-ml/source-outline.md` is a byte-preserved copy. `manifest.json` and `coverage.json` map every method to stable chapter and topic IDs. Chapter IDs are `statistics-001` through `statistics-040`; topic headings use `stat-SS-NN` so Markdown renderer anchors resolve directly.
+- 40 complete tutorial chapters under `courses/statistics-ml/chapters/`.
+- All 1,005 bold method bullets in the supplied 40-section outline mapped one-to-one in `coverage.json` to explicit method explanations and stable Markdown topic headings.
+- 97,117 whitespace-delimited words across chapter files, including code; this count is a scope measure, not a teaching-quality proof.
+- 40 standalone executable chapter programs containing 126 named functions other than main. The functions include demonstrations and supporting computational routines.
+- 118 interview questions with explanatory answers.
+- Chapter-specific theory, assumptions, selection guidance, failure modes, mathematical derivations, numerical interpretation and extended cases. Core regression, experiments, causal inference, Bayes, ensembles, PCA, validation, uncertainty and forecasting receive connected worked treatments.
+- Applied LLM connections cover extraction as measurement, embeddings, grounded synthesis, SFT/LoRA, retrieval and answer evaluation, point-in-time data and accountable domain-assistant workflows. Links point to existing applied-course guides.
 
-Chapters 1-24 have authored first-pass explanations for every source bullet, complete offline programs, numerical expectations and answered interview discussions. Core regression, experiment, causal, Bayesian, ensemble and PCA chapters include initial derivations. This is not yet a claim of final requested book depth: an additional case-study and detailed-method pass is underway for chapters 1-24. A second writer owns chapters 25-40 and their examples; completion of those files must be checked rather than inferred from the manifest.
+The user explicitly requested no exams or problem sets. This is a tutorial book with complete demonstrations and answered interviews, not a graded exercise track. Reading markers do not certify mastery. Specialized methods have explanatory coverage; the book does not claim a production implementation of every research estimator.
 
-The user explicitly requested no exams or problem sets. Tutorial examples are complete demonstrations, and interview questions have explanatory answers. There are no hidden answer or exercise-completion requirements.
+## Scope and provenance
 
-## Execution evidence
+`courses/statistics-ml/source-outline.md` is byte-identical to the original supplied source. SHA-256:
 
-Chapter programs 1-22 ran successfully in the prepared local Python 3.12 scientific environment: NumPy 2.4.6, pandas 2.3.3, SciPy 1.18.0, scikit-learn 1.9.0 and statsmodels 0.14.6. Each program uses tiny local fixtures, deterministic seeds where random behavior is demonstrated, a main guard and meaningful numerical assertions. No data/model downloads or cloud calls occurred.
+```text
+146945b484305436b8cdee1fd3eb90b6689c3b32397321f20b2a77b15ae1f938
+```
 
-On this restricted macOS process, joblib emitted one physical-core discovery warning and fell back to logical cores; the chapter assertions still passed. This warning is environmental, not a model-convergence failure. Chapters 23-40 and the final all-book regression suite remain to be checked after authoring and revisions complete. No Docker, Windows or Linux execution claim is made by these local tests.
+`manifest.json` records repository-relative paths, prerequisites, levels, time estimates, actual imported scientific dependencies and tutorial mode. Chapter IDs are `statistics-001` through `statistics-040`; topic IDs use `stat-SS-NN` in original source order. Repeated method names in different source sections keep separate IDs and contexts. All 1,005 labels and their exact order are checked against the preserved outline.
 
-## Remaining work
+## Actual validation evidence
 
-- Expand the first-pass chapter treatments with longer connected case studies, derivations, diagnostics, method comparisons and interpretation, especially foundations 1-10 and core model families.
-- Finish and validate the second writer's chapters 25-40.
-- Verify all 1,005 topic anchors, method-body coverage, local links, source digest, declared dependencies and every standalone program.
-- Add focused book contract tests and update this checkpoint with final counts and actual validation results.
-- Keep root-owned catalog, reader and classroom integration separate from content execution evidence.
+The focused command completed with **82 passed in 2.14 seconds**:
+
+```text
+python -m pytest tests/test_statistics_book.py -q -p no:cacheprovider
+```
+
+The test suite checks source digest and exact method coverage, stable topic headings, nonempty substantive method bodies, answered interviews, no exercise/exam headings, local link resolution, declared core imports, main guards, numerical assertions and verbatim equality between embedded chapter code and standalone programs. Every one of the 40 programs executed with socket connections blocked. No dataset/model downloads or cloud calls occurred. All chapter text and programs were checked for the user's no-em-dash rule.
+
+Execution environment: local macOS arm64 Python 3.12, NumPy 2.4.6, pandas 2.3.3, SciPy 1.18.0, scikit-learn 1.9.0 and statsmodels 0.14.6. The test sets a process-local joblib CPU-count hint to avoid a restricted-macOS physical-core discovery warning. It does not suppress numerical or model-convergence warnings.
+
+This establishes source, structural and local executable-example correctness for this environment. It does not establish Windows/Linux or Docker execution, production statistical validity, or learner mastery. Root-owned catalog/reader/classroom tests provide separate integration evidence. Default programs require only the prepared scientific core; optional XGBoost, PyMC/Stan, NetworkX and other ecosystems are discussed without automatic imports or installation.
+
+## Maintenance
+
+Preserve source-outline.md and stable topic IDs. Revise original chapter Markdown and example programs together, then run the focused suite and root-owned reader/catalog checks. Do not infer broad estimator validity from a tiny demonstration. Keep assumptions, uncertainty limits and claims of actual runtime acceptance explicit.

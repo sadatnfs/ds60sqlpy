@@ -1,0 +1,1143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-algo-03 · Graph Traversal, Priority Queues, and Shortest-Path Evidence · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-algo-03" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-algo-03</p>
+        <h1>Graph Traversal, Priority Queues, and Shortest-Path Evidence</h1>
+        <p class="hero-copy">Python data mechanics and algorithmic reasoning</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">core setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-algo-02.html">python-algo-02</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p id="run-guidance">Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_algo_03.py</code>.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_algo_03.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+
+          <a class="button lab-only" href="../learn?lesson=python-algo-03" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_algo_03.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_algo_03.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--graph-traversal-priority-queues-and-shortest-path-evidence">Graph Traversal, Priority Queues, and Shortest-Path Evidence<a class="heading-anchor" href="#guide--graph-traversal-priority-queues-and-shortest-path-evidence" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-algo-03</code></p>
+<p><strong>Estimated time:</strong> 150 minutes; split the reading and implementation across sessions when useful.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Intermediate. Direct catalog prerequisites: <code>python-algo-02</code>. This lesson deepens the named mechanism after the introductory track; it does not require a cloud account or download data.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Open the <a href="python-algo-03.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython python/professional/lessons/py_algo_03.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_algo_03.py</code></pre>
+<p>Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-algo-03.html#solution-1">explanatory solutions</a> and <a href="python-algo-03.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
+<h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Graph:</strong> A set of vertices and edges describing permitted relationships or transitions; this lesson uses directed weighted edges.</li>
+</ul>
+<ul>
+<li><strong>Frontier:</strong> The discovered vertices or candidate states waiting to be processed by a traversal.</li>
+</ul>
+<ul>
+<li><strong>Priority queue:</strong> A structure that removes the item with smallest priority efficiently; a heap implements this without fully sorting all items.</li>
+</ul>
+<ul>
+<li><strong>Relaxation:</strong> Replacing a best-known path cost when a newly considered edge produces a cheaper route.</li>
+</ul>
+<p>The frontier data structure determines which search question an algorithm answers. A FIFO queue explores vertices by number of edges from the start, so breadth-first search finds minimum-hop paths in an unweighted graph. A priority queue explores the smallest known cumulative cost, which is needed when edge weights differ. A one-edge route can be much more expensive than a two-edge route.</p>
+<p>Dijkstra&#x27;s algorithm maintains best-known distances and repeatedly removes the lowest-cost frontier entry. With nonnegative edge weights, a removed best distance cannot later be improved by traveling through a more expensive unexplored state. Negative edges break that argument. The lesson rejects them rather than silently running an algorithm whose proof no longer applies.</p>
+<p>Python&#x27;s heapq has no direct decrease-key operation. A simple implementation pushes a new entry when a better route is discovered and leaves the older entry in the heap. On removal, compare its recorded cost with the current best distance and skip it if stale. This can create several heap entries for one vertex, but the distance table remains the source of truth.</p>
+<p>A parent map records the predecessor used by each improving path. Reconstructing a route is a separate operation: walk backward from goal to start, detect malformed cycles or unknown parent labels, then reverse the sequence. An unreachable vertex should have infinite distance and no route, not a fabricated empty successful path. A start-to-itself route legitimately has zero cost and contains the start vertex.</p>
+<p>Topological ordering solves another graph problem: order every vertex before its outgoing neighbors in an acyclic graph. Kahn&#x27;s algorithm removes zero-indegree vertices and decreases their neighbors&#x27; indegrees. If fewer than all vertices can be removed, a cycle remains. A heap can choose the lexicographically smallest available label for deterministic output, adding a tie policy without changing dependency correctness.</p>
+<p>The final exercise uses the same heap mechanism to keep the largest k stream values. A size-k min-heap stores current candidates, with its smallest value at the root. New larger values can replace that root. This bounds candidate memory by k, unlike sorting every input. The lesson compares numeric results, actual routes and cycle failures so an algorithm&#x27;s name is never treated as evidence of correctness.</p>
+<h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import math
+import heapq
+from collections import deque
+
+graph={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)]}
+assert len([&quot;a&quot;,&quot;b&quot;])-1==1
+assert len([&quot;a&quot;,&quot;c&quot;,&quot;b&quot;])-1==2
+assert 1.+1.&lt;10.
+print(&quot;Fewest hops differs from lowest cost:1 edge costs10;2 edges cost2&quot;)</code></pre>
+<p>Breadth-first search would discover b directly in one hop. A cost-aware search must also consider the two-edge route through c, whose total weight is two. The fixture is a counterexample to using hop count as a proxy for weighted travel cost.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import math
+import heapq
+from collections import deque
+
+heap=[]
+for value in [4.,1.,9.,3.,8.]:
+    if len(heap)&lt;3:
+        heapq.heappush(heap,value)
+    else:
+        heapq.heappushpop(heap,value)
+assert sorted(heap,reverse=True)==[9.,8.,4.]
+assert heap[0]==4.
+print(&quot;Largest three:&quot;,sorted(heap,reverse=True))</code></pre>
+<p>The heap array is not a fully sorted list. Its root is only guaranteed to be the smallest retained candidate. Sorting the final small heap creates the desired presentation order while avoiding a full sort of all input values.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Validate the shortest-path assumptions.</strong> Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</li>
+</ol>
+<p><strong>Expected:</strong> a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</p>
+<ol>
+<li><strong>Find minimum edge counts.</strong> Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</li>
+</ol>
+<p><strong>Expected:</strong> For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</p>
+<ol>
+<li><strong>Use cumulative cost and skip stale entries.</strong> Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</li>
+</ol>
+<p><strong>Expected:</strong> In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</p>
+<ol>
+<li><strong>Verify a route rather than only its score.</strong> Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</li>
+</ol>
+<p><strong>Expected:</strong> Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</p>
+<ol>
+<li><strong>Order dependencies and expose cycles.</strong> Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</li>
+</ol>
+<p><strong>Expected:</strong> a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</p>
+<ol>
+<li><strong>Transfer priority-queue reasoning to a stream.</strong> Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</li>
+</ol>
+<p><strong>Expected:</strong> [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</p>
+<h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<p>If a weighted route has too high a cost, check whether a FIFO queue was used where a priority queue was required. If stale routes overwrite better distances, compare each popped cost with the current distance table. If reconstruction loops, validate parent-chain identities and cycles. If a dependency ordering omits nodes, compare processed count with the full vertex set, including isolated nodes. If a heap printout looks unsorted, inspect the root invariant rather than assuming the entire internal list is ordered. Never claim Dijkstra supports negative weights just because one small negative-edge fixture happened to return a plausible path.</p>
+<h4 id="guide--self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#guide--self-check-and-retrieval" aria-label="Link to this section">#</a></h4>
+<p>Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.</p>
+<h4 id="guide--next-steps">Next steps<a class="heading-anchor" href="#guide--next-steps" aria-label="Link to this section">#</a></h4>
+<p>Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the <a href="../reference-pages/python/professional/README.md.html">professional track</a> for related modules.</p>
+<h4 id="guide--primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#guide--primary-sources-and-official-apis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="https://docs.python.org/3/library/heapq.html">Python heapq priority queues</a>.</li>
+</ul>
+<ul>
+<li><a href="https://docs.python.org/3/library/collections.html#collections.deque">Python deque</a>.</li>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-algo-03: Graph Traversal, Priority Queues, and Shortest-Path Evidence.
+Read python/professional/companion-guides/py_algo_03.md and python/professional/lessons/py_algo_03.py. Direct prerequisites: python-algo-02.
+Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_algo_03.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_algo_03.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-algo-03: Graph Traversal, Priority Queues, and Shortest-Path Evidence.</span>
+<span> </span>
+<span>Run the worked examples, then implement the six contracts below.</span>
+<span>Official implementations remain in solutions/.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>import math</span>
+<span>import heapq</span>
+<span>from collections import deque</span>
+<span> </span>
+<span>def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:</span>
+<span>    &quot;&quot;&quot;Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement validate_graph&quot;)</span>
+<span> </span>
+<span>def bfs_hops(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; dict[str, int]:</span>
+<span>    &quot;&quot;&quot;Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement bfs_hops&quot;)</span>
+<span> </span>
+<span>def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
+<span>    &quot;&quot;&quot;Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement dijkstra&quot;)</span>
+<span> </span>
+<span>def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:</span>
+<span>    &quot;&quot;&quot;Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement reconstruct_path&quot;)</span>
+<span> </span>
+<span>def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:</span>
+<span>    &quot;&quot;&quot;Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement topological_order&quot;)</span>
+<span> </span>
+<span>def largest_k(values, k: int) -&gt; list[float]:</span>
+<span>    &quot;&quot;&quot;Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement largest_k&quot;)</span>
+<span> </span>
+<span>def worked_examples():</span>
+<span>    graph={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)]}</span>
+<span>    assert len([&quot;a&quot;,&quot;b&quot;])-1==1</span>
+<span>    assert len([&quot;a&quot;,&quot;c&quot;,&quot;b&quot;])-1==2</span>
+<span>    assert 1.+1.&lt;10.</span>
+<span>    print(&quot;Fewest hops differs from lowest cost:1 edge costs10;2 edges cost2&quot;)</span>
+<span> </span>
+<span>    heap=[]</span>
+<span>    for value in [4.,1.,9.,3.,8.]:</span>
+<span>        if len(heap)&lt;3:</span>
+<span>            heapq.heappush(heap,value)</span>
+<span>        else:</span>
+<span>            heapq.heappushpop(heap,value)</span>
+<span>    assert sorted(heap,reverse=True)==[9.,8.,4.]</span>
+<span>    assert heap[0]==4.</span>
+<span>    print(&quot;Largest three:&quot;,sorted(heap,reverse=True))</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    worked_examples()</span>
+<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
+<span> </span>
+<span># Exercise 1: Validate the shortest-path assumptions</span>
+<span># Prompt: Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</span>
+<span># Expected: a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</span>
+<span> </span>
+<span># Exercise 2: Find minimum edge counts</span>
+<span># Prompt: Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</span>
+<span># Expected: For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</span>
+<span> </span>
+<span># Exercise 3: Use cumulative cost and skip stale entries</span>
+<span># Prompt: Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</span>
+<span># Expected: In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</span>
+<span> </span>
+<span># Exercise 4: Verify a route rather than only its score</span>
+<span># Prompt: Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</span>
+<span># Expected: Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</span>
+<span> </span>
+<span># Exercise 5: Order dependencies and expose cycles</span>
+<span># Prompt: Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</span>
+<span># Expected: a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</span>
+<span> </span>
+<span># Exercise 6: Transfer priority-queue reasoning to a stream</span>
+<span># Prompt: Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</span>
+<span># Expected: [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_algo_03_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_algo_03_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--python-algo-03-explained-reference-solutions">python-algo-03: Explained reference solutions<a class="heading-anchor" href="#solution-1--python-algo-03-explained-reference-solutions" aria-label="Link to this section">#</a></h3>
+<p>These answers implement the contracts in <a href="python-algo-03.html#guide">Graph Traversal, Priority Queues, and Shortest-Path Evidence</a>. Compare after an attempt. The <a href="python-algo-03.html#solution-2">executable reference</a> contains the complete implementations and assertions. Each answer explains the mechanism, not just the final value.</p>
+<h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-validate-the-shortest-path-assumptions">Exercise 1: Validate the shortest-path assumptions<a class="heading-anchor" href="#solution-1--exercise-1-validate-the-shortest-path-assumptions" aria-label="Link to this section">#</a></h5>
+<p>Require string vertex labels, edges to existing vertices and finite nonnegative numeric weights. Reject Boolean weights, missing neighbor vertices, negative weights and nonfinite weights with ValueError. Empty graphs are valid structures.</p>
+<p><strong>Expected:</strong> a-&gt;b with weight 2 passes when both vertices exist. Weight-1, NaN, True or an edge to absent z fails.</p>
+<pre><code class="language-python">def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:
+    if any(not isinstance(vertex,str) for vertex in graph):
+        raise ValueError(&quot;Vertex labels must be strings&quot;)
+    for edges in graph.values():
+        for neighbor,weight in edges:
+            if neighbor not in graph or isinstance(weight,bool) or not isinstance(weight,(int,float)) or not math.isfinite(weight) or weight&lt;0:
+                raise ValueError(&quot;Edges need existing vertices and finite nonnegative weights&quot;)</code></pre>
+<p>Validation establishes the assumptions used by the Dijkstra proof before any route is reported. Including every neighbor as an explicit vertex distinguishes an unreachable or terminal node from a misspelled label. A zero-weight edge is permitted and can be meaningful; a negative edge is rejected because it changes the algorithmic problem. The graph can contain cycles under these nonnegative weights, even though the later topological-order function will reject cycles for its own purpose.</p>
+<pre><code class="language-python">validate_graph({&quot;a&quot;:[(&quot;b&quot;,2.)],&quot;b&quot;:[]});validate_graph({})
+expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;z&quot;,1.)]}))
+expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,-1.)]}))
+expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,math.nan)]}))
+expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,True)]}))</code></pre>
+<h5 id="solution-1--exercise-2-find-minimum-edge-counts">Exercise 2: Find minimum edge counts<a class="heading-anchor" href="#solution-1--exercise-2-find-minimum-edge-counts" aria-label="Link to this section">#</a></h5>
+<p>Return minimum hop counts from start to reachable vertices using a deque frontier. Ignore edge magnitudes for this hop-count question, but validate graph and require start to exist. Do not include unreachable vertices in the result.</p>
+<p><strong>Expected:</strong> For a-&gt;b(weight 10), a-&gt;c(weight 1), c-&gt;b(weight 1), hops are a 0, b1, c1. An isolated d is absent; an unknown start raises ValueError.</p>
+<pre><code class="language-python">def bfs_hops(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; dict[str, int]:
+    validate_graph(graph)
+    if start not in graph:
+        raise ValueError(&quot;Start vertex is absent&quot;)
+    distance={start:0};frontier=deque([start])
+    while frontier:
+        vertex=frontier.popleft()
+        for neighbor,_ in graph[vertex]:
+            if neighbor not in distance:
+                distance[neighbor]=distance[vertex]+1
+                frontier.append(neighbor)
+    return distance</code></pre>
+<p>A FIFO queue processes all vertices at hop distance d before vertices at distance d+1. Marking a vertex when it is enqueued prevents duplicate frontier entries and ensures its first discovered hop count is minimal. Edge weights remain irrelevant by contract, so this result should not be relabeled as minimum travel cost. The isolated-node test verifies that reachability is represented honestly.</p>
+<pre><code class="language-python">g={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)],&quot;d&quot;:[]}
+assert bfs_hops(g,&quot;a&quot;)=={&quot;a&quot;:0,&quot;b&quot;:1,&quot;c&quot;:1}
+assert bfs_hops(g,&quot;d&quot;)=={&quot;d&quot;:0}
+expect_value_error(lambda:bfs_hops(g,&quot;z&quot;))</code></pre>
+<h5 id="solution-1--exercise-3-use-cumulative-cost-and-skip-stale-entries">Exercise 3: Use cumulative cost and skip stale entries<a class="heading-anchor" href="#solution-1--exercise-3-use-cumulative-cost-and-skip-stale-entries" aria-label="Link to this section">#</a></h5>
+<p>Return distances and parent links for every graph vertex using a min-heap and nonnegative weights. Unreachable vertices retain infinity and None. Push improved candidates and skip stale popped entries. Reject an absent start or cumulative-cost overflow.</p>
+<p><strong>Expected:</strong> In the a, b, c, d fixture, distances are a 0, c1, b2, d infinity and parent[b]=c. The earlier direct b cost 10 must not overwrite the improved cost 2.</p>
+<pre><code class="language-python">def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:
+    validate_graph(graph)
+    if start not in graph:
+        raise ValueError(&quot;Start vertex is absent&quot;)
+    distance={vertex:math.inf for vertex in graph};parent={vertex:None for vertex in graph}
+    distance[start]=0.;frontier=[(0.,start)]
+    while frontier:
+        cost,vertex=heapq.heappop(frontier)
+        if cost!=distance[vertex]:
+            continue
+        for neighbor,weight in graph[vertex]:
+            candidate=cost+weight
+            if not math.isfinite(candidate):
+                raise ValueError(&quot;Cumulative path cost exceeds finite floating range&quot;)
+            if candidate&lt;distance[neighbor]:
+                distance[neighbor]=candidate;parent[neighbor]=vertex
+                heapq.heappush(frontier,(candidate,neighbor))
+    return distance,parent</code></pre>
+<p>The heap initially contains a direct route to b costing ten, then receives a cheaper route costing two through c. The old entry remains but is ignored because it no longer matches the distance table. Parent links change only on strict improvement, retaining a deterministic route for this fixture. Nonnegative weights justify processing minimum known costs; removing the validation would invalidate that argument even if some negative-edge examples happened to work.</p>
+<pre><code class="language-python">distance,parent=dijkstra(g,&quot;a&quot;)
+assert distance[&quot;a&quot;]==0 and distance[&quot;c&quot;]==1 and distance[&quot;b&quot;]==2 and math.isinf(distance[&quot;d&quot;])
+assert parent[&quot;b&quot;]==&quot;c&quot; and parent[&quot;d&quot;] is None
+expect_value_error(lambda:dijkstra(g,&quot;z&quot;))
+expect_value_error(lambda:dijkstra({&quot;a&quot;:[(&quot;b&quot;,1e308)],&quot;b&quot;:[(&quot;c&quot;,1e308)],&quot;c&quot;:[]},&quot;a&quot;))</code></pre>
+<h5 id="solution-1--exercise-4-verify-a-route-rather-than-only-its-score">Exercise 4: Verify a route rather than only its score<a class="heading-anchor" href="#solution-1--exercise-4-verify-a-route-rather-than-only-its-score" aria-label="Link to this section">#</a></h5>
+<p>Reconstruct a start-to-goal path from parent links. Return None for an unreachable goal, return [start] when start equals goal, and reject absent vertices, unknown parent labels or a cycle encountered during reconstruction.</p>
+<p><strong>Expected:</strong> Parents from dijkstra produce[a, c, b] for a to b and None for a to d. A parent cycle x-&gt;y-&gt;x raises ValueError rather than looping.</p>
+<pre><code class="language-python">def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:
+    if start not in parent or goal not in parent:
+        raise ValueError(&quot;Start and goal must appear in the parent map&quot;)
+    path=[];seen=set();vertex=goal
+    while vertex!=start:
+        if vertex in seen or vertex not in parent:
+            raise ValueError(&quot;Parent chain contains a cycle or unknown vertex&quot;)
+        seen.add(vertex);path.append(vertex);vertex=parent[vertex]
+        if vertex is None:
+            return None
+    path.append(start)
+    return list(reversed(path))</code></pre>
+<p>A distance is a numerical claim; the path supplies concrete transitions that can be independently checked and summed. Walking backward follows the predecessor relation, and reversing restores travel order. None terminates an unreachable chain, while a visited set prevents malformed evidence from causing an infinite loop. A zero-edge start-to-itself path is valid and differs from no path, so the return values preserve that distinction.</p>
+<pre><code class="language-python">assert reconstruct_path(parent,&quot;a&quot;,&quot;b&quot;)==[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;]
+assert reconstruct_path(parent,&quot;a&quot;,&quot;d&quot;) is None and reconstruct_path(parent,&quot;a&quot;,&quot;a&quot;)==[&quot;a&quot;]
+expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;x&quot;:&quot;y&quot;,&quot;y&quot;:&quot;x&quot;},&quot;a&quot;,&quot;x&quot;))
+expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;b&quot;:&quot;missing&quot;},&quot;a&quot;,&quot;b&quot;))</code></pre>
+<h5 id="solution-1--exercise-5-order-dependencies-and-expose-cycles">Exercise 5: Order dependencies and expose cycles<a class="heading-anchor" href="#solution-1--exercise-5-order-dependencies-and-expose-cycles" aria-label="Link to this section">#</a></h5>
+<p>Return a topological order using indegrees and a heap of available string labels, choosing the lexicographically smallest available vertex. Include isolated vertices. Raise ValueError when a directed cycle prevents processing every vertex.</p>
+<p><strong>Expected:</strong> a-&gt;c, b-&gt;c plus isolated d yields [a, b, c, d]. Every edge source precedes its target. a-&gt;b, b-&gt;a raises ValueError; empty graph returns [].</p>
+<pre><code class="language-python">def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:
+    validate_graph(graph)
+    indegree={vertex:0 for vertex in graph}
+    for edges in graph.values():
+        for neighbor,_ in edges:
+            indegree[neighbor]+=1
+    frontier=[vertex for vertex,degree in indegree.items() if degree==0];heapq.heapify(frontier)
+    result=[]
+    while frontier:
+        vertex=heapq.heappop(frontier);result.append(vertex)
+        for neighbor,_ in graph[vertex]:
+            indegree[neighbor]-=1
+            if indegree[neighbor]==0:
+                heapq.heappush(frontier,neighbor)
+    if len(result)!=len(graph):
+        raise ValueError(&quot;A directed cycle prevents a topological order&quot;)
+    return result</code></pre>
+<p>Indegree counts unprocessed prerequisites. Only zero-indegree vertices are eligible, so removing one and updating its outgoing neighbors preserves dependency correctness. The heap adds a deterministic choice among eligible labels; it does not declare that this is the only valid topological order. If a cycle remains, no vertex within that cycle can become eligible, and the final count exposes the failure.</p>
+<pre><code class="language-python">dag={&quot;a&quot;:[(&quot;c&quot;,1.)],&quot;b&quot;:[(&quot;c&quot;,1.)],&quot;c&quot;:[],&quot;d&quot;:[]}
+order=topological_order(dag)
+assert order==[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;]
+position={vertex:index for index,vertex in enumerate(order)}
+assert all(position[source]&lt;position[target] for source,edges in dag.items() for target,_ in edges)
+expect_value_error(lambda:topological_order({&quot;a&quot;:[(&quot;b&quot;,1.)],&quot;b&quot;:[(&quot;a&quot;,1.)]}))
+assert topological_order({})==[]</code></pre>
+<h5 id="solution-1--exercise-6-transfer-priority-queue-reasoning-to-a-stream">Exercise 6: Transfer priority-queue reasoning to a stream<a class="heading-anchor" href="#solution-1--exercise-6-transfer-priority-queue-reasoning-to-a-stream" aria-label="Link to this section">#</a></h5>
+<p>Consume finite numeric values and retain the k largest values, including duplicates, using at most k heap entries. Return descending values. Require nonnegative non-Boolean integer k and reject nonfinite input; k0 still validates the input stream.</p>
+<p><strong>Expected:</strong> [4,1,9,3,8] with k3 gives [9,8,4]; [2,2,1] with k2 gives [2,2]. Empty input or k0 yields []; NaN raises ValueError.</p>
+<pre><code class="language-python">def largest_k(values, k: int) -&gt; list[float]:
+    if isinstance(k,bool) or not isinstance(k,int) or k&lt;0:
+        raise ValueError(&quot;Expected a nonnegative integer k&quot;)
+    heap=[]
+    for raw in values:
+        value=float(raw)
+        if not math.isfinite(value):
+            raise ValueError(&quot;Expected finite stream values&quot;)
+        if k==0:
+            continue
+        if len(heap)&lt;k:
+            heapq.heappush(heap,value)
+        else:
+            heapq.heappushpop(heap,value)
+    return sorted(heap,reverse=True)</code></pre>
+<p>Once the heap has k entries, its smallest candidate is the only one a new value can displace. heappushpop keeps the larger candidates without growing retained state beyond k. Duplicates remain because this is a multiset ranking task, not unique-value selection. Sorting only the final heap costs work in k rather than the full stream length. Input validation remains active even when no outputs are requested, avoiding a hidden bypass for malformed data.</p>
+<pre><code class="language-python">assert largest_k(iter([4,1,9,3,8]),3)==[9.,8.,4.]
+assert largest_k([2,2,1],2)==[2.,2.] and largest_k([],3)==[] and largest_k([1,2],0)==[]
+expect_value_error(lambda:largest_k([math.nan],0))
+expect_value_error(lambda:largest_k([1],True))</code></pre>
+<h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
+<p>Run <code>python python/professional/solutions/py_algo_03_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_algo_03_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_algo_03_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-algo-03.&quot;&quot;&quot;</span>
+<span> </span>
+<span>import math</span>
+<span>import heapq</span>
+<span>from collections import deque</span>
+<span> </span>
+<span>def validate_graph(graph: dict[str, list[tuple[str, float]]]) -&gt; None:</span>
+<span>    if any(not isinstance(vertex,str) for vertex in graph):</span>
+<span>        raise ValueError(&quot;Vertex labels must be strings&quot;)</span>
+<span>    for edges in graph.values():</span>
+<span>        for neighbor,weight in edges:</span>
+<span>            if neighbor not in graph or isinstance(weight,bool) or not isinstance(weight,(int,float)) or not math.isfinite(weight) or weight&lt;0:</span>
+<span>                raise ValueError(&quot;Edges need existing vertices and finite nonnegative weights&quot;)</span>
+<span> </span>
+<span>def bfs_hops(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; dict[str, int]:</span>
+<span>    validate_graph(graph)</span>
+<span>    if start not in graph:</span>
+<span>        raise ValueError(&quot;Start vertex is absent&quot;)</span>
+<span>    distance={start:0};frontier=deque([start])</span>
+<span>    while frontier:</span>
+<span>        vertex=frontier.popleft()</span>
+<span>        for neighbor,_ in graph[vertex]:</span>
+<span>            if neighbor not in distance:</span>
+<span>                distance[neighbor]=distance[vertex]+1</span>
+<span>                frontier.append(neighbor)</span>
+<span>    return distance</span>
+<span> </span>
+<span>def dijkstra(graph: dict[str, list[tuple[str, float]]], start: str) -&gt; tuple[dict[str, float], dict[str, str | None]]:</span>
+<span>    validate_graph(graph)</span>
+<span>    if start not in graph:</span>
+<span>        raise ValueError(&quot;Start vertex is absent&quot;)</span>
+<span>    distance={vertex:math.inf for vertex in graph};parent={vertex:None for vertex in graph}</span>
+<span>    distance[start]=0.;frontier=[(0.,start)]</span>
+<span>    while frontier:</span>
+<span>        cost,vertex=heapq.heappop(frontier)</span>
+<span>        if cost!=distance[vertex]:</span>
+<span>            continue</span>
+<span>        for neighbor,weight in graph[vertex]:</span>
+<span>            candidate=cost+weight</span>
+<span>            if not math.isfinite(candidate):</span>
+<span>                raise ValueError(&quot;Cumulative path cost exceeds finite floating range&quot;)</span>
+<span>            if candidate&lt;distance[neighbor]:</span>
+<span>                distance[neighbor]=candidate;parent[neighbor]=vertex</span>
+<span>                heapq.heappush(frontier,(candidate,neighbor))</span>
+<span>    return distance,parent</span>
+<span> </span>
+<span>def reconstruct_path(parent: dict[str, str | None], start: str, goal: str) -&gt; list[str] | None:</span>
+<span>    if start not in parent or goal not in parent:</span>
+<span>        raise ValueError(&quot;Start and goal must appear in the parent map&quot;)</span>
+<span>    path=[];seen=set();vertex=goal</span>
+<span>    while vertex!=start:</span>
+<span>        if vertex in seen or vertex not in parent:</span>
+<span>            raise ValueError(&quot;Parent chain contains a cycle or unknown vertex&quot;)</span>
+<span>        seen.add(vertex);path.append(vertex);vertex=parent[vertex]</span>
+<span>        if vertex is None:</span>
+<span>            return None</span>
+<span>    path.append(start)</span>
+<span>    return list(reversed(path))</span>
+<span> </span>
+<span>def topological_order(graph: dict[str, list[tuple[str, float]]]) -&gt; list[str]:</span>
+<span>    validate_graph(graph)</span>
+<span>    indegree={vertex:0 for vertex in graph}</span>
+<span>    for edges in graph.values():</span>
+<span>        for neighbor,_ in edges:</span>
+<span>            indegree[neighbor]+=1</span>
+<span>    frontier=[vertex for vertex,degree in indegree.items() if degree==0];heapq.heapify(frontier)</span>
+<span>    result=[]</span>
+<span>    while frontier:</span>
+<span>        vertex=heapq.heappop(frontier);result.append(vertex)</span>
+<span>        for neighbor,_ in graph[vertex]:</span>
+<span>            indegree[neighbor]-=1</span>
+<span>            if indegree[neighbor]==0:</span>
+<span>                heapq.heappush(frontier,neighbor)</span>
+<span>    if len(result)!=len(graph):</span>
+<span>        raise ValueError(&quot;A directed cycle prevents a topological order&quot;)</span>
+<span>    return result</span>
+<span> </span>
+<span>def largest_k(values, k: int) -&gt; list[float]:</span>
+<span>    if isinstance(k,bool) or not isinstance(k,int) or k&lt;0:</span>
+<span>        raise ValueError(&quot;Expected a nonnegative integer k&quot;)</span>
+<span>    heap=[]</span>
+<span>    for raw in values:</span>
+<span>        value=float(raw)</span>
+<span>        if not math.isfinite(value):</span>
+<span>            raise ValueError(&quot;Expected finite stream values&quot;)</span>
+<span>        if k==0:</span>
+<span>            continue</span>
+<span>        if len(heap)&lt;k:</span>
+<span>            heapq.heappush(heap,value)</span>
+<span>        else:</span>
+<span>            heapq.heappushpop(heap,value)</span>
+<span>    return sorted(heap,reverse=True)</span>
+<span> </span>
+<span>def expect_value_error(call):</span>
+<span>    try:</span>
+<span>        call()</span>
+<span>    except ValueError:</span>
+<span>        return</span>
+<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
+<span> </span>
+<span>def main():</span>
+<span>    # Exercise 1: Validate the shortest-path assumptions</span>
+<span>    validate_graph({&quot;a&quot;:[(&quot;b&quot;,2.)],&quot;b&quot;:[]});validate_graph({})</span>
+<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;z&quot;,1.)]}))</span>
+<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,-1.)]}))</span>
+<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,math.nan)]}))</span>
+<span>    expect_value_error(lambda:validate_graph({&quot;a&quot;:[(&quot;a&quot;,True)]}))</span>
+<span>    # Exercise 2: Find minimum edge counts</span>
+<span>    g={&quot;a&quot;:[(&quot;b&quot;,10.),(&quot;c&quot;,1.)],&quot;b&quot;:[],&quot;c&quot;:[(&quot;b&quot;,1.)],&quot;d&quot;:[]}</span>
+<span>    assert bfs_hops(g,&quot;a&quot;)=={&quot;a&quot;:0,&quot;b&quot;:1,&quot;c&quot;:1}</span>
+<span>    assert bfs_hops(g,&quot;d&quot;)=={&quot;d&quot;:0}</span>
+<span>    expect_value_error(lambda:bfs_hops(g,&quot;z&quot;))</span>
+<span>    # Exercise 3: Use cumulative cost and skip stale entries</span>
+<span>    distance,parent=dijkstra(g,&quot;a&quot;)</span>
+<span>    assert distance[&quot;a&quot;]==0 and distance[&quot;c&quot;]==1 and distance[&quot;b&quot;]==2 and math.isinf(distance[&quot;d&quot;])</span>
+<span>    assert parent[&quot;b&quot;]==&quot;c&quot; and parent[&quot;d&quot;] is None</span>
+<span>    expect_value_error(lambda:dijkstra(g,&quot;z&quot;))</span>
+<span>    expect_value_error(lambda:dijkstra({&quot;a&quot;:[(&quot;b&quot;,1e308)],&quot;b&quot;:[(&quot;c&quot;,1e308)],&quot;c&quot;:[]},&quot;a&quot;))</span>
+<span>    # Exercise 4: Verify a route rather than only its score</span>
+<span>    assert reconstruct_path(parent,&quot;a&quot;,&quot;b&quot;)==[&quot;a&quot;,&quot;c&quot;,&quot;b&quot;]</span>
+<span>    assert reconstruct_path(parent,&quot;a&quot;,&quot;d&quot;) is None and reconstruct_path(parent,&quot;a&quot;,&quot;a&quot;)==[&quot;a&quot;]</span>
+<span>    expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;x&quot;:&quot;y&quot;,&quot;y&quot;:&quot;x&quot;},&quot;a&quot;,&quot;x&quot;))</span>
+<span>    expect_value_error(lambda:reconstruct_path({&quot;a&quot;:None,&quot;b&quot;:&quot;missing&quot;},&quot;a&quot;,&quot;b&quot;))</span>
+<span>    # Exercise 5: Order dependencies and expose cycles</span>
+<span>    dag={&quot;a&quot;:[(&quot;c&quot;,1.)],&quot;b&quot;:[(&quot;c&quot;,1.)],&quot;c&quot;:[],&quot;d&quot;:[]}</span>
+<span>    order=topological_order(dag)</span>
+<span>    assert order==[&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;]</span>
+<span>    position={vertex:index for index,vertex in enumerate(order)}</span>
+<span>    assert all(position[source]&lt;position[target] for source,edges in dag.items() for target,_ in edges)</span>
+<span>    expect_value_error(lambda:topological_order({&quot;a&quot;:[(&quot;b&quot;,1.)],&quot;b&quot;:[(&quot;a&quot;,1.)]}))</span>
+<span>    assert topological_order({})==[]</span>
+<span>    # Exercise 6: Transfer priority-queue reasoning to a stream</span>
+<span>    assert largest_k(iter([4,1,9,3,8]),3)==[9.,8.,4.]</span>
+<span>    assert largest_k([2,2,1],2)==[2.,2.] and largest_k([],3)==[] and largest_k([1,2],0)==[]</span>
+<span>    expect_value_error(lambda:largest_k([math.nan],0))</span>
+<span>    expect_value_error(lambda:largest_k([1],True))</span>
+<span>    print(&quot;python-algo-03: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through python-algo-03: Graph Traversal, Priority Queues, and Shortest-Path Evidence.
+Read python/professional/companion-guides/py_algo_03.md and python/professional/lessons/py_algo_03.py. Direct prerequisites: python-algo-02.
+Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-algo-02.html"><small>Previous lesson</small><strong>python-algo-02</strong><span>Stable Ordering, Binary-Search Boundaries, and Merge Algorithms</span></a>
+        <a class="nav-card next" href="python-algo-04.html"><small>Next lesson</small><strong>python-algo-04</strong><span>Dynamic Programming, State Design, and Reconstructable Decisions</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-algo-03";
+    const LEARNER_PATH = "python/professional/lessons/py_algo_03.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

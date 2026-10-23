@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>torch-020: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>torch-020: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-pytorch/solutions/torch-020_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="torch-020-explanatory-solutions">torch-020: explanatory solutions<a class="heading-anchor" href="#torch-020-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>Pooling reduces local spatial information. Max pooling retains the largest response; average pooling uses every entry. Both can make certain perturbations less visible while also discarding potentially useful details. Augmentation changes training inputs under a declared label policy. A horizontal flip may preserve a shape label but reverse a left/right direction label. A transform&#x27;s availability in a library does not establish its validity for the task.</p>
+<p>This lesson uses only torch operations on literal images, not torch vision or a data download. Training transforms and evaluation transforms are separate functions. Evaluation remains deterministic. Random augmentation, when introduced, should use the intended random state and be tested by invariants rather than a hard coded cross-platform mask.</p>
+<p><strong>Pooling:</strong> A local reduction discarding spatial detail.</p>
+<p><strong>Augmentation:</strong> A training transform with a declared target policy.</p>
+<p><strong>Label invariance:</strong> The condition that the target remains valid after a transform.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.</p>
+<h3 id="exercise-1-compare-local-reductions">Exercise 1: Compare local reductions<a class="heading-anchor" href="#exercise-1-compare-local-reductions" aria-label="Link to this section">#</a></h3>
+<p>The question is: Pool patch1, 3; 2, 4 with a2x2window.</p>
+<p>The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.</p>
+<pre><code class="language-python">image=torch.tensor([[[[1.,3.],[2.,4.]]]])
+assert F.max_pool2d(image,2).item()==4 and F.avg_pool2d(image,2).item()==2.5</code></pre>
+<p><strong>Expected:</strong> max4; average2.5.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with max4; average2.5.</p>
+<h3 id="exercise-2-inspect-a-horizontal-flip">Exercise 2: Inspect a horizontal flip<a class="heading-anchor" href="#exercise-2-inspect-a-horizontal-flip" aria-label="Link to this section">#</a></h3>
+<p>The question is: Flip the width axis and read the pixel s.</p>
+<p>The last axis is the width under NCHW. Flipping the channel or height axis would be a different operation.</p>
+<pre><code class="language-python">flipped=torch.flip(image,dims=(-1,))
+assert flipped[0,0].tolist()==[[3.,1.],[4.,2.]]</code></pre>
+<p><strong>Expected:</strong> rows3, 1 and4, 2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with rows3, 1 and4, 2.</p>
+<h3 id="exercise-3-check-the-round-trip">Exercise 3: Check the round trip<a class="heading-anchor" href="#exercise-3-check-the-round-trip" aria-label="Link to this section">#</a></h3>
+<p>The question is: Flip the image horizontal l y twice.</p>
+<p>Reversibility is a useful indexing check, but does not prove the intermediate image has the original semantic label.</p>
+<pre><code class="language-python">assert torch.equal(torch.flip(flipped,dims=(-1,)),image)</code></pre>
+<p><strong>Expected:</strong> exact original values.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with exact original values.</p>
+<h3 id="exercise-4-expose-discarded-information">Exercise 4: Expose discarded information<a class="heading-anchor" href="#exercise-4-expose-discarded-information" aria-label="Link to this section">#</a></h3>
+<p>The question is: Change only the non maximum pixel1to0 and compare pool s.</p>
+<p>The perturbation is invisible to max pooling. That can be useful robustness or harmful information loss, depending on the task.</p>
+<pre><code class="language-python">changed=image.clone(); changed[0,0,0,0]=0
+assert F.max_pool2d(changed,2).item()==4 and F.avg_pool2d(changed,2).item()==2.25</code></pre>
+<p><strong>Expected:</strong> max still4; average2.25.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with max still4; average2.25.</p>
+<h3 id="exercise-5-keep-evaluation-transforms-deterministic">Exercise 5: Keep evaluation transforms deterministic<a class="heading-anchor" href="#exercise-5-keep-evaluation-transforms-deterministic" aria-label="Link to this section">#</a></h3>
+<p>The question is: Define a transform that flips only in training and returns an owned copy in evaluation.</p>
+<p>A clear branch makes mode behavior reviewable. The owned copy also prevents downstream mutation from changing the original fixture.</p>
+<pre><code class="language-python">def transform(value,training): return torch.flip(value,(-1,)) if training else value.clone()
+evaluated=transform(image,False); assert torch.equal(evaluated,image)
+evaluated[0,0,0,0]=99; assert image[0,0,0,0].item()==1</code></pre>
+<p><strong>Expected:</strong> evaluation equals source and does not alias it.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with evaluation equals source and does not alias it.</p>
+<h3 id="exercise-6-transform-directional-labels-consistently">Exercise 6: Transform directional labels consistently<a class="heading-anchor" href="#exercise-6-transform-directional-labels-consistently" aria-label="Link to this section">#</a></h3>
+<p>The question is: Map left to right under horizontal reflect i on and check the inverse.</p>
+<p>A valid augmentation can transform the target rather than preserve it, but that mapping must be explicit. Keeping the left label after a flip would teach contradictory examples.</p>
+<pre><code class="language-python">labels={&#x27;left&#x27;:&#x27;right&#x27;,&#x27;right&#x27;:&#x27;left&#x27;}
+assert labels[&#x27;left&#x27;]==&#x27;right&#x27; and labels[labels[&#x27;left&#x27;]]==&#x27;left&#x27;</code></pre>
+<p><strong>Expected:</strong> left-&gt;right-&gt;left.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with left-&gt;right-&gt;left.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

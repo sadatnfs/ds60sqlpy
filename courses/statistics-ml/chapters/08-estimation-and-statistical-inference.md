@@ -184,6 +184,44 @@ Resample contiguous blocks to retain local dependence. Block length trades depen
 
 Multiply residuals by random mean-zero weights while preserving the design. Wild bootstrap methods can address heteroskedastic regression settings; cluster variants require cluster-level multipliers and appropriate small-cluster care.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: confidence coverage is a property of a procedure
+
+Imagine repeatedly drawing n independent normal observations from a population with mean mu and known SD sigma. For each sample, form mean(X) plus or minus 1.96*sigma/sqrt(n). Across repetitions, approximately 95% of these intervals contain the fixed mu. Each realized interval either contains mu or does not; the frequency statement refers to the procedure under its assumptions.
+
+A simulation with a known generating mean can check whether the implemented procedure has the expected repeated-sampling behavior. It does not prove coverage for a different distribution, dependence structure or selection process. If the analyst repeatedly inspects intervals and stops when one excludes zero, the reported interval belongs to a different procedure and ordinary fixed-sample coverage need not hold.
+
+A Bayesian credible interval can assign posterior probability to a parameter region because the parameter has a probability distribution within that model. Its frequentist coverage may be good, poor or calibrated under particular priors and models. Similar-looking intervals do not erase the distinction between their interpretations.
+
+### Case study: derive the delta method for a rate ratio
+
+Let estimates A and B have a joint approximate normal distribution with covariance matrix Sigma. For g(A,B)=A/B, the gradient is (1/B,-A/B-squared). The approximate variance is gradient-transpose Sigma gradient. Expanding it produces a numerator variance term, denominator variance term and a covariance term. Ignoring covariance can substantially change the standard error when numerator and denominator arise from the same units.
+
+The approximation is local. If B is near zero or highly uncertain, the ratio distribution can be skewed or have extreme tails, and a symmetric normal interval may be misleading. Fieller-type reasoning, transformations, likelihood methods or a carefully designed bootstrap may be more appropriate depending on the problem. The choice follows the denominator behavior and target, not a rule that bootstrap always fixes ratios.
+
+For g(theta)=log(theta), the derivative is 1/theta, so the approximate SE is SE(theta)/theta. This provides a route to multiplicative intervals, but only when theta is positive and the local approximation is adequate. Reporting a transformed estimate requires explaining whether it targets a transformed parameter or a transformed future observation.
+
+### Case study: choose the bootstrap's unit and generating world
+
+A dataset contains several visits per customer. Resampling visits independently produces pseudo-samples with an unrealistic amount of independent information. Resampling customers with all their visits preserves some within-customer dependence and better matches a customer-sampling process. For time series, blocks preserve local serial relationships, with block length governing a bias-variance tradeoff.
+
+A parametric bootstrap fits a model, simulates new data from it and refits the entire analysis. It can handle a statistic whose analytic sampling distribution is awkward, but it assumes the fitted model captures the relevant generating process. A nonparametric bootstrap resamples the empirical distribution and relies on its own approximation conditions. Neither observes unseen selection mechanisms or hidden confounders.
+
+Extreme statistics can be difficult because the empirical distribution cannot generate values beyond the observed range. The ordinary bootstrap for a sample maximum is a standard warning about nonregular behavior. Smooth means and regression contrasts often have better bootstrap approximations under suitable conditions, but diagnostics and design knowledge still matter.
+
+### Case study: a robust standard error cannot repair a biased coefficient
+
+Suppose a linear regression omits a nonlinear trend that is correlated with a treatment indicator. Heteroskedasticity-robust covariance can estimate uncertainty around the fitted linear projection under its assumptions. It does not make that projection equal the causal treatment effect or the correctly specified conditional mean.
+
+Cluster-robust covariance similarly aggregates dependence within groups while relying on enough independent clusters for its approximation. A thousand rows in four clusters do not justify treating the number of rows as the asymptotic sample size. Small-cluster corrections or design-based methods may be needed, and sometimes the honest interval remains wide.
+
+Separate the target's identification, the estimator's bias, the covariance approximation and numerical computation. A single robust flag in software changes only part of this chain. A scientific review should ask which failure mode the adjustment addresses and which important uncertainties remain outside the reported interval.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_08.py](../examples/chapter_08.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -199,6 +237,10 @@ For five normal-model observations, both intervals use a t critical value with f
 ### Resampling and local propagation
 
 The bootstrap repeatedly samples from the empirical distribution, whose variance uses divisor n, and its simulated SE is compared with that exact conditional target. The delta method uses the derivative of log(theta), 1/theta, so variance 0.25 at theta 4 yields log-scale SE 0.125.
+
+### Check an interval procedure over repeated samples
+
+Five thousand independent samples are drawn from a known normal population with mean three and SD two. The known-SD interval contains the true mean close to 95% of the time, within four Monte Carlo standard errors. This tests the implemented procedure under its generating assumptions and keeps simulation error separate from inferential uncertainty.
 
 ### Complete executable example
 
@@ -227,7 +269,19 @@ def bootstrap_and_delta():
     assert log_se == .125
     print("Bootstrap SE:", means.std(ddof=1), "delta log SE:", log_se)
 
+def repeated_sample_coverage():
+    rng=np.random.default_rng(808)
+    samples=rng.normal(loc=3.,scale=2.,size=(5000,20))
+    means=samples.mean(axis=1)
+    halfwidth=stats.norm.ppf(.975)*2/np.sqrt(20)
+    coverage=np.mean(np.abs(means-3)<=halfwidth)
+    monte_carlo_se=np.sqrt(.95*.05/len(means))
+    assert abs(coverage-.95)<4*monte_carlo_se
+    assert halfwidth<stats.norm.ppf(.975)*2
+    print("Repeated-sample coverage:",coverage,"Monte Carlo SE near target:",monte_carlo_se)
+
 def main():
+    repeated_sample_coverage()
     mean_and_prediction()
     bootstrap_and_delta()
 

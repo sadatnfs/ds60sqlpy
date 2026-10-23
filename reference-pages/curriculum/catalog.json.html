@@ -132,7 +132,23 @@
 <span>      &quot;plan&quot;: &quot;bridge/README.md&quot;</span>
 <span>    }</span>
 <span>  },</span>
-<span>  &quot;learning_paths&quot;: {},</span>
+<span>  &quot;learning_paths&quot;: {</span>
+<span>    &quot;python-data-mechanics&quot;: {</span>
+<span>      &quot;title&quot;: &quot;NumPy and pandas data mechanics&quot;,</span>
+<span>      &quot;description&quot;: &quot;Trace ownership, numerical stability, label alignment, temporal lookup and chunked reductions with exact evidence.&quot;,</span>
+<span>      &quot;targets&quot;: [</span>
+<span>        &quot;python-numpy-04&quot;,</span>
+<span>        &quot;python-pandas-04&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    &quot;algorithmic-reasoning&quot;: {</span>
+<span>      &quot;title&quot;: &quot;Algorithmic reasoning and reconstructable decisions&quot;,</span>
+<span>      &quot;description&quot;: &quot;Progress from hash indexes and stable ordering to graph search and dynamic programming with checked counterexamples.&quot;,</span>
+<span>      &quot;targets&quot;: [</span>
+<span>        &quot;python-algo-04&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  },</span>
 <span>  &quot;lessons&quot;: [</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;python-01&quot;,</span>
@@ -1756,6 +1772,367 @@
 <span>        &quot;python/professional/solutions/py_pro_03_restartable_file_pipeline_solution.py&quot;</span>
 <span>      ],</span>
 <span>      &quot;runner&quot;: &quot;python&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-numpy-01&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 74,</span>
+<span>      &quot;title&quot;: &quot;NumPy Memory Ownership, Strides, and Safe Mutation&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-16&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_numpy_01.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_numpy_01.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_numpy_01_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_numpy_01_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;numpy&quot;,</span>
+<span>        &quot;memory&quot;,</span>
+<span>        &quot;ownership&quot;,</span>
+<span>        &quot;strides&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;safe&quot;,</span>
+<span>        &quot;mutation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-numpy-02&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 75,</span>
+<span>      &quot;title&quot;: &quot;Axes, Broadcasting, and Batched Linear Algebra&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-numpy-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_numpy_02.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_numpy_02.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_numpy_02_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_numpy_02_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;axes&quot;,</span>
+<span>        &quot;broadcasting&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;batched&quot;,</span>
+<span>        &quot;linear&quot;,</span>
+<span>        &quot;algebra&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-numpy-03&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 76,</span>
+<span>      &quot;title&quot;: &quot;Gather, Scatter, Masks, and Deterministic Selection&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-numpy-02&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_numpy_03.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_numpy_03.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_numpy_03_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_numpy_03_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;gather&quot;,</span>
+<span>        &quot;scatter&quot;,</span>
+<span>        &quot;masks&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;deterministic&quot;,</span>
+<span>        &quot;selection&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-numpy-04&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 77,</span>
+<span>      &quot;title&quot;: &quot;Stable Numerical Computation and Honest Error Bounds&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-numpy-03&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_numpy_04.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_numpy_04.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_numpy_04_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_numpy_04_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;stable&quot;,</span>
+<span>        &quot;numerical&quot;,</span>
+<span>        &quot;computation&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;honest&quot;,</span>
+<span>        &quot;error&quot;,</span>
+<span>        &quot;bounds&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-pandas-01&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 78,</span>
+<span>      &quot;title&quot;: &quot;pandas Label Alignment, Nullable Logic, and Safe Assignment&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-20&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_pandas_01.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_pandas_01.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_pandas_01_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_pandas_01_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;pandas&quot;,</span>
+<span>        &quot;label&quot;,</span>
+<span>        &quot;alignment&quot;,</span>
+<span>        &quot;nullable&quot;,</span>
+<span>        &quot;logic&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;safe&quot;,</span>
+<span>        &quot;assignment&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-pandas-02&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 79,</span>
+<span>      &quot;title&quot;: &quot;Join Contracts and Point-in-Time Feature Lookup&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-pandas-01&quot;,</span>
+<span>        &quot;python-21&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_pandas_02.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_pandas_02.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_pandas_02_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_pandas_02_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;join&quot;,</span>
+<span>        &quot;contracts&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;point-in-time&quot;,</span>
+<span>        &quot;feature&quot;,</span>
+<span>        &quot;lookup&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-pandas-03&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 80,</span>
+<span>      &quot;title&quot;: &quot;Grouped Transforms, Temporal Windows, and Session Boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-pandas-02&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_pandas_03.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_pandas_03.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_pandas_03_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_pandas_03_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;grouped&quot;,</span>
+<span>        &quot;transforms&quot;,</span>
+<span>        &quot;temporal&quot;,</span>
+<span>        &quot;windows&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;session&quot;,</span>
+<span>        &quot;boundaries&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-pandas-04&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 81,</span>
+<span>      &quot;title&quot;: &quot;Chunked Data, Global Reductions, and Cross-Batch State&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-pandas-03&quot;,</span>
+<span>        &quot;python-23&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_pandas_04.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_pandas_04.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_pandas_04_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_pandas_04_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;data&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;chunked&quot;,</span>
+<span>        &quot;data&quot;,</span>
+<span>        &quot;global&quot;,</span>
+<span>        &quot;reductions&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;cross-batch&quot;,</span>
+<span>        &quot;state&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-algo-01&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 82,</span>
+<span>      &quot;title&quot;: &quot;Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-06&quot;,</span>
+<span>        &quot;python-10&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_algo_01.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_algo_01.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_algo_01_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_algo_01_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;algorithmic&quot;,</span>
+<span>        &quot;cost&quot;,</span>
+<span>        &quot;hash&quot;,</span>
+<span>        &quot;indexes&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;duplicate-aware&quot;,</span>
+<span>        &quot;matching&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-algo-02&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 83,</span>
+<span>      &quot;title&quot;: &quot;Stable Ordering, Binary-Search Boundaries, and Merge Algorithms&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-algo-01&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_algo_02.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_algo_02.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_algo_02_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_algo_02_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;stable&quot;,</span>
+<span>        &quot;ordering&quot;,</span>
+<span>        &quot;binary-search&quot;,</span>
+<span>        &quot;boundaries&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;merge&quot;,</span>
+<span>        &quot;algorithms&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-algo-03&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 84,</span>
+<span>      &quot;title&quot;: &quot;Graph Traversal, Priority Queues, and Shortest-Path Evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-algo-02&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_algo_03.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_algo_03.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_algo_03_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_algo_03_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;graph&quot;,</span>
+<span>        &quot;traversal&quot;,</span>
+<span>        &quot;priority&quot;,</span>
+<span>        &quot;queues&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;shortest-path&quot;,</span>
+<span>        &quot;evidence&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;python-algo-04&quot;,</span>
+<span>      &quot;track&quot;: &quot;python&quot;,</span>
+<span>      &quot;day&quot;: 85,</span>
+<span>      &quot;title&quot;: &quot;Dynamic Programming, State Design, and Reconstructable Decisions&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;phase&quot;: &quot;Python data mechanics and algorithmic reasoning&quot;,</span>
+<span>      &quot;estimated_minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-algo-03&quot;</span>
+<span>      ],</span>
+<span>      &quot;lesson_path&quot;: &quot;python/professional/lessons/py_algo_04.py&quot;,</span>
+<span>      &quot;guide_path&quot;: &quot;python/professional/companion-guides/py_algo_04.md&quot;,</span>
+<span>      &quot;solution_paths&quot;: [</span>
+<span>        &quot;python/professional/solutions/py_algo_04_solutions.md&quot;,</span>
+<span>        &quot;python/professional/solutions/py_algo_04_solution.py&quot;</span>
+<span>      ],</span>
+<span>      &quot;dependency_group&quot;: &quot;core&quot;,</span>
+<span>      &quot;network&quot;: &quot;offline&quot;,</span>
+<span>      &quot;runner&quot;: &quot;python&quot;,</span>
+<span>      &quot;topics&quot;: [</span>
+<span>        &quot;dynamic&quot;,</span>
+<span>        &quot;programming&quot;,</span>
+<span>        &quot;state&quot;,</span>
+<span>        &quot;design&quot;,</span>
+<span>        &quot;and&quot;,</span>
+<span>        &quot;reconstructable&quot;,</span>
+<span>        &quot;decisions&quot;</span>
+<span>      ]</span>
 <span>    },</span>
 <span>    {</span>
 <span>      &quot;id&quot;: &quot;sql-start-01&quot;,</span>

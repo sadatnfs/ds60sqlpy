@@ -186,6 +186,44 @@ Factorial or otherwise planned overlap can reveal whether interventions amplify 
 
 Coordinate eligibility layers, shared holdouts, metric definitions, sequential rules and owners. Governance preserves interpretation across many studies. A portfolio optimized only for number of significant wins invites selection and reproducibility problems.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: a conversion lift caused by logging
+
+A control arm logs all eligible users, while a new treatment page drops some failed visits before the exposure event is emitted. Conversion among logged exposed users rises, even if no customer's purchase behavior improves. The observed denominator is now affected by treatment and correlated with outcome. Randomization at assignment remains valid, but the exposed-only analysis no longer compares equivalent populations.
+
+An intent-to-treat analysis beginning from assignment logs can reveal the issue if outcome collection remains complete. Compare assignment counts, exposure rates, event funnels and missing outcomes by arm and device. A sample-ratio mismatch in the exposed population is diagnostic evidence, not a standalone estimate of the resulting bias. Repair the measurement path and preserve both the original and corrected definitions so the result can be reconstructed.
+
+Triggered analysis can be valid when a trigger identifies a relevant opportunity independently of assignment, or when a carefully designed counterfactual trigger is recorded symmetrically. It is not valid merely because the remaining users look engaged. The important distinction is whether treatment changed entry into the analyzed subset.
+
+### Case study: CUPED with incomplete prehistory
+
+Existing users have a previous-month activity measure that strongly predicts experiment activity. New users have no preperiod record. Dropping new users yields a different population; filling their covariate with zero treats absence of history as genuine zero activity. A practical design can include a missing-history indicator and define adjustment separately or model the baseline information available for each group.
+
+CUPED's ideal variance reduction factor 1-rho-squared describes a linear adjustment with the relevant covariance. If rho=.8, the remaining variance is .36 of the original, which can substantially improve precision. That does not imply every metric or user segment receives the same gain. Sparse counts, outliers and low pre/post correlation may yield little benefit. Estimate and validate the adjustment without permitting outcome-informed exclusion rules or future data to enter the baseline.
+
+The adjustment coefficient can be estimated from pooled data with an appropriate analysis, from a separate historical sample, or using cross-fitting in more flexible variants. The precise inferential treatment should follow the implemented estimator. The central scientific condition is that the covariate precedes and is unaffected by the intervention, not that it happens to have a column name containing pre.
+
+### Case study: ratios can hide a beneficial or harmful total change
+
+An interface reduces low-value browsing sessions, leaving total purchases unchanged while sessions fall. Purchases per session rises. This could indicate improved efficiency, but it does not establish higher total customer value. Conversely, a feature may attract exploratory sessions that lower conversion per session while increasing total purchases and long-term retention.
+
+Define the primary estimand before choosing which ratio to celebrate. Revenue per assigned user, revenue per exposed user and revenue per session have different denominators, causal interpretations and sensitivity to behavior changes. Analyze numerator and denominator components alongside the ratio. The delta-method covariance term matters because high-activity users can contribute large values to both.
+
+When ratios have rare or zero denominators, inspect the distribution of unit contributions. A few power users can dominate a ratio of totals, while averaging unit ratios can overemphasize users with one opportunity. Resampling must preserve the randomized unit and the joint numerator-denominator record. A simple standard error computed on individual sessions may badly understate uncertainty in a user-randomized study.
+
+### Case study: rollout effects differ from mixed-experiment effects
+
+A marketplace search change improves the chance that treated buyers obtain scarce inventory. Control buyers may then lose access to that inventory. The treatment-control contrast measures an effect within a mixed marketplace at that saturation, not necessarily the effect of treating every buyer. Full rollout removes the same competitive comparison and can shift seller behavior, pricing or supply.
+
+Choose a design that addresses the desired policy, such as geographic or market clusters, time-based switchbacks with adequate washout, or explicit saturation experiments. Each introduces its own costs: few clusters, serial dependence, spillovers across boundaries or carryover. Document the exposure mapping and the target equilibrium or short-run effect. Statistical precision is secondary if the experiment does not represent the rollout question.
+
+Long-term holdouts and cohort analyses help assess novelty, learning and cumulative harms, but their populations must remain comparable as users enter, leave and cross devices. A persistent identifier policy is part of study validity. A short-term surrogate should be validated against the outcome that ultimately matters across relevant interventions, not only shown to correlate with it among users.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_14.py](../examples/chapter_14.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

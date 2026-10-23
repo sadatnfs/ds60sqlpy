@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>13. Classical Experimental Design · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>13. Classical Experimental Design</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/13-classical-experimental-design.md</code></p>
+    </header>
+    <article class="document"><h2 id="13-classical-experimental-design">13. Classical Experimental Design<a class="heading-anchor" href="#13-classical-experimental-design" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-013</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>An experiment creates information through controlled variation. Randomization breaks systematic relationships between assignment and pre-existing potential outcomes in expectation; it does not guarantee perfect balance in every realized sample. Blocking uses known prognostic differences to improve precision before assignment. Replication estimates noise, and independent randomization units determine how much information an experiment contains.</p>
+<h4 id="main-effects-and-interactions">Main effects and interactions<a class="heading-anchor" href="#main-effects-and-interactions" aria-label="Link to this section">#</a></h4>
+<p>For two factors coded A,B in {-1,+1}, write E[Y]=beta0+betaA<em>A+betaB</em>B+betaAB<em>A</em>B. Moving A from -1 to +1 at fixed B changes the response by 2<em>betaA+2</em>betaAB<em>B. The average main effect of A across balanced B levels is 2</em>betaA. A factorial experiment estimates interactions because it varies combinations, unlike changing one factor while holding all others at a baseline.</p>
+<p>A fractional design saves runs by deliberately losing distinctions. If a third factor C is assigned as A*B, the C column equals the AB interaction column, so their effects are aliased. No regression package can separate them from that design alone. The scientific assumption that one is negligible creates the interpretation.</p>
+<h4 id="design-precision-before-collection">Design precision before collection<a class="heading-anchor" href="#design-precision-before-collection" aria-label="Link to this section">#</a></h4>
+<p>For independent groups of equal size n and common SD sigma, the difference in means has SE=sigma<em>sqrt(2/n). A rough two-sided normal approximation gives n=2</em>sigma^2*(z_(1-alpha/2)+z_power)^2/delta^2 per group. This shows why halving the target effect needs about four times the sample. Clustering, attrition, unequal allocation and multiplicity must be added to the design, and simulation can evaluate realistic departures.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-13-01">Randomized controlled trials<a class="heading-anchor" href="#stat-13-01" aria-label="Link to this section">#</a></h4>
+<p>Assign interventions using a known random mechanism and analyze the assignment-defined population. Randomization supports exchangeability in expectation, while consistency, interference, missing outcomes and adherence still determine the causal interpretation.</p>
+<h4 id="stat-13-02">Complete randomization<a class="heading-anchor" href="#stat-13-02" aria-label="Link to this section">#</a></h4>
+<p>Assign a fixed count of units to each arm uniformly over allowed allocations. This controls total allocation but can leave chance covariate imbalance. Use the same allocation space in randomization-based inference.</p>
+<h4 id="stat-13-03">Blocked randomization<a class="heading-anchor" href="#stat-13-03" aria-label="Link to this section">#</a></h4>
+<p>Form blocks using pretreatment prognostic variables, then randomize within them. Analyze with block awareness. Blocking on too many tiny categories can constrain assignment and complicate generalization.</p>
+<h4 id="stat-13-04">Matched-pair randomization<a class="heading-anchor" href="#stat-13-04" aria-label="Link to this section">#</a></h4>
+<p>Create similar pairs and randomly treat one member of each. Analyze within-pair contrasts and retain pair identifiers. Matching quality affects precision; treatment-dependent pairing would undermine the design.</p>
+<h4 id="stat-13-05">Cluster randomized trials<a class="heading-anchor" href="#stat-13-05" aria-label="Link to this section">#</a></h4>
+<p>Randomize groups to reduce contamination or respect operational delivery. Effective sample size depends strongly on cluster count and correlation. Account for unequal cluster sizes and whether the estimand weights clusters or individuals.</p>
+<h4 id="stat-13-06">Stratified randomization<a class="heading-anchor" href="#stat-13-06" aria-label="Link to this section">#</a></h4>
+<p>Randomize separately within prespecified strata to maintain balance on important categories. Unlike outcome-driven subgroup selection, strata precede treatment. Preserve their allocation probabilities and population weights in analysis.</p>
+<h4 id="stat-13-07">Factorial designs<a class="heading-anchor" href="#stat-13-07" aria-label="Link to this section">#</a></h4>
+<p>Vary all combinations of factor levels to estimate main and interaction effects efficiently. Balance provides useful orthogonality. Factorial main effects average over the other factor settings used in the design.</p>
+<h4 id="stat-13-08">Fractional factorial designs<a class="heading-anchor" href="#stat-13-08" aria-label="Link to this section">#</a></h4>
+<p>Select a principled subset of factorial combinations to reduce runs. The defining relation determines aliases and design resolution. A small experiment cannot estimate all effects merely by fitting a larger formula.</p>
+<h4 id="stat-13-09">Aliasing and confounding in designs<a class="heading-anchor" href="#stat-13-09" aria-label="Link to this section">#</a></h4>
+<p>Effects are aliased when their design columns are identical or linearly dependent. Confounding is then structural rather than a high correlation warning. Additional runs or substantive zero-effect assumptions are needed to separate them.</p>
+<h4 id="stat-13-10">Split-plot designs<a class="heading-anchor" href="#stat-13-10" aria-label="Link to this section">#</a></h4>
+<p>Randomize hard-to-change factors at whole-plot level and easier factors within plots. Different effects use different error strata. Treating all runs as independently assigned overstates precision for whole-plot factors.</p>
+<h4 id="stat-13-11">Latin square designs<a class="heading-anchor" href="#stat-13-11" aria-label="Link to this section">#</a></h4>
+<p>Arrange treatments so each occurs once in every row and column block. This controls two nuisance dimensions efficiently but assumes the relevant interaction structure is manageable. Randomize the permissible layout.</p>
+<h4 id="stat-13-12">Crossover designs<a class="heading-anchor" href="#stat-13-12" aria-label="Link to this section">#</a></h4>
+<p>Each unit receives multiple treatments in a randomized sequence across periods. Within-unit comparison improves precision when carryover is absent or modeled. Period effects and informative dropout can invalidate simple differences.</p>
+<h4 id="stat-13-13">Washout periods<a class="heading-anchor" href="#stat-13-13" aria-label="Link to this section">#</a></h4>
+<p>Allow enough time between treatments for relevant effects to dissipate. The duration must follow domain knowledge or evidence; a calendar gap alone does not prove carryover disappeared.</p>
+<h4 id="stat-13-14">Carryover effects<a class="heading-anchor" href="#stat-13-14" aria-label="Link to this section">#</a></h4>
+<p>Earlier treatment changes later responses beyond the current treatment. Detecting no significant carryover in a small study is weak assurance. Consider parallel designs when persistent effects are plausible.</p>
+<h4 id="stat-13-15">Stepped-wedge designs<a class="heading-anchor" href="#stat-13-15" aria-label="Link to this section">#</a></h4>
+<p>Randomize when clusters adopt an intervention, often eventually treating all. Calendar time can confound treatment exposure, so model secular trends and cluster dependence. Effects may vary with time since adoption.</p>
+<h4 id="stat-13-16">Response surface methodology<a class="heading-anchor" href="#stat-13-16" aria-label="Link to this section">#</a></h4>
+<p>Use local polynomial response models to search favorable factor settings. Start near a credible region and iterate; a fitted optimum outside the experimental range is unsupported extrapolation.</p>
+<h4 id="stat-13-17">Central composite designs<a class="heading-anchor" href="#stat-13-17" aria-label="Link to this section">#</a></h4>
+<p>Combine factorial points, center replicates and axial points to estimate quadratic curvature. Axial distance influences rotatability and feasible operating ranges. Repeated center points help assess pure error and lack of fit.</p>
+<h4 id="stat-13-18">Box–Behnken designs<a class="heading-anchor" href="#stat-13-18" aria-label="Link to this section">#</a></h4>
+<p>Use mid-edge combinations and center points for quadratic models without all extreme corners. This can avoid dangerous joint extremes, but omitted corners limit information about behavior there.</p>
+<h4 id="stat-13-19">Optimal experimental design<a class="heading-anchor" href="#stat-13-19" aria-label="Link to this section">#</a></h4>
+<p>Choose runs to maximize an information criterion under a specified model and feasible region. The optimal design is model-dependent; robust or sequential designs may be preferable when the response structure is uncertain.</p>
+<h4 id="stat-13-20">D-optimal design<a class="heading-anchor" href="#stat-13-20" aria-label="Link to this section">#</a></h4>
+<p>Maximize the determinant of X-transpose X, reducing the volume of a coefficient uncertainty ellipsoid under the model. A singular information matrix cannot estimate all coefficients, regardless of its individual diagonal entries.</p>
+<h4 id="stat-13-21">A-optimal design<a class="heading-anchor" href="#stat-13-21" aria-label="Link to this section">#</a></h4>
+<p>Minimize the trace of the inverse information matrix, targeting average coefficient variance. Parameter scaling affects this criterion, so choose scientifically meaningful units or standardized contrasts.</p>
+<h4 id="stat-13-22">Power and sample-size analysis<a class="heading-anchor" href="#stat-13-22" aria-label="Link to this section">#</a></h4>
+<p>Specify effect, variability, alpha, power, allocation and independent units before sizing. Small-cluster or rare-event settings often need simulation instead of a simple normal approximation.</p>
+<h4 id="stat-13-23">Simulation-based design<a class="heading-anchor" href="#stat-13-23" aria-label="Link to this section">#</a></h4>
+<p>Generate outcomes and assignment under realistic scenarios, analyze each with the planned method, and estimate operating characteristics. Include failure scenarios and Monte Carlo error; simulation proves only the scenarios implemented.</p>
+<h4 id="stat-13-24">Blinding<a class="heading-anchor" href="#stat-13-24" aria-label="Link to this section">#</a></h4>
+<p>Conceal assignment from participants, operators or assessors where feasible to reduce expectation and measurement effects. Blinding differs from allocation concealment before enrollment, and both address distinct bias pathways.</p>
+<h4 id="stat-13-25">Preregistration and analysis plans<a class="heading-anchor" href="#stat-13-25" aria-label="Link to this section">#</a></h4>
+<p>Prespecify estimands, metrics, exclusions, sample size, stopping and multiplicity before outcomes are inspected. Amendments can be valid when transparently dated and justified; concealment of outcome-informed changes undermines confirmation.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-optimize-a-process-without-confounding-factors">Case study: optimize a process without confounding factors<a class="heading-anchor" href="#case-study-optimize-a-process-without-confounding-factors" aria-label="Link to this section">#</a></h4>
+<p>A manufacturing team can change temperature and pressure, each at two settings. Changing temperature first at low pressure, then pressure at high temperature, confounds the pressure comparison with the changed temperature setting. A full two-by-two factorial measures all combinations, allowing a direct interaction contrast: the temperature effect at high pressure minus its effect at low pressure.</p>
+<p>Suppose the four means at (low,low), (high,low), (low,high), (high,high) are 10,12,13,23. Temperature adds two at low pressure but ten at high pressure, so the interaction contrast is eight. Averaging temperature over equal pressure weights gives a main effect six. A one-factor-at-a-time conclusion that temperature adds two would miss the operating region with the largest benefit. Whether that region is safe and feasible remains an engineering constraint, not a statistical property of the fitted surface.</p>
+<p>Replication at the same setting estimates noise, while varying settings identifies response structure. Repeating one corner 100 times does not identify a quadratic response over the entire region. Center points help reveal curvature, and a response-surface design adds settings to estimate it. If extreme corners are unsafe, a Box-Behnken design may be attractive, but conclusions about those omitted extremes remain limited. Optimal design should include the feasible region explicitly rather than suggest settings the process cannot tolerate.</p>
+<h4 id="case-study-randomize-at-the-level-where-intervention-acts">Case study: randomize at the level where intervention acts<a class="heading-anchor" href="#case-study-randomize-at-the-level-where-intervention-acts" aria-label="Link to this section">#</a></h4>
+<p>Suppose a training program is delivered to whole teams. Team members share instructors, managers and communication, so an individual&#x27;s outcome may depend on teammates&#x27; exposure. Randomizing individuals inside a team can contaminate the comparison. Randomizing teams preserves a cleaner delivery contrast but reduces the number of independent assignments.</p>
+<p>If only eight teams exist, collecting hundreds of measurements per member cannot create dozens of independently randomized teams. Block teams on a few strong pretreatment predictors if justified, preserve the assignment scheme, and consider design-based inference or small-sample methods appropriate to the cluster count. Power calculations must include plausible intraclass correlation and unequal team sizes. A precise member-level regression that ignores those facts reports imaginary information.</p>
+<p>The estimand also needs a weight choice. An average team effect weights small and large teams equally; an average employee effect weights by team size. If team size is associated with treatment effect, the answers differ. State the operational decision before choosing a convenient aggregate. Attrition at team and member level can further change which population remains observed.</p>
+<h4 id="case-study-crossover-efficiency-and-carryover-risk">Case study: crossover efficiency and carryover risk<a class="heading-anchor" href="#case-study-crossover-efficiency-and-carryover-risk" aria-label="Link to this section">#</a></h4>
+<p>A crossover can compare two interfaces within the same participants, reducing stable participant-level variation. Randomizing sequence separates some treatment and period effects. But learning the first interface may change how a participant uses the second, and no short washout can necessarily remove learned skill. The potential outcome then depends on treatment history rather than only current treatment.</p>
+<p>A paired analysis of final scores assumes away relevant carryover if it treats the two periods as interchangeable conditions. A larger sample narrows its interval around that wrong comparison. Alternatives include a parallel-arm design, a carefully modeled period/history estimand, or an intervention where carryover is scientifically negligible. Decide using the mechanism before calculating the efficiency benefit of pairing.</p>
+<p>Stepped-wedge designs similarly combine treatment rollout with calendar time. They may be operationally appealing because all clusters eventually receive treatment, but later-treated clusters experience a different calendar environment. Secular trends, implementation learning and varying time since adoption need explicit modeling. A phased schedule is not automatically a well-randomized stepped-wedge study.</p>
+<h4 id="from-planning-numbers-to-a-defensible-experiment">From planning numbers to a defensible experiment<a class="heading-anchor" href="#from-planning-numbers-to-a-defensible-experiment" aria-label="Link to this section">#</a></h4>
+<p>Sample-size formulas require an effect worth detecting, not merely the effect that makes the available sample look sufficient. Translate the smallest useful benefit into the measurement scale, estimate variance from relevant historical information, and include realistic attrition. If an outcome is rare or heavy-tailed, simulate plausible generating processes and evaluate the exact planned analysis.</p>
+<p>A simulation-based design report should show power, false-positive behavior, bias, interval coverage and failure frequency across favorable and adverse scenarios. Report Monte Carlo uncertainty: estimating power from 100 replications is itself noisy. A design that works only when every assumption is exactly true may need a simpler estimand, better measurements or a larger independent sample rather than a more elaborate estimator.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_13.py.html">chapter_13.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_13.py</code></pre>
+<h4 id="estimate-an-interaction-and-expose-an-alias">Estimate an interaction and expose an alias<a class="heading-anchor" href="#estimate-an-interaction-and-expose-an-alias" aria-label="Link to this section">#</a></h4>
+<p>The four-run factorial recovers coefficients 10,2,3,4. The main A effect is four because coded levels differ by two, while its conditional effects depend strongly on B. Adding C=A*B makes a fifth coefficient impossible to identify from four independent directions. Rank reveals the design limitation exactly.</p>
+<h4 id="randomize-within-prognostic-groups">Randomize within prognostic groups<a class="heading-anchor" href="#randomize-within-prognostic-groups" aria-label="Link to this section">#</a></h4>
+<p>Each block has four units and exactly two receive treatment. The fixed seed makes this illustration reproducible, but a real assignment system must also protect allocation integrity and avoid rerandomizing until a favorable sample appears.</p>
+<h4 id="budget-precision">Budget precision<a class="heading-anchor" href="#budget-precision" aria-label="Link to this section">#</a></h4>
+<p>The normal approximation requires about 63 observations per arm for SD two, effect one, two-sided alpha .05 and power .8. Halving the effect requires about 252. These are planning approximations for independent observations, not a valid calculation for 63 highly correlated records from one cluster.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+from itertools import product
+from scipy.stats import norm
+
+def factorial_and_alias():
+    ab=np.array(list(product([-1.,1.],repeat=2)))
+    a,b=ab.T
+    design=np.column_stack([np.ones(4),a,b,a*b])
+    y=10+2*a+3*b+4*a*b
+    beta=np.linalg.solve(design,y)
+    assert np.allclose(beta,[10,2,3,4])
+    assert np.isclose(y[a==1].mean()-y[a==-1].mean(),4)
+    c=a*b
+    alias=np.column_stack([np.ones(4),a,b,c,a*b])
+    assert np.linalg.matrix_rank(alias)==4 and alias.shape[1]==5
+    print(&quot;Factorial coefficients:&quot;,beta,&quot;C and AB are identical:&quot;,np.array_equal(c,a*b))
+
+def blocked_assignment():
+    rng=np.random.default_rng(13)
+    blocks=np.repeat(np.arange(4),4)
+    treatment=np.zeros(16,dtype=int)
+    for block in np.unique(blocks):
+        rows=np.flatnonzero(blocks==block)
+        treatment[rng.choice(rows,2,replace=False)]=1
+    assert all(treatment[blocks==b].sum()==2 for b in range(4))
+    print(&quot;Treated per block:&quot;,[int(treatment[blocks==b].sum()) for b in range(4)])
+
+def sample_size():
+    sigma,delta=2.,1.
+    n=2*sigma**2*(norm.ppf(.975)+norm.ppf(.8))**2/delta**2
+    half_effect=2*sigma**2*(norm.ppf(.975)+norm.ppf(.8))**2/(delta/2)**2
+    assert np.isclose(half_effect,4*n)
+    print(&quot;Approximate per-arm n:&quot;,int(np.ceil(n)),&quot;half effect:&quot;,int(np.ceil(half_effect)))
+
+def main():
+    factorial_and_alias();blocked_assignment();sample_size()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Why use a factorial experiment rather than several one-factor studies?</strong> It can estimate interactions and reuse control information across combinations. If one factor&#x27;s benefit depends on another, isolated baseline changes can miss the relevant operating setting. Feasibility and interference still constrain the design.</p>
+<p><strong>Interview: What does aliasing mean operationally?</strong> Two proposed effects make the same predictions at every chosen run. Additional numerical precision cannot distinguish them. Add design points or state which effect is assumed negligible.</p>
+<p><strong>Interview: Is balanced assignment enough to establish an experiment was randomized?</strong> No. Deterministic alternation or a flawed hash can produce balanced counts while correlating assignment with arrival or identity. Inspect the mechanism, logging and implementation as well as realized balance.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://www.itl.nist.gov/div898/handbook/pri/section3/pri3.htm">NIST choosing an experimental design</a>.</li>
+</ul>
+<ul>
+<li><a href="https://itl.nist.gov/div898/handbook/pri/section3/pri3363.htm">NIST response-surface design comparison</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="14-online-experimentation-and-a-b-testing.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

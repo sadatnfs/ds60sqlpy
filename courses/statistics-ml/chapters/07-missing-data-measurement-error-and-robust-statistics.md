@@ -160,6 +160,44 @@ The influence function describes first-order sensitivity to a tiny contaminating
 
 The breakdown point measures the contamination fraction needed to make an estimator arbitrarily bad. A median can approach 50% breakdown for location, while the mean can break with one unbounded observation.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: complete-case analysis changes who is represented
+
+A salary survey has higher nonresponse among high earners. The observed mean is likely below the population mean, but the blank cells alone do not reveal how much. If response depends only on recorded job category and region, MAR may be plausible conditional on those variables, permitting suitable imputation or weighting. If salary itself still predicts response within those groups, an MNAR assumption is needed.
+
+Dropping incomplete records can be valid for some targets under specific mechanisms, but the phrase only 5% missing is not a justification. A small missing fraction concentrated in extreme values can materially change a mean or disparity. Conversely, a larger fraction missing independently can mainly reduce precision. Examine the pattern and its relationship to the estimand.
+
+A sensitivity model can shift imputed missing salaries by delta relative to the MAR prediction. Average the completed outcome under several defensible deltas and identify where the policy conclusion changes. The data usually do not estimate delta without external information. Present it as an assumption and use domain knowledge or validation sampling to narrow its plausible range.
+
+### Case study: multiple imputation combines two uncertainties
+
+Each completed dataset contains a plausible version of missing values. Fitting the analysis model yields estimate Q_m and variance U_m. Pool estimates by their average Q_bar. The within-imputation variance W is the average U_m, and between-imputation variance B is the sample variance of Q_m. Rubin's total variance is W+(1+1/M)*B under the relevant framework.
+
+The multiplier accounts for using a finite number of imputations. More imputations reduce Monte Carlo variability in the pooling calculation; they do not create more observed information. If all completed datasets use the same deterministic mean replacement, B is zero because the imputation procedure failed to express missing-value uncertainty, not because the missing values are known.
+
+Include variables needed to preserve the analysis relationships, such as interactions, nonlinear terms, outcomes and design variables where appropriate. Imputing each variable independently can destroy covariance. Chained equations offer flexibility but need compatible conditional models and diagnostic checks. Inspect distributions, logical constraints, convergence and sensitivity rather than treating successful execution as validated missing-data assumptions.
+
+### Case study: derive attenuation from classical predictor error
+
+Let the true model be Y=beta*X+epsilon, but observe W=X+U. Assume X, U and epsilon are appropriately independent with zero-mean errors. Cov(W,Y)=beta*Var(X), while Var(W)=Var(X)+Var(U). The population regression slope of Y on W is therefore beta*Var(X)/(Var(X)+Var(U)). Noise in the predictor shrinks the slope toward zero in this simple setting.
+
+If beta=2 and true-signal and measurement-error variances are both one, the observed slope is one. Increasing sample size estimates that attenuated slope more precisely; it does not restore beta. Repeated measurements or validation data can estimate the error variance and support regression calibration, errors-in-variables methods or SIMEX under additional assumptions.
+
+The direction is not universal in multivariable, nonlinear or differential-error settings. Correlated error or error related to the outcome can bias estimates away from zero or reverse associations. State the error model explicitly before repeating the slogan that measurement error attenuates effects.
+
+### Case study: robustness can protect or hide the important signal
+
+Suppose most recorded transaction amounts are near ten but one is 1,000. A median resists that value, while a mean reflects its contribution to total spending. If 1,000 is a decimal-placement error, a robust summary may protect a location estimate. If it is a legitimate high-value transaction, ignoring its contribution can distort a business total. Statistical outlier status does not resolve provenance.
+
+Huber loss limits the score of large outcome residuals, but a high-leverage predictor can still strongly influence a regression. Breakdown point and influence function describe different robustness properties: the former concerns a contamination fraction, the latter local infinitesimal sensitivity. A method can have favorable one property without solving every contamination problem.
+
+Choose the estimand and contamination model, verify suspicious records, and report how robust and ordinary analyses differ. Trimming or Winsorizing changes the target relative to the original mean. If the decision is about rare failure cost, the tail may be the object of study rather than nuisance to suppress.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_07.py](../examples/chapter_07.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -175,6 +213,10 @@ One added value of 1,000 raises the mean above 100 while the median stays 10. Tr
 ### Missing values add uncertainty
 
 Three imputation-specific estimates average to 2.5. Their disagreement adds one-third to variance beyond the within-imputation variance 0.04. The sensitivity calculation then shifts the missing 30% of outcomes by minus two, zero or plus two, yielding means 1.4, 2 and 2.6. Those scenarios are assumptions, not estimates of unseen data.
+
+### Predictor noise can attenuate a relationship
+
+A balanced four-cell fixture makes true signal and measurement error independent with equal variances. The true slope is two, while regression on the noisy predictor gives one, exactly the reliability-ratio attenuation formula. More copies of the same generating distribution would estimate that biased slope more precisely, not remove the measurement error.
 
 ### Complete executable example
 
@@ -207,7 +249,17 @@ def imputation_uncertainty():
     assert np.allclose(sensitivity, [1.4,2.,2.6])
     print("Pooled estimate/SE:", estimates.mean(), np.sqrt(total), "MNAR scenarios:", sensitivity)
 
+def measurement_error_attenuation():
+    x=np.array([-1.,-1.,1.,1.])
+    error=np.array([-1.,1.,-1.,1.])
+    observed=x+error;y=2*x
+    slope=np.sum((observed-observed.mean())*(y-y.mean()))/np.sum((observed-observed.mean())**2)
+    reliability=np.var(x)/(np.var(x)+np.var(error))
+    assert np.isclose(slope,1.) and np.isclose(slope,2*reliability)
+    print("True slope 2; noisy-predictor slope:",slope,"reliability ratio:",reliability)
+
 def main():
+    measurement_error_attenuation()
     robust_location()
     imputation_uncertainty()
 

@@ -78,6 +78,17 @@ Do not hand-maintain a second lesson inventory when it can be derived from the g
 
 Use `python -m pip`, repository-relative paths, and `pathlib`. Never add a developer-specific absolute path.
 
+## Explicit tutorial-book exception
+
+The statistics/ML book is a tutorial, as explicitly requested by the user.
+Its `learning_mode: tutorial` content must include detailed theory, worked
+examples and answered interview discussions, with no exams, problem sets,
+prediction gate or withheld solutions. Its manual read marker is not mastery.
+Use the book's coverage and executable-example tests instead of applying the
+practice exercise-count rules below. Ordinary programming and systems lessons
+retain their full practice contracts. New subjects use the module extension
+contract in `docs/implementation/ADDING_A_MODULE.md`; do not hardcode five subjects.
+
 ## Learner experience
 
 - Assume no prior programming or database experience unless the learner says otherwise.

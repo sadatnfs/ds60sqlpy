@@ -33,6 +33,79 @@ agents before resuming; disable it after the entire requested scope passes.
 The acceptance numbers below describe the prior checkpoint, not these new
 changes. Do not claim the expanded project is fully tested from those numbers.
 
+## PyTorch parity scope addition
+
+The user explicitly requested equally substantial PyTorch and TensorFlow
+teaching. Root added the36lesson `deep-learning-pytorch` route and paired
+comparison guide. It reuses the prepared `llm-torch-cpu` worker. The ML author
+paused Java after001-020 and is now authoring torch-001 through torch-036.
+Java021-036 and all JavaScript/TypeScript lessons remain required afterward.
+
+A temporary validation classroom is currently running on localhost58770,
+Compose project `ds60-classroom-validation`, with test database port58434.
+Only this project may be replaced or stopped; preserve named volumes. The
+personal PostgreSQL and unrelated Valkey continue running untouched. Stop the
+validation HTTP service and workers after browser checks. No kind cluster exists.
+
+The first expanded image served208authored lessons/chapters across10subjects.
+Browser inspection caught nested section headings omitted from the chapter
+selector. The shared renderer/UI fix now preserves coverage IDs while showing
+human method names, includes nested headings in navigation, and offers a
+full-width reading view. Its28JSbehavior checks and2newreader checks pass;
+updated image rebuild/browser readback is pending. The latest focused suite
+before those two extra checks passed261tests with6host-onlyPyTorch skips, all
+of which have separate successful Docker runtime receipts.
+
+## Latest verified implementation checkpoint
+
+The40chapter statistics book is authored with all1,005source methods mapped.
+Its82focusedtests pass, including all40offline example programs and embedded
+code parity. The24lesson applied LLM route is authored; all23default runnable
+references passed actual Docker (17Core,6Torch). The optional pretrained recipe
+is documented but no model weights were downloaded or trained.
+
+All27TensorFlow and15LLM-theory PyTorch reference cases now pass in Docker after
+repairing three fresh-process examples. Java001-012 all compile/run in Java21.
+All41runnable C++ references pass GCC inside Docker using the current adapter
+mounted over the previous image; final image rebuild remains required. Both
+C++ multi-file CMake/CTest/install fixtures passed as well.
+
+Root owns shared runtime/catalog/reader/UI integration and final acceptance.
+NLP001-004 are authored and have8focusedpassingtests; systems author now owns
+NLP005-024 after finishing statistics25-40. The ML author finishes applied
+status/tests then resumes Java013-036, with JS/TS42 to follow. Statistics author
+owns18deeperPythonSQLlessons and its additive manifest. Kubernetes38missing and
+Scala/Spark38missing remain queued and required. No one should mark the overall
+requested expansion complete until those remaining bodies and full integration
+are finished. User's newest priority is very detailed LLM/NLP instruction.
+
+Root UI now has26behavior checks including exact Java/TS diagnostics, tutorial
+read markers and topic search. Full expanded image/browser/suite acceptance is
+still pending. Build logs and perlesson runtime receipts are in ignored work/.
+
+## Latest LLM and NLP scope addition
+
+The user explicitly requested much more LLM and NLP detail, especially
+fine-tuning, RAG, use in data science and training subject-matter assistants.
+The ML writer completed TF36/36 and LLM42/42, then paused Java authoring to own
+`courses/llm-applied/` with an expanded practical route. Root is preparing
+`courses/nlp/` for the systems writer after book25-40. Java36 and JS/TS42 plans
+are registered but their content remains queued. They are not finished lessons.
+All older requested Python/SQL, Kubernetes and Spark scope remains required.
+
+New runtime evidence: Java, JavaScript and TypeScript compiled/executed and
+passed failure/cancellation cases in local Linux arm64 Docker. C++ multi-file
+CMake, CTest and install examples passed in the prepared image. The focused
+four-worker suite passed139tests before the latest UI/LLM additions. Book
+navigation now includes search, section selection and an explicit saved read
+marker, with no mastery inference. Additional UI regression checks are pending.
+
+The first real TensorFlow fullreference pass had25successes out of27. Fresh
+subprocess checkpoint/export lessons028/032 revealed indentation bugs, now
+assigned to the content owner for correction. Do not call that pass all-green.
+PyTorch CPU image is built; all15reference cases are running. See ignored
+`work/*-all-lessons-acceptance.jsonl`, not prior host skips, for runtime evidence.
+
 ## Scope and current result
 
 Work happens directly in `~/workspace/ds60sqlpy`. There are no additional

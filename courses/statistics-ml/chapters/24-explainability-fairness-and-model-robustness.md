@@ -158,6 +158,50 @@ Assess whether nominally neutral features encode sensitive distinctions or histo
 
 Specify permitted and prohibited causal paths and evaluate counterfactual or path-specific criteria. The conclusions depend on a credible causal model and normative choices. Observational association alone cannot determine which pathways are legitimate.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: correlated features change the explanation question
+
+Suppose income and a credit-limit feature are tightly related, and a model uses credit limit but not income directly. An interventional-style feature attribution that replaces absent features independently may assign little or no direct contribution to income. A conditional value function can assign income a contribution because observing it changes expectations about credit limit. Both can satisfy an internally consistent attribution framework while answering different questions.
+
+State the value function, background population and dependence treatment. The phrase feature importance is incomplete without the perturbation and evaluation metric. Permuting credit limit independently of income can create impossible combinations, while permuting income alone may have no effect if the model never uses it. Grouped or conditional perturbations can ask alternative questions, but they require additional modeling choices.
+
+A causal intervention on income is yet another question. It may change credit limit, employment, spending and eligibility over time. Holding every other feature fixed can describe model sensitivity without describing a feasible real-world intervention. An explanation report should make that boundary explicit before suggesting action.
+
+### Case study: local fidelity and recourse feasibility
+
+A local linear surrogate can closely approximate a nonlinear model near one record while failing slightly farther away. Its coefficients depend on the neighborhood, perturbation distribution and feature representation. Before presenting it as an explanation, check local prediction fidelity and sensitivity to reasonable neighborhood choices. A stable-looking coefficient table can be an artifact of the surrogate's sampling scheme.
+
+A counterfactual search may suggest changing age, reducing debt while holding available balance fixed, or altering a derived feature without changing its inputs. Those changes can cross the model boundary in feature space but are impossible or incoherent actions. Feasible recourse requires constraints on immutable attributes and a model of how actions propagate through dependent variables.
+
+Costs differ among people. A recommendation to obtain a credential or reduce debt may be technically possible but prohibitively costly for some groups. Recourse evaluation should include feasibility, burden, uncertainty and whether the promised outcome survives model updates. A model's prediction can change without the underlying outcome improving, so the decision system should not incentivize merely gaming a proxy.
+
+### Case study: fairness tradeoffs are visible in a confusion table
+
+Consider two groups with prevalences .2 and .8. If both have sensitivity .8 and false-positive rate .1, their positive decision rates are .8*.2+.1*.8=.24 and .8*.8+.1*.2=.66. Equalized odds holds, while demographic parity does not. Their precision values are .16/.24 and .64/.66, which differ markedly.
+
+Changing thresholds to equalize positive decision rates generally changes the class-conditional error rates. Calibrated probabilities with unequal base rates also create constraints on which predictive-value and error-rate equalities can simultaneously hold under imperfect prediction. The appropriate choice depends on the allocation, harms and legal or organizational context, not an automatic preference for one mathematical criterion.
+
+Labels themselves require scrutiny. A target such as historical approval, arrest or access to treatment may reflect prior unequal decisions rather than an independent ground truth about merit or need. Equal error rates against that label can reproduce existing inequities. Use measurement and causal reasoning to examine the construct before interpreting a fairness metric as a complete ethical result.
+
+### Case study: evaluate an assistant across groups and tasks
+
+A subject-matter assistant answers questions from different teams, languages and expertise levels. Overall helpfulness may be high while one group receives unsupported citations or inappropriate confidence. Evaluate factuality, groundedness, task completion and abstention separately, with representative sampling and sufficiently precise subgroup estimates.
+
+An automated judge can introduce its own style preferences, verbosity bias or sensitivity to position. Validate judge behavior against well-designed human evaluation and include counterbalanced comparisons. A generated explanation of why another answer is correct is not independent evidence that its factual claims are true. For quantitative answers, the supporting calculation, data version and denominator should be inspectable.
+
+Robustness tests should reflect realistic failures: stale retrieved documents, conflicting evidence, missing context, malformed inputs and attempts to redirect the assistant through untrusted content. Define which actions the assistant can take and what requires a verified tool result or human review. Evaluate the entire trajectory and final outcome, not just a fluent final paragraph.
+
+### How to report explanation and fairness evidence
+
+Present the model behavior being explained, the population, the reference construction and the limitations first. Include representative local cases and adverse cases instead of only a polished global summary. Report uncertainty for subgroup metrics and disclose small sample sizes rather than interpreting every difference as established.
+
+Separate descriptive disparities, predictive error disparities and causal claims about discriminatory mechanisms. Each requires different evidence. Document who chose the criterion and who owns the resulting action. Technical analysis can clarify tradeoffs and expose failure modes; it cannot erase the value judgments embedded in the decision.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_24.py](../examples/chapter_24.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -224,6 +268,10 @@ if __name__ == "__main__":
 **Interview: Why can equalized odds coexist with unequal precision?** Error rates condition on actual class, while precision conditions on the prediction. Different base rates change the mixture of true and false positives even when class-conditional error rates match.
 
 **Interview: A sensitive field is removed. Is discrimination removed?** No. Other features can encode proxies and historical disadvantage, and labels can be biased. Evaluate subgroup behavior, data processes and relevant causal pathways rather than relying on feature exclusion alone.
+
+## Applied LLM companion
+
+Continue with the [applied LLM course](../../llm-applied/guides/llm-applied-001.md) for domain assistants, grounded answers and controlled adaptation. Use this chapter to review explanation fidelity, subgroup evaluation, recourse assumptions and the boundary between generated prose and verified evidence.
 
 ## Primary sources and official APIs
 

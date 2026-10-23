@@ -176,6 +176,44 @@ Perturb samples or features, refit, and compare partitions after accounting for 
 
 Combine multiple partitions through co-assignment or other consensus rules. This can stabilize shared structure but also preserve common biases. State which algorithms, samples and similarity rules contributed to the consensus.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: derive soft mixture membership
+
+Take a one-dimensional two-component Gaussian mixture with equal weights, means minus one and plus one, and unit variances. At x=0 the component likelihoods are equal, giving responsibility .5 for each. At x=1, the plus-one component has log-likelihood advantage two over the minus-one component, so its responsibility is exp(2)/(1+exp(2)), about .881. The assignment is graded rather than an absolute declaration of category identity.
+
+The EM algorithm alternates these responsibilities with weighted estimates of component means, covariances and mixing weights. Each exact EM step does not decrease the observed-data likelihood, but it can converge to a local optimum. Multiple starts and regularization matter. In an unconstrained Gaussian mixture, a component can collapse onto one point with variance approaching zero, making likelihood arbitrarily large. A covariance floor prevents that numerical degeneracy but adds a modeling constraint.
+
+Information criteria can compare parameterized mixtures, but a chosen component count is not proof of that many natural populations. A skewed single population may require several Gaussian components to approximate its density. Interpret components through stability, external measurements and the decision they support, rather than assigning a name to every fitted Gaussian automatically.
+
+### Case study: a cluster boundary changes with measurement units
+
+Suppose customers have annual spending measured in dollars and support contacts measured as counts. Squared Euclidean distance on raw columns may be dominated by spending because its numerical scale is much larger. Standardizing gives support contacts comparable variance influence, creating a different segmentation. A robust scaling or a domain-specific cost metric could produce a third partition.
+
+There is no purely algorithmic answer to which partition is correct. If the action is assigning service capacity, contacts may be central. If the action is estimating revenue exposure, spending may deserve dominant weight. The representation, distance and objective should follow that purpose. Report how labels change under reasonable scaling and whether the proposed actions remain sensible.
+
+K-means forces every point into one of K compact regions. DBSCAN can identify dense nonconvex regions and leave noise, but one radius may not suit both sparse and dense populations. Hierarchical clustering exposes nested relationships but the linkage rule can create chains or compact groups. Model selection therefore begins with the desired meaning of a cluster, not simply a grid search over whichever method yields the highest silhouette score.
+
+### Case study: a latent factor is a measurement model
+
+Let two observed features satisfy x1=f+epsilon1 and x2=2*f+epsilon2, with Var(f)=1, independent errors, and error variances .5 and two. Their covariance matrix is [[1.5,2],[2,6]]. The shared latent factor accounts for covariance two, while the diagonal contains both shared and feature-specific variation.
+
+PCA seeks a direction explaining total observed variance, including those unequal noise variances. Factor analysis explicitly separates shared covariance from unique noise under its assumptions. A confirmatory model might constrain which indicators load on a construct, while an exploratory model examines alternative loading structures. Rotation and scale choices mean that factor labels require substantive validation, not merely a mathematically convenient solution.
+
+Measurement invariance becomes important when comparing factor scores across groups. If an item or sensor responds differently to the same latent attribute in different populations, observed score differences can mix real attribute differences with measurement differences. A good overall covariance fit can conceal that problem. Use group-aware diagnostics and explain which comparisons the measurement model supports.
+
+### Case study: validating a segmentation used for action
+
+A marketing team finds four attractive customer clusters and proposes four campaigns. Internal separation is only the first evidence layer. Assess whether clusters recur under bootstrap samples, new time periods and modest preprocessing changes. Compare co-assignment or adjusted partition measures because cluster numbers can permute across fits.
+
+Then ask whether campaign response differs in a useful way. The clustering objective never optimized incremental treatment effects, so distinct clusters need not need distinct actions. A randomized campaign evaluation or another credible causal design can test whether segmentation improves net value beyond a simple baseline. If clusters are unstable but actions are stable, a direct policy model may be preferable. If clusters are stable but actions do not differ, the segmentation may be descriptive rather than prescriptive.
+
+For visualization, use t-SNE or UMAP as exploratory views and inspect several parameter settings. Label apparent islands cautiously, check original-space neighborhoods and avoid measuring global distance on the rendered map as though it were calibrated scientific distance. A visually clean figure is an invitation to investigate, not the final validation of latent population categories.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_21.py](../examples/chapter_21.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

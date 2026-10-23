@@ -119,7 +119,7 @@
 <p>Read the <a href="CHECKPOINT.md.html">checkpoint</a> and <a href="../expansion/architecture.md.html">expansion architecture</a> first. Reuse one existing runtime when it fits. A new subject, a new lesson and a new execution backend are separate changes, with separate acceptance evidence.</p>
 <h3 id="add-a-lesson-to-an-existing-subject">Add a lesson to an existing subject<a class="heading-anchor" href="#add-a-lesson-to-an-existing-subject" aria-label="Link to this section">#</a></h3>
 <ol>
-<li>Read <code>courses/&lt;track&gt;/AGENTS.md</code>. Add the complete prerequisite-aware plan entry under <code>docs/expansion/plans/</code>, retaining a stable lesson ID.</li>
+<li>Read <code>courses/&lt;track&gt;/AGENTS.md</code>. Add the complete prerequisite-aware plan entry in its existing <code>docs/expansion/plans/</code> plan or additive <code>courses/&lt;track&gt;/track.json</code>, retaining a stable lesson ID.</li>
 <li>Author a substantial guide, learner source or worksheet, separate executable solution and explanation, and deterministic small fixtures. Define vocabulary, explain the mechanism, show worked examples, and progress from observation to repair and transfer. Do not use an empty heading or a task list as a lesson.</li>
 <li>Register only completed content in <code>courses/&lt;track&gt;/lessons.json</code>. Copy an existing record&#x27;s schema: ID, authored status, language, fixed runtime profile, guide/source/solution paths and optional registered verification ID. Keep paths inside that course and exclude credentials, downloads and shell text.</li>
 <li>Use <code>reading</code> plus <code>markdown</code> for a theory worksheet that needs no execution. Use a curated language variant only when the same learning objective has a separately authored implementation. <code>spark-013@pyspark</code> demonstrates separate saved pads while retaining one canonical lesson count.</li>
@@ -128,14 +128,16 @@
 </ol>
 <p>The module manifest cannot contain a run command, endpoint, compiler flag or arbitrary file path. <code>ModuleCatalog</code> validates curated file ownership, suffixes, source limits and profile/language compatibility. Reads revalidate paths. <code>ModuleState</code> preserves drafts in the host learning directory and never rewrites the original progress file or the learner source in <code>courses/</code>.</p>
 <h3 id="add-a-subject-or-execution-backend">Add a subject or execution backend<a class="heading-anchor" href="#add-a-subject-or-execution-backend" aria-label="Link to this section">#</a></h3>
-<p>Subject admission currently uses explicit registries. Do not assume adding a JSON file enables arbitrary languages. Update and test these deliberate gates:</p>
+<p>New subject routes use <code>courses/&lt;track&gt;/track.json</code> with schema version 1, ID matching the directory, title, summary and lesson rows. Each row supplies a stable ID, title, stage, duration, prerequisites, one registered runtime, concepts, outcome, lab description and verification explanation. The loader checks all three stages and the combined prerequisite graph. These are metadata, not commands. Authored file admission still uses <code>lessons.json</code> and the exact reviewed schema. New subjects appear in the UI and read-only MCP discovery without editing a second subject list.</p>
+<p>The statistics book uses <code>courses/statistics-ml/manifest.json</code> and tutorial mode. Its complete chapter/example pairs are exposed directly, with no exams, problem sets, verifier or solution gate. Its manual read marker records reading only. The exact source outline and method coverage index remain separately auditable.</p>
+<p>Do not assume adding a JSON file enables arbitrary languages. New execution backends still require updating and testing these deliberate gates:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Layer</th>
 <th>Implementation</th>
 </tr></thead><tbody>
 <tr>
 <td>Planned route and prerequisite graph</td>
-<td><code>journey_design.py</code>: <code>TRACK_IDS</code>, profiles and plan validation</td>
+<td><code>journey_design.py</code> for the original five designs; <code>module_extensions.py</code> for additive subjects and tutorial books</td>
 </tr>
 <tr>
 <td>Authored file admission</td>

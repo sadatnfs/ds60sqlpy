@@ -1,6 +1,15 @@
 # Expansion architecture
 
-Status: proposed implementation contract, 22 October 2026. Only the read-only journey preview is implemented in this phase. Worker, job, and progress-v2 interfaces below are designs, not available APIs.
+Status: historical design contract, 22 October 2026. The original five-course
+preview has since become an implemented classroom with private workers,
+async jobs and saved module state. Use [the current module contract](../implementation/ADDING_A_MODULE.md),
+[Docker classroom instructions](../docker-classroom.md) and
+[the implementation checkpoint](../implementation/CHECKPOINT.md) for current
+behavior. Proposed endpoints and artifact/progress-v2 features described below
+are design history, not promises that those exact interfaces exist. The active
+browser protocol uses authenticated `/api/modules` actions. Returned logs,
+source and job receipts are implemented; arbitrary output-artifact export is
+not implied by this design.
 
 ## System boundaries
 

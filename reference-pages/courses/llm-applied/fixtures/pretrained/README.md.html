@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Optional pinned pretrained-model experiment · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Optional pinned pretrained-model experiment</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/fixtures/pretrained/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="optional-pinned-pretrained-model-experiment">Optional pinned pretrained-model experiment<a class="heading-anchor" href="#optional-pinned-pretrained-model-experiment" aria-label="Link to this section">#</a></h2>
+<p>This optional recipe is authored and statically checked. No pretrained weights were downloaded and no pretrained training was run during course authoring. The default lessons remain offline and use literal data or the tiny PyTorch decoder.</p>
+<p>The model is <code>HuggingFaceTB/SmolLM2-135M-Instruct</code>, pinned to revision <code>12fd25f77366fa6b3b4b768ec3050bf629380bac</code>. Its model card reported <code>apache-2.0</code> when checked on2026-10-22. Review the actual model license and your own training-data permissions before choosing an intended use. The small fixture is a mechanics experiment, not a domain-assistant quality benchmark.</p>
+<h3 id="files-and-contracts">Files and contracts<a class="heading-anchor" href="#files-and-contracts" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="requirements.txt.html">requirements.txt</a> pins direct packages for a separate Python3.12 environment. These are real released versions checked against package metadata. This is not a complete transitive lock or a claim that this exact platform combination has executed. Resolve and retain a platform-specific hash lock and wheels before sharing a qualified environment.</li>
+<li><a href="asset_contract.json.html">asset_contract.json</a> fixes model identity and the default10-step/128-token budget.</li>
+<li><a href="prepare_assets.py.html">prepare_assets.py</a> is the only connected acquisition entry point. It refuses to run without <code>--acknowledge-network</code>, refuses an existing destination, downloads the pinned snapshot and writes a local SHA256 manifest. It is never imported or invoked by a default lesson.</li>
+<li><a href="verify_assets.py.html">verify_assets.py</a> checks revision, license metadata, safe paths and every recorded file hash using only local reads.</li>
+<li><a href="train_local.py.html">train_local.py</a> supports full SFT or LoRA on local assets, checks family isolation, template prefix alignment, completion masks and collated labels, then performs exactly10 CPU updates and writes an actual receipt only after execution.</li>
+<li><a href="infer_local.py.html">infer_local.py</a> performs optional bounded local generation from the pinned base and an optional local adapter. Its output is explicitly an unvalidated proposal. Citation and support validation remain required before treating it as an answer.</li>
+<li><a href="../../../../../courses/llm-applied/fixtures/pretrained/train.jsonl">train.jsonl</a> and <a href="../../../../../courses/llm-applied/fixtures/pretrained/eval.jsonl">eval.jsonl</a> are authored prompt/completion fixtures with disjoint families. Four training records and one evaluation record are far too small to establish useful domain performance.</li>
+</ul>
+<h3 id="separate-preparation-from-offline-work">Separate preparation from offline work<a class="heading-anchor" href="#separate-preparation-from-offline-work" aria-label="Link to this section">#</a></h3>
+<p>Choose a new learner-owned directory under <code>.learning/optional-models/</code>. Prepare dependencies in a separate environment using the interpreter selected by your setup. Do not replace the main classroom environment. The following package installation is an optional connected setup action, not part of default lesson execution:</p>
+<pre><code class="language-text">python -m pip install -r courses/llm-applied/fixtures/pretrained/requirements.txt</code></pre>
+<p>Acquire the model only when you deliberately choose the connected step. From the repository root, PowerShell and POSIX can use the same argument structure with their selected interpreter:</p>
+<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/prepare_assets.py --destination .learning/optional-models/smollm2-135m-pinned --acknowledge-network</code></pre>
+<p>The destination must not already exist. A failed partial acquisition is retained for inspection; the script does not delete or overwrite it. Resolve the failure deliberately and use a new destination for another acquisition. No credentials are printed or written by the course code.</p>
+<p>Once dependencies and assets exist, the training script sets Hugging Face offline flags before importing model libraries. It calls every <code>from_pretrained</code> with a local directory and <code>local_files_only=True</code>; model loading also uses <code>trust_remote_code=False</code>. Missing or modified files fail instead of triggering a network fallback.</p>
+<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/train_local.py --model-dir .learning/optional-models/smollm2-135m-pinned --output-dir .learning/optional-models/run-lora-001 --mode lora</code></pre>
+<p>Use a different empty output directory and <code>--mode full</code> for a controlled full-SFT comparison. The scripts are CPU-first, <code>float32</code>, batch1, maximum length128, seed7 and maximum10 updates. LoRA uses rank4, alpha8, no adapter dropout and <code>q_proj</code>/<code>v_proj</code> targets. No GPU speed or memory claim is made. The resource requirement includes the pretrained base, activations, gradients and optimizer state, so it is substantially larger than the default tiny decoder.</p>
+<h3 id="inspect-the-mask-before-trusting-the-objective">Inspect the mask before trusting the objective<a class="heading-anchor" href="#inspect-the-mask-before-trusting-the-objective" aria-label="Link to this section">#</a></h3>
+<p>The fixture uses conversational prompt/completion records. The tokenizer renders the prompt with <code>add_generation_prompt=True</code> and the full conversation with <code>add_generation_prompt=False</code>. The script requires the prompt IDs to be an exact prefix of the full IDs and refuses examples longer than128 tokens. This avoids silently truncating every answer target.</p>
+<p>TRL processes the same records with <code>completion_only_loss=True</code> and <code>packing=False</code>. The script requires a completion mask containing both ignored prompt and active completion positions, then inspects an actual collated batch. Active labels must equal input token IDs at the same positions. The causal model performs its own next-token shift internally. Manually shifting these labels again would train on the wrong positions.</p>
+<p>These checks can fail if a model template or library behavior differs from the expected contract. Preserve the failure and inspect the exact template and processed example. Do not replace missing masks with all-ones labels to make training run. The PEFT0.17.1 package pin was verified from release metadata; the official0.17.0 LoRA reference documents the relevant configuration fields.</p>
+<h3 id="evaluate-and-preserve-actual-evidence">Evaluate and preserve actual evidence<a class="heading-anchor" href="#evaluate-and-preserve-actual-evidence" aria-label="Link to this section">#</a></h3>
+<p>The script records pre/post held-out loss, exact update count, template lengths, trainable parameter count, data hashes, base revision and installed versions. It saves the model or adapter plus tokenizer into the new output directory. A receipt is written only after an actual run; this repository does not contain a fabricated pretrained success receipt.</p>
+<p>For local generation after a LoRA run:</p>
+<pre><code class="language-text">python courses/llm-applied/fixtures/pretrained/infer_local.py --model-dir .learning/optional-models/smollm2-135m-pinned --adapter-dir .learning/optional-models/run-lora-001/model --question &quot;How is conversion rate defined?&quot;</code></pre>
+<p>The probe supplies one public fixture source, uses greedy generation and caps new tokens at64. It does not implement real authentication, a production retriever or a complete semantic-support checker. Treat output as a proposal and validate it through the citation, abstention and tool contracts in lessons011,022 and024. Evaluate supported, unsupported, stale, contradictory and access-restricted questions before making any subject-assistant claim.</p>
+<p>Sources: <a href="https://huggingface.co/docs/transformers/v4.57.1/en/chat_templating">versioned Transformers chat templates</a>, <a href="https://huggingface.co/docs/trl/v0.24.0/en/sft_trainer">TRL0.24 SFTTrainer</a>, <a href="https://huggingface.co/docs/peft/v0.17.0/en/package_reference/lora">PEFT LoRA configuration</a>, and the <a href="https://huggingface.co/HuggingFaceTB/SmolLM2-135M-Instruct/tree/12fd25f77366fa6b3b4b768ec3050bf629380bac">pinned model card</a>.</p>
+<h3 id="size-and-memory-planning">Size and memory planning<a class="heading-anchor" href="#size-and-memory-planning" aria-label="Link to this section">#</a></h3>
+<p>The pinned model tree reports <code>model.safetensors</code> as269,060,552 bytes, about257MiB, before tokenizer/configuration files. This value was read from repository metadata without downloading the weights. The optional environment and package wheels require additional disk space, often severalGiB depending on platform and Torch distribution.</p>
+<p>The model has roughly135million parameters. A float32 base alone is approximately540million bytes. Full-SFT parameter,gradient and two Adam-moment arrays alone are approximately2.16billion bytes before activations,temporary tensors and framework overhead. A4-8GiB CPU memory budget is a planning estimate for this small batch/context recipe,not a measured requirement or guarantee. LoRA reduces trainable gradient/optimizer state but retains the base and activations. Measure actual peak memory in the prepared environment before increasing lengths or batches.</p>
+<h3 id="optional-container-with-persistent-learner-owned-artifacts">Optional container with persistent learner-owned artifacts<a class="heading-anchor" href="#optional-container-with-persistent-learner-owned-artifacts" aria-label="Link to this section">#</a></h3>
+<p>The <a href="../../../../../courses/llm-applied/fixtures/pretrained/Dockerfile.optional">optional Dockerfile</a> is separate from the classroom images and has not been built by this authoring pass. Supply a reviewed,digest-pinned Python3.12 base image through <code>PYTHON_BASE_IMAGE</code>; no floating base tag is silently selected. Image preparation is connected because it installs the pinned direct dependencies. A qualified release should additionally use a complete platform-specific hash lock.</p>
+<pre><code class="language-text">docker build --build-arg PYTHON_BASE_IMAGE=&lt;reviewed-python312-image@sha256:digest&gt; -f courses/llm-applied/fixtures/pretrained/Dockerfile.optional -t ds60-pretrained-recipe:local courses/llm-applied/fixtures/pretrained</code></pre>
+<p>After explicit asset acquisition, mount a learner-owned model/run directory. Do not save downloaded weights or trained adapters in an ephemeral browser pad. The following offline run keeps both base artifacts and training outputs in the mounted host directory.</p>
+<p>POSIX,from the repository root:</p>
+<pre><code class="language-bash">docker run --rm --network none --mount &quot;type=bind,source=$(pwd)/.learning/optional-models,target=/models&quot; ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-135m-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
+<p>PowerShell,from the repository root:</p>
+<pre><code class="language-powershell">$ModelRoot = (Resolve-Path .learning\optional-models).Path
+docker run --rm --network none --mount &quot;type=bind,source=$ModelRoot,target=/models&quot; ds60-pretrained-recipe:local /recipe/train_local.py --model-dir /models/smollm2-135m-pinned --output-dir /models/run-lora-001 --mode lora</code></pre>
+<p>The directory must already exist and contain the verified model snapshot. The new run directory must be absent or empty. These are manual commands for the optional prepared image,not a claim that the default classroom includes Transformers/TRL/PEFT or that this recipe has executed.</p></article>
+  </main>
+</body>
+</html>

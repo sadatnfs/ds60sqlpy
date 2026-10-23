@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-039: Robustness, fairness and finite safety evidence · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-039: Robustness, fairness and finite safety evidence</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/guides/llm-039.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-039-robustness-fairness-and-finite-safety-evidence">llm-039: Robustness, fairness and finite safety evidence<a class="heading-anchor" href="#llm-039-robustness-fairness-and-finite-safety-evidence" aria-label="Link to this section">#</a></h2>
+<p>Status: authored beta content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 120 minutes. Direct prerequisites: <code>llm-038</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Turn a broad safety claim into a scoped test plan with explicit missing coverage. The central investigation is concrete: Analyze fixed adversarial, subgroup and counterfactual prompt families; separate an observed pass from a guarantee. The finish condition is Every result reports family, group, count and severity. Zero observed failures is not described as zero risk; no private/personally identifying data is collected. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Finite robustness and safety evaluations describe observed behavior on specified cases. They cannot prove that every possible future input is safe. Group labels, prompt families, severity and sample counts matter because an aggregate rate can conceal rare but consequential failures. Counterfactual pairs change one relevant attribute while keeping the rest of a case fixed, helping identify inconsistent treatment. A pair is useful only if the expected behavior is justified for the task. This worksheet uses fictional authored cases and collects no personal data. Its purpose is to make claims proportional to evidence and to preserve failures for review, rather than to award an unsupported safety certificate.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Counterfactual pair:</strong> Two cases differing in a controlled attribute.</p>
+<p><strong>Severity:</strong> The consequence category of a failure, separate from frequency.</p>
+<p><strong>Finite evidence:</strong> Observations from a bounded set of tested cases.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required.</p>
+<p>Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Example B changes an assumption that matters to this mechanism. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Read the supplied rows as family,group,count,failures,severity. Calculate rates only with nonzero counts. Keep severe failures visible even when overall success is high. For a counterfactual pair, list the changed attribute and the behavior that should remain stable. An untested group receives an unknown result, not a zero failure rate. State the scope and the next evidence needed in the conclusion.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-read-group-denominators">Example A: Read group denominators<a class="heading-anchor" href="#example-a-read-group-denominators" aria-label="Link to this section">#</a></h4>
+<p>Equal observed rates do not imply equal uncertainty. The denominator is a central part of the result and should remain visible in a report.</p>
+<pre><code class="language-text">A: failures0,count10,observed rate0/10
+B: failures0,count1,observed rate0/1
+Neither establishes a zero population failure probability.</code></pre>
+<p><strong>Expected:</strong> both observed zero;B has much less evidence.</p>
+<h4 id="example-b-expose-a-severe-failure">Example B: Expose a severe failure<a class="heading-anchor" href="#example-b-expose-a-severe-failure" aria-label="Link to this section">#</a></h4>
+<p>Averages cannot override an explicitly required critical condition. The decision rule should be established before seeing which case failed.</p>
+<pre><code class="language-text">Pass rate = 9/10 = 90percent
+Severe failures = 1
+Required severe-failure gate = fail</code></pre>
+<p><strong>Expected:</strong> 90percent passes;gatefails.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: Every result reports family, group, count and severity. Zero observed failures is not described as zero risk; no private/personally identifying data is collected. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Read group denominators.</strong> GroupA has0 failures in10 cases;groupB has0 in1. Compare what is established. <strong>Expected:</strong> both observed zero;B has much less evidence. <strong>Verify:</strong> Save the reasoning table for exercise 1, including both observed zero;B has much less evidence.</li>
+</ol>
+<ol>
+<li><strong>Expose a severe failure.</strong> Nine minor cases pass andone severe case fails. Calculate total pass rate and state the release implication under a no-severe-failure gate. <strong>Expected:</strong> 90percent passes;gatefails. <strong>Verify:</strong> Save the reasoning table for exercise 2, including 90percent passes;gatefails.</li>
+</ol>
+<ol>
+<li><strong>Analyze a counterfactual pair.</strong> Two fictional applicants have identical task-relevant qualifications; only a neutral name token differs, and the system gives opposite eligibility outcomes. <strong>Expected:</strong> inconsistency requires investigation under this fixture rubric. <strong>Verify:</strong> Save the reasoning table for exercise 3, including inconsistency requires investigation under this fixture rubric.</li>
+</ol>
+<ol>
+<li><strong>Handle an untested group.</strong> GroupC hascount0. Decide what rate and claim to report. <strong>Expected:</strong> rateunknown;groupuntested. <strong>Verify:</strong> Save the reasoning table for exercise 4, including rateunknown;groupuntested.</li>
+</ol>
+<ol>
+<li><strong>Separate families from paraphrases.</strong> Twenty prompts are paraphrases ofone attack family. State the independent coverage count under family-based evaluation. <strong>Expected:</strong> one tested family,twenty variants. <strong>Verify:</strong> Save the reasoning table for exercise 5, including one tested family,twenty variants.</li>
+</ol>
+<ol>
+<li><strong>Write a finite claim.</strong> Draft a conclusion for the cases above including the severe failure and untested group. <strong>Expected:</strong> conclusion rejects a universal safety guarantee. <strong>Verify:</strong> Save the reasoning table for exercise 6, including conclusion rejects a universal safety guarantee.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Counterfactual pair, Severity, Finite evidence using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-038</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://arxiv.org/abs/1810.03993">Model Cards for Model Reporting</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/ml-content-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-039, Robustness, fairness and finite safety evidence.
+Read courses/llm-theory/guides/llm-039.md and courses/llm-theory/lessons/llm-039.md. Direct prerequisites: `llm-038`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-theory/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

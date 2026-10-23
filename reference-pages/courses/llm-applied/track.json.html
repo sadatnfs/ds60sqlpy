@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Track · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Track</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/track.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;schema_version&quot;: 1,</span>
+<span>  &quot;id&quot;: &quot;llm-applied&quot;,</span>
+<span>  &quot;title&quot;: &quot;Applied LLMs: subject assistants, retrieval and adaptation&quot;,</span>
+<span>  &quot;summary&quot;: &quot;A detailed24-lesson path from task choice to grounded data-science assistants, with offline retrieval, actual tiny-model training and separately gated pretrained-model recipes.&quot;,</span>
+<span>  &quot;lessons&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;The subject assistant decision: prompts, retrieval or fine-tuning&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-014&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Subject assistant&quot;,</span>
+<span>        &quot;RAG&quot;,</span>
+<span>        &quot;SFT&quot;,</span>
+<span>        &quot;Task contract&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A subject assistant is a system that helps someone perform a bounded task using a defined body of knowledge.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Describe a request for the current conversion-rate definition requiring a citation.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;route retrieval; reason current cited evidence. contract has exact fields, an abstention policy and a family split.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Data-science task contracts and structured extraction&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-001&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Schema validity&quot;,</span>
+<span>        &quot;Semantic validity&quot;,</span>
+<span>        &quot;Provenance span&quot;,</span>
+<span>        &quot;Abstention&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Structured extraction turns text into typed records, but valid JSON is only the first boundary.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Validate visits 10, purchases 3 and assignment_unit account.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;conversion rate 0.3. invalid unit rejected; account remains explicit.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Prompt and context engineering with measurable boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-002&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Prompt template&quot;,</span>
+<span>        &quot;Context budget&quot;,</span>
+<span>        &quot;Few-shot example&quot;,</span>
+<span>        &quot;Injection boundary&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Prompt engineering defines a task and the information presented to a model.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a prompt with one metric evidence item and a conversion-rate question.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;separate instruction, evidence and question fields, with template subject-v1. ValueError before context selection.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Corpus provenance, versions and evaluation isolation&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-003&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Corpus manifest&quot;,</span>
+<span>        &quot;Content hash&quot;,</span>
+<span>        &quot;Document family&quot;,</span>
+<span>        &quot;Scope&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A domain corpus is a versioned dataset.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Add source=course-authored, permission=course-fixture and SHA256 to each local document.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;6 complete records; all hashes contain64 characters. attack text remains data; restricted record remains restricted.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Chunking, overlap, offsets and context budgets&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-004&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Chunk&quot;,</span>
+<span>        &quot;Overlap&quot;,</span>
+<span>        &quot;Source offset&quot;,</span>
+<span>        &quot;Context budget&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Chunking divides documents into retrieval units.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Chunk one two three four five six seven with size 3 and overlap 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;chunks one two three, three four five and five six seven. empty list for empty text; one short chunk for the two-token source.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;Lexical retrieval and BM25 from first principles&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Term frequency&quot;,</span>
+<span>        &quot;Document frequency&quot;,</span>
+<span>        &quot;IDF&quot;,</span>
+<span>        &quot;BM25&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Lexical retrieval ranks documents using observed terms.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Rank documents a=account randomization, b=visit counts and c=account outcomes for the query randomization.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;a ranks first with a positive score; the other scores are0. empty result for no documents; finite zero score for an empty document.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Embedding retrieval, similarity and representation limits&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-006&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Embedding&quot;,</span>
+<span>        &quot;Cosine similarity&quot;,</span>
+<span>        &quot;Embedding space&quot;,</span>
+<span>        &quot;Semantic retrieval&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Embedding retrieval maps queries and documents to vectors and compares their geometry.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use query[1, 0, 0] and documents purchase[1, .1, 0], geometry[0, 1, 0], mixed[.5, .5, 0].&quot;,</span>
+<span>      &quot;verification&quot;: &quot;purchase ranks first, mixed second, geometry last. top-ranked IDwrong is outside the authored relevant set.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;Hybrid retrieval, reciprocal-rank fusion and reranking&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-007&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Hybrid retrieval&quot;,</span>
+<span>        &quot;RRF&quot;,</span>
+<span>        &quot;Reranker&quot;,</span>
+<span>        &quot;Candidate recall&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Hybrid retrieval combines complementary candidate generators.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Fuse lexical[a, b, c] and dense[b, d, a] with constant60.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;b ranks first, a second. ValueError for nonpositive constant; TypeError for non-string ID.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;Metadata filtering and access-controlled retrieval&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-008&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Authorization filter&quot;,</span>
+<span>        &quot;Metadata filter&quot;,</span>
+<span>        &quot;Policy fingerprint&quot;,</span>
+<span>        &quot;Cache partition&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Access-controlled retrieval must prevent unauthorized material from entering candidate selection, answer context, caches and logs.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Give a public-only request the six-document corpus and inspect admitted IDs.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;private-v1 absent before ranking. trace contains only public document IDs.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;Query rewriting and bounded multi-hop retrieval&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Query rewrite&quot;,</span>
+<span>        &quot;Multi-hop retrieval&quot;,</span>
+<span>        &quot;Bridge evidence&quot;,</span>
+<span>        &quot;Stopping rule&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Query rewriting can translate a user&#x27;s phrasing into terms that a retriever understands.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Rewritebuy rate usingbuy-&gt;purchase while preserving the original question.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;rewrittenpurchase rate; original unchanged. restricted document never appears.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Grounded claims, citations and evidence-based abstention&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-010&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Grounded claim&quot;,</span>
+<span>        &quot;Citation integrity&quot;,</span>
+<span>        &quot;Entailment&quot;,</span>
+<span>        &quot;Abstention policy&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Grounded answering requires a connection between each substantive claim and supporting evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Answer the conversion-definition question from the metric document and its first sentence.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;statusanswered; one claim; citation slices the exact sentence. rate.3 with input counts preserved.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Evaluating retrieval and answers with oracle controls&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-011&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Retrieval recall&quot;,</span>
+<span>        &quot;Reciprocal rank&quot;,</span>
+<span>        &quot;Oracle-context control&quot;,</span>
+<span>        &quot;Failure taxonomy&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A RAG evaluation should identify where the pipeline failed.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use relevant IDs a, c and retrieved b, c, a.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;recall1; reciprocal rank.5. duplicate ID detected.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Paired reliability studies and family-aware uncertainty&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Paired evaluation&quot;,</span>
+<span>        &quot;Family unit&quot;,</span>
+<span>        &quot;Bootstrap estimate&quot;,</span>
+<span>        &quot;Selective accuracy&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Reliability comparisons require an explicit unit of independence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;differences[-1, -1, 1] by sortedID. test-based selection rejected.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Supervised fine-tuning data and answer-target masks&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;SFT record&quot;,</span>
+<span>        &quot;Answer target mask&quot;,</span>
+<span>        &quot;Chat template&quot;,</span>
+<span>        &quot;Training denominator&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Supervised fine-tuning data specifies the behavior a model is asked to imitate.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use promptIDs[1, 2] andanswerIDs[5, 6, 3].&quot;,</span>
+<span>      &quot;verification&quot;: &quot;inputs[1, 2, 5, 6]; labels[-100, 5, 6, 3]; 3 active targets. record excluded despite valid token arrays.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;Full supervised fine-tuning of a tiny causal decoder&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-014&quot;,</span>
+<span>        &quot;llm-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Full SFT&quot;,</span>
+<span>        &quot;Answer-only objective&quot;,</span>
+<span>        &quot;Forgetting&quot;,</span>
+<span>        &quot;Held-out transfer&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Full supervised fine-tuning updates all trainable model parameters on governed target examples.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says20 updates, 4 active training targets and no natural-language competence claim.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Low-rank adaptation: dimensions, gradients and a real update&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-015&quot;,</span>
+<span>        &quot;llm-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Adapter rank&quot;,</span>
+<span>        &quot;LoRA scale&quot;,</span>
+<span>        &quot;Frozen base&quot;,</span>
+<span>        &quot;Merged inference&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Low-rank adaptation freezes a base weight matrix and learns a smaller additive update.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;ConstructW=I8, A=ones(8, 2)/8, B=zeros(2, 8), rank 2, alpha 4.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;base64 entries; adapter32; scale2. rank at most2; delta atalpha4 is twice delta atalpha2.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Quantized frozen bases, adapter gradients and QLoRA limits&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-016&quot;,</span>
+<span>        &quot;llm-034&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Quantized base&quot;,</span>
+<span>        &quot;Nibble packing&quot;,</span>
+<span>        &quot;Dequantization&quot;,</span>
+<span>        &quot;QLoRA boundary&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;QLoRA combines a quantized frozen base with trainable low-rank adapters, allowing gradients to flow through computations involving the dequantized base into adapter parameters.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;QuantizeW[[.1, -.9], [1.7, -.2]] withscale1.7/7 andnearest-even rounding.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;codes[[0, -4], [7, -1]]. all four unimplemented claims explicitlyFalse.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;Compare full and adapter fine-tuning on frozen tasks&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Controlled adaptation comparison&quot;,</span>
+<span>        &quot;Target module&quot;,</span>
+<span>        &quot;Frozen-state proof&quot;,</span>
+<span>        &quot;Task transfer metric&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A fair adaptation comparison starts both candidates from the same base state and uses the same training examples, target masks and held-out tasks.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a seed 31 decoder and copy its state into full and adapted candidates.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;all initial base parameters equal. adapter96 entries; 20 updates each; scope literal-token task.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Preference optimization, DPO and the RLHF distinction&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Preference margin&quot;,</span>
+<span>        &quot;DPO-style loss&quot;,</span>
+<span>        &quot;Reference policy&quot;,</span>
+<span>        &quot;RLHF distinction&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Preference optimization uses labels describing which of two responses is preferred.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Set policy difference0, reference difference0, beta.5.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;losslog2. offline updateTrue; reward_model_trainedFalse; online_rlFalse.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;Fine-tuning embeddings and a small reranker&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-019&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;llm-torch-cpu&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Bi-encoder&quot;,</span>
+<span>        &quot;Contrastive objective&quot;,</span>
+<span>        &quot;False negative&quot;,</span>
+<span>        &quot;Pairwise reranker&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;Embedding and reranker fine-tuning adapts retrieval behavior rather than only answer generation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use queries anddocuments equal to the2x2identity matrix, withpositive labels0, 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;score shape(2, 2); one positive perquery. actual gradient updatesTrue; pretrained_semantic_encoderFalse.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;Optional pretrained-model adaptation with pinned offline artifacts&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Pinned revision&quot;,</span>
+<span>        &quot;Offline asset manifest&quot;,</span>
+<span>        &quot;Chat-template alignment&quot;,</span>
+<span>        &quot;Completion-only loss&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A realistic pretrained-model adaptation recipe introduces dependencies that the tiny offline exercises deliberately avoid: model weights, tokenizer files, chat templates, library versions, artifact licenses and larger resource needs.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Read the supplied model manifest and identify model ID, revision and license note before any download.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;exact40-character revision and Apache-2.0 card note are present. pretrained executionunverified; no generated success receipt.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Structured tools for extraction, aggregation and data-science work&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-021&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Tool proposal&quot;,</span>
+<span>        &quot;Dispatcher&quot;,</span>
+<span>        &quot;Deterministic analysis artifact&quot;,</span>
+<span>        &quot;Interpretation boundary&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;An LLM can help propose data-science operations, but the application should execute only typed, bounded operations whose semantics are understood.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use rowsA1, A3, B10 and the admittedgroup_mean request.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A count 2 mean2; B count 1 mean10. descriptive statisticavailable; causal claimnot established.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Domain assistant boundaries: freshness, injection, budgets and traces&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-022&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Freshness policy&quot;,</span>
+<span>        &quot;Injected clock&quot;,</span>
+<span>        &quot;Work budget&quot;,</span>
+<span>        &quot;Safe trace&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A production-oriented domain assistant needs controls around the model as well as a good prompt.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use fixedUTCnow2026-10-22 and a document published one day earlier under a two-day limit.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;freshTrue. answer admissionFalse; reasonstale evidence.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;llm-applied-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone: a grounded and evaluated data-science subject assistant&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;llm-applied-020&quot;,</span>
+<span>        &quot;llm-applied-022&quot;,</span>
+<span>        &quot;llm-applied-023&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;End-to-end evidence path&quot;,</span>
+<span>        &quot;Extractive baseline&quot;,</span>
+<span>        &quot;Acceptance gate&quot;,</span>
+<span>        &quot;Subject-assistant artifact&quot;</span>
+<span>      ],</span>
+<span>      &quot;outcome&quot;: &quot;A subject-assistant capstone should demonstrate an entire evidence path: task admission, authorized retrieval, versioned source selection, grounded output, deterministic data-science computation and independent evaluation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Ask the public assistant forconversion_definition.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;answered withmetric-v1 citation and source text. local_fixture_passTrue; production_gono-go.&quot;</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

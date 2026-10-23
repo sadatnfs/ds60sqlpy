@@ -71,6 +71,66 @@
       "baseline": 0,
       "target": 6,
       "basis": "new-lesson"
+    },
+    "python-numpy-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-numpy-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-pandas-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-01": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-02": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-03": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
+    },
+    "python-algo-04": {
+      "baseline": 0,
+      "target": 6,
+      "basis": "new-lesson"
     }
   }
 }

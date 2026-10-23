@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>tf-010: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>tf-010: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-010_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="tf-010-explanatory-solutions">tf-010: explanatory solutions<a class="heading-anchor" href="#tf-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A split defines what is unseen. If two rows belong to one account, putting one in training and one in validation exposes part of the validation entity during fitting. Grouped splitting assigns the entity once, then carries all of its rows together. Preprocessing is also fitting: a mean inferred from validation values has already consumed validation information even if no label was used. Store the training statistic and apply it unchanged to validation. This lesson uses literal account records so every crossing can be enumerated. The tiny fixture teaches isolation and does not establish that an account model will generalize to a future deployment.</p>
+<p><strong>Split unit:</strong> Entity assigned wholly to one partition.</p>
+<p><strong>Leakage:</strong> Assessment information influencing fitting or selection.</p>
+<p><strong>Fit statistic:</strong> A quantity estimated from training inputs and then frozen.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Use a mapping from account to split before selecting values. Set intersection tests group isolation. NumPy mean reduces only the selected training values, and subtraction then broadcasts the scalar to both partitions. A validation perturbation should change transformed validation values while leaving the saved fit statistic unchanged. Hash canonical record IDs only after freezing the selection, and never refit merely because a held-out point looks extreme.</p>
+<h3 id="exercise-1-partition-accounts">Exercise 1: Partition accounts<a class="heading-anchor" href="#exercise-1-partition-accounts" aria-label="Link to this section">#</a></h3>
+<p>The question is: Use account IDs A,A,B,B,C,C,D,D with values1,3,5,7,20,22,30,32; train on A,B.</p>
+<p>The boolean mask has one position per record. Its values come from group identity, not a target-dependent ranking. Training has four values and validation has four, but equal counts are incidental to the group-isolation contract.</p>
+<pre><code class="language-python">groups=np.array(list(&#x27;AABBCCDD&#x27;)); x=np.array([1.,3.,5.,7.,20.,22.,30.,32.])
+train=np.isin(groups,[&#x27;A&#x27;,&#x27;B&#x27;]); valid=~train; mean=x[train].mean()
+assert mean==4 and set(groups[valid])=={&#x27;C&#x27;,&#x27;D&#x27;}</code></pre>
+<p><strong>Expected:</strong> train mean4 and validation IDs C,D.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with train mean4 and validation IDs C,D.</p>
+<h3 id="exercise-2-expose-global-fitting">Exercise 2: Expose global fitting<a class="heading-anchor" href="#exercise-2-expose-global-fitting" aria-label="Link to this section">#</a></h3>
+<p>The question is: Change the last validation value to3200 and compare train-only and global means.</p>
+<p>A perturbation restricted to validation cannot influence a training-only mean. This controlled counterexample detects leakage more directly than inspecting the name of a preprocessing object.</p>
+<pre><code class="language-python">changed=x.copy(); changed[-1]=3200
+assert changed[train].mean()==mean
+assert changed.mean()!=x.mean()</code></pre>
+<p><strong>Expected:</strong> training mean stays4; global mean changes.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with training mean stays4; global mean changes.</p>
+<h3 id="exercise-3-find-crossing-groups">Exercise 3: Find crossing groups<a class="heading-anchor" href="#exercise-3-find-crossing-groups" aria-label="Link to this section">#</a></h3>
+<p>The question is: Assign alternating rows to train and validation and inspect intersections.</p>
+<p>A row split can look balanced while violating the intended unit. Set intersection exposes the repeated accounts; disjoint row indices alone do not prove disjoint entities.</p>
+<pre><code class="language-python">wrong=np.arange(8)%2==0
+assert set(groups[wrong]) &amp; set(groups[~wrong])==set(&#x27;ABCD&#x27;)</code></pre>
+<p><strong>Expected:</strong> A,B,C,D all cross the split.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with A,B,C,D all cross the split.</p>
+<h3 id="exercise-4-apply-frozen-centering">Exercise 4: Apply frozen centering<a class="heading-anchor" href="#exercise-4-apply-frozen-centering" aria-label="Link to this section">#</a></h3>
+<p>The question is: Center both partitions with training mean4 and compare validation centered values.</p>
+<p>Only the training values are guaranteed to have centered mean zero. Forcing validation to mean zero would estimate a new statistic and erase a potentially meaningful distribution shift.</p>
+<pre><code class="language-python">np.testing.assert_array_equal(x[valid]-mean,[16,18,26,28])
+assert (x[train]-mean).mean()==0</code></pre>
+<p><strong>Expected:</strong> validation values16,18,26,28.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with validation values16,18,26,28.</p>
+<h3 id="exercise-5-freeze-selection-identity">Exercise 5: Freeze selection identity<a class="heading-anchor" href="#exercise-5-freeze-selection-identity" aria-label="Link to this section">#</a></h3>
+<p>The question is: Hash sorted training IDs before and after calculating validation errors.</p>
+<p>The hash is a compact identity receipt, not proof of good split design. It can reveal accidental mutation after evaluation. The original IDs must still be available for review.</p>
+<pre><code class="language-python">import hashlib,json
+ids=[&#x27;a1&#x27;,&#x27;a2&#x27;,&#x27;b1&#x27;,&#x27;b2&#x27;]; frozen=json.dumps(ids).encode(); digest=hashlib.sha256(frozen).hexdigest()
+validation_error=float(np.mean((x[valid]-mean)**2))
+assert validation_error&gt;0 and hashlib.sha256(json.dumps(ids).encode()).hexdigest()==digest</code></pre>
+<p><strong>Expected:</strong> The selection hash is unchanged.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with The selection hash is unchanged.</p>
+<h3 id="exercise-6-transfer-to-unseen-accounts">Exercise 6: Transfer to unseen accounts<a class="heading-anchor" href="#exercise-6-transfer-to-unseen-accounts" aria-label="Link to this section">#</a></h3>
+<p>The question is: Add account E with value1000 only to evaluation; specify whether its normalization can update the training mean.</p>
+<p>A deployment input is transformed using the fitted state. Updating the mean online is a separate algorithm requiring an explicit policy and new evaluation; it is not a harmless formatting adjustment.</p>
+<pre><code class="language-python">new_value=1000-mean
+assert new_value==996 and mean==4</code></pre>
+<p><strong>Expected:</strong> transformed value996; fitted mean remains4.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with transformed value996; fitted mean remains4.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

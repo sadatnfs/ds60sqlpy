@@ -21,7 +21,19 @@ def positive_and_truncated():
     assert np.isclose(stats.expon.sf(5, scale=2)/stats.expon.sf(3, scale=2), stats.expon.sf(2, scale=2))
     print("Lognormal mean/median:", round(arithmetic,4), median, "P(Z<=1 | Z>0):", round(conditional,4))
 
+def mixtures_and_zeros():
+    weight=np.array([.8,.2]);means=np.array([1.,6.]);variances=np.array([1.,1.])
+    mean=weight@means
+    variance=weight@variances+weight@(means-mean)**2
+    assert np.isclose(mean,2) and np.isclose(variance,5)
+    structural_zero=.3;rate=2.
+    zero_probability=structural_zero+(1-structural_zero)*stats.poisson.pmf(0,rate)
+    assert zero_probability>stats.poisson.pmf(0,rate)
+    assert np.isclose((1-structural_zero)*rate,1.4)
+    print("Mixture mean/variance:",mean,variance,"zero-inflated P(0):",zero_probability)
+
 def main():
+    mixtures_and_zeros()
     counts_and_tails()
     positive_and_truncated()
 

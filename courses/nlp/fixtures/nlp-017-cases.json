@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-017",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Count unigram overlap for the repeated-the candidate.",
+      "expected": "Precision .25, not1."
+    },
+    {
+      "exercise": 2,
+      "task": "Score the cat against the cat sat with maximum order2 and no smoothing.",
+      "expected": "Both precisions1; BP and score exp(-.5)."
+    },
+    {
+      "exercise": 3,
+      "task": "Compute LCS and P/R/F1 for the readiness minimal pair.",
+      "expected": "LCS3, precision1, recall.75, F1=6/7."
+    },
+    {
+      "exercise": 4,
+      "task": "Write a source-support judgment for the same minimal pair.",
+      "expected": "The candidate contradicts readiness; a high overlap score is retained alongside the failure label."
+    },
+    {
+      "exercise": 5,
+      "task": "Use family a outcomes[true,false] and family b outcome[false].",
+      "expected": "Family rates[.5,0] and equal-family mean.25; explain why row mean1/3 answers a different weighting question."
+    },
+    {
+      "exercise": 6,
+      "task": "Design a rubric and record for a source-grounded generated summary.",
+      "expected": "Record includes task/source/version/output/atomic support labels/metric config/rater or judge identity and an abstention case."
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-006",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Fit the authored sentences with EOS and UNK but no predicted BOS.",
+      "expected": "Seven prediction targets, five observed words plus EOS/UNK."
+    },
+    {
+      "exercise": 2,
+      "task": "Calculate the four conditional factors for we like tea at alpha=1.",
+      "expected": "[0.3,1/3,0.3,1/3]."
+    },
+    {
+      "exercise": 3,
+      "task": "Return log likelihood, perplexity and predicted-event count.",
+      "expected": "Joint probability .01, four events and perplexity sqrt(10)."
+    },
+    {
+      "exercise": 4,
+      "task": "Sum probabilities over the frozen vocabulary for BOS,we,like and UNK.",
+      "expected": "Each row sums to one within numerical tolerance."
+    },
+    {
+      "exercise": 5,
+      "task": "Score we like cocoa and compare model state before and after.",
+      "expected": "Finite score; cocoa absent from vocabulary; counts and vocabulary unchanged."
+    },
+    {
+      "exercise": 6,
+      "task": "Score empty raw input and explain why tokenizer or EOS changes invalidate naive perplexity comparisons.",
+      "expected": "One EOS prediction with perplexity 10; a written comparison lists tokenization, corpus and boundary conventions."
+    }
+  ]
+}

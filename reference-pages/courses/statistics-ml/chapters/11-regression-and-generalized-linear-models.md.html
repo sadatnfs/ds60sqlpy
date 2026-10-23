@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>11. Regression and Generalized Linear Models · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>11. Regression and Generalized Linear Models</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/11-regression-and-generalized-linear-models.md</code></p>
+    </header>
+    <article class="document"><h2 id="11-regression-and-generalized-linear-models">11. Regression and Generalized Linear Models<a class="heading-anchor" href="#11-regression-and-generalized-linear-models" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-011</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Regression specifies how an outcome distribution changes with predictors. A linear regression is linear in coefficients, so squared features and spline bases can represent curved relationships while retaining a linear coefficient problem. A generalized linear model separates three choices: an outcome family, a linear predictor eta=X beta, and a link g(mu)=eta. These choices encode support and variance as well as mean behavior.</p>
+<h4 id="derive-ordinary-least-squares">Derive ordinary least squares<a class="heading-anchor" href="#derive-ordinary-least-squares" aria-label="Link to this section">#</a></h4>
+<p>Let r=y-X beta and minimize r-transpose r. Differentiating gives gradient -2 X-transpose r. Setting it to zero yields the normal equations X-transpose X beta=X-transpose y. With full column rank the solution is unique, but QR or SVD is preferable to explicitly inverting the normal matrix. Under E[epsilon|X]=0, coefficients describe a correctly specified conditional mean. Homoskedasticity is needed for the simplest covariance formula, not for calculating the minimizing coefficients. Normal errors are useful for exact small-sample t inference, not a requirement that predictors or outcomes be normally distributed.</p>
+<p>A coefficient measures a conditional contrast holding the other encoded columns fixed. With y=beta0+beta1<em>x+beta2</em>z+beta3<em>x</em>z, the x slope is beta1+beta3*z. Reporting beta1 as a universal effect ignores the interaction. Prediction outside the observed design region adds extrapolation assumptions that the normal equations cannot check.</p>
+<h4 id="derive-logistic-regression">Derive logistic regression<a class="heading-anchor" href="#derive-logistic-regression" aria-label="Link to this section">#</a></h4>
+<p>For binary y, set p=sigmoid(eta)=1/(1+exp(-eta)). The negative log likelihood is sum(log(1+exp(eta))-y*eta); <code>logaddexp</code> computes this stably. Its gradient is X-transpose(p-y) and Hessian X-transpose W X with W_i=p_i(1-p_i). A coefficient beta_j multiplies conditional odds by exp(beta_j) per unit, not probabilities. If an intercept-only model has p=.2, adding log(2) to its linear predictor changes p to one-third, not .4. Complete separation can make unpenalized coefficients diverge even while classification looks perfect.</p>
+<h4 id="select-a-family-and-a-loss">Select a family and a loss<a class="heading-anchor" href="#select-a-family-and-a-loss" aria-label="Link to this section">#</a></h4>
+<p>Use a Poisson log-link mean for counts with exposure offsets; inspect overdispersion before relying on Poisson standard errors. Use gamma for strictly positive continuous outcomes with a suitable mean-variance relation; use a two-part or Tweedie model when exact zeros have substantive meaning. Quantile regression minimizes asymmetric absolute loss and answers a different question from mean regression. Penalization addresses prediction stability, not unmeasured confounding. Standardize columns within training folds before comparing penalty strengths, and keep the intercept treatment explicit.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-11-01">Ordinary least squares<a class="heading-anchor" href="#stat-11-01" aria-label="Link to this section">#</a></h4>
+<p>Minimize squared residuals to estimate a linear conditional mean or best linear projection. Diagnose residual structure and leverage. A good projection coefficient need not equal a causal effect or remain stable under population shift.</p>
+<h4 id="stat-11-02">Weighted least squares<a class="heading-anchor" href="#stat-11-02" aria-label="Link to this section">#</a></h4>
+<p>Weight squared residuals, often inversely to known conditional error variances. Precision weights differ from sampling weights and policy-importance weights. Incorrect weights can hurt efficiency and change the fitted projection under misspecification.</p>
+<h4 id="stat-11-03">Generalized least squares<a class="heading-anchor" href="#stat-11-03" aria-label="Link to this section">#</a></h4>
+<p>Use a specified full residual covariance matrix to account for heteroskedasticity and correlation. Whitening transforms the problem to ordinary least squares. Estimating the covariance adds uncertainty and can introduce misspecification.</p>
+<h4 id="stat-11-04">Polynomial regression<a class="heading-anchor" href="#stat-11-04" aria-label="Link to this section">#</a></h4>
+<p>Add powers of predictors to capture curvature while remaining linear in coefficients. Centering helps numerical behavior. High-degree polynomials can oscillate or extrapolate wildly even when interpolation fits well.</p>
+<h4 id="stat-11-05">Interaction models<a class="heading-anchor" href="#stat-11-05" aria-label="Link to this section">#</a></h4>
+<p>Include products of predictors so one association varies with another variable. Interpret conditional slopes or contrasts at meaningful covariate values. Main-effect coefficients alone no longer summarize the full relationship.</p>
+<h4 id="stat-11-06">Spline regression<a class="heading-anchor" href="#stat-11-06" aria-label="Link to this section">#</a></h4>
+<p>Join local polynomial pieces at knots with continuity constraints. Knot placement and regularization control flexibility. Too many effective degrees of freedom overfit; insufficient boundary data make extrapolation unreliable.</p>
+<h4 id="stat-11-07">Restricted cubic splines<a class="heading-anchor" href="#stat-11-07" aria-label="Link to this section">#</a></h4>
+<p>Natural or restricted cubic splines impose linear behavior in the tails. This improves stability relative to unrestricted cubic extrapolation but does not make beyond-range predictions scientifically validated.</p>
+<h4 id="stat-11-08">Generalized additive models<a class="heading-anchor" href="#stat-11-08" aria-label="Link to this section">#</a></h4>
+<p>Model the link-scale mean as a sum of smooth predictor functions. Penalized smoothness controls complexity. Additivity excludes interactions unless explicitly modeled, so inspect residual structure for missing joint effects.</p>
+<h4 id="stat-11-09">Generalized linear models<a class="heading-anchor" href="#stat-11-09" aria-label="Link to this section">#</a></h4>
+<p>Choose a response family, link and linear predictor together. The link constrains means to valid support, while the family supplies a variance relationship. Robust covariance can relax some variance assumptions but not repair a wrong mean.</p>
+<h4 id="stat-11-10">Logistic regression<a class="heading-anchor" href="#stat-11-10" aria-label="Link to this section">#</a></h4>
+<p>Use a logit link to estimate conditional binary probabilities. Exponentiated coefficients are conditional odds ratios. Check separation, calibration, functional form and class weighting; weighted training probabilities may need interpretation adjustment.</p>
+<h4 id="stat-11-11">Probit regression<a class="heading-anchor" href="#stat-11-11" aria-label="Link to this section">#</a></h4>
+<p>Use the standard normal CDF as the inverse link. Coefficients act on a latent normal index and are not odds ratios. Report probability contrasts at relevant covariate values for interpretability.</p>
+<h4 id="stat-11-12">Multinomial logistic regression<a class="heading-anchor" href="#stat-11-12" aria-label="Link to this section">#</a></h4>
+<p>Compare each unordered class against a reference through log odds, producing probabilities that sum to one. Reference-class changes alter coefficients but not predictions. Basic multinomial logit imposes restrictive substitution structure.</p>
+<h4 id="stat-11-13">Ordinal regression<a class="heading-anchor" href="#stat-11-13" aria-label="Link to this section">#</a></h4>
+<p>Model ordered categories, often through cumulative probabilities and proportional odds. Test whether shared slopes across thresholds are plausible. Treating ordinal labels as equally spaced numbers imposes a different, often unjustified assumption.</p>
+<h4 id="stat-11-14">Poisson regression<a class="heading-anchor" href="#stat-11-14" aria-label="Link to this section">#</a></h4>
+<p>Set log(mu)=X beta+log(exposure) for event counts. Exponentiated coefficients are rate ratios given predictors. Positive exposure is required; unexplained overdispersion affects uncertainty and predictive tails.</p>
+<h4 id="stat-11-15">Negative binomial regression<a class="heading-anchor" href="#stat-11-15" aria-label="Link to this section">#</a></h4>
+<p>Add a dispersion parameter so count variance can exceed the mean. This suits heterogeneous rates but does not automatically model excess structural zeros or temporal dependence. Compare residual and predictive count distributions.</p>
+<h4 id="stat-11-16">Quasi-likelihood models<a class="heading-anchor" href="#stat-11-16" aria-label="Link to this section">#</a></h4>
+<p>Specify a mean and variance function without a complete likelihood. Quasi-score equations can estimate effects with a dispersion adjustment. Likelihood-based model comparisons cannot be transferred mechanically without an actual likelihood.</p>
+<h4 id="stat-11-17">Zero-inflated models<a class="heading-anchor" href="#stat-11-17" aria-label="Link to this section">#</a></h4>
+<p>Model structural-zero probability separately from a count process that may also emit zero. The two components require distinct interpretation and can be difficult to identify. Diagnose both zero frequency and positive-count tails.</p>
+<h4 id="stat-11-18">Hurdle models<a class="heading-anchor" href="#stat-11-18" aria-label="Link to this section">#</a></h4>
+<p>Fit zero versus positive occurrence, then a zero-truncated positive outcome model. Every observed zero belongs to the hurdle component. This distinguishes participation from intensity when the substantive process supports that split.</p>
+<h4 id="stat-11-19">Gamma regression<a class="heading-anchor" href="#stat-11-19" aria-label="Link to this section">#</a></h4>
+<p>Use a gamma response for strictly positive skewed outcomes, often with log link and variance proportional to mean squared. Zeros need another mechanism, and inverse-link choices can create undesirable domain behavior.</p>
+<h4 id="stat-11-20">Tweedie models<a class="heading-anchor" href="#stat-11-20" aria-label="Link to this section">#</a></h4>
+<p>For power between one and two, a compound Poisson-gamma Tweedie model combines exact zero mass with continuous positive outcomes. Exposure and dispersion matter; not every zero-heavy quantity fits this generating process.</p>
+<h4 id="stat-11-21">Beta regression<a class="heading-anchor" href="#stat-11-21" aria-label="Link to this section">#</a></h4>
+<p>Model an outcome strictly inside (0,1), often with separate mean and precision parameters. Boundary observations violate the basic beta support. Measurement rounding or zero/one inflation needs an explicit extension.</p>
+<h4 id="stat-11-22">Fractional response models<a class="heading-anchor" href="#stat-11-22" aria-label="Link to this section">#</a></h4>
+<p>Model conditional fractions with a link keeping the mean in [0,1], potentially using Bernoulli quasi-likelihood. Values zero and one can be allowed without pretending the fractional observations are individual binary trials.</p>
+<h4 id="stat-11-23">Quantile regression<a class="heading-anchor" href="#stat-11-23" aria-label="Link to this section">#</a></h4>
+<p>Minimize pinball loss for a chosen conditional quantile. Coefficients describe that quantile, not an average effect. Fitting quantiles separately can produce crossing estimates unless constrained or reconciled.</p>
+<h4 id="stat-11-24">Expectile regression<a class="heading-anchor" href="#stat-11-24" aria-label="Link to this section">#</a></h4>
+<p>Minimize asymmetrically weighted squared residuals. Expectiles use residual magnitudes differently from quantiles and are not generally quantiles at the same nominal level. They remain more tail-sensitive than absolute-loss summaries.</p>
+<h4 id="stat-11-25">Nonlinear least squares<a class="heading-anchor" href="#stat-11-25" aria-label="Link to this section">#</a></h4>
+<p>Specify a nonlinear mean function and minimize squared residuals over its parameters. Multiple local optima and parameter tradeoffs can occur. Inspect starting-value sensitivity, identifiability and residual assumptions.</p>
+<h4 id="stat-11-26">Robust regression<a class="heading-anchor" href="#stat-11-26" aria-label="Link to this section">#</a></h4>
+<p>Use robust losses or estimators to reduce contamination sensitivity. Distinguish residual outliers from predictor leverage. Robust coefficients do not automatically retain the same target under a misspecified mean function.</p>
+<h4 id="stat-11-27">Ridge regression<a class="heading-anchor" href="#stat-11-27" aria-label="Link to this section">#</a></h4>
+<p>Add lambda times squared coefficient norm. Shrinkage stabilizes correlated directions but usually retains all coefficients. Scaling and whether the intercept is penalized determine the actual optimization problem.</p>
+<h4 id="stat-11-28">Lasso regression<a class="heading-anchor" href="#stat-11-28" aria-label="Link to this section">#</a></h4>
+<p>Add an absolute-value coefficient penalty, producing zeros via soft thresholding in simple cases. With correlated features, selected variables can be unstable. Selection does not make ordinary post-fit p-values valid.</p>
+<h4 id="stat-11-29">Elastic net<a class="heading-anchor" href="#stat-11-29" aria-label="Link to this section">#</a></h4>
+<p>Combine L1 and L2 penalties to balance sparsity and stability among correlated predictors. Tune both strength and mixing using nested or appropriately separated validation, not the final test set.</p>
+<h4 id="stat-11-30">Group lasso<a class="heading-anchor" href="#stat-11-30" aria-label="Link to this section">#</a></h4>
+<p>Penalize norms of predefined coefficient groups so entire groups enter or leave together. Group definition and size scaling matter. Overlapping groups need a dedicated formulation, not ordinary independent group penalties.</p>
+<h4 id="stat-11-31">Firth regression<a class="heading-anchor" href="#stat-11-31" aria-label="Link to this section">#</a></h4>
+<p>Use a bias-reducing likelihood adjustment, commonly Jeffreys-information based, to mitigate small-sample bias and separation. It differs from arbitrary ridge shrinkage and does not guarantee a meaningful model under omitted structure.</p>
+<h4 id="stat-11-32">Generalized additive location, scale, and shape models<a class="heading-anchor" href="#stat-11-32" aria-label="Link to this section">#</a></h4>
+<p>Allow location, scale and shape parameters to depend on predictors, extending beyond mean-only models. This can represent changing skew or dispersion but increases identifiability, fitting and diagnostic demands.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-fitting-a-line-is-only-the-first-step">Case study: fitting a line is only the first step<a class="heading-anchor" href="#case-study-fitting-a-line-is-only-the-first-step" aria-label="Link to this section">#</a></h4>
+<p>Consider three observations with predictor x=(0,1,2) and outcome y=(1,2,4). The design matrix has an intercept column and x. Its cross-product is [[3,3],[3,5]], and X-transpose y is (7,10). Solving the normal equations gives intercept 5/6 and slope 3/2. Predictions are 5/6, 7/3 and 23/6; residuals are 1/6, -1/3 and 1/6. Their sum is zero and their predictor-weighted sum is zero, exactly the two normal equations.</p>
+<p>The residual sum of squares is 1/6. With three observations and two fitted coefficients, only one residual degree of freedom remains. Under independent normal errors with common variance, s-squared=SSE/(n-p)=1/6. The slope variance estimate is s-squared divided by sum((x-mean(x))^2), or 1/12, so its standard error is about .289. The two-sided 95% t critical value with one degree of freedom is about 12.706. The resulting slope interval is extremely wide despite the convincing upward pattern. Three points determine a visually strong trend without providing much information about noise.</p>
+<p>This calculation separates geometry from inference. The coefficient solution is valid as a least-squares calculation with no normality assumption. The reported interval depends on the normal, independent, equal-variance error model. If the three observations are repeated readings from one device, treating them as independent may be inappropriate. If x was chosen because it showed the strongest pattern among 100 candidates, the ordinary interval ignores selection. If x is caused by an unmeasured common cause of y, its coefficient is not an intervention effect.</p>
+<p>Now predict at x=3. The fitted conditional mean is 16/3. Its leverage relative to the training design is 1/3+(3-1)^2/2=7/3, larger than for central observations. Uncertainty in the fitted mean grows because this point extrapolates beyond the observed range. A new outcome additionally includes residual variance. Reporting only the coefficient line, without the range of supporting x values or an appropriate predictive interval, conceals this distinction.</p>
+<h4 id="case-study-an-interaction-changes-what-a-coefficient-means">Case study: an interaction changes what a coefficient means<a class="heading-anchor" href="#case-study-an-interaction-changes-what-a-coefficient-means" aria-label="Link to this section">#</a></h4>
+<p>Suppose y=10+2<em>x+3</em>z+4<em>x</em>z, where z indicates a customer segment. When z=0, the x slope is two. When z=1, the slope is six. The segment difference at x is 3+4*x. A statement that segment membership adds three units is true only at x=0. If zero lies far outside the observed x range, that intercept contrast may have little practical meaning.</p>
+<p>Center x at a meaningful baseline c by writing x=x_centered+c. The interaction coefficient remains four, but the segment main coefficient becomes 3+4*c. Predictions do not change. This shows why a coefficient&#x27;s numerical value can change under harmless recoding while the model&#x27;s substantive prediction remains identical. Interpret contrasts at explicit feature settings, not isolated coefficients detached from the design matrix.</p>
+<p>For continuous interactions, marginal effects should be reported over meaningful combinations with uncertainty. A regression can fit a strong interaction in regions with no overlap between segments, effectively extrapolating one segment&#x27;s relationship. Inspect the joint support before presenting a precise conditional contrast. Restricted cubic splines and GAM interactions face the same support issue even though their basis functions are more flexible.</p>
+<h4 id="case-study-logistic-odds-probabilities-and-separation">Case study: logistic odds, probabilities and separation<a class="heading-anchor" href="#case-study-logistic-odds-probabilities-and-separation" aria-label="Link to this section">#</a></h4>
+<p>A binary model with intercept log(.2/.8) predicts baseline probability .2. A coefficient log(2) doubles odds from .25 to .5, producing probability .5/(1+.5)=1/3. At baseline probability .8, the same coefficient doubles odds from four to eight and produces probability 8/9. The absolute changes are about .133 and .089. Thus one constant log-odds coefficient creates different probability changes across the predictor space.</p>
+<p>The logistic likelihood assumes each binary contribution is appropriate for the observation design. Ten repeated labels for the same customer are not automatically ten independent trials. A binomial aggregate should carry both successes and trial count, and overdispersion can indicate within-group dependence or heterogeneous probabilities. A robust covariance adjustment may help uncertainty but will not repair biased labels or a missing time effect.</p>
+<p>Complete separation occurs when a linear boundary classifies every training outcome correctly. Increasing coefficient magnitude keeps improving likelihood, so a finite unpenalized maximum may not exist. Extremely large coefficients, huge standard errors or convergence messages should prompt investigation. Penalization or Firth-type bias reduction can produce finite estimates, but the data still contain limited information about how probabilities behave away from the observed categories. Evaluate calibration and sensitivity, not merely whether the optimizer stops warning.</p>
+<p>Class weighting changes the training objective. If positive observations are artificially upweighted, the fitted score can be useful for decisions but may no longer estimate the original-population probability without adjustment or recalibration. A threshold optimized for the weighted objective should not be interpreted as a universally calibrated .5 rule.</p>
+<h4 id="case-study-mean-quantile-and-distribution-models-solve-different-staffing-questions">Case study: mean, quantile and distribution models solve different staffing questions<a class="heading-anchor" href="#case-study-mean-quantile-and-distribution-models-solve-different-staffing-questions" aria-label="Link to this section">#</a></h4>
+<p>Suppose a team staffs for tomorrow&#x27;s workload. Squared-error regression targets the conditional mean, which is useful for expected total resource accounting. Absolute-error regression targets the conditional median, balancing overprediction and underprediction equally in absolute units. If understaffing costs four times as much as overstaffing, pinball loss targets quantile four-fifths rather than the mean or median. The asymmetry follows from the decision&#x27;s marginal costs, not a preference for a more advanced model.</p>
+<p>A Poisson count model requires a count-generating interpretation and an exposure denominator. If observations represent intervals of different length, the offset log(exposure) enters with coefficient fixed at one. Estimating that coefficient freely asks whether the rate changes with exposure and is a different model. A negative-binomial extension allows additional count variability; a hurdle model separates zero occurrence from positive intensity. Gamma regression models positive continuous values rather than counts, while a compound Poisson-gamma Tweedie model can accommodate exact zeros and positive continuous totals.</p>
+<p>Select among these families through support, plausible mean-variance behavior, residual diagnostics and held-out distributional checks. Compare zero rates, upper quantiles, interval coverage and decisions, not only an in-sample information criterion. A family with slightly worse average log score may still be inadequate if it dramatically underestimates the operationally important tail. Conversely, a complicated two-part model may be unjustified if a simpler mean model with robust inference answers the actual question.</p>
+<h4 id="how-to-review-a-fitted-regression">How to review a fitted regression<a class="heading-anchor" href="#how-to-review-a-fitted-regression" aria-label="Link to this section">#</a></h4>
+<p>Read the formula and encoded feature table first. Confirm the unit of outcome, unit of observation, reference categories, offsets, interactions and any transformations. Check training support and rank, then inspect whether the fitting procedure converged and whether constraints or penalties were active. Separate predictive fit diagnostics from inferential assumptions and causal assumptions.</p>
+<p>Next inspect residuals or appropriate deviance/Pearson residuals, subgroup calibration, leverage and influential records. Refit under defensible alternatives such as a nonlinear term, robust covariance or a different variance family, and explain which scientific claim each change affects. Finally, report an interpretable contrast with uncertainty and a decision threshold. A long coefficient table is an intermediate computational object, not the completed scientific communication.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_11.py.html">chapter_11.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_11.py</code></pre>
+<h4 id="solve-and-inspect-the-ols-geometry">Solve and inspect the OLS geometry<a class="heading-anchor" href="#solve-and-inspect-the-ols-geometry" aria-label="Link to this section">#</a></h4>
+<p>The constructed residual vector is orthogonal to the intercept and slope columns, so the fitted coefficients are exactly 1 and 2 despite nonzero residuals. The assertion tests the normal equations, rather than only checking that a library returned an object. Residual spread would still matter for confidence and prediction intervals.</p>
+<h4 id="fit-logistic-regression-from-its-objective">Fit logistic regression from its objective<a class="heading-anchor" href="#fit-logistic-regression-from-its-objective" aria-label="Link to this section">#</a></h4>
+<p>The example explicitly computes stable negative log likelihood and its gradient. BFGS must converge and leave a small gradient norm. The fitted objective must improve over probability 0.5 for every row. A separate odds calculation converts baseline probability .2 to one-third after doubling odds, exposing a common interpretation error.</p>
+<h4 id="counts-require-an-exposure-denominator">Counts require an exposure denominator<a class="heading-anchor" href="#counts-require-an-exposure-denominator" aria-label="Link to this section">#</a></h4>
+<p>An intercept-only Poisson rate model with offsets yields total count divided by total exposure: 20/10=2. It predicts means 2,4,6,8 for exposures 1,2,3,4. Without the offset, differences in observation time would be confused with rate differences.</p>
+<h4 id="see-shrinkage-algebra-numerically">See shrinkage algebra numerically<a class="heading-anchor" href="#see-shrinkage-algebra-numerically" aria-label="Link to this section">#</a></h4>
+<p>For centered one-feature data, ridge gives beta=sum(x*y)/(sum(x^2)+lambda). Here numerator is 30, squared-feature sum is 10 and lambda is 10, so the slope halves from 3 to 1.5. This is intentional bias, and whether it improves future prediction requires validation.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+from scipy.special import expit
+from scipy.optimize import minimize
+from sklearn.linear_model import Ridge
+import statsmodels.api as sm
+
+def ordinary_least_squares():
+    x=np.arange(6,dtype=float)
+    design=np.column_stack([np.ones(6),x])
+    y=1+2*x+np.array([1.,-1.,0.,0.,-1.,1.])
+    beta=np.linalg.lstsq(design,y,rcond=None)[0]
+    assert np.allclose(beta,[1,2])
+    assert np.allclose(design.T@(y-design@beta),0)
+    print(&quot;OLS intercept/slope:&quot;,beta)
+
+def logistic_likelihood():
+    x=np.column_stack([np.ones(8),np.arange(8)-3.5])
+    y=np.array([0.,0.,1.,0.,1.,0.,1.,1.])
+    objective=lambda b: np.sum(np.logaddexp(0,x@b)-y*(x@b))
+    gradient=lambda b: x.T@(expit(x@b)-y)
+    fit=minimize(objective,np.zeros(2),jac=gradient,method=&quot;BFGS&quot;)
+    assert fit.success and np.linalg.norm(gradient(fit.x))&lt;1e-4
+    assert objective(fit.x)&lt;objective(np.zeros(2))
+    doubled_odds_probability=expit(np.log(.2/.8)+np.log(2))
+    assert np.isclose(doubled_odds_probability,1/3)
+    print(&quot;Logistic coefficients:&quot;,fit.x,&quot;twice odds probability:&quot;,doubled_odds_probability)
+
+def counts_with_exposure():
+    exposure=np.array([1.,2.,3.,4.])
+    counts=np.array([2.,5.,5.,8.])
+    fit=sm.GLM(counts,np.ones((4,1)),family=sm.families.Poisson(),offset=np.log(exposure)).fit()
+    estimated_rate=np.exp(fit.params[0])
+    assert np.isclose(estimated_rate,counts.sum()/exposure.sum())
+    assert np.allclose(fit.predict(offset=np.log(exposure)),2*exposure)
+    print(&quot;Exposure-adjusted Poisson rate:&quot;,estimated_rate)
+
+def shrinkage():
+    x=np.array([[-2.],[-1.],[0.],[1.],[2.]])
+    y=3*x[:,0]
+    ridge=Ridge(alpha=10,fit_intercept=False).fit(x,y)
+    assert np.isclose(ridge.coef_[0],1.5)
+    print(&quot;Unpenalized slope 3; ridge slope:&quot;,ridge.coef_[0])
+
+def main():
+    ordinary_least_squares();logistic_likelihood();counts_with_exposure();shrinkage()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: What are the assumptions of linear regression?</strong> Separate calculation, interpretation and inference. OLS always minimizes its objective when solved correctly. An unbiased coefficient interpretation needs a suitable conditional mean and exogeneity. Classical standard errors add variance and dependence assumptions; exact t inference adds normal-error assumptions. Causality requires identification beyond these algebraic conditions.</p>
+<p><strong>Interview: How do you interpret a logistic coefficient of log(2)?</strong> It doubles conditional odds per encoded unit, holding the remaining design fixed. The probability change depends on baseline probability and interactions. It is not a doubling of risk and is not inherently causal.</p>
+<p><strong>Interview: Why might lasso select one of two equally useful features?</strong> Correlated columns offer similar loss reduction, and the L1 geometry can choose sparse alternatives. The selected identity can change with small perturbations. Elastic net or stability analysis may better represent the shared predictive signal.</p>
+<p><strong>Interview: Choose Poisson, negative binomial or a hurdle model.</strong> Begin with count exposure and the generating process. Use Poisson for the basic mean-variance relation, negative binomial for extra rate heterogeneity, and a hurdle when occurrence and positive intensity are substantively separate. Validate zeros, tails and held-out predictive behavior.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://scikit-learn.org/stable/modules/linear_model.html">scikit-learn linear model formulations and regularization</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.statsmodels.org/stable/glm.html">statsmodels generalized linear models</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="10-multiple-testing-sequential-inference-and-selective-inference.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

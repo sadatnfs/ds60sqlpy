@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-040: explanatory solutions · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-040: explanatory solutions</h1>
+      <p class="source-path">Generated from <code>courses/llm-theory/solutions/llm-040_solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-040-explanatory-solutions">llm-040: explanatory solutions<a class="heading-anchor" href="#llm-040-explanatory-solutions" aria-label="Link to this section">#</a></h2>
+<p>Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer.</p>
+<h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
+<p>A reliability argument combines a decision rule with evidence and its limits. When comparing systems, preserve question-level pairing and the dependence between paraphrases in the same family. Resampling individual rows can exaggerate the effective sample size when many variants repeat one underlying task. Aggregate or resample by family under a declared policy. Prompt and retrieval tuning belong on validation data; the final holdout is opened after the policy is frozen. Abstention changes coverage, so accuracy among answered questions must be reported beside answered count and total count. A favorable mean is not enough when severe failures violate a required gate.</p>
+<p><strong>Clustered resampling:</strong> Sampling related groups as units rather than individual rows.</p>
+<p><strong>Coverage:</strong> Fraction of questions receiving an answer.</p>
+<p><strong>Reliability argument:</strong> A decision supported by specified tests and bounded assumptions.</p>
+<h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
+<p>Align both systems by question ID, compute per-question loss or correctness differences, then average within family if families are the resampling unit. Use one index draw for the paired family differences. Preserve a decision ledger separating validation choices from final assessment. Calculate coverage=answered/total and selective accuracy=correct_answered/answered, with an explicit empty-answer policy.</p>
+<h3 id="exercise-1-align-paired-question-results">Exercise 1: Align paired question results<a class="heading-anchor" href="#exercise-1-align-paired-question-results" aria-label="Link to this section">#</a></h3>
+<p>The question is: Use questionsq1,q2 inA andq3 inB; system error differences[-1,-1,1].</p>
+<p>The repeated familyA receives twice the weight under a row mean. The family mean asks a different question and prevents variants from silently dominating the comparison.</p>
+<pre><code class="language-python">families=[&#x27;A&#x27;,&#x27;A&#x27;,&#x27;B&#x27;]; diff=np.array([-1.,-1.,1.]); grouped=np.array([diff[np.array(families)==f].mean() for f in [&#x27;A&#x27;,&#x27;B&#x27;]])
+np.testing.assert_array_equal(grouped,[-1,1]); np.testing.assert_allclose(diff.mean(),-1/3,atol=1e-12,rtol=0)</code></pre>
+<p><strong>Expected:</strong> question mean-1/3;family meansA-1,B1.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with question mean-1/3;family meansA-1,B1.</p>
+<h3 id="exercise-2-resample-whole-families">Exercise 2: Resample whole families<a class="heading-anchor" href="#exercise-2-resample-whole-families" aria-label="Link to this section">#</a></h3>
+<p>The question is: Draw1000 bootstrap samples of the two family differences with seed8.</p>
+<p>The sample space is tiny and visibly discrete. A smooth-looking interval would not create more independent families than the two observed.</p>
+<pre><code class="language-python">indices=np.random.default_rng(8).integers(0,2,size=(1000,2)); estimates=grouped[indices].mean(1)
+assert set(np.unique(estimates))&lt;={-1.,0.,1.} and grouped.mean()==0</code></pre>
+<p><strong>Expected:</strong> estimates only-1,0,1;mean of original family values0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with estimates only-1,0,1;mean of original family values0.</p>
+<h3 id="exercise-3-expose-row-weighting-dependence">Exercise 3: Expose row-weighting dependence<a class="heading-anchor" href="#exercise-3-expose-row-weighting-dependence" aria-label="Link to this section">#</a></h3>
+<p>The question is: Repeatq1 ten times and compare row mean with unchanged family means.</p>
+<p>Duplicating a variant can alter a row-weighted conclusion without adding new task families. The test demonstrates why the unit must be chosen before scoring.</p>
+<pre><code class="language-python">repeated=np.concatenate([diff,[-1.]*10]); assert repeated.mean()!=diff.mean() and grouped.mean()==0</code></pre>
+<p><strong>Expected:</strong> row mean changes;family mean remains0.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with row mean changes;family mean remains0.</p>
+<h3 id="exercise-4-report-selective-accuracy">Exercise 4: Report selective accuracy<a class="heading-anchor" href="#exercise-4-report-selective-accuracy" aria-label="Link to this section">#</a></h3>
+<p>The question is: Of4 questions,answer2 correctly and abstain on2. Compute coverage and answered accuracy.</p>
+<p>Perfect accuracy among answered questions can coexist with limited usefulness. Coverage makes the abstention tradeoff visible.</p>
+<pre><code class="language-python">total,answered,correct=4,2,2
+assert answered/total==.5 and correct/answered==1 and correct==2</code></pre>
+<p><strong>Expected:</strong> coverage.5;answered accuracy1;total correct answers2.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with coverage.5;answered accuracy1;total correct answers2.</p>
+<h3 id="exercise-5-audit-decision-chronology">Exercise 5: Audit decision chronology<a class="heading-anchor" href="#exercise-5-audit-decision-chronology" aria-label="Link to this section">#</a></h3>
+<p>The question is: Record prompt selection onvalidation followed by final-test assessment; flag a test-driven prompt change.</p>
+<p>Information use determines the boundary. Renaming a file or calling a repeated assessment a confirmation does not restore an untouched holdout.</p>
+<pre><code class="language-python">ledger=[(&#x27;select_prompt&#x27;,&#x27;validation&#x27;),(&#x27;assess&#x27;,&#x27;test&#x27;)]
+assert all(part==&#x27;validation&#x27; for action,part in ledger if action==&#x27;select_prompt&#x27;)
+forbidden=(&#x27;select_prompt&#x27;,&#x27;test&#x27;); assert forbidden[1]!=&#x27;validation&#x27;</code></pre>
+<p><strong>Expected:</strong> test-driven selection is invalid for a fresh final claim.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with test-driven selection is invalid for a fresh final claim.</p>
+<h3 id="exercise-6-combine-gates-with-uncertainty">Exercise 6: Combine gates with uncertainty<a class="heading-anchor" href="#exercise-6-combine-gates-with-uncertainty" aria-label="Link to this section">#</a></h3>
+<p>The question is: Require no severe failures and adequate family coverage; evaluate a report withone severe failure.</p>
+<p>The decision reflects a predeclared constraint. A mean difference and a bootstrap summary provide evidence but do not replace a required failure-severity gate.</p>
+<pre><code class="language-python">gates={&#x27;severe_failures&#x27;:1,&#x27;tested_families&#x27;:2,&#x27;minimum_families&#x27;:2}
+go=gates[&#x27;severe_failures&#x27;]==0 and gates[&#x27;tested_families&#x27;]&gt;=gates[&#x27;minimum_families&#x27;]
+assert not go</code></pre>
+<p><strong>Expected:</strong> decisionno-go regardless of favorable average.</p>
+<p><strong>Verify:</strong> Compare the computed values or written argument with decisionno-go regardless of favorable average.</p>
+<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Repeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+  </main>
+</body>
+</html>

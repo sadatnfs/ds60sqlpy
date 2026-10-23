@@ -500,3 +500,27 @@ def test_decoder_cache_has_nonuniform_prefix_and_context_limit_controls() -> Non
         foreign_batch = {name: value[:, :, :1] for name, value in foreign_batch.items()}
         with pytest.raises(ValueError, match='batch'):
             model(torch.tensor([[1]]), foreign_batch)
+
+
+@pytest.mark.parametrize(
+    ('track','lesson_id'),
+    [('deep-learning-tensorflow','tf-028'),('deep-learning-tensorflow','tf-032'),('llm-theory','llm-022')],
+)
+def test_fresh_process_reference_programs_compile_without_heavy_imports(track: str, lesson_id: str) -> None:
+    import textwrap
+
+    path=ROOT/'courses'/track/'solutions'/f'{lesson_id}_solution.py'
+    tree=ast.parse(path.read_text())
+    programs=[]
+    for node in ast.walk(tree):
+        if not isinstance(node,ast.Assign) or not any(isinstance(target,ast.Name) and target.id=='program' for target in node.targets):
+            continue
+        assert isinstance(node.value,ast.Call)
+        assert isinstance(node.value.func,ast.Attribute) and node.value.func.attr=='dedent'
+        assert len(node.value.args)==1 and isinstance(node.value.args[0],ast.Constant)
+        program=textwrap.dedent(node.value.args[0].value)
+        compile(program,f'{lesson_id}-child','exec')
+        programs.append(program)
+    assert len(programs)==1
+    source=path.read_text()
+    assert 'result.stderr' in source and 'check=False' in source

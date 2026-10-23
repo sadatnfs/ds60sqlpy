@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>java-003: Decisions, loops and invariants · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>java-003: Decisions, loops and invariants</h1>
+      <p class="source-path">Generated from <code>courses/java/guides/java-003.md</code></p>
+    </header>
+    <article class="document"><h2 id="java-003-decisions-loops-and-invariants">java-003: Decisions, loops and invariants<a class="heading-anchor" href="#java-003-decisions-loops-and-invariants" aria-label="Link to this section">#</a></h2>
+<p>Authored course content. Java21 runtime qualification and execution receipts are recorded separately in the implementation checkpoint. A saved source file is not proof that the code was compiled or that the learner understands it.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner, approximately 90 minutes. Direct prerequisites: <code>java-002</code></p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Explain short circuit, loop invariant, boundary case using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. The first investigation is Use textnull and testtext!=null before callingisEmpty. The final exercise transfers the mechanism to expose a wrong boundary.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Control flow chooses which statements run and how often. A boolean expression has a truth value, while short-circuit operators can skip an operand entirely. That behavior lets a null check guard a later method call. A loop invariant is a statement that remains true before and after each iteration; it connects a repeated computation to its intended result. For a prefix sum, the accumulator equals the sum of elements already visited. Boundary cases such as an empty array or a limit of zero test whether the initial state and termination condition are correct. A loop that works for one nonempty example can still have an off-by-one error.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Short circuit:</strong> Skipping an operand once a boolean result is determined.</p>
+<p><strong>Loop invariant:</strong> A property preserved at every iteration boundary.</p>
+<p><strong>Boundary case:</strong> An input at an edge of the accepted domain.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Open the Docker classroom, choose the prepared Java21 profile and save a learner pad. The pad is compiled as <code>Main.java</code> with <code>javac --release 21</code> and executed with <code>java -ea Main</code>. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws <code>AssertionError</code> and the process should fail. Do not remove assertions to obtain a green result.</p>
+<p>For a prepared native JDK, copy a worked example into your own <code>Main.java</code> under ignored <code>.learning/expansion/java-003/</code>. From that directory run the same two commands on PowerShell, macOS or Linux:</p>
+<pre><code class="language-text">javac --release 21 Main.java
+java -ea Main</code></pre>
+<p>The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. The default examples use only prepared JDK libraries and tiny local fixtures. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.</p>
+<h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
+<p>if selects a branch. &amp;&amp; evaluates the right operand only when the left istrue;|| evaluates it only when needed. A for loop has initialization,condition andupdate. Use index&lt;length for zero-based arrays. The prefix-sum invariant starts with index0,sum0, then adds exactly the element at the current index before advancing. Break exits the loop;continue skips to the next iteration and can accidentally bypass an update in a while loop.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-guard-a-nullable-value">Example A: Guard a nullable value<a class="heading-anchor" href="#example-a-guard-a-nullable-value" aria-label="Link to this section">#</a></h4>
+<p>The right operand is not evaluated when the left isfalse. Reversing the operands would attempt the method call before the guard.</p>
+<pre><code class="language-java">import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        String text = null;
+        boolean nonempty = text != null &amp;&amp; !text.isEmpty();
+        assert !nonempty;
+    }
+}
+</code></pre>
+<p><strong>Expected:</strong> conditionfalse with noNullPointerException.</p>
+<h4 id="example-b-trace-a-prefix-sum">Example B: Trace a prefix sum<a class="heading-anchor" href="#example-b-trace-a-prefix-sum" aria-label="Link to this section">#</a></h4>
+<p>The accumulator begins at the additive identity0. Each iteration adds one new element, so no record is skipped or counted twice.</p>
+<pre><code class="language-java">import java.util.*;
+
+public class Main {
+
+    public static void main(String[] args) throws Exception {
+        String text = null;
+        boolean nonempty = text != null &amp;&amp; !text.isEmpty();
+        assert !nonempty;
+
+        int[] values = {2, 4, 6}; int sum = 0;
+        List&lt;Integer&gt; prefixes = new ArrayList&lt;&gt;();
+        for (int i = 0; i &lt; values.length; i++) { sum += values[i]; prefixes.add(sum); }
+        assert prefixes.equals(List.of(2, 6, 12)) &amp;&amp; sum == 12;
+    }
+}
+</code></pre>
+<p><strong>Expected:</strong> prefix sums2,6,12;final12.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Guard a nullable value.</strong> Use textnull and testtext!=null before callingisEmpty. <strong>Expected:</strong> conditionfalse with noNullPointerException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with conditionfalse with noNullPointerException.</li>
+</ol>
+<ol>
+<li><strong>Trace a prefix sum.</strong> Sum array2,4,6 while retaining the invariant thatsum covers indices belowi. <strong>Expected:</strong> prefix sums2,6,12;final12. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with prefix sums2,6,12;final12.</li>
+</ol>
+<ol>
+<li><strong>Handle an empty loop.</strong> Run the same sum pattern over an emptyint array. <strong>Expected:</strong> sum0 and zero iterations. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with sum0 and zero iterations.</li>
+</ol>
+<ol>
+<li><strong>Count a half-open interval.</strong> Count integers starting0 whilei&lt;5. <strong>Expected:</strong> visited0,1,2,3,4;count5. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with visited0,1,2,3,4;count5.</li>
+</ol>
+<ol>
+<li><strong>Stop at the first match.</strong> Search3,8,8 for the first8 and stop immediately. <strong>Expected:</strong> index1. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with index1.</li>
+</ol>
+<ol>
+<li><strong>Expose a wrong boundary.</strong> Compare a loop usingi&lt;=length with the validi&lt;length contract on a one-element array. <strong>Expected:</strong> wrong loop raisesArrayIndexOutOfBoundsException. <strong>Verify:</strong> Compare your assertion values or captured diagnostic with wrong loop raisesArrayIndexOutOfBoundsException.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.</p>
+<p>Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First reconstruct the values and identities in the worked example. Next isolate the line that changes the result when one input is altered. Finally compare the normal and failure paths with the stated contract. Use a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close the solution and explain Short circuit, Loop invariant, Boundary case in your own words. Reconstruct one example from a blank <code>Main.java</code>, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p><a href="https://docs.oracle.com/en/java/javase/21/docs/api/index.html">Official Java21 API or language reference</a>, reviewed2026-10-22. Examples and exercise fixtures are original course material. Consult <code>docs/implementation/java-content-status.md</code> for the actual compile/run receipts. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning for java-003: Decisions, loops and invariants.
+Read courses/java/guides/java-003.md and courses/java/lessons/java-003.java. Direct prerequisites: `java-002`.
+Explain the mechanism, ask for a prediction, review my attempt, give one hint,
+request compiler/runtime evidence, and ask a fresh retrieval question.
+Keep courses/java/solutions/ closed until I request comparison or show an attempt.
+Use Java21 and the declared offline fixture. Done when I can explain the state
+transitions, pass all six exercise contracts, diagnose one failure and solve a
+new boundary case without copying the solution.</code></pre></article>
+  </main>
+</body>
+</html>

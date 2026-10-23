@@ -204,6 +204,46 @@ Reuse a representation or parameters from a source task, then adapt or evaluate 
 
 Adjust learning across source and target distributions under a stated shift assumption. Covariate reweighting presumes a stable conditional outcome mechanism and overlap; it cannot fix arbitrary concept change.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: derive the bias-variance tradeoff at one input
+
+Fix a deployment input x and write its future outcome as Y=f(x)+epsilon, with mean-zero noise independent of the training sample. Different possible training samples produce different fitted predictions f_hat(x). Expanding E[(Y-f_hat(x))^2] gives Var(epsilon)+[E(f_hat(x))-f(x)]^2+Var(f_hat(x)). The cross terms vanish under these assumptions. The decomposition concerns repeated training samples and squared loss at a fixed input, not three numbers that can be read directly from one train-test split.
+
+A shallow tree can have high approximation bias if the response changes smoothly in several dimensions. A deep tree can track local detail but vary substantially when a few training rows change. Bagging primarily addresses that instability. Regularization or a simpler model can reduce variability even while increasing bias. If the labels are systematically wrong, however, the apparent irreducible error term is conditional on that measurement process and should not be treated as a law of nature.
+
+Learning curves help distinguish some practical patterns. If training loss is tiny and validation loss improves with more independent data, variance may be limiting. If both are poor, feature quality or model capacity may be limiting. If random splits look excellent but future splits fail, distribution change or leakage may dominate. These are diagnostic hypotheses, not one-to-one interpretations of curve shape.
+
+### Case study: why feature randomness helps a forest
+
+Suppose one strong predictor dominates every tree's first split. Bootstrap samples differ, but nearly every tree builds a similar structure and makes similar mistakes in the same region. Averaging many nearly identical errors gives little variance reduction. Restricting candidate features at each split forces some trees to explore alternative predictors, reducing error correlation at a possible cost to individual tree strength.
+
+This tradeoff explains why the feature-sampling parameter is not merely a speed setting. Too few candidates can make trees weak when only a few features contain signal; too many can make them strongly correlated. Minimum leaf size controls how local a response average becomes, while the number of trees stabilizes the average of the chosen base-learning procedure. A forest with thousands of trees can remain biased, leaked or poorly calibrated.
+
+Out-of-bag prediction uses trees that did not bootstrap-sample a particular row. That gives convenient internal evaluation for appropriately independent rows, but related rows can still appear in a tree's training sample. A patient's other visits or a customer's duplicated record can leak information into its out-of-bag prediction. Use grouped or temporal external validation for the actual deployment task, even if the out-of-bag score looks reassuring.
+
+Impurity-based importance accumulates training split improvements and can favor variables with many candidate splits. Held-out permutation importance asks a different question: how much predictive performance suffers when one feature is disrupted. Correlated alternatives, unrealistic perturbations and subgroup differences complicate both. Importance should explain model reliance, not be relabeled as causal effect.
+
+### Case study: one boosting split and its regularization cost
+
+For half squared error, g_i=prediction_i-y_i and h_i=1. Suppose a parent leaf contains residual gradients summing to zero, while a candidate split creates children with G_L=-6,H_L=3 and G_R=6,H_R=3. With lambda=1, optimal child weights are +1.5 and -1.5. The parent weight is zero. The second-order improvement before a split penalty is one-half times [36/4+36/4-0/7], or nine.
+
+If the leaf-complexity penalty gamma exceeds nine, the split is not worthwhile under this local objective. If gamma is smaller, the split may be accepted, then the learning rate further shrinks its contribution to the ensemble. This makes the regularization parameters concrete: lambda shrinks leaf magnitudes and gamma discourages additional leaves. They are not substitutes for independent validation or a correct loss.
+
+For logistic loss, h_i=p_i*(1-p_i), so confident predictions can have small curvature. Newton-style updates must be controlled when curvature is tiny or labels are unusual. Real implementations include further constraints and numerical safeguards. The compact formula teaches the optimization mechanism without claiming that a few NumPy lines reproduce XGBoost's full training system.
+
+### Case study: choose between linear, tree and kernel baselines
+
+A tabular problem with mostly additive smooth effects may be served well by regularized regression or a GAM. A tree ensemble can capture thresholds and interactions with less feature construction, but its predictions outside observed ranges are usually piecewise constant. A kernel method can provide smooth nonlinear behavior but may require costly sample-by-sample matrices and careful scaling. These are structural differences, not a universal ranking.
+
+Compare the candidates under the same data boundary, tuning budget and decision metric. Fit imputation and scaling inside each relevant pipeline, use the same held-out customers or dates, and include a simple constant or historical baseline. Inspect where the winner improves: common cases, rare failures, new entities or only noisy corners. A tiny aggregate gain may not justify added latency, complexity or loss of interpretability.
+
+For transfer learning and semi-supervised methods, document the source of extra information. Unlabeled data can hurt if the assumed cluster structure does not align with labels, and a pretrained representation can carry evaluation contamination or a mismatched domain. An active-learning acquisition policy changes the distribution of labeled examples. Keep a representative evaluation set whose selection process does not reward the model for choosing easy or favorable labels.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_19.py](../examples/chapter_19.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

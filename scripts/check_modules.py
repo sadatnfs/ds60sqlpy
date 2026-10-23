@@ -39,12 +39,12 @@ def main() -> int:
         "authored": len(catalog.canonical_ids.intersection(catalog.lessons)),
         "planned": len(catalog.canonical_ids),
         "tracks": tracks,
-        "publication": "Authored modules and tutorial books; published legacy catalog remains separate.",
+        "publication": "Authored modules and books; the legacy catalog remains separate.",
     }
     if args.json:
         print(json.dumps(report, indent=2))
     else:
-        print(f"Validated {report['authored']} authored lessons across {len(tracks)} subject tracks.")
+        print(f"Validated {report['authored']} authored lessons across {len(tracks)} tracks.")
         for track in tracks:
             print(f"{track['id']}: {len(track['authored_ids'])}/{track['planned']} authored")
         print(report["publication"])

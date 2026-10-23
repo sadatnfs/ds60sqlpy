@@ -15,7 +15,23 @@
       "plan": "bridge/README.md"
     }
   },
-  "learning_paths": {},
+  "learning_paths": {
+    "python-data-mechanics": {
+      "title": "NumPy and pandas data mechanics",
+      "description": "Trace ownership, numerical stability, label alignment, temporal lookup and chunked reductions with exact evidence.",
+      "targets": [
+        "python-numpy-04",
+        "python-pandas-04"
+      ]
+    },
+    "algorithmic-reasoning": {
+      "title": "Algorithmic reasoning and reconstructable decisions",
+      "description": "Progress from hash indexes and stable ordering to graph search and dynamic programming with checked counterexamples.",
+      "targets": [
+        "python-algo-04"
+      ]
+    }
+  },
   "lessons": [
     {
       "id": "python-01",
@@ -1639,6 +1655,367 @@
         "python/professional/solutions/py_pro_03_restartable_file_pipeline_solution.py"
       ],
       "runner": "python"
+    },
+    {
+      "id": "python-numpy-01",
+      "track": "python",
+      "day": 74,
+      "title": "NumPy Memory Ownership, Strides, and Safe Mutation",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-16"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_01.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_01.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_01_solutions.md",
+        "python/professional/solutions/py_numpy_01_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "numpy",
+        "memory",
+        "ownership",
+        "strides",
+        "and",
+        "safe",
+        "mutation"
+      ]
+    },
+    {
+      "id": "python-numpy-02",
+      "track": "python",
+      "day": 75,
+      "title": "Axes, Broadcasting, and Batched Linear Algebra",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-numpy-01"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_02.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_02.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_02_solutions.md",
+        "python/professional/solutions/py_numpy_02_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "axes",
+        "broadcasting",
+        "and",
+        "batched",
+        "linear",
+        "algebra"
+      ]
+    },
+    {
+      "id": "python-numpy-03",
+      "track": "python",
+      "day": 76,
+      "title": "Gather, Scatter, Masks, and Deterministic Selection",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-numpy-02"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_03.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_03.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_03_solutions.md",
+        "python/professional/solutions/py_numpy_03_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "gather",
+        "scatter",
+        "masks",
+        "and",
+        "deterministic",
+        "selection"
+      ]
+    },
+    {
+      "id": "python-numpy-04",
+      "track": "python",
+      "day": 77,
+      "title": "Stable Numerical Computation and Honest Error Bounds",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-numpy-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_numpy_04.py",
+      "guide_path": "python/professional/companion-guides/py_numpy_04.md",
+      "solution_paths": [
+        "python/professional/solutions/py_numpy_04_solutions.md",
+        "python/professional/solutions/py_numpy_04_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "stable",
+        "numerical",
+        "computation",
+        "and",
+        "honest",
+        "error",
+        "bounds"
+      ]
+    },
+    {
+      "id": "python-pandas-01",
+      "track": "python",
+      "day": 78,
+      "title": "pandas Label Alignment, Nullable Logic, and Safe Assignment",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-20"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_01.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_01.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_01_solutions.md",
+        "python/professional/solutions/py_pandas_01_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "pandas",
+        "label",
+        "alignment",
+        "nullable",
+        "logic",
+        "and",
+        "safe",
+        "assignment"
+      ]
+    },
+    {
+      "id": "python-pandas-02",
+      "track": "python",
+      "day": 79,
+      "title": "Join Contracts and Point-in-Time Feature Lookup",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-pandas-01",
+        "python-21"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_02.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_02.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_02_solutions.md",
+        "python/professional/solutions/py_pandas_02_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "join",
+        "contracts",
+        "and",
+        "point-in-time",
+        "feature",
+        "lookup"
+      ]
+    },
+    {
+      "id": "python-pandas-03",
+      "track": "python",
+      "day": 80,
+      "title": "Grouped Transforms, Temporal Windows, and Session Boundaries",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-pandas-02"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_03.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_03.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_03_solutions.md",
+        "python/professional/solutions/py_pandas_03_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "grouped",
+        "transforms",
+        "temporal",
+        "windows",
+        "and",
+        "session",
+        "boundaries"
+      ]
+    },
+    {
+      "id": "python-pandas-04",
+      "track": "python",
+      "day": 81,
+      "title": "Chunked Data, Global Reductions, and Cross-Batch State",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-pandas-03",
+        "python-23"
+      ],
+      "lesson_path": "python/professional/lessons/py_pandas_04.py",
+      "guide_path": "python/professional/companion-guides/py_pandas_04.md",
+      "solution_paths": [
+        "python/professional/solutions/py_pandas_04_solutions.md",
+        "python/professional/solutions/py_pandas_04_solution.py"
+      ],
+      "dependency_group": "data",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "chunked",
+        "data",
+        "global",
+        "reductions",
+        "and",
+        "cross-batch",
+        "state"
+      ]
+    },
+    {
+      "id": "python-algo-01",
+      "track": "python",
+      "day": 82,
+      "title": "Algorithmic Cost, Hash Indexes, and Duplicate-Aware Matching",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-06",
+        "python-10"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_01.py",
+      "guide_path": "python/professional/companion-guides/py_algo_01.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_01_solutions.md",
+        "python/professional/solutions/py_algo_01_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "algorithmic",
+        "cost",
+        "hash",
+        "indexes",
+        "and",
+        "duplicate-aware",
+        "matching"
+      ]
+    },
+    {
+      "id": "python-algo-02",
+      "track": "python",
+      "day": 83,
+      "title": "Stable Ordering, Binary-Search Boundaries, and Merge Algorithms",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-algo-01"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_02.py",
+      "guide_path": "python/professional/companion-guides/py_algo_02.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_02_solutions.md",
+        "python/professional/solutions/py_algo_02_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "stable",
+        "ordering",
+        "binary-search",
+        "boundaries",
+        "and",
+        "merge",
+        "algorithms"
+      ]
+    },
+    {
+      "id": "python-algo-03",
+      "track": "python",
+      "day": 84,
+      "title": "Graph Traversal, Priority Queues, and Shortest-Path Evidence",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-algo-02"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_03.py",
+      "guide_path": "python/professional/companion-guides/py_algo_03.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_03_solutions.md",
+        "python/professional/solutions/py_algo_03_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "graph",
+        "traversal",
+        "priority",
+        "queues",
+        "and",
+        "shortest-path",
+        "evidence"
+      ]
+    },
+    {
+      "id": "python-algo-04",
+      "track": "python",
+      "day": 85,
+      "title": "Dynamic Programming, State Design, and Reconstructable Decisions",
+      "level": "intermediate",
+      "phase": "Python data mechanics and algorithmic reasoning",
+      "estimated_minutes": 150,
+      "prerequisites": [
+        "python-algo-03"
+      ],
+      "lesson_path": "python/professional/lessons/py_algo_04.py",
+      "guide_path": "python/professional/companion-guides/py_algo_04.md",
+      "solution_paths": [
+        "python/professional/solutions/py_algo_04_solutions.md",
+        "python/professional/solutions/py_algo_04_solution.py"
+      ],
+      "dependency_group": "core",
+      "network": "offline",
+      "runner": "python",
+      "topics": [
+        "dynamic",
+        "programming",
+        "state",
+        "design",
+        "and",
+        "reconstructable",
+        "decisions"
+      ]
     },
     {
       "id": "sql-start-01",

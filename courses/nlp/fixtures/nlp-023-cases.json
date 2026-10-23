@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-023",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Apply the role/time rule to the three source records at time10.",
+      "expected": "Only policy version2 for ops; unknown role and expired time30 yield no records."
+    },
+    {
+      "exercise": 2,
+      "task": "Hash canonical records, reverse their input order and change one text field.",
+      "expected": "Reordering leaves hash unchanged; text change produces a different hash."
+    },
+    {
+      "exercise": 3,
+      "task": "Compute total variation for [50,50] and [80,20].",
+      "expected": "Distance.3; negative,nonfinite or zero-total count vectors are rejected."
+    },
+    {
+      "exercise": 4,
+      "task": "Evaluate predictions[1,1,0] with labels[1,None,0], then an all-unknown case.",
+      "expected": "Two mature cases with accuracy1; all-unknown returns count0 and no accuracy."
+    },
+    {
+      "exercise": 5,
+      "task": "Store the adversarial fixture in an evidence packet and apply the synthetic email redaction.",
+      "expected": "Text remains inert; only the declared email pattern is replaced; no broad anonymization claim."
+    },
+    {
+      "exercise": 6,
+      "task": "Specify a stale-document incident with versions,diagnostics,rollback/reindex choice and acceptance evidence.",
+      "expected": "A concrete record distinguishes observed failure,hypothesis,authorized action and verified recovery."
+    }
+  ]
+}

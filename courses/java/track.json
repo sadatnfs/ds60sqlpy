@@ -17,9 +17,9 @@
         "entry point",
         "compiler diagnostics"
       ],
-      "outcome": "Explain and apply from source file to running jvm with explicit assumptions and failure handling.",
-      "lab": "Work through source examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A Java program begins as text.",
+      "lab": "Create a message variable containing Hello,Java and print it once.",
+      "verification": "one line Hello, Java. compiler resultfalse and at least one ERROR diagnostic."
     },
     {
       "id": "java-002",
@@ -36,9 +36,9 @@
         "casting",
         "BigDecimal"
       ],
-      "outcome": "Explain and apply values, numeric types and conversion with explicit assumptions and failure handling.",
-      "lab": "Work through primitives examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A numeric type defines both a range and a set of operations.",
+      "lab": "Calculate7/2 and7/2.0.",
+      "verification": "integer3 and double3.5. exact division throws;rounded result0.33."
     },
     {
       "id": "java-003",
@@ -55,9 +55,9 @@
         "loop invariant",
         "boundary"
       ],
-      "outcome": "Explain and apply decisions, loops and invariants with explicit assumptions and failure handling.",
-      "lab": "Work through boolean examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Control flow chooses which statements run and how often.",
+      "lab": "Use textnull and testtext!=null before callingisEmpty.",
+      "verification": "conditionfalse with noNullPointerException. wrong loop raisesArrayIndexOutOfBoundsException."
     },
     {
       "id": "java-004",
@@ -74,9 +74,9 @@
         "overloading",
         "pass by value"
       ],
-      "outcome": "Explain and apply methods and explicit contracts with explicit assumptions and failure handling.",
-      "lab": "Work through parameters examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A method packages a computation behind a contract: which inputs it accepts, what it returns, what state it changes and how it reports invalid input.",
+      "lab": "ImplementdoubleValue(intx) and evaluate7 and0.",
+      "verification": "14 and0. int andlong respectively."
     },
     {
       "id": "java-005",
@@ -93,9 +93,9 @@
         "code points",
         "immutability"
       ],
-      "outcome": "Explain and apply arrays, strings and unicode with explicit assumptions and failure handling.",
-      "lab": "Work through array bounds examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An array is a fixed-length indexed container.",
+      "lab": "Copy array1,2,3,mutate the copy and compare the original.",
+      "verification": "original starts1;copy starts9. ArrayIndexOutOfBoundsException."
     },
     {
       "id": "java-006",
@@ -112,9 +112,9 @@
         "HashSet",
         "iteration"
       ],
-      "outcome": "Explain and apply lists, sets and maps with explicit assumptions and failure handling.",
-      "lab": "Work through ArrayList examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Lists preserve an ordered sequence and may contain duplicates.",
+      "lab": "Create a mutable listred,blue,red and appendgreen.",
+      "verification": "size4;red appears twice. UnsupportedOperationException."
     },
     {
       "id": "java-007",
@@ -130,9 +130,9 @@
         "access modifiers",
         "instance methods"
       ],
-      "outcome": "Explain and apply classes and encapsulation with explicit assumptions and failure handling.",
-      "lab": "Work through object state examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An object combines state with operations that preserve its rules.",
+      "lab": "Construct accounts with100 and100 cents,deposit50 into the first.",
+      "verification": "balances150 and100. ArithmeticException;original maximum balance preserved."
     },
     {
       "id": "java-008",
@@ -148,9 +148,9 @@
         "compact constructor",
         "validation"
       ],
-      "outcome": "Explain and apply constructors, records and invariants with explicit assumptions and failure handling.",
-      "lab": "Work through record examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A record is a concise carrier for a fixed set of components, with generated accessors, equality, hashing and a descriptive string.",
+      "lab": "Create an Order with idspaceAspace and itemx.",
+      "verification": "idA and items[x]. NullPointerException from the declaredcopy policy."
     },
     {
       "id": "java-009",
@@ -166,9 +166,9 @@
         "try with resources",
         "suppressed exception"
       ],
-      "outcome": "Explain and apply exceptions and resource lifetime with explicit assumptions and failure handling.",
-      "lab": "Work through checked exception examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Exceptions separate normal return values from failure.",
+      "lab": "Open a Probe resource,recordbody,then inspect closure order.",
+      "verification": "eventsbody,closeA. cause remains the originalIOException."
     },
     {
       "id": "java-010",
@@ -185,9 +185,9 @@
         "composition",
         "dispatch"
       ],
-      "outcome": "Explain and apply interfaces and polymorphism with explicit assumptions and failure handling.",
-      "lab": "Work through interface examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "An interface describes behavior a caller can rely on without depending on one implementation.",
+      "lab": "UsePricing references to identity andhalf-price implementations on100 cents.",
+      "verification": "100 and50. negative feeIllegalArgumentException;null delegateNullPointerException."
     },
     {
       "id": "java-011",
@@ -204,9 +204,9 @@
         "Comparator",
         "mutable keys"
       ],
-      "outcome": "Explain and apply equality, hashing and ordering with explicit assumptions and failure handling.",
-      "lab": "Work through equals examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Equality, hashing and ordering are related contracts with different roles.",
+      "lab": "Create two equalPoint records and insert one into a map.",
+      "verification": "lookup with the other returnsorigin;hashes equal. display labels equal;points unequal."
     },
     {
       "id": "java-012",
@@ -224,9 +224,9 @@
         "super",
         "type erasure"
       ],
-      "outcome": "Explain and apply generics and variance with explicit assumptions and failure handling.",
-      "lab": "Work through type parameter examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Generics express type relationships so many errors can be detected before execution.",
+      "lab": "SumList.of(1,2,3) andList.of(1.5,2.5) throughList<?extendsNumber>.",
+      "verification": "sums6.0 and4.0. runtime classes equal;compile-time contracts remain distinct."
     },
     {
       "id": "java-013",
@@ -243,9 +243,9 @@
         "Predicate",
         "Function"
       ],
-      "outcome": "Explain and apply lambdas and functional interfaces with explicit assumptions and failure handling.",
-      "lab": "Work through capture examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A lambda supplies the behavior of a functional interface, an interface with one abstract method.",
+      "lab": "Create a Predicate<Integer> accepting positive values and test3,0,-1.",
+      "verification": "true,false,false. 7 accepted;blank rejected."
     },
     {
       "id": "java-014",
@@ -262,9 +262,9 @@
         "groupingBy",
         "parallel hazards"
       ],
-      "outcome": "Explain and apply streams and collectors with explicit assumptions and failure handling.",
-      "lab": "Work through lazy pipeline examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A stream is a single-use computation pipeline over a source.",
+      "lab": "Keep even values from1,2,3,4 and sum their squares.",
+      "verification": "20. 5 versus9;parallel sum5050."
     },
     {
       "id": "java-015",
@@ -281,9 +281,9 @@
         "ZonedDateTime",
         "DST"
       ],
-      "outcome": "Explain and apply dates, time zones and formatting with explicit assumptions and failure handling.",
-      "lab": "Work through Instant examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Time has several meanings.",
+      "lab": "Parse2024-01-01T00:00:00Z and view it inUTC andAmerica/New_York.",
+      "verification": "same instant;New York local date2023-12-31. start included;end excluded."
     },
     {
       "id": "java-016",
@@ -300,9 +300,9 @@
         "UTF-8",
         "atomic replacement"
       ],
-      "outcome": "Explain and apply files, paths and character encoding with explicit assumptions and failure handling.",
-      "lab": "Work through Path examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A path names a location; it is not the file contents or a guarantee that the location exists.",
+      "lab": "WriteCaf\u00e9 and an emoji to an owned temporary file,then read it withUTF-8.",
+      "verification": "exact text equality. original exception propagated;owned directory absent."
     },
     {
       "id": "java-017",
@@ -319,9 +319,9 @@
         "domain error",
         "parse"
       ],
-      "outcome": "Explain and apply optional values and validation boundaries with explicit assumptions and failure handling.",
-      "lab": "Work through Optional examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Optional represents the presence or absence of a value in a return contract.",
+      "lab": "Look up knowna andunknownb in a fixed map throughOptional.",
+      "verification": "a present with7;b empty. specific absence failure."
     },
     {
       "id": "java-018",
@@ -338,9 +338,9 @@
         "properties",
         "mutation"
       ],
-      "outcome": "Explain and apply tests that detect broken behavior with explicit assumptions and failure handling.",
-      "lab": "Work through assert examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A useful test distinguishes correct behavior from a plausible mistake.",
+      "lab": "Testclamp for values-2,0,3,9 underbounds0..5.",
+      "verification": "outputs0,0,3,5. all originals restored;input arrays unchanged."
     },
     {
       "id": "java-019",
@@ -357,9 +357,9 @@
         "heap",
         "Big O"
       ],
-      "outcome": "Explain and apply data structures and complexity with explicit assumptions and failure handling.",
-      "lab": "Work through hash table examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "A data structure is a set of operations with representation and cost tradeoffs.",
+      "lab": "Adda,b,c to anArrayDeque and remove from the front.",
+      "verification": "a,b,c order. poll returnsnull;remove throwsNoSuchElementException."
     },
     {
       "id": "java-020",
@@ -376,9 +376,9 @@
         "memoization",
         "DP"
       ],
-      "outcome": "Explain and apply search, sorting and dynamic programming with explicit assumptions and failure handling.",
-      "lab": "Work through binary search examples and compare normal, boundary and invalid cases.",
-      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+      "outcome": "Algorithms connect a problem contract to a sequence of operations and invariants.",
+      "lab": "RunlowerBound on1,2,2,5 withtarget2 andtarget6.",
+      "verification": "indices1 and4. IllegalArgumentException forboth."
     },
     {
       "id": "java-021",

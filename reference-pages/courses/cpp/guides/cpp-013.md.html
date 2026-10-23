@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>cpp-013: Warnings and CTest as feedback · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>cpp-013: Warnings and CTest as feedback</h1>
+      <p class="source-path">Generated from <code>courses/cpp/guides/cpp-013.md</code></p>
+    </header>
+    <article class="document"><h2 id="cpp-013-warnings-and-ctest-as-feedback">cpp-013: Warnings and CTest as feedback<a class="heading-anchor" href="#cpp-013-warnings-and-ctest-as-feedback" aria-label="Link to this section">#</a></h2>
+<p>Authored beta content. Content completion and runtime qualification are separate evidence.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Beginner; 90 minutes. Direct prerequisites: <code>cpp-009</code>, <code>cpp-012</code>.</p>
+<p>Learner artifact: <a href="../lessons/cpp-013.cpp.html">cpp-013.cpp</a>. Keep <a href="../solutions/cpp-013_solutions.md.html">official solutions</a> closed until an attempt. The immutable <a href="../fixtures/cpp-013-cases.json.html">case ledger</a> records exercise inputs and expected observations.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Turn behavioral contracts into tests that still run in Release builds.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p>A warning is compiler feedback about suspicious code even when compilation succeeds. A test is an executable check against a contract. CTest runs registered processes and reports their statuses. The NDEBUG macro disables standard assert expressions, so a Release test that only uses assert can accidentally check nothing.</p>
+<h3 id="syntax-and-mechanism">Syntax and mechanism<a class="heading-anchor" href="#syntax-and-mechanism" aria-label="Link to this section">#</a></h3>
+<p><code>if (actual != expected) return 1;</code> is an always-active test. <code>-Wall -Wextra -Wpedantic</code> requests common warning groups; it is not a proof of correctness. A successful CMake configure does not execute tests; run ctest and inspect the executed count.</p>
+<h3 id="trace-the-mechanism">Trace the mechanism<a class="heading-anchor" href="#trace-the-mechanism" aria-label="Link to this section">#</a></h3>
+<p>A test has two jobs: perform a check and make failure observable. With NDEBUG, assert(expression) can remove expression entirely, including side effects accidentally placed inside it. An ordinary if condition and nonzero return stay active in Release. CTest adds process orchestration but cannot invent checks inside a program. Inspect the executed test count as well as the pass label, because a project with zero registered tests has not validated the intended behavior.</p>
+<h3 id="run-and-inspect">Run and inspect<a class="heading-anchor" href="#run-and-inspect" aria-label="Link to this section">#</a></h3>
+<p>Open the C++ module, save this lesson&#x27;s learner pad, then use Run. The worker stages the pad as <code>main.cpp</code> and compiles one translation unit. Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for exact local commands, flags, exit statuses, paths and Docker guidance. Tests involving multiple files, CMake, tool flags or shared libraries are explicitly host-project exercises.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-cpp">if (twice(3)!=6) return 1;</code></pre>
+<p><strong>Expected:</strong> The process returns nonzero if the result is wrong, including Release builds.</p>
+<h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-cpp">#ifdef NDEBUG
+// assert expressions can be removed here.
+#endif</code></pre>
+<p><strong>Expected:</strong> NDEBUG changes assertions, not ordinary if-based contract checks.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<h4 id="exercise-1-read-flags">Exercise 1: Read flags<a class="heading-anchor" href="#exercise-1-read-flags" aria-label="Link to this section">#</a></h4>
+<p>Explain -std=c++20, -Wall, -Wextra and -Wpedantic.</p>
+<p><strong>Expected result/shape:</strong> Language selection and three diagnostic groups distinguished.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Language selection and three diagnostic groups distinguished.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Warnings are feedback rather than successful tests.</p>
+<h4 id="exercise-2-run-named-tests">Exercise 2: Run named tests<a class="heading-anchor" href="#exercise-2-run-named-tests" aria-label="Link to this section">#</a></h4>
+<p>Use the supplied CMake project and ctest --output-on-failure.</p>
+<p><strong>Expected result/shape:</strong> One or more registered tests actually execute; record count and status.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: One or more registered tests actually execute; record count and status.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Configure/build/test are three phases.</p>
+<h4 id="exercise-3-create-a-failing-check">Exercise 3: Create a failing check<a class="heading-anchor" href="#exercise-3-create-a-failing-check" aria-label="Link to this section">#</a></h4>
+<p>Change the expected twice(3) result to 7 in a scratch copy.</p>
+<p><strong>Expected result/shape:</strong> Executable exit 1 and failing test.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Executable exit 1 and failing test.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A failed assertion needs to be observable outside the process.</p>
+<h4 id="exercise-4-repair-a-disabled-test">Exercise 4: Repair a disabled test<a class="heading-anchor" href="#exercise-4-repair-a-disabled-test" aria-label="Link to this section">#</a></h4>
+<p>Build a scratch assert-only test with -DNDEBUG.</p>
+<p><strong>Expected result/shape:</strong> The wrong assert disappears; an if-based test still fails.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: The wrong assert disappears; an if-based test still fails.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Do not use disabled assertions as the only release oracle.</p>
+<h4 id="exercise-5-test-zero">Exercise 5: Test zero<a class="heading-anchor" href="#exercise-5-test-zero" aria-label="Link to this section">#</a></h4>
+<p>Keep the always-active twice(0)==0 check.</p>
+<p><strong>Expected result/shape:</strong> Exit 0 for the correct function.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Exit 0 for the correct function.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: Boundary behavior is a separate test input.</p>
+<h4 id="exercise-6-transfer-a-regression">Exercise 6: Transfer a regression<a class="heading-anchor" href="#exercise-6-transfer-a-regression" aria-label="Link to this section">#</a></h4>
+<p>Break twice to x+x+1, run both tests, then restore.</p>
+<p><strong>Expected result/shape:</strong> Both normal and zero contracts reject the broken function.</p>
+<p><strong>Verify:</strong> Record the concrete output, assertion, field comparison or bounded transcript described here: Both normal and zero contracts reject the broken function.</p>
+<p><strong>Progressive hints:</strong> First identify the changed input. Then trace the relevant operation in the worked examples. Finally compare the result to this clue: A test suite earns confidence by detecting a plausible defect.</p>
+<h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
+<p>Explain why this observation follows from the mechanism: The process returns nonzero if the result is wrong, including Release builds. Then explain the changed condition in example 2 without opening the answer.</p>
+<h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
+<p><code>if (actual != expected) return 1;</code> is an always-active test. <code>-Wall -Wextra -Wpedantic</code> requests common warning groups; it is not a proof of correctness. A successful CMake configure does not execute tests; run ctest and inspect the executed count.</p>
+<p>If the result disagrees, preserve the original input and inspect the first differing value or condition. Do not use disabled assertions as the only release oracle.</p>
+<h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Close the source. Reconstruct the reasoning for Exercise 6: Transfer a regression. Explain which assumptions would fail on a larger input or another runtime.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Continue with <a href="cpp-014.md.html">cpp-014</a> after saving the six observations.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach cpp-013.
+Read courses/cpp/guides/cpp-013.md and courses/cpp/lessons/cpp-013.cpp.
+Direct prerequisites: `cpp-009`, `cpp-012`.
+Explain the mechanism, ask me to predict, let me attempt, give one hint, inspect evidence, then ask for retrieval.
+Do not read courses/cpp/solutions/ until I attempt the exercise or explicitly request a reveal.
+Use the exact case ledger and distinguish source review from actual execution.
+Do not install tools or choose an ambient cluster.</code></pre></article>
+  </main>
+</body>
+</html>

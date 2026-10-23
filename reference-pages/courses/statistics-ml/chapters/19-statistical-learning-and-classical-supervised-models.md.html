@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>19. Statistical Learning and Classical Supervised Models · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>19. Statistical Learning and Classical Supervised Models</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/19-statistical-learning-and-classical-supervised-models.md</code></p>
+    </header>
+    <article class="document"><h2 id="19-statistical-learning-and-classical-supervised-models">19. Statistical Learning and Classical Supervised Models<a class="heading-anchor" href="#19-statistical-learning-and-classical-supervised-models" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-019</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Supervised learning maps observed features to an unknown outcome using examples where the outcome is known. Empirical risk is average training loss. Generalization is performance on the deployment distribution, which is not guaranteed by minimizing training loss. Model selection therefore combines the structure of the data, sample size, feature availability, computational cost and independent evaluation.</p>
+<h4 id="trees-and-random-forests-from-first-principles">Trees and random forests from first principles<a class="heading-anchor" href="#trees-and-random-forests-from-first-principles" aria-label="Link to this section">#</a></h4>
+<p>A regression tree chooses a feature and threshold that reduce within-leaf squared error. Each leaf predicts its training outcome mean. A classification tree similarly reduces an impurity such as Gini, 1-sum_k p_k^2, or entropy. Trees handle nonlinearities and interactions without requiring a linear predictor, but greedy early splits can change dramatically after small data perturbations. Depth and minimum leaf size control local complexity.</p>
+<p>Bagging averages trees fitted to bootstrap samples. If B tree errors have variance sigma^2 and common correlation rho, their average has variance sigma^2*[rho+(1-rho)/B]. More trees reduce the uncorrelated part, but the correlated part remains. Random forests additionally sample candidate features at splits to reduce correlation, possibly weakening individual trees. Tune leaf size, feature sampling and depth using appropriate validation; adding trees mainly stabilizes the ensemble. Out-of-bag evaluation reuses bootstrap exclusion, but does not repair temporal or group leakage.</p>
+<h4 id="gradient-boosting-and-xgboost">Gradient boosting and XGBoost<a class="heading-anchor" href="#gradient-boosting-and-xgboost" aria-label="Link to this section">#</a></h4>
+<p>Boosting constructs F_m(x)=F_(m-1)(x)+eta*h_m(x), where h_m approximates the negative gradient of the loss with respect to current predictions. For half squared error, that gradient is the residual y-F. Small learning rates and limited tree complexity spread improvement across stages. For classification, updates occur on a score such as log odds, not by simply adding probabilities. Early stopping must monitor data separate from final evaluation.</p>
+<p>XGBoost is a particular regularized tree-boosting system. Its second-order local objective uses first derivatives g_i and second derivatives h_i. A leaf with summed derivatives G,H and L2 penalty lambda has optimal weight -G/(H+lambda). A candidate split compares the regularized scores of its children with the parent and subtracts a leaf-complexity cost. This explains why tiny low-information leaves are penalized. Missing-value routing, sampling, histogram approximations and implementation choices affect behavior. The book demonstrates this objective with NumPy; the optional <code>xgboost</code> package is not required or imported.</p>
+<h4 id="choose-a-model-through-failure-modes">Choose a model through failure modes<a class="heading-anchor" href="#choose-a-model-through-failure-modes" aria-label="Link to this section">#</a></h4>
+<p>Nearest neighbors need a meaningful scaled distance and degrade in high dimensions. Naive Bayes can classify effectively despite imperfect independence but may produce extreme uncalibrated probabilities. Margin methods need kernel and scaling choices. Tree ensembles are strong tabular baselines but usually extrapolate poorly beyond trained feature ranges. Neural and transfer models can exploit richer representations while increasing optimization and distribution-shift risks. Start with an honest simple baseline and use measured incremental value to justify complexity.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-19-01">Empirical risk minimization<a class="heading-anchor" href="#stat-19-01" aria-label="Link to this section">#</a></h4>
+<p>Minimize average observed loss over a model class. Training improvement can reflect memorization, so the risk target must be evaluated separately. Sampling and label availability define whose errors the objective actually emphasizes.</p>
+<h4 id="stat-19-02">Regularized risk minimization<a class="heading-anchor" href="#stat-19-02" aria-label="Link to this section">#</a></h4>
+<p>Add a complexity penalty to training loss or constrain the model class. Regularization trades some fit for stability. Its strength depends on feature scale, sample size and the loss normalization used by the implementation.</p>
+<h4 id="stat-19-03">Bias–variance tradeoff<a class="heading-anchor" href="#stat-19-03" aria-label="Link to this section">#</a></h4>
+<p>For squared loss, prediction error decomposes into irreducible noise, squared bias and variance under a specified sampling setup. More flexible models often reduce bias while increasing variability, but the pattern is not universally monotonic.</p>
+<h4 id="stat-19-04">Overfitting<a class="heading-anchor" href="#stat-19-04" aria-label="Link to this section">#</a></h4>
+<p>A model captures sample-specific noise or leakage and performs worse on relevant unseen data. Diagnose through honest validation, learning curves and duplicate/group checks. A train-test gap alone does not identify which mechanism caused it.</p>
+<h4 id="stat-19-05">Underfitting<a class="heading-anchor" href="#stat-19-05" aria-label="Link to this section">#</a></h4>
+<p>A model cannot represent useful signal or is constrained too strongly. Both training and validation loss may remain high. Better features or appropriate flexibility help only after ruling out noisy targets and misaligned loss.</p>
+<h4 id="stat-19-06">Nearest-neighbor methods<a class="heading-anchor" href="#stat-19-06" aria-label="Link to this section">#</a></h4>
+<p>Predict from nearby training observations under a chosen metric. Standardization, irrelevant dimensions and neighborhood size strongly affect results. Local support is essential; distance does not establish causal similarity.</p>
+<h4 id="stat-19-07">Naive Bayes<a class="heading-anchor" href="#stat-19-07" aria-label="Link to this section">#</a></h4>
+<p>Factorize feature likelihoods conditionally on class and combine them with class priors. Violated dependence can double-count evidence and distort probabilities. Classification ranking may remain useful despite that mismatch.</p>
+<h4 id="stat-19-08">Linear discriminant analysis<a class="heading-anchor" href="#stat-19-08" aria-label="Link to this section">#</a></h4>
+<p>Assume Gaussian class distributions sharing a covariance matrix, yielding linear boundaries. Covariance estimation becomes unstable with many features relative to samples. Scaling and shrinkage can affect robustness.</p>
+<h4 id="stat-19-09">Quadratic discriminant analysis<a class="heading-anchor" href="#stat-19-09" aria-label="Link to this section">#</a></h4>
+<p>Allow class-specific Gaussian covariance matrices, yielding quadratic boundaries. This increases flexibility and parameter count. Sparse classes may have singular or poorly estimated covariance and need regularization.</p>
+<h4 id="stat-19-10">Decision trees<a class="heading-anchor" href="#stat-19-10" aria-label="Link to this section">#</a></h4>
+<p>Recursively split predictors to improve a loss or impurity criterion. Leaves summarize training outcomes. Greedy splitting is unstable and can overfit small leaves; impurity importance favors variables with many possible splits.</p>
+<h4 id="stat-19-11">Bagging<a class="heading-anchor" href="#stat-19-11" aria-label="Link to this section">#</a></h4>
+<p>Average base learners trained on bootstrap resamples. It especially helps unstable estimators such as trees. Highly correlated base errors limit the variance reduction available from additional members.</p>
+<h4 id="stat-19-12">Random forests<a class="heading-anchor" href="#stat-19-12" aria-label="Link to this section">#</a></h4>
+<p>Combine bootstrap sampling and randomized candidate features to diversify trees. Evaluate grouped or temporal data with matching splits. Forest predictions are averages of local training responses and are poor at unconstrained extrapolation.</p>
+<h4 id="stat-19-13">Extremely randomized trees<a class="heading-anchor" href="#stat-19-13" aria-label="Link to this section">#</a></h4>
+<p>Randomize split thresholds more strongly, often across the whole training sample by default. Extra randomness can reduce variance but increase bias. Implementation sampling defaults differ from a conventional random forest.</p>
+<h4 id="stat-19-14">Gradient boosting<a class="heading-anchor" href="#stat-19-14" aria-label="Link to this section">#</a></h4>
+<p>Fit weak learners to negative loss gradients and add shrunken updates. The loss determines the residual-like target. Learning rate, stage count and learner complexity interact and require joint validation.</p>
+<h4 id="stat-19-15">Boosted decision trees<a class="heading-anchor" href="#stat-19-15" aria-label="Link to this section">#</a></h4>
+<p>Use shallow or regularized trees as additive boosting components. They capture interactions through repeated partitions. Tree depth limits each component&#x27;s interaction structure; the number of stages controls aggregate flexibility.</p>
+<h4 id="stat-19-16">AdaBoost<a class="heading-anchor" href="#stat-19-16" aria-label="Link to this section">#</a></h4>
+<p>Increase emphasis on misclassified cases through sequential weighting or additive exponential-loss fitting. Mislabeled outliers can receive excessive attention. Learning rate and base learner complexity affect both robustness and margin behavior.</p>
+<h4 id="stat-19-17">Support vector machines<a class="heading-anchor" href="#stat-19-17" aria-label="Link to this section">#</a></h4>
+<p>Optimize a margin-based objective with slack penalties, optionally in a kernel feature space. Scale features and tune regularization carefully. Margin scores are not calibrated probabilities without additional estimation.</p>
+<h4 id="stat-19-18">Kernel methods<a class="heading-anchor" href="#stat-19-18" aria-label="Link to this section">#</a></h4>
+<p>Replace explicit feature products with a positive-semidefinite similarity function. Kernel choice encodes smoothness and geometry. A similarity matrix that is not a valid kernel may violate the intended optimization assumptions.</p>
+<h4 id="stat-19-19">Kernel ridge regression<a class="heading-anchor" href="#stat-19-19" aria-label="Link to this section">#</a></h4>
+<p>Solve squared-error regression with L2 regularization in a kernel space. It can model nonlinear smooth relationships but standard exact fitting requires a dense sample-by-sample matrix, limiting large-data scalability.</p>
+<h4 id="stat-19-20">Gaussian process regression<a class="heading-anchor" href="#stat-19-20" aria-label="Link to this section">#</a></h4>
+<p>Condition a kernel-defined Gaussian prior on observed outcomes to obtain mean and covariance predictions. Noise and kernel assumptions determine uncertainty; optimized hyperparameters alone do not guarantee calibrated intervals.</p>
+<h4 id="stat-19-21">Multilayer perceptrons<a class="heading-anchor" href="#stat-19-21" aria-label="Link to this section">#</a></h4>
+<p>Compose affine transformations and nonlinear activations, optimized by gradient methods. Scaling, architecture and regularization matter. Convergence warnings, seed sensitivity and limited tabular data can make a simpler baseline preferable.</p>
+<h4 id="stat-19-22">Multitask learning<a class="heading-anchor" href="#stat-19-22" aria-label="Link to this section">#</a></h4>
+<p>Share parameters or representations across related tasks. Transfer helps when shared structure is real and can hurt when tasks conflict. Measure each task&#x27;s performance rather than only a pooled average.</p>
+<h4 id="stat-19-23">Multioutput learning<a class="heading-anchor" href="#stat-19-23" aria-label="Link to this section">#</a></h4>
+<p>Predict several outcomes with a shared model or coordinated estimators. Joint modeling can exploit dependence, but a wrapper fitting independent models does not necessarily learn cross-output structure.</p>
+<h4 id="stat-19-24">Learning to rank<a class="heading-anchor" href="#stat-19-24" aria-label="Link to this section">#</a></h4>
+<p>Optimize order-related losses across query-specific candidates. Group queries in validation and evaluate position-sensitive utility. A low pointwise regression loss does not guarantee the correct ordering of important pairs.</p>
+<h4 id="stat-19-25">Cost-sensitive learning<a class="heading-anchor" href="#stat-19-25" aria-label="Link to this section">#</a></h4>
+<p>Weight errors or training observations according to consequences. Altered class weights can change probability interpretation. Separate learning a risk score from choosing an operational threshold where feasible.</p>
+<h4 id="stat-19-26">Positive–unlabeled learning<a class="heading-anchor" href="#stat-19-26" aria-label="Link to this section">#</a></h4>
+<p>Learn with confirmed positives and unlabeled cases containing both classes. Identification depends on how positives become labeled or on class-prior information. Treating every unlabeled case as negative can bias the model.</p>
+<h4 id="stat-19-27">Semi-supervised learning<a class="heading-anchor" href="#stat-19-27" aria-label="Link to this section">#</a></h4>
+<p>Use unlabeled data with assumptions connecting feature structure to labels, such as cluster smoothness. Unlabeled examples can hurt when that assumption is wrong or their distribution differs from the labeled target population.</p>
+<h4 id="stat-19-28">Active learning<a class="heading-anchor" href="#stat-19-28" aria-label="Link to this section">#</a></h4>
+<p>Select observations for labeling to reduce useful uncertainty. Log the acquisition mechanism and evaluate on representative data. Focusing exclusively on uncertain cases can miss unexplored regions and distort ordinary evaluation.</p>
+<h4 id="stat-19-29">Transfer learning<a class="heading-anchor" href="#stat-19-29" aria-label="Link to this section">#</a></h4>
+<p>Reuse a representation or parameters from a source task, then adapt or evaluate on the target. Shared appearance does not guarantee transferable mechanisms. Negative transfer and source-data leakage need explicit checks.</p>
+<h4 id="stat-19-30">Domain adaptation<a class="heading-anchor" href="#stat-19-30" aria-label="Link to this section">#</a></h4>
+<p>Adjust learning across source and target distributions under a stated shift assumption. Covariate reweighting presumes a stable conditional outcome mechanism and overlap; it cannot fix arbitrary concept change.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-derive-the-bias-variance-tradeoff-at-one-input">Case study: derive the bias-variance tradeoff at one input<a class="heading-anchor" href="#case-study-derive-the-bias-variance-tradeoff-at-one-input" aria-label="Link to this section">#</a></h4>
+<p>Fix a deployment input x and write its future outcome as Y=f(x)+epsilon, with mean-zero noise independent of the training sample. Different possible training samples produce different fitted predictions f_hat(x). Expanding E[(Y-f_hat(x))^2] gives Var(epsilon)+[E(f_hat(x))-f(x)]^2+Var(f_hat(x)). The cross terms vanish under these assumptions. The decomposition concerns repeated training samples and squared loss at a fixed input, not three numbers that can be read directly from one train-test split.</p>
+<p>A shallow tree can have high approximation bias if the response changes smoothly in several dimensions. A deep tree can track local detail but vary substantially when a few training rows change. Bagging primarily addresses that instability. Regularization or a simpler model can reduce variability even while increasing bias. If the labels are systematically wrong, however, the apparent irreducible error term is conditional on that measurement process and should not be treated as a law of nature.</p>
+<p>Learning curves help distinguish some practical patterns. If training loss is tiny and validation loss improves with more independent data, variance may be limiting. If both are poor, feature quality or model capacity may be limiting. If random splits look excellent but future splits fail, distribution change or leakage may dominate. These are diagnostic hypotheses, not one-to-one interpretations of curve shape.</p>
+<h4 id="case-study-why-feature-randomness-helps-a-forest">Case study: why feature randomness helps a forest<a class="heading-anchor" href="#case-study-why-feature-randomness-helps-a-forest" aria-label="Link to this section">#</a></h4>
+<p>Suppose one strong predictor dominates every tree&#x27;s first split. Bootstrap samples differ, but nearly every tree builds a similar structure and makes similar mistakes in the same region. Averaging many nearly identical errors gives little variance reduction. Restricting candidate features at each split forces some trees to explore alternative predictors, reducing error correlation at a possible cost to individual tree strength.</p>
+<p>This tradeoff explains why the feature-sampling parameter is not merely a speed setting. Too few candidates can make trees weak when only a few features contain signal; too many can make them strongly correlated. Minimum leaf size controls how local a response average becomes, while the number of trees stabilizes the average of the chosen base-learning procedure. A forest with thousands of trees can remain biased, leaked or poorly calibrated.</p>
+<p>Out-of-bag prediction uses trees that did not bootstrap-sample a particular row. That gives convenient internal evaluation for appropriately independent rows, but related rows can still appear in a tree&#x27;s training sample. A patient&#x27;s other visits or a customer&#x27;s duplicated record can leak information into its out-of-bag prediction. Use grouped or temporal external validation for the actual deployment task, even if the out-of-bag score looks reassuring.</p>
+<p>Impurity-based importance accumulates training split improvements and can favor variables with many candidate splits. Held-out permutation importance asks a different question: how much predictive performance suffers when one feature is disrupted. Correlated alternatives, unrealistic perturbations and subgroup differences complicate both. Importance should explain model reliance, not be relabeled as causal effect.</p>
+<h4 id="case-study-one-boosting-split-and-its-regularization-cost">Case study: one boosting split and its regularization cost<a class="heading-anchor" href="#case-study-one-boosting-split-and-its-regularization-cost" aria-label="Link to this section">#</a></h4>
+<p>For half squared error, g_i=prediction_i-y_i and h_i=1. Suppose a parent leaf contains residual gradients summing to zero, while a candidate split creates children with G_L=-6,H_L=3 and G_R=6,H_R=3. With lambda=1, optimal child weights are +1.5 and -1.5. The parent weight is zero. The second-order improvement before a split penalty is one-half times [36/4+36/4-0/7], or nine.</p>
+<p>If the leaf-complexity penalty gamma exceeds nine, the split is not worthwhile under this local objective. If gamma is smaller, the split may be accepted, then the learning rate further shrinks its contribution to the ensemble. This makes the regularization parameters concrete: lambda shrinks leaf magnitudes and gamma discourages additional leaves. They are not substitutes for independent validation or a correct loss.</p>
+<p>For logistic loss, h_i=p_i*(1-p_i), so confident predictions can have small curvature. Newton-style updates must be controlled when curvature is tiny or labels are unusual. Real implementations include further constraints and numerical safeguards. The compact formula teaches the optimization mechanism without claiming that a few NumPy lines reproduce XGBoost&#x27;s full training system.</p>
+<h4 id="case-study-choose-between-linear-tree-and-kernel-baselines">Case study: choose between linear, tree and kernel baselines<a class="heading-anchor" href="#case-study-choose-between-linear-tree-and-kernel-baselines" aria-label="Link to this section">#</a></h4>
+<p>A tabular problem with mostly additive smooth effects may be served well by regularized regression or a GAM. A tree ensemble can capture thresholds and interactions with less feature construction, but its predictions outside observed ranges are usually piecewise constant. A kernel method can provide smooth nonlinear behavior but may require costly sample-by-sample matrices and careful scaling. These are structural differences, not a universal ranking.</p>
+<p>Compare the candidates under the same data boundary, tuning budget and decision metric. Fit imputation and scaling inside each relevant pipeline, use the same held-out customers or dates, and include a simple constant or historical baseline. Inspect where the winner improves: common cases, rare failures, new entities or only noisy corners. A tiny aggregate gain may not justify added latency, complexity or loss of interpretability.</p>
+<p>For transfer learning and semi-supervised methods, document the source of extra information. Unlabeled data can hurt if the assumed cluster structure does not align with labels, and a pretrained representation can carry evaluation contamination or a mismatched domain. An active-learning acquisition policy changes the distribution of labeled examples. Keep a representative evaluation set whose selection process does not reward the model for choosing easy or favorable labels.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_19.py.html">chapter_19.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_19.py</code></pre>
+<h4 id="a-tree-searches-for-useful-partitions">A tree searches for useful partitions<a class="heading-anchor" href="#a-tree-searches-for-useful-partitions" aria-label="Link to this section">#</a></h4>
+<p>Six points form two constant outcome regions. A depth-one tree chooses threshold 2.5 and predicts both regions exactly. This illustrates squared-error reduction without implying a one-split tree can generalize every dataset or infer a causal threshold.</p>
+<h4 id="averaging-cannot-remove-shared-error">Averaging cannot remove shared error<a class="heading-anchor" href="#averaging-cannot-remove-shared-error" aria-label="Link to this section">#</a></h4>
+<p>The forest correctly predicts the two obvious regions of a tiny deterministic step function. Separately, the variance formula with rho=.3 and sigma-squared four decreases from 1.48 at ten members to 1.228 at 100, approaching a floor of 1.2. Feature randomization seeks to lower that correlation floor.</p>
+<h4 id="boost-residuals-not-labels-repeatedly">Boost residuals, not labels repeatedly<a class="heading-anchor" href="#boost-residuals-not-labels-repeatedly" aria-label="Link to this section">#</a></h4>
+<p>The initial mean prediction is three everywhere with MSE nine. A stump fits residuals minus three and plus three; adding half the fitted residual reduces MSE to 2.25. The learning rate deliberately takes a smaller corrective step.</p>
+<h4 id="understand-a-regularized-boosting-leaf">Understand a regularized boosting leaf<a class="heading-anchor" href="#understand-a-regularized-boosting-leaf" aria-label="Link to this section">#</a></h4>
+<p>Summed gradients minus three, summed Hessians two and lambda one imply leaf weight one. The code checks that the local objective decreases and its derivative vanishes. This is the mathematical core of a Newton-style leaf update, not a reimplementation of the complete XGBoost library.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+
+def split_geometry():
+    x=np.arange(6,dtype=float)[:,None];y=np.array([0.,0.,0.,6.,6.,6.])
+    stump=DecisionTreeRegressor(max_depth=1,random_state=19).fit(x,y)
+    assert np.allclose(stump.predict(x),y)
+    assert np.isclose(stump.tree_.threshold[0],2.5)
+    print(&quot;Stump split:&quot;,stump.tree_.threshold[0],&quot;training MSE:&quot;,np.mean((stump.predict(x)-y)**2))
+
+def forest_and_variance():
+    x=np.linspace(0,1,80)[:,None];y=np.where(x[:,0]&lt;.5,0.,2.)
+    forest=RandomForestRegressor(n_estimators=40,max_depth=3,random_state=19,n_jobs=1).fit(x,y)
+    predictions=forest.predict([[.1],[.9]])
+    assert np.allclose(predictions,[0.,2.])
+    rho,sigma2=.3,4.
+    variance=lambda b:sigma2*(rho+(1-rho)/b)
+    assert variance(100)&lt;variance(10) and variance(100)&gt;rho*sigma2
+    print(&quot;Forest predictions:&quot;,predictions,&quot;ensemble variance B10/B100:&quot;,variance(10),variance(100))
+
+def boosting_update():
+    x=np.arange(6,dtype=float)[:,None];y=np.array([0.,0.,0.,6.,6.,6.])
+    current=np.full(len(y),y.mean());residual=y-current
+    tree=DecisionTreeRegressor(max_depth=1,random_state=19).fit(x,residual)
+    updated=current+.5*tree.predict(x)
+    before=np.mean((y-current)**2);after=np.mean((y-updated)**2)
+    assert before==9 and after==2.25
+    print(&quot;One half-step boosting MSE:&quot;,before,&quot;to&quot;,after)
+
+def second_order_leaf():
+    g=np.array([-2.,-1.]);h=np.ones(2);penalty=1.
+    weight=-g.sum()/(h.sum()+penalty)
+    objective=lambda w:g.sum()*w+.5*(h.sum()+penalty)*w*w
+    assert weight==1 and objective(weight)&lt;objective(0)
+    assert np.isclose(g.sum()+(h.sum()+penalty)*weight,0)
+    print(&quot;Regularized Newton leaf weight:&quot;,weight)
+
+def main():
+    split_geometry();forest_and_variance();boosting_update();second_order_leaf()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Why does a random forest usually improve on one deep tree?</strong> Averaging reduces instability when trees make partly different errors. Bootstrap samples and feature subsampling encourage that diversity. Correlated error remains, so more trees cannot fix missing signal, leakage or a wrong target.</p>
+<p><strong>Interview: How does boosting differ from bagging?</strong> Bagging trains perturbed models largely independently and averages them. Boosting adds models sequentially to improve a current loss, using gradients or related reweighting. Its stage count and learning rate form an optimization and regularization tradeoff.</p>
+<p><strong>Interview: What distinguishes XGBoost from generic gradient boosting?</strong> It is a particular system combining regularized tree objectives, derivative-based split and leaf calculations, and scalable implementation strategies. Naming the package is not a model-selection argument; compare it with simpler baselines on the deployment split.</p>
+<p><strong>Interview: Can a forest extrapolate a rising trend beyond training values?</strong> Standard regression-tree leaves average observed outcomes, so predictions typically flatten outside learned partitions. A linear or structured trend model may extrapolate more coherently when that scientific assumption is defensible.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://scikit-learn.org/stable/modules/ensemble.html">scikit-learn ensemble methods</a>.</li>
+</ul>
+<ul>
+<li><a href="https://arxiv.org/abs/1603.02754">Chen and Guestrin, XGBoost: A Scalable Tree Boosting System</a>.</li>
+</ul>
+<ul>
+<li><a href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html">XGBoost objective and boosted-tree tutorial</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="18-bayesian-statistics-and-probabilistic-modeling.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="20-feature-engineering-and-representation-learning.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

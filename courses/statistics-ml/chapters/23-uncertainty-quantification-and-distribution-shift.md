@@ -140,6 +140,44 @@ Optimize against a specified set of plausible distributions. The uncertainty set
 
 Score novelty relative to development data or learned representations. A detector can miss harmful semantic shifts and flag benign changes. Evaluate false alarms, missed shifts and downstream performance consequences separately.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: derive the rank guarantee without a parametric error model
+
+Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting k=ceil((n+1)*(1-alpha)) therefore gives coverage at least 1-alpha.
+
+With n=19 and alpha=.1, k=18. Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that k=n+1, there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.
+
+Ties can make coverage conservative with the usual nonrandomized threshold. Randomized tie-breaking can produce more exact rank behavior under suitable construction, but the implementation and interpretation must be explicit. The core result concerns marginal prediction coverage, not the accuracy of the point model or the conditional coverage of every subgroup.
+
+### Case study: overall coverage hides a difficult subgroup
+
+Suppose 90% of observations belong to an easy group with nearly deterministic outcomes and 10% to a noisy group. A constant-width interval calibrated to 90% marginal coverage can cover almost every easy case while failing most noisy cases. The aggregate target may be met even though the system is least reliable for the group where uncertainty matters most.
+
+A quantile model can adapt interval width to predictors of noise, and conformalized quantile regression calibrates its remaining boundary errors. Group-specific calibration can target coverage within prespecified groups if each has enough calibration data. Both approaches introduce design choices and finite-sample limits. Tiny intersections may require wide intervals, pooling assumptions or an explicit abstention policy.
+
+Measure interval width as well as coverage. An interval spanning every possible operational outcome is calibrated but not useful. Evaluate proper scores or quantile losses, coverage by meaningful group, and the downstream action. Avoid choosing the narrowest of many interval methods on the same calibration labels and then claiming the original split-conformal guarantee without accounting for that selection.
+
+### Case study: distinguish three shifts before reweighting
+
+A model predicts incident severity from diagnostic features. A new product mix changes feature frequencies while severity conditional on features remains unchanged: this is covariate shift. If all target feature regions are represented in training, target-to-source density ratios can reweight evaluation or learning. Extremely large ratios reveal that target performance depends on a small number of source examples.
+
+Alternatively, severity prevalence changes while each severity class retains the same feature distribution: this is label shift. Prior-odds correction follows a different model and can change calibrated probabilities without changing some class-conditional patterns. If a new software architecture changes how the same diagnostic features map to severity, the conditional mechanism itself has changed: concept drift. Neither simple covariate weights nor prior-odds correction is sufficient in general.
+
+Observed data rarely prove one shift model perfectly. Use domain changes, label feedback and diagnostics to assess plausibility. A classifier that distinguishes source from target shows distributional difference in the observed inputs, not which correction is valid. A model can also suffer concept drift with unchanged input distributions, so input monitoring alone misses some failures.
+
+### Case study: uncertainty must reach the final decision
+
+A demand model outputs a predictive distribution, then a staffing optimizer treats its mean as certain. The uncertainty has disappeared at the interface between components. If understaffing is costly, optimize against the predictive distribution, quantiles or explicitly defined scenarios rather than only the average. Preserve correlation across locations when shared shocks affect all of them.
+
+Monte Carlo propagation can sample model parameters and future outcomes jointly, then compute the decision outcome for each draw. Distinguish posterior or parameter uncertainty from process variability, and preserve shared latent effects. Sampling each location independently can drastically understate the probability of simultaneous overload.
+
+An abstention policy similarly needs a complete fallback model. If difficult cases are routed to people, evaluate reviewer capacity, error, delay and consistency. A model with excellent accepted-case accuracy may produce a worse system if it sends an unmanageable fraction to review. Report coverage, conditional risk and end-to-end utility together.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_23.py](../examples/chapter_23.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

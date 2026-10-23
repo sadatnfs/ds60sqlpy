@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>llm-applied-015: Full supervised fine-tuning of a tiny causal decoder · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>llm-applied-015: Full supervised fine-tuning of a tiny causal decoder</h1>
+      <p class="source-path">Generated from <code>courses/llm-applied/guides/llm-applied-015.md</code></p>
+    </header>
+    <article class="document"><h2 id="llm-applied-015-full-supervised-fine-tuning-of-a-tiny-causal-decoder">llm-applied-015: Full supervised fine-tuning of a tiny causal decoder<a class="heading-anchor" href="#llm-applied-015-full-supervised-fine-tuning-of-a-tiny-causal-decoder" aria-label="Link to this section">#</a></h2>
+<p>Status: authored applied LLM content. The manifest inventories complete teaching files; runtime readiness remains a separate, measured property.</p>
+<h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
+<p>Advanced; approximately 240 minutes. Direct prerequisites: <code>llm-applied-014</code>, <code>llm-028</code>. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<p>Full supervised fine-tuning updates all trainable model parameters on governed target examples. The central investigation is concrete: Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target. The finish condition is inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says20 updates, 4 active training targets and no natural-language competence claim. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.</p>
+<h3 id="purpose-and-mental-model">Purpose and mental model<a class="heading-anchor" href="#purpose-and-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Full supervised fine-tuning updates all trainable model parameters on governed target examples. The operation can change representations, attention and output behavior together, which offers flexibility but also risks overfitting and forgetting. A working training loop is not evidence that a subject assistant has learned current facts or become reliable. The task data, mask, objective, optimizer and evaluation split define what the update actually means.</p>
+<p>This chapter performs real CPU gradient updates on the course&#x27;s small causal decoder. It has a literal vocabulary of 16 token IDs, width32, two attention heads and one block. The tokens stand for authored prompt and answer symbols, not natural-language competence. Two training sequences teach a simple answer pattern; a separately identified held-out prompt tests a small transfer case. We update every parameter for exactly20 steps and report training and held-out loss separately. No pretrained weights, external corpus or hosted model is used. The point is to make the mechanics, evidence and limitations of full SFT visible before using a larger stack.</p>
+<h3 id="design-decisions-and-when-to-use-this-method">Design decisions and when to use this method<a class="heading-anchor" href="#design-decisions-and-when-to-use-this-method" aria-label="Link to this section">#</a></h3>
+<p>Use full SFT when a measured task requires enough flexibility to justify updating the complete model and the compute, governance and regression-testing costs are acceptable. Compare it with prompt and adapter baselines under the same data and evaluation contract. A larger trainable parameter count can fit a small dataset quickly while worsening transfer, so keep validation and baseline-retention checks separate.</p>
+<p>Do not interpret a lower training loss as proof of domain expertise. It can reflect memorization, target leakage or a task-specific shortcut. For a realistic pretrained model, preserve chat-template compatibility, label masks, sequence truncation policy and tokenizer revision. Measure output support and task utility, not only token loss. Keep a rollback artifact and evaluate unrelated baseline capabilities to detect forgetting before considering deployment.</p>
+<h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
+<p><strong>Full SFT:</strong> Updating all trainable model parameters on supervised examples.</p>
+<p><strong>Answer-only objective:</strong> Loss over answer targets while prompt tokens remain context.</p>
+<p><strong>Forgetting:</strong> Loss of previously useful behavior after adaptation.</p>
+<p><strong>Held-out transfer:</strong> Behavior on records excluded from fitting and selection.</p>
+<h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
+<p>Use a prepared <code>llm-torch-cpu</code> environment. NumPy is a declared package. TensorFlow and PyTorch require their own prepared CPU profiles; a successful syntax check does not establish their runtime readiness. No package installation, dataset download, pretrained model or network service belongs in this lesson. Copy the learner source into ignored <code>.learning/expansion/llm-applied-015/</code> before editing, or use the application&#x27;s saved pad. The examples use literal local data and a bounded number of operations. For Windows use the interpreter selected by setup: <code>&amp; $CoursePython courses/llm-applied/lessons/llm-applied-015.py</code>. For macOS/Linux use <code>.venv/bin/python courses/llm-applied/lessons/llm-applied-015.py</code> from the repository root.</p>
+<p>Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Distinguish a retrieval or extraction baseline from an actual trained language model; each example names what it implements. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact.</p>
+<h3 id="syntax-anatomy-and-reasoning-sequence">Syntax anatomy and reasoning sequence<a class="heading-anchor" href="#syntax-anatomy-and-reasoning-sequence" aria-label="Link to this section">#</a></h3>
+<p>Construct shifted inputs and answer-only labels, using-100 for the prompt-prediction position. Set a local seed before model creation. Adam receives all model parameters. Each step clears gradients, calculates logits, flattens the batch/time axes for cross entropy, backpropagates and applies one update. A detached clone records initial state. Evaluation usesmodel.eval andtorch.no_grad, then calculates the same active-target objective on held-out IDs.</p>
+<h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
+<h4 id="example-a-build-an-explicit-sft-batch">Example A: Build an explicit SFT batch<a class="heading-anchor" href="#example-a-build-an-explicit-sft-batch" aria-label="Link to this section">#</a></h4>
+<p>The first answer token is still supervised. The mask excludes predicting the prompt continuation, not the role of the prompt as conditioning context.</p>
+<pre><code class="language-python">import numpy as np
+import torch
+from torch import nn
+from torch.nn import functional as F
+class TinyDecoder(nn.Module):
+    def __init__(self,vocab=16,width=32,heads=2,context=32):
+        super().__init__()
+        self.vocab,self.width,self.heads,self.context=vocab,width,heads,context
+        self.token=nn.Embedding(vocab,width); self.position=nn.Embedding(context,width)
+        self.norm1=nn.LayerNorm(width); self.qkv=nn.Linear(width,3*width,bias=False)
+        self.projection=nn.Linear(width,width,bias=False); self.norm2=nn.LayerNorm(width)
+        self.feed=nn.Sequential(nn.Linear(width,2*width),nn.ReLU(),nn.Linear(2*width,width))
+        self.output=nn.Linear(width,vocab,bias=False)
+    def forward(self,ids,cache=None):
+        if ids.ndim!=2 or ids.dtype!=torch.long or ids.shape[1]==0: raise ValueError(&#x27;nonempty long batch,time IDs&#x27;)
+        offset=0 if cache is None else cache[&#x27;k&#x27;].shape[2]
+        batch,time=ids.shape
+        if offset+time&gt;self.context or torch.any(ids&lt;0) or torch.any(ids&gt;=self.vocab): raise ValueError(&#x27;context or vocabulary limit&#x27;)
+        x=self.token(ids)+self.position(torch.arange(offset,offset+time))
+        q,k,v=self.qkv(self.norm1(x)).chunk(3,dim=-1)
+        def split(t): return t.reshape(batch,time,self.heads,self.width//self.heads).transpose(1,2)
+        q,k,v=map(split,(q,k,v))
+        if cache is not None:
+            if cache[&#x27;k&#x27;].shape[0]!=batch: raise ValueError(&#x27;cache batch mismatch&#x27;)
+            k=torch.cat([cache[&#x27;k&#x27;],k],dim=2); v=torch.cat([cache[&#x27;v&#x27;],v],dim=2)
+        allowed=torch.arange(k.shape[2])[None,:]&lt;=torch.arange(offset,offset+time)[:,None]
+        scores=q@k.transpose(-2,-1)/(self.width//self.heads)**.5
+        weights=torch.softmax(scores.masked_fill(~allowed,float(&#x27;-inf&#x27;)),dim=-1)
+        mixed=(weights@v).transpose(1,2).contiguous().reshape(batch,time,self.width)
+        x=x+self.projection(mixed); x=x+self.feed(self.norm2(x))
+        return self.output(x),{&#x27;k&#x27;:k.detach(),&#x27;v&#x27;:v.detach()}
+
+def objective(model,inputs,labels):
+    logits,_=model(inputs)
+    return F.cross_entropy(logits.reshape(-1,model.vocab),labels.reshape(-1),ignore_index=-100)
+torch.manual_seed(23); model=TinyDecoder(); sequences=torch.tensor([[1,2,5,3],[1,4,6,3]])
+inputs=sequences[:,:-1]; labels=sequences[:,1:].clone(); labels[:,0]=-100
+assert tuple(inputs.shape)==(2,3) and labels.tolist()==[[-100,5,3],[-100,6,3]] and int((labels!=-100).sum())==4</code></pre>
+<p><strong>Expected:</strong> inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</p>
+<h4 id="example-b-measure-the-initial-state">Example B: Measure the initial state<a class="heading-anchor" href="#example-b-measure-the-initial-state" aria-label="Link to this section">#</a></h4>
+<p>The held-out baseline is recorded before fitting, but it is not used to choose the update count. The fixed count defines the experiment in advance.</p>
+<pre><code class="language-python">held=torch.tensor([[7,2,5,3]]); held_labels=held[:,1:].clone(); held_labels[:,0]=-100
+with torch.no_grad():
+    initial_train=objective(model,inputs,labels).item(); initial_held=objective(model,held[:,:-1],held_labels).item()
+count=sum(p.numel() for p in model.parameters() if p.requires_grad)
+assert np.isfinite([initial_train,initial_held]).all() and 0&lt;count&lt;50000 and all(p.requires_grad for p in model.parameters())</code></pre>
+<p><strong>Expected:</strong> both losses finite; all model parameters trainable; count below50000.</p>
+<h4 id="example-c-perform-actual-full-fine-tuning">Example C: Perform actual full fine-tuning<a class="heading-anchor" href="#example-c-perform-actual-full-fine-tuning" aria-label="Link to this section">#</a></h4>
+<p>Checking an embedding parameter demonstrates that the update reaches more than the final output layer. A loss curve alone could be misleading if it came from a different object or cached tensor.</p>
+<pre><code class="language-python">before=model.token.weight.detach().clone(); opt=torch.optim.Adam(model.parameters(),lr=.01); curve=[]
+for _ in range(20):
+    opt.zero_grad(set_to_none=True); loss=objective(model,inputs,labels); curve.append(loss.item()); loss.backward(); opt.step()
+assert len(curve)==20 and np.isfinite(curve).all() and curve[-1]&lt;curve[0]
+assert not torch.equal(before,model.token.weight.detach())</code></pre>
+<p><strong>Expected:</strong> 20 finite losses; training loss decreases; an embedding parameter changes.</p>
+<h3 id="prediction-before-your-attempt">Prediction before your attempt<a class="heading-anchor" href="#prediction-before-your-attempt" aria-label="Link to this section">#</a></h3>
+<p>For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson&#x27;s acceptance condition in your own words: inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. receipt says20 updates, 4 active training targets and no natural-language competence claim. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.</p>
+<h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Build an explicit SFT batch.</strong> Use sequences[1, 2, 5, 3] and[1, 4, 6, 3], masking the first shifted target. <strong>Expected:</strong> inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets. <strong>Verify:</strong> Save the assertion results for exercise 1, including inputs shape(2, 3); labels[[-100, 5, 3], [-100, 6, 3]]; 4 active targets.</li>
+</ol>
+<ol>
+<li><strong>Measure the initial state.</strong> Calculate initial training loss and a held-out prompt loss before any update; count trainable parameters. <strong>Expected:</strong> both losses finite; all model parameters trainable; count below50000. <strong>Verify:</strong> Save the assertion results for exercise 2, including both losses finite; all model parameters trainable; count below50000.</li>
+</ol>
+<ol>
+<li><strong>Perform actual full fine-tuning.</strong> Run20 Adam updates atlearningrate.01, clearing gradients each time. <strong>Expected:</strong> 20 finite losses; training loss decreases; an embedding parameter changes. <strong>Verify:</strong> Save the assertion results for exercise 3, including 20 finite losses; training loss decreases; an embedding parameter changes.</li>
+</ol>
+<ol>
+<li><strong>Inspect the mask derivative.</strong> Differentiate cross entropy with respect to fresh zero logits under the samelabels. <strong>Expected:</strong> ignored prompt positions have zero gradient; answer positions do not. <strong>Verify:</strong> Save the assertion results for exercise 4, including ignored prompt positions have zero gradient; answer positions do not.</li>
+</ol>
+<ol>
+<li><strong>Evaluate the frozen held-out prompt.</strong> After the declared20 updates, evaluate the held-out sequence without another optimizer step. <strong>Expected:</strong> finite held-out loss and unchanged weights during evaluation; no promised improvement. <strong>Verify:</strong> Save the assertion results for exercise 5, including finite held-out loss and unchanged weights during evaluation; no promised improvement.</li>
+</ol>
+<ol>
+<li><strong>Write an honest adaptation receipt.</strong> Record update count, active training targets, train/heldout losses and the literal-token limitation. <strong>Expected:</strong> receipt says20 updates, 4 active training targets and no natural-language competence claim. <strong>Verify:</strong> Save the assertion results for exercise 6, including receipt says20 updates, 4 active training targets and no natural-language competence claim.</li>
+</ol>
+<h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
+<p>When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result.</p>
+<h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
+<p>First draw the state described in the vocabulary section. Next use the smallest fixture that distinguishes the two interpretations in Example B. Finally compare your intermediate values with the exercise&#x27;s expected count, shape or scalar. Ask for the first incorrect step, not a complete replacement implementation. Keep any counterexample that exposed the error as a regression test for the next lesson.</p>
+<h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
+<p>Close both worked examples. Explain Full SFT, Answer-only objective, Forgetting using the lesson fixture. Reconstruct one computation from its inputs. Then change one input while retaining the mechanism and predict whether the conclusion survives. Write which part is guaranteed by the code and which part would need new observations. This last distinction prevents a tiny deterministic teaching example from being presented as evidence about an unseen population or a production model.</p>
+<h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
+<p>Revisit the direct prerequisite <code>llm-applied-014</code>, <code>llm-028</code> if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it.</p>
+<h3 id="sources-and-verification-status">Sources and verification status<a class="heading-anchor" href="#sources-and-verification-status" aria-label="Link to this section">#</a></h3>
+<p>API and mechanism reference: <a href="https://docs.pytorch.org/tutorials/beginner/basics/optimization_tutorial.html">PyTorch training mechanics</a>, reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. Current execution receipts are recorded in <code>docs/implementation/llm-applied-status.md</code>; authored content does not imply that a heavy runtime was executed.</p>
+<h3 id="ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h3>
+<pre><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for llm-applied-015, Full supervised fine-tuning of a tiny causal decoder.
+Read courses/llm-applied/guides/llm-applied-015.md and courses/llm-applied/lessons/llm-applied-015.py. Direct prerequisites: `llm-applied-014`, `llm-028`.
+Explain the mental model, ask me to predict the worked example, review my attempt,
+give one hint, request output evidence, and ask a fresh retrieval question.
+Keep courses/llm-applied/solutions/ closed until I request comparison or show an attempt.
+Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
+and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions.</code></pre></article>
+  </main>
+</body>
+</html>

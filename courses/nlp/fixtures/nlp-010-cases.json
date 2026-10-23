@@ -1,0 +1,35 @@
+{
+  "lesson_id": "nlp-010",
+  "cases": [
+    {
+      "exercise": 1,
+      "task": "Compute initialization log scores for the first fixture before any transition.",
+      "expected": "Exponentiated initial scores are [0.36,0.04]."
+    },
+    {
+      "exercise": 2,
+      "task": "Implement Viterbi and decode the first two-token fixture.",
+      "expected": "Path [0,1], probability 0.0756 and two labels for two observations."
+    },
+    {
+      "exercise": 3,
+      "task": "Enumerate all four two-state paths and compare the optimum with the decoder; then run the persistent-transition fixture.",
+      "expected": "First optimum N,V at 0.0756; second optimum V,V at 0.1386."
+    },
+    {
+      "exercise": 4,
+      "task": "Test an empty sequence, an all-zero emission row and exact ties.",
+      "expected": "Empty path/log score 0; impossible row raises ValueError; tied fixture chooses [0,0]."
+    },
+    {
+      "exercise": 5,
+      "task": "Implement strict BIO validation for the three stated sequences.",
+      "expected": "Valid [B-ORG,I-ORG,O]; reject leading I-ORG and a PER-to-ORG continuation."
+    },
+    {
+      "exercise": 6,
+      "task": "Analyze the gold/predicted three-tag example and explain the exact-span result.",
+      "expected": "Token accuracy 2/3 but zero exactly recovered two-token ORG entities."
+    }
+  ]
+}

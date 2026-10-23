@@ -172,6 +172,52 @@ Truncation conditions on inclusion within a range and renormalizes the density. 
 
 A zero-inflated model gives probability pi to structural zeros plus 1-pi to a count distribution that can itself generate zeros. A hurdle model excludes zeros from its positive component. Excess zeros alone do not prove a structural-zero mechanism.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: use support and mechanism to shortlist distributions
+
+A single conversion is binary, so a Bernoulli model is a natural starting point. Ten independent opportunities with a common probability produce a binomial count. If different customers have different probabilities shared across their repeated opportunities, a beta-binomial mixture can model extra variation. The same observed count mean can therefore correspond to materially different uncertainty.
+
+A count of incidents over an exposure interval suggests a Poisson starting point if independent increments and rate assumptions are plausible. Doubling exposure doubles the expected count, so exposure must travel with the observation. A negative-binomial model adds rate heterogeneity and overdispersion. Neither automatically accounts for serial contagion or changes in the measurement process.
+
+A positive duration can be exponential, gamma, Weibull or lognormal depending on the mechanism and desired hazard behavior. The exponential has constant hazard; Weibull can increase or decrease hazard; lognormal behavior arises naturally from multiplicative variation. Compare survival or tail probabilities relevant to operations, not only whether the central histogram looks acceptable.
+
+### Case study: why t, chi-square and F appear together
+
+If Z is standard normal and U is independent chi-square with nu degrees of freedom, then T=Z/sqrt(U/nu) has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.
+
+A normal sample's residual sum of squares divided by sigma-squared has a chi-square distribution with the appropriate residual degrees of freedom. Ratios of independent scaled chi-square quantities produce F distributions, which underlie classical variance comparisons and ANOVA. Independence, normal errors and correct degrees of freedom are doing the work; the named reference distribution is not a universal property of every ratio statistic.
+
+As degrees of freedom increase, the t distribution approaches normal behavior. But replacing t by normal in a tiny sample can drastically narrow an interval. The three-point regression example in chapter11 has only one residual degree of freedom, which explains its large t critical value even though the fitted line looks compelling.
+
+### Case study: mixture variation can imitate heavy tails
+
+Suppose most requests come from a fast regime but a small fraction come from an overloaded regime. Each regime may have modest, roughly symmetric variation. The pooled distribution can become skewed, heavy-tailed or multimodal because it mixes different means and variances. Fitting one heavy-tailed family might approximate it, but conditioning on regime could explain the mechanism more usefully.
+
+Conversely, fitting several Gaussian components does not prove the existence of discrete regimes. A mixture can approximate one skewed continuous population. Distinguish density approximation from latent-class interpretation by using external mechanism information, stability and predictive checks. Component labels can permute without changing the mixture distribution.
+
+Zero inflation makes a particular mixture claim: one mechanism produces structural zeros and another produces a count that may also equal zero. In a hurdle model, the positive component is zero-truncated, so every zero belongs to the hurdle mechanism. A low-rate ordinary Poisson already produces many zeros; excess relative to a poorly fitted mean model is not sufficient evidence for structural inactivity.
+
+### Case study: truncation and censoring yield different likelihoods
+
+If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by P(Y>10). This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.
+
+If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is P(Y<10), not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.
+
+A simple imputation such as replacing every censored value by the boundary creates artificial point masses and distorts means, variances and regression relationships. If the decision depends on the tail, model the observation mechanism directly or present bounds and sensitivity assumptions.
+
+### Case study: extreme-value inference trades approximation against data
+
+Block-maxima analysis fits the distribution of maxima over fixed periods, while peaks-over-threshold analysis models exceedances above a high cutoff. The first discards nonmaximal observations in each block; the second uses more tail observations but requires a threshold choice and attention to dependent exceedance clusters.
+
+A lower threshold provides more observations but may violate the generalized-Pareto tail approximation. A higher threshold improves the asymptotic motivation while leaving fewer data and wider uncertainty. Examine stability over plausible thresholds, dependence, uncertainty in return levels and the exposure horizon. Extrapolating a once-in-a-century level from a few years of data is highly assumption-sensitive, even if the fitted line on a diagnostic plot looks straight.
+
+Heavy-tail parameters can determine whether moments exist. A Pareto model with an infinite variance undermines conventional mean-SE approximations; an infinite mean changes the target itself. Report these implications rather than merely naming the fitted family. Distribution choice is part of the scientific claim about rare outcomes.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_04.py](../examples/chapter_04.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:
@@ -187,6 +233,10 @@ Binomial and beta-binomial counts both have mean two in this fixture, but the be
 ### Transformation and observation mechanisms
 
 A lognormal with log mean zero has median one but mean about 1.6487. The truncated-normal calculation explicitly divides by the probability of inclusion. The exponential survival ratio verifies memorylessness: already waiting three units does not change the next two units' survival probability under that particular model.
+
+### Similar means can hide a different generating process
+
+Mixing two unit-variance groups with means one and six produces mean two and variance five. A separate zero-inflated Poisson adds structural zero probability .3 to a Poisson rate two, giving mean 1.4 and a larger zero probability than the Poisson component alone. The formulas make the mixture assumptions explicit instead of diagnosing a mechanism from zeros alone.
 
 ### Complete executable example
 
@@ -214,7 +264,19 @@ def positive_and_truncated():
     assert np.isclose(stats.expon.sf(5, scale=2)/stats.expon.sf(3, scale=2), stats.expon.sf(2, scale=2))
     print("Lognormal mean/median:", round(arithmetic,4), median, "P(Z<=1 | Z>0):", round(conditional,4))
 
+def mixtures_and_zeros():
+    weight=np.array([.8,.2]);means=np.array([1.,6.]);variances=np.array([1.,1.])
+    mean=weight@means
+    variance=weight@variances+weight@(means-mean)**2
+    assert np.isclose(mean,2) and np.isclose(variance,5)
+    structural_zero=.3;rate=2.
+    zero_probability=structural_zero+(1-structural_zero)*stats.poisson.pmf(0,rate)
+    assert zero_probability>stats.poisson.pmf(0,rate)
+    assert np.isclose((1-structural_zero)*rate,1.4)
+    print("Mixture mean/variance:",mean,variance,"zero-inflated P(0):",zero_probability)
+
 def main():
+    mixtures_and_zeros()
     counts_and_tails()
     positive_and_truncated()
 

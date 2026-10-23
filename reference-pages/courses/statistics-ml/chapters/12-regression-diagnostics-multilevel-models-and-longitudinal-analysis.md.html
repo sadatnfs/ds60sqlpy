@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>12. Regression Diagnostics, Multilevel Models, and Longitudinal Analysis · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>12. Regression Diagnostics, Multilevel Models, and Longitudinal Analysis</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/chapters/12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md</code></p>
+    </header>
+    <article class="document"><h2 id="12-regression-diagnostics-multilevel-models-and-longitudinal-analysis">12. Regression Diagnostics, Multilevel Models, and Longitudinal Analysis<a class="heading-anchor" href="#12-regression-diagnostics-multilevel-models-and-longitudinal-analysis" aria-label="Link to this section">#</a></h2>
+<p>Book: <strong>Statistics and Machine Learning for Data Scientists End To End</strong>. Chapter ID: <code>statistics-012</code>. Tutorial mode; all examples and interview answers are fully worked.</p>
+<h3 id="the-decision-and-the-mental-model">The decision and the mental model<a class="heading-anchor" href="#the-decision-and-the-mental-model" aria-label="Link to this section">#</a></h3>
+<p>Repeated measurements create two kinds of variation: differences between entities and changes within an entity. A customer with high baseline engagement may remain high every week. Treating those weeks as independent customers makes uncertainty too optimistic and can confuse a between-customer association with a within-customer effect.</p>
+<p>A random-intercept model writes y_ij=X_ij beta+b_j+epsilon_ij, with group variance tau^2 and residual variance sigma^2. Two observations in the same group share b_j, creating covariance tau^2 and intraclass correlation tau^2/(tau^2+sigma^2). Partial pooling shrinks a noisy group mean toward the population mean by weight tau^2/(tau^2+sigma^2/n_j). Small groups shrink more because their means contain less information.</p>
+<p>Fixed-effects panel estimation instead removes each unit&#x27;s mean, identifying coefficients from within-unit changes. Time-invariant predictors disappear under this transformation. Random effects can estimate such associations but ordinarily assumes the random effect is suitably independent of included predictors. Neither method automatically handles treatment-confounder feedback, endogenous timing or short-panel lagged outcomes.</p>
+<h3 id="methods-mechanisms-and-limits">Methods, mechanisms, and limits<a class="heading-anchor" href="#methods-mechanisms-and-limits" aria-label="Link to this section">#</a></h3>
+<h4 id="stat-12-01">Residual analysis<a class="heading-anchor" href="#stat-12-01" aria-label="Link to this section">#</a></h4>
+<p>Plot residuals against fitted values, predictors, time and groups. Structure reveals errors not visible in one aggregate loss. Normal-looking residuals do not establish exogeneity or causal identification.</p>
+<h4 id="stat-12-02">Leverage<a class="heading-anchor" href="#stat-12-02" aria-label="Link to this section">#</a></h4>
+<p>Leverage is the diagonal of the projection matrix and depends on predictors, not outcome residual size. A high-leverage point can strongly determine a fit while having a deceptively small residual.</p>
+<h4 id="stat-12-03">Cook’s distance<a class="heading-anchor" href="#stat-12-03" aria-label="Link to this section">#</a></h4>
+<p>Cook&#x27;s distance combines residual size and leverage to assess fitted-model change on deletion. Investigate influential records rather than automatically deleting them. A rare legitimate operating regime may be scientifically central.</p>
+<h4 id="stat-12-04">Multicollinearity diagnostics<a class="heading-anchor" href="#stat-12-04" aria-label="Link to this section">#</a></h4>
+<p>Near-linear predictor dependencies inflate coefficient uncertainty and instability. Predictions inside the observed design may remain accurate. Distinguish numerical scaling problems from insufficient independent variation for interpreting separate effects.</p>
+<h4 id="stat-12-05">Variance inflation factors<a class="heading-anchor" href="#stat-12-05" aria-label="Link to this section">#</a></h4>
+<p>VIF is 1/(1-R_j^2) from regressing a predictor on the others. It diagnoses linear redundancy conditional on the design. Universal cutoff rules ignore sample size, scientific contrasts and prediction objectives.</p>
+<h4 id="stat-12-06">Heteroskedasticity diagnostics<a class="heading-anchor" href="#stat-12-06" aria-label="Link to this section">#</a></h4>
+<p>Inspect residual spread and use tests such as Breusch-Pagan with care about mean misspecification. Robust standard errors address uncertainty under heteroskedasticity; variance modeling may also improve prediction intervals.</p>
+<h4 id="stat-12-07">Autocorrelation diagnostics<a class="heading-anchor" href="#stat-12-07" aria-label="Link to this section">#</a></h4>
+<p>Check lagged residual relationships after fitting. Unmodeled autocorrelation reduces effective information and can indicate missing dynamics. The relevant time ordering must reflect actual observation intervals rather than arbitrary row order.</p>
+<h4 id="stat-12-08">Model specification tests<a class="heading-anchor" href="#stat-12-08" aria-label="Link to this section">#</a></h4>
+<p>Specification diagnostics test selected implications, such as omitted nonlinear structure. A rejection does not identify the unique correction, while nonrejection does not validate every model assumption.</p>
+<h4 id="stat-12-09">Linear mixed-effects models<a class="heading-anchor" href="#stat-12-09" aria-label="Link to this section">#</a></h4>
+<p>Combine fixed population coefficients with modeled group-level deviations. Fit covariance components by likelihood or restricted likelihood, then inspect singular fits and residual patterns. Random-effects distributions are substantive modeling assumptions.</p>
+<h4 id="stat-12-10">Generalized linear mixed models<a class="heading-anchor" href="#stat-12-10" aria-label="Link to this section">#</a></h4>
+<p>Apply a link and non-Gaussian response with group random effects. Conditional subject-specific coefficients differ from marginal population-average effects, particularly with nonlinear links. Integrating random effects is part of prediction.</p>
+<h4 id="stat-12-11">Random intercept models<a class="heading-anchor" href="#stat-12-11" aria-label="Link to this section">#</a></h4>
+<p>Give each group its own deviation from a common baseline. This induces within-group correlation and shrinkage. It cannot represent groups whose predictor slopes genuinely differ.</p>
+<h4 id="stat-12-12">Random slope models<a class="heading-anchor" href="#stat-12-12" aria-label="Link to this section">#</a></h4>
+<p>Allow selected predictor coefficients to vary by group, potentially correlated with intercepts. Each group needs enough within-group variation. Sparse groups can make covariance estimates singular or highly prior-sensitive.</p>
+<h4 id="stat-12-13">Partial pooling<a class="heading-anchor" href="#stat-12-13" aria-label="Link to this section">#</a></h4>
+<p>Combine local evidence with a common distribution. Small or noisy groups shrink more than well-measured groups. Pooling assumes relevant common structure; forcing unrelated groups together can erase real heterogeneity.</p>
+<h4 id="stat-12-14">Intraclass correlation<a class="heading-anchor" href="#stat-12-14" aria-label="Link to this section">#</a></h4>
+<p>ICC measures the fraction of variance attributable to shared group variation in a simple random-intercept model. It depends on scale and model. Non-Gaussian outcomes need care about latent versus observed-scale ICC.</p>
+<h4 id="stat-12-15">Cross-classified models<a class="heading-anchor" href="#stat-12-15" aria-label="Link to this section">#</a></h4>
+<p>Represent intersecting memberships, such as students assessed by multiple teachers across schools. Treating one membership as nested in another misstates correlation when the actual structure crosses.</p>
+<h4 id="stat-12-16">Nested models<a class="heading-anchor" href="#stat-12-16" aria-label="Link to this section">#</a></h4>
+<p>Represent levels contained within higher levels, such as measurements within patients within hospitals. Distinguish hierarchical nesting from the separate use of nested models in likelihood comparisons.</p>
+<h4 id="stat-12-17">Generalized estimating equations<a class="heading-anchor" href="#stat-12-17" aria-label="Link to this section">#</a></h4>
+<p>GEE estimates a marginal mean using a working correlation and sandwich covariance. Robustness concerns the correlation specification under adequate independent clusters, not a wrong mean or informative missingness.</p>
+<h4 id="stat-12-18">Repeated-measures models<a class="heading-anchor" href="#stat-12-18" aria-label="Link to this section">#</a></h4>
+<p>Model within-unit covariance across repeated conditions or times. Sphericity, compound symmetry and unstructured covariance impose different restrictions. The correct choice depends on design, sample information and target contrasts.</p>
+<h4 id="stat-12-19">Growth curve models<a class="heading-anchor" href="#stat-12-19" aria-label="Link to this section">#</a></h4>
+<p>Represent individual trajectories with time functions and possibly random intercepts or slopes. Center time meaningfully to interpret baseline effects. Attrition tied to unobserved trajectories can bias estimated growth.</p>
+<h4 id="stat-12-20">Panel fixed-effects models<a class="heading-anchor" href="#stat-12-20" aria-label="Link to this section">#</a></h4>
+<p>Subtract unit means or include unit indicators to remove time-invariant unit factors. Identification comes from within-unit variation. Time-varying confounding, measurement error and endogenous treatment remain possible.</p>
+<h4 id="stat-12-21">Panel random-effects models<a class="heading-anchor" href="#stat-12-21" aria-label="Link to this section">#</a></h4>
+<p>Model unit-specific variation while retaining between-unit information. Standard consistency assumptions relate those effects to predictors. A correlated-random-effects or Mundlak formulation can explicitly include unit predictor means.</p>
+<h4 id="stat-12-22">Dynamic panel models<a class="heading-anchor" href="#stat-12-22" aria-label="Link to this section">#</a></h4>
+<p>A lagged outcome correlates with transformed errors in short fixed-effects panels, creating Nickell-type bias. Instrument-based estimators need valid moment conditions and control of instrument proliferation, not just additional lags.</p>
+<h4 id="stat-12-23">Hausman tests<a class="heading-anchor" href="#stat-12-23" aria-label="Link to this section">#</a></h4>
+<p>Compare two estimators consistent under a null but differently robust under alternatives. A significant difference challenges the joint assumptions, not uniquely one cause. Covariance estimation and finite samples affect interpretation.</p>
+<h4 id="stat-12-24">Multilevel regression and poststratification<a class="heading-anchor" href="#stat-12-24" aria-label="Link to this section">#</a></h4>
+<p>Fit hierarchical outcome models over demographic or geographic cells, then average predictions using population cell counts. MRP depends on model adequacy and accurate target composition, especially for sparsely sampled or empty cells.</p>
+<h3 id="extended-case-studies-and-scientific-reasoning">Extended case studies and scientific reasoning<a class="heading-anchor" href="#extended-case-studies-and-scientific-reasoning" aria-label="Link to this section">#</a></h3>
+<h4 id="case-study-repeated-customer-measurements">Case study: repeated customer measurements<a class="heading-anchor" href="#case-study-repeated-customer-measurements" aria-label="Link to this section">#</a></h4>
+<p>Assume a customer contributes four weekly outcomes. A useful decomposition is y_ij=mu+b_j+epsilon_ij, with Var(b_j)=9 and Var(epsilon_ij)=1. A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer&#x27;s four-week mean has variance 9+1/4=9.25, not 10/4=2.5. Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.</p>
+<p>For m equal observations per group, the familiar design-effect expression 1+(m-1)*ICC follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.</p>
+<p>The model also defines what prediction means. For an existing customer with observed history, a random-intercept estimate can adapt to that customer&#x27;s baseline. For a new customer, that baseline is unknown and must be integrated over its population distribution. Evaluating new-customer predictions while allowing the model to use that customer&#x27;s other weeks leaks the very information deployment lacks. Grouped validation distinguishes those questions.</p>
+<h4 id="case-study-pooling-a-small-region-responsibly">Case study: pooling a small region responsibly<a class="heading-anchor" href="#case-study-pooling-a-small-region-responsibly" aria-label="Link to this section">#</a></h4>
+<p>A national rate is .10. A small region has one event in two observations, giving raw rate .50. A large region has 500 events in 1,000 observations, also giving .50. Treating both estimates as equally precise creates unstable rankings and incentives. A hierarchical model combines local likelihood information with a distribution of regional rates, generally shrinking the small region more.</p>
+<p>The prior or random-effects distribution should reflect relevant comparability. If the small region uses a different measurement rule or serves a different population, shrinkage toward the national mean can conceal a structural difference. Include plausible predictors, check posterior or fitted predictive distributions, and inspect whether the group variance is near a boundary. A singular mixed-model fit can indicate insufficient data for the proposed random-slope covariance, not merely an optimizer inconvenience.</p>
+<p>Report both the target and uncertainty. A shrunk region estimate is a model-based estimate for that region, not a raw observed rate. If the purpose is to allocate investigation, posterior exceedance probability or expected loss may be more appropriate than sorting point estimates. For public comparison, explain how group sizes and pooling affect the result so small regions are not mistaken for having proven exceptional performance.</p>
+<h4 id="case-study-fixed-effects-remove-some-confounding-not-every-problem">Case study: fixed effects remove some confounding, not every problem<a class="heading-anchor" href="#case-study-fixed-effects-remove-some-confounding-not-every-problem" aria-label="Link to this section">#</a></h4>
+<p>Consider a panel of stores with stable location quality. High-quality stores may both spend more on advertising and sell more. A pooled sales-advertising coefficient combines between-store quality differences with within-store spending changes. Store fixed effects remove time-invariant quality by demeaning within each store. Calendar effects can remove shocks common to all stores.</p>
+<p>But a manager may increase advertising after observing an unrecorded local demand opportunity. That time-varying confounder survives store and calendar demeaning. Lagged sales may be jointly determined with current errors, and a short panel containing a lagged dependent variable introduces additional estimation bias. Fixed effects are a precise transformation of variation, not a universal causal label.</p>
+<p>If the scientific question concerns a time-invariant store characteristic, a within-store estimator cannot identify its coefficient because demeaning removes it. Random effects or between-store models can retain that variation but need assumptions about relationships between unobserved store effects and predictors. A Hausman comparison can reveal disagreement between estimators under their assumptions; it cannot explain all possible reasons for disagreement.</p>
+<h4 id="diagnostic-reasoning-in-a-review">Diagnostic reasoning in a review<a class="heading-anchor" href="#diagnostic-reasoning-in-a-review" aria-label="Link to this section">#</a></h4>
+<p>When residuals show increasing spread, ask whether variance changes or the mean curve is wrong. When residuals correlate over time, ask whether a missing trend, seasonality, group effect or serial process explains the pattern. When one record is influential, verify its provenance and scientific relevance before deleting it. A legitimate extreme operating condition may be precisely the case the model must support.</p>
+<p>Use the simplest covariance structure that captures the decision-relevant dependence with available information. An unstructured repeated-measures covariance grows quickly in parameter count, while compound symmetry assumes equal pairwise correlation. Random slopes allow trajectory heterogeneity but require within-group predictor variation. Explain the tradeoff as a claim about the data-generating process and supported precision, not a contest among increasingly complex formulas.</p>
+<h3 id="worked-python-demonstrations">Worked Python demonstrations<a class="heading-anchor" href="#worked-python-demonstrations" aria-label="Link to this section">#</a></h3>
+<p>Complete offline program: <a href="../examples/chapter_12.py.html">chapter_12.py</a>. It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_12.py</code></pre>
+<h4 id="a-point-can-determine-the-line">A point can determine the line<a class="heading-anchor" href="#a-point-can-determine-the-line" aria-label="Link to this section">#</a></h4>
+<p>The observation at x=20 has leverage above .9 because the other predictors lie between zero and three. The leverage values sum to the model rank, two. This checks the projection geometry and explains why residual size alone can fail to flag influential predictor configurations.</p>
+<h4 id="shrink-according-to-information">Shrink according to information<a class="heading-anchor" href="#shrink-according-to-information" aria-label="Link to this section">#</a></h4>
+<p>Three groups share the observed mean nine but have sample sizes 1,4,100. With population mean five and known variance components, their pooling weights are .2,.5 and about .962. The smallest group moves closest to the shared mean. Variance components are fixed here to isolate the mechanism; fitting them adds uncertainty.</p>
+<h4 id="separate-within-and-between-associations">Separate within and between associations<a class="heading-anchor" href="#separate-within-and-between-associations" aria-label="Link to this section">#</a></h4>
+<p>Both units have a true within-unit slope two, but their baselines differ strongly and inversely with their feature levels. The pooled slope is negative. Demeaning within each unit recovers two, illustrating the source of fixed-effects identification and its inability to estimate time-invariant characteristics.</p>
+<h4 id="complete-executable-example">Complete executable example<a class="heading-anchor" href="#complete-executable-example" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-python">import numpy as np
+
+def leverage_and_residuals():
+    x=np.array([0.,1.,2.,3.,20.])
+    design=np.column_stack([np.ones(5),x])
+    hat=design@np.linalg.pinv(design)
+    leverage=np.diag(hat)
+    assert np.isclose(leverage.sum(),2) and leverage[-1]&gt;.9
+    print(&quot;Leverage:&quot;,leverage,&quot;sum equals rank:&quot;,leverage.sum())
+
+def partial_pooling():
+    grand_mean,tau2,sigma2=5.,1.,4.
+    n=np.array([1.,4.,100.]);group_mean=np.array([9.,9.,9.])
+    weight=tau2/(tau2+sigma2/n)
+    pooled=weight*group_mean+(1-weight)*grand_mean
+    assert np.all(np.diff(weight)&gt;0) and np.all((pooled&gt;5)&amp;(pooled&lt;9))
+    assert np.isclose(tau2/(tau2+sigma2),.2)
+    print(&quot;Pooling weights:&quot;,weight,&quot;group predictions:&quot;,pooled,&quot;ICC:&quot;,.2)
+
+def within_estimation():
+    x=np.array([[0.,1.,2.],[10.,11.,12.]])
+    intercept=np.array([100.,-100.])[:,None]
+    y=intercept+2*x
+    xc=x-x.mean(axis=1,keepdims=True)
+    yc=y-y.mean(axis=1,keepdims=True)
+    within=np.sum(xc*yc)/np.sum(xc*xc)
+    pooled=np.polyfit(x.ravel(),y.ravel(),1)[0]
+    assert np.isclose(within,2) and pooled&lt;0
+    print(&quot;Within-unit slope:&quot;,within,&quot;naive pooled slope:&quot;,pooled)
+
+def main():
+    leverage_and_residuals();partial_pooling();within_estimation()
+
+if __name__ == &quot;__main__&quot;:
+    main()</code></pre>
+<h3 id="data-science-interview-discussions">Data science interview discussions<a class="heading-anchor" href="#data-science-interview-discussions" aria-label="Link to this section">#</a></h3>
+<p><strong>Interview: Does a high VIF make a model useless?</strong> It undermines separate coefficient interpretation and can increase uncertainty, but predictions within the observed covariate region may remain stable. Decide whether the task needs individual effects, contrasts, extrapolation or only prediction.</p>
+<p><strong>Interview: When do random intercepts and cluster-robust standard errors answer different needs?</strong> A random-intercept model changes the probability model and can produce group predictions with pooling. Cluster-robust covariance primarily changes uncertainty for a chosen mean estimator. Neither substitutes automatically for the other.</p>
+<p><strong>Interview: Why can a fixed-effects estimate disagree with a pooled estimate?</strong> They use different variation. Fixed effects isolate within-unit changes; pooled models also use between-unit differences that may be confounded by stable unit characteristics. Agreement is not guaranteed even with correctly executed code.</p>
+<h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://www.statsmodels.org/stable/mixed_linear.html">statsmodels linear mixed-effects models</a>.</li>
+</ul>
+<ul>
+<li><a href="https://www.statsmodels.org/stable/gee.html">statsmodels generalized estimating equations</a>.</li>
+</ul>
+<h3 id="reading-connections">Reading connections<a class="heading-anchor" href="#reading-connections" aria-label="Link to this section">#</a></h3>
+<p><a href="11-regression-and-generalized-linear-models.md.html">Previous chapter</a> | <a href="../README.md.html">Book contents</a> | <a href="13-classical-experimental-design.md.html">Next chapter</a></p></article>
+  </main>
+</body>
+</html>

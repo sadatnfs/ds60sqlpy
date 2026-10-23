@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Statistics and Machine Learning for Data Scientists End To End · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Statistics and Machine Learning for Data Scientists End To End</h1>
+      <p class="source-path">Generated from <code>courses/statistics-ml/README.md</code></p>
+    </header>
+    <article class="document"><h2 id="statistics-and-machine-learning-for-data-scientists-end-to-end">Statistics and Machine Learning for Data Scientists End To End<a class="heading-anchor" href="#statistics-and-machine-learning-for-data-scientists-end-to-end" aria-label="Link to this section">#</a></h2>
+<p>This book develops the 1,005 named methods in the supplied 40-section outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method. Each chapter explains mechanisms, assumptions, appropriate uses, failure modes and interpretation, then connects them to complete Python demonstrations and answered interview discussions.</p>
+<p>This is a tutorial and reference book. It contains no exams, problem sets or hidden solutions. The small examples explain mechanisms; their assertions check mathematical and implementation claims, not learner mastery. Advanced method descriptions are not claims that every research estimator has a production implementation in this repository.</p>
+<h3 id="running-the-worked-examples">Running the worked examples<a class="heading-anchor" href="#running-the-worked-examples" aria-label="Link to this section">#</a></h3>
+<p>Open a chapter in the classroom reader, or read its Markdown file. Reading needs no Python packages. The examples use Python 3.11 or 3.12 and the repository&#x27;s prepared scientific environment: NumPy, pandas, SciPy, scikit-learn and statsmodels. No dataset, pretrained model, API key or network connection is required after dependencies are installed. Examples construct tiny local fixtures and print interpretable results.</p>
+<p>From the repository root, run this command in a terminal whose <code>python</code> resolves to the prepared environment. The command is identical in PowerShell, Command Prompt, Bash and zsh:</p>
+<pre><code class="language-text">python courses/statistics-ml/examples/chapter_01.py</code></pre>
+<p>Replace <code>01</code> with the chapter number. Optional ecosystems such as PyMC/Stan, XGBoost, NetworkX, lifelines, UMAP and specialized spatial, survey or reinforcement-learning packages are discussed only where relevant. They are not required by the examples and are never installed or imported automatically.</p>
+<h3 id="scope-and-provenance">Scope and provenance<a class="heading-anchor" href="#scope-and-provenance" aria-label="Link to this section">#</a></h3>
+<p><a href="source-outline.md.html">source-outline.md</a> is an unmodified copy of the user-provided scope. <a href="manifest.json.html">manifest.json</a> records its SHA-256 digest and chapter metadata. <a href="coverage.json.html">coverage.json</a> maps each of its 1,005 bold method bullets to a stable <code>stat-SS-NN</code> anchor. These IDs follow the original section and bullet order, so similarly named methods in different contexts retain different IDs. Coverage means an explanatory treatment of the named method, not an unsupported claim that one toy calculation validates the entire method family.</p>
+<p>The prose, numerical fixtures and programs are original teaching material. Chapter references link to primary papers, author-maintained books or official API documentation. External reading is optional. Interpret each demonstration within its stated assumptions and distinguish a worked calculation, an estimator&#x27;s mathematical guarantee, and evidence that a real deployment is useful.</p>
+<h3 id="contents">Contents<a class="heading-anchor" href="#contents" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><a href="chapters/01-problem-formulation-and-statistical-reasoning.md.html">Problem Formulation and Statistical Reasoning</a></li>
+<li><a href="chapters/02-mathematical-foundations.md.html">Mathematical Foundations</a></li>
+<li><a href="chapters/03-probability-fundamentals-and-stochastic-processes.md.html">Probability Fundamentals and Stochastic Processes</a></li>
+<li><a href="chapters/04-probability-distributions-you-should-recognize.md.html">Probability Distributions You Should Recognize</a></li>
+<li><a href="chapters/05-sampling-surveys-and-data-collection.md.html">Sampling, Surveys, and Data Collection</a></li>
+<li><a href="chapters/06-measurement-exploratory-analysis-and-data-quality.md.html">Measurement, Exploratory Analysis, and Data Quality</a></li>
+<li><a href="chapters/07-missing-data-measurement-error-and-robust-statistics.md.html">Missing Data, Measurement Error, and Robust Statistics</a></li>
+<li><a href="chapters/08-estimation-and-statistical-inference.md.html">Estimation and Statistical Inference</a></li>
+<li><a href="chapters/09-hypothesis-tests-and-group-comparisons.md.html">Hypothesis Tests and Group Comparisons</a></li>
+<li><a href="chapters/10-multiple-testing-sequential-inference-and-selective-inference.md.html">Multiple Testing, Sequential Inference, and Selective Inference</a></li>
+<li><a href="chapters/11-regression-and-generalized-linear-models.md.html">Regression and Generalized Linear Models</a></li>
+<li><a href="chapters/12-regression-diagnostics-multilevel-models-and-longitudinal-analysis.md.html">Regression Diagnostics, Multilevel Models, and Longitudinal Analysis</a></li>
+<li><a href="chapters/13-classical-experimental-design.md.html">Classical Experimental Design</a></li>
+<li><a href="chapters/14-online-experimentation-and-a-b-testing.md.html">Online Experimentation and A/B Testing</a></li>
+<li><a href="chapters/15-causal-inference-foundations.md.html">Causal Inference Foundations</a></li>
+<li><a href="chapters/16-quasi-experiments-and-causal-study-designs.md.html">Quasi-Experiments and Causal Study Designs</a></li>
+<li><a href="chapters/17-causal-estimation-heterogeneous-effects-and-policy-learning.md.html">Causal Estimation, Heterogeneous Effects, and Policy Learning</a></li>
+<li><a href="chapters/18-bayesian-statistics-and-probabilistic-modeling.md.html">Bayesian Statistics and Probabilistic Modeling</a></li>
+<li><a href="chapters/19-statistical-learning-and-classical-supervised-models.md.html">Statistical Learning and Classical Supervised Models</a></li>
+<li><a href="chapters/20-feature-engineering-and-representation-learning.md.html">Feature Engineering and Representation Learning</a></li>
+<li><a href="chapters/21-unsupervised-learning-and-multivariate-analysis.md.html">Unsupervised Learning and Multivariate Analysis</a></li>
+<li><a href="chapters/22-model-validation-and-predictive-performance.md.html">Model Validation and Predictive Performance</a></li>
+<li><a href="chapters/23-uncertainty-quantification-and-distribution-shift.md.html">Uncertainty Quantification and Distribution Shift</a></li>
+<li><a href="chapters/24-explainability-fairness-and-model-robustness.md.html">Explainability, Fairness, and Model Robustness</a></li>
+<li><a href="chapters/25-time-series-foundations-and-diagnostics.md.html">Time-Series Foundations and Diagnostics</a></li>
+<li><a href="chapters/26-classical-forecasting-methods.md.html">Classical Forecasting Methods</a></li>
+<li><a href="chapters/27-advanced-forecasting-and-forecast-evaluation.md.html">Advanced Forecasting and Forecast Evaluation</a></li>
+<li><a href="chapters/28-survival-analysis-duration-models-and-reliability.md.html">Survival Analysis, Duration Models, and Reliability</a></li>
+<li><a href="chapters/29-anomaly-detection-changepoints-and-statistical-process-control.md.html">Anomaly Detection, Changepoints, and Statistical Process Control</a></li>
+<li><a href="chapters/30-spatial-and-spatiotemporal-statistics.md.html">Spatial and Spatiotemporal Statistics</a></li>
+<li><a href="chapters/31-network-and-graph-analysis.md.html">Network and Graph Analysis</a></li>
+<li><a href="chapters/32-recommendation-information-retrieval-and-ranking.md.html">Recommendation, Information Retrieval, and Ranking</a></li>
+<li><a href="chapters/33-deep-learning-language-and-generative-modeling.md.html">Deep Learning, Language, and Generative Modeling</a></li>
+<li><a href="chapters/34-generative-ai-and-language-model-evaluation.md.html">Generative AI and Language-Model Evaluation</a></li>
+<li><a href="chapters/35-bandits-reinforcement-learning-and-adaptive-decisions.md.html">Bandits, Reinforcement Learning, and Adaptive Decisions</a></li>
+<li><a href="chapters/36-optimization-and-operations-research.md.html">Optimization and Operations Research</a></li>
+<li><a href="chapters/37-simulation-and-computational-statistics.md.html">Simulation and Computational Statistics</a></li>
+<li><a href="chapters/38-product-customer-marketing-and-business-analytics.md.html">Product, Customer, Marketing, and Business Analytics</a></li>
+<li><a href="chapters/39-research-synthesis-and-specialized-statistical-methodologies.md.html">Research Synthesis and Specialized Statistical Methodologies</a></li>
+<li><a href="chapters/40-production-methodology-governance-and-senior-scientific-judgment.md.html">Production Methodology, Governance, and Senior Scientific Judgment</a></li>
+</ol></article>
+  </main>
+</body>
+</html>

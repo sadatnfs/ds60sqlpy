@@ -45,11 +45,7 @@
       "level": "foundation",
       "minutes": 90,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -87,11 +83,7 @@
       "level": "foundation",
       "minutes": 90,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -136,11 +128,7 @@
       "level": "foundation",
       "minutes": 90,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -188,10 +176,7 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -234,11 +219,7 @@
       "level": "foundation",
       "minutes": 90,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -284,10 +265,7 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "pandas"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -333,10 +311,7 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -386,10 +361,7 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -443,10 +415,7 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -489,9 +458,6 @@
       "minutes": 90,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
         "statsmodels"
       ],
       "mode": "tutorial",
@@ -545,9 +511,8 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
         "scikit-learn",
+        "scipy",
         "statsmodels"
       ],
       "mode": "tutorial",
@@ -592,11 +557,7 @@
       "level": "intermediate",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -642,10 +603,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -694,10 +652,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -739,11 +694,7 @@
       "level": "intermediate",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -785,11 +736,7 @@
       "level": "intermediate",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -838,11 +785,7 @@
       "level": "intermediate",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -893,10 +836,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -947,10 +887,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scikit-learn"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -992,11 +929,7 @@
       "level": "intermediate",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1043,10 +976,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scikit-learn"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1097,10 +1027,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scikit-learn"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1140,11 +1067,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1187,11 +1110,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1236,11 +1155,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1286,11 +1201,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1340,11 +1251,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1391,11 +1298,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1436,11 +1339,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1480,11 +1379,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1521,11 +1416,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1565,11 +1456,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1616,11 +1503,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1660,11 +1543,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1707,11 +1586,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1759,10 +1634,7 @@
       "minutes": 120,
       "dependencies": [
         "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "scipy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1802,11 +1674,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1856,11 +1724,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1910,11 +1774,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"
@@ -1964,11 +1824,7 @@
       "level": "advanced",
       "minutes": 120,
       "dependencies": [
-        "numpy",
-        "scipy",
-        "pandas",
-        "scikit-learn",
-        "statsmodels"
+        "numpy"
       ],
       "mode": "tutorial",
       "network": "offline"

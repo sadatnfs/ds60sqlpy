@@ -538,6 +538,7 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
     """Fixed single-file Java and Node toolchains; source cannot supply build flags."""
     node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
     if profile_id == "java21":
+        library = "/opt/course-libs/h2-2.5.252.jar"
         (directory / "classes").mkdir(mode=0o755, exist_ok=True)
         return (
             [
@@ -548,12 +549,14 @@ def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]]
                     "-Xlint:all",
                     "--release",
                     "21",
+                    "-cp",
+                    library,
                     "-d",
                     "classes",
                     "Main.java",
                 ]
             ],
-            ["java", "-ea", "-Xmx512m", "-cp", "classes", "Main"],
+            ["java", "-ea", "-Xmx512m", "-cp", os.pathsep.join(["classes", library]), "Main"],
         )
     if profile_id == "javascript-node":
         return [], [*node, "main.mjs"]

@@ -5,7 +5,7 @@ This generated report enforces the complete-amateur teaching standard in
 review must still judge technical accuracy, progression, and whether the
 examples actually teach the named topic.
 
-- Cataloged lessons passing: **168/168**
+- Cataloged lessons passing: **180/180**
 - Minimum guide words: **1050**
 - Minimum worked-example fences: **2**
 - Minimum explicitly defined terms: **3**
@@ -95,6 +95,18 @@ examples actually teach the named topic.
 | `python-data-02` | 1716 | 5 | 11 | 8/8 | 975 | notebook gate n/a | PASS |
 | `python-ml-02` | 1817 | 5 | 11 | 8/8 | 983 | notebook gate n/a | PASS |
 | `python-pro-03` | 1911 | 5 | 10 | 8/8 | 975 | notebook gate n/a | PASS |
+| `python-numpy-01` | 1569 | 5 | 7 | 6/6 | 1386 | notebook gate n/a | PASS |
+| `python-numpy-02` | 1612 | 5 | 7 | 6/6 | 1600 | notebook gate n/a | PASS |
+| `python-numpy-03` | 1577 | 5 | 7 | 6/6 | 1603 | notebook gate n/a | PASS |
+| `python-numpy-04` | 1623 | 5 | 7 | 6/6 | 1589 | notebook gate n/a | PASS |
+| `python-pandas-01` | 1656 | 5 | 7 | 6/6 | 1570 | notebook gate n/a | PASS |
+| `python-pandas-02` | 1656 | 5 | 7 | 6/6 | 1729 | notebook gate n/a | PASS |
+| `python-pandas-03` | 1684 | 5 | 7 | 6/6 | 1769 | notebook gate n/a | PASS |
+| `python-pandas-04` | 1703 | 5 | 7 | 6/6 | 1785 | notebook gate n/a | PASS |
+| `python-algo-01` | 1544 | 5 | 7 | 6/6 | 1264 | notebook gate n/a | PASS |
+| `python-algo-02` | 1620 | 5 | 7 | 6/6 | 1397 | notebook gate n/a | PASS |
+| `python-algo-03` | 1627 | 5 | 7 | 6/6 | 1673 | notebook gate n/a | PASS |
+| `python-algo-04` | 1698 | 5 | 7 | 6/6 | 1753 | notebook gate n/a | PASS |
 | `sql-start-01` | 2226 | 5 | 15 | 6/6 | 1567 | notebook gate n/a | PASS |
 | `sql-start-02` | 2232 | 5 | 14 | 6/6 | 1602 | notebook gate n/a | PASS |
 | `sql-start-03` | 2212 | 5 | 14 | 6/6 | 1584 | notebook gate n/a | PASS |

@@ -210,6 +210,44 @@ Set meaningful lower and upper margins, then reject both one-sided nonequivalenc
 
 Prespecify the largest acceptable disadvantage and test against that margin. Choosing the margin after results defeats the decision interpretation. Treatment adherence and missing outcomes can particularly distort noninferiority conclusions.
 
+<!-- detailed-case-studies:start -->
+
+## Extended case studies and scientific reasoning
+
+### Case study: a significant difference can be too small to use
+
+A high-traffic experiment estimates a latency improvement of .02 milliseconds with a very small p-value. If deployment costs and operational complexity require at least a one-millisecond benefit, statistical significance does not meet the decision threshold. Report the estimate and interval on the original scale and compare them with the prespecified practical margin.
+
+The opposite case also matters: an estimated improvement of ten milliseconds with a wide interval from minus five to twenty-five may be practically promising but statistically uncertain. Nonsignificance does not establish no useful effect. The next decision could be collect more independent information, narrow the rollout or improve measurement, depending on the cost of uncertainty.
+
+Power analysis should therefore begin with the effect worth detecting. Choosing a target effect after observing a favorable estimate invites optimism. An underpowered study can generate exaggerated significant effects because only unusually positive noise crosses the threshold, connecting power to the winner's curse.
+
+### Case study: rank tests do not automatically test medians
+
+Two groups can have the same median but different spread or shape. A Mann-Whitney comparison concerns pairwise ordering probabilities under a general interpretation, not simply a median difference. Under a pure location-shift model with comparable shapes, it can support a location interpretation. Without that model, describe the distributional question actually tested.
+
+For paired data, the signed-rank test uses both signs and ranks of absolute differences and relies on symmetry for its standard location interpretation. The sign test uses only positive versus negative differences and makes a weaker shape assumption, sacrificing magnitude information. Neither is a universal replacement for a paired t-test whenever a normality p-value is small.
+
+Choose based on the estimand, design and robustness needs. If the decision concerns mean total cost, a rank test may answer a less relevant question even if its distributional assumptions are attractive. A robust mean estimator or a carefully designed resampling method may better match the target.
+
+### Case study: exactness depends on the design
+
+A paired randomized experiment assigns one unit in each pair to treatment. Valid randomization permutations swap assignment within pairs. Shuffling treatment labels freely across all units includes assignments the design never allowed, so the resulting reference distribution is wrong for that experiment.
+
+Fisher's exact test conditions on margins in a contingency table. Its exact tail probability is exact under that conditional null model, but it does not repair nonrandom sampling, repeated observations or outcome-dependent selection. Exact is a statement about a probability calculation, not a guarantee that the scientific design is valid.
+
+Permutation tests similarly need exchangeability under the null or a justified randomization mechanism. Equal means alone do not generally make all observations exchangeable when distributions have different variances. Studentized permutation procedures can address some settings, but the procedure and assumptions must be stated rather than hidden behind the word nonparametric.
+
+### Case study: demonstrate equivalence instead of accepting a null
+
+Suppose two measurement systems are interchangeable only if their mean difference lies between minus .5 and plus .5 units. A 90% confidence interval entirely inside these margins corresponds to rejecting both one-sided nonequivalence nulls at .05 in the usual TOST framework. This is a positive evidential requirement for practical similarity.
+
+A wide interval from minus two to plus two contains zero but fails that requirement. Saying no significant difference would conceal the possibility of important disagreement. Noninferiority changes the question again: it excludes deterioration beyond one specified margin without necessarily proving equivalence in both directions.
+
+Margins must be justified before seeing results, and missing outcomes or nonadherence can bias similarity claims toward zero. A treatment comparison that loses the most harmed participants may look reassuringly similar. Review the analysis population and observation process as carefully as the test statistic.
+
+<!-- detailed-case-studies:end -->
+
 ## Worked Python demonstrations
 
 Complete offline program: [chapter_09.py](../examples/chapter_09.py). It uses tiny fixtures, no downloads, and assertions that check the expected observations. Run from the repository root:

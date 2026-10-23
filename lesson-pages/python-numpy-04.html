@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src 'self'; img-src data:; form-action 'none'"
+  >
+  <title>python-numpy-04 · Stable Numerical Computation and Honest Error Bounds · DS60</title>
+  <style>
+    :root {
+      --paper: #f6f2e8;
+      --surface: #fffdf8;
+      --ink: #17221e;
+      --muted: #59655f;
+      --line: #d7d7ca;
+      --navy: #173f5f;
+      --navy-soft: #e8f0f5;
+      --green: #0f6b4f;
+      --green-soft: #e4f3ec;
+      --gold: #9d6515;
+      --gold-soft: #f7ead2;
+      --red: #9c3f35;
+      --shadow: 0 18px 46px rgb(28 45 37 / 10%);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 25rem),
+        radial-gradient(circle at 100% 3rem, rgb(23 63 95 / 11%), transparent 29rem),
+        var(--paper);
+      line-height: 1.6;
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    button, input { font: inherit; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(1120px, calc(100% - 2rem)); margin-inline: auto; }
+    .skip-link {
+      position: fixed; z-index: 100; top: .5rem; left: .5rem; transform: translateY(-160%);
+      border-radius: .5rem; padding: .65rem 1rem; color: #fff; background: var(--navy);
+    }
+    .skip-link:focus { transform: translateY(0); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    .topbar {
+      position: sticky; z-index: 20; top: 0; border-bottom: 1px solid rgb(215 215 202 / 80%);
+      background: rgb(246 242 232 / 92%); backdrop-filter: blur(14px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-right: .55rem;
+      border-radius: .65rem; color: #fff; background: linear-gradient(145deg, var(--navy), var(--green));
+      font-size: .73rem; letter-spacing: .04em;
+    }
+    .top-actions { display: flex; align-items: center; gap: .7rem; }
+    .completion { display: flex; align-items: center; gap: .4rem; color: var(--muted); font-size: .86rem; font-weight: 750; }
+    .completion input { width: 1.05rem; height: 1.05rem; accent-color: var(--green); }
+    .hero { padding: clamp(2.5rem, 7vw, 5.5rem) 0 2.5rem; }
+    .eyebrow { margin: 0 0 .5rem; color: var(--green); font-size: .78rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.18; text-wrap: balance; }
+    h1 { max-width: 19ch; margin: .55rem 0 1rem; font-size: clamp(2.4rem, 6vw, 5rem); letter-spacing: -.055em; }
+    h2 { margin-top: 0; font-size: clamp(1.7rem, 3vw, 2.55rem); letter-spacing: -.035em; }
+    h3 { margin-top: 2.2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+    h4 { margin-top: 1.7rem; font-size: 1.2rem; }
+    .hero-copy { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .meta, .prerequisite-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 1rem 0; }
+    .tag {
+      display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: .2rem .55rem;
+      color: var(--muted); background: var(--surface); font-size: .76rem; text-decoration: none;
+    }
+    .run-card {
+      display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 1.5rem;
+      border: 1px solid #79aa94; border-radius: 20px; padding: clamp(1.2rem, 3vw, 2rem);
+      background: linear-gradient(135deg, var(--surface), var(--green-soft)); box-shadow: var(--shadow);
+    }
+    .run-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .run-card p { max-width: 70ch; margin: 0; color: var(--muted); }
+    .run-actions, .artifact-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .55rem; }
+    .button {
+      display: inline-flex; min-height: 2.65rem; align-items: center; justify-content: center;
+      border: 1px solid var(--navy); border-radius: 999px; padding: .55rem 1rem;
+      color: #fff; background: var(--navy); cursor: pointer; font-weight: 760; text-decoration: none;
+    }
+    .button:hover { color: #fff; background: var(--green); border-color: var(--green); }
+    .button.secondary { color: var(--navy); background: transparent; }
+    .button.secondary:hover { color: #fff; background: var(--navy); }
+    .launcher-status { margin: .75rem 0 0; color: var(--muted); font-size: .85rem; }
+    .static-help { margin: .8rem 0 0; color: var(--muted); font-size: .82rem; }
+    .sql-run-guide {
+      margin: 1rem 0 2rem; border: 1px solid #8eac9e; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .sql-run-guide > p:not(.eyebrow) { max-width: 80ch; color: var(--muted); }
+    .run-steps { display: grid; gap: .75rem; padding: 0; list-style: none; counter-reset: sql-step; }
+    .run-steps li {
+      display: grid; grid-template-columns: 2rem minmax(9rem, .36fr) 1fr; gap: .8rem;
+      align-items: start; border: 1px solid var(--line); border-radius: 13px;
+      padding: .85rem; background: #fff; counter-increment: sql-step;
+    }
+    .run-steps li::before {
+      display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 50%;
+      color: #fff; background: var(--green); font-weight: 850; content: counter(sql-step);
+    }
+    .run-steps span { color: var(--muted); }
+    .sql-run-guide details { margin-top: 1rem; border-top: 1px solid var(--line); padding-top: 1rem; }
+    .sql-run-guide summary { cursor: pointer; color: var(--navy); }
+    .error-map { display: grid; grid-template-columns: minmax(12rem, .35fr) 1fr; gap: .65rem 1rem; }
+    .error-map dt { font-weight: 780; }
+    .error-map dd { margin: 0; color: var(--muted); }
+    .sequence {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; margin: 1.25rem 0 2.5rem;
+    }
+    .sequence article { border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); }
+    .sequence strong { display: block; margin-bottom: .25rem; }
+    .sequence span { color: var(--muted); font-size: .88rem; }
+    .coach-card {
+      margin: 0 0 2.5rem; border: 1px solid #89a7be; border-radius: 20px;
+      padding: clamp(1.2rem, 3vw, 2rem); background: linear-gradient(135deg, var(--surface), var(--navy-soft));
+      box-shadow: var(--shadow);
+    }
+    .coach-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; }
+    .coach-card h2 { margin-bottom: .55rem; font-size: 1.65rem; }
+    .coach-card p { max-width: 78ch; color: var(--muted); }
+    .codex-prompt {
+      width: 100%; min-height: 20rem; resize: vertical; border: 1px solid var(--line);
+      border-radius: 12px; padding: 1rem; color: var(--ink); background: #fff;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem; line-height: 1.5;
+    }
+    .copy-status { min-height: 1.3rem; margin: .55rem 0 0; color: var(--muted); font-size: .82rem; }
+    .tabs {
+      position: sticky; z-index: 10; top: 4rem; display: flex; overflow-x: auto; gap: .4rem;
+      border: 1px solid var(--line); border-radius: 14px; padding: .5rem; background: rgb(255 253 248 / 94%);
+      box-shadow: 0 8px 25px rgb(28 45 37 / 8%); backdrop-filter: blur(12px);
+    }
+    .tabs a {
+      flex: 0 0 auto; border-radius: 9px; padding: .55rem .8rem; color: var(--muted);
+      font-size: .86rem; font-weight: 780; text-decoration: none;
+    }
+    .tabs a[aria-selected="true"] { color: #fff; background: var(--navy); }
+    .artifact-panel {
+      scroll-margin-top: 9rem; margin: 1rem 0 2rem; border: 1px solid var(--line);
+      border-radius: 20px; padding: clamp(1rem, 3vw, 2rem); background: var(--surface); box-shadow: var(--shadow);
+    }
+    .tabs-ready .artifact-panel:not([data-selected]) { display: none; }
+    .artifact-head { display: flex; align-items: start; justify-content: space-between; gap: 1.2rem; border-bottom: 1px solid var(--line); padding-bottom: 1rem; }
+    .artifact-head h2 { margin-bottom: .35rem; }
+    .artifact-path { margin: 0; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+    .artifact-content { max-width: 88ch; margin: 1.7rem auto 0; }
+    .artifact-content p, .artifact-content li { color: #26332d; }
+    .artifact-content img { max-width: 100%; }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    .artifact-content h3:hover .heading-anchor,
+    .artifact-content h4:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8; text-align: right;
+      counter-increment: source-line; content: counter(source-line); user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .notebook-cell { margin: 1rem 0; border: 1px solid var(--line); border-radius: 13px; padding: 1rem; background: #fff; }
+    .markdown-cell { border-left: 4px solid var(--green); }
+    .code-cell { border-left: 4px solid var(--navy); }
+    .cell-label { margin-bottom: .5rem; color: var(--muted); font-family: "Cascadia Code", Consolas, monospace; font-size: .72rem; font-weight: 780; text-transform: uppercase; }
+    .cell-output { margin-top: .7rem; }
+    .preview-note, .solution-notice {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0; padding: .8rem 1rem;
+      color: #594217; background: var(--gold-soft);
+    }
+    .solution-notice { margin-top: 1rem; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote { margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem; color: var(--muted); background: var(--navy-soft); }
+    .image-note { display: inline-block; border: 1px dashed var(--line); border-radius: .4rem; padding: .15rem .4rem; color: var(--muted); }
+    .lesson-nav { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; margin: 2rem 0 4rem; }
+    .nav-card { display: grid; border: 1px solid var(--line); border-radius: 14px; padding: 1rem; background: var(--surface); text-decoration: none; }
+    .nav-card small { color: var(--muted); }
+    .nav-card span { color: var(--muted); font-size: .88rem; }
+    .nav-card.next { text-align: right; }
+    .nav-card.disabled { opacity: .65; }
+    footer { border-top: 1px solid var(--line); padding: 2rem 0; color: var(--muted); font-size: .85rem; }
+    @media (max-width: 760px) {
+      .top-actions .completion { display: none; }
+      .run-card, .sequence, .coach-grid, .run-steps li, .error-map, .lesson-nav { grid-template-columns: 1fr; }
+      .run-steps li::before { margin-bottom: .15rem; }
+      .run-actions, .artifact-actions { justify-content: flex-start; }
+      .artifact-head { display: block; }
+      .artifact-actions { margin-top: 1rem; }
+      .nav-card.next { text-align: left; }
+    }
+    @media print {
+      .topbar, .run-card, .coach-card, .tabs, .artifact-actions, .lesson-nav, footer { display: none !important; }
+      body { background: #fff; }
+      .artifact-panel { display: block !important; border: 0; box-shadow: none; break-before: page; }
+      .solution-notice { break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#lesson-content">Skip to lesson</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <div class="top-actions">
+        <label class="completion launcher-only" hidden>
+          <input id="lesson-complete" type="checkbox">
+          Mark complete
+        </label>
+        <a class="static-only" href="../START_HERE.html#catalog">
+          Track completion on the course dashboard
+        </a>
+        <a href="../START_HERE.html#catalog">All lessons</a>
+        <a class="lab-only" href="../learn?lesson=python-numpy-04" hidden>
+          Open this lesson in the coding lab
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="lesson-content">
+    <div class="shell">
+      <section class="hero">
+        <p class="eyebrow">python · lesson python-numpy-04</p>
+        <h1>Stable Numerical Computation and Honest Error Bounds</h1>
+        <p class="hero-copy">Python data mechanics and algorithmic reasoning</p>
+        <div class="meta">
+          <span class="tag">intermediate</span>
+          <span class="tag">150 minutes</span>
+          <span class="tag">data setup</span>
+          <span class="tag">offline</span>
+        </div>
+        <p><strong>Prerequisites:</strong></p>
+        <div class="prerequisite-list"><a class="tag" href="python-numpy-03.html">python-numpy-03</a></div>
+      </section>
+
+      <section class="run-card" aria-labelledby="run-heading">
+        <div>
+          <p class="eyebrow">Your working copy</p>
+          <h2 id="run-heading">Run this Python file from the repository environment</h2>
+          <p id="run-guidance">Open the source in VS Code, read the exercise contract, and run it from the repository root with the interpreter reported by the setup checker. The cataloged path is <code>python/professional/lessons/py_numpy_04.py</code>.</p>
+          <div class="static-help">
+            Static/USB mode can ask VS Code to open the real file. If your browser does not recognize that link, open this repository in VS Code and use the printed catalog path. On Windows, <code>START_DS60.cmd</code> is the guided setup and launcher route.
+          </div>
+          <p class="launcher-status" id="launcher-status" aria-live="polite"></p>
+        </div>
+        <div class="run-actions">
+          <a class="button" href="#" data-vscode-path="python/professional/lessons/py_numpy_04.py">
+            Open learner artifact in VS Code
+          </a>
+          <button class="button launcher-only" type="button" id="launch-learner" hidden>
+            Open with guided launcher
+          </button>
+
+
+          <a class="button lab-only" href="../learn?lesson=python-numpy-04" hidden>
+            Practice and keep evidence in the coding lab
+          </a>
+        </div>
+      </section>
+
+
+
+      <div class="sequence" aria-label="Recommended learning sequence">
+        <article><strong>1 · Understand</strong><span>Read the guide and predict the worked examples.</span></article>
+        <article><strong>2 · Practice</strong><span>Open the learner artifact and run or query it in the course environment.</span></article>
+        <article><strong>3 · Reflect</strong><span>Compare solutions only after an honest attempt, then explain the difference.</span></article>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="Lesson materials">
+        <a id="tab-guide" role="tab" aria-selected="true" aria-controls="guide" href="#guide" data-tab="guide">Guide</a>
+        <a id="tab-learner" role="tab" aria-selected="false" aria-controls="learner" href="#learner" data-tab="learner">Learner artifact</a>
+        <a id="tab-solution-1" role="tab" aria-selected="false" aria-controls="solution-1" href="#solution-1" data-tab="solution-1">Solution 1</a>
+<a id="tab-solution-2" role="tab" aria-selected="false" aria-controls="solution-2" href="#solution-2" data-tab="solution-2">Solution 2</a>
+      </nav>
+
+
+      <section
+        class="artifact-panel"
+        id="guide"
+        role="tabpanel"
+        aria-labelledby="tab-guide"
+        data-panel="guide"
+        data-selected
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Understand the concept</p>
+            <h2>Companion guide</h2>
+            <p class="artifact-path"><code>python/professional/companion-guides/py_numpy_04.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/companion-guides/py_numpy_04.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Companion guide"
+              data-artifact-kind="guide"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><h3 id="guide--stable-numerical-computation-and-honest-error-bounds">Stable Numerical Computation and Honest Error Bounds<a class="heading-anchor" href="#guide--stable-numerical-computation-and-honest-error-bounds" aria-label="Link to this section">#</a></h3>
+<p><strong>Stable ID:</strong> <code>python-numpy-04</code></p>
+<p><strong>Estimated time:</strong> 150 minutes; split the reading and implementation across sessions when useful.</p>
+<h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
+<p>Intermediate. Direct catalog prerequisites: <code>python-numpy-03</code>. This lesson deepens the named mechanism after the introductory track; it does not require a cloud account or download data.</p>
+<h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
+<p>By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.</p>
+<h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
+<p>Open the <a href="python-numpy-04.html#learner">learner script</a> in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored <code>.learning/</code> copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise <code>NotImplementedError</code> until you implement them. A successful example is not evidence that the six tasks are finished.</p>
+<p>Windows PowerShell:</p>
+<pre><code class="language-powershell">$CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
+    (Resolve-Path .\.venv\Scripts\python.exe).Path
+} else {
+    (Resolve-Path .\.venv\python.exe).Path
+}
+&amp; $CoursePython python/professional/lessons/py_numpy_04.py</code></pre>
+<p>macOS/Linux:</p>
+<pre><code class="language-bash">.venv/bin/python python/professional/lessons/py_numpy_04.py</code></pre>
+<p>Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep <a href="python-numpy-04.html#solution-1">explanatory solutions</a> and <a href="python-numpy-04.html#solution-2">runnable reference</a> closed until an attempt or an explicit worked comparison.</p>
+<h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><strong>Floating-point precision:</strong> The finite number of significant binary digits retained in a numerical representation, distinct from the magnitude range it can express.</li>
+</ul>
+<ul>
+<li><strong>Cancellation:</strong> Loss of relative accuracy when subtracting nearly equal approximate quantities.</li>
+</ul>
+<ul>
+<li><strong>Conditioning:</strong> Sensitivity of the exact problem solution to small changes in its inputs, distinct from errors introduced by the algorithm.</li>
+</ul>
+<ul>
+<li><strong>Tolerance:</strong> An explicit absolute or relative error allowance chosen for a comparison, not proof of mathematical equality.</li>
+</ul>
+<p>Scientific programs represent most real values approximately. An algorithm can be mathematically correct and still lose useful digits through cancellation, overflow or an inappropriate data type. Numerical stability asks whether the computation adds avoidable error. Conditioning asks whether the underlying problem itself is sensitive. A stable solver cannot recover a well-determined answer from nearly indistinguishable input columns without additional assumptions.</p>
+<p>Exponentials illustrate avoidable overflow. A softmax divides exp(x_i) by the sum of all exponentials. Adding the same constant to every score leaves the probabilities unchanged, so subtract the maximum before exponentiating. The largest exponent becomes zero and all others are nonpositive. The log-sum-exp identity similarly writes log(sum(exp(x))) as m+log(sum(exp(x-m))). The transformation preserves the mathematical result while avoiding huge intermediate exponentials.</p>
+<p>Summation order matters because floating addition is not associative. For values 1e16, one and -1e16, an ordinary sequential or array sum can lose the one. math.fsum tracks partial sums to recover more accurate results for this example. It is not arbitrary-precision arithmetic and cannot represent a final result outside the floating range. Explicitly distinguish a recoverable rounding problem from a genuinely unrepresentable answer.</p>
+<p>Integer arrays have their own range limits. Multiplying int64 values before converting to float can overflow in integer arithmetic. Converting operands first avoids that specific failure, but float conversion may lose exact low bits for very large integers. Exact accounting and identity calculations should retain exact integer or decimal contracts instead of assuming scientific floating operations are interchangeable.</p>
+<p>Solving A*x=b should use a solver rather than explicitly forming inverse(A). Inspect the condition number and the residual norm. A tiny residual shows that the computed result approximately solves the supplied system; it does not prove the solution is insensitive to measurement error. A nearly singular system can have a tiny residual and wildly unstable coefficients.</p>
+<p>Finally, choose comparison tolerances from units and scale. Absolute tolerance controls behavior near zero, while relative tolerance scales with a reference magnitude. Comparing arrays with mismatched shapes through broadcasting can accidentally validate unrelated outputs, so the exercise&#x27;s comparison contract requires identical shapes. A tolerance should explain which differences are operationally negligible, not be enlarged until a failing computation passes.</p>
+<h4 id="guide--worked-examples-and-syntax-anatomy">Worked examples and syntax anatomy<a class="heading-anchor" href="#guide--worked-examples-and-syntax-anatomy" aria-label="Link to this section">#</a></h4>
+<h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import math
+import numpy as np
+
+scores=np.array([1000.,1001.,999.])
+shifted=scores-scores.max()
+probability=np.exp(shifted)/np.exp(shifted).sum()
+assert np.isfinite(probability).all() and np.isclose(probability.sum(),1)
+assert probability.argmax()==1
+print(&quot;Stable probabilities:&quot;,probability.tolist())</code></pre>
+<p>The raw exponentials would overflow at these scores, while subtracting 1001 changes neither their relative ratios nor the resulting probabilities. The maximum-score class remains the most probable. Checking finite values, normalization and ordering gives three independent observations about the transformation.</p>
+<h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
+<pre><code class="language-python">import math
+import numpy as np
+
+values=[1e16,1.,-1e16]
+ordinary=float(np.sum(values));accurate=math.fsum(values)
+assert accurate==1. and ordinary==0.
+a=np.array([[2.,0.],[0.,4.]])
+b=np.array([6.,8.]);x=np.linalg.solve(a,b)
+assert np.allclose(x,[3.,2.]) and np.allclose(a@x,b)
+print(&quot;Summation:&quot;,ordinary,accurate,&quot;linear solution:&quot;,x.tolist())</code></pre>
+<p>The summation counterexample exposes lost low-order information. The diagonal system then makes a solver result independently inspectable: two times three is six and four times two is eight. A library success flag is weaker evidence than both the expected solution and a checked residual on a known fixture.</p>
+<h4 id="guide--exercises">Exercises<a class="heading-anchor" href="#guide--exercises" aria-label="Link to this section">#</a></h4>
+<ol>
+<li><strong>Aggregate log weights without overflow.</strong> Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</li>
+</ol>
+<p><strong>Expected:</strong> [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
+<ol>
+<li><strong>Normalize large scores.</strong> Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</li>
+</ol>
+<p><strong>Expected:</strong> [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</p>
+<ol>
+<li><strong>Preserve small contributions.</strong> Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</li>
+</ol>
+<p><strong>Expected:</strong> [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</p>
+<ol>
+<li><strong>Promote before multiplying.</strong> Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</li>
+</ol>
+<p><strong>Expected:</strong> int64[2<strong>62] dotted with int64[4] yields float(2</strong>64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</p>
+<ol>
+<li><strong>Separate solver residual from conditioning.</strong> Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</li>
+</ol>
+<p><strong>Expected:</strong> diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</p>
+<ol>
+<li><strong>Make numerical comparison semantics explicit.</strong> Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</li>
+</ol>
+<p><strong>Expected:</strong> Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</p>
+<h4 id="guide--common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#guide--common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h4>
+<p>If exp produces infinity, inspect the largest score and reformulate with a maximum shift instead of clipping arbitrarily. If a sum changes when values are reordered, use a cancellation fixture and compare with math.fsum before selecting a tolerance. If an integer product wraps, inspect dtype before multiplication, not after the incorrect result exists. If a solver returns huge coefficients with a tiny residual, inspect the condition number and input uncertainty. If an allclose assertion passes for the wrong output shape, add a shape assertion rather than merely tightening tolerances.</p>
+<h4 id="guide--self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#guide--self-check-and-retrieval" aria-label="Link to this section">#</a></h4>
+<p>Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.</p>
+<h4 id="guide--next-steps">Next steps<a class="heading-anchor" href="#guide--next-steps" aria-label="Link to this section">#</a></h4>
+<p>Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the <a href="../reference-pages/python/professional/README.md.html">professional track</a> for related modules.</p>
+<h4 id="guide--primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#guide--primary-sources-and-official-apis" aria-label="Link to this section">#</a></h4>
+<ul>
+<li><a href="https://numpy.org/doc/stable/user/basics.types.html">NumPy numerical data types and overflow</a>.</li>
+</ul>
+<ul>
+<li><a href="https://docs.python.org/3/library/math.html#math.fsum">Python math.fsum</a>.</li>
+</ul>
+<ul>
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.solve.html">NumPy linear solve</a>.</li>
+</ul>
+<h4 id="guide--ask-codex-about-this-lesson">Ask Codex about this lesson<a class="heading-anchor" href="#guide--ask-codex-about-this-lesson" aria-label="Link to this section">#</a></h4>
+<pre><code class="language-text">Use $guide-ds60sqlpy-learning to coach me through python-numpy-04: Stable Numerical Computation and Honest Error Bounds.
+Read python/professional/companion-guides/py_numpy_04.md and python/professional/lessons/py_numpy_04.py. Direct prerequisites: python-numpy-03.
+Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="learner"
+        role="tabpanel"
+        aria-labelledby="tab-learner"
+        data-panel="learner"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Practice actively</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/lessons/py_numpy_04.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/lessons/py_numpy_04.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="lesson"
+
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;python-numpy-04: Stable Numerical Computation and Honest Error Bounds.</span>
+<span> </span>
+<span>Run the worked examples, then implement the six contracts below.</span>
+<span>Official implementations remain in solutions/.</span>
+<span>&quot;&quot;&quot;</span>
+<span> </span>
+<span>import math</span>
+<span>import numpy as np</span>
+<span> </span>
+<span>def logsumexp(values: np.ndarray) -&gt; float:</span>
+<span>    &quot;&quot;&quot;Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement logsumexp&quot;)</span>
+<span> </span>
+<span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
+<span>    &quot;&quot;&quot;Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement softmax&quot;)</span>
+<span> </span>
+<span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
+<span>    &quot;&quot;&quot;Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement accurate_sum&quot;)</span>
+<span> </span>
+<span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
+<span>    &quot;&quot;&quot;Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement floating_dot&quot;)</span>
+<span> </span>
+<span>def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:</span>
+<span>    &quot;&quot;&quot;Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement solve_checked&quot;)</span>
+<span> </span>
+<span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
+<span>    &quot;&quot;&quot;Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.&quot;&quot;&quot;</span>
+<span>    raise NotImplementedError(&quot;Implement within_tolerance&quot;)</span>
+<span> </span>
+<span>def worked_examples():</span>
+<span>    scores=np.array([1000.,1001.,999.])</span>
+<span>    shifted=scores-scores.max()</span>
+<span>    probability=np.exp(shifted)/np.exp(shifted).sum()</span>
+<span>    assert np.isfinite(probability).all() and np.isclose(probability.sum(),1)</span>
+<span>    assert probability.argmax()==1</span>
+<span>    print(&quot;Stable probabilities:&quot;,probability.tolist())</span>
+<span> </span>
+<span>    values=[1e16,1.,-1e16]</span>
+<span>    ordinary=float(np.sum(values));accurate=math.fsum(values)</span>
+<span>    assert accurate==1. and ordinary==0.</span>
+<span>    a=np.array([[2.,0.],[0.,4.]])</span>
+<span>    b=np.array([6.,8.]);x=np.linalg.solve(a,b)</span>
+<span>    assert np.allclose(x,[3.,2.]) and np.allclose(a@x,b)</span>
+<span>    print(&quot;Summation:&quot;,ordinary,accurate,&quot;linear solution:&quot;,x.tolist())</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    worked_examples()</span>
+<span>    print(&quot;Worked examples passed. Complete the six task functions and their boundary checks.&quot;)</span>
+<span> </span>
+<span># Exercise 1: Aggregate log weights without overflow</span>
+<span># Prompt: Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</span>
+<span># Expected: [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</span>
+<span> </span>
+<span># Exercise 2: Normalize large scores</span>
+<span># Prompt: Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</span>
+<span># Expected: [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</span>
+<span> </span>
+<span># Exercise 3: Preserve small contributions</span>
+<span># Prompt: Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</span>
+<span># Expected: [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</span>
+<span> </span>
+<span># Exercise 4: Promote before multiplying</span>
+<span># Prompt: Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</span>
+<span># Expected: int64[2**62] dotted with int64[4] yields float(2**64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</span>
+<span> </span>
+<span># Exercise 5: Separate solver residual from conditioning</span>
+<span># Prompt: Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</span>
+<span># Expected: diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</span>
+<span> </span>
+<span># Exercise 6: Make numerical comparison semantics explicit</span>
+<span># Prompt: Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</span>
+<span># Expected: Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-1"
+        role="tabpanel"
+        aria-labelledby="tab-solution-1"
+        data-panel="solution-1"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 1</p>
+            <h2>lesson notes</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_numpy_04_solutions.md</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_numpy_04_solutions.md">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="lesson notes"
+              data-artifact-kind="solution"
+               data-solution-index="0"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><h3 id="solution-1--python-numpy-04-explained-reference-solutions">python-numpy-04: Explained reference solutions<a class="heading-anchor" href="#solution-1--python-numpy-04-explained-reference-solutions" aria-label="Link to this section">#</a></h3>
+<p>These answers implement the contracts in <a href="python-numpy-04.html#guide">Stable Numerical Computation and Honest Error Bounds</a>. Compare after an attempt. The <a href="python-numpy-04.html#solution-2">executable reference</a> contains the complete implementations and assertions. Each answer explains the mechanism, not just the final value.</p>
+<h4 id="solution-1--exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#solution-1--exercises-and-reasoning" aria-label="Link to this section">#</a></h4>
+<h5 id="solution-1--exercise-1-aggregate-log-weights-without-overflow">Exercise 1: Aggregate log weights without overflow<a class="heading-anchor" href="#solution-1--exercise-1-aggregate-log-weights-without-overflow" aria-label="Link to this section">#</a></h5>
+<p>Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.</p>
+<p><strong>Expected:</strong> [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.</p>
+<pre><code class="language-python">def logsumexp(values: np.ndarray) -&gt; float:
+    x=np.asarray(values,dtype=float)
+    if x.ndim!=1 or np.isnan(x).any() or np.isposinf(x).any():
+        raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)
+    if x.size==0 or np.isneginf(x).all():
+        return -math.inf
+    maximum=float(x.max())
+    with np.errstate(over=&quot;ignore&quot;):
+        shifted=x-maximum
+    return maximum+math.log(float(np.exp(shifted).sum()))</code></pre>
+<p>The maximum shift bounds all exponential inputs above by zero. A very negative shifted value can become negative infinity through subtraction overflow, which correctly contributes zero exponential weight; this specific operation is handled explicitly. The all-negative-infinity case is separated before subtracting to avoid an undefined infinity-minus-infinity operation. Empty aggregation has zero total weight, whose logarithm is the declared negative-infinity identity.</p>
+<pre><code class="language-python">assert math.isclose(logsumexp(np.array([1000.,1000.])),1000+math.log(2))
+assert logsumexp(np.array([-np.inf,-np.inf]))==-np.inf
+assert logsumexp(np.array([]))==-np.inf
+expect_value_error(lambda:logsumexp(np.array([np.nan])))
+expect_value_error(lambda:logsumexp(np.array([np.inf])))</code></pre>
+<h5 id="solution-1--exercise-2-normalize-large-scores">Exercise 2: Normalize large scores<a class="heading-anchor" href="#solution-1--exercise-2-normalize-large-scores" aria-label="Link to this section">#</a></h5>
+<p>Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.</p>
+<p><strong>Expected:</strong> [1000,1001] returns finite probabilities summing to one with the second larger. Adding-1000 produces the same probabilities; equal scores give [.5,.5].</p>
+<pre><code class="language-python">def softmax(scores: np.ndarray) -&gt; np.ndarray:
+    x=np.asarray(scores,dtype=float)
+    if x.ndim!=1 or x.size==0 or not np.isfinite(x).all():
+        raise ValueError(&quot;Expected a nonempty finite score vector&quot;)
+    with np.errstate(over=&quot;ignore&quot;):
+        weight=np.exp(x-x.max())
+    return weight/weight.sum()</code></pre>
+<p>At least one shifted score is zero, so at least one exponential is one and the denominator cannot vanish. Other sufficiently negative scores can underflow to zero without causing normalization failure. Shift invariance is a mathematical property independent of the exact printed probabilities. The result is a normalized score transformation, not proof that the probabilities are statistically calibrated for any real classification problem.</p>
+<pre><code class="language-python">s=np.array([1000.,1001.]);p=softmax(s)
+assert np.isfinite(p).all() and np.isclose(p.sum(),1) and p[1]&gt;p[0]
+assert np.allclose(p,softmax(s-1000)) and np.allclose(softmax(np.array([7.,7.])),[.5,.5])
+expect_value_error(lambda:softmax(np.array([])))
+expect_value_error(lambda:softmax(np.array([np.inf])))</code></pre>
+<h5 id="solution-1--exercise-3-preserve-small-contributions">Exercise 3: Preserve small contributions<a class="heading-anchor" href="#solution-1--exercise-3-preserve-small-contributions" aria-label="Link to this section">#</a></h5>
+<p>Sum a finite one-dimensional array using math.fsum after conversion to Python floats. Return zero for empty input. Reject nonfinite inputs or a final overflow with ValueError. Demonstrate a cancellation case rather than only positive small integers.</p>
+<p><strong>Expected:</strong> [1e16,1,-1e16] returns 1; empty returns 0; [inf] and [1e308,1e308] raise ValueError.</p>
+<pre><code class="language-python">def accurate_sum(values: np.ndarray) -&gt; float:
+    x=np.asarray(values,dtype=float)
+    if x.ndim!=1 or not np.isfinite(x).all():
+        raise ValueError(&quot;Expected finite summands&quot;)
+    try:
+        return math.fsum(float(value) for value in x)
+    except OverflowError as error:
+        raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</code></pre>
+<p>Compensated partial-sum logic avoids losing the small contribution in the supplied cancellation example. Converting inputs to Python floats makes the representation boundary explicit. The overflow case distinguishes precision loss that an improved algorithm can reduce from a final result the representation cannot hold. Returning infinity would violate the finite-result interpretation, so overflow is surfaced as a contract error.</p>
+<pre><code class="language-python">assert accurate_sum(np.array([1e16,1.,-1e16]))==1.
+assert accurate_sum(np.array([]))==0.
+expect_value_error(lambda:accurate_sum(np.array([np.inf])))
+expect_value_error(lambda:accurate_sum(np.array([1e308,1e308])))</code></pre>
+<h5 id="solution-1--exercise-4-promote-before-multiplying">Exercise 4: Promote before multiplying<a class="heading-anchor" href="#solution-1--exercise-4-promote-before-multiplying" aria-label="Link to this section">#</a></h5>
+<p>Compute a floating dot product of equal-length finite vectors, converting operands before multiplication. Reject shape mismatch or an unrepresentable nonfinite result. Empty equal vectors return zero. This contract is approximate floating arithmetic, not exact integer accounting.</p>
+<p><strong>Expected:</strong> int64[2<strong>62] dotted with int64[4] yields float(2</strong>64), not integer overflow zero. Length mismatch raises ValueError, and empty vectors return 0.</p>
+<pre><code class="language-python">def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:
+    a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)
+    if a.ndim!=1 or b.ndim!=1 or a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all():
+        raise ValueError(&quot;Expected equal finite vectors&quot;)
+    with np.errstate(over=&quot;ignore&quot;,invalid=&quot;ignore&quot;):
+        result=float(np.dot(a,b))
+    if not math.isfinite(result):
+        raise ValueError(&quot;Dot product exceeds finite floating range&quot;)
+    return result</code></pre>
+<p>Promotion happens before the multiplication, which avoids wrapping the int64 product. The chosen power-of-two result is exactly representable as a float, making the expected value unambiguous. Other large integers may lose low-order digits on conversion, so this is not an exactness guarantee for arbitrary integer values. A finite-output check catches arithmetic range failures that a successful array shape match cannot detect.</p>
+<pre><code class="language-python">a=np.array([2**62],dtype=np.int64);b=np.array([4],dtype=np.int64)
+assert floating_dot(a,b)==float(2**64)
+assert floating_dot(np.array([]),np.array([]))==0
+expect_value_error(lambda:floating_dot(np.array([1]),np.array([1,2])))
+expect_value_error(lambda:floating_dot(np.array([1e308]),np.array([1e308])))</code></pre>
+<h5 id="solution-1--exercise-5-separate-solver-residual-from-conditioning">Exercise 5: Separate solver residual from conditioning<a class="heading-anchor" href="#solution-1--exercise-5-separate-solver-residual-from-conditioning" aria-label="Link to this section">#</a></h5>
+<p>Solve a nonempty finite square system with a matching finite target vector. Require a finite condition limit of at least one and reject systems whose condition number exceeds it. Use np.linalg.solve, not an explicit inverse.</p>
+<p><strong>Expected:</strong> diag(2,4) with [6,8] returns [3,2] and a zero residual within tolerance. A duplicate-row system and diag(1,1e-12) at default limit raise ValueError.</p>
+<pre><code class="language-python">def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:
+    a=np.asarray(matrix,dtype=float);b=np.asarray(target,dtype=float)
+    if a.ndim!=2 or a.shape[0]==0 or a.shape[0]!=a.shape[1] or b.shape!=(a.shape[0],) or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(max_condition) or max_condition&lt;1:
+        raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)
+    condition=float(np.linalg.cond(a))
+    if not math.isfinite(condition) or condition&gt;max_condition:
+        raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)
+    return np.linalg.solve(a,b)</code></pre>
+<p>The condition-number gate is an explicit policy about sensitivity, not a universal scientific cutoff. A matrix can be invertible yet too sensitive for the intended precision. Solving directly avoids forming an unnecessary inverse, while the residual check verifies the answer against the supplied equations. It does not prove that small changes to measured matrix entries would leave the solution stable; that is why conditioning is examined separately.</p>
+<pre><code class="language-python">a=np.diag([2.,4.]);b=np.array([6.,8.]);x=solve_checked(a,b)
+assert np.allclose(x,[3,2]) and np.linalg.norm(a@x-b)&lt;1e-12
+expect_value_error(lambda:solve_checked(np.ones((2,2)),np.ones(2)))
+expect_value_error(lambda:solve_checked(np.diag([1.,1e-12]),np.ones(2)))</code></pre>
+<h5 id="solution-1--exercise-6-make-numerical-comparison-semantics-explicit">Exercise 6: Make numerical comparison semantics explicit<a class="heading-anchor" href="#solution-1--exercise-6-make-numerical-comparison-semantics-explicit" aria-label="Link to this section">#</a></h5>
+<p>Compare finite arrays with exactly equal shapes using abs(actual-expected)&lt;=atol+rtol*abs(expected) elementwise. Require finite nonnegative tolerances. Reject broadcasting-compatible but unequal shapes and nonfinite values. Empty equal arrays return True.</p>
+<p><strong>Expected:</strong> Actual[1e8+1,1e-9] versus expected[1e8,0] passes with atol 1 e-8, rtol 1 e-7; it fails with zero tolerances. Shapes(2,) and (1,2) raise ValueError.</p>
+<pre><code class="language-python">def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:
+    a=np.asarray(actual,dtype=float);b=np.asarray(expected,dtype=float)
+    if a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(atol) or not math.isfinite(rtol) or atol&lt;0 or rtol&lt;0:
+        raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)
+    with np.errstate(over=&quot;ignore&quot;):
+        return bool(np.all(np.abs(a-b)&lt;=atol+rtol*np.abs(b)))</code></pre>
+<p>Absolute tolerance allows a small error near a zero reference, while relative tolerance scales with the expected magnitude. The comparison is deliberately reference-oriented rather than symmetric. Exact shape equality prevents broadcasting from turning a structural error into a passing numerical check. Empty matching arrays satisfy the all-elements condition vacuously, but a caller still needs separate evidence that an empty output is scientifically appropriate.</p>
+<pre><code class="language-python">a=np.array([1e8+1,1e-9]);b=np.array([1e8,0.])
+assert within_tolerance(a,b,1e-8,1e-7) and not within_tolerance(a,b,0,0)
+assert within_tolerance(np.array([]),np.array([]),0,0)
+expect_value_error(lambda:within_tolerance(np.ones(2),np.ones((1,2)),0,0))
+expect_value_error(lambda:within_tolerance(a,b,-1,0))</code></pre>
+<h4 id="solution-1--verification-and-interpretation">Verification and interpretation<a class="heading-anchor" href="#solution-1--verification-and-interpretation" aria-label="Link to this section">#</a></h4>
+<p>Run <code>python python/professional/solutions/py_numpy_04_solution.py</code> from the repository root with the prepared interpreter. The code checks normal inputs and explicit edge cases before printing its success line. Assertions are the evidence; the printed sentence alone is not. The helper <code>expect_value_error</code> requires an actual <code>ValueError</code> and fails if a function silently accepts an invalid input. Inspect each function&#x27;s mutation and ordering behavior as part of its contract.</p></div>
+      </section>
+
+
+      <section
+        class="artifact-panel"
+        id="solution-2"
+        role="tabpanel"
+        aria-labelledby="tab-solution-2"
+        data-panel="solution-2"
+
+      >
+        <header class="artifact-head">
+          <div>
+            <p class="eyebrow">Reference solution 2</p>
+            <h2>Python source file</h2>
+            <p class="artifact-path"><code>python/professional/solutions/py_numpy_04_solution.py</code></p>
+          </div>
+          <div class="artifact-actions">
+            <a class="button secondary" href="#" data-vscode-path="python/professional/solutions/py_numpy_04_solution.py">
+              Open this file in VS Code
+            </a>
+            <button
+              class="button launcher-only"
+              type="button"
+              data-launch-artifact="Python source file"
+              data-artifact-kind="solution"
+               data-solution-index="1"
+              hidden
+            >Open with guided launcher</button>
+          </div>
+        </header>
+        <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
+        <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-python"><code><span>&quot;&quot;&quot;Reference implementation and exact boundary checks for python-numpy-04.&quot;&quot;&quot;</span>
+<span> </span>
+<span>import math</span>
+<span>import numpy as np</span>
+<span> </span>
+<span>def logsumexp(values: np.ndarray) -&gt; float:</span>
+<span>    x=np.asarray(values,dtype=float)</span>
+<span>    if x.ndim!=1 or np.isnan(x).any() or np.isposinf(x).any():</span>
+<span>        raise ValueError(&quot;Expected finite or negative-infinite log weights&quot;)</span>
+<span>    if x.size==0 or np.isneginf(x).all():</span>
+<span>        return -math.inf</span>
+<span>    maximum=float(x.max())</span>
+<span>    with np.errstate(over=&quot;ignore&quot;):</span>
+<span>        shifted=x-maximum</span>
+<span>    return maximum+math.log(float(np.exp(shifted).sum()))</span>
+<span> </span>
+<span>def softmax(scores: np.ndarray) -&gt; np.ndarray:</span>
+<span>    x=np.asarray(scores,dtype=float)</span>
+<span>    if x.ndim!=1 or x.size==0 or not np.isfinite(x).all():</span>
+<span>        raise ValueError(&quot;Expected a nonempty finite score vector&quot;)</span>
+<span>    with np.errstate(over=&quot;ignore&quot;):</span>
+<span>        weight=np.exp(x-x.max())</span>
+<span>    return weight/weight.sum()</span>
+<span> </span>
+<span>def accurate_sum(values: np.ndarray) -&gt; float:</span>
+<span>    x=np.asarray(values,dtype=float)</span>
+<span>    if x.ndim!=1 or not np.isfinite(x).all():</span>
+<span>        raise ValueError(&quot;Expected finite summands&quot;)</span>
+<span>    try:</span>
+<span>        return math.fsum(float(value) for value in x)</span>
+<span>    except OverflowError as error:</span>
+<span>        raise ValueError(&quot;The sum exceeds floating-point range&quot;) from error</span>
+<span> </span>
+<span>def floating_dot(left: np.ndarray, right: np.ndarray) -&gt; float:</span>
+<span>    a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)</span>
+<span>    if a.ndim!=1 or b.ndim!=1 or a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all():</span>
+<span>        raise ValueError(&quot;Expected equal finite vectors&quot;)</span>
+<span>    with np.errstate(over=&quot;ignore&quot;,invalid=&quot;ignore&quot;):</span>
+<span>        result=float(np.dot(a,b))</span>
+<span>    if not math.isfinite(result):</span>
+<span>        raise ValueError(&quot;Dot product exceeds finite floating range&quot;)</span>
+<span>    return result</span>
+<span> </span>
+<span>def solve_checked(matrix: np.ndarray, target: np.ndarray, max_condition: float = 1e10) -&gt; np.ndarray:</span>
+<span>    a=np.asarray(matrix,dtype=float);b=np.asarray(target,dtype=float)</span>
+<span>    if a.ndim!=2 or a.shape[0]==0 or a.shape[0]!=a.shape[1] or b.shape!=(a.shape[0],) or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(max_condition) or max_condition&lt;1:</span>
+<span>        raise ValueError(&quot;Expected a finite square system and valid condition limit&quot;)</span>
+<span>    condition=float(np.linalg.cond(a))</span>
+<span>    if not math.isfinite(condition) or condition&gt;max_condition:</span>
+<span>        raise ValueError(&quot;System is singular or exceeds the condition policy&quot;)</span>
+<span>    return np.linalg.solve(a,b)</span>
+<span> </span>
+<span>def within_tolerance(actual: np.ndarray, expected: np.ndarray, atol: float, rtol: float) -&gt; bool:</span>
+<span>    a=np.asarray(actual,dtype=float);b=np.asarray(expected,dtype=float)</span>
+<span>    if a.shape!=b.shape or not np.isfinite(a).all() or not np.isfinite(b).all() or not math.isfinite(atol) or not math.isfinite(rtol) or atol&lt;0 or rtol&lt;0:</span>
+<span>        raise ValueError(&quot;Expected equal finite shapes and nonnegative tolerances&quot;)</span>
+<span>    with np.errstate(over=&quot;ignore&quot;):</span>
+<span>        return bool(np.all(np.abs(a-b)&lt;=atol+rtol*np.abs(b)))</span>
+<span> </span>
+<span>def expect_value_error(call):</span>
+<span>    try:</span>
+<span>        call()</span>
+<span>    except ValueError:</span>
+<span>        return</span>
+<span>    raise AssertionError(&quot;Expected ValueError&quot;)</span>
+<span> </span>
+<span>def main():</span>
+<span>    # Exercise 1: Aggregate log weights without overflow</span>
+<span>    assert math.isclose(logsumexp(np.array([1000.,1000.])),1000+math.log(2))</span>
+<span>    assert logsumexp(np.array([-np.inf,-np.inf]))==-np.inf</span>
+<span>    assert logsumexp(np.array([]))==-np.inf</span>
+<span>    expect_value_error(lambda:logsumexp(np.array([np.nan])))</span>
+<span>    expect_value_error(lambda:logsumexp(np.array([np.inf])))</span>
+<span>    # Exercise 2: Normalize large scores</span>
+<span>    s=np.array([1000.,1001.]);p=softmax(s)</span>
+<span>    assert np.isfinite(p).all() and np.isclose(p.sum(),1) and p[1]&gt;p[0]</span>
+<span>    assert np.allclose(p,softmax(s-1000)) and np.allclose(softmax(np.array([7.,7.])),[.5,.5])</span>
+<span>    expect_value_error(lambda:softmax(np.array([])))</span>
+<span>    expect_value_error(lambda:softmax(np.array([np.inf])))</span>
+<span>    # Exercise 3: Preserve small contributions</span>
+<span>    assert accurate_sum(np.array([1e16,1.,-1e16]))==1.</span>
+<span>    assert accurate_sum(np.array([]))==0.</span>
+<span>    expect_value_error(lambda:accurate_sum(np.array([np.inf])))</span>
+<span>    expect_value_error(lambda:accurate_sum(np.array([1e308,1e308])))</span>
+<span>    # Exercise 4: Promote before multiplying</span>
+<span>    a=np.array([2**62],dtype=np.int64);b=np.array([4],dtype=np.int64)</span>
+<span>    assert floating_dot(a,b)==float(2**64)</span>
+<span>    assert floating_dot(np.array([]),np.array([]))==0</span>
+<span>    expect_value_error(lambda:floating_dot(np.array([1]),np.array([1,2])))</span>
+<span>    expect_value_error(lambda:floating_dot(np.array([1e308]),np.array([1e308])))</span>
+<span>    # Exercise 5: Separate solver residual from conditioning</span>
+<span>    a=np.diag([2.,4.]);b=np.array([6.,8.]);x=solve_checked(a,b)</span>
+<span>    assert np.allclose(x,[3,2]) and np.linalg.norm(a@x-b)&lt;1e-12</span>
+<span>    expect_value_error(lambda:solve_checked(np.ones((2,2)),np.ones(2)))</span>
+<span>    expect_value_error(lambda:solve_checked(np.diag([1.,1e-12]),np.ones(2)))</span>
+<span>    # Exercise 6: Make numerical comparison semantics explicit</span>
+<span>    a=np.array([1e8+1,1e-9]);b=np.array([1e8,0.])</span>
+<span>    assert within_tolerance(a,b,1e-8,1e-7) and not within_tolerance(a,b,0,0)</span>
+<span>    assert within_tolerance(np.array([]),np.array([]),0,0)</span>
+<span>    expect_value_error(lambda:within_tolerance(np.ones(2),np.ones((1,2)),0,0))</span>
+<span>    expect_value_error(lambda:within_tolerance(a,b,-1,0))</span>
+<span>    print(&quot;python-numpy-04: all six normal and boundary contracts passed&quot;)</span>
+<span> </span>
+<span>if __name__ == &quot;__main__&quot;:</span>
+<span>    main()</span>
+<span> </span></code></pre></div>
+      </section>
+
+
+      <section class="coach-card" aria-labelledby="coach-heading">
+        <p class="eyebrow">Optional learning coach · after reading the guide</p>
+        <h2 id="coach-heading">Ask Codex about this lesson</h2>
+        <p>
+          The lesson is complete without Codex. If this repository is open in Codex,
+          copy the prompt below to get a context-aware explanation, progressive hints,
+          and evidence-based review without opening the official solution too early.
+        </p>
+        <div class="coach-grid">
+          <label>
+            <span class="cell-label">Copy-ready lesson prompt</span>
+            <textarea class="codex-prompt" id="codex-prompt" readonly>Use $guide-ds60sqlpy-learning to coach me through python-numpy-04: Stable Numerical Computation and Honest Error Bounds.
+Read python/professional/companion-guides/py_numpy_04.md and python/professional/lessons/py_numpy_04.py. Direct prerequisites: python-numpy-03.
+Explain the vocabulary and mechanism at a beginner-friendly pace, then ask me to predict a concrete result before my attempt. Give one hint at a time, review my numerical or exception evidence, and ask retrieval questions in my own words. Do not read solutions/ until I request it or have made an honest attempt. Use only the prepared local Python environment and tiny offline inputs; preserve my saved work.
+Done when all six contracts and their boundary cases have inspected evidence and I can explain why a tempting incorrect implementation fails.</textarea>
+          </label>
+          <button class="button" type="button" id="copy-codex-prompt">Copy Codex prompt</button>
+        </div>
+        <p class="copy-status" id="copy-status" aria-live="polite"></p>
+      </section>
+
+      <nav class="lesson-nav" aria-label="Previous and next lessons">
+        <a class="nav-card" href="python-numpy-03.html"><small>Previous lesson</small><strong>python-numpy-03</strong><span>Gather, Scatter, Masks, and Deterministic Selection</span></a>
+        <a class="nav-card next" href="python-pandas-01.html"><small>Next lesson</small><strong>python-pandas-01</strong><span>pandas Label Alignment, Nullable Logic, and Safe Assignment</span></a>
+      </nav>
+    </div>
+  </main>
+
+  <footer>
+    <div class="shell">
+      Generated from checked-in course artifacts · readable offline · run code only in the course environment
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+    const LESSON_ID = "python-numpy-04";
+    const LEARNER_PATH = "python/professional/lessons/py_numpy_04.py";
+    const STORAGE_KEY = "ds60sqlpy.portable-guide.v1";
+    const SERVER_TOKEN = "";
+    const LAB_MODE = false;
+    const launcherMode = Boolean(
+      SERVER_TOKEN &&
+      !LAB_MODE &&
+      location.protocol === "http:" &&
+      location.hostname === "127.0.0.1"
+    );
+    const labMode = Boolean(
+      SERVER_TOKEN && LAB_MODE &&
+      location.protocol === "http:" && location.hostname === "127.0.0.1"
+    );
+    if (labMode) {
+      document.querySelectorAll(".lab-only").forEach((element) => { element.hidden = false; });
+      document.querySelectorAll(".native-only, .static-help, .static-only").forEach((element) => { element.hidden = true; });
+      document.querySelector("#run-heading").textContent = "Keep your attempt beside the lesson";
+      document.querySelector("#run-guidance").textContent =
+        "Open this lesson in the coding lab to save your reasoning and work. Its capability notice explains which execution tools are available. Completion follows your saved evidence and self-check.";
+    }
+
+    document.documentElement.classList.add("tabs-ready");
+    const panels = [...document.querySelectorAll("[data-panel]")];
+    const tabs = [...document.querySelectorAll("[data-tab]")];
+
+    function activatePanel(panelId, focusTab = false) {
+      const selected = panels.some((panel) => panel.id === panelId) ? panelId : "guide";
+      panels.forEach((panel) => {
+        panel.toggleAttribute("data-selected", panel.id === selected);
+      });
+      tabs.forEach((tab) => {
+        const active = tab.dataset.tab === selected;
+        tab.setAttribute("aria-selected", String(active));
+        tab.tabIndex = active ? 0 : -1;
+        if (active && focusTab) tab.focus();
+      });
+    }
+
+    function panelFromHash() {
+      return decodeURIComponent(location.hash.slice(1)).split("--")[0] || "guide";
+    }
+
+    function activateFromHash() {
+      activatePanel(panelFromHash());
+      const exactTarget = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+      if (exactTarget && !exactTarget.matches("[data-panel]")) {
+        requestAnimationFrame(() => exactTarget.scrollIntoView({ block: "start" }));
+      }
+    }
+
+    tabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => activatePanel(tab.dataset.tab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+        if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = tabs.length - 1;
+        const nextTab = tabs[nextIndex];
+        location.hash = nextTab.dataset.tab;
+        activatePanel(nextTab.dataset.tab, true);
+      });
+    });
+    window.addEventListener("hashchange", activateFromHash);
+    activateFromHash();
+
+    function fileUrlFor(relativePath) {
+      return new URL("../" + relativePath.split("/").map(encodeURIComponent).join("/"), location.href);
+    }
+
+    function vscodeUrlFor(relativePath) {
+      const fileUrl = fileUrlFor(relativePath);
+      const host = fileUrl.host ? "//" + fileUrl.host : "";
+      return "vscode://file" + host + fileUrl.pathname;
+    }
+
+    document.querySelectorAll("[data-vscode-path]").forEach((link) => {
+      if (location.protocol !== "file:") {
+        link.hidden = true;
+      } else try {
+        link.href = vscodeUrlFor(link.dataset.vscodePath);
+      } catch {
+        link.removeAttribute("href");
+        link.setAttribute("aria-disabled", "true");
+      }
+    });
+
+    const codexPrompt = document.querySelector("#codex-prompt");
+    const copyStatus = document.querySelector("#copy-status");
+    document.querySelector("#copy-codex-prompt").addEventListener("click", async () => {
+      codexPrompt.focus();
+      codexPrompt.select();
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(codexPrompt.value);
+        } else if (!document.execCommand("copy")) {
+          throw new Error("copy command was unavailable");
+        }
+        copyStatus.textContent = "Prompt copied. Paste it into a Codex task opened at the repository root.";
+      } catch {
+        copyStatus.textContent = "Automatic copy was blocked. The prompt is selected; use Ctrl+C or Cmd+C.";
+      }
+    });
+
+    function readProgress() {
+      try {
+        const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+        return value && Array.isArray(value.completed) ? value : { completed: [], setup: {}, os: "windows" };
+      } catch {
+        return { completed: [], setup: {}, os: "windows" };
+      }
+    }
+
+    function writeProgress(complete) {
+      const state = readProgress();
+      const completed = new Set(state.completed);
+      complete ? completed.add(LESSON_ID) : completed.delete(LESSON_ID);
+      state.completed = [...completed].sort();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    }
+
+    const completion = document.querySelector("#lesson-complete");
+    if (launcherMode) {
+      completion.checked = readProgress().completed.includes(LESSON_ID);
+      completion.addEventListener("change", async () => {
+        writeProgress(completion.checked);
+        try {
+          await apiRequest("/api/progress", {
+            method: "POST",
+            body: JSON.stringify({ lesson_id: LESSON_ID, complete: completion.checked })
+          });
+          setStatus(completion.checked ? "Progress saved as complete." : "Progress saved as incomplete.");
+        } catch (error) {
+          setStatus("Browser progress changed, but the progress file was not updated: " + error.message, true);
+        }
+      });
+    }
+
+    function setStatus(message, failed = false) {
+      const status = document.querySelector("#launcher-status");
+      status.textContent = message;
+      status.style.color = failed ? "var(--red)" : "var(--muted)";
+    }
+
+    async function apiRequest(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          "X-DS60-Token": SERVER_TOKEN,
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Guided launcher request failed.");
+      return payload;
+    }
+
+    async function launch(detail) {
+      setStatus("Opening the allowlisted course artifact…");
+      try {
+        const payload = await apiRequest("/api/launch", {
+          method: "POST",
+          body: JSON.stringify(detail)
+        });
+        setStatus(payload.action + " started.");
+      } catch (error) {
+        setStatus("Could not launch this artifact: " + error.message, true);
+      }
+    }
+
+    if (launcherMode) {
+      document.querySelectorAll(".launcher-only").forEach((button) => { button.hidden = false; });
+      document.querySelectorAll(".static-only").forEach((element) => { element.hidden = true; });
+      setStatus("Guided launcher mode is ready.");
+      document.querySelector("#launch-learner").addEventListener("click", () => {
+        void launch({ action: "open-artifact", lesson_id: LESSON_ID, artifact: "lesson" });
+      });
+      const jupyterButton = document.querySelector("#launch-jupyter");
+      if (jupyterButton) {
+        jupyterButton.addEventListener("click", () => {
+          void launch({ action: "jupyter-lesson", lesson_id: LESSON_ID });
+        });
+      }
+      const sqlNotebookButton = document.querySelector("#launch-sql-notebook");
+      if (sqlNotebookButton) {
+        sqlNotebookButton.addEventListener("click", () => {
+          void launch({
+            action: "jupyter-sql",
+            lesson_id: LESSON_ID,
+            artifact: "lesson",
+            solution_index: 1
+          });
+        });
+      }
+      document.querySelectorAll("[data-launch-artifact]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const detail = {
+            action: "open-artifact",
+            lesson_id: LESSON_ID,
+            artifact: button.dataset.artifactKind
+          };
+          if (button.dataset.solutionIndex !== undefined) {
+            detail.solution_index = Number(button.dataset.solutionIndex);
+          }
+          void launch(detail);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

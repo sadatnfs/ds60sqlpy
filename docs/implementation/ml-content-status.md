@@ -19,7 +19,7 @@ Command from the repository root, using the existing prepared Python environment
 python -m pytest tests/test_ml_module_lessons.py -q --disable-warnings
 ```
 
-Result: **55 passed,42 skipped**. Skips are explicit optional heavy-runtime tests:1 existing TensorFlow foundation test,25 newly completed TensorFlow reference tests,15 PyTorch reference tests and1 additional decoder/cache negative-control test. One pytest cache write warning from the read-only command boundary did not change the test result.
+Result: **58 passed,42 skipped**. Skips are explicit optional heavy-runtime tests:1 existing TensorFlow foundation test,25 newly completed TensorFlow reference tests,15 PyTorch reference tests and1 additional decoder/cache negative-control test. The latest focused run completed without warnings. Three additional regressions compile embedded child programs without importing heavy frameworks.
 
 The complete78-entry inventory passed the shared lesson depth and practice checks inside the focused test suite. All authored Python files parsed. Existing behavior tests were preserved; new tests cover full planned-ID coverage, core reference execution, tool proposal failures, retrieval tie behavior, tokenwise normalization and optional decoder/cache boundaries.
 
@@ -63,3 +63,11 @@ Those are POSIX environment-prefix forms. In PowerShell set `$env:DS60_TEST_TENS
 ## Remaining integration work
 
 Run the full heavy reference suites in prepared containers, record failures and repairs, regenerate the shared dashboard/readers after root catalog integration, and inspect the actual browser lesson/solution flow. Current content completion must not be described as a live-runtime or production-quality acceptance result. Additional Python/SQL deepening remains a separate queued workstream owned by root; no such lesson was claimed complete by this ML pass.
+
+## Fresh-process repair checkpoint
+
+Root prepared-container execution reported25 of27 TensorFlow references passing and indentation failures in the embedded child programs of `tf-028` and `tf-032`. The authoring specifications and generated artifacts now use `textwrap.dedent` with a leading newline, compile the child source before launching it, and include child stderr in a failure. The same defect was proactively repaired in `llm-022`. Static child-source compilation regressions pass. Root will rerun the actual prepared-runtime cases; this paragraph does not claim the repaired subprocesses have executed.
+
+## Prepared-runtime acceptance readback
+
+Root integration subsequently executed all27 TensorFlow reference programs and all15 PyTorch reference programs successfully in the prepared Linux arm64 Docker images. Initial failures in TensorFlow028/032 and PyTorch022 were repaired and individually rerun. TensorFlow032 additionally retains the loaded SavedModel owner so its captured variables remain alive during serve. Receipts are the local implementation files `work/tensorflow-all-lessons-acceptance.jsonl`, `work/tensorflow-repaired-lessons-acceptance.jsonl`, `work/tensorflow-export-lifetime-acceptance.jsonl`, `work/torch-all-lessons-acceptance.jsonl` and `work/torch-repaired-lessons-acceptance.jsonl`. These establish bounded CPU reference execution on that image/architecture, not Windows-native, x86, GPU, production-quality or learner-mastery acceptance. Earlier unexecuted statements above describe the authoring pass before this integration run.
