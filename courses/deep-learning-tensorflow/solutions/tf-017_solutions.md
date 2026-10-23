@@ -27,9 +27,9 @@ w=tf.constant([1.,-2.]); l1=float(tf.reduce_sum(tf.abs(w))); l2=float(tf.reduce_
 assert (l1,l2)==(3.,5.)
 ```
 
-**Expected:** L1=3; squaredL2=5.
+**Expected:** \(L_{1}=3\); squaredL2=5.
 
-**Verify:** Compare the computed values or written argument with L1=3; squaredL2=5.
+**Verify:** Compare the computed values or written argument with \(L_{1}=3\); squaredL2=5.
 
 ## Exercise 2: Switch dropout to evaluation
 

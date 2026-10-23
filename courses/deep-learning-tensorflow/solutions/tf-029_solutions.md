@@ -43,9 +43,9 @@ loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=tf.constan
 np.testing.assert_allclose(loss.numpy(),[np.logaddexp(0,-1)],atol=1e-6,rtol=0)
 ```
 
-**Expected:** losslog(1+exp(-1)) within1e-6.
+**Expected:** loss \(\log(1+e^{-1})\) within 1e-6.
 
-**Verify:** Compare the computed values or written argument with losslog(1+exp(-1)) within1e-6.
+**Verify:** Compare the computed values or written argument with loss \(\log(1+e^{-1})\) within 1e-6.
 
 ## Exercise 3: Check shift invariance
 
@@ -57,9 +57,9 @@ A common score shift cancels from the normalized distribution. This metamorphic 
 np.testing.assert_allclose(tf.nn.softmax(z).numpy(),tf.nn.softmax([0.,-1.]).numpy(),atol=1e-6,rtol=0)
 ```
 
-**Expected:** probabilities agree within1e-6.
+**Expected:** probabilities agree within 1e-6.
 
-**Verify:** Compare the computed values or written argument with probabilities agree within1e-6.
+**Verify:** Compare the computed values or written argument with probabilities agree within 1e-6.
 
 ## Exercise 4: Inspect gradients
 

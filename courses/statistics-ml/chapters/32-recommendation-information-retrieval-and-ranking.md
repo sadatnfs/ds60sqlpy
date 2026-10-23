@@ -12,11 +12,11 @@ A user can click only an item they were shown, and high positions receive more a
 
 ### From representations to scores
 
-Matrix factorization approximates a user-item score by p_u_transpose*q_i, where p_u and q_i are learned latent vectors. Content models instead derive features from item or user attributes. A two-tower model generalizes this with separate encoders so item vectors can be precomputed and searched efficiently. That architectural efficiency constrains interactions: a final ranker can add features unavailable to a simple dot-product retrieval stage.
+Matrix factorization approximates a user-item score by \(p_{u}^{\mathsf T}\cdot q_{i}\), where p_u and q_i are learned latent vectors. Content models instead derive features from item or user attributes. A two-tower model generalizes this with separate encoders so item vectors can be precomputed and searched efficiently. That architectural efficiency constrains interactions: a final ranker can add features unavailable to a simple dot-product retrieval stage.
 
 ### Ranking metrics encode a user model
 
-Reciprocal rank values the position of the first relevant result. Average precision rewards finding multiple relevant results early. NDCG discounts lower positions and supports graded relevance, normalized by the best ordering for the judged candidate set. State the gain convention: exponential gains 2^relevance-1 and direct relevance gains are both used, but their numbers differ. A metric name without its cutoff, gain convention and query averaging rule is incomplete.
+Reciprocal rank values the position of the first relevant result. Average precision rewards finding multiple relevant results early. NDCG discounts lower positions and supports graded relevance, normalized by the best ordering for the judged candidate set. State the gain convention: exponential gains \(2^{\mathrm{relevance}}-1\) and direct relevance gains are both used, but their numbers differ. A metric name without its cutoff, gain convention and query averaging rule is incomplete.
 
 ### Build a realistic evaluation population
 
@@ -98,13 +98,13 @@ Listwise ranking optimizes a distribution or metric surrogate over an entire can
 
 **NDCG**
 
-NDCG sums discounted gains for a ranked list and divides by the ideal ordering's sum. With exponential gain, DCG=sum_r (2^rel_r-1)/log2(r+1); other conventions use direct gains. Define the cutoff, handling of all-zero relevance and ties. Normalizing per query supports comparison but can give a small easy query the same weight as a high-value difficult one.
+NDCG sums discounted gains for a ranked list and divides by the ideal ordering's sum. With exponential gain, \(\mathrm{DCG}=\sum_r\frac{2^{\mathrm{rel}_r}-1}{\log_2(r+1)}\); other conventions use direct gains. Define the cutoff, handling of all-zero relevance and ties. Normalizing per query supports comparison but can give a small easy query the same weight as a high-value difficult one.
 
 ### stat-32-13
 
 **Mean reciprocal rank**
 
-Mean reciprocal rank averages 1/r for the first relevant result in each query, with zero when none is found. It matches tasks where one useful answer is sufficient. It ignores relevance after the first hit, so it is unsuitable as the sole measure when several documents are needed. Specify the retrieval cutoff and treatment of queries with no relevant catalogue item.
+Mean reciprocal rank averages \(\frac{1}{r}\) for the first relevant result in each query, with zero when none is found. It matches tasks where one useful answer is sufficient. It ignores relevance after the first hit, so it is unsuitable as the sole measure when several documents are needed. Specify the retrieval cutoff and treatment of queries with no relevant catalogue item.
 
 ### stat-32-14
 
@@ -162,7 +162,7 @@ Three unit vectors produce exact query dot products [1,0.8,0]. An approximate ca
 
 ### Compute three ranking objectives
 
-The graded relevance values [3,2,0] are returned in order [0-relevance,3-relevance,2-relevance]. The example explicitly uses exponential gains for NDCG. Binary hits at ranks two and three give reciprocal rank one-half and average precision (1/2+2/3)/2=7/12. Each metric emphasizes a different aspect of the ordered result.
+The graded relevance values [3,2,0] are returned in order [0-relevance,3-relevance,2-relevance]. The example explicitly uses exponential gains for NDCG. Binary hits at ranks two and three give reciprocal rank one-half and average precision \(\frac{\frac{1}{2}+\frac{2}{3}}{2}=\frac{7}{12}\). Each metric emphasizes a different aspect of the ordered result.
 
 ### See why clicks mix preference with exposure
 

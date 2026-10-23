@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim('batch', min=1, max=4) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.
+Save model.state_dict with torch.save and load into an nn.Linear(2, 1, bias=False). torch.export.export(model, (example, ), strict=True) captures a static program; torch.export.save/load persists it. Call loaded_program.module() to obtain the checked inference module. For variable batch length, declareDim('batch', \(\mathrm{min}=1\), \(\mathrm{max}=4\)) through dynamic_shapes and test within and outside the bound. Keep loaded owners in named variables while using their derived objects.
 
 ## Compare tensor state with a constrained program
 

@@ -14,6 +14,15 @@ By the end, explain the mechanism in your own words, implement each bounded cont
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Open the [learner script](../lessons/py_pandas_03.py) in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored `.learning/` copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
 
 Windows PowerShell:

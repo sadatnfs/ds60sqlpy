@@ -8,7 +8,7 @@ Bayesian inference combines a model for observations with a probability distribu
 
 ### A complete beta-binomial update
 
-Let p be a success probability, p~Beta(alpha,beta), and observe s successes in n independent trials. Multiplication of p^(alpha-1)*(1-p)^(beta-1) by p^s*(1-p)^(n-s) gives Beta(alpha+s,beta+n-s). The posterior mean is a weighted average of the prior mean and sample proportion, with total prior concentration alpha+beta acting as prior information in this model. For Beta(2,2) and eight successes out of ten, the posterior is Beta(10,4) with mean 10/14. The next outcome is still binary, so its uncertainty is much larger than uncertainty in the posterior mean alone.
+Let p be a success probability, \(p\sim\operatorname{Beta}(\alpha,\beta)\), and observe s successes in n independent trials. Multiplication of \(p^{\alpha-1}(1-p)^{\beta-1}\) by \(p^s(1-p)^{n-s}\) gives \(\operatorname{Beta}(\alpha+s,\beta+n-s)\). The posterior mean is a weighted average of the prior mean and sample proportion, with total prior concentration alpha+beta acting as prior information in this model. For Beta(2,2) and eight successes out of ten, the posterior is Beta(10,4) with mean \(\frac{10}{14}\). The next outcome is still binary, so its uncertainty is much larger than uncertainty in the posterior mean alone.
 
 ### Computation and diagnostics
 
@@ -204,9 +204,9 @@ Specify a joint Gaussian law for function values through a mean and kernel. Cond
 
 ### Case study: conjugacy reveals what the prior contributes
 
-The Beta(2,2) prior has mean .5 and concentration four. Eight successes in ten trials yield Beta(10,4), with posterior mean 10/14. Algebraically this is [4/(4+10)]*.5+[10/(4+10)]*.8. The prior receives weight four-fourteenths, and the observed success proportion receives ten-fourteenths. This convenient pseudo-count interpretation is specific to the beta-binomial model and should not be transferred mechanically to arbitrary priors.
+The Beta(2,2) prior has mean .5 and concentration four. Eight successes in ten trials yield Beta(10,4), with posterior mean \(\frac{10}{14}\). Algebraically this is \([\frac{4}{4+10}]\cdot 0.5+[\frac{10}{4+10}]\cdot 0.8\). The prior receives weight four-fourteenths, and the observed success proportion receives ten-fourteenths. This convenient pseudo-count interpretation is specific to the beta-binomial model and should not be transferred mechanically to arbitrary priors.
 
-For the next binary trial, the posterior predictive success probability equals the posterior mean. For several future trials, integrating over the common unknown p induces dependence among their outcomes and produces a beta-binomial count distribution. Plugging in p=10/14 and pretending it is known gives a binomial predictive count with too little parameter uncertainty. The distinction matters when forecasting aggregate incidents or conversions over a new period.
+For the next binary trial, the posterior predictive success probability equals the posterior mean. For several future trials, integrating over the common unknown p induces dependence among their outcomes and produces a beta-binomial count distribution. Plugging in \(p=\frac{10}{14}\) and pretending it is known gives a binomial predictive count with too little parameter uncertainty. The distinction matters when forecasting aggregate incidents or conversions over a new period.
 
 Before fitting, ask whether one common p is plausible. Different customers, time periods or machines may have systematically different probabilities. A narrow posterior for one pooled p can fit the total success count while missing group variation. A hierarchical beta-binomial or regression model can represent some heterogeneity, but it introduces another model whose predictive implications need checking.
 
@@ -214,15 +214,15 @@ Before fitting, ask whether one common p is plausible. Different customers, time
 
 Suppose a measurement mean y_bar has known sampling variance v, and the unknown mean theta has prior N(mu0,tau-squared). The posterior precision is 1/tau-squared+1/v, and the posterior mean is (mu0/tau-squared+y_bar/v) divided by that precision. Precision is inverse variance, so the more informative source receives more weight.
 
-If mu0=0, tau-squared=4, y_bar=3 and v=1, posterior precision is 1.25, posterior variance .8 and posterior mean 2.4. This update does not average the prior and observation equally. If the measurement variance falls to .25, the posterior mean moves closer to three because the likelihood contributes more precision. If the prior variance shrinks dramatically, the prior dominates.
+If mu0=0, tau-squared=4, \(y_{\mathrm{bar}}=3\) and \(v=1\), posterior precision is 1.25, posterior variance .8 and posterior mean 2.4. This update does not average the prior and observation equally. If the measurement variance falls to .25, the posterior mean moves closer to three because the likelihood contributes more precision. If the prior variance shrinks dramatically, the prior dominates.
 
 The calculation assumes the measurement variance is known and the observation model is credible. Unknown noise variance, correlated measurements and selection into observation require additional modeling. A prior concentrated at zero can suppress a real effect in weak data; a broad prior can place mass on implausible outcomes. Prior predictive simulation translates these abstract scales into consequences people can inspect.
 
 ### Case study: a good posterior fit can coexist with a prior-sensitive Bayes factor
 
-Compare a null theta=0 with an alternative theta~N(0,tau-squared), observing one y~N(theta,1). Under the alternative, the marginal distribution is N(0,1+tau-squared). The Bayes factor for alternative versus null is [1/sqrt(1+tau-squared)]*exp[y-squared*tau-squared/(2*(1+tau-squared))]. This follows by integrating the normal likelihood over the normal prior.
+Compare a null \(\theta=0\) with an alternative \(\theta\sim\mathcal{N}(0,\tau^2)\), observing one \(y\sim\mathcal{N}(\theta,1)\). Under the alternative, the marginal distribution is \(\mathcal{N}(0,1+\tau^2)\). The Bayes factor for alternative versus null is \(\frac{1}{\sqrt{1+\tau^2}}\exp\!\left(\frac{y^2\tau^2}{2(1+\tau^2)}\right)\). This follows by integrating the normal likelihood over the normal prior.
 
-At y=2 and tau=1, the factor is about 1.92. At tau=100, it is about .074. The diffuse alternative wastes prior predictive mass on enormous observations that were not seen, so its marginal likelihood falls. This is not an arithmetic paradox. It shows that model comparison asks how well each model predicted the observation before seeing it, averaged over its parameter prior.
+At \(y=2\) and \(\tau=1\), the factor is about 1.92. At \(\tau=100\), it is about .074. The diffuse alternative wastes prior predictive mass on enormous observations that were not seen, so its marginal likelihood falls. This is not an arithmetic paradox. It shows that model comparison asks how well each model predicted the observation before seeing it, averaged over its parameter prior.
 
 A posterior interval for theta under the alternative and a Bayes factor comparing models answer different questions. Neither should be reported without its prior assumptions. Sensitivity analysis should use scientifically defensible prior scales, not search for the one that gives a desired evidential conclusion.
 
@@ -260,7 +260,7 @@ The Metropolis chain targets a standard normal density using a symmetric random-
 
 ### A kernel makes an uncertainty assumption
 
-Gaussian conditioning uses a squared-exponential covariance plus observation noise. The latent variance at x=3 exceeds that at .5 because it is farther from observed inputs. That behavior follows from the selected kernel and training support; it does not guarantee calibrated uncertainty under a different generating process.
+Gaussian conditioning uses a squared-exponential covariance plus observation noise. The latent variance at \(x=3\) exceeds that at .5 because it is farther from observed inputs. That behavior follows from the selected kernel and training support; it does not guarantee calibrated uncertainty under a different generating process.
 
 ### Complete executable example
 

@@ -15,3 +15,15 @@ python -m pytest tests/test_pytorch_lessons.py -q
 ```
 
 The host suite checks all 36 bundles, paired links, practice contracts, exact regeneration, worked/reference parity and bounded child programs. Actual numerical reference tests are opt-in through `DS60_TEST_TORCH=1` inside the separately prepared PyTorch runtime. A host skip does not establish execution. Changes to reference behavior or worked programs require new parent-owned prepared-worker receipts. These authoring tools do not download data or models, install packages, change shared runtime definitions or modify learner state.
+
+## Unified classroom presentation
+
+Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
+`\[ ... \]` delimiters. Tag every fenced code example with its actual language.
+After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+from the repository root before rebuilding HTML readers. The reviewed
+`curriculum/math-prose.json` registry preserves this migration across regeneration;
+it does not change executable fences, notebook code or the supplied statistics
+outline. The public learner entrypoint is `/classroom`, shared by every subject.
+See [the content contract](../../../docs/content-authoring.md) for the rendering
+and subject-theme requirements.

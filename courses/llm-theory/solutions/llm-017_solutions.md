@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Training predicts the next token at each active position. A four-token sequence gives three input-target pairs, and padding creates storage slots without creating observations. Cross entropy can ignore a sentinel target such as-100, but the denominator must still count only active targets. Summing losses and dividing by padded width understates error when sequences are short. The vocabulary dimension belongs to logits, while labels are integer class indices. This lesson uses zero logits so each active target has exactly log(vocabulary_size) loss, making padding and reduction errors visible without a trained model.
+Training predicts the next token at each active position. A four-token sequence gives three input-target pairs, and padding creates storage slots without creating observations. Cross entropy can ignore a sentinel target such as-100, but the denominator must still count only active targets. Summing losses and dividing by padded width understates error when sequences are short. The vocabulary dimension belongs to logits, while labels are integer class indices. This lesson uses zero logits so each active target has exactly \(\log(\mathrm{vocabulary\ size})\) loss, making padding and reduction errors visible without a trained model.
 
 **Active target:** A real next-token observation included in the objective.
 

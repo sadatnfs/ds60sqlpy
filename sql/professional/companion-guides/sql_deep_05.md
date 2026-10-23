@@ -4,6 +4,15 @@
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **PostgreSQL** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Use the private reader's **Create/open guided SQL notebook** action. It creates the ignored editable copy at `.learning/sql/sql-deep-05/lesson/workspace/sql/professional/lessons/sql_deep_05.sql`. Read the supplied fixture, write a prediction, edit that copy and run the complete script. The prepared target must be the local disposable `advanced_sql_training` database. These lessons never require a production connection or a new cloud service.
 
 The learner file starts a transaction, checks the database name, creates only temporary tables, runs two worked examples and ends with ROLLBACK. Your six query attempts belong before that final rollback. Re-run the complete file after an error so the fixture and transaction state are known. Output appears in the notebook or terminal as named columns and bounded rows; a command tag alone does not verify a SELECT result.

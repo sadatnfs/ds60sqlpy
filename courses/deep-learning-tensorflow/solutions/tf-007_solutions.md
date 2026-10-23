@@ -19,13 +19,13 @@ regardless of the optional arithmetic checker.
 
 The subtraction w-2 and the square of that result occur inside GradientTape, so the tape records their dependence on the trainable Variable. At zero the loss is 4 and the derivative is -4. The input dtype is float64 and CPU placement is explicit. A tape is an operational recording scope, not a symbolic parser that searches later Python text for a weight name. Its result should agree with the scalar derivative already checked in the previous lessons.
 
-**Expected:** Loss 4 and gradient -4 at w=0, dtype float64.
+**Expected:** Loss 4 and gradient -4 at \(w=0\), dtype float64.
 
 **Verify:** Assert the scalar values and inspect that subtraction and square both occur inside the tape indentation.
 
 ## Exercise 2: Distinguish a true zero
 
-At w=2 the same recorded path still exists. Its residual is zero and the connected derivative is the numeric tensor zero. Check that the result is not None before inspecting its scalar value. The distinction matters because a legitimate stationary point should not be diagnosed as a broken recording, and a broken recording should not be disguised as a stationary point. The fixture isolates this mechanism without asserting that every zero gradient in a larger network indicates an optimum.
+At \(w=2\) the same recorded path still exists. Its residual is zero and the connected derivative is the numeric tensor zero. Check that the result is not None before inspecting its scalar value. The distinction matters because a legitimate stationary point should not be diagnosed as a broken recording, and a broken recording should not be disguised as a stationary point. The fixture isolates this mechanism without asserting that every zero gradient in a larger network indicates an optimum.
 
 **Expected:** Connected loss 0 and numeric gradient 0, not None.
 
@@ -49,7 +49,7 @@ A trainable Variable is normally watched automatically when read, while a consta
 
 ## Exercise 5: Preserve Variable identity
 
-The expression w-0.1*gradient creates a Tensor. Assigning that result to a Python name rebinds the name and leaves the original Variable unchanged at zero. By contrast, assign_sub mutates the existing Variable, preserving its identity and bringing its value to 0.4. Retain a reference to the original object when comparing the two cases so a renamed Tensor cannot masquerade as mutable parameter state. Identity becomes important when optimizers track state for particular parameter objects.
+The expression \(w-0.1\cdot \mathrm{gradient}\) creates a Tensor. Assigning that result to a Python name rebinds the name and leaves the original Variable unchanged at zero. By contrast, assign_sub mutates the existing Variable, preserving its identity and bringing its value to 0.4. Retain a reference to the original object when comparing the two cases so a renamed Tensor cannot masquerade as mutable parameter state. Identity becomes important when optimizers track state for particular parameter objects.
 
 **Expected:** Rebinding yields a Tensor at 0.4 while the old Variable remains 0; assign_sub preserves the Variable object and changes its value to 0.4.
 
@@ -57,7 +57,7 @@ The expression w-0.1*gradient creates a Tensor. Assigning that result to a Pytho
 
 ## Exercise 6: Use a fresh recording
 
-An ordinary nonpersistent tape releases its recorded resources after one gradient query; a second query raises RuntimeError. Build a new tape and recompute the forward loss to ask again. The scalar derivative is still -4. For fixed x=2 and loss=(2*w-4)^2 at zero, the chain rule gives 2*(-4)*2=-16. This confirms that a feature can remain constant while the weight has a connected gradient. No persistent tape or trainable feature is necessary for the example.
+An ordinary nonpersistent tape releases its recorded resources after one gradient query; a second query raises RuntimeError. Build a new tape and recompute the forward loss to ask again. The scalar derivative is still -4. For fixed \(x=2\) and \(\mathrm{loss}={\left(2\cdot w-4\right)}^{2}\) at zero, the chain rule gives \(2\cdot (-4)\cdot 2=-16\). This confirms that a feature can remain constant while the weight has a connected gradient. No persistent tape or trainable feature is necessary for the example.
 
 **Expected:** Second use of the consumed tape raises RuntimeError; a fresh scalar tape gives -4, and the constant-feature loss gives gradient -16.
 
@@ -88,7 +88,7 @@ def gradient_at(value):
 
 ## Retrieval and alternatives
 
-Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of (3*w-6)^2 at zero before running a fresh recording.
+Close the examples and explain the three different observations None, numeric zero and RuntimeError after tape consumption. Then derive the gradient of \({\left(3\cdot w-6\right)}^{2}\) at zero before running a fresh recording.
 
 After revealing this file, choose another fixture before treating the answer
 as independent retrieval evidence. Explain why the rejected case is invalid,

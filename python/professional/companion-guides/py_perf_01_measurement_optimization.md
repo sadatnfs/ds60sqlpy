@@ -100,6 +100,15 @@ where work occurs, not exact seconds.
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Work from the repository root. First run the answer-free learner
 module named in this guide's original walkthrough. Read each TODO as a
 contract: record the input, returned value, raised exception, and side
@@ -326,7 +335,7 @@ Measure cold import/first call separately from steady state. Repeat with garbage
 
 Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve 'first second occurrence' semantics and report time/peak memory across unique-heavy and duplicate-early inputs.
 
-**Progressive hint:** An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.
+**Progressive hint:** An algorithm with lower expected time can retain \(O(n)\) state. Alternative semantics or external sorting must be stated honestly.
 
 **Verify:** trade algorithm speed for memory — compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget; preserve 'first second occurrence' semantics and report time/peak memory across unique-heavy and duplicate-early inputs.
 

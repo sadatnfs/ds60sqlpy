@@ -12,17 +12,17 @@ The denominator counts possible next-token events, so including BOS would incorr
 
 Each row has its own denominator. BOS has three observations, we has two, like has three and tea has two. Adding alpha once per vocabulary target adds seven to each row denominator. Using the grand corpus count would fail normalization and no longer estimate the stated conditional distribution.
 
-**Expected:** [0.3,1/3,0.3,1/3].
+**Expected:** \([0.3,\frac{1}{3},0.3,\frac{1}{3}]\).
 
 ## Exercise 3: Implement log scoring
 
 The log representation avoids multiplying many tiny values. The inverse geometric average probability is computed per prediction event. A correct numeric answer needs the boundary convention as well as the formula; reporting only a perplexity without its token unit makes comparisons ambiguous.
 
-**Expected:** Joint probability .01, four events and perplexity sqrt(10).
+**Expected:** Joint probability .01, four events and perplexity \(\sqrt{10}\).
 
 ## Exercise 4: Prove normalization
 
-The additive numerator sums to the observed row total plus alpha*V, exactly matching the denominator. This invariant catches vocabulary and denominator errors. It also verifies the declared unseen-context behavior rather than relying on one plausible sentence score.
+The additive numerator sums to the observed row total plus \(\alpha\cdot V\), exactly matching the denominator. This invariant catches vocabulary and denominator errors. It also verifies the declared unseen-context behavior rather than relying on one plausible sentence score.
 
 **Expected:** Each row sums to one within numerical tolerance.
 

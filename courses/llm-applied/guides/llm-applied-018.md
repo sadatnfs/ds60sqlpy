@@ -86,9 +86,9 @@ Create one base model, copy its state_dict into two new instances, and snapshot 
 
 ## Trace the two candidate models from one base
 
-The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for 64+32=96 trainable entries. The trainable ratio is 96/10464=1/109, about 0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
+The full candidate starts with 10464 trainable parameters from the decoder ledger. The adapter candidate retains those base values frozen and adds A[32, 2] and B[2, 16] to the output projection, for \(64+32=96\) trainable entries. The trainable ratio is \(\frac{96}{10464}=\frac{1}{109}\), about 0.917%. Total stored parameter entries are larger in the unmerged adapter object because the frozen base and the additional factors both remain present.
 
-The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B, T, 32]. In this fixture alpha=r=2, so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
+The output-head function is base_output(H)+(HAB)*(alpha/r), with hidden states H shaped[B, T, 32]. In this fixture \(\alpha=r=2\), so the scale is one. B starts at zero and therefore preserves initial logits regardless of the random nonzero A. Comparing logits verifies function preservation, while exact parameter comparisons verify that the copied base states agree. The two checks answer different questions.
 
 Only the final vocabulary mapping is adapted. Token embeddings, position embeddings, attention and feed-forward transformations remain fixed in that candidate. The full model can change all of them. This constrains which representation failures the adapter can repair. A low training loss from the output head may be sufficient for the tiny task, while a task requiring different hidden-state distinctions could need another target module or a different method.
 
@@ -165,7 +165,7 @@ assert all(torch.equal(a,b) for a,b in zip(full.parameters(),adapted.parameters(
 
 ### Example B: Install an output-head adapter
 
-ZeroB preserves the original function. The trainable count follows 32*2+2*16, which is specific to this output-head placement.
+ZeroB preserves the original function. The trainable count follows \(32\cdot 2+2\cdot 16\), which is specific to this output-head placement.
 
 ```python
 for p in adapted.parameters(): p.requires_grad_(False)

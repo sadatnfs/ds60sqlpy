@@ -30,14 +30,14 @@ The bootstrap draws two family indices with replacement. There are four equally 
 
 | Resampled families | Mean difference | Probability |
 | --- | --- | --- |
-| F, F | -1 | 1/4 |
-| F, G | 0 | 1/4 |
-| G, F | 0 | 1/4 |
-| G, G | +1 | 1/4 |
+| F, F | -1 | \(\frac{1}{4}\) |
+| F, G | 0 | \(\frac{1}{4}\) |
+| G, F | 0 | \(\frac{1}{4}\) |
+| G, G | +1 | \(\frac{1}{4}\) |
 
-The exact bootstrap mean is zero and variance is1/2. Its standard deviation is sqrt(1/2), about0.7071. The2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.
+The exact bootstrap mean is zero and variance is1/2. Its standard deviation is \(\sqrt{\frac{1}{2}}\), about0.7071. The2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.
 
-Pairing preserves the relationship between candidate errors. The variance identity Var(A-B)=Var(A)+Var(B)-2Cov(A, B) explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.
+Pairing preserves the relationship between candidate errors. The variance identity \(\operatorname{Var}(A-B)=\operatorname{Var}(A)+\operatorname{Var}(B)-2\operatorname{Cov}(A,B)\) explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.
 
 Selective answering introduces more denominators. With ten questions, six answers and five correct answers, coverage is6/10=0.6 and accuracy among answers is5/6. Correct answers per all requests is5/10. A system that answers only the easiest one correctly has conditional accuracy one but coverage0.1. It may or may not be useful under the task's costs. Always retain how many refusals were appropriate and how many answerable cases were declined.
 
@@ -53,7 +53,7 @@ The saved errors here are teaching data. Their bootstrap computation is real ari
 
 ## Exercise 1: Align paired errors
 
-The question is: Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.
+The question is: Use systemA errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) andB \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
 
 Pairing by IDs prevents dictionary order from changing which observations are subtracted. A negative difference favorsA because the metric is error.
 

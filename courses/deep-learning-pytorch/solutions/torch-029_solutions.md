@@ -22,9 +22,9 @@ Use F.cross_entropy on raw logits and torch.logsumexp for a stable log normalize
 
 ## Separate the mathematical distribution from its representation
 
-For logits z=[1000, 999], the first-class probability is exp(1000)/(exp(1000)+exp(999)). Dividing numerator and denominator by exp(1000) gives 1/(1+exp(-1)), approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing exp(1000) overflows the types used in the counterexample.
+For logits z=[1000, 999], the first-class probability is \(\frac{\exp(1000)}{\exp(1000)+\exp(999)}\). Dividing numerator and denominator by \(\exp(1000)\) gives \(\frac{1}{1+\exp(-1)}\), approximately 0.731059. The other probability is approximately 0.268941. The mathematical ratio is well defined even though directly materializing \(\exp(1000)\) overflows the types used in the counterexample.
 
-More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing m=max(z) makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is log(1+exp(-1)), approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
+More generally, subtracting the same finite m from every logit preserves softmax in exact arithmetic. Choosing \(m=\max(z)\) makes every shifted exponent at most one and at least one exactly one. For the target 0 loss, the shifted form is \(\log(1+\exp(-1))\), approximately 0.313262. The gradient is p-one_hot(target), or approximately[-0.268941, 0.268941]. Its entries sum to zero because a common logit shift does not change the objective. This gives an independent forward and backward contract.
 
 Stability is more specific than a function name. logsumexp avoids raw exponential overflow, but computing a large logsumexp value and then subtracting a nearly equal large target logit can still lose precision. A fused logits loss or log_softmax formulation can preserve the small relative difference more directly. Similarly, computing a tiny probability and then taking its log can underflow where a direct log-probability calculation remains finite. Inspect intermediate representation rather than assuming algebraic equivalence implies equal floating-point error.
 
@@ -32,10 +32,10 @@ Range and precision are different properties:
 
 | Type | Approximate maximum finite magnitude | Relative spacing near one |
 | --- | --- | --- |
-| float16 | 65, 504 | 2^-10 |
-| bfloat 16 | 3.39×10^38 | 2^-7 |
-| float32 | 3.40×10^38 | 2^-23 |
-| float64 | 1.80×10^308 | 2^-52 |
+| float16 | 65, 504 | \({2}^{-10}\) |
+| bfloat 16 | \(3.39\cdot {10}^{38}\) | \({2}^{-7}\) |
+| float32 | \(3.4\cdot {10}^{38}\) | \({2}^{-23}\) |
+| float64 | \(1.8\cdot {10}^{308}\) | \({2}^{-52}\) |
 
 bfloat 16 has a much wider exponent range than float16 but fewer fraction bits. A value can avoid overflow while still be represented coarsely. Epsilon near one is not a universal absolute tolerance for all magnitudes or all algorithms. Summation length, conditioning, cancellation and the operations actually performed matter. [PyTorch 2.9 numerical accuracy](https://docs.pytorch.org/docs/2.9/notes/numerical_accuracy.html).
 
@@ -75,9 +75,9 @@ stable=F.cross_entropy(logits[None,:],torch.tensor([0]))
 np.testing.assert_allclose(stable.item(),np.log1p(np.exp(-1)),atol=1e-6,rtol=0)
 ```
 
-**Expected:** loss log(1+exp(-1)) within 1e-6.
+**Expected:** loss \(\log(1+\exp(-1))\) within 1e-6.
 
-**Verify:** Compare the computed values or written argument with loss log(1+exp(-1)) within 1e-6.
+**Verify:** Compare the computed values or written argument with loss \(\log(1+\exp(-1))\) within 1e-6.
 
 ## Exercise 3: Check shift invariance
 

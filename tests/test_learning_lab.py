@@ -158,7 +158,7 @@ def test_lab_requires_origin_token_and_does_not_execute_from_portal(tmp_path: Pa
     try:
         with urlopen(server.url + "learn", timeout=3) as response:
             html = response.read().decode()
-        assert "Coding pad" in html and server.token in html
+        assert "/assets/classroom.js" in html and server.token in html
         payload = {
             "action": "run",
             "lesson_id": "python-01",

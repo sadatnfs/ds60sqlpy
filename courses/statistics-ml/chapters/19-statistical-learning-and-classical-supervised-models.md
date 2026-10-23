@@ -8,15 +8,15 @@ Supervised learning maps observed features to an unknown outcome using examples 
 
 ### Trees and random forests from first principles
 
-A regression tree chooses a feature and threshold that reduce within-leaf squared error. Each leaf predicts its training outcome mean. A classification tree similarly reduces an impurity such as Gini, 1-sum_k p_k^2, or entropy. Trees handle nonlinearities and interactions without requiring a linear predictor, but greedy early splits can change dramatically after small data perturbations. Depth and minimum leaf size control local complexity.
+A regression tree chooses a feature and threshold that reduce within-leaf squared error. Each leaf predicts its training outcome mean. A classification tree similarly reduces an impurity such as Gini, \(1-\sum_k p_k^2\), or entropy. Trees handle nonlinearities and interactions without requiring a linear predictor, but greedy early splits can change dramatically after small data perturbations. Depth and minimum leaf size control local complexity.
 
-Bagging averages trees fitted to bootstrap samples. If B tree errors have variance sigma^2 and common correlation rho, their average has variance sigma^2*[rho+(1-rho)/B]. More trees reduce the uncorrelated part, but the correlated part remains. Random forests additionally sample candidate features at splits to reduce correlation, possibly weakening individual trees. Tune leaf size, feature sampling and depth using appropriate validation; adding trees mainly stabilizes the ensemble. Out-of-bag evaluation reuses bootstrap exclusion, but does not repair temporal or group leakage.
+Bagging averages trees fitted to bootstrap samples. If B tree errors have variance \({\sigma}^{2}\) and common correlation rho, their average has variance \(\sigma^2\left[\rho+\frac{1-\rho}{B}\right]\). More trees reduce the uncorrelated part, but the correlated part remains. Random forests additionally sample candidate features at splits to reduce correlation, possibly weakening individual trees. Tune leaf size, feature sampling and depth using appropriate validation; adding trees mainly stabilizes the ensemble. Out-of-bag evaluation reuses bootstrap exclusion, but does not repair temporal or group leakage.
 
 ### Gradient boosting and XGBoost
 
-Boosting constructs F_m(x)=F_(m-1)(x)+eta*h_m(x), where h_m approximates the negative gradient of the loss with respect to current predictions. For half squared error, that gradient is the residual y-F. Small learning rates and limited tree complexity spread improvement across stages. For classification, updates occur on a score such as log odds, not by simply adding probabilities. Early stopping must monitor data separate from final evaluation.
+Boosting constructs \(F_m(x)=F_{m-1}(x)+\eta h_m(x)\), where h_m approximates the negative gradient of the loss with respect to current predictions. For half squared error, that gradient is the residual y-F. Small learning rates and limited tree complexity spread improvement across stages. For classification, updates occur on a score such as log odds, not by simply adding probabilities. Early stopping must monitor data separate from final evaluation.
 
-XGBoost is a particular regularized tree-boosting system. Its second-order local objective uses first derivatives g_i and second derivatives h_i. A leaf with summed derivatives G,H and L2 penalty lambda has optimal weight -G/(H+lambda). A candidate split compares the regularized scores of its children with the parent and subtracts a leaf-complexity cost. This explains why tiny low-information leaves are penalized. Missing-value routing, sampling, histogram approximations and implementation choices affect behavior. The book demonstrates this objective with NumPy; the optional `xgboost` package is not required or imported.
+XGBoost is a particular regularized tree-boosting system. Its second-order local objective uses first derivatives g_i and second derivatives h_i. A leaf with summed derivatives G,H and L2 penalty lambda has optimal weight \(\frac{-G}{H+\lambda}\). A candidate split compares the regularized scores of its children with the parent and subtracts a leaf-complexity cost. This explains why tiny low-information leaves are penalized. Missing-value routing, sampling, histogram approximations and implementation choices affect behavior. The book demonstrates this objective with NumPy; the optional `xgboost` package is not required or imported.
 
 ### Choose a model through failure modes
 
@@ -210,7 +210,7 @@ Adjust learning across source and target distributions under a stated shift assu
 
 ### Case study: derive the bias-variance tradeoff at one input
 
-Fix a deployment input x and write its future outcome as Y=f(x)+epsilon, with mean-zero noise independent of the training sample. Different possible training samples produce different fitted predictions f_hat(x). Expanding E[(Y-f_hat(x))^2] gives Var(epsilon)+[E(f_hat(x))-f(x)]^2+Var(f_hat(x)). The cross terms vanish under these assumptions. The decomposition concerns repeated training samples and squared loss at a fixed input, not three numbers that can be read directly from one train-test split.
+Fix a deployment input x and write its future outcome as \(Y=f(x)+\epsilon\), with mean-zero noise independent of the training sample. Different possible training samples produce different fitted predictions f_hat(x). Expanding \(\mathbb{E}[(Y-\widehat{f}(x))^2]\) gives \(\operatorname{Var}(\epsilon)+\bigl[\mathbb{E}[\widehat{f}(x)]-f(x)\bigr]^2+\operatorname{Var}(\widehat{f}(x))\). The cross terms vanish under these assumptions. The decomposition concerns repeated training samples and squared loss at a fixed input, not three numbers that can be read directly from one train-test split.
 
 A shallow tree can have high approximation bias if the response changes smoothly in several dimensions. A deep tree can track local detail but vary substantially when a few training rows change. Bagging primarily addresses that instability. Regularization or a simpler model can reduce variability even while increasing bias. If the labels are systematically wrong, however, the apparent irreducible error term is conditional on that measurement process and should not be treated as a law of nature.
 
@@ -228,11 +228,11 @@ Impurity-based importance accumulates training split improvements and can favor 
 
 ### Case study: one boosting split and its regularization cost
 
-For half squared error, g_i=prediction_i-y_i and h_i=1. Suppose a parent leaf contains residual gradients summing to zero, while a candidate split creates children with G_L=-6,H_L=3 and G_R=6,H_R=3. With lambda=1, optimal child weights are +1.5 and -1.5. The parent weight is zero. The second-order improvement before a split penalty is one-half times [36/4+36/4-0/7], or nine.
+For half squared error, \(g_i=\widehat{y}_i-y_i\) and \(h_{i}=1\). Suppose a parent leaf contains residual gradients summing to zero, while a candidate split creates children with G_L=-6,H_L=3 and G_R=6,H_R=3. With \(\lambda=1\), optimal child weights are +1.5 and -1.5. The parent weight is zero. The second-order improvement before a split penalty is one-half times \([\frac{36}{4}+\frac{36}{4}-\frac{0}{7}]\), or nine.
 
 If the leaf-complexity penalty gamma exceeds nine, the split is not worthwhile under this local objective. If gamma is smaller, the split may be accepted, then the learning rate further shrinks its contribution to the ensemble. This makes the regularization parameters concrete: lambda shrinks leaf magnitudes and gamma discourages additional leaves. They are not substitutes for independent validation or a correct loss.
 
-For logistic loss, h_i=p_i*(1-p_i), so confident predictions can have small curvature. Newton-style updates must be controlled when curvature is tiny or labels are unusual. Real implementations include further constraints and numerical safeguards. The compact formula teaches the optimization mechanism without claiming that a few NumPy lines reproduce XGBoost's full training system.
+For logistic loss, \(h_i=p_i(1-p_i)\), so confident predictions can have small curvature. Newton-style updates must be controlled when curvature is tiny or labels are unusual. Real implementations include further constraints and numerical safeguards. The compact formula teaches the optimization mechanism without claiming that a few NumPy lines reproduce XGBoost's full training system.
 
 ### Case study: choose between linear, tree and kernel baselines
 
@@ -258,7 +258,7 @@ Six points form two constant outcome regions. A depth-one tree chooses threshold
 
 ### Averaging cannot remove shared error
 
-The forest correctly predicts the two obvious regions of a tiny deterministic step function. Separately, the variance formula with rho=.3 and sigma-squared four decreases from 1.48 at ten members to 1.228 at 100, approaching a floor of 1.2. Feature randomization seeks to lower that correlation floor.
+The forest correctly predicts the two obvious regions of a tiny deterministic step function. Separately, the variance formula with \(\rho=0.3\) and sigma-squared four decreases from 1.48 at ten members to 1.228 at 100, approaching a floor of 1.2. Feature randomization seeks to lower that correlation floor.
 
 ### Boost residuals, not labels repeatedly
 

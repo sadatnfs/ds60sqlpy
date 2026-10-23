@@ -12,13 +12,13 @@ The class-zero documents contain three thanks events and no urgent events. Class
 
 Smoothing assigns a nonzero urgent probability to class zero despite no observed urgent events there. The denominator is class token total plus alpha times vocabulary size. Using the number of documents instead would not normalize the multinomial token distribution.
 
-**Expected:** Likelihoods [[1/5,4/5],[4/6,2/6]], each summing to one.
+**Expected:** Likelihoods \([[\frac{1}{5},\frac{4}{5}],[\frac{4}{6},\frac{2}{6}]]\), each summing to one.
 
 ## Exercise 3: Compute stable posteriors
 
-The two unnormalized weights are 0.1 and one-third. Their sum is 13/30, giving the stated fractions. Logsumexp computes the same normalization without underflow. Matching one argmax alone would miss a wrong probability scale, so compare the full vector.
+The two unnormalized weights are 0.1 and one-third. Their sum is \(\frac{13}{30}\), giving the stated fractions. Logsumexp computes the same normalization without underflow. Matching one argmax alone would miss a wrong probability scale, so compare the full vector.
 
-**Expected:** Posterior [3/13,10/13] for classes[0,1].
+**Expected:** Posterior \([\frac{3}{13},\frac{10}{13}]\) for classes[0,1].
 
 ## Exercise 4: Verify library parity
 

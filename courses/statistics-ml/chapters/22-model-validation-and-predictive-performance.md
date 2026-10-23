@@ -10,7 +10,7 @@ Validation estimates how a complete learning procedure will behave under a speci
 
 ROC AUC measures the probability that a randomly chosen positive receives a higher score than a randomly chosen negative, with a convention for ties. It does not measure calibration. Log loss and Brier score evaluate probabilities, while threshold metrics evaluate a particular action rule. Precision depends on prevalence: if sensitivity and false-positive rate stay fixed but positives become rarer, positive predictions become less reliable.
 
-For false-positive cost C_FP and false-negative cost C_FN, a calibrated probability p leads to action when C_FP*(1-p)<C_FN*p, or p>C_FP/(C_FP+C_FN). Capacity constraints can instead create a top-k policy. Tune that policy on development data, freeze it, then assess final utility and harms on held-out evidence.
+For false-positive cost C_FP and false-negative cost C_FN, a calibrated probability p leads to action when \(C_{\mathrm{FP}}\cdot (1-p)<C_{\mathrm{FN}}\cdot p\), or \(p>\frac{C_{\mathrm{FP}}}{C_{\mathrm{FP}}+C_{\mathrm{FN}}}\). Capacity constraints can instead create a top-k policy. Tune that policy on development data, freeze it, then assess final utility and harms on held-out evidence.
 
 ### Estimate uncertainty about a comparison
 
@@ -138,13 +138,13 @@ Average squared differences between probabilities and binary outcomes. The Brier
 
 **Precision and recall**
 
-Precision is TP/(TP+FP); recall is TP/(TP+FN). Precision depends on prevalence and both depend on threshold. Undefined denominators need an explicit reporting policy rather than silently favorable defaults.
+Precision is \(\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FP}}\); recall is \(\frac{\mathrm{TP}}{\mathrm{TP}+\mathrm{FN}}\). Precision depends on prevalence and both depend on threshold. Undefined denominators need an explicit reporting policy rather than silently favorable defaults.
 
 ### stat-22-21
 
 **Specificity and sensitivity**
 
-Sensitivity is recall among positives; specificity is TN/(TN+FP) among negatives. These condition on true class, unlike precision. Their usefulness still depends on representative labels and subgroup behavior.
+Sensitivity is recall among positives; specificity is \(\frac{\mathrm{TN}}{\mathrm{TN}+\mathrm{FP}}\) among negatives. These condition on true class, unlike precision. Their usefulness still depends on representative labels and subgroup behavior.
 
 ### stat-22-22
 
@@ -206,7 +206,7 @@ Quantify sample variability through appropriate intervals or resampling, plus sc
 
 ### Case study: rare events expose the limits of accuracy and ROC
 
-A detector operates on 100,000 requests with 1% true incidents. At sensitivity .9 it catches 900 of 1,000 incidents. At false-positive rate .01 it also flags 990 of 99,000 nonincidents. Precision is 900/(900+990), about .476. The false-positive rate sounds small, yet more than half the alerts are false because the negative population is large.
+A detector operates on 100,000 requests with 1% true incidents. At sensitivity .9 it catches 900 of 1,000 incidents. At false-positive rate .01 it also flags 990 of 99,000 nonincidents. Precision is \(\frac{900}{900+990}\), about .476. The false-positive rate sounds small, yet more than half the alerts are false because the negative population is large.
 
 If prevalence falls to .1% while sensitivity and false-positive rate remain unchanged, the system catches 90 of 100 incidents and generates 999 false alerts. Precision falls to about .083. Ranking and class-conditional rates may be unchanged, but the operational workload and meaning of an alert change substantially. Calibration and threshold policy should be reassessed for the new prevalence rather than inferred from the original ROC curve.
 

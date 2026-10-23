@@ -10,7 +10,7 @@ Spatial statistics starts with the fact that nearby or connected observations ma
 
 A spatial weights matrix W records which observations influence or are compared with which others. Entries can represent shared borders, distance bands or nearest neighbors. Row normalization changes the scale and interpretation of spatial lags. Islands with no neighbors, asymmetric nearest-neighbor links and distance units need explicit handling. A result obtained under one W is conditional on that definition rather than a universal property of the map.
 
-For centered values z_i=y_i-ybar, global Moran I is n/S0 times (z_transpose*W*z)/(z_transpose*z), where S0 is the sum of all weights. Neighboring similar deviations increase the numerator. Its reference distribution depends on the null and weights; under common randomization assumptions the expectation is -1/(n-1), not automatically zero. Local statistics ask a different multiple-comparison question.
+For centered values \(z_i=y_i-\bar{y}\), global Moran I is \(\frac{n}{S_{0}}\) times \(\frac{z^{\mathsf T}Wz}{z^{\mathsf T}z}\), where S0 is the sum of all weights. Neighboring similar deviations increase the numerator. Its reference distribution depends on the null and weights; under common randomization assumptions the expectation is \(\frac{-1}{n-1}\), not automatically zero. Local statistics ask a different multiple-comparison question.
 
 ### Distinguish interpolation from causal explanation
 
@@ -78,19 +78,19 @@ Conditional autoregressive models specify each area's distribution conditional o
 
 **Simultaneous autoregressive models**
 
-Simultaneous autoregressive models define a joint relation involving a spatial weight matrix, with dependence induced through an inverse such as (I-rho*W)^(-1). Parameter restrictions ensure the system is well defined. Different placements of the spatial term yield different interpretations. The same numerical rho means little without the normalization and spectrum of W.
+Simultaneous autoregressive models define a joint relation involving a spatial weight matrix, with dependence induced through an inverse such as \((I-\rho W)^{-1}\). Parameter restrictions ensure the system is well defined. Different placements of the spatial term yield different interpretations. The same numerical rho means little without the normalization and spectrum of W.
 
 ### stat-30-10
 
 **Spatial lag models**
 
-A spatial lag model includes neighboring outcomes through y=rho*W*y+X*beta+epsilon. Because y appears on both sides, ordinary least squares generally does not estimate the model correctly. A covariate change can propagate through the spatial multiplier, so beta alone is not the total marginal effect. Distinguish direct, indirect and total impacts under the specified model.
+A spatial lag model includes neighboring outcomes through \(y=\rho Wy+X\beta+\epsilon\). Because y appears on both sides, ordinary least squares generally does not estimate the model correctly. A covariate change can propagate through the spatial multiplier, so beta alone is not the total marginal effect. Distinguish direct, indirect and total impacts under the specified model.
 
 ### stat-30-11
 
 **Spatial error models**
 
-A spatial error model places dependence in unobserved disturbances, such as epsilon=lambda*W*epsilon+u. It addresses residual covariance rather than explicitly modeling outcome spillovers. Similar-looking fit improvements can therefore imply different substantive stories. Choosing spatial error over spatial lag should involve mechanism and diagnostics, not only whichever coefficient is significant.
+A spatial error model places dependence in unobserved disturbances, such as \(\epsilon=\lambda W\epsilon+u\). It addresses residual covariance rather than explicitly modeling outcome spillovers. Similar-looking fit improvements can therefore imply different substantive stories. Choosing spatial error over spatial lag should involve mechanism and diagnostics, not only whichever coefficient is significant.
 
 ### stat-30-12
 
@@ -108,7 +108,7 @@ Spatial point processes model random event locations and sometimes marks such as
 
 **Log-Gaussian Cox processes**
 
-A log-Gaussian Cox process lets point-process intensity equal exp(Z(s)) for a latent Gaussian field Z. This creates flexible positive intensity and clustering through latent spatial variation. Fitting must separate covariate-driven exposure from unexplained field structure and account for observation windows. Fine grids or numerical approximations can be expensive and influence inferred small-scale patterns.
+A log-Gaussian Cox process lets point-process intensity equal \(e^{Z(s)}\) for a latent Gaussian field Z. This creates flexible positive intensity and clustering through latent spatial variation. Fitting must separate covariate-driven exposure from unexplained field structure and account for observation windows. Fine grids or numerical approximations can be expensive and influence inferred small-scale patterns.
 
 ### stat-30-15
 
@@ -156,7 +156,7 @@ python courses/statistics-ml/examples/chapter_30.py
 
 ### See the neighborhood enter the statistic
 
-Four values [1,1,3,3] lie on a chain with adjacent undirected links. Centering gives [-1,-1,1,1]. The weighted cross-product is two, total squared deviation four, and the weight sum six, giving Moran I=(4/6)*(2/4)=1/3. Changing the links changes the statistic even though the observations remain identical.
+Four values [1,1,3,3] lie on a chain with adjacent undirected links. Centering gives [-1,-1,1,1]. The weighted cross-product is two, total squared deviation four, and the weight sum six, giving Moran \(I=\frac46\times\frac24=\frac13\). Changing the links changes the statistic even though the observations remain identical.
 
 ### Solve a tiny ordinary-kriging system
 

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "javascript-typescript",
   "title": "JavaScript and TypeScript: language, browser and Node applications",
-  "summary": "42 sequenced lessons with explanations, worked examples, six inspectable exercises and separate reference solutions. Content becomes runnable only when its complete authored set is registered.",
+  "summary": "42 lessons in JavaScript and TypeScript, from first expressions to asynchronous programs, browser behavior, types and testing. Use worked examples, independent practice and separate reference solutions.",
   "lessons": [
     {
       "id": "js-001",

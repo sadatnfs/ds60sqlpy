@@ -1,5 +1,13 @@
 # Applied LLMs: subject assistants, retrieval and adaptation
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Applied LLMs: subject assistants, retrieval and adaptation** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 Build a subject assistant by specifying its task, sources, computation and evaluation before choosing a model update. This24-lesson route complements the [language-model mechanisms course](../llm-theory/README.md), the [NLP foundations route](../nlp/README.md) and the [statistics book](../statistics-ml/README.md). It covers data-science extraction and analysis, grounded retrieval, actual tiny-model fine-tuning, low-rank adapters and a bounded assistant capstone.
 
 The [authored manifest](lessons.json) is the source of truth for available lesson artifacts. The [route plan](track.json) preserves stable IDs and prerequisites. There are currently24 authored lesson bundles. Authored content and runtime acceptance are separate: consult the [execution checkpoint](../../docs/implementation/llm-applied-status.md) for the exact references that have run.

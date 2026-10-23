@@ -12,7 +12,7 @@ The shift ensures each prediction conditions only on previous target tokens. EOS
 
 The score matrix has one target row and two source columns. Stable softmax normalizes over source positions. Multiplying by values produces the stated two-dimensional output. This exact fixture detects wrong-axis normalization and confusing key/value roles.
 
-**Expected:** Weights sum to one; output[10p,20(1-p)] with p=sigmoid(1/sqrt2).
+**Expected:** Weights sum to one; output[10p,20(1-p)] with \(p=\operatorname{sigmoid}\!\left(\frac1{\sqrt2}\right)\).
 
 ## Exercise 3: Mask source padding
 

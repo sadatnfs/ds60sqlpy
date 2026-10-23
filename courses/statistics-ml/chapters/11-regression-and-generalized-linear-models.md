@@ -8,13 +8,13 @@ Regression specifies how an outcome distribution changes with predictors. A line
 
 ### Derive ordinary least squares
 
-Let r=y-X beta and minimize r-transpose r. Differentiating gives gradient -2 X-transpose r. Setting it to zero yields the normal equations X-transpose X beta=X-transpose y. With full column rank the solution is unique, but QR or SVD is preferable to explicitly inverting the normal matrix. Under E[epsilon|X]=0, coefficients describe a correctly specified conditional mean. Homoskedasticity is needed for the simplest covariance formula, not for calculating the minimizing coefficients. Normal errors are useful for exact small-sample t inference, not a requirement that predictors or outcomes be normally distributed.
+Let \(r=y-X\) beta and minimize r-transpose r. Differentiating gives gradient -2 X-transpose r. Setting it to zero yields the normal equations \(X^{\mathsf T}X\) beta=\(X^{\mathsf T}y\). With full column rank the solution is unique, but QR or SVD is preferable to explicitly inverting the normal matrix. Under E[epsilon|X]=0, coefficients describe a correctly specified conditional mean. Homoskedasticity is needed for the simplest covariance formula, not for calculating the minimizing coefficients. Normal errors are useful for exact small-sample t inference, not a requirement that predictors or outcomes be normally distributed.
 
 A coefficient measures a conditional contrast holding the other encoded columns fixed. With y=beta0+beta1*x+beta2*z+beta3*x*z, the x slope is beta1+beta3*z. Reporting beta1 as a universal effect ignores the interaction. Prediction outside the observed design region adds extrapolation assumptions that the normal equations cannot check.
 
 ### Derive logistic regression
 
-For binary y, set p=sigmoid(eta)=1/(1+exp(-eta)). The negative log likelihood is sum(log(1+exp(eta))-y*eta); `logaddexp` computes this stably. Its gradient is X-transpose(p-y) and Hessian X-transpose W X with W_i=p_i(1-p_i). A coefficient beta_j multiplies conditional odds by exp(beta_j) per unit, not probabilities. If an intercept-only model has p=.2, adding log(2) to its linear predictor changes p to one-third, not .4. Complete separation can make unpenalized coefficients diverge even while classification looks perfect.
+For binary y, set \(p=\sigma(\eta)=\frac{1}{1+\exp(-\eta)}\). The negative log likelihood is \(\operatorname{sum}(\log(1+\exp(\eta))-y\cdot \eta)\); `logaddexp` computes this stably. Its gradient is X-transpose(p-y) and Hessian X-transpose W X with W_i=p_i(1-p_i). A coefficient beta_j multiplies conditional odds by \(\exp(\beta_{j})\) per unit, not probabilities. If an intercept-only model has \(p=0.2\), adding \(\log(2)\) to its linear predictor changes p to one-third, not .4. Complete separation can make unpenalized coefficients diverge even while classification looks perfect.
 
 ### Select a family and a loss
 
@@ -104,7 +104,7 @@ Model ordered categories, often through cumulative probabilities and proportiona
 
 **Poisson regression**
 
-Set log(mu)=X beta+log(exposure) for event counts. Exponentiated coefficients are rate ratios given predictors. Positive exposure is required; unexplained overdispersion affects uncertainty and predictive tails.
+Set \(\log\mu=X\beta+\log(\mathrm{exposure})\) for event counts. Exponentiated coefficients are rate ratios given predictors. Positive exposure is required; unexplained overdispersion affects uncertainty and predictive tails.
 
 ### stat-11-15
 
@@ -220,25 +220,25 @@ Allow location, scale and shape parameters to depend on predictors, extending be
 
 ### Case study: fitting a line is only the first step
 
-Consider three observations with predictor x=(0,1,2) and outcome y=(1,2,4). The design matrix has an intercept column and x. Its cross-product is [[3,3],[3,5]], and X-transpose y is (7,10). Solving the normal equations gives intercept 5/6 and slope 3/2. Predictions are 5/6, 7/3 and 23/6; residuals are 1/6, -1/3 and 1/6. Their sum is zero and their predictor-weighted sum is zero, exactly the two normal equations.
+Consider three observations with predictor \(x=(0,1,2)\) and outcome \(y=(1,2,4)\). The design matrix has an intercept column and x. Its cross-product is [[3,3],[3,5]], and \(X^{\mathsf T}y\) is (7,10). Solving the normal equations gives intercept \(\frac{5}{6}\) and slope \(\frac{3}{2}\). Predictions are \(\frac{5}{6}\), \(\frac{7}{3}\) and \(\frac{23}{6}\); residuals are \(\frac{1}{6}\), \(\frac{-1}{3}\) and \(\frac{1}{6}\). Their sum is zero and their predictor-weighted sum is zero, exactly the two normal equations.
 
-The residual sum of squares is 1/6. With three observations and two fitted coefficients, only one residual degree of freedom remains. Under independent normal errors with common variance, s-squared=SSE/(n-p)=1/6. The slope variance estimate is s-squared divided by sum((x-mean(x))^2), or 1/12, so its standard error is about .289. The two-sided 95% t critical value with one degree of freedom is about 12.706. The resulting slope interval is extremely wide despite the convincing upward pattern. Three points determine a visually strong trend without providing much information about noise.
+The residual sum of squares is \(\frac{1}{6}\). With three observations and two fitted coefficients, only one residual degree of freedom remains. Under independent normal errors with common variance, \(s^2=\frac{\mathrm{SSE}}{n-p}=\frac16\). The slope variance estimate is s-squared divided by \(\sum_i(x_i-\bar{x})^2\), or \(\frac{1}{12}\), so its standard error is about .289. The two-sided 95% t critical value with one degree of freedom is about 12.706. The resulting slope interval is extremely wide despite the convincing upward pattern. Three points determine a visually strong trend without providing much information about noise.
 
 This calculation separates geometry from inference. The coefficient solution is valid as a least-squares calculation with no normality assumption. The reported interval depends on the normal, independent, equal-variance error model. If the three observations are repeated readings from one device, treating them as independent may be inappropriate. If x was chosen because it showed the strongest pattern among 100 candidates, the ordinary interval ignores selection. If x is caused by an unmeasured common cause of y, its coefficient is not an intervention effect.
 
-Now predict at x=3. The fitted conditional mean is 16/3. Its leverage relative to the training design is 1/3+(3-1)^2/2=7/3, larger than for central observations. Uncertainty in the fitted mean grows because this point extrapolates beyond the observed range. A new outcome additionally includes residual variance. Reporting only the coefficient line, without the range of supporting x values or an appropriate predictive interval, conceals this distinction.
+Now predict at \(x=3\). The fitted conditional mean is \(\frac{16}{3}\). Its leverage relative to the training design is \(\frac13+\frac{(3-1)^2}{2}=\frac73\), larger than for central observations. Uncertainty in the fitted mean grows because this point extrapolates beyond the observed range. A new outcome additionally includes residual variance. Reporting only the coefficient line, without the range of supporting x values or an appropriate predictive interval, conceals this distinction.
 
 ### Case study: an interaction changes what a coefficient means
 
-Suppose y=10+2*x+3*z+4*x*z, where z indicates a customer segment. When z=0, the x slope is two. When z=1, the slope is six. The segment difference at x is 3+4*x. A statement that segment membership adds three units is true only at x=0. If zero lies far outside the observed x range, that intercept contrast may have little practical meaning.
+Suppose \(y=10+2x+3z+4xz\), where z indicates a customer segment. When \(z=0\), the x slope is two. When \(z=1\), the slope is six. The segment difference at x is \(3+4\cdot x\). A statement that segment membership adds three units is true only at \(x=0\). If zero lies far outside the observed x range, that intercept contrast may have little practical meaning.
 
-Center x at a meaningful baseline c by writing x=x_centered+c. The interaction coefficient remains four, but the segment main coefficient becomes 3+4*c. Predictions do not change. This shows why a coefficient's numerical value can change under harmless recoding while the model's substantive prediction remains identical. Interpret contrasts at explicit feature settings, not isolated coefficients detached from the design matrix.
+Center x at a meaningful baseline c by writing \(x=x_{\mathrm{centered}}+c\). The interaction coefficient remains four, but the segment main coefficient becomes \(3+4\cdot c\). Predictions do not change. This shows why a coefficient's numerical value can change under harmless recoding while the model's substantive prediction remains identical. Interpret contrasts at explicit feature settings, not isolated coefficients detached from the design matrix.
 
 For continuous interactions, marginal effects should be reported over meaningful combinations with uncertainty. A regression can fit a strong interaction in regions with no overlap between segments, effectively extrapolating one segment's relationship. Inspect the joint support before presenting a precise conditional contrast. Restricted cubic splines and GAM interactions face the same support issue even though their basis functions are more flexible.
 
 ### Case study: logistic odds, probabilities and separation
 
-A binary model with intercept log(.2/.8) predicts baseline probability .2. A coefficient log(2) doubles odds from .25 to .5, producing probability .5/(1+.5)=1/3. At baseline probability .8, the same coefficient doubles odds from four to eight and produces probability 8/9. The absolute changes are about .133 and .089. Thus one constant log-odds coefficient creates different probability changes across the predictor space.
+A binary model with intercept \(\log(\frac{0.2}{0.8})\) predicts baseline probability .2. A coefficient \(\log(2)\) doubles odds from .25 to .5, producing probability \(\frac{0.5}{1+0.5}=\frac13\). At baseline probability .8, the same coefficient doubles odds from four to eight and produces probability \(\frac{8}{9}\). The absolute changes are about .133 and .089. Thus one constant log-odds coefficient creates different probability changes across the predictor space.
 
 The logistic likelihood assumes each binary contribution is appropriate for the observation design. Ten repeated labels for the same customer are not automatically ten independent trials. A binomial aggregate should carry both successes and trial count, and overdispersion can indicate within-group dependence or heterogeneous probabilities. A robust covariance adjustment may help uncertainty but will not repair biased labels or a missing time effect.
 
@@ -250,7 +250,7 @@ Class weighting changes the training objective. If positive observations are art
 
 Suppose a team staffs for tomorrow's workload. Squared-error regression targets the conditional mean, which is useful for expected total resource accounting. Absolute-error regression targets the conditional median, balancing overprediction and underprediction equally in absolute units. If understaffing costs four times as much as overstaffing, pinball loss targets quantile four-fifths rather than the mean or median. The asymmetry follows from the decision's marginal costs, not a preference for a more advanced model.
 
-A Poisson count model requires a count-generating interpretation and an exposure denominator. If observations represent intervals of different length, the offset log(exposure) enters with coefficient fixed at one. Estimating that coefficient freely asks whether the rate changes with exposure and is a different model. A negative-binomial extension allows additional count variability; a hurdle model separates zero occurrence from positive intensity. Gamma regression models positive continuous values rather than counts, while a compound Poisson-gamma Tweedie model can accommodate exact zeros and positive continuous totals.
+A Poisson count model requires a count-generating interpretation and an exposure denominator. If observations represent intervals of different length, the offset \(\log(\mathrm{exposure})\) enters with coefficient fixed at one. Estimating that coefficient freely asks whether the rate changes with exposure and is a different model. A negative-binomial extension allows additional count variability; a hurdle model separates zero occurrence from positive intensity. Gamma regression models positive continuous values rather than counts, while a compound Poisson-gamma Tweedie model can accommodate exact zeros and positive continuous totals.
 
 Select among these families through support, plausible mean-variance behavior, residual diagnostics and held-out distributional checks. Compare zero rates, upper quantiles, interval coverage and decisions, not only an in-sample information criterion. A family with slightly worse average log score may still be inadequate if it dramatically underestimates the operationally important tail. Conversely, a complicated two-part model may be unjustified if a simpler mean model with robust inference answers the actual question.
 
@@ -280,11 +280,11 @@ The example explicitly computes stable negative log likelihood and its gradient.
 
 ### Counts require an exposure denominator
 
-An intercept-only Poisson rate model with offsets yields total count divided by total exposure: 20/10=2. It predicts means 2,4,6,8 for exposures 1,2,3,4. Without the offset, differences in observation time would be confused with rate differences.
+An intercept-only Poisson rate model with offsets yields total count divided by total exposure: \(\frac{20}{10}=2\). It predicts means 2,4,6,8 for exposures 1,2,3,4. Without the offset, differences in observation time would be confused with rate differences.
 
 ### See shrinkage algebra numerically
 
-For centered one-feature data, ridge gives beta=sum(x*y)/(sum(x^2)+lambda). Here numerator is 30, squared-feature sum is 10 and lambda is 10, so the slope halves from 3 to 1.5. This is intentional bias, and whether it improves future prediction requires validation.
+For centered one-feature data, ridge gives \(\beta=\frac{\sum_i x_i y_i}{\sum_i x_i^2+\lambda}\). Here numerator is 30, squared-feature sum is 10 and lambda is 10, so the slope halves from 3 to 1.5. This is intentional bias, and whether it improves future prediction requires validation.
 
 ### Complete executable example
 
@@ -343,7 +343,7 @@ if __name__ == "__main__":
 
 **Interview: What are the assumptions of linear regression?** Separate calculation, interpretation and inference. OLS always minimizes its objective when solved correctly. An unbiased coefficient interpretation needs a suitable conditional mean and exogeneity. Classical standard errors add variance and dependence assumptions; exact t inference adds normal-error assumptions. Causality requires identification beyond these algebraic conditions.
 
-**Interview: How do you interpret a logistic coefficient of log(2)?** It doubles conditional odds per encoded unit, holding the remaining design fixed. The probability change depends on baseline probability and interactions. It is not a doubling of risk and is not inherently causal.
+**Interview: How do you interpret a logistic coefficient of \(\log(2)\)?** It doubles conditional odds per encoded unit, holding the remaining design fixed. The probability change depends on baseline probability and interactions. It is not a doubling of risk and is not inherently causal.
 
 **Interview: Why might lasso select one of two equally useful features?** Correlated columns offer similar loss reduction, and the L1 geometry can choose sparse alternatives. The selected identity can change with small perturbations. Elastic net or stability analysis may better represent the shared predictive signal.
 

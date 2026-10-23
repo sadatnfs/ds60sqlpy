@@ -56,22 +56,22 @@ Align by stable ID before calculating losses. The fixture's dictionary insertion
 | b | 1 | 2 | 2 | 1 | 1 | 0 |
 | c | 2 | 2 | 3 | 0 | 1 | -1 |
 
-The mean contrast is-2/3 in squared-target units. Its sign favors A for this loss and these three cases. It does not mean A wins on every possible metric, group or deployment condition. Equal key sets are required before indexing; silently dropping missing predictions can select an easier assessment subset.
+The mean contrast is \(\frac{-2}{3}\) in squared-target units. Its sign favors A for this loss and these three cases. It does not mean A wins on every possible metric, group or deployment condition. Equal key sets are required before indexing; silently dropping missing predictions can select an easier assessment subset.
 
-Pairing preserves shared case difficulty. In general, Var(lossA-lossB)=Var(lossA)+Var(lossB)-2Cov(lossA, lossB). Independently resampling the two models discards that covariance and answers a different question. The particular fixture has B losses all equal to one, so its covariance term is zero; it is not by itself a strong counterexample for every unpaired bootstrap mistake.
+Pairing preserves shared case difficulty. In general, \(\operatorname{Var}(\ell_A-\ell_B)=\operatorname{Var}(\ell_A)+\operatorname{Var}(\ell_B)-2\operatorname{Cov}(\ell_A,\ell_B)\). Independently resampling the two models discards that covariance and answers a different question. The particular fixture has B losses all equal to one, so its covariance term is zero; it is not by itself a strong counterexample for every unpaired bootstrap mistake.
 
 A separate analytic example makes the dependence visible. Suppose two cases have losses A=[1, 11] and B=[0, 10]. Every paired difference is one, so every paired resampled mean is one. Independent resampling can pair the easy A loss with the hard B loss or vice versa and create variation that was absent from the paired contrast. This explains the method without claiming that the original three-case code exercised that different fixture.
 
-For the actual differences[-1, 0, -1], an empirical draw has probability 2/3 of-1 and 1/3 of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, 2/3) law and the estimate is-K/3:
+For the actual differences[-1, 0, -1], an empirical draw has probability \(\frac{2}{3}\) of-1 and \(\frac{1}{3}\) of zero. Each bootstrap estimate averages three independent draws from that empirical distribution. Let K count the selected-1 values; then K has a Binomial(3, \(\frac{2}{3}\)) law and the estimate is-K/3:
 
 | Resampled mean | Exact empirical probability |
 | --- | --- |
-| -1 | 8/27 |
-| -2/3 | 12/27 |
-| -1/3 | 6/27 |
-| 0 | 1/27 |
+| -1 | \(\frac{8}{27}\) |
+| \(\frac{-2}{3}\) | \(\frac{12}{27}\) |
+| \(\frac{-1}{3}\) | \(\frac{6}{27}\) |
+| 0 | \(\frac{1}{27}\) |
 
-The expected bootstrap mean is-2/3 and its variance is 2/27 under this empirical resampling model. These are properties of resampling the three observed values, not a proof that the unknown population has this four-point distribution. The thousand generated estimates approximate these probabilities with random frequency variation. The reference checks shape, finiteness and the exact allowed range, not a guaranteed count for each value.
+The expected bootstrap mean is \(\frac{-2}{3}\) and its variance is \(\frac{2}{27}\) under this empirical resampling model. These are properties of resampling the three observed values, not a proof that the unknown population has this four-point distribution. The thousand generated estimates approximate these probabilities with random frequency variation. The reference checks shape, finiteness and the exact allowed range, not a guaranteed count for each value.
 
 More draws refine the numerical approximation to that empirical distribution. They do not turn three cases into a thousand independent assessment observations. Even the ideal empirical percentile interval can be uninformative here: the lower tail includes-1 and the upper tail reaches zero. The code does not calculate or certify a particular confidence interval, and any interval method would still need its sampling assumptions and quantile convention stated.
 
@@ -110,7 +110,7 @@ The sign follows the declared A-minus-Blossorder. A negative value favors A only
 np.testing.assert_allclose(difference.mean().item(),-2/3,atol=1e-12,rtol=0)
 ```
 
-**Expected:** mean-2/3, favoring A on this loss fixture.
+**Expected:** mean \(\frac{-2}{3}\), favoring A on this loss fixture.
 
 ### Example C: Resample pairs reproducibly
 
@@ -134,8 +134,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 1, including paired squared-loss differences-1, 0, -1.
 
 2. **Interpret the average contrast.** Average the three paired differences.
-   **Expected:** mean-2/3, favoring A on this loss fixture.
-   **Verify:** Save the assertion results for exercise 2, including mean-2/3, favoring A on this loss fixture.
+   **Expected:** mean \(\frac{-2}{3}\), favoring A on this loss fixture.
+   **Verify:** Save the assertion results for exercise 2, including mean \(\frac{-2}{3}\), favoring A on this loss fixture.
 
 3. **Resample pairs reproducibly.** Draw 1000 three-index bootstrap samples with local Generator seed 7.
    **Expected:** 1000finite estimates within-1..0.

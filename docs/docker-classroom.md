@@ -1,5 +1,12 @@
 # Docker-only classroom
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 The primary workflow is one command from the course folder:
 
 ```sh
@@ -85,8 +92,8 @@ docker compose -f compose.classroom.yaml --profile python-core up -d --no-build 
 docker compose -f compose.classroom.yaml --profile "*" ps
 ```
 
-Wait for readiness, then open [the module classroom](http://127.0.0.1:8765/journeys)
-yourself. [The original Python/SQL lab](http://127.0.0.1:8765/learn) is also
+Wait for readiness, then open [the module classroom](http://127.0.0.1:8765/classroom)
+yourself. [The original Python/SQL lab](http://127.0.0.1:8765/classroom) is also
 available. No website account is needed. The initializer prepares private worker
 credentials and writable learner storage inside Docker volumes.
 
@@ -229,7 +236,7 @@ DS60_LAB_PORT=8766
 DS60_POSTGRES_PORT=55433
 ```
 
-Then repeat the same `up` command and open <http://127.0.0.1:8766/journeys>.
+Then repeat the same `up` command and open <http://127.0.0.1:8766/classroom>.
 These numbers are examples; choose other unused ports if necessary. The
 PostgreSQL container publishes both the database and classroom ports because
 they share a network namespace. An older course database can therefore hold
@@ -273,7 +280,7 @@ docker compose -f compose.classroom.yaml pull postgres
 docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node up -d --no-build --pull never --wait
 ```
 
-Open <http://localhost:8765/journeys>. Compose itself cannot open a host browser;
+Open <http://localhost:8765/classroom>. Compose itself cannot open a host browser;
 the optional double-click launchers do so for their default Python classroom.
 You can add the `--profile python-core` flag to both commands above to run
 statistics and LLM examples alongside the language tracks. The `--wait` flag

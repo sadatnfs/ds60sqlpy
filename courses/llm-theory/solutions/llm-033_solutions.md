@@ -42,9 +42,9 @@ margin=.5*(2-0); loss=np.logaddexp(0,-margin)
 np.testing.assert_allclose(loss,np.log1p(np.exp(-1)),atol=1e-12,rtol=0)
 ```
 
-**Expected:** margin1;losslog(1+exp(-1)).
+**Expected:** margin1;loss \(\log(1+e^{-1})\).
 
-**Verify:** Compare the computed values or written argument with margin1;losslog(1+exp(-1)).
+**Verify:** Compare the computed values or written argument with margin1;loss \(\log(1+e^{-1})\).
 
 ## Exercise 3: Reverse the labels
 
@@ -65,7 +65,7 @@ assert reversed_margin==-1 and reversed_loss>loss
 
 The question is: Evaluate margins1000 and-1000 withlogaddexp.
 
-A naive log(sigmoid()) calculation may underflow at extreme margins. The stable form computes the same objective without an unnecessary probability round trip.
+A naive `log(sigmoid())` calculation may underflow at extreme margins. The stable form computes the same objective without an unnecessary probability round trip.
 
 ```python
 values=np.logaddexp(0,-np.array([1000.,-1000.]))

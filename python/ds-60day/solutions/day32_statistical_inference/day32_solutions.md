@@ -142,7 +142,7 @@ unless you can explain why that output follows from the inputs.
 
 **Prompt:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
 
-**Reasoning before implementation:** Standard error shrinks approximately with 1/sqrt(n); the underlying standardized effect does not grow merely because more rows were collected.
+**Reasoning before implementation:** Standard error shrinks approximately with \(\frac1{\sqrt n}\); the underlying standardized effect does not grow merely because more rows were collected.
 
 Larger samples generally narrow the interval and increase power because the
 sampling distribution of the mean becomes tighter. The population difference
@@ -158,7 +158,7 @@ inflate the apparent sample size.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about sqrt(10), power rises, and the population effect size remains fixed.
+**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
 
 ### Exercise 5 — Implementation
 
@@ -225,4 +225,4 @@ than quietly folded into the confirmatory analysis.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability 1 - 0.95^20 (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
+**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.

@@ -8,7 +8,7 @@ Simulation approximates consequences of a model by generating artificial observa
 
 ### An average is an estimator with its own error
 
-To estimate mu=E[f(X)], draw X_1,...,X_n from the target distribution and average f(X_i). With independent draws and finite variance sigma_f^2, the Monte Carlo standard error is approximately sample_sd/sqrt(n). Halving this numerical error generally needs four times as many independent draws. More simulation can reduce Monte Carlo error while leaving a badly chosen input distribution or model structure unchanged.
+To estimate \(\mu=\mathbb{E}[f(X)]\), draw X_1,...,X_n from the target distribution and average f(X_i). With independent draws and finite variance \({\sigma_{f}}^{2}\), the Monte Carlo standard error is approximately \(\frac{s_f}{\sqrt{n}}\). Halving this numerical error generally needs four times as many independent draws. More simulation can reduce Monte Carlo error while leaving a badly chosen input distribution or model structure unchanged.
 
 A fixed seed makes a demonstration repeatable, but it is not a statistical guarantee. Keep independent streams or a deliberate common-random-number design when comparing alternatives. If a simulation uses autocorrelated MCMC output, the independent-draw standard error is inappropriate and must account for dependence. Rare events can produce zero observed occurrences in a small run without having zero probability.
 
@@ -16,7 +16,7 @@ A fixed seed makes a demonstration repeatable, but it is not a statistical guara
 
 Variance reduction uses mathematical structure to obtain a more precise estimator per unit of work. A control variate subtracts a centered quantity with known expectation. Importance sampling changes the sampling distribution and restores the target through likelihood ratios. Antithetic sampling pairs negatively related draws. Each method needs its own validity and support conditions; a lower observed variance is not enough if the estimator became biased for an unintended target.
 
-For a control variate g with known mean m_g, estimate E[f] by the mean of f(X)-beta*(g(X)-m_g). The expectation remains E[f] for fixed beta. The variance-minimizing coefficient is Cov(f,g)/Var(g), when these quantities exist. Estimating beta from the same finite sample introduces details worth handling deliberately in formal uncertainty analysis. The example uses the analytically known coefficient for a simple uniform distribution.
+For a control variate g with known mean m_g, estimate E[f] by the mean of f(X)-beta*(g(X)-m_g). The expectation remains E[f] for fixed beta. The variance-minimizing coefficient is \(\frac{\operatorname{Cov}(f,g)}{\operatorname{Var}(g)}\), when these quantities exist. Estimating beta from the same finite sample introduces details worth handling deliberately in formal uncertainty analysis. The example uses the analytically known coefficient for a simple uniform distribution.
 
 ### Simulate the decision process, not only a histogram
 
@@ -158,7 +158,7 @@ python courses/statistics-ml/examples/chapter_37.py
 
 ### Reduce numerical error without changing the integral
 
-For U uniform on [0,1], E[U^2]=1/3 and E[U]=1/2. Subtracting U-1/2 with coefficient one preserves the target and strongly reduces variance because U and U^2 are correlated. A fixed seed makes the demonstration reproducible, while the printed standard errors describe independent Monte Carlo variation. Pairing U with 1-U gives exactly one-half for their average in the separate linear antithetic example.
+For U uniform on [0,1], E[\({U}^{2}\)]=1/3 and E[U]=1/2. Subtracting \(U-\frac{1}{2}\) with coefficient one preserves the target and strongly reduces variance because U and \({U}^{2}\) are correlated. A fixed seed makes the demonstration reproducible, while the printed standard errors describe independent Monte Carlo variation. Pairing U with 1-U gives exactly one-half for their average in the separate linear antithetic example.
 
 ### Check a queue through conservation
 

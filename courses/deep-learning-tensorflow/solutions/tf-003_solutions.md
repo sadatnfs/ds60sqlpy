@@ -17,7 +17,7 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace the product
 
-The original feature matrix has two observations and three input features. W has three feature rows and one output column, so the contracted feature dimension is valid. The first output is 1-3+2=0 and the second is 0+2=2. Preserve the (2,1) result shape because this helper represents an explicit output axis. A rank-one residual helper may choose a different layout later, but that conversion must be deliberate.
+The original feature matrix has two observations and three input features. W has three feature rows and one output column, so the contracted feature dimension is valid. The first output is \(1-3+2=0\) and the second is \(0+2=2\). Preserve the (2,1) result shape because this helper represents an explicit output axis. A rank-one residual helper may choose a different layout later, but that conversion must be deliberate.
 
 **Expected:** Result [[0],[2]] with shape (2,1).
 
@@ -25,7 +25,7 @@ The original feature matrix has two observations and three input features. W has
 
 ## Exercise 2: Add an observation
 
-A batch row changes the number of observations, not the feature width or the parameter count. Appending [3,0,0] adds prediction 3*1 + 0*0 + 0*(-1) + 2 = 5. The original rows remain 0 and 2. Comparing that unchanged prefix is useful evidence that a batching operation did not accidentally normalize across records or change a parameter. It does not imply an arbitrary future training pipeline has the same invariant.
+A batch row changes the number of observations, not the feature width or the parameter count. Appending [3,0,0] adds prediction \(3\cdot 1\) + \(0\cdot 0\) + \(0\cdot (-1)\) + 2 = 5. The original rows remain 0 and 2. Comparing that unchanged prefix is useful evidence that a batching operation did not accidentally normalize across records or change a parameter. It does not imply an arbitrary future training pipeline has the same invariant.
 
 **Expected:** The result is [[0],[2],[5]] with shape (3,1).
 
@@ -49,7 +49,7 @@ For one output, a scalar bias and a length-one output vector both add 2 to each 
 
 ## Exercise 5: Extend to two outputs
 
-The two-output weight maps each input row to two sums. First output weights [1,0,-1] with bias 2 reproduce [0,2]. Second output weights [0,1,1] with bias -1 give 2+3-1=4 for the first record and 1-1=0 for the second. Assemble these as [[0,4],[2,0]]. Looking only at the (2,2) shape could miss an incorrect column order, sign or bias, so inspect values as well.
+The two-output weight maps each input row to two sums. First output weights [1,0,-1] with bias 2 reproduce [0,2]. Second output weights [0,1,1] with bias -1 give \(2+3-1=4\) for the first record and \(1-1=0\) for the second. Assemble these as [[0,4],[2,0]]. Looking only at the (2,2) shape could miss an incorrect column order, sign or bias, so inspect values as well.
 
 **Expected:** The result is [[0,4],[2,0]] with shape (2,2).
 
@@ -59,7 +59,7 @@ The two-output weight maps each input row to two sums. First output weights [1,0
 
 The centimeter inputs are 100 times the meter values. To preserve the same weighted contribution when inputs are divided by 100, multiply the corresponding weight by 100: 0.02 becomes 2. The shared bias remains 1. Both models therefore produce 3 and 5. Retaining weight 0.02 on the meter inputs would yield 1.02 and 1.04, a valid-shaped but different computation. Feature-unit metadata must travel with model preprocessing and inference contracts.
 
-**Expected:** The centimeter model and meter model with W=[[2]] both predict [[3],[5]].
+**Expected:** The centimeter model and meter model with \(W=[[2]]\) both predict [[3],[5]].
 
 **Verify:** Assert both predictions agree and explain why changing X alone while retaining 0.02 would alter the model.
 

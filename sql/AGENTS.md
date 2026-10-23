@@ -52,10 +52,11 @@ Do not present MySQL, SQL Server, or Oracle syntax as runnable PostgreSQL. Porta
 - Keep the lesson script, companion guide, Markdown solution, executable solution when present, catalog-builder inputs, and generated catalog entry aligned.
 - Use Markdown solutions for explanation and `.sql` solutions for executable coverage.
 - Assume the learner has never used a database client. Every companion guide
-  must lead with `## How to run this lesson`, name the disposable
-  `advanced_sql_training` database, explain the private reader's
-  **Create/open guided SQL notebook** action, and include a repository-root
-  `psql -X -v ON_ERROR_STOP=1` fallback.
+  must lead with `## How to run this lesson`, identify the unified `/classroom`
+  workflow and its capability notice, and name the disposable
+  `advanced_sql_training` database. Preserve the separately labeled optional
+  private-reader **Create/open guided SQL notebook** action and repository-root
+  `psql -X -v ON_ERROR_STOP=1` fallback for prepared native environments.
 - Explain every new clause and the query's logical row-shaping sequence. Worked
   examples must state the starting row grain, expected columns/rows, NULL and
   ordering assumptions, and what evidence proves the query behaved correctly.

@@ -1,5 +1,13 @@
 # PostgreSQL professional modules
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **PostgreSQL** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 These named modules extend the numbered PostgreSQL track without renumbering
 Days 1–60. They teach database responsibilities that are normally encountered
 in application and production work: owning a relational model, evolving it

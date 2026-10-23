@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Stacking affine layers without an intervening nonlinearity still produces an affine function. XOR asks for opposite labels at the diagonally opposite corners of a square, a pattern one affine threshold cannot separate. Two rectified differences create the needed representation: h1=max(x1-x2,0), h2=max(x2-x1,0). Their sum is one exactly when the inputs differ. This hand-built network separates representational capacity from optimization. If the construction works but a fitted model does not, the architecture may be capable while the training procedure failed. Initialization changes the starting state and symmetry of fitting; it cannot repair an architecture that lacks the required function.
+Stacking affine layers without an intervening nonlinearity still produces an affine function. XOR asks for opposite labels at the diagonally opposite corners of a square, a pattern one affine threshold cannot separate. Two rectified differences create the needed representation: \(h_{1}=\max(x_{1}-x_{2},0)\), \(h_{2}=\max(x_{2}-x_{1},0)\). Their sum is one exactly when the inputs differ. This hand-built network separates representational capacity from optimization. If the construction works but a fitted model does not, the architecture may be capable while the training procedure failed. Initialization changes the starting state and symmetry of fitting; it cannot repair an architecture that lacks the required function.
 
 **Nonlinearity:** A transformation that cannot be represented by a single affine map.
 
@@ -58,9 +58,9 @@ a=tf.constant([[1.,2.],[3.,4.]]); b=tf.constant([[2.],[-1.]])
 np.testing.assert_allclose(((x@a)@b).numpy(),(x@(a@b)).numpy(),atol=1e-6,rtol=0)
 ```
 
-**Expected:** two paths agree within1e-6.
+**Expected:** two paths agree within 1e-6.
 
-**Verify:** Compare the computed values or written argument with two paths agree within1e-6.
+**Verify:** Compare the computed values or written argument with two paths agree within 1e-6.
 
 ## Exercise 4: Inspect a dead region
 

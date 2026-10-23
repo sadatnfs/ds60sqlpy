@@ -61,7 +61,7 @@ PyTorch Linear stores [out_features,in_features] and applies the transposed weig
 | Second residual | [1,4,32] | transformed contextual representation |
 | Vocabulary logits | [1,4,16] | one score per vocabulary ID |
 
-Each head has width 32/2=16, so its dot products are divided by sqrt(16)=4. The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.
+Each head has width \(\frac{32}{2}=16\), so its dot products are divided by \(\sqrt{16}=4\). The Boolean triangle [4,4] broadcasts across batch and heads. Softmax reduces the final key axis, not the query axis or the vocabulary axis. The diagonal is allowed because the representation at input position t predicts the following token when training uses correctly shifted targets. The current input is therefore legal information under that objective.
 
 After attention, transpose restores [batch,time,head,head_width]. contiguous makes the requested layout explicit before reshape combines the last two axes into model width. A reshape with the correct number of elements can still scramble token/head membership if the transpose order is wrong. The exact shape ledger and prefix checks are complementary; neither substitutes for the other.
 

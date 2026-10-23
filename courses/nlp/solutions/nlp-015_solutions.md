@@ -24,7 +24,7 @@ This performs actual parameter updates and verifies the objective numerically. T
 
 The ignored sentinel is not a class ID. Filtering it first prevents invalid indexing and makes the loss denominator equal the number of supervised positions. A real tokenizer alignment record must explain why each piece is supervised or ignored.
 
-**Expected:** Loss log(1+exp(-2)); changing ignored logits does not alter it.
+**Expected:** Loss \(\log(1+\exp(-2))\); changing ignored logits does not alter it.
 
 ## Exercise 5: Reject missing supervision
 

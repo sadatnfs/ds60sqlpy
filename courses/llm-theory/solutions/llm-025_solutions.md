@@ -14,7 +14,7 @@ Memory estimates begin with tensor shapes and dtype sizes. An attention score ma
 
 ## Reading the implementation
 
-For batch B, heads H, sequence length T, head width d and s bytes per element, scores contain B*H*T*T elements. Full multi-head K/V storage contains 2*L*B*H*T*d*s bytes across L layers. Model width is D=H*d; using D in place of d would count the heads twice. Convert bytes to KiB by dividing by 1024, not 1000. Change one dimension at a time to expose scaling.
+For batch B, heads H, sequence length T, head width d and s bytes per element, scores contain \(B\cdot H\cdot T\cdot T\) elements. Full multi-head K/V storage contains \(2\cdot L\cdot B\cdot H\cdot T\cdot d\cdot s\) bytes across L layers. Model width is \(D=H\cdot d\); using D in place of d would count the heads twice. Convert bytes to KiB by dividing by 1024, not 1000. Change one dimension at a time to expose scaling.
 
 ## Exercise 1: Count attention scores
 

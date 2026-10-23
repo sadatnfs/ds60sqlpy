@@ -10,11 +10,11 @@ Advanced forecasting often improves the framing of the task more than the comple
 
 Let T be the forecast origin and h the horizon. Evaluate y_(T+h) against a forecast built exclusively from data available at T. Direct forecasting fits a separate model for each h; recursive forecasting iterates a one-step model; multihorizon models produce a vector jointly. These approaches share inputs but impose different parameter sharing and error propagation. Use rolling origins and preserve the same forecast availability rules for every candidate.
 
-The preferred forecast depends on the loss. Squared error targets a conditional mean, absolute error a median, and asymmetric pinball loss a quantile. For quantile q, residual u=y-yhat has loss q*u when u>=0 and (q-1)*u otherwise. Underforecasting is therefore more expensive at q=0.9. A point estimate called the best forecast is incomplete until the cost of over- and underprediction is specified.
+The preferred forecast depends on the loss. Squared error targets a conditional mean, absolute error a median, and asymmetric pinball loss a quantile. For quantile q, residual \(u=y-\widehat{y}\) has loss \(q\cdot u\) when \(u\ge 0\) and \((q-1)\cdot u\) otherwise. Underforecasting is therefore more expensive at \(q=0.9\). A point estimate called the best forecast is incomplete until the cost of over- and underprediction is specified.
 
 ### Coherence is a linear constraint
 
-Write all aggregate and bottom-level series as y=S*b, where b contains bottom-level values and S sums them into the reporting hierarchy. Independently fitted forecasts may not lie in the column space of S. Reconciliation projects them onto that coherent space, using a weighting matrix to express forecast-error uncertainty. Coherence ensures totals agree; it does not create accuracy, nonnegativity or calibrated intervals automatically.
+Write all aggregate and bottom-level series as \(y=Sb\), where b contains bottom-level values and S sums them into the reporting hierarchy. Independently fitted forecasts may not lie in the column space of S. Reconciliation projects them onto that coherent space, using a weighting matrix to express forecast-error uncertainty. Coherence ensures totals agree; it does not create accuracy, nonnegativity or calibrated intervals automatically.
 
 ### Evaluate distributions as well as points
 
@@ -50,7 +50,7 @@ Reconciliation changes base forecasts so they satisfy aggregation constraints. W
 
 **Minimum-trace reconciliation**
 
-Minimum-trace reconciliation uses the covariance W of base forecast errors to minimize total reconciled error variance under its assumptions. A common form is S*(S_transpose*W_inverse*S)^(-1)*S_transpose*W_inverse*yhat. Estimating W is difficult with many related series and short history, so shrinkage or structural approximations matter. A mathematically optimal projection using a poor covariance estimate can underperform a simpler method.
+Minimum-trace reconciliation uses the covariance W of base forecast errors to minimize total reconciled error variance under its assumptions. A common form is \(S(S^{\mathsf T}W^{-1}S)^{-1}S^{\mathsf T}W^{-1}\widehat{y}\). Estimating W is difficult with many related series and short history, so shrinkage or structural approximations matter. A mathematically optimal projection using a poor covariance estimate can underperform a simpler method.
 
 ### stat-27-05
 
@@ -188,7 +188,7 @@ MASE scales mean absolute forecast error by the training-sample error of a naive
 
 **Pinball loss**
 
-Pinball loss targets a specified conditional quantile. For residual u=y-qhat, loss is tau*u when u is nonnegative and (tau-1)*u otherwise. At tau=0.9, underprediction receives nine times the per-unit penalty of overprediction. Quantiles can cross if trained separately, and a low average loss can conceal subgroup miscalibration. Report the quantile level and relevant decision cost.
+Pinball loss targets a specified conditional quantile. For residual \(u=y-\widehat{q}\), loss is \(\tau\cdot u\) when u is nonnegative and \((\tau-1)\cdot u\) otherwise. At \(\tau=0.9\), underprediction receives nine times the per-unit penalty of overprediction. Quantiles can cross if trained separately, and a low average loss can conceal subgroup miscalibration. Report the quantile level and relevant decision cost.
 
 ### stat-27-28
 
@@ -218,7 +218,7 @@ python courses/statistics-ml/examples/chapter_27.py
 
 ### Reconcile an inconsistent total
 
-The base total is 100 while its children sum to 90. Under equal-error-variance Euclidean projection, the residual 10 is distributed along the constraint vector [1,-1,-1]: subtract 10/3 from the total and add 10/3 to each child. The coherent result is approximately [96.667,43.333,53.333]. Different error covariances would allocate the correction differently; coherence alone cannot say which forecast is more accurate.
+The base total is 100 while its children sum to 90. Under equal-error-variance Euclidean projection, the residual 10 is distributed along the constraint vector [1,-1,-1]: subtract \(\frac{10}{3}\) from the total and add \(\frac{10}{3}\) to each child. The coherent result is approximately [96.667,43.333,53.333]. Different error covariances would allocate the correction differently; coherence alone cannot say which forecast is more accurate.
 
 ### Translate error into a decision-specific loss
 

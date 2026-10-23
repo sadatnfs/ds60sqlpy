@@ -6,7 +6,44 @@ Book: **Statistics and Machine Learning for Data Scientists End To End**. Chapte
 
 A hypothesis test evaluates a procedure under a specified null model. It does not assign a probability to the null hypothesis and does not establish that an effect matters. The design determines which observations can be compared, which permutations are legal, and which error rate has meaning.
 
-For an independent two-group mean comparison, estimate delta=mean(A)-mean(B). Welch's standard error is sqrt(sA^2/nA+sB^2/nB), with an approximate degrees-of-freedom correction. For paired measurements, form each within-pair difference first and test its mean. Pairing removes stable person-level variability; pretending pairs are independent groups discards that information.
+For independent groups A and B, estimate the population mean difference using
+
+\[
+\widehat{\delta}=\bar{x}_A-\bar{x}_B,
+\qquad
+\operatorname{SE}(\widehat{\delta})
+=\sqrt{\frac{s_A^2}{n_A}+\frac{s_B^2}{n_B}}.
+\]
+
+Here \(\bar{x}_A\) and \(\bar{x}_B\) are sample means, \(s_A^2\) and
+\(s_B^2\) are sample variances calculated with the sample-size-minus-one
+denominator, and \(n_A,n_B>1\) are the group sizes. The two variance contributions
+add because the group estimates are independent. Test a specified null difference
+\(\delta_0\) with the Welch statistic
+
+\[
+t=\frac{\widehat{\delta}-\delta_0}
+{\operatorname{SE}(\widehat{\delta})},
+\qquad
+\nu\approx
+\frac{(s_A^2/n_A+s_B^2/n_B)^2}
+{\frac{(s_A^2/n_A)^2}{n_A-1}+\frac{(s_B^2/n_B)^2}{n_B-1}}.
+\]
+
+The Welch-Satterthwaite degrees of freedom \(\nu\) are generally nonintegral;
+the reference distribution accounts approximately for estimating two unequal
+variances. A zero standard error needs an explicit degeneracy policy rather
+than division by zero. These formulas do not repair dependent samples or a
+misidentified observational unit. [NIST two-sample test definition](https://www.itl.nist.gov/div898/handbook/eda/section3/eda353.htm).
+
+For paired measurements, first calculate a within-pair difference \(d_i\),
+then apply a one-sample test to those differences. Its standard error is
+\(s_d/\sqrt{n}\), where \(s_d\) is the sample standard deviation of the
+\(n\) independent pairs. Pairing removes stable person-level variability;
+pretending paired measurements are independent groups discards that information.
+In SciPy, the independent unequal-variance example deliberately uses
+`ttest_ind(..., equal_var=False)`; paired data use `ttest_rel` instead.
+[SciPy independent t-test contract](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.ttest_ind.html).
 
 Choose the null to match the decision. Superiority asks whether an effect differs from or exceeds zero. Equivalence asks whether it lies entirely inside a meaningful interval, commonly through two one-sided tests. Failure to reject zero is not evidence that two options are sufficiently similar.
 
@@ -22,7 +59,7 @@ Specify the parameter, null region, alternative direction and analysis populatio
 
 **P-values**
 
-A p-value is the null-model probability of a test statistic at least as extreme as observed. It is neither P(null given data) nor the probability that the result occurred by chance.
+A p-value is the null-model probability of a test statistic at least as extreme as observed. It is neither \(\Pr(H_0\mid\mathrm{data})\) nor the probability that the result occurred by chance.
 
 ### stat-09-03
 
@@ -312,7 +349,7 @@ if __name__ == "__main__":
 
 **Interview: Which test should compare before and after measurements?** First determine whether the same units were measured. Pairing permits analysis of differences; time trends, attrition and lack of a concurrent control still limit causal interpretation. A paired test alone does not identify the intervention effect.
 
-**Interview: What does p=.03 prove?** It reports a tail probability under the stated null and procedure. It does not quantify effect importance, probability of the null or protection against undisclosed selection. Inspect the estimate, interval, design and multiplicity.
+**Interview: What does \(p=0.03\) prove?** It reports a tail probability under the stated null and procedure. It does not quantify effect importance, probability of the null or protection against undisclosed selection. Inspect the estimate, interval, design and multiplicity.
 
 **Interview: Why is a nonsignificant result insufficient for equivalence?** An imprecise interval can include both zero and consequential harm. Equivalence requires enough precision to exclude all effects outside prespecified practical margins.
 

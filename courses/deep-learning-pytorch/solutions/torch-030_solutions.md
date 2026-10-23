@@ -22,15 +22,15 @@ Use reduction='sum' for each microbatch, call backward without stepping, then di
 
 ## Derive the global gradient and the reduction factor
 
-Let rank or shard r contain n_r participating examples, local gradient sum S_r and local mean g_r=S_r/n_r when n_r>0. The global example-mean gradient is(sum_r S_r)/(sum_r n_r), equivalently(sum_r n_r g_r)/N. For means 2 and 6 with counts 1 and 3, the numerator is 2+18=20 and N=4, giving five. Averaging the two means gives four and defines a different objective with equal shard weight.
+Let rank or shard r contain n_r participating examples, local gradient sum S_r and local mean \(g_{r}=\frac{S_{r}}{n_{r}}\) when \(n_{r}>0\). The global example-mean gradient is \(\frac{\sum_r S_r}{\sum_r n_r}\), equivalently \(\frac{\sum_r n_rg_r}{N}\). For means 2 and 6 with counts 1 and 3, the numerator is \(2+18=20\) and \(N=4\), giving five. Averaging the two means gives four and defines a different objective with equal shard weight.
 
-The vector[2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to 20/4=5. An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has N=0 and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
+The vector[2, 4, 6, 8] is an independent four-example oracle. Splitting it 1:3 gives sums 2 and 18, which recombine to \(\frac{20}{4}=5\). An empty shard contributes sum zero and count zero; its local mean need not be evaluated at all. A globally empty collection has \(N=0\) and must not be divided by zero or described as a valid zero-gradient batch without an explicit skip policy.
 
-For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and w=0. The per-example derivatives are -4x^2, or[-4, -16, -36, -64]. Their sum is-120 and global mean-30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives w=0.3.
+For the actual squared-loss fixture, x=[1, 2, 3, 4], y=2x and \(w=0\). The per-example derivatives are \(-4x^2\), or[-4, -16, -36, -64]. Their sum is-120 and global mean-30. The two backward calls in Example C accumulate the summed objectives at the same unchanged w, then divide once by four. One SGD update at 0.01 gives \(w=0.3\).
 
 Stepping after each microbatch changes both normalization and evaluation state. The first one-row mean has gradient-4, so w becomes 0.04. The second three-row mean is then evaluated at that new value and has derivative(58/3)(0.04-2), approximately-37.893333. Its second update ends at approximately 0.418933, not 0.3. This discrepancy is expected because it is a different optimization trajectory, not an accumulation bug to hide with a tolerance.
 
-A distributed reducer introduces another factor. Under a fixed R-rank configuration that averages gradients across ranks, backpropagating a local summed loss divided by global N would produce only 1/R of the intended global gradient after averaging. One appropriate local scaling for this stated convention is L_r=(R/N)×sum_i loss_ri. The reducer then returns(1/R)sum_r(R S_r/N)=sum_r S_r/N. Equivalently, weight each nonempty local mean by R n_r/N. When all n_r are equal, the ordinary mean of local means already has the intended weighting.
+A distributed reducer introduces another factor. Under a fixed R-rank configuration that averages gradients across ranks, backpropagating a local summed loss divided by global N would produce only \(\frac{1}{R}\) of the intended global gradient after averaging. One appropriate local scaling for this stated convention is \(L_r=\frac{R}{N}\sum_i\ell_{ri}\). The reducer then returns \(\frac1R\sum_r\frac{RS_r}{N}=\frac{\sum_rS_r}{N}\). Equivalently, weight each nonempty local mean by R \(\frac{n_{r}}{N}\). When all n_r are equal, the ordinary mean of local means already has the intended weighting.
 
 That derivation assumes the documented reducer behavior and a fixed participation set. Custom communication hooks, uneven-input mechanisms and changed divisors require a fresh derivation. PyTorch DDP documents that its gradient synchronization semantics depend on the loss reduction and participating processes. [PyTorch 2.9 DistributedDataParallel](https://docs.pytorch.org/docs/2.9/generated/torch.nn.parallel.DistributedDataParallel.html). The current lesson launches no process group and therefore verifies none of that communication behavior experimentally.
 
@@ -74,7 +74,7 @@ assert sum(part.sum() for part in parts).div(sum(part.numel() for part in parts)
 
 ## Exercise 3: Accumulate one full-batch gradient
 
-The question is: At w=0, usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.
+The question is: At \(w=0\), usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.
 
 The weight remains fixed across both backward calls. Accumulation is intentional here, and its denominator is applied exactly once.
 

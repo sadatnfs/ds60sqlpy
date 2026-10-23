@@ -1,31 +1,28 @@
 # macOS setup
 
-The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code. Commands below use a POSIX shell and run from the repository root.
+The primary course experience is the unified Docker classroom. Every subject,
+including Python and SQL, opens from the same `/classroom` page. You only need
+a local Docker-compatible engine, Linux containers, and the documented Compose
+version. The language runtimes live inside the images.
 
-New to terminals or notebooks? Keep [Your first successful session](first-success.md)
-beside this guide. Complete Python setup first; PostgreSQL can wait until you
-start the SQL track. Use Terminal from Applications → Utilities. Type commands
-without the surrounding Markdown fences and wait for each to finish.
 
-## Browser lab with Docker
+From the extracted course folder or checkout, run:
 
-For the browser coding application, follow the complete
-[Docker beginner walkthrough](../docker-beginners.md). Choose the engine's
-Apple Silicon or Intel installer for your Mac, start the engine, extract the
-course folder, then double-click `START_DOCKER_LAB.command`. The Terminal
-alternative, from the folder containing `compose.yaml`, is:
-
-```bash
-bash scripts/docker_lab.sh start
+```sh
+./classroom
 ```
 
-No host Python, native PostgreSQL, or VS Code installation is required for
-this route. The launcher builds when needed, waits for the app, and opens
-`http://127.0.0.1:8765/learn`. Saved pads, evidence, and progress live in the
-host `.learning` folder. A fresh Docker database uses the limited course
-login `admin` / password `admin`.
+The command builds locally, starts the services, checks readiness and opens the
+actual browser address. Follow the [one-command walkthrough](../one-command-classroom.md)
+for first-time engine installation, WSL integration, stopping, backups and
+recovery. Saved work in the standard classroom uses persistent named Docker
+volumes. Use `./classroom status` to rediscover its address.
 
-Continue below when you want native Python, Jupyter, or PostgreSQL too.
+## Optional native environment
+
+The remainder of this page is for learners who also want host Python, Jupyter,
+VS Code or PostgreSQL. These installations are not classroom prerequisites.
+Keep a native environment's `.learning` files separate from Docker-volume state.
 
 ## 1. Install base tools
 

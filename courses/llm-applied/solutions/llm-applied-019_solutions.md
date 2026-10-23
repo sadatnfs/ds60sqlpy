@@ -22,9 +22,9 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 ## Derive the DPO-style scalar update
 
-Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is z=beta*(d-r), and the loss is log(1+exp(-z)), implemented through softplus for numerical stability. Its derivative with respect to d is-beta*sigmoid(-z). The second derivative is beta²*sigmoid(z)*sigmoid(-z), nonnegative, so this scalar loss is convex in d for a fixed reference.
+Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At d=r=0 and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log2, about0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to0-0.2*(-0.25)=0.05. The new adjusted margin is0.025 and the loss is about0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
@@ -42,7 +42,7 @@ Feedback quality remains decisive. If annotators prefer a confident but unsuppor
 
 **Does a lower preference loss establish factuality?** It establishes better agreement with the supplied preference objective on the measured pairs. Factual support depends on the rubric, evidence and independent evaluation.
 
-**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is beta/2; changing it changes the update even before considering a full model's dynamics.
+**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is \(\frac{\beta}{2}\); changing it changes the update even before considering a full model's dynamics.
 
 ## Exercise 1: Calculate the equal-margin loss
 

@@ -26,7 +26,7 @@ The sampling distribution is the distribution of an estimator under repeated sam
 
 **Standard errors**
 
-A standard error estimates the standard deviation of an estimator's sampling distribution. For independent observations, the mean's SE is sample SD divided by sqrt(n). Dependence changes that calculation.
+A standard error estimates the standard deviation of an estimator's sampling distribution. For independent observations, the mean's SE is sample SD divided by \(\sqrt{n}\). Dependence changes that calculation.
 
 ### stat-08-04
 
@@ -190,7 +190,7 @@ Multiply residuals by random mean-zero weights while preserving the design. Wild
 
 ### Case study: confidence coverage is a property of a procedure
 
-Imagine repeatedly drawing n independent normal observations from a population with mean mu and known SD sigma. For each sample, form mean(X) plus or minus 1.96*sigma/sqrt(n). Across repetitions, approximately 95% of these intervals contain the fixed mu. Each realized interval either contains mu or does not; the frequency statement refers to the procedure under its assumptions.
+Imagine repeatedly drawing n independent normal observations from a population with mean mu and known SD sigma. For each sample, form \(\bar{X}\pm\frac{1.96\sigma}{\sqrt{n}}\). Across repetitions, approximately 95% of these intervals contain the fixed mu. Each realized interval either contains mu or does not; the frequency statement refers to the procedure under its assumptions.
 
 A simulation with a known generating mean can check whether the implemented procedure has the expected repeated-sampling behavior. It does not prove coverage for a different distribution, dependence structure or selection process. If the analyst repeatedly inspects intervals and stops when one excludes zero, the reported interval belongs to a different procedure and ordinary fixed-sample coverage need not hold.
 
@@ -198,11 +198,11 @@ A Bayesian credible interval can assign posterior probability to a parameter reg
 
 ### Case study: derive the delta method for a rate ratio
 
-Let estimates A and B have a joint approximate normal distribution with covariance matrix Sigma. For g(A,B)=A/B, the gradient is (1/B,-A/B-squared). The approximate variance is gradient-transpose Sigma gradient. Expanding it produces a numerator variance term, denominator variance term and a covariance term. Ignoring covariance can substantially change the standard error when numerator and denominator arise from the same units.
+Let estimates A and B have a joint approximate normal distribution with covariance matrix Sigma. For \(g(A,B)=\frac{A}{B}\), the gradient is \(\left(\frac1B,-\frac{A}{B^2}\right)\). The approximate variance is gradient-transpose Sigma gradient. Expanding it produces a numerator variance term, denominator variance term and a covariance term. Ignoring covariance can substantially change the standard error when numerator and denominator arise from the same units.
 
 The approximation is local. If B is near zero or highly uncertain, the ratio distribution can be skewed or have extreme tails, and a symmetric normal interval may be misleading. Fieller-type reasoning, transformations, likelihood methods or a carefully designed bootstrap may be more appropriate depending on the problem. The choice follows the denominator behavior and target, not a rule that bootstrap always fixes ratios.
 
-For g(theta)=log(theta), the derivative is 1/theta, so the approximate SE is SE(theta)/theta. This provides a route to multiplicative intervals, but only when theta is positive and the local approximation is adequate. Reporting a transformed estimate requires explaining whether it targets a transformed parameter or a transformed future observation.
+For \(g(\theta)=\log\theta\), the derivative is \(\frac{1}{\theta}\), so the approximate SE is \(\frac{\operatorname{SE}(\theta)}{\theta}\). This provides a route to multiplicative intervals, but only when theta is positive and the local approximation is adequate. Reporting a transformed estimate requires explaining whether it targets a transformed parameter or a transformed future observation.
 
 ### Case study: choose the bootstrap's unit and generating world
 
@@ -232,11 +232,11 @@ python courses/statistics-ml/examples/chapter_08.py
 
 ### Which uncertainty belongs to the question?
 
-For five normal-model observations, both intervals use a t critical value with four degrees of freedom. Mean uncertainty divides SD by sqrt(n); a new individual's uncertainty multiplies SD by sqrt(1+1/n). The code verifies that prediction uncertainty exceeds uncertainty about the mean.
+For five normal-model observations, both intervals use a t critical value with four degrees of freedom. Mean uncertainty divides SD by \(\sqrt{n}\); a new individual's uncertainty multiplies SD by \(\sqrt{1+\frac{1}{n}}\). The code verifies that prediction uncertainty exceeds uncertainty about the mean.
 
 ### Resampling and local propagation
 
-The bootstrap repeatedly samples from the empirical distribution, whose variance uses divisor n, and its simulated SE is compared with that exact conditional target. The delta method uses the derivative of log(theta), 1/theta, so variance 0.25 at theta 4 yields log-scale SE 0.125.
+The bootstrap repeatedly samples from the empirical distribution, whose variance uses divisor n, and its simulated SE is compared with that exact conditional target. The delta method uses the derivative of \(\log(\theta)\), \(\frac{1}{\theta}\), so variance 0.25 at theta 4 yields log-scale SE 0.125.
 
 ### Check an interval procedure over repeated samples
 

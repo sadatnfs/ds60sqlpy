@@ -24,7 +24,7 @@ The numerical change shows how repetition of one cue can dominate a naive vote. 
 
 Entropy measures uncertainty under the current predicted distribution. It does not directly measure expected labeling value or detect every confidently wrong outlier. The selection rule is a heuristic whose behavior should be inspected by class and domain.
 
-**Expected:** Top two uncertainty indices[0,1]; p=.5 has maximum entropy.
+**Expected:** Top two uncertainty indices[0,1]; \(p=0.5\) has maximum entropy.
 
 ## Exercise 5: Enforce diversity and budget
 

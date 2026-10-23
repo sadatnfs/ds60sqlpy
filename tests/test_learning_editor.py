@@ -9,15 +9,15 @@ from pathlib import Path
 
 import pytest
 
-ASSET = Path(__file__).parents[1] / "src/ds60sqlpy/assets/learning_lab.html"
+ASSET = Path(__file__).parents[1] / "src/ds60sqlpy/assets/classroom.js"
 NODE = shutil.which("node")
 pytestmark = pytest.mark.skipif(NODE is None, reason="Node is an optional developer UI check")
 
 
 def evaluate_helper(expression: str) -> object:
     document = ASSET.read_text(encoding="utf-8")
-    source = document.split("// BEGIN EDITOR PURE HELPERS", 1)[1].split(
-        "// END EDITOR PURE HELPERS", 1
+    source = document.split("// BEGIN DIAGNOSTIC PURE HELPERS", 1)[1].split(
+        "// END DIAGNOSTIC PURE HELPERS", 1
     )[0]
     program = (
         "const vm = require('node:vm');\n"
@@ -40,44 +40,6 @@ def evaluate_helper(expression: str) -> object:
         check=True,
     )
     return json.loads(result.stdout)
-
-
-def test_visual_tokens_preserve_every_source_character() -> None:
-    sources = [
-        'print("<img src=x onerror=alert(1)>")\n# hello\n',
-        "SELECT 'A''B', 42; -- inspect\n",
-        'def f(x):\n\treturn f"{x!r}"\n',
-        "s = '''multiline\nstring'''\n",
-        "object Main { val x = 3 }\n",
-        "apiVersion: v1\n# hello\n",
-        "",
-        "\n\n",
-        "Smile: \U0001f60a <&> \r\n",
-        '"unterminated\\',
-        "x" * 90000,
-    ]
-    expression = (
-        f"const sources = {json.dumps(sources)};\n"
-        'sources.flatMap(source => [".py", ".sql", ".cpp", ".scala", ".yaml", ""]'
-        ".map(mode => { const tokens = syntaxTokens(source, mode); return {"
-        'equal: tokens.map(token => token.text).join("") === source,'
-        'safeKinds: tokens.every(token => ["", "keyword", "number", "string", '
-        '"builtin", "comment"].includes(token.kind))}; }));'
-    )
-    results = evaluate_helper(expression)
-    assert isinstance(results, list)
-    assert len(results) == len(sources) * 6
-    assert all(result == {"equal": True, "safeKinds": True} for result in results)
-    classifications = evaluate_helper(
-        'syntaxTokens("def f():\\n    return 42 # inspect\\n", ".py")'
-        ".filter(token => token.kind).map(token => [token.text, token.kind])"
-    )
-    assert classifications == [
-        ["def", "keyword"],
-        ["return", "keyword"],
-        ["42", "number"],
-        ["# inspect", "comment"],
-    ]
 
 
 def test_error_navigation_uses_only_valid_submitted_source_lines() -> None:

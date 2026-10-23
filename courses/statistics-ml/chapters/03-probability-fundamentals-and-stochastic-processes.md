@@ -14,13 +14,13 @@ Independent observations are a special case. Time series, shared customers and c
 
 **Conditional probability**
 
-Compute P(A given B)=P(A and B)/P(B) when P(B)>0. Restrict the population to B before interpreting the rate. Rare conditioning events create unstable empirical estimates even when the formula is simple.
+Compute \(\Pr(A\mid B)=\frac{\Pr(A\cap B)}{\Pr(B)}\) when \(\Pr(B)>0\). Restrict the population to B before interpreting the rate. Rare conditioning events create unstable empirical estimates even when the formula is simple.
 
 ### stat-03-02
 
 **Bayes’ theorem**
 
-Posterior odds equal prior odds times the likelihood ratio. A sensitive alert can still have low positive predictive value when the event is rare. Distinguish P(alert given event) from P(event given alert).
+Posterior odds equal prior odds times the likelihood ratio. A sensitive alert can still have low positive predictive value when the event is rare. Distinguish \(\Pr(\mathrm{alert}\mid\mathrm{event})\) from \(\Pr(\mathrm{event}\mid\mathrm{alert})\).
 
 ### stat-03-03
 
@@ -128,7 +128,7 @@ A transition matrix gives next-state probabilities conditional on the current st
 
 **Poisson processes**
 
-A homogeneous Poisson process has independent increments and a constant event rate. Counts over time t have mean lambda*t and interarrival times are exponential. Bursty self-exciting incidents violate these assumptions.
+A homogeneous Poisson process has independent increments and a constant event rate. Counts over time t have mean \(\lambda\cdot t\) and interarrival times are exponential. Bursty self-exciting incidents violate these assumptions.
 
 ### stat-03-21
 
@@ -166,15 +166,15 @@ A copula couples marginal distributions into a joint distribution. Matching ordi
 
 ### Case study: calculate a diagnostic alert with a population table
 
-Imagine 10,000 cases with event prevalence 1%. There are 100 events and 9,900 nonevents. A detector with sensitivity .9 flags 90 events. At false-positive rate .05 it also flags 495 nonevents. Among 585 total alerts, 90 are real events, giving positive predictive value 90/585, about .154.
+Imagine 10,000 cases with event prevalence 1%. There are 100 events and 9,900 nonevents. A detector with sensitivity .9 flags 90 events. At false-positive rate .05 it also flags 495 nonevents. Among 585 total alerts, 90 are real events, giving positive predictive value \(\frac{90}{585}\), about .154.
 
-The calculation is Bayes' rule written as counts. It makes clear why P(alert|event) and P(event|alert) differ: their denominators refer to different populations. Improving sensitivity without reducing false-positive rate may leave precision disappointing when events are rare. Changing the deployment prevalence changes alert meaning even if the detector's class-conditional behavior remains fixed.
+The calculation is Bayes' rule written as counts. It makes clear why \(\Pr(\mathrm{alert}\mid\mathrm{event})\) and \(\Pr(\mathrm{event}\mid\mathrm{alert})\) differ: their denominators refer to different populations. Improving sensitivity without reducing false-positive rate may leave precision disappointing when events are rare. Changing the deployment prevalence changes alert meaning even if the detector's class-conditional behavior remains fixed.
 
 Conditional probability also clarifies selection. Restricting a table to logged or reviewed cases changes the denominator and potentially the distribution. If review is triggered by both severity and model confidence, performance estimated only among reviewed cases may not describe all cases. The observation mechanism belongs in the probability model.
 
 ### Case study: derive total variance from a decomposition
 
-Write X-E[X] as [X-E[X|G]]+[E[X|G]-E[X]]. Squaring and taking expectations yields two squared terms and a cross term. The cross term vanishes because E[X-E[X|G]|G]=0. The remaining terms are E[Var(X|G)]+Var(E[X|G]). This derivation shows exactly why between-group mean differences add variability even when every group's internal noise is small.
+Write X-E[X] as \([X-\mathbb{E}[X\mid G]]+[\mathbb{E}[X\mid G]-\mathbb{E}[X]]\). Squaring and taking expectations yields two squared terms and a cross term. The cross term vanishes because \(\mathbb{E}[X-\mathbb{E}[X\mid G]\mid G]=0\). The remaining terms are \(\mathbb{E}[\operatorname{Var}(X\mid G)]+\operatorname{Var}(\mathbb{E}[X\mid G])\). This derivation shows exactly why between-group mean differences add variability even when every group's internal noise is small.
 
 Suppose two equally frequent environments have means zero and ten and each has variance one. The overall mean is five. Within-environment variance contributes one, while variance of environment means contributes 25, giving total variance 26. A model using the environment label can explain much of that variability. A model omitting it may interpret the same pattern as irreducible noise.
 
@@ -182,7 +182,7 @@ The identity applies to predictive uncertainty as well. Averaging conditional va
 
 ### Case study: what the central limit theorem actually says
 
-Let X_i be independent identically distributed observations with mean mu and finite variance sigma-squared. The central limit theorem states that sqrt(n)*(mean(X)-mu)/sigma converges in distribution to a standard normal. It does not say the raw observations become normal, and it does not say every sample mean is accurate. The standardization changes with n because the mean's variance is sigma-squared/n.
+Let X_i be independent identically distributed observations with mean mu and finite variance sigma-squared. The central limit theorem states that \(\frac{\sqrt{n}(\bar{X}-\mu)}{\sigma}\) converges in distribution to a standard normal. It does not say the raw observations become normal, and it does not say every sample mean is accurate. The standardization changes with n because the mean's variance is sigma-squared/n.
 
 For exponential observations with mean and variance one, the raw distribution is right-skewed. Means of 32 such observations are less skewed, and their standardized fluctuations approximate a normal distribution. A simulation can compare means, variances and quantiles across repeated samples. The approximation improves in a model-dependent way; there is no universal sample size at which n is large enough for every tail probability.
 
@@ -192,15 +192,15 @@ Dependence creates another limitation. If every recorded value repeats the same 
 
 ### Case study: concentration bounds trade precision for assumptions
 
-For a nonnegative variable, Markov's inequality bounds P(X>=a) by E[X]/a. Applying it to squared deviations gives Chebyshev's inequality, P(|X-mu|>=t)<=sigma-squared/t-squared. These bounds use little distributional information and can be conservative.
+For a nonnegative variable, Markov's inequality bounds \(\Pr(X\ge a)\) by \(\frac{\mathbb{E}[X]}{a}\). Applying it to squared deviations gives Chebyshev's inequality, \(\Pr(|X-\mu|\ge t)\le\frac{\sigma^2}{t^2}\). These bounds use little distributional information and can be conservative.
 
-For independent variables bounded between zero and one, Hoeffding bounds the sample-mean tail by 2*exp(-2*n*epsilon-squared). To make that bound at most alpha, choose epsilon=sqrt(log(2/alpha)/(2*n)). This bound supports explicit finite-sample guarantees for bounded observations, but it does not apply unchanged to unbounded durations or correlated repeated events.
+For independent variables bounded between zero and one, Hoeffding bounds the sample-mean tail by \(2\exp(-2n\epsilon^2)\). To make that bound at most alpha, choose \(\epsilon=\sqrt{\frac{\log(2/\alpha)}{2n}}\). This bound supports explicit finite-sample guarantees for bounded observations, but it does not apply unchanged to unbounded durations or correlated repeated events.
 
 A bound that is numerically loose can still be valuable when a distributional approximation is unreliable. Conversely, a tighter normal approximation may be practically useful when its assumptions are well supported. State whether an interval is an exact finite-sample result, an asymptotic approximation or a simulation-based assessment.
 
 ### Case study: stationarity, mixing and long-run averages
 
-A Markov chain's transition matrix describes one-step conditional behavior. A stationary distribution satisfies pi P=pi, but starting the chain in another distribution creates a transient period. Irreducibility and aperiodicity in a finite-state chain support convergence to the stationary law; reducible or periodic chains can fail to mix in the expected way.
+A Markov chain's transition matrix describes one-step conditional behavior. A stationary distribution satisfies \(\pi P=\pi\), but starting the chain in another distribution creates a transient period. Irreducibility and aperiodicity in a finite-state chain support convergence to the stationary law; reducible or periodic chains can fail to mix in the expected way.
 
 Ergodicity concerns whether time averages along one sufficiently long trajectory represent the relevant distributional averages. A process can have a stationary distribution while remaining trapped in one component. This matters for MCMC, service-state models and simulation: a long log file is not necessarily representative of all operating regimes.
 
@@ -226,7 +226,7 @@ The two-state transition matrix moves toward probabilities two-thirds and one-th
 
 ### Simulate the central limit theorem's standardized quantity
 
-Six thousand independent samples each contain 32 exponential observations. Their means are centered at the known mean one and multiplied by sqrt(32), because the population SD is one. The resulting mean is near zero and variance near one, with less skew than the raw observations. This demonstrates the CLT for this finite-variance independent model; it does not validate a universal sample-size rule.
+Six thousand independent samples each contain 32 exponential observations. Their means are centered at the known mean one and multiplied by \(\sqrt{32}\), because the population SD is one. The resulting mean is near zero and variance near one, with less skew than the raw observations. This demonstrates the CLT for this finite-variance independent model; it does not validate a universal sample-size rule.
 
 ### Complete executable example
 

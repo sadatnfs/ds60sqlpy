@@ -86,7 +86,7 @@ Review span created before vector growth that reallocates.
 
 ## Exercise 5: Test empty view
 
-Pass an empty span to sum_view.
+Pass an empty span to `sum_view`.
 
 **Expected:** 0 without dereference.
 

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "nlp",
   "title": "Natural Language Processing: from text to reliable language systems",
-  "summary": "A detailed24lesson foundation in language data, linguistic structure, classical models, neural representations and trustworthy evaluation. Continue into LLM theory and applied domain assistants.",
+  "summary": "24 lessons in natural language processing, from text representation and linguistic structure to classical models, neural methods and careful evaluation. Continue into LLM mechanisms and subject assistants when ready.",
   "lessons": [
     {
       "id": "nlp-001",

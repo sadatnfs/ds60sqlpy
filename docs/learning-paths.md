@@ -1,5 +1,12 @@
 # Learning paths, placement, and deliberate practice
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 The course has no sixty-day deadline. Its historical day IDs are stable navigation points. A named module may be a beginner practice lab, an intermediate foundation, or a multi-session advanced project. Progress comes from producing and explaining evidence, not from opening sixty files.
 
 ## Find a starting point

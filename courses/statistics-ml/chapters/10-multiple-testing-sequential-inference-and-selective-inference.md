@@ -6,9 +6,9 @@ Book: **Statistics and Machine Learning for Data Scientists End To End**. Chapte
 
 A laboratory tests one prespecified hypothesis at alpha .05. A dashboard tests 200 metrics every hour and highlights whichever crosses .05. These are different statistical procedures. Multiplicity arises across outcomes, subgroups, model choices and time. The correction must follow the procedure that could generate a reported claim.
 
-For m valid p-values, Bonferroni uses alpha/m. The union bound gives P(any false rejection) no greater than the sum of individual error probabilities, with no independence assumption. Holm improves this by comparing ordered p-values to progressively less stringent thresholds. FDR instead controls an expected proportion among discoveries and is useful for screening, not equivalent to limiting the probability of any mistake.
+For m valid p-values, Bonferroni uses alpha/m. The union bound gives \(\Pr(\text{at least one false rejection})\) no greater than the sum of individual error probabilities, with no independence assumption. Holm improves this by comparing ordered p-values to progressively less stringent thresholds. FDR instead controls an expected proportion among discoveries and is useful for screening, not equivalent to limiting the probability of any mistake.
 
-Sequential evidence must be designed for monitoring. One transparent confidence-sequence construction allocates error alpha_t=alpha/[t(t+1)] at each time. Because the alpha_t values sum to alpha, the probability that any interval misses is at most alpha if each time-specific interval has its advertised coverage. This construction is conservative but makes optional-stopping protection understandable.
+Sequential evidence must be designed for monitoring. One transparent confidence-sequence construction allocates error \(\alpha_t=\frac{\alpha}{t(t+1)}\) at each time. Because the alpha_t values sum to alpha, the probability that any interval misses is at most alpha if each time-specific interval has its advertised coverage. This construction is conservative but makes optional-stopping protection understandable.
 
 ## Methods, mechanisms, and limits
 
@@ -16,7 +16,7 @@ Sequential evidence must be designed for monitoring. One transparent confidence-
 
 **Family-wise error rate**
 
-FWER is P(at least one false rejection) in a defined family. Specify the family before seeing results. Subdividing one scientific search into convenient smaller families can conceal the actual error opportunity.
+FWER is \(\Pr(\text{at least one false rejection})\) in a defined family. Specify the family before seeing results. Subdividing one scientific search into convenient smaller families can conceal the actual error opportunity.
 
 ### stat-10-02
 
@@ -34,7 +34,7 @@ Compare each valid p-value with alpha/m or multiply it by m, capped at one. The 
 
 **Holm’s procedure**
 
-Order p-values and test the smallest at alpha/m, then alpha/(m-1), stopping at the first failure. Holm controls FWER under general dependence and never rejects fewer hypotheses than ordinary Bonferroni.
+Order p-values and test the smallest at alpha/m, then \(\frac{\alpha}{m-1}\), stopping at the first failure. Holm controls FWER under general dependence and never rejects fewer hypotheses than ordinary Bonferroni.
 
 ### stat-10-05
 
@@ -46,7 +46,7 @@ Find the largest rank k with p_(k)<=q*k/m and reject through k. Its FDR guarante
 
 **Benjamini–Yekutieli procedure**
 
-Divide the BH target by the harmonic sum of 1/i to obtain a conservative general-dependence correction. Its broader guarantee can substantially reduce power when the family is large.
+Divide the BH target by the harmonic sum of \(\frac{1}{i}\) to obtain a conservative general-dependence correction. Its broader guarantee can substantially reduce power when the family is large.
 
 ### stat-10-07
 
@@ -150,9 +150,9 @@ Run defensible analysis specifications and display their full result distributio
 
 ### Case study: the probability of at least one lucky result
 
-If 100 independent true null hypotheses are each tested at .05, the probability of no false rejection is .95^100, about .0059. The chance of at least one false rejection is therefore about .994. Independence is used for this exact calculation; dependence changes the number, but it does not eliminate the need to define the family of opportunities.
+If 100 independent true null hypotheses are each tested at .05, the probability of no false rejection is \({0.95}^{100}\), about .0059. The chance of at least one false rejection is therefore about .994. Independence is used for this exact calculation; dependence changes the number, but it does not eliminate the need to define the family of opportunities.
 
-Bonferroni instead allocates .05/100 to each valid test and uses the union bound to control family-wise error without assuming independence. Holm retains that broad protection while using ordered thresholds more efficiently. These procedures answer a different question from FDR control, which permits some false discoveries in a screening list while controlling an expected proportion.
+Bonferroni instead allocates \(\frac{0.05}{100}\) to each valid test and uses the union bound to control family-wise error without assuming independence. Holm retains that broad protection while using ordered thresholds more efficiently. These procedures answer a different question from FDR control, which permits some false discoveries in a screening list while controlling an expected proportion.
 
 Under the global null, every discovery is false, so FDR equals the probability of any discovery. In mixed null/alternative families, the distinction becomes important. A discovery list controlled at 5% FDR does not mean each selected item has a 5% posterior probability of being false or that exactly 5% of this particular list is wrong.
 
@@ -162,11 +162,11 @@ An analyst checks an ordinary fixed-sample p-value every day and stops the first
 
 A group sequential design calibrates boundaries for planned information times. Alpha-spending methods specify how cumulative Type I error can be used as information grows. Confidence sequences and e-processes provide other frameworks for permitted ongoing monitoring. They are not interchangeable labels for rerunning a fixed-sample test.
 
-The conservative spending construction alpha_t=alpha/[t(t+1)] is instructive because the sum telescopes to alpha. If each time-specific interval misses with probability at most alpha_t, the probability of any miss is at most alpha. This proves simultaneous protection through a union bound, though more refined methods can be much tighter. The guarantee still depends on each constituent bound's assumptions.
+The conservative spending construction \(\alpha_t=\frac{\alpha}{t(t+1)}\) is instructive because the sum telescopes to alpha. If each time-specific interval misses with probability at most alpha_t, the probability of any miss is at most alpha. This proves simultaneous protection through a union bound, though more refined methods can be much tighter. The guarantee still depends on each constituent bound's assumptions.
 
 ### Case study: likelihood-ratio evidence and optional stopping
 
-For independent Bernoulli observations, compare a specified alternative p1 with null p0. Multiply p1/p0 after a success and (1-p1)/(1-p0) after a failure. Under the null, the expected one-step multiplier is one, so the accumulated likelihood ratio is a nonnegative martingale under the stated model. A threshold crossing can then be controlled using a martingale inequality.
+For independent Bernoulli observations, compare a specified alternative p1 with null p0. Multiply \(\frac{p_{1}}{p_{0}}\) after a success and \(\frac{1-p_{1}}{1-p_{0}}\) after a failure. Under the null, the expected one-step multiplier is one, so the accumulated likelihood ratio is a nonnegative martingale under the stated model. A threshold crossing can then be controlled using a martingale inequality.
 
 This construction works because the full process, not only its final value, has the required expectation property. Multiplying arbitrary dependent e-values or selecting the most favorable among many unaccounted-for processes can destroy validity. Composite nulls, adaptive alternatives and dependent observations need appropriately designed constructions.
 
@@ -196,7 +196,7 @@ For the same four p-values, Holm rejects one hypothesis and BH rejects two at 0.
 
 ### Build monitoring validity from explicit bounds
 
-The spending sequence telescopes and remains below 0.05 over 100 looks. A Hoeffding radius uses each look's allocated error under independent bounded observations. Separately, an all-success Bernoulli path produces a likelihood ratio above 20 for p=.8 against p=.5. The one-step expected multiplier under the null equals one; the extreme path is evidence, not a statement that the null has 5% posterior probability.
+The spending sequence telescopes and remains below 0.05 over 100 looks. A Hoeffding radius uses each look's allocated error under independent bounded observations. Separately, an all-success Bernoulli path produces a likelihood ratio above 20 for \(p=0.8\) against \(p=0.5\). The one-step expected multiplier under the null equals one; the extreme path is evidence, not a statement that the null has 5% posterior probability.
 
 ### Complete executable example
 
@@ -236,7 +236,7 @@ if __name__ == "__main__":
 
 ## Data science interview discussions
 
-**Interview: Can you stop an A/B test as soon as p<.05?** Only if the inferential procedure was designed for that monitoring rule. Repeated fixed-sample tests increase opportunities for an accidental crossing. Use prescheduled analyses, calibrated group sequential boundaries or a valid sequential method.
+**Interview: Can you stop an A/B test as soon as \(p<0.05\)?** Only if the inferential procedure was designed for that monitoring rule. Repeated fixed-sample tests increase opportunities for an accidental crossing. Use prescheduled analyses, calibrated group sequential boundaries or a valid sequential method.
 
 **Interview: Does BH at 5% mean each selected feature has a 5% chance of being false?** No. It controls an expected fraction over repeated uses under its assumptions. It does not assign a posterior error probability to an individual feature.
 

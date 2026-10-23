@@ -27,9 +27,9 @@ logits=tf.zeros((1,3)); loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labe
 np.testing.assert_allclose(loss.numpy(),[np.log(3)],atol=1e-6,rtol=0)
 ```
 
-**Expected:** loss log(3).
+**Expected:** loss \(\log(3)\).
 
-**Verify:** Compare the computed values or written argument with loss log(3).
+**Verify:** Compare the computed values or written argument with loss \(\log(3)\).
 
 ## Exercise 2: Independent labels
 

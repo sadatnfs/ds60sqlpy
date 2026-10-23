@@ -30,7 +30,7 @@ The scalar model owns a Parameter named weight and a buffer named offset. Both a
 
 These are registration defaults, not a law that buffers can never participate in autograd or that every registered Parameter must be trainable. requires_grad and optimizer membership remain separate choices. A buffer registered with persistent=False still follows module conversion but is omitted from state_dict. The supplied offset uses the default persistent behavior. [PyTorch 2.9 Module state APIs](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Module.html).
 
-A call to model(x) routes through Module machinery and its forward method. At weight=offset=0, the three inputs 1, 2, 3 produce three zeros. No loss, backward call or optimizer step is implied by that invocation. The explicit loop then clears gradients, computes the paired mean squared objective, backpropagates and applies SGD. The one-step weight 28/15 is the same scalar oracle as the earlier chapter, while offset remains zero.
+A call to model(x) routes through Module machinery and its forward method. At weight=offset=0, the three inputs 1, 2, 3 produce three zeros. No loss, backward call or optimizer step is implied by that invocation. The explicit loop then clears gradients, computes the paired mean squared objective, backpropagates and applies SGD. The one-step weight \(\frac{28}{15}\) is the same scalar oracle as the earlier chapter, while offset remains zero.
 
 Converting the module to float32 moves both registered tensors through the module conversion mechanism. A plain auxiliary tensor could remain at its old dtype or device and later cause an operation mismatch. This example checks CPU dtype movement; it does not qualify a GPU placement path. In a larger model, also inspect optimizer state after a late conversion because momentum or other optimizer tensors have their own lifecycle.
 
@@ -85,9 +85,9 @@ loss=((model(x)-y)**2).mean(); loss.backward(); optimizer.step()
 np.testing.assert_allclose(model.weight.item(),28/15,atol=1e-12,rtol=0); assert model.offset.item()==0
 ```
 
-**Expected:** weight 28/15; buffer still 0.
+**Expected:** weight \(\frac{28}{15}\); buffer still 0.
 
-**Verify:** Compare the computed values or written argument with weight 28/15; buffer still 0.
+**Verify:** Compare the computed values or written argument with weight \(\frac{28}{15}\); buffer still 0.
 
 ## Exercise 4: Move dtype through registered state
 

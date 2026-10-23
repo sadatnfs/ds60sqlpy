@@ -8,11 +8,11 @@ Duration data contain a time origin, an event definition and an observation mech
 
 ### Survival and hazard answer different questions
 
-For nonnegative event time T, survival is S(t)=P(T>t). The hazard h(t) is the instantaneous event rate conditional on survival to t. In a continuous model, S(t)=exp(-H(t)), where H(t) is the integrated hazard. Hazard is a rate with time units, not a probability, and a hazard ratio is not a ratio of cumulative event probabilities. Translating model output into a decision often requires survival curves or restricted mean time, not only a coefficient.
+For nonnegative event time T, survival is \(S(t)=\Pr(T>t)\). The hazard h(t) is the instantaneous event rate conditional on survival to t. In a continuous model, \(S(t)=e^{-H(t)}\), where H(t) is the integrated hazard. Hazard is a rate with time units, not a probability, and a hazard ratio is not a ratio of cumulative event probabilities. Translating model output into a decision often requires survival curves or restricted mean time, not only a coefficient.
 
 ### Risk sets encode observation correctly
 
-At each event time, count individuals still under observation and event-free immediately before that time. Kaplan-Meier multiplies conditional survival factors 1-d_j/n_j, with d_j events among n_j at risk. Censored individuals contribute to earlier risk sets and leave when follow-up ends; they do not create a survival drop. Delayed entry requires excluding individuals before their actual entry time. Ignoring these rules can create artificial survival advantages.
+At each event time, count individuals still under observation and event-free immediately before that time. Kaplan-Meier multiplies conditional survival factors \(1-\frac{d_{j}}{n_{j}}\), with d_j events among n_j at risk. Censored individuals contribute to earlier risk sets and leave when follow-up ends; they do not create a survival drop. Delayed entry requires excluding individuals before their actual entry time. Ignoring these rules can create artificial survival advantages.
 
 ### Censoring assumptions require substantive reasoning
 
@@ -36,7 +36,7 @@ Time-to-event analysis models the distribution of elapsed time until a defined e
 
 **Survival functions**
 
-The survival function S(t)=P(T>t) gives the probability of remaining event-free beyond t. It is nonincreasing and begins at one when all event times are positive. A step estimate between observed events does not imply the underlying process changes only at those instants. Report time units and uncertainty, especially in the far tail where few individuals remain at risk.
+The survival function \(S(t)=\Pr(T>t)\) gives the probability of remaining event-free beyond t. It is nonincreasing and begins at one when all event times are positive. A step estimate between observed events does not imply the underlying process changes only at those instants. Report time units and uncertainty, especially in the far tail where few individuals remain at risk.
 
 ### stat-28-03
 
@@ -60,7 +60,7 @@ Left censoring means an event occurred before a known observation time, but its 
 
 **Interval censoring**
 
-Interval censoring identifies an event only between two inspections, such as a failure discovered during a monthly visit. The contribution is P(L<T<=R), determined by both interval endpoints. Replacing every event with the midpoint can distort uncertainty and time patterns when intervals are wide or variable. Use a method designed for interval observation and describe the inspection process.
+Interval censoring identifies an event only between two inspections, such as a failure discovered during a monthly visit. The contribution is \(\Pr(L<T\le R)\), determined by both interval endpoints. Replacing every event with the midpoint can distort uncertainty and time patterns when intervals are wide or variable. Use a method designed for interval observation and describe the inspection process.
 
 ### stat-28-07
 
@@ -72,13 +72,13 @@ Left truncation, or delayed entry, includes an individual only after they surviv
 
 **Kaplan–Meier estimation**
 
-Kaplan-Meier estimates survival by multiplying 1-d_j/n_j at each event time. Censoring changes later denominators without creating an event drop. Ties require a clear convention for events and censoring at the same recorded time. Its tail is unstable when few remain under observation, so accompany curves with numbers at risk and avoid interpreting an unreached median as an infinite lifetime.
+Kaplan-Meier estimates survival by multiplying \(1-\frac{d_{j}}{n_{j}}\) at each event time. Censoring changes later denominators without creating an event drop. Ties require a clear convention for events and censoring at the same recorded time. Its tail is unstable when few remain under observation, so accompany curves with numbers at risk and avoid interpreting an unreached median as an infinite lifetime.
 
 ### stat-28-09
 
 **Nelson–Aalen estimation**
 
-Nelson-Aalen estimates cumulative hazard as the sum d_j/n_j across event times. Exponentiating its negative gives a survival estimate related to, but not identical to, Kaplan-Meier in finite samples. It is useful for inspecting accumulated event intensity and model diagnostics. Large jumps near the tail can reflect small risk sets rather than a well-estimated sudden biological change.
+Nelson-Aalen estimates cumulative hazard as the sum \(\frac{d_{j}}{n_{j}}\) across event times. Exponentiating its negative gives a survival estimate related to, but not identical to, Kaplan-Meier in finite samples. It is useful for inspecting accumulated event intensity and model diagnostics. Large jumps near the tail can reflect small risk sets rather than a well-estimated sudden biological change.
 
 ### stat-28-10
 
@@ -90,7 +90,7 @@ The log-rank test compares observed and expected events between groups across ri
 
 **Cox proportional hazards models**
 
-The Cox model specifies h(t|x)=h0(t)*exp(x_transpose*beta), leaving the baseline hazard unspecified. Partial likelihood compares covariates within event-time risk sets to estimate beta. Proportional hazards means a covariate hazard ratio is constant over time. A coefficient is a log hazard ratio, not a direct survival-probability change or an accelerated-time factor.
+The Cox model specifies \(h(t\mid x)=h_0(t)\exp(x^{\mathsf T}\beta)\), leaving the baseline hazard unspecified. Partial likelihood compares covariates within event-time risk sets to estimate beta. Proportional hazards means a covariate hazard ratio is constant over time. A coefficient is a log hazard ratio, not a direct survival-probability change or an accelerated-time factor.
 
 ### stat-28-12
 
@@ -102,7 +102,7 @@ Proportional-hazards diagnostics examine whether covariate effects vary with tim
 
 **Accelerated failure-time models**
 
-An accelerated failure-time model specifies log T=x_transpose*beta+error, so exp(beta) describes multiplicative time scaling under the chosen model. A factor above one generally lengthens survival time for a positive coefficient. The error distribution determines the survival family and extrapolation. AFT and proportional-hazard interpretations coincide only for particular families, so do not translate coefficients indiscriminately.
+An accelerated failure-time model specifies \(\log T=x^{\mathsf T}\beta+\varepsilon\), so \(\exp(\beta)\) describes multiplicative time scaling under the chosen model. A factor above one generally lengthens survival time for a positive coefficient. The error distribution determines the survival family and extrapolation. AFT and proportional-hazard interpretations coincide only for particular families, so do not translate coefficients indiscriminately.
 
 ### stat-28-14
 
@@ -144,7 +144,7 @@ A cause-specific hazard models the instantaneous rate of one event among individ
 
 **Cumulative incidence functions**
 
-The cumulative incidence function F_k(t) gives P(T<=t,cause=k). It accumulates overall event-free survival just before each time multiplied by the cause-specific hazard increment. Unlike one-minus-Kaplan-Meier after censoring competitors, it respects the fact that other causes prevent future target events. The CIFs across causes sum to total event probability, providing a useful accounting check.
+The cumulative incidence function F_k(t) gives \(\Pr(T\le t,\mathrm{cause}=k)\). It accumulates overall event-free survival just before each time multiplied by the cause-specific hazard increment. Unlike one-minus-Kaplan-Meier after censoring competitors, it respects the fact that other causes prevent future target events. The CIFs across causes sum to total event probability, providing a useful accounting check.
 
 ### stat-28-21
 
@@ -198,15 +198,15 @@ python courses/statistics-ml/examples/chapter_28.py
 
 ### Build the risk sets by hand
 
-Four individuals have follow-up times [1,2,3,4] and event flags [1,0,1,1]. At time one, one event among four gives survival 3/4. The person censored at time two leaves without a survival drop. At time three, one event among two multiplies survival by one-half, yielding 3/8. The final event drops the estimate to zero, based on only one remaining person.
+Four individuals have follow-up times [1,2,3,4] and event flags [1,0,1,1]. At time one, one event among four gives survival \(\frac{3}{4}\). The person censored at time two leaves without a survival drop. At time three, one event among two multiplies survival by one-half, yielding \(\frac{3}{8}\). The final event drops the estimate to zero, based on only one remaining person.
 
 ### Integrate meaningful time rather than an unobserved tail
 
-The estimated survival is one for the first time unit, 0.75 for the next two, and 0.375 for the final unit through horizon four. The restricted mean is 1+1.5+0.375=2.875 time units. This is a finite-window quantity. It does not estimate an unrestricted lifetime beyond follow-up.
+The estimated survival is one for the first time unit, 0.75 for the next two, and 0.375 for the final unit through horizon four. The restricted mean is \(1+1.5+0.375=2.875\) time units. This is a finite-window quantity. It does not estimate an unrestricted lifetime beyond follow-up.
 
 ### Account for competing events
 
-With one cause-A event among four and then one cause-B event among the remaining three, each cause has cumulative incidence 0.25 and event-free survival is 0.5. The second increment uses the pre-event survival 0.75 times 1/3. The sum-to-one check makes the competing-event accounting explicit.
+With one cause-A event among four and then one cause-B event among the remaining three, each cause has cumulative incidence 0.25 and event-free survival is 0.5. The second increment uses the pre-event survival 0.75 times \(\frac{1}{3}\). The sum-to-one check makes the competing-event accounting explicit.
 
 ### Complete executable example
 

@@ -1,5 +1,13 @@
 # Scala and Apache Spark: correct data and recoverable products
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Scala and Apache Spark: correct data and recoverable products** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This course builds from Scala language reasoning or a tested Python bridge into paired Scala/PySpark batch and finite-streaming work. The [authored manifest](lessons.json) is the file inventory consumed by the classroom. The [full design route](../../docs/expansion/tracks/scala-spark.md) describes the 42-lesson progression. All 42 lessons are authored; the [implementation status](../../docs/implementation/spark-content-status.md) records actual runtime qualification separately.
 
 ## Start with a language route

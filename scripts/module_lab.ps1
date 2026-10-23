@@ -147,7 +147,7 @@ switch ($Action) {
         & docker @Compose up -d --no-build --pull never --wait --wait-timeout 180 lab @Services
         if ($LASTEXITCODE -ne 0) { throw 'A module service did not become ready. Inspect the worker logs before retrying.' }
         $Port = if ($env:DS60_LAB_PORT) { $env:DS60_LAB_PORT } else { '8765' }
-        $Url = 'http://127.0.0.1:' + $Port + '/journeys'
+        $Url = 'http://127.0.0.1:' + $Port + '/classroom'
         Write-Host "Module labs: $Url"
         if (-not $NoBrowser) { Start-Process $Url }
     }

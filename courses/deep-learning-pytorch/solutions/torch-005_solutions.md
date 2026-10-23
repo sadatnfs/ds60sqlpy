@@ -16,19 +16,19 @@ Finite differences involve a tradeoff: large steps measure a wider region, while
 
 ## Reading the implementation
 
-For f(w)=(w-2)^2, the analytic derivative is 2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.
+For \(f(w)=(w-2)^2\), the analytic derivative is \(2(w-2)\). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses \(\frac{f(w+h)-f(w-h)}{2h}\). Validate positive finite h and finite function values before comparing.
 
 ## Derive the slope before using it as an update
 
-For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=2(w-2). At w=0 the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
+For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=\(2(w-2)\). At \(w=0\) the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
 
 The central finite difference uses two probes separated by 2 h:
 
 `D_h = [f(w+h)-f(w-h)]/(2h)`.
 
-Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=2(w-2) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
+Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=\(2(w-2)\) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
 
-A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus h=0.1 gives -3.9, h=0.01 gives -3.99, and h=0.001 gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
+A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus \(h=0.1\) gives -3.9, \(h=0.01\) gives -3.99, and \(h=0.001\) gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
 
 Floating-point cancellation pushes in the opposite direction from truncation error. As h shrinks, the two function values can become nearly equal compared with their magnitude. Their subtraction can lose meaningful digits, and a sufficiently small perturbation may not change the represented point at all. Scaling, dtype and the function's local behavior all matter. Sweep several probe scales and inspect the error curve rather than applying a universal h or tolerance.
 
@@ -40,7 +40,7 @@ Finally, `autograd.grad` returns the requested derivatives. It does not mean tha
 
 ## Exercise 1: Derive a scalar slope
 
-The question is: Differentiate (w-2)**2 at w=0 using autograd.grad.
+The question is: Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using autograd.grad.
 
 The analytic derivative provides an oracle independent of autograd. The negative sign means increasing w locally decreases the loss.
 
@@ -56,7 +56,7 @@ assert gradient.item()==-4 and loss.item()==4
 
 ## Exercise 2: Check three finite differences
 
-The question is: Use h=0.1, .01, .001 at w=0 and compare each slope with-4.
+The question is: Use \(h=0.1\), .01, .001 at \(w=0\) and compare each slope with-4.
 
 The quadratic central difference is especially clean. This does not imply every function or every step size achieves the same tolerance.
 
@@ -82,9 +82,9 @@ np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()
 ```
 
-**Expected:** new w=0.4, not-4.
+**Expected:** new \(w=0.4\), not-4.
 
-**Verify:** Compare the computed values or written argument with new w=0.4, not-4.
+**Verify:** Compare the computed values or written argument with new \(w=0.4\), not-4.
 
 ## Exercise 4: Inspect a stationary point
 
@@ -118,7 +118,7 @@ assert w.grad is None and gradient.item()==-4
 
 ## Exercise 6: Reject invalid probes
 
-The question is: Pass h=0, negative h and a function returning infinity to the finite-difference helper.
+The question is: Pass \(h=0\), negative h and a function returning infinity to the finite-difference helper.
 
 Validation distinguishes an unusable numerical check from a disagreement with the analytic derivative. Widening a tolerance cannot repair undefined input.
 

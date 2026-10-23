@@ -24,6 +24,15 @@ visualization (`python-25`), feature engineering (`python-28`), and schemas
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Work from the repository root. The rendered HTML lesson is a readable
 preview; execute the real notebook in VS Code or JupyterLab.
 

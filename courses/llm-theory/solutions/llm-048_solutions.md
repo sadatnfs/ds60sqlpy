@@ -6,13 +6,13 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 Speculative decoding proposes several tokens with a cheaper draft model and verifies them against a target model. Exact speculative sampling is not simply accepting a token when the two argmaxes agree. The acceptance rule and the correction distribution are chosen so the emitted token law remains the target distribution under the declared sampling policy. This preserves a distribution, not necessarily the same individual sample produced by another random-number schedule.
 
-For target probabilities p and draft probabilities q at the same prefix, a draft token i is accepted with probability min(1, p_i/q_i). If rejected, sample from the normalized positive part of p-q. Accepted draft mass and corrected rejection mass add back to p exactly. The distributions must already include the intended temperature or filtering policy, and both models must refer to the same token identities.
+For target probabilities p and draft probabilities q at the same prefix, a draft token i is accepted with probability min(1, \(\frac{p_{i}}{q_{i}}\)). If rejected, sample from the normalized positive part of p-q. Accepted draft mass and corrected rejection mass add back to p exactly. The distributions must already include the intended temperature or filtering policy, and both models must refer to the same token identities.
 
 A multi-token round accepts a contiguous prefix of draft proposals. At the first rejection, discard the unaccepted suffix and emit one correction token. If all proposals are accepted, an additional token can be drawn from the target's next distribution when the budget permits. Cached keys/values for discarded draft positions must be rolled back, and the correction or bonus token must be appended at its correct position. The reference uses exact probability tables and real small NumPy K/V arrays. It does not run a fast serving kernel or claim a measured speedup.
 
 **Draft distribution:** The proposal model's next-token probabilities at a specific prefix.
 
-**Acceptance probability:** The correction rulemin(1,p_i/q_i) for a sampled draft token.
+**Acceptance probability:** The correction rulemin(1,\(\frac{p_{i}}{q_{i}}\)) for a sampled draft token.
 
 **Residual distribution:** Normalized positive mass from p-q used after rejection.
 
@@ -111,7 +111,7 @@ broken.append(0); assert broken.tokens!=fresh.tokens and not np.allclose(broken.
 
 ## Exercise 6: Handle equality, EOS, budgets and invalid support
 
-The question is: Check p=q has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.
+The question is: Check \(p=q\) has no residual, stop on an accepted EOS 2, cap output at 2 tokens, and reject a zero-probability draft proposal.
 
 An accepted EOS ends generation immediately, andabudget is not permission toappendanextra bonus. Equaldistributionsmustavoid dividingbyazero residualnormalizer. Invalidsupport shouldfailclearly ratherthan fabricate aprobability.
 

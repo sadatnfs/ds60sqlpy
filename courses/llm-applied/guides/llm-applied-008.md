@@ -36,7 +36,7 @@ Duplicate handling must distinguish those levels. Repeated IDs within one result
 
 A common second stage is a cross-encoder that reads the query and a candidate together. In a transformer implementation, tokens from both sides can interact inside the model, allowing finer comparisons than a single precomputed document vector. That flexibility is often useful for distinctions such as whether a passage answers a question, discusses an exception or merely mentions the same topic.
 
-The extra interaction has a work cost. A standard dense self-attention layer over a combined sequence of length Q+D forms a score matrix proportional to(Q+D)^2. A bi-encoder can compute document representations in advance and encode a new query separately. These operation counts explain a design tradeoff; they are not measured latency or memory claims for every architecture, kernel or batch size.
+The extra interaction has a work cost. A standard dense self-attention layer over a combined sequence of length Q+D forms a score matrix proportional to \((Q+D)^2\). A bi-encoder can compute document representations in advance and encode a new query separately. These operation counts explain a design tradeoff; they are not measured latency or memory claims for every architecture, kernel or batch size.
 
 A reranker is therefore usually applied to a smaller admitted candidate set. Its budget includes candidate count and passage length, not only the number of model calls. Increasing the candidate pool may improve recall while increasing latency and context-processing work. Compare quality at a declared budget, and record whether truncation removed the part of a candidate that made it relevant.
 
@@ -44,7 +44,7 @@ The runnable reranker here sorts authored features. It demonstrates the second-s
 
 ## Read a failure as a pipeline trace
 
-Consider an illustrative evaluation of ten questions. The first-stage candidates contain sufficient evidence for eight. The final context retains sufficient evidence for six of those eight. The answer stage produces a correct supported answer for five of those six. The observed end-to-end success count is five, while the conditional stage rates are 8/10,6/8 and 5/6. Their product is 5/10. This arithmetic is a diagnostic worksheet, not a recorded benchmark.
+Consider an illustrative evaluation of ten questions. The first-stage candidates contain sufficient evidence for eight. The final context retains sufficient evidence for six of those eight. The answer stage produces a correct supported answer for five of those six. The observed end-to-end success count is five, while the conditional stage rates are 8/10,6/8 and \(\frac{5}{6}\). Their product is \(\frac{5}{10}\). This arithmetic is a diagnostic worksheet, not a recorded benchmark.
 
 The two candidate misses and two context-selection losses require different interventions. If the required passage is absent from the candidate set, a better reranking order cannot recover it. If the passage is present but displaced by redundant chunks, the final selector needs attention. If sufficient evidence reaches the model but its answer is wrong, improving candidate recall alone may leave the error unchanged.
 
@@ -60,7 +60,7 @@ Use ablations to identify what each component contributes: lexical only, dense o
 
 Use fusion when error analysis shows complementary retrieval strengths, and test whether the additional complexity improves held-out evidence coverage. A reranker is useful when the first-stage candidate set has good recall but poor ordering. Its compute cost grows with candidate count and input length, so measure quality against a fixed latency or work budget.
 
-Do not compare a hybrid system with k=100 against a lexical baseline with k=5 and attribute all improvement to the model. Hold candidate and context budgets explicit. Raw-score normalization is another possible design, but it needs calibration evidence. RRF avoids raw-scale assumptions at the cost of discarding score gaps: a narrow first-place lead and an overwhelming lead receive the same rank contribution. Record that tradeoff rather than calling fusion universally optimal.
+Do not compare a hybrid system with \(k=100\) against a lexical baseline with \(k=5\) and attribute all improvement to the model. Hold candidate and context budgets explicit. Raw-score normalization is another possible design, but it needs calibration evidence. RRF avoids raw-scale assumptions at the cost of discarding score gaps: a narrow first-place lead and an overwhelming lead receive the same rank contribution. Record that tradeoff rather than calling fusion universally optimal.
 
 Measure complementarity before fusing retrieval systems. Two different model names can return nearly identical errors, while a simple lexical branch may recover important IDs missed by a dense branch. Compare union coverage and final context quality at a fixed work budget before assuming a hybrid is useful.
 
@@ -88,18 +88,18 @@ Use one-based ranks and a positive fusion constant. Deduplicate each input ranki
 
 ## Calculate the fused ordering and its limits
 
-For constant c and one-based rank r, this fixture contributes 1/(c+r) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant 60, the scores are:
+For constant c and one-based rank r, this fixture contributes \(\frac{1}{c+r}\) from each list containing the document. Missing documents contribute zero. With lists[a, b, c] and[b, d, a] at constant 60, the scores are:
 
 | Document | Contributions | Fused score |
 | --- | --- | --- |
-| b | 1/62+1/61 | about 0.032522 |
-| a | 1/61+1/63 | about 0.032266 |
-| d | 1/62 | about 0.016129 |
-| c | 1/63 | about 0.015873 |
+| b | \(\frac{1}{62}+\frac{1}{61}\) | about 0.032522 |
+| a | \(\frac{1}{61}+\frac{1}{63}\) | about 0.032266 |
+| d | \(\frac{1}{62}\) | about 0.016129 |
+| c | \(\frac{1}{63}\) | about 0.015873 |
 
-The b-minus-a gap is 1/62-1/63=1/3906, about 0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to 0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf).
+The b-minus-a gap is \(\frac{1}{62}-\frac{1}{63}=\frac{1}{3906}\), about 0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to 0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf).
 
-The constant changes how strongly rank gaps matter. With a large constant relative to the list depth, each appearance contributes roughly 1/c, so cross-list occurrence count becomes influential and nearby ranks differ little. With a small positive constant, top ranks have much stronger relative weight. Neither setting is universally optimal. The fixture's60 is a declared choice, not a calibrated relevance probability or a domain-independent threshold.
+The constant changes how strongly rank gaps matter. With a large constant relative to the list depth, each appearance contributes roughly \(\frac{1}{c}\), so cross-list occurrence count becomes influential and nearby ranks differ little. With a small positive constant, top ranks have much stronger relative weight. Neither setting is universally optimal. The fixture's60 is a declared choice, not a calibrated relevance probability or a domain-independent threshold.
 
 RRF discards raw score gaps. A system giving its first document a tiny lead and another giving an overwhelming lead produce the same rank contribution. This makes fusion insensitive to raw score units, but it also discards potentially useful confidence information. A calibrated score-combination approach is a different design that needs validation of both scales and their transfer across query families.
 
@@ -172,7 +172,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** b ranks first, a second.
    **Verify:** Save the assertion results for exercise 1, including b ranks first, a second.
 
-2. **Inspect one exact contribution.** Calculate the fused score ofb as 1/62+1/61.
+2. **Inspect one exact contribution.** Calculate the fused score ofb as \(\frac{1}{62}+\frac{1}{61}\).
    **Expected:** computed b score equals that sum within 1e-12.
    **Verify:** Save the assertion results for exercise 2, including computed b score equals that sum within 1e-12.
 

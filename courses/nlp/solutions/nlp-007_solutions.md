@@ -12,7 +12,7 @@ Tea appears twice but only in one document, so its document frequency is one. Cu
 
 Different TF-IDF conventions omit one or more of these terms. The reference fixes the exact scikit-learn settings and checks the resulting array, so agreement is about a specified implementation rather than the vague label TF-IDF.
 
-**Expected:** [log(3/2)+1,1,log(3/2)+1] in the verified vocabulary order.
+**Expected:** \([\log(\frac{3}{2})+1,1,\log(\frac{3}{2})+1]\) in the verified vocabulary order.
 
 ## Exercise 3: Build the normalized rows
 
@@ -24,7 +24,7 @@ The first tea coordinate is twice its IDF because raw TF is two. Dividing by eac
 
 The query has only the tea coordinate, so the score reads that coordinate from each normalized document. This exact small calculation verifies the sparse API path. It does not establish that the highest lexical score is the best answer for a real user.
 
-**Expected:** First score 2a/sqrt(1+4a^2); second score zero.
+**Expected:** First score \(\frac{2a}{\sqrt{1+4a^2}}\); second score zero.
 
 ## Exercise 5: Handle OOV without refitting
 
@@ -36,7 +36,7 @@ Refitting on the query would alter the column space and make comparisons invalid
 
 Sublinear TF reduces the influence of repeated words while leaving IDF unchanged. This controlled comparison shows which part of the representation changed. Select the choice using the downstream task and an honest evaluation split, not from one favorable query.
 
-**Expected:** Tea weight becomes (1+log(2))*a, distinct from 2a.
+**Expected:** Tea weight becomes \((1+\log(2))\cdot a\), distinct from 2a.
 
 ## Transfer and limits
 

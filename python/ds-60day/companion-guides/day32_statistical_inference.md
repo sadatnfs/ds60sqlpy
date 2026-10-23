@@ -67,6 +67,15 @@ with the sample size and assumptions; a p-value alone hides the effect magnitude
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 1. Open the Day 32 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
@@ -227,9 +236,9 @@ Predict or plan before you run code. Use the hint only after an honest
 attempt, and record the evidence that would prove your result correct.
 
 4. **Prediction:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
-   **Progressive hint:** Standard error shrinks approximately with 1/sqrt(n); the underlying standardized effect does not grow merely because more rows were collected.
+   **Progressive hint:** Standard error shrinks approximately with \(\frac1{\sqrt n}\); the underlying standardized effect does not grow merely because more rows were collected.
 
-**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about sqrt(10), power rises, and the population effect size remains fixed.
+**Verify:** Prediction — with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
 
 5. **Implementation:** Build a seeded percentile-bootstrap confidence interval for a median difference. Validate empty groups and expose the number of resamples as a parameter.
    **Progressive hint:** Resample each group independently with replacement, compute one median difference per resample, then take symmetric quantiles.
@@ -239,7 +248,7 @@ attempt, and record the evidence that would prove your result correct.
 6. **Multiple-comparison reasoning:** You test 20 unrelated null hypotheses at alpha=0.05. Estimate the chance of at least one false positive, then compare Bonferroni and false-discovery-rate control for a planned analysis.
    **Progressive hint:** Under independent true nulls, use 1-(1-alpha)**20. Bonferroni controls family-wise error; Benjamini-Hochberg targets the expected false-discovery proportion among rejections.
 
-**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability 1 - 0.95^20 (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
+**Verify:** Multiple-comparison reasoning — show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.
 
 Before opening the reference solution, explain the relevant assumption,
 failure mode, and validation check for every answer.

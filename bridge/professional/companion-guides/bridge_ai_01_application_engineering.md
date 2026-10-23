@@ -43,6 +43,15 @@ The reference implementation and its evaluation also run offline:
 <!-- BEGIN BRIDGE ENRICHMENT: HOW TO RUN -->
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python + PostgreSQL engineering** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Start at the repository root. The answer-free starter is deliberately safe to
 run: it prints orientation text and does not call unfinished functions or
 contact PostgreSQL.

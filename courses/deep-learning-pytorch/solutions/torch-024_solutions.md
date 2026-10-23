@@ -18,28 +18,28 @@ Report confusion counts and their denominator, not only accuracy. A mean baselin
 
 ## Reading the implementation
 
-UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
+UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for 40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify \(\mathrm{logits}\ge 0\). Count TP, TN, FP, FN with boolean masks and verify their sum.
 
 ## Derive the classifier and audit every assessment row
 
-The training values[-2, -1, 1, 2] have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale sqrt(2.5). PyTorch's correction=0 matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce sqrt(10/3). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
+The training values[-2, -1, 1, 2] have mean zero and squared deviations summing to ten. Population variance divides by four, giving 2.5 and scale \(\sqrt{2.5}\). PyTorch's correction=0 matches NumPy's default used in the paired TensorFlow guide. Using the default sample correction would divide by three and produce \(\sqrt{\frac{10}{3}}\). Both scales are mathematically meaningful statistics, but they define different model inputs and update trajectories. Equal final class labels would not prove framework parity.
 
 The stored model weight has shape(1, 1), inputs and targets have shape(4, 1), and logits have shape(4, 1). The bias is deliberately absent. Binary cross-entropy with logits is applied directly to those logits. Applying sigmoid first and then passing its output to the logits loss would change the objective. A target shaped(4, ) is also a different interface from(4, 1), even when it contains the same four numbers; preserve the declared axes rather than relying on broadcasting or reshaping after a failure.
 
-For one normalized feature t and label y, the logit is z=wt and the loss derivative with respect to w is(sigmoid(z)-y)t. At w=0, all probabilities are one-half. Writing s=sqrt(2.5), the four derivative contributions are -1/s, -1/(2s), -1/(2s), -1/s. Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
+For one normalized feature t and label y, the logit is \(z=\mathrm{wt}\) and the loss derivative with respect to w is \((\operatorname{sigmoid}(z)-y)t\). At \(w=0\), all probabilities are one-half. Writing \(s=\sqrt{2.5}\), the four derivative contributions are \(\frac{-1}{s}\), -1/(2s), -1/(2s), \(\frac{-1}{s}\). Their mean is -3/(4s), approximately-0.474342. The first SGD step at 0.1 therefore makes w approximately 0.0474342. This analytic sign and scale explain why the later fixed 40-step run should have a positive finite weight.
 
 The data are separable under this one-feature rule. In an unregularized logistic model, continued loss reduction can push the weight larger without a finite optimum that must be reached. Forty steps are a declared computational budget, not evidence of convergence or a reason to repeat training until a preferred test score appears. If early stopping or hyperparameters are to be selected, they need a separate selection procedure and data boundary.
 
-The decision rule is logit>=0, which corresponds to probability>=0.5. At the zero initial weight, both test logits are exactly zero and this tie convention predicts the positive class for both rows. After a positive weight, the transformed-3 point has a negative logit and the+3 point a positive one. The final confusion table is:
+The decision rule is \(\mathrm{logit}\ge 0\), which corresponds to probability>=0.5. At the zero initial weight, both test logits are exactly zero and this tie convention predicts the positive class for both rows. After a positive weight, the transformed-3 point has a negative logit and the+3 point a positive one. The final confusion table is:
 
 | Test input | Truth | Decision | Count category |
 | --- | --- | --- | --- |
-| -3 | negative | negative | TN=1 |
-| +3 | positive | positive | TP=1 |
+| -3 | negative | negative | \(\mathrm{TN}=1\) |
+| +3 | positive | positive | \(\mathrm{TP}=1\) |
 
-FP and FN are zero, and the four counts sum to two. The fixed class-zero baseline instead has TN=1, FN=1. Its one error and the model's zero errors are evaluated on the same two units. This is a useful paired comparison, but one changed decision would move accuracy by 50 percentage points, so the apparent difference is not a stable population estimate.
+FP and FN are zero, and the four counts sum to two. The fixed class-zero baseline instead has \(\mathrm{TN}=1\), \(\mathrm{FN}=1\). Its one error and the model's zero errors are evaluated on the same two units. This is a useful paired comparison, but one changed decision would move accuracy by 50 percentage points, so the apparent difference is not a stable population estimate.
 
-The subgroup counterexample changes only the positive row's decision. The negative group then has 0 errors out of 1 and the positive group 1 out of 1. Reporting only an aggregate error rate of 1/2 hides which group failed. At the same time, one observation per group is not sufficient for a reliable subgroup performance claim. These sign-based teaching groups are not a demonstrated fairness analysis of a real population.
+The subgroup counterexample changes only the positive row's decision. The negative group then has 0 errors out of 1 and the positive group 1 out of 1. Reporting only an aggregate error rate of \(\frac{1}{2}\) hides which group failed. At the same time, one observation per group is not sufficient for a reliable subgroup performance claim. These sign-based teaching groups are not a demonstrated fairness analysis of a real population.
 
 Distinct train/test IDs are necessary but not sufficient for independence. Real data can contain copied examples, shared source families, temporal leakage or features only available after the decision. The literal fixture has none of those hidden sources by construction, but its rule is already visible to the learner. Preserve this difference between a procedure test and an undisclosed final assessment.
 
@@ -139,9 +139,9 @@ report={group:(int(broken[i]!=truth[i]),1) for i,group in enumerate(['negative',
 assert report=={'negative':(0,1),'positive':(1,1)}
 ```
 
-**Expected:** negative 0/1errors; positive 1/1.
+**Expected:** negative 0/1errors; positive \(\frac{1}{1}\).
 
-**Verify:** Compare the computed values or written argument with negative 0/1errors; positive 1/1.
+**Verify:** Compare the computed values or written argument with negative 0/1errors; positive \(\frac{1}{1}\).
 
 ## Review after comparison
 

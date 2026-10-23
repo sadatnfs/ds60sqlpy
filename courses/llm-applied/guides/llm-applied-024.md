@@ -18,9 +18,9 @@ The default capstone assembles an offline extractive RAG baseline over authored 
 
 The Methods Desk began with a request for conversion and an interpretation of a checkout change. The course has now supplied the concepts needed to answer that request carefully: applicable source versions, structured extraction, retrieval, support checks, deterministic tools, adaptation objectives and operational boundaries. The final task is to connect them without claiming that a list of components is already an integrated system.
 
-Use the illustrative event case from the opening chapter. There are 12 recorded visits and four purchases, including two visits and one purchase from test accounts. Under the stated exclusion policy, the descriptive rate is 3/10=0.3. A useful answer identifies the reporting period, the applicable definition and exclusion, the calculation artifact and the limits of the interpretation.
+Use the illustrative event case from the opening chapter. There are 12 recorded visits and four purchases, including two visits and one purchase from test accounts. Under the stated exclusion policy, the descriptive rate is \(\frac{3}{10}=0.3\). A useful answer identifies the reporting period, the applicable definition and exclusion, the calculation artifact and the limits of the interpretation.
 
-Notice that both 4/12 and 3/10 satisfy a simple count schema with purchases no greater than visits. A numerical validator cannot decide which population was intended from those values alone. Eligibility and provenance must be established before the calculation. This is why the evidence chain matters even when the arithmetic is elementary.
+Notice that both \(\frac{4}{12}\) and \(\frac{3}{10}\) satisfy a simple count schema with purchases no greater than visits. A numerical validator cannot decide which population was intended from those values alone. Eligibility and provenance must be established before the calculation. This is why the evidence chain matters even when the arithmetic is elementary.
 
 The causal question needs more. A handbook instruction saying “Randomize by account” establishes a recommended design, not proof that a particular experiment actually followed it. The assistant needs the experiment's assignment and analysis evidence before claiming a treatment effect. A source can be authoritative about a method while not being evidence that the method was executed.
 
@@ -56,7 +56,7 @@ The capstone's local receipt therefore correctly records that pretrained generat
 
 ## Evaluate the complete request, including useful refusal
 
-The three fixed status cases contain one answered definition and two correct unknowns. Status accuracy is 3/3, while answer coverage is 1/3. That is an appropriate result for those authored cases, not a general assistant benchmark. A useful broader assessment needs representative supported questions, missing-evidence cases, access constraints, source revisions, calculations and interpretation requests.
+The three fixed status cases contain one answered definition and two correct unknowns. Status accuracy is \(\frac{3}{3}\), while answer coverage is \(\frac{1}{3}\). That is an appropriate result for those authored cases, not a general assistant benchmark. A useful broader assessment needs representative supported questions, missing-evidence cases, access constraints, source revisions, calculations and interpretation requests.
 
 Score numerical fidelity and support independently. Corrupt a citation span while keeping the answer text plausible. Change an eligibility rule while keeping raw counts fixed. Provide a correct tool result and check whether the explanation preserves it. Ask for a causal conclusion without assignment evidence. These controlled cases reveal which interface fails and prevent a broad average from concealing an important boundary.
 
@@ -110,11 +110,11 @@ This is an explicit lookup-and-extraction baseline. It does not embed a natural-
 | --- | --- | --- |
 | Scope filtering | Restricted target absent from public instance | Authenticated dynamic policy integration |
 | Source extraction | Exact first-sentence slice and version | General claim support and conflict handling |
-| Numerical calculation | Validated 3/10=0.3 and invalid-count rejection | Real input provenance and analysis design |
+| Numerical calculation | Validated \(\frac{3}{10}=0.3\) and invalid-count rejection | Real input provenance and analysis design |
 | Task statuses | Three fixed expected statuses match | Independent question families and utility |
 | Model generation | Not invoked by this baseline | Actual candidate outputs and grounding evaluation |
 
-The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is 3/3, but answer coverage is 1/3. That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
+The three status cases include one answered definition and two correct unknowns: missing comet evidence and a restricted threshold under public scope. Status accuracy is \(\frac{3}{3}\), but answer coverage is \(\frac{1}{3}\). That is appropriate for these authored cases; it is not evidence that every future question is answered correctly. A high status score can coexist with low usefulness if the evaluation contains too many easy refusals.
 
 Citation integrity is checked separately by slicing the original document. This catches a corrupted span even if status remains answered. It does not prove that the first sentence contains every caveat needed by a future question. The metric document's second sentence excludes test accounts, while the returned first sentence gives the formula. A question requiring eligibility details would need the additional span; the current fixed key is not a general policy-synthesis test.
 

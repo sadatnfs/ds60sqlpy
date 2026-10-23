@@ -47,7 +47,7 @@ try {
     $env:DS60_POSTGRES_PORT = [string]$DatabasePort
     $Compose = @('compose', '--project-directory', $RepoRoot, '--project-name', $Project,
                  '--file', (Join-Path $RepoRoot 'compose.yaml'), '--profile', 'lab')
-    $Url = "http://127.0.0.1:$Port/learn"
+    $Url = "http://127.0.0.1:$Port/classroom"
     Write-Host "Local lab: $Url"
     Write-Host "Saved progress and pads: $DataDir"
     if ($Action -eq 'doctor') { Write-Host 'Docker and Compose are ready. No data folder was created.'; exit 0 }

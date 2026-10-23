@@ -88,7 +88,7 @@ Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. 
 
 ## Calculate metrics without losing the task's evidence structure
 
-For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall 2/2=1. The first relevant item is at rank two, giving reciprocal rank 1/2. If the caller truncates to the first two items, recall becomes 1/2 while reciprocal rank remains 1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall \(\frac{2}{2}=1\). The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes \(\frac{1}{2}\) while reciprocal rank remains \(\frac{1}{2}\). The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
 
 A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
 
@@ -96,7 +96,7 @@ Duplicate retrieved IDs are rejected before metrics. Without that boundary, a na
 
 For an unanswerable question, the relevant set is empty. Recall has a zero denominator, so the helper returns None and separately assigns reciprocal rank zero. Treating undefined recall as one would reward a system merely for facing a question with no evidence. Treating it as zero inside every average would confound retriever quality on answerable cases with the prevalence of unanswerable cases. Report the number of answerable cases and score abstention separately.
 
-Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is 2/10=0.2. Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
+Suppose one question has one relevant document and retrieves it, while another has nine relevant documents and retrieves one. Macro-average recall is(1+1/9)/2=5/9. Micro recall over all relevant IDs is \(\frac{2}{10}=0.2\). Neither arithmetic result is inherently wrong: one weights questions equally, the other weights relevant-document opportunities equally. The population and task contract must choose the estimand before seeing which number looks better.
 
 The oracle fixture contains saved labels observed={q1:0, q2:0} and oracle={q1:1, q2:0}. It calculates a paired gain of one for q1 and zero for q2, averaging 0.5 over those two fixed IDs. No language model is invoked by those dictionaries, and the values are not empirical measurements of a named model. They demonstrate how an actual paired result would be represented and analyzed.
 

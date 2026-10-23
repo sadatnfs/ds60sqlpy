@@ -155,7 +155,7 @@ published_url() {
   address="$("${compose[@]}" port postgres "$internal_port")" || return 1
   [[ "$address" =~ ^127[.]0[.]0[.]1:([0-9]+)$ ]] || return 1
   [ "${BASH_REMATCH[1]}" -gt 0 ] || return 1
-  printf 'http://%s/journeys' "$address"
+  printf 'http://%s/classroom' "$address"
 }
 case "$action" in
   doctor) printf 'Local Linux Docker engine and Compose %s are ready.\nProject: %s\nProfiles: %s\n' "$version" "$project_name" "${selected_profiles[*]}"; exit 0 ;;
@@ -214,7 +214,7 @@ printf '\nStarting the database and selecting the published browser port...\n'
 "${compose[@]}" up -d --no-build --pull never --wait --wait-timeout 180 postgres
 url="$(published_url)" || fail 'Docker did not report a loopback browser mapping for this project.'
 public_port="${url#http://127.0.0.1:}"
-public_port="${public_port%/journeys}"
+public_port="${public_port%/classroom}"
 export DS60_PUBLIC_PORT="$public_port"
 printf '\nStarting the application with its exact public Host/Origin...\n'
 "${compose[@]}" up -d --no-build --pull never --wait --wait-timeout 180 lab
@@ -231,7 +231,7 @@ if command -v curl >/dev/null 2>&1; then
 else
   if ! (
     exec 3<>"/dev/tcp/127.0.0.1/$public_port" || exit 1
-    printf 'GET /journeys HTTP/1.0\r\nHost: 127.0.0.1:%s\r\nConnection: close\r\n\r\n' "$public_port" >&3 || exit 1
+    printf 'GET /classroom HTTP/1.0\r\nHost: 127.0.0.1:%s\r\nConnection: close\r\n\r\n' "$public_port" >&3 || exit 1
     IFS= read -r -t 10 response <&3 || exit 1
     [[ "$response" =~ ^HTTP/1[.][01][[:space:]]200[[:space:]] ]] || exit 1
     exec 3>&-

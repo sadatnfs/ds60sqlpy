@@ -13,7 +13,7 @@ try:
         raise ValueError("Invalid application port")
     opener = build_opener(ProxyHandler({}))
     request = Request(
-        f"http://127.0.0.1:{port}/learn", headers={"Host": f"127.0.0.1:{public_port}"}
+        f"http://127.0.0.1:{port}/classroom", headers={"Host": f"127.0.0.1:{public_port}"}
     )
     with opener.open(request, timeout=2) as response:
         if response.status != 200:

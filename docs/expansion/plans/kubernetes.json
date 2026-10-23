@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "kubernetes",
   "title": "Kubernetes: from first object to platform reasoning",
-  "summary": "42 planned lessons teach observable reconciliation, workload networking, identity, state, release and recovery on host-owned disposable kind fixtures. No cluster or adapter is installed.",
+  "summary": "42 lessons in Kubernetes, from workloads and reconciliation to networking, identity, state, releases and recovery. Learn with explained manifests and bounded practice on disposable local fixtures.",
   "north_star": "Declare an owned workload, prove desired state, ready traffic paths and data behavior, then diagnose and recover a bounded failure without touching another target.",
   "entry_prerequisites": [],
   "runtime_profiles": [

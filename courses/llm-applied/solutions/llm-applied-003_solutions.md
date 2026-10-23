@@ -22,7 +22,7 @@ Build a prompt as separate instruction, evidence andquestion fields before seria
 
 ## Derive a context allocation and identify its missing terms
 
-Let C be a model's allowed context budget, I instruction tokens, Q question tokens, H chat-template and tool-schema overhead, R reserved response capacity and E selected evidence tokens. A complete allocation must satisfy I+Q+H+R+E<=C under the intended tokenizer and serving contract. A whitespace word count is a different unit. The fixture deliberately models only E<=C-R so its arithmetic is inspectable.
+Let C be a model's allowed context budget, I instruction tokens, Q question tokens, H chat-template and tool-schema overhead, R reserved response capacity and E selected evidence tokens. A complete allocation must satisfy \(I+Q+H+R+E\le C\) under the intended tokenizer and serving contract. A whitespace word count is a different unit. The fixture deliberately models only \(E\le C-R\) so its arithmetic is inspectable.
 
 With total12 and reserve 4, the evidence allowance is eight whitespace units. The first item costs five and is admitted. The second costs four; 5+4 would exceed eight, so it is omitted. Used evidence is five and unused allowance is three. Returning only five used units is correct under a whole-item policy. It is not evidence that the policy maximizes evidence utility or uses every possible unit.
 

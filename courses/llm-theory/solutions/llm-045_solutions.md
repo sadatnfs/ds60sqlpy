@@ -22,7 +22,7 @@ A gated feed-forward network multiplies two projections. SwiGLU uses SiLU(xWg) e
 
 ## Reading the implementation
 
-All examples use float64 and small feature widths. RMSNorm computes x/sqrt(mean(x²)+eps) times gain. LayerNorm computes(x-mean(x))/sqrt(mean((x-mean(x))²)+eps). A pre/post comparison uses a zero linear branch so the residual distinction is isolated. SwiGLU uses F.silu for the gate projection and an elementwise product with the up projection. Check the three matrix shapes before counting parameters or requesting gradients.
+All examples use float64 and small feature widths. RMSNorm computes \(\frac{x}{\sqrt{\operatorname{mean}({x}^{2})+\epsilon}}\) times gain. LayerNorm computes \(\frac{x-\operatorname{mean}(x)}{\sqrt{\operatorname{mean}((x-\operatorname{mean}(x))^2)+\epsilon}}\). A pre/post comparison uses a zero linear branch so the residual distinction is isolated. SwiGLU uses F.silu for the gate projection and an elementwise product with the up projection. Check the three matrix shapes before counting parameters or requesting gradients.
 
 ## Exercise 1: Compare RMSNorm and LayerNorm
 
@@ -62,7 +62,7 @@ torch.testing.assert_close(post@torch.ones(3,dtype=torch.float64),torch.zeros(3,
 
 ## Exercise 3: Calculate a SwiGLU gate derivative
 
-The question is: Use scalar g=0, u=2 and output SiLU(g)*u.
+The question is: Use scalar \(g=0\), \(u=2\) and output SiLU(g)*u.
 
 At zero, SiLU has derivative one-half. Multiplication by up2 givesgate gradient 1, while the up branch sees the zero gate value. A connected zero gradient is not a missing path.
 
@@ -78,7 +78,7 @@ assert output.item()==0 and gate.grad.item()==1 and up.grad.item()==0
 
 ## Exercise 4: Check the RMSNorm Jacobian formula
 
-The question is: Compare autograd with J=I/r-xxT/(d*r³) at x=[1, 2, 3].
+The question is: Compare autograd with \(J=\frac{I}{r}-\frac{xx^{\mathsf T}}{d\cdot {r}^{3}}\) at x=[1, 2, 3].
 
 The derivative contains a directcoordinate term andacoupling term through the sharedRMSdenominator. Omitting the coupling wouldtreat normalization asconstant scaling andproduce incorrectgradients.
 
@@ -95,7 +95,7 @@ torch.testing.assert_close(automatic,analytic,atol=1e-10,rtol=0)
 
 ## Exercise 5: Match feed-forward parameter budgets
 
-The question is: Compare plain FFN model width d=4, hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4.
+The question is: Compare plain FFN model width \(d=4\), hidden 6 with SwiGLU hidden width 4, excluding biases; execute a gated block with input and output width 4.
 
 Matching hidden widths wouldnotmatch parameter counts. The2/3 width relation is a budget arithmetic rule here, not a universal model-quality prescription.
 

@@ -10,7 +10,7 @@ Preference learning optimizes a comparison supplied by its feedback data. This c
 
 ## Purpose and mental model
 
-Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss log(2). The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
+Preference optimization uses labels describing which of two responses is preferred. A DPO-style objective compares the policy chosen-versus-rejected log-probability advantage with the same advantage under a fixed reference policy, then applies a logistic loss scaled by beta. Equal adjusted margins give loss \(\log(2)\). The objective can be differentiated directly from offline preference pairs without running an online reinforcement-learning environment.
 
 RLHF is a broader family of workflows in which human feedback informs a reward or preference signal and a policy optimization procedure. A reward model and an online policy update introduce additional state, exploration and reward-hacking risks. This chapter performs a real scalar PyTorch update on a DPO-style preference margin and contrasts its evidence with an RLHF workflow. It does not claim to train a reward model, execute online RL, or establish factuality. A preferred answer can still be unsupported or wrong if the preference labels reward style over truth.
 
@@ -32,9 +32,9 @@ The reference makes the comparison relative to an existing distribution. A respo
 
 ## Relative advantage does not determine absolute probability
 
-An illustrative probability example makes the distinction concrete. Suppose the reference assigns probabilities 0.4 to the chosen response and 0.3 to the rejected response, leaving 0.3 for other responses. A candidate assigns 0.3 and 0.1, leaving 0.6 elsewhere. The chosen response became less probable in absolute terms, but its advantage over the rejected response increased from 4/3 to 3.
+An illustrative probability example makes the distinction concrete. Suppose the reference assigns probabilities 0.4 to the chosen response and 0.3 to the rejected response, leaving 0.3 for other responses. A candidate assigns 0.3 and 0.1, leaving 0.6 elsewhere. The chosen response became less probable in absolute terms, but its advantage over the rejected response increased from \(\frac{4}{3}\) to 3.
 
-The adjusted log-ratio is log(3/(4/3))=log(9/4), about 0.81093. At beta 0.5, the margin is log(3/2), and the logistic loss is log(5/3), about 0.51083, below log2. This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
+The adjusted log-ratio is \(\log(\frac{3}{\frac{4}{3}})=\log(\frac{9}{4})\), about 0.81093. At beta 0.5, the margin is \(\log(\frac{3}{2})\), and the logistic loss is \(\log(\frac{5}{3})\), about 0.51083, below log2. This is a hand calculation for valid illustrative distributions, not a measured model update. It shows why a preference-loss improvement should not be paraphrased as “every chosen answer became more likely” or as a task-accuracy improvement without examining the actual outputs.
 
 Sequence scoring adds another assumption. A joint response log probability is a sum of conditional token log probabilities under the chosen mask and stopping convention. Averaging by response length defines a different score. Prompt positions, end markers and truncation must be handled consistently for policy and reference. A convenient normalization should not be introduced silently while retaining the interpretation of a different objective.
 
@@ -86,9 +86,9 @@ Represent the policy log-probability difference as a trainable scalar for the sm
 
 ## Derive the DPO-style scalar update
 
-Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is z=beta*(d-r), and the loss is log(1+exp(-z)), implemented through softplus for numerical stability. Its derivative with respect to d is-beta*sigmoid(-z). The second derivative is beta²*sigmoid(z)*sigmoid(-z), nonnegative, so this scalar loss is convex in d for a fixed reference.
+Let d be the policy chosen-minus-rejected log-probability difference and r the same difference under a fixed reference. The adjusted margin is \(z=\beta\cdot (d-r)\), and the loss is \(\log(1+\exp(-z))\), implemented through softplus for numerical stability. Its derivative with respect to d is \(-\beta\operatorname{sigmoid}(-z)\). The second derivative is \({\beta}^{2}\cdot \sigma(z)\cdot \sigma(-z)\), nonnegative, so this scalar loss is convex in d for a fixed reference.
 
-At d=r=0 and beta 0.5, the loss is log2, about 0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is 0.25*0.25=0.0625. SGD with learning rate 0.2 moves d to 0-0.2*(-0.25)=0.05. The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
+At \(d=r=0\) and beta 0.5, the loss is log2, about 0.693147. The derivative is-0.5*0.5=-0.25, and the curvature is \(0.25\cdot 0.25=0.0625\). SGD with learning rate 0.2 moves d to \(0-0.2\cdot (-0.25)=0.05\). The new adjusted margin is 0.025 and the loss is about 0.680725. This is an actual scalar gradient update in the reference.
 
 A positive step increases the chosen-response advantage relative to the reference, but it does not uniquely specify the two response probabilities. Many pairs of chosen/rejected log probabilities can have the same difference. The fixture optimizes a free scalar and does not implement a vocabulary softmax, sequence model, KL measurement or normalized policy distribution. Calling it DPO-style margin mechanics preserves that distinction.
 
@@ -106,7 +106,7 @@ Feedback quality remains decisive. If annotators prefer a confident but unsuppor
 
 **Does a lower preference loss establish factuality?** It establishes better agreement with the supplied preference objective on the measured pairs. Factual support depends on the rubric, evidence and independent evaluation.
 
-**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is beta/2; changing it changes the update even before considering a full model's dynamics.
+**Why does beta matter beyond a name in configuration?** It scales the margin, derivative and curvature. At zero margin the gradient magnitude is \(\frac{\beta}{2}\); changing it changes the update even before considering a full model's dynamics.
 
 ## Worked example / walkthrough
 
@@ -125,7 +125,7 @@ loss=F.softplus(-beta*(difference-reference))
 np.testing.assert_allclose(loss.item(),np.log(2),atol=1e-12,rtol=0)
 ```
 
-**Expected:** loss log(2).
+**Expected:** loss \(\log(2)\).
 
 ### Example B: Inspect the preference gradient
 
@@ -146,25 +146,25 @@ opt=torch.optim.SGD([difference],lr=.2); opt.step(); after=F.softplus(-beta*(dif
 np.testing.assert_allclose(difference.item(),.05,atol=1e-12,rtol=0); assert after.item()<loss.item()
 ```
 
-**Expected:** difference.05; loss below log(2).
+**Expected:** difference.05; loss below \(\log(2)\).
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: loss log(2). offline update True; reward_model_trained False; online_rl False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: loss \(\log(2)\). offline update True; reward_model_trained False; online_rl False. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Calculate the equal-margin loss.** Set policy difference 0, reference difference 0, beta.5.
-   **Expected:** loss log(2).
-   **Verify:** Save the assertion results for exercise 1, including loss log(2).
+   **Expected:** loss \(\log(2)\).
+   **Verify:** Save the assertion results for exercise 1, including loss \(\log(2)\).
 
 2. **Inspect the preference gradient.** Backpropagate the equal-margin loss.
    **Expected:** gradient-.25.
    **Verify:** Save the assertion results for exercise 2, including gradient-.25.
 
 3. **Perform an actual update.** Take SGD at 0.2 on the scalar policy difference and recompute the loss.
-   **Expected:** difference.05; loss below log(2).
-   **Verify:** Save the assertion results for exercise 3, including difference.05; loss below log(2).
+   **Expected:** difference.05; loss below \(\log(2)\).
+   **Verify:** Save the assertion results for exercise 3, including difference.05; loss below \(\log(2)\).
 
 4. **Reverse the preference.** At zero policy difference, reverse the chosen/rejected orientation and inspect the gradient.
    **Expected:** gradient+.25.

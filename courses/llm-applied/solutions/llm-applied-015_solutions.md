@@ -22,7 +22,7 @@ Construct shifted inputs and answer-only labels, using-100 for the prompt-predic
 
 ## Trace the full-SFT state and objective
 
-The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with B=2, T=3, token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
+The model uses vocabulary16, width32, two attention heads and context capacity32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
 
 The trainable parameter ledger is explicit:
 

@@ -36,7 +36,7 @@ A tensor's value, storage aliases, graph role and stored gradient are related bu
 
 For tensors requiring gradients, a leaf is not the result of a tracked differentiable operation. An intermediate such as 2 w has an operation history even when assigned to a named variable. Tensors not requiring gradients are treated as leaves by convention. A conversion or copy operation can therefore change the graph role of a tracked tensor; inspect the actual metadata instead of assuming every user-named tensor is a leaf. [PyTorch 2.9 is_leaf](https://docs.pytorch.org/docs/2.9/generated/torch.Tensor.is_leaf.html).
 
-The first fixture has w=0 and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
+The first fixture has \(w=0\) and intermediate=2w. Backpropagating that scalar gives incoming sensitivity one at the intermediate and sensitivity two at w. The intermediate's gradient is visible only because retain_grad was requested. Its absence by default would be a storage-policy observation, not evidence that the chain rule failed.
 
 Now reset w.grad to None and compute(w-2)². The new contribution is -4. Building the same expression again creates a fresh graph, but backward adds another -4 into the existing gradient buffer, leaving -8. A fresh graph does not clear a previous buffer. Resetting to None before the third computation gives -4 again without changing w itself.
 
@@ -63,7 +63,7 @@ assert w.is_leaf and not intermediate.is_leaf and w.grad.item()==2 and intermedi
 
 ## Exercise 2: Observe accumulation across fresh graphs
 
-The question is: Compute (w-2)**2 twice at w=0 without clearing grad.
+The question is: Compute \({\left(w-2\right)}^{2}\) twice at \(w=0\) without clearing grad.
 
 The second forward creates a new graph, but backward still adds into the existing leaf gradient buffer. Graph freshness does not imply gradient-buffer freshness.
 

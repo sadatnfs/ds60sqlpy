@@ -104,9 +104,9 @@ pairs=[(a,b) for doc in documents for a,b in zip(doc[:-1],doc[1:])]
 assert len(pairs)==4 and (3,8) not in pairs
 ```
 
-**Expected:** 3+1=4 targets, not5.
+**Expected:** \(3+1=4\) targets, not5.
 
-**Verify:** Compare the computed values or written argument with 3+1=4 targets, not5.
+**Verify:** Compare the computed values or written argument with \(3+1=4\) targets, not5.
 
 ## Review after comparison
 

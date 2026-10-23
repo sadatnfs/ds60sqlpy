@@ -8,13 +8,13 @@ Unsupervised methods describe structure without a supervised target, but they st
 
 ### K-means and mixtures answer different questions
 
-K-means minimizes sum_i ||x_i-mu_(z_i)||^2. Assignment chooses the nearest centroid; updating each centroid to its assigned mean cannot increase that objective. Repeating these steps reaches a local solution, so multiple initializations matter. Euclidean scaling, outliers and a forced number of roughly compact groups shape its output.
+K-means minimizes \(\sum_i\lVert x_i-\mu_{z_i}\rVert_2^2\). Assignment chooses the nearest centroid; updating each centroid to its assigned mean cannot increase that objective. Repeating these steps reaches a local solution, so multiple initializations matter. Euclidean scaling, outliers and a forced number of roughly compact groups shape its output.
 
-A Gaussian mixture instead models p(x)=sum_k pi_k*N(x|mu_k,Sigma_k). The E-step computes soft posterior component responsibilities; the M-step updates parameters using those weights. Flexible covariances model elongated groups but can collapse around individual points without regularization. Mixture likelihood can improve by adding components even when those components do not correspond to meaningful categories. Compare predictive density, complexity, stability and domain utility.
+A Gaussian mixture instead models \(p(x)=\sum_k\pi_k\mathcal{N}(x\mid\mu_k,\Sigma_k)\). The E-step computes soft posterior component responsibilities; the M-step updates parameters using those weights. Flexible covariances model elongated groups but can collapse around individual points without regularization. Mixture likelihood can improve by adding components even when those components do not correspond to meaningful categories. Compare predictive density, complexity, stability and domain utility.
 
 ### Latent dimensions are not always clusters
 
-Factor analysis writes x=Lambda*f+epsilon and separates shared covariance from feature-specific noise. PCA minimizes reconstruction error without that noise model. Confirmatory factor analysis imposes a specified loading pattern; identification requires constraints on scales and rotations. A two-dimensional t-SNE or UMAP view is a visualization whose neighborhood construction and optimization can change apparent separation. Global distances, cluster sizes and empty gaps should not be interpreted as calibrated population facts.
+Factor analysis writes \(x=\Lambda f+\epsilon\) and separates shared covariance from feature-specific noise. PCA minimizes reconstruction error without that noise model. Confirmatory factor analysis imposes a specified loading pattern; identification requires constraints on scales and rotations. A two-dimensional t-SNE or UMAP view is a visualization whose neighborhood construction and optimization can change apparent separation. Global distances, cluster sizes and empty gaps should not be interpreted as calibrated population facts.
 
 For every grouping, ask whether it survives resampling, scaling changes and reasonable parameters, and whether it supports a useful decision. If cluster assignments will govern actions, evaluate those actions directly.
 
@@ -182,7 +182,7 @@ Combine multiple partitions through co-assignment or other consensus rules. This
 
 ### Case study: derive soft mixture membership
 
-Take a one-dimensional two-component Gaussian mixture with equal weights, means minus one and plus one, and unit variances. At x=0 the component likelihoods are equal, giving responsibility .5 for each. At x=1, the plus-one component has log-likelihood advantage two over the minus-one component, so its responsibility is exp(2)/(1+exp(2)), about .881. The assignment is graded rather than an absolute declaration of category identity.
+Take a one-dimensional two-component Gaussian mixture with equal weights, means minus one and plus one, and unit variances. At \(x=0\) the component likelihoods are equal, giving responsibility .5 for each. At \(x=1\), the plus-one component has log-likelihood advantage two over the minus-one component, so its responsibility is \(\frac{\exp(2)}{1+\exp(2)}\), about .881. The assignment is graded rather than an absolute declaration of category identity.
 
 The EM algorithm alternates these responsibilities with weighted estimates of component means, covariances and mixing weights. Each exact EM step does not decrease the observed-data likelihood, but it can converge to a local optimum. Multiple starts and regularization matter. In an unconstrained Gaussian mixture, a component can collapse onto one point with variance approaching zero, making likelihood arbitrarily large. A covariance floor prevents that numerical degeneracy but adds a modeling constraint.
 
@@ -198,7 +198,7 @@ K-means forces every point into one of K compact regions. DBSCAN can identify de
 
 ### Case study: a latent factor is a measurement model
 
-Let two observed features satisfy x1=f+epsilon1 and x2=2*f+epsilon2, with Var(f)=1, independent errors, and error variances .5 and two. Their covariance matrix is [[1.5,2],[2,6]]. The shared latent factor accounts for covariance two, while the diagonal contains both shared and feature-specific variation.
+Let two observed features satisfy \(x_1=f+\epsilon_1\) and \(x_2=2f+\epsilon_2\), with \(\operatorname{Var}(f)=1\), independent errors, and error variances .5 and two. Their covariance matrix is [[1.5,2],[2,6]]. The shared latent factor accounts for covariance two, while the diagonal contains both shared and feature-specific variation.
 
 PCA seeks a direction explaining total observed variance, including those unequal noise variances. Factor analysis explicitly separates shared covariance from unique noise under its assumptions. A confirmatory model might constrain which indicators load on a construct, while an exploratory model examines alternative loading structures. Rotation and scale choices mean that factor labels require substantive validation, not merely a mathematically convenient solution.
 

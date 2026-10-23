@@ -36,11 +36,11 @@ The third worked message contains three kinds of candidate. The all-zero one has
 
 ## Exercise 5: Score entity identities at the declared granularity
 
-An entity tuple includes document identity, start, end and canonical ID. Intersecting the predicted and gold sets finds two exact agreements. One prediction is absent from gold, and one gold item is absent from predictions. Precision and recall therefore have the same numeric value, 2/3, for different denominators.
+An entity tuple includes document identity, start, end and canonical ID. Intersecting the predicted and gold sets finds two exact agreements. One prediction is absent from gold, and one gold item is absent from predictions. Precision and recall therefore have the same numeric value, \(\frac{2}{3}\), for different denominators.
 
 Moving a predicted reference to another document must break the match even when its text and local offsets remain identical. Dropping the document ID from the evaluator would incorrectly combine unrelated evidence. The helper returns `None` when a metric's denominator is zero. That is an explicit convention, not an implied zero or perfect score. A report should show TP, FP and FN so the reader can interpret such cases.
 
-**Expected:** TP=2, FP=1, FN=1; precision and recall 2/3. Moving one correct entity to another document reduces TP to 1.
+**Expected:** \(\mathrm{TP}=2\), \(\mathrm{FP}=1\), \(\mathrm{FN}=1\); precision and recall \(\frac{2}{3}\). Moving one correct entity to another document reduces TP to 1.
 
 ## Exercise 6: A mention is not an authorized action
 

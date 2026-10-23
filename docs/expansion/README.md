@@ -1,8 +1,17 @@
 # Five new learning journeys
 
+> **Developer design archive:** this directory records the expansion design
+> and planning contracts. The public learner entrypoint is now `/classroom`,
+> combining Python, SQL, bridge and all module/book subjects. The old
+> `/journey-preview` browser path is a compatibility alias to that classroom.
+> Preview JSON, templates and the preview generator remain developer planning
+> artifacts; they are not a second learner application or runtime proof.
+> Read [the classroom guide](../classroom-experience.md) for the current experience.
+
+
 Original design review:22October2026. This folder retains the five original
 curriculum blueprints and their interactive design preview. Active authored
-lessons now live under `courses/` and run through `/journeys`; additional
+lessons now live under `courses/` and run through `/classroom`; additional
 subjects use additive track manifests. The [implementation checkpoint](../implementation/CHECKPOINT.md)
 records current content, runtime evidence and remaining work. The
 [Docker classroom](../docker-classroom.md) is the learner entry point.
@@ -14,7 +23,7 @@ journey for authored lessons and the declared runtime profile for each pad.
 ## Start the review
 
 1. Read [the teaching experience](learning-experience.md) and [the lesson contract](lesson-contract.md).
-2. Open the app's `/journey-preview` page to explore the five paths and their pilot walkthroughs. The preview also works as a standalone HTML file. It performs browser reasoning checks, not compiler, cluster, or training execution.
+2. For historical design comparison, inspect the standalone generated `journey_preview.html` artifact. It records the original five-path pilot and browser reasoning checks. The public app's old `/journey-preview` path now opens the unified `/classroom` shell; use that shell for all current subjects and actual runtime readiness.
 3. Review the subject plans below, including their prerequisites, capstones, and pilot exercises.
 4. Use [the architecture](architecture.md), [runtime and testing plan](runtime-and-testing.md), and [delivery roadmap](delivery-roadmap.md) to turn one vertical slice at a time into a supported course.
 

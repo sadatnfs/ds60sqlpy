@@ -48,15 +48,15 @@ Compute boolean error vectors before aggregation. Groupby declared labels and re
 
 ## Keep population, perturbation and mechanism claims separate
 
-The original three records contain one error: groupA has 1/2 and groupB has 0/1. Overall error is 1/3. Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes 1/8 even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
+The original three records contain one error: groupA has \(\frac{1}{2}\) and groupB has 0/1. Overall error is \(\frac{1}{3}\). Repeating the correct record c five additional times creates eight rows but only three unique IDs. A naive row-weighted error becomes \(\frac{1}{8}\) even though no new case was tested. The apparent improvement comes entirely from changing the weight of one existing success.
 
 This counterexample does not imply that every repeated identity should be removed. A longitudinal task may legitimately contain several observations from one person or device. The question is which unit the reported quantity is intended to average over, and whether dependence is modeled. Exact duplicate detection, source-family grouping and a weighting policy are related but different controls. A set of three IDs alone also does not prove those units are statistically independent.
 
-Zero errors among one observation is weak evidence about an unknown error probability. Under a deliberately stated independent Bernoulli sampling model, the chance of observing zero errors in n cases is(1-p)^n. Solving(1-p)^n=0.05 gives a one-sided 95% upper bound 1-0.05^(1/n):0.95 at n=1 and approximately 0.0295 at n=100. This arithmetic illustrates why denominators matter. The hand-selected synthetic cases do not automatically satisfy the random-sampling assumptions needed to interpret that bound as a population claim.
+Zero errors among one observation is weak evidence about an unknown error probability. Under a deliberately stated independent Bernoulli sampling model, the chance of observing zero errors in n cases is \((1-p)^n\). Solving \((1-p)^n=0.05\) gives a one-sided 95% upper bound \(1-{0.05}^{\frac{1}{n}}\):0.95 at \(n=1\) and approximately 0.0295 at \(n=100\). This arithmetic illustrates why denominators matter. The hand-selected synthetic cases do not automatically satisfy the random-sampling assumptions needed to interpret that bound as a population claim.
 
 An empty group has no measured rate. Returning None preserves that absence; returning zero invents a successful observation. A report or chart should not replace missing rates with zero merely to fill a display. Likewise, a confidence calculation cannot create coverage for a group or condition that never appeared in the data. Keep coverage counts and the intended target population beside every aggregate.
 
-The perturbation rule here is f(x)=1 when x>=0. Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
+The perturbation rule here is f(x)=1 when \(x\ge 0\). Starting at one, the shifts-0.1, -0.9, -1.1 produce 0.9, 0.1, -0.1 and therefore labels 1, 1, 0. If the target itself is defined by the observed sign, the final change is correct behavior after crossing the decision boundary. Calling it a robustness failure would assume an invariant label that the task definition does not support.
 
 A different application might model these shifts as measurement noise while the latent class remains fixed. That is a different target policy and needs its own oracle. For this simple sign rule, perturbations with magnitude strictly below one cannot cross from the starting point to the negative side. That analytic statement is local to this scalar rule and declared perturbation set; it is not evidence that an arbitrary neural classifier is robust to all small changes.
 
@@ -123,7 +123,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** 8rows but 3 unique IDs.
    **Verify:** Save the assertion results for exercise 2, including 8rows but 3 unique IDs.
 
-3. **Trace a controlled perturbation.** Classify x>=0 at base 1 after shifts-.1, -.9, -1.1.
+3. **Trace a controlled perturbation.** Classify \(x\ge 0\) at base 1 after shifts-.1, -.9, -1.1.
    **Expected:** labels 1, 1, 0.
    **Verify:** Save the assertion results for exercise 3, including labels 1, 1, 0.
 

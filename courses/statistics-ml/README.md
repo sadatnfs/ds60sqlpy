@@ -1,5 +1,13 @@
 # Statistics and Machine Learning for Data Scientists End To End
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Statistics and Machine Learning for Data Scientists End To End** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This book develops the 1,005 named methods in the supplied 40-section outline into an end-to-end reference for data science decisions. Read sequentially for foundations, or use the topic manifest to find a method. Each chapter explains mechanisms, assumptions, appropriate uses, failure modes and interpretation, then connects them to complete Python demonstrations and answered interview discussions.
 
 This is a tutorial and reference book. It contains no exams, problem sets or hidden solutions. The small examples explain mechanisms; their assertions check mathematical and implementation claims, not learner mastery. Advanced method descriptions are not claims that every research estimator has a production implementation in this repository.

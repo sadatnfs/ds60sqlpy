@@ -6,37 +6,26 @@ No image was published. Preserve unrelated containers and every learner volume.
 
 ## Current phase
 
-The single-command classroom and all 72 LLM textbook chapters are implemented
-and reviewed. `./classroom` builds the app and ten ordinary workers locally,
-starts them in a controlled order, checks internal and host-facing readiness,
-and opens the actual browser URL. It uses Bash on macOS/Linux/WSL 2 and requires
-Compose 2.28.0 or newer. The Windows CMD and Mac command files delegate to it.
-Each service is built in a separate Compose invocation because live Compose
-Bake testing showed that a multi-service build could ignore the parallel limit.
+Unified-classroom implementation is in progress. The user requested one
+entrypoint for Python, SQL, bridge and all eleven module/book subjects, distinct
+subject themes, properly typeset math, syntax-highlighted code, and updated
+navigation/documentation. Root owns backend integration, routing, launchers,
+validation and packaging. Parallel owners: rich_rendering owns the shared
+renderer/dependencies; unified_ui owns classroom HTML/CSS/JS and UI tests;
+math_content_docs owns authored math conversion and user-facing documentation.
 
-The launcher selects available loopback ports for a new project, preserves
-explicit settings and named data volumes, and serializes concurrent starts and
-stale-lock recovery. Container-only DS60_PUBLIC_PORT retains one exact allowed
-Host/Origin for the discovered host port. Internal and external HTTP checks,
-no-curl failure cases, actual strict Host/Origin requests and the controlled
-stale-lock race are covered. A saved source/prediction/notes marker survived
-port change and rebuilt application containers in ds60-onestep-validation.
+Canonical URL: /classroom. The former /learn and /journeys URLs will serve the
+same shell as compatibility aliases. Existing legacy pads, coaching phases,
+module sessions and job histories retain their storage and stable IDs. The
+combined subject index is derived from both catalogs, never hand-counted.
+Native MathML and server syntax highlighting must work offline and preserve
+code bytes. Math authoring conversion is separate from executable code changes.
 
-All 48 theory and 24 applied chapters have connected textbook narratives,
-notation, numerical traces and chapter bridges. The applied route follows a
-Methods Desk case. Both LLM journeys default to wide reading, remember layout
-per journey, link directly to the chapter map, and retain their practice pads.
-The applied prose pass preserves 73 protected artifacts and all 97 fences.
-Historical theory prose-only parity receipts remain historical: subsequent
-independent review repaired 046 attention overflow and 048 zero-support sampling.
-Both references, both worked sequences and both numeric regressions passed
-fresh current Core Docker. The 025/031 notation/scope corrections include a
-031 learner-comment spacing correction with no executable change.
-
-The portable delivery is DS60LearningLab-0.3.0-One-Command-Classroom.zip, with
-ONE-COMMAND-CLASSROOM.md and acceptance/checksum files in the task outputs.
-The final image/archive comparison binds packaged source bytes to the built
-app and worker images. See the detailed single-command setup guide for users.
+This phase is not complete. Final acceptance must cover all fourteen subjects,
+legacy Python/SQL save and execution modes, module jobs/variants, explicit
+solutions, math/code rendering, mobile/keyboard/themes, persistence, strict
+Host/Origin/token checks, full parallel tests, Docker delivery and a new clean
+archive. Earlier acceptance numbers below describe the prior distribution.
 
 The user requests comprehensive teaching rather than larger counts alone.
 The statistics book is a learning tutorial with theory, worked examples and

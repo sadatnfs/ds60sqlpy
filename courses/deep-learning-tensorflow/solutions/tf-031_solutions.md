@@ -8,7 +8,7 @@ tf.function traces Python code to construct TensorFlow graphs specialized for in
 
 This stage should be distinguished from explicitly requesting XLA compilation with jit_compile=True. A traced TensorFlow graph can run through the normal runtime and its available kernels. Graph construction, graph optimization, kernel execution and optional XLA machine-code compilation are related but separate stages. This lesson does not request or qualify XLA, and a successful tf.function call is not evidence that an XLA-compiled executable was used.
 
-The fixture uses x*x+1 so eager output can be calculated independently. It compares eager and graph values, observes trace reuse and dtype specialization, and measures a small warmed-call interval. The timing boundary includes Python dispatch, tensor execution and NumPy materialization; it is not a GPU kernel benchmark. No measured speed ranking is claimed. A graph can add overhead for tiny work, while repeated larger computations may benefit from graph execution under a suitable runtime.
+The fixture uses \(x\cdot x+1\) so eager output can be calculated independently. It compares eager and graph values, observes trace reuse and dtype specialization, and measures a small warmed-call interval. The timing boundary includes Python dispatch, tensor execution and NumPy materialization; it is not a GPU kernel benchmark. No measured speed ranking is claimed. A graph can add overhead for tiny work, while repeated larger computations may benefit from graph execution under a suitable runtime.
 
 An input signature is both a reuse policy and an interface contract. TensorSpec([None],float32) allows different vector lengths while fixing rank and dtype. None does not mean any rank or any type. Broadening a signature can reduce retracing, but it must still describe the inputs the function can correctly handle. Reusing a graph is useful only when its computation and boundary remain valid.
 
@@ -30,7 +30,7 @@ Materializing result.numpy() before stopping the clock ensures the measured host
 
 ## Exercise 1: Check eager arithmetic
 
-The question is: Evaluate x*x+1 at float32[1,2].
+The question is: Evaluate \(x\cdot x+1\) at float32[1,2].
 
 The arithmetic provides a simple independent oracle. Correctness must be established before timing a graph implementation.
 

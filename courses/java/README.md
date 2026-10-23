@@ -1,5 +1,13 @@
 # Java: from the first compile to reliable applications
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Java: from the first compile to reliable applications** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 All36 lessons in the [reviewed route](track.json) now have complete authored bundles in the [manifest](lessons.json). The course starts with source,types,control flow andobjects,then develops collections,generics,functional code,testing,algorithms,concurrency,files,HTTP,JDBC,serialization,service discovery,profiling andrelease engineering. Every guide has two complete worked examples,six inspectable exercises,mechanism explanations,diagnosis,hints andseparate executable/explanatory solutions.
 
 Use the Docker classroom's prepared Java21 profile. The pad is compiled as `Main.java` with `--release 21` andrun with assertions enabled. Helper classes can share that file. You do not need a host JDK. Source viewing,compilation,reference execution andlearner mastery are separate evidence;the [checkpoint](../../docs/implementation/java-content-status.md) records actual prepared-container results.

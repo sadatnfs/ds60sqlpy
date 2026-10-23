@@ -54,9 +54,9 @@ Notes
 ---
 
 Worked reference for Exercise 3 — Stability and iterative methods
-- Normal equation inverts X^T X (or solves a system); if X has multicollinearity or large condition number, numerical errors grow
+- Normal equation inverts \(X^{\mathsf T}X\) (or solves a system); if X has multicollinearity or large condition number, numerical errors grow
 - Use np.linalg.lstsq or pinv to mitigate; better yet, rely on QR/SVD inside libraries
-- For large n,d or online learning, gradient-based solvers (SGD, coordinate descent) scale better (avoid O(d^3) inversion)
+- For large n,d or online learning, gradient-based solvers (SGD, coordinate descent) scale better (avoid \(O(d^3)\) inversion)
 
 Takeaways
 - Prefer library solvers (sklearn) that use robust decompositions

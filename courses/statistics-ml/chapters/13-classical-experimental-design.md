@@ -8,13 +8,13 @@ An experiment creates information through controlled variation. Randomization br
 
 ### Main effects and interactions
 
-For two factors coded A,B in {-1,+1}, write E[Y]=beta0+betaA*A+betaB*B+betaAB*A*B. Moving A from -1 to +1 at fixed B changes the response by 2*betaA+2*betaAB*B. The average main effect of A across balanced B levels is 2*betaA. A factorial experiment estimates interactions because it varies combinations, unlike changing one factor while holding all others at a baseline.
+For two factors coded A,B in {-1,+1}, write E[Y]=beta0+betaA*A+betaB*B+betaAB*\(A\cdot B\). Moving A from -1 to +1 at fixed B changes the response by 2*betaA+2*betaAB*B. The average main effect of A across balanced B levels is 2*betaA. A factorial experiment estimates interactions because it varies combinations, unlike changing one factor while holding all others at a baseline.
 
-A fractional design saves runs by deliberately losing distinctions. If a third factor C is assigned as A*B, the C column equals the AB interaction column, so their effects are aliased. No regression package can separate them from that design alone. The scientific assumption that one is negligible creates the interpretation.
+A fractional design saves runs by deliberately losing distinctions. If a third factor C is assigned as \(A\cdot B\), the C column equals the AB interaction column, so their effects are aliased. No regression package can separate them from that design alone. The scientific assumption that one is negligible creates the interpretation.
 
 ### Design precision before collection
 
-For independent groups of equal size n and common SD sigma, the difference in means has SE=sigma*sqrt(2/n). A rough two-sided normal approximation gives n=2*sigma^2*(z_(1-alpha/2)+z_power)^2/delta^2 per group. This shows why halving the target effect needs about four times the sample. Clustering, attrition, unequal allocation and multiplicity must be added to the design, and simulation can evaluate realistic departures.
+For independent groups of equal size n and common SD sigma, the difference in means has \(\mathrm{SE}=\sigma\cdot \sqrt{\frac{2}{n}}\). A rough two-sided normal approximation gives \(n=\frac{2\sigma^2(z_{1-\alpha/2}+z_{\mathrm{power}})^2}{\delta^2}\) per group. This shows why halving the target effect needs about four times the sample. Clustering, attrition, unequal allocation and multiplicity must be added to the design, and simulation can evaluate realistic departures.
 
 ## Methods, mechanisms, and limits
 
@@ -136,7 +136,7 @@ Choose runs to maximize an information criterion under a specified model and fea
 
 **D-optimal design**
 
-Maximize the determinant of X-transpose X, reducing the volume of a coefficient uncertainty ellipsoid under the model. A singular information matrix cannot estimate all coefficients, regardless of its individual diagonal entries.
+Maximize the determinant of \(X^{\mathsf T}X\), reducing the volume of a coefficient uncertainty ellipsoid under the model. A singular information matrix cannot estimate all coefficients, regardless of its individual diagonal entries.
 
 ### stat-13-21
 
@@ -214,7 +214,7 @@ python courses/statistics-ml/examples/chapter_13.py
 
 ### Estimate an interaction and expose an alias
 
-The four-run factorial recovers coefficients 10,2,3,4. The main A effect is four because coded levels differ by two, while its conditional effects depend strongly on B. Adding C=A*B makes a fifth coefficient impossible to identify from four independent directions. Rank reveals the design limitation exactly.
+The four-run factorial recovers coefficients 10,2,3,4. The main A effect is four because coded levels differ by two, while its conditional effects depend strongly on B. Adding \(C=A\cdot B\) makes a fifth coefficient impossible to identify from four independent directions. Rank reveals the design limitation exactly.
 
 ### Randomize within prognostic groups
 

@@ -6,7 +6,7 @@ Book: **Statistics and Machine Learning for Data Scientists End To End**. Chapte
 
 Repeated measurements create two kinds of variation: differences between entities and changes within an entity. A customer with high baseline engagement may remain high every week. Treating those weeks as independent customers makes uncertainty too optimistic and can confuse a between-customer association with a within-customer effect.
 
-A random-intercept model writes y_ij=X_ij beta+b_j+epsilon_ij, with group variance tau^2 and residual variance sigma^2. Two observations in the same group share b_j, creating covariance tau^2 and intraclass correlation tau^2/(tau^2+sigma^2). Partial pooling shrinks a noisy group mean toward the population mean by weight tau^2/(tau^2+sigma^2/n_j). Small groups shrink more because their means contain less information.
+A random-intercept model writes \(y_{ij}=X_{ij}\beta+b_j+\epsilon_{ij}\), with group variance \({\tau}^{2}\) and residual variance \({\sigma}^{2}\). Two observations in the same group share b_j, creating covariance \({\tau}^{2}\) and intraclass correlation \(\frac{\tau^2}{\tau^2+\sigma^2}\). Partial pooling shrinks a noisy group mean toward the population mean by weight \(\frac{\tau^2}{\tau^2+\sigma^2/n_j}\). Small groups shrink more because their means contain less information.
 
 Fixed-effects panel estimation instead removes each unit's mean, identifying coefficients from within-unit changes. Time-invariant predictors disappear under this transformation. Random effects can estimate such associations but ordinarily assumes the random effect is suitably independent of included predictors. Neither method automatically handles treatment-confounder feedback, endogenous timing or short-panel lagged outcomes.
 
@@ -40,7 +40,7 @@ Near-linear predictor dependencies inflate coefficient uncertainty and instabili
 
 **Variance inflation factors**
 
-VIF is 1/(1-R_j^2) from regressing a predictor on the others. It diagnoses linear redundancy conditional on the design. Universal cutoff rules ignore sample size, scientific contrasts and prediction objectives.
+VIF is \(\frac{1}{1-R_j^2}\) from regressing a predictor on the others. It diagnoses linear redundancy conditional on the design. Universal cutoff rules ignore sample size, scientific contrasts and prediction objectives.
 
 ### stat-12-06
 
@@ -162,9 +162,9 @@ Fit hierarchical outcome models over demographic or geographic cells, then avera
 
 ### Case study: repeated customer measurements
 
-Assume a customer contributes four weekly outcomes. A useful decomposition is y_ij=mu+b_j+epsilon_ij, with Var(b_j)=9 and Var(epsilon_ij)=1. A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer's four-week mean has variance 9+1/4=9.25, not 10/4=2.5. Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.
+Assume a customer contributes four weekly outcomes. A useful decomposition is \(y_{ij}=\mu+b_j+\epsilon_{ij}\), with \(\operatorname{Var}(b_j)=9\) and \(\operatorname{Var}(\epsilon_{ij})=1\). A single measurement has variance ten, and two weeks from the same customer have covariance nine. The intraclass correlation is .9. The customer's four-week mean has variance 9+1/4=9.25, not \(\frac{10}{4}=2.5\). Repeating observations reduces transient noise but barely reduces uncertainty from which customers were sampled.
 
-For m equal observations per group, the familiar design-effect expression 1+(m-1)*ICC follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.
+For m equal observations per group, the familiar design-effect expression \(1+(m-1)\cdot \mathrm{ICC}\) follows by expanding the variance of their sum and including all pairwise covariances. Here it is 3.7. A thousand weekly rows from 250 highly stable customers can provide much less independent information than a thousand distinct customers. The approximation concerns a particular mean under a simple correlation structure; unequal group sizes and covariate adjustment require fuller analysis.
 
 The model also defines what prediction means. For an existing customer with observed history, a random-intercept estimate can adapt to that customer's baseline. For a new customer, that baseline is unknown and must be integrated over its population distribution. Evaluating new-customer predictions while allowing the model to use that customer's other weeks leaks the very information deployment lacks. Grouped validation distinguishes those questions.
 
@@ -202,7 +202,7 @@ python courses/statistics-ml/examples/chapter_12.py
 
 ### A point can determine the line
 
-The observation at x=20 has leverage above .9 because the other predictors lie between zero and three. The leverage values sum to the model rank, two. This checks the projection geometry and explains why residual size alone can fail to flag influential predictor configurations.
+The observation at \(x=20\) has leverage above .9 because the other predictors lie between zero and three. The leverage values sum to the model rank, two. This checks the projection geometry and explains why residual size alone can fail to flag influential predictor configurations.
 
 ### Shrink according to information
 

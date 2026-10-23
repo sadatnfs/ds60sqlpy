@@ -59,9 +59,9 @@ loss=tf.nn.sparse_softmax_cross_entropy_with_logits(labels=[0],logits=[[1.,0.]])
 np.testing.assert_allclose(loss.numpy(),[np.log1p(np.exp(-1))],atol=1e-6,rtol=0)
 ```
 
-**Expected:** losslog(1+exp(-1)).
+**Expected:** loss \(\log(1+e^{-1})\).
 
-**Verify:** Compare the computed values or written argument with losslog(1+exp(-1)).
+**Verify:** Compare the computed values or written argument with loss \(\log(1+e^{-1})\).
 
 ## Exercise 4: Detect a false negative
 

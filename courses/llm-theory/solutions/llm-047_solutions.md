@@ -26,7 +26,7 @@ Inputs have shape(tokens, model_width), router logits(tokens, experts), and expe
 
 ## Exercise 1: Calculate a top2 expert mixture
 
-The question is: Use experts I, 2I, -I and three token/router rows with selected probabilities 3/4 and 1/4.
+The question is: Use experts I, 2I, -I and three token/router rows with selected probabilities \(\frac{3}{4}\) and \(\frac{1}{4}\).
 
 The third token combines a negative expert with a positive expert, so routing can change the function ratherthan merely selecting a faster implementation of the same computation.
 
@@ -90,9 +90,9 @@ numeric=(mixture(x,plus,experts,2)[0][0,0]-mixture(x,minus,experts,2)[0][0,0])/(
 np.testing.assert_allclose(numeric,-3/16,atol=1e-8,rtol=0)
 ```
 
-**Expected:** derivative of first output coordinate is -3/16 within 1e-8.
+**Expected:** derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
 
-**Verify:** Compare the computed values or written argument with derivative of first output coordinate is -3/16 within 1e-8.
+**Verify:** Compare the computed values or written argument with derivative of first output coordinate is \(\frac{-3}{16}\) within 1e-8.
 
 ## Exercise 5: Separate total and active parameter counts
 

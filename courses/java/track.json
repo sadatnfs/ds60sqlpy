@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "java",
   "title": "Java: from the first compile to reliable applications",
-  "summary": "36 sequenced lessons with explanations, worked examples, six inspectable exercises and separate reference solutions. Content becomes runnable only when its complete authored set is registered.",
+  "summary": "36 lessons in Java, from first programs and objects to collections, concurrency, testing and practical services. Worked examples and separate solutions connect language rules with observable behavior.",
   "lessons": [
     {
       "id": "java-001",
@@ -301,7 +301,7 @@
         "atomic replacement"
       ],
       "outcome": "A path names a location; it is not the file contents or a guarantee that the location exists.",
-      "lab": "WriteCaf\u00e9 and an emoji to an owned temporary file,then read it withUTF-8.",
+      "lab": "WriteCafé and an emoji to an owned temporary file,then read it withUTF-8.",
       "verification": "exact text equality. original exception propagated;owned directory absent."
     },
     {
@@ -572,7 +572,7 @@
         "deserialization"
       ],
       "outcome": "Serialization turns domain values into a representation that another process orversion can read.",
-      "lab": "Encode accounta1,balance125,noteCaf\u00e9 withversion2 anddecode.",
+      "lab": "Encode accounta1,balance125,noteCafé withversion2 anddecode.",
       "verification": "equal domain record andexact Unicode note. trailing payloadIOException;negative balanceIllegalArgumentException."
     },
     {

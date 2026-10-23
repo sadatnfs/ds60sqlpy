@@ -24,7 +24,7 @@ This failure follows mathematically from the representation. Increasing nearest-
 
 Each row has the same two-score gap, so both losses agree. The stable expression avoids unnecessary exponent overflow. This is one objective calculation, not a training run or a calibration guarantee for relevance probabilities.
 
-**Expected:** Average log(1+exp(-2)), approximately .126928.
+**Expected:** Average \(\log(1+\exp(-2))\), approximately .126928.
 
 ## Exercise 5: Change temperature and candidate semantics
 

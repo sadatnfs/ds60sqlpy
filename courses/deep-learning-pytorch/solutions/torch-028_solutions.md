@@ -33,7 +33,7 @@ Training state is the input to a transition. A useful inventory separates compon
 | data_position=2 | declared completed-update marker | progress metadata |
 | literal x and target rule | fixed next-batch construction | a reproducible input contract |
 
-Adam maintains m_t=beta 1*m_(t-1)+(1-beta 1)*g_t and v_t=beta 2*v_(t-1)+(1-beta 2)*g_t^2, then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.
+Adam maintains \(m_t=\beta_1m_{t-1}+(1-\beta_1)g_t\) and \(v_t=\beta_2v_{t-1}+(1-\beta_2)g_t^2\), then uses step-dependent bias correction and an epsilon-stabilized normalized update. Two models with identical weights but different m, v, t need not take the same next step. Saving after two real updates makes those histories nontrivial; checkpointing before any update would leave a much weaker test.
 
 The weights-only negative control is deliberately given the same next noise tensor as the uninterrupted run. Its different result therefore isolates missing optimizer history rather than simultaneously changing the batch and the optimizer. It is a stronger experiment than comparing two restarted jobs whose data order and RNG streams are also unknown. The paired TensorFlow chapter tests the same reconstruction principle, although its scalar objective and optimizer rate differ from this PyTorch fixture; their literal weights are not a cross-framework equality oracle.
 

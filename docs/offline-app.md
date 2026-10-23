@@ -1,5 +1,12 @@
 # The guided learning application
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 DS60 now has a working local coding environment in addition to its static course library. The application combines a prerequisite-aware route, the complete lesson guide, Python and PostgreSQL coding pads, saved work, progressive hints, an explicit solution reveal, and evidence notes. It runs in your browser while a local process handles storage and execution. There is no hosted application account or mandatory AI connection.
 
 ## Choose how to run it
@@ -36,7 +43,7 @@ bash scripts/docker_lab.sh start
 
 The launcher builds when needed, starts the containers, waits for HTTP
 readiness, and opens the host browser. Use the printed exact URL, normally
-[the local coding lab](http://127.0.0.1:8765/learn). The app validates its Host
+[the local coding lab](http://127.0.0.1:8765/classroom). The app validates its Host
 header. `localhost` is a different host label. For ports, a custom learning
 folder, no-browser mode, or a deliberate rebuild, see the
 [launcher examples](docker-beginners.md#7-stop-resume-and-rebuild-without-losing-progress).
@@ -479,7 +486,7 @@ docker compose --profile lab up --detach --no-build --pull never
 
 The app still connects over the private shared namespace to port 5432; this
 setting changes only the host's published database port. The browser address
-remains `http://127.0.0.1:8765/learn` unless you change `DS60_LAB_PORT`. Use a Docker-compatible local engine with
+remains `http://127.0.0.1:8765/classroom` unless you change `DS60_LAB_PORT`. Use a Docker-compatible local engine with
 Compose. For Rancher Desktop, verify that its local Moby engine is running
 with `docker info` and `docker compose version`. Inspect the selected context
 and endpoint before using a machine that also has remote Docker contexts.

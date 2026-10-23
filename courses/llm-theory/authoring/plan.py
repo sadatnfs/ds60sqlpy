@@ -13,5 +13,5 @@ def append_plan():
  for index,(identity,title,profile,concepts) in enumerate(ROWS):
   if identity in existing:continue
   plan['lessons'].append(dict(id=identity,title=title,level='advanced',minutes=210,prerequisites=['llm-042' if index==0 else ROWS[index-1][0]],runtime=profile,outcome=f'Explain and verify {title.lower()} on bounded CPU fixtures.',lab='Derive exact values, implement the mechanism and test a controlled failure.',verification='Compare independent numerical oracles and report model/runtime limits.',concepts=concepts))
- plan['summary']='A48-lesson route from token probabilities and causal attention through tiny-model evidence and advanced transformer architecture,position,normalization,attention,expert-routing and exact decoding mechanisms.'
+ plan['summary']='48 detailed lessons on how language models work, from token probabilities and causal attention to Transformers, adaptation, efficient attention, expert routing and exact decoding mechanisms.'
  path.write_text(json.dumps(plan,indent=2)+'\n')

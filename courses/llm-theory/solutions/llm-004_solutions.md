@@ -27,7 +27,7 @@ The first document contributes A-to-B and B-to-A. The second contributes A-to-A.
 
 Add one to each of the three candidate counts. A becomes [2,2,1], denominator five; B becomes [2,1,1], denominator four; C becomes [1,1,1], denominator three. The resulting rows match the expected fractions and each sums to one. The vocabulary order is part of the contract because an array of correct probabilities in a different token order would score the wrong targets. Do not normalize over every matrix entry at once.
 
-**Expected:** Rows A=[2/5,2/5,1/5], B=[1/2,1/4,1/4] and C=[1/3,1/3,1/3].
+**Expected:** Rows \(A=[\frac{2}{5},\frac{2}{5},\frac{1}{5}]\), \(B=[\frac{1}{2},\frac{1}{4},\frac{1}{4}]\) and \(C=[\frac{1}{3},\frac{1}{3},\frac{1}{3}]\).
 
 **Verify:** Assert all three arrays with rtol=0, atol=1e-12 and inspect each denominator.
 
@@ -43,7 +43,7 @@ A one-token document has no neighboring-token pair. Two independent one-token do
 
 The reference chooses a uniform distribution over the existing vocabulary for an unknown scoring context Z. Its shape remains three, it sums to one, and the original count matrix is not changed. This is a transparent fallback policy rather than a learned distribution for Z. Another application could reject the unknown context, but it must disclose that alternative. It must not expand the vocabulary or fit new counts while claiming validation was read-only.
 
-**Expected:** The declared fallback returns three equal values 1/3 and leaves vocabulary/counts unchanged.
+**Expected:** The declared fallback returns three equal values \(\frac{1}{3}\) and leaves vocabulary/counts unchanged.
 
 **Verify:** Compare the before/after count matrix and assert output shape (3,) and row sum one.
 
@@ -57,11 +57,11 @@ An empty vocabulary has no candidate distribution, duplicate entries create ambi
 
 ## Exercise 6: Keep validation read-only
 
-Context C has no observed transitions, so add-one smoothing yields A probability 1/3 and negative log score ln(3). Scoring that lookup must not increment C-to-A or otherwise consume validation as training. Copy and compare the matrix before and after to expose mutation. This is held-out arithmetic for a public classroom fixture, not evidence of general language ability. A meaningful broader comparison needs a frozen source-family split and a declared target denominator.
+Context C has no observed transitions, so add-one smoothing yields A probability \(\frac{1}{3}\) and negative log score ln(3). Scoring that lookup must not increment C-to-A or otherwise consume validation as training. Copy and compare the matrix before and after to expose mutation. This is held-out arithmetic for a public classroom fixture, not evidence of general language ability. A meaningful broader comparison needs a frozen source-family split and a declared target denominator.
 
-**Expected:** Probability 1/3 and negative log score log(3); no training count changes.
+**Expected:** Probability \(\frac{1}{3}\) and negative log score \(\log(3)\); no training count changes.
 
-**Verify:** Copy the count matrix before scoring, assert byte-equal values afterward and compare the held-out score with log(3).
+**Verify:** Copy the count matrix before scoring, assert byte-equal values afterward and compare the held-out score with \(\log(3)\).
 
 ## Inspectable reference functions
 

@@ -26,7 +26,7 @@ The operation catalog should correspond to useful analytical tasks. A count, a g
 
 The accepted request does not establish that the rows are appropriate. The application must know which observations the principal may use, which reporting period they belong to and what one row represents. The fixture uses one uniquely identified observation per row and rejects duplicate IDs. A join that duplicates a row would otherwise change the weight it receives in the mean.
 
-For group A with values 1 and 3 and group B with value 10, the tool returns counts and means: A has count 2 and mean 2; B has count 1 and mean 10. The difference of means is eight. Retaining counts makes the result interpretable and allows the overall observation mean to be reconstructed as 14/3. Averaging the two group means instead yields six and defines a different weighting rule.
+For group A with values 1 and 3 and group B with value 10, the tool returns counts and means: A has count 2 and mean 2; B has count 1 and mean 10. The difference of means is eight. Retaining counts makes the result interpretable and allows the overall observation mean to be reconstructed as \(\frac{14}{3}\). Averaging the two group means instead yields six and defines a different weighting rule.
 
 Missingness is another part of the contract. Replacing a missing measurement with zero or dropping it silently changes the denominator and possibly the population. The fixture rejects missing values under its strict policy. Another operation could support missingness explicitly, but should then report which observations contributed and which policy was applied.
 
@@ -90,7 +90,7 @@ The accepted request is exactly operation=group_mean, group_by=group, value=valu
 
 The input grain is one identified observation per row. The output grain is one row per group, carrying count and mean. For A values 1, 3, the sum is four, count two and mean two. B has value ten, count one and mean ten. The descriptive difference B minus A is eight. The output preserves the different sample counts instead of presenting both means as equally supported by data.
 
-Aggregation can change meaning. The overall observation mean is(1+3+10)/3=14/3. Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
+Aggregation can change meaning. The overall observation mean is(1+3+10)/3=\(\frac{14}{3}\). Averaging the two group means gives(2+10)/2=6 and weights groups equally rather than observations. Carrying counts makes the distinction reconstructible. The request schema does not authorize a later explanation to substitute either aggregate silently.
 
 Finite input checks alone do not prevent intermediate overflow. With values[1e308, 1e308], ordinary floating summation can become infinity before division by two, although the mathematical mean is 1e308. The repaired calculation uses s=max(abs(values)), computes a mean of scaled values v/s, then multiplies by s. Every scaled magnitude is at most one, so the bounded group cannot overflow that summation. A zero scale returns zero directly. The result is also checked for finiteness.
 

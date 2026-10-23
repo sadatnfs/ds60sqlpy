@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "llm-theory",
   "title": "Language models: mechanisms, training and evidence",
-  "summary": "A48-lesson route from token probabilities and causal attention through tiny-model evidence and advanced transformer architecture,position,normalization,attention,expert-routing and exact decoding mechanisms.",
+  "summary": "48 detailed lessons on how language models work, from token probabilities and causal attention to Transformers, adaptation, efficient attention, expert routing and exact decoding mechanisms.",
   "north_star": "Explain what each language-model component computes, test its information boundary and make a scoped system decision from reproducible evidence.",
   "entry_prerequisites": [
     "python-16"

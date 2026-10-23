@@ -8,7 +8,7 @@ A point prediction hides at least two uncertainties: variability in future outco
 
 ### Split conformal prediction by ranks
 
-Fit a prediction model on training data. On n fresh calibration observations, compute nonconformity scores, such as absolute residuals s_i=|y_i-f(x_i)|. For desired miscoverage alpha, take k=ceil((n+1)*(1-alpha)) and the kth smallest calibration score q. If k exceeds n, use an unbounded interval rather than quietly substituting the largest observed score. Predict [f(x)-q,f(x)+q]. Under exchangeability of calibration and new observations, conditional on the training fit, the new score's rank among n+1 scores provides finite-sample marginal coverage of at least 1-alpha, with suitable handling of ties.
+Fit a prediction model on training data. On n fresh calibration observations, compute nonconformity scores, such as absolute residuals \(s_i=|y_i-f(x_i)|\). For desired miscoverage alpha, take \(k=\left\lceil(n+1)(1-\alpha)\right\rceil\) and the kth smallest calibration score q. If k exceeds n, use an unbounded interval rather than quietly substituting the largest observed score. Predict \([f(x)-q,f(x)+q]\). Under exchangeability of calibration and new observations, conditional on the training fit, the new score's rank among n+1 scores provides finite-sample marginal coverage of at least 1-alpha, with suitable handling of ties.
 
 This is marginal coverage across new observations, not a promise of 90% coverage at every exact x or within every subgroup. A model can meet overall coverage while systematically under-covering a rare region. Conformalized quantile regression uses scores max(lower(x)-y,y-upper(x)) to adapt interval width to heteroskedasticity, then applies an analogous rank correction. Better base models can improve efficiency, while the calibration argument supplies coverage under its assumptions.
 
@@ -146,9 +146,9 @@ Score novelty relative to development data or learned representations. A detecto
 
 ### Case study: derive the rank guarantee without a parametric error model
 
-Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting k=ceil((n+1)*(1-alpha)) therefore gives coverage at least 1-alpha.
+Condition on a predictor trained independently of calibration data. Suppose the n calibration scores and one future score are exchangeable. Ignoring ties for the moment, each of the n+1 ranks is equally likely for the future score. Choosing the kth calibration order statistic as a threshold accepts at least k of those n+1 rank positions. Setting \(k=\left\lceil(n+1)(1-\alpha)\right\rceil\) therefore gives coverage at least 1-alpha.
 
-With n=19 and alpha=.1, k=18. Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that k=n+1, there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.
+With \(n=19\) and \(\alpha=0.1\), \(k=18\). Using an ordinary interpolated .9 sample quantile without the finite-sample correction can choose a different threshold. If alpha is so small that \(k=n+1\), there is no finite calibration order statistic supporting that requested bound in the simple construction. Returning infinity is honest; silently using the maximum calibration residual weakens the stated guarantee.
 
 Ties can make coverage conservative with the usual nonrandomized threshold. Randomized tie-breaking can produce more exact rank behavior under suitable construction, but the implementation and interpretation must be explicit. The core result concerns marginal prediction coverage, not the accuracy of the point model or the conditional coverage of every subgroup.
 
@@ -192,7 +192,7 @@ Nineteen calibration residuals and alpha .1 require the eighteenth ordered resid
 
 ### Reweight the target, not the narrative
 
-Two strata have unchanged conditional outcomes one and nine, but their shares reverse from .8/.2 to .2/.8. The mean changes from 2.6 to 7.4. Density ratios .25 and four recover the target mean exactly. If the conditional outcomes also changed, these weights alone would not suffice.
+Two strata have unchanged conditional outcomes one and nine, but their shares reverse from \(\frac{0.8}{0.2}\) to \(\frac{0.2}{0.8}\). The mean changes from 2.6 to 7.4. Density ratios .25 and four recover the target mean exactly. If the conditional outcomes also changed, these weights alone would not suffice.
 
 ### Zero accepted error can hide low coverage
 

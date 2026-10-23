@@ -56,9 +56,9 @@ The basis-vector training design makes the optimizer trajectory independently so
 
 Its gradient is(w-w*)/2. With SGD rate 0.1, one update changes the error to 0.95(w-w*). Starting at zero, after t updates the weight is`w_t=(1-0.95^t)w*`. This oracle does not read PyTorch's gradient buffer or reuse the training-loop implementation. It follows from the declared design matrix and denominator.
 
-After 100 updates, the missing fraction is r=0.95^100, about 0.00592. The weights are approximately[1.98816, -0.99408, 0.99408]. The final training MSE is 1.5r² and the assessment MSE is 10 r², about 0.000351. The assessment formula follows because its predictions are(1-r) times targets 2 and 4, so the two squared residuals are 4 r² and 16 r². These exact symbolic quantities strengthen the capstone beyond merely observing that loss decreased or beat 7.25.
+After 100 updates, the missing fraction is \(r={0.95}^{100}\), about 0.00592. The weights are approximately[1.98816, -0.99408, 0.99408]. The final training MSE is 1.5r² and the assessment MSE is 10 r², about 0.000351. The assessment formula follows because its predictions are(1-r) times targets 2 and 4, so the two squared residuals are 4 r² and 16 r². These exact symbolic quantities strengthen the capstone beyond merely observing that loss decreased or beat 7.25.
 
-The curve records each loss before that iteration's update. Its first value is 1.5 and its last value corresponds to 99 completed updates, namely 1.5×0.95^198. The separately recomputed final training error follows 100 updates and is 1.5×0.95^200. Calling curve[-1] the final model's loss would create a one-step interpretation error even though every loop operation ran successfully.
+The curve records each loss before that iteration's update. Its first value is 1.5 and its last value corresponds to 99 completed updates, namely \(1.5\cdot {0.95}^{198}\). The separately recomputed final training error follows 100 updates and is \(1.5\cdot {0.95}^{200}\). Calling curve[-1] the final model's loss would create a one-step interpretation error even though every loop operation ran successfully.
 
 The fixture is identifiable within this hypothesis class because the three nonzero training rows span all three feature directions. That mathematical fact helps explain successful recovery on linear combinations of those directions. It does not show that an arbitrary real dataset is linear, noise-free, representative orwell-conditioned. Adding a trainable bias, changing feature scaling oraltering the loss denominator changes the derivation and requires a new oracle.
 
@@ -137,8 +137,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 4, including finite errors; holdout error below 7.25on this fixture.
 
 5. **Retain an independent pilot oracle.** Calculate the scalar first update directly from NumPy without using the module.
-   **Expected:** w28/15and loss 56/675.
-   **Verify:** Save the assertion results for exercise 5, including w28/15and loss 56/675.
+   **Expected:** w28/15and loss \(\frac{56}{675}\).
+   **Verify:** Save the assertion results for exercise 5, including w28/15and loss \(\frac{56}{675}\).
 
 6. **Write the bounded evidence report.** Record split IDs, 100 steps, errors and the two-row limitation.
    **Expected:** disjoint IDs; holdout count 2; explicit limited scope.
@@ -146,7 +146,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Common pitfalls and diagnosis
 
-If fitting fails to approach the coefficient row[2, -1, 1], inspect feature order, stored weight orientation, zero initialization and the no-bias setting. If the learned weight differs from(1-0.95^100) times that row, inspect the denominator and actual number of steps before changing a learning rate. A decrease alone cannot distinguish 99 from 100 updates or an accidental extra intercept.
+If fitting fails to approach the coefficient row[2, -1, 1], inspect feature order, stored weight orientation, zero initialization and the no-bias setting. If the learned weight differs from \((1-0.95^{100})\) times that row, inspect the denominator and actual number of steps before changing a learning rate. A decrease alone cannot distinguish 99 from 100 updates or an accidental extra intercept.
 
 If a reported final loss matches the last training-curve value rather than the recomputed final model, check the before/after update timing. If the baseline is not 7.25, verify that its mean came only from training targets. If holdout error informed another decision, record that change of role. Preserve the independent scalar pilot and the closed-form capstone trace so a large collection of passing prints cannot replace mechanism-level evidence.
 

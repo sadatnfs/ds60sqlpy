@@ -24,9 +24,9 @@ The exact arithmetic below shows that a successful code round trip does not impl
 
 ## Outliers explain a basic quantization tradeoff
 
-Consider an illustrative uniform quantizer for weights[0.01,0.02,0.03,10] using the range-7 through 7. A single scale based on the maximum is 10/7, about 1.4286. The three small weights round to zero because the grid is too coarse to distinguish them, while the large value uses the extreme code.
+Consider an illustrative uniform quantizer for weights[0.01,0.02,0.03,10] using the range-7 through 7. A single scale based on the maximum is \(\frac{10}{7}\), about 1.4286. The three small weights round to zero because the grid is too coarse to distinguish them, while the large value uses the extreme code.
 
-If the first three weights were represented in a separate group, their maximum-based scale would be 0.03/7, about 0.004286. They could then be represented much more accurately, at the cost of additional group metadata and a different computation layout. This explains why granularity and scale policy matter. It is an example of uniform quantization reasoning, not an implementation of NF4 or a claim that a particular block size is optimal.
+If the first three weights were represented in a separate group, their maximum-based scale would be \(\frac{0.03}{7}\), about 0.004286. They could then be represented much more accurately, at the cost of additional group metadata and a different computation layout. This explains why granularity and scale policy matter. It is an example of uniform quantization reasoning, not an implementation of NF4 or a claim that a particular block size is optimal.
 
 A nonuniform codebook makes another tradeoff by placing representable values more densely in some regions than others. The original QLoRA method uses specific mechanisms including NF4, double quantization and paged optimizers. The CPU fixture implements none of those particular backend features. Its value is that the simpler codes, packing and adapter gradients can be derived directly before reading a larger implementation.
 
@@ -88,15 +88,15 @@ Use scale=maxabs/7 and integer codes-7..7. Offset each code by 8 to fit a 4-bit 
 
 ## Derive the codes, bytes and forward error
 
-The maximum absolute matrix entry is 1.7, so the uniform scale is 1.7/7=17/70, about 0.242857. Dividing the entries by that scale and rounding gives codes[[0, -4], [7, -1]]. The allowed signed range contains 15 values from-7 through 7. Offsetting by eight produces unsigned nibbles[8, 4, 15, 7]; one of the 16 possible nibble values is unused by this chosen symmetric scheme.
+The maximum absolute matrix entry is 1.7, so the uniform scale is \(\frac{1.7}{7}=\frac{17}{70}\), about 0.242857. Dividing the entries by that scale and rounding gives codes[[0, -4], [7, -1]]. The allowed signed range contains 15 values from-7 through 7. Offsetting by eight produces unsigned nibbles[8, 4, 15, 7]; one of the 16 possible nibble values is unused by this chosen symmetric scheme.
 
 The first packed byte is 8+(4 shifted left by 4)=8+64=72. The second is 15+(7 shifted left by 4)=15+112=127. Unpacking the low four bits and then the high four bits restores those integer codes exactly. This is a lossless representation change of the already quantized integers. The information loss happened earlier when the original floating weights were rounded.
 
 Using ideal decimal arithmetic, the reconstructed matrix is[[0, -34/35], [17/10, -17/70]]. Multiplying by x=[1, -2] gives[68/35, 153/70], about[1.942857, 2.185714]. The original output is[1.9, 2.1], so the errors are[3/70, 6/70], about[0.042857, 0.085714]. Actual float32 operations can differ slightly from these ideal-decimal values, which is why the executable comparison uses explicit tolerances.
 
-Without clipping, nearest-grid rounding has per-weight absolute error at most scale/2. For a fixed output row, the triangle inequality gives an output error bound of(scale/2)*sum(abs(x)). Here that is(17/140)*3=51/140, about 0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
+Without clipping, nearest-grid rounding has per-weight absolute error at most \(\frac{\mathrm{scale}}{2}\). For a fixed output row, the triangle inequality gives an output error bound of(\(\frac{\mathrm{scale}}{2}\))*sum(abs(x)). Here that is(17/140)*3=51/140, about 0.364286. The observed errors are smaller. This is a worst-case arithmetic bound for the declared uniform quantizer and input, not a bound on classification quality or generated-answer support.
 
-The adapter code uses the stored output-by-input matrix convention: Y=X(W+AB)^T. A has shape[2, 1] and B[1, 2]. At B=0, the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is 0.1*sum(Y)*X, approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
+The adapter code uses the stored output-by-input matrix convention: \(Y=X(W+AB)^{\mathsf T}\). A has shape[2, 1] and B[1, 2]. At \(B=0\), the A gradient is zero, while B can receive a gradient through nonzero A. With the initial one-row output above and mean squared loss against zero, the upstream output gradient equals Y because there are two output elements. Since A entries are 0.1, the first B gradient is \(0.1\cdot \operatorname{sum}(Y)\cdot X\), approximately[0.412857, -0.825714]. The packed codes stay fixed while that differentiable branch changes.
 
 The adapter's target is zero output on one input, not the original full-precision output. A falling loss therefore demonstrates optimization of the stated task; it does not prove recovery of the original weight matrix or correction of quantization on other inputs. A rank-one update fitting one vector leaves many unconstrained directions.
 
@@ -164,7 +164,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Quantize a fixed matrix.** QuantizeW[[.1, -.9], [1.7, -.2]] withscale 1.7/7 andnearest-even rounding.
+1. **Quantize a fixed matrix.** QuantizeW[[.1, -.9], [1.7, -.2]] withscale \(\frac{1.7}{7}\) andnearest-even rounding.
    **Expected:** codes[[0, -4], [7, -1]].
    **Verify:** Save the assertion results for exercise 1, including codes[[0, -4], [7, -1]].
 

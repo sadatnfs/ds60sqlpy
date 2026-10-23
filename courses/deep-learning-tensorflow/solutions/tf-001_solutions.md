@@ -25,9 +25,9 @@ The three t-prefixed records are training examples and the four h-prefixed recor
 
 ## Exercise 2: Compare a fixed baseline
 
-Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is 8/3. Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.
+Fit the mean on [2,4,6], obtaining 4. Training residuals are [2,0,-2], so squared sum 8 divided by 3 is \(\frac{8}{3}\). Evaluation residuals are [-4,-6,-8,-10], whose squares sum to 216; divide by 4 to obtain 54. The evaluation-target mean 11 must not replace 4. That would use information from the set reserved for inspection and answer a different question. Keep both labeled metrics, even when the evaluation result is worse.
 
-**Expected:** The constant is 4, training MSE is 8/3 and holdout MSE is 54.
+**Expected:** The constant is 4, training MSE is \(\frac{8}{3}\) and holdout MSE is 54.
 
 **Verify:** Record all seven residuals and compare their two separately labeled sums and denominators.
 
@@ -57,7 +57,7 @@ No arithmetic mean exists for an empty collection because its denominator is zer
 
 ## Exercise 6: Bound the conclusion
 
-Zero error shows that y=2*x matches these seven published feature/target pairs. The rule and labels are already visible, so this is an arithmetic demonstration and cannot establish unseen-population performance. A statement such as every future input is correct is unsupported. Choose new source groups or a later time period under a frozen protocol and state the intended use first. Report any revision made after inspecting those results as selection work rather than untouched testing.
+Zero error shows that \(y=2\cdot x\) matches these seven published feature/target pairs. The rule and labels are already visible, so this is an arithmetic demonstration and cannot establish unseen-population performance. A statement such as every future input is correct is unsupported. Choose new source groups or a later time period under a frozen protocol and state the intended use first. Report any revision made after inspecting those results as selection work rather than untouched testing.
 
 **Expected:** The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported.
 

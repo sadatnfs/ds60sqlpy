@@ -17,7 +17,7 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Label slope and state
 
-At zero the loss is (0-2)^2=4 and the derivative is 2*(0-2)=-4. The rate-0.1 subtraction gives 0.4, then recomputing the function gives 2.56. The derivative is evaluated at the old state; it is not the updated state or the post-update loss. Keep each number labeled. This example supports the arithmetic of one small update and does not promise that every finite gradient step improves every objective.
+At zero the loss is \({\left(0-2\right)}^{2}=4\) and the derivative is \(2\cdot (0-2)=-4\). The rate-0.1 subtraction gives 0.4, then recomputing the function gives 2.56. The derivative is evaluated at the old state; it is not the updated state or the post-update loss. Keep each number labeled. This example supports the arithmetic of one small update and does not promise that every finite gradient step improves every objective.
 
 **Expected:** Loss 4, derivative -4, new w 0.4 and new loss 2.56.
 
@@ -25,7 +25,7 @@ At zero the loss is (0-2)^2=4 and the derivative is 2*(0-2)=-4. The rate-0.1 sub
 
 ## Exercise 2: Construct central probes
 
-The central formula uses both sides and divides by 2*h. At zero for a quadratic, the h-squared terms cancel symmetrically, leaving -4 apart from binary rounding. All three supplied sizes meet the stated absolute tolerance. Retain the scale/value table rather than merely printing one number that happened to match. For a nonquadratic function the approximation generally has truncation error, so agreement at every h is not a universal property of the method.
+The central formula uses both sides and divides by \(2\cdot h\). At zero for a quadratic, the h-squared terms cancel symmetrically, leaving -4 apart from binary rounding. All three supplied sizes meet the stated absolute tolerance. Retain the scale/value table rather than merely printing one number that happened to match. For a nonquadratic function the approximation generally has truncation error, so agreement at every h is not a universal property of the method.
 
 **Expected:** Every central approximation matches -4 within 1e-10.
 
@@ -33,7 +33,7 @@ The central formula uses both sides and divides by 2*h. At zero for a quadratic,
 
 ## Exercise 3: Expose a one-sided bias
 
-Expanding f(h)-f(0) gives -4*h+h*h. Division by h produces -4+h, yielding the three stated forward differences. Their errors are exactly h in real arithmetic, which demonstrates finite-step bias without a framework. Smaller h reduces that bias until rounding and cancellation become relevant. The symmetric quadratic check avoids this term, but the lesson is about knowing the approximation contract, not declaring forward differences invalid for every use.
+Expanding f(h)-f(0) gives \(-4\cdot h+h\cdot h\). Division by h produces -4+h, yielding the three stated forward differences. Their errors are exactly h in real arithmetic, which demonstrates finite-step bias without a framework. Smaller h reduces that bias until rounding and cancellation become relevant. The symmetric quadratic check avoids this term, but the lesson is about knowing the approximation contract, not declaring forward differences invalid for every use.
 
 **Expected:** Values are -3.9, -3.99 and -3.999, differing from -4 by h.
 
@@ -41,7 +41,7 @@ Expanding f(h)-f(0) gives -4*h+h*h. Division by h produces -4+h, yielding the th
 
 ## Exercise 4: Move from the other side
 
-At w=3, the derivative is 2. Subtracting one tenth of it changes the parameter to 2.8. Its distance from the optimum is 0.8, so the new squared loss is 0.64. The update decreases the parameter because the derivative is positive on this side of the optimum. Recompute the loss at the new point instead of reusing the old value 1; a correct update followed by a stale printed loss would be misleading evidence.
+At \(w=3\), the derivative is 2. Subtracting one tenth of it changes the parameter to 2.8. Its distance from the optimum is 0.8, so the new squared loss is 0.64. The update decreases the parameter because the derivative is positive on this side of the optimum. Recompute the loss at the new point instead of reusing the old value 1; a correct update followed by a stale printed loss would be misleading evidence.
 
 **Expected:** Derivative 2, new w 2.8 and new loss 0.64.
 
@@ -49,7 +49,7 @@ At w=3, the derivative is 2. Subtracting one tenth of it changes the parameter t
 
 ## Exercise 5: Diagnose an invalid derivative claim
 
-For absolute value at zero, a left slope of -1 and a right slope of +1 show that no ordinary two-sided derivative exists. The symmetric calculation returns 0 because its numerator cancels, not because the kink disappeared. Reject h=0 to avoid division by zero and reject NaN because nearby comparisons would be uninterpretable. A framework may choose a subgradient convention at the kink; label that separately from a unique classical derivative.
+For absolute value at zero, a left slope of -1 and a right slope of +1 show that no ordinary two-sided derivative exists. The symmetric calculation returns 0 because its numerator cancels, not because the kink disappeared. Reject \(h=0\) to avoid division by zero and reject NaN because nearby comparisons would be uninterpretable. A framework may choose a subgradient convention at the kink; label that separately from a unique classical derivative.
 
 **Expected:** One-sided slopes -1 and +1 contradict differentiability; central is 0. Invalid h/point cases raise ValueError.
 
@@ -57,7 +57,7 @@ For absolute value at zero, a left slope of -1 and a right slope of +1 show that
 
 ## Exercise 6: Transfer to a scaled objective
 
-The derivative of 3*(w-1)^2 is 6*(w-1), giving 6 at w=2. A rate-0.1 step reaches 1.4 and its loss is 3*0.4^2=0.48. This fresh objective confirms that the learner can transfer the mechanism rather than memorize -4. A direct symbolic derivative and a central finite difference are complementary checks. Neither removes the need to inspect which actual computation a later automatic-differentiation tape records.
+The derivative of \(3\cdot {\left(w-1\right)}^{2}\) is \(6\cdot (w-1)\), giving 6 at \(w=2\). A rate-0.1 step reaches 1.4 and its loss is \(3\cdot {0.4}^{2}=0.48\). This fresh objective confirms that the learner can transfer the mechanism rather than memorize -4. A direct symbolic derivative and a central finite difference are complementary checks. Neither removes the need to inspect which actual computation a later automatic-differentiation tape records.
 
 **Expected:** Gradient 6, new w 1.4 and new loss 0.48.
 
@@ -86,7 +86,7 @@ def central_difference(function, point, h):
 
 ## Retrieval and alternatives
 
-Derive the slope of (w+1)^2 at zero without a framework. Then explain why h and a learning rate play different roles even though both may be written as small decimal numbers.
+Derive the slope of \({\left(w+1\right)}^{2}\) at zero without a framework. Then explain why h and a learning rate play different roles even though both may be written as small decimal numbers.
 
 After revealing this file, choose another fixture before treating the answer
 as independent retrieval evidence. Explain why the rejected case is invalid,

@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "deep-learning-tensorflow",
   "title": "Deep learning with TensorFlow and Keras",
-  "summary": "A 36-lesson design from explicit arithmetic and gradients to a bounded, reproducible small-model release.",
+  "summary": "36 lessons in TensorFlow and Keras, from tensor arithmetic and gradients to training, neural architectures, diagnosis and a reproducible model release. Compare mechanisms with the paired PyTorch lessons.",
   "north_star": "Explain a model computation, prove its training/inference contracts and make only the claims supported by its held-out evidence.",
   "entry_prerequisites": [
     "python-16"

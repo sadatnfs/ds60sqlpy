@@ -40,7 +40,7 @@ Formatting is part of that sequence. Role markers, separators and end-of-turn to
 
 ## Choose the weighting rule, not just the loss name
 
-Let record i have m_i active answer tokens and mean token loss l_i. A global token mean is the sum of m_i*l_i divided by the sum of m_i. An equally weighted mean of record losses is the sum of l_i divided by the number of records. These objectives differ when answer lengths differ.
+Let record i have m_i active answer tokens and mean token loss l_i. A global token mean is the sum of \(m_{i}\cdot l_{i}\) divided by the sum of m_i. An equally weighted mean of record losses is the sum of l_i divided by the number of records. These objectives differ when answer lengths differ.
 
 For an illustrative pair, one answer has ten active tokens with mean loss 0.2 and another has 100 active tokens with mean loss 1.0. The token-weighted mean is(10*0.2+100*1.0)/110=102/110, about 0.9273. The equally weighted record mean is(0.2+1.0)/2=0.6. The first gives the longer answer more influence. Neither is automatically correct for every assistant task; the intended population and behavior should determine the weighting.
 
@@ -88,7 +88,7 @@ Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtarget
 
 ## Enumerate the target positions before training
 
-Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when i+1>=P, or equivalently i>=P-1. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
+Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when \(i+1\ge P\), or equivalently \(i\ge P-1\). The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
 
 For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:
 

@@ -1,175 +1,131 @@
-# DS60 Learning Lab: Python, Data Science, SQL, and Engineering
+# DS60 Classroom: learn at your own pace
 
 [![Course validation](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml/badge.svg)](https://github.com/sadatnfs/ds60sqlpy/actions/workflows/ci.yml)
 
-DS60 is a self-paced repository for learning practical Python, data science, and PostgreSQL from introductory material through substantial projects. The existing tracks are organized as 60 numbered lessons, but the number is a navigation aid rather than a deadline: take the time you need, repeat lessons, and use the curriculum catalog to choose prerequisites.
+DS60 is one local classroom for programming, data science, statistics, machine
+learning and systems. Its opening page brings **Python, PostgreSQL, the
+engineering bridge and every newer subject together**. Choose any path, review
+its prerequisites, and study at a pace that fits you. Historical day numbers
+are lesson labels, not deadlines.
 
-> [!TIP]
-> From the course folder, run **`./classroom`** to build locally, start all ten
-> ordinary workers, wait for readiness and open the browser. The same entrypoint
-> works on macOS, Linux and Windows through WSL 2. It selects available local
-> ports and retains learning data in named Docker volumes. Read the
-> [one-command setup](docs/one-command-classroom.md) for first-time engine/WSL
-> preparation, a smaller starter option, stopping and recovery.
-> [START_HERE.html](START_HERE.html) remains the static offline reading library.
+## Build, start and open the classroom
 
+With your local Docker engine running, open a terminal in the course folder:
 
-The repository is designed for:
+```sh
+./classroom
+```
 
-- A learner using the browser coding lab, Visual Studio Code, or JupyterLab
-- Windows, macOS, and Linux
-- A one-time connected setup followed by offline study
-- Optional guidance from Codex without requiring Codex to run the lessons
+The command builds images locally with visible logs, starts PostgreSQL and all
+ten ordinary runtime workers, checks readiness, and opens the actual local
+browser address at **`/classroom`**. It works on macOS, Linux and Windows through
+WSL 2. No host Python, PostgreSQL, Java, C++ compiler or Node installation is
+required. Nothing is pushed to a registry.
 
-**Learning journeys:** open `/journeys` for C++20, Java, JavaScript/TypeScript,
-Kubernetes, Scala and Apache Spark, TensorFlow, PyTorch, NLP, LLM internals,
-and applied LLM systems. Each journey shows its authored lessons and any
-future extension points. The statistics/ML book is a separate reading route
-with explained theory, Python examples, and answered interview discussions.
-Its chapters have no exams or solution gate. The [LLM textbook reading route](docs/learning/llm-textbook.md) connects the 48 theory and 24 applied chapters with notation, derivations and a subject-assistant case study. For a connected explanation of how a language model works, read [Inside a Transformer](docs/learning/inside-a-transformer.md), including its runnable numerical forward pass. The [implementation checkpoint](docs/implementation/CHECKPOINT.md)
-records current completion and actual runtime evidence. The original Python,
-PostgreSQL, and bridge library remains available, with additional NumPy,
-pandas, algorithms, and advanced SQL lessons.
+Read the [beginner one-command setup](docs/one-command-classroom.md) for engine
+installation, Windows WSL integration, storage, a smaller first build and
+recovery. Windows Explorer users can run **START_DOCKER_CLASSROOM.cmd** after
+WSL and engine integration are configured. Mac users can double-click
+**START_DOCKER_CLASSROOM.command**.
 
-Each Python, SQL, and bridge guide is designed to stand on its own: it defines the
-mental model and vocabulary, breaks down syntax or query anatomy, provides
-runnable examples and visible checks, diagnoses common mistakes, and supplies
-a progression of practice. Its final **Ask Codex about this lesson** block is
-optional, copy-ready coaching context - not a replacement for the lesson.
+```sh
+./classroom status      # Containers and the current browser address
+./classroom logs        # Recent app and database logs
+./classroom stop        # Stop while preserving saved work
+./classroom --no-build  # Resume using already built images
+```
 
-> [!IMPORTANT]
-> The repository runs locally after setup, but a brand-new machine still needs internet access to install Python packages, PostgreSQL or Docker, and VS Code extensions. A few lessons use Seaborn datasets that download on first use and are cached afterward. Pretrained Hugging Face, spaCy, and torchvision exercises can also require a deliberate first download; their lesson notes identify those cases. See [Offline use](docs/setup/offline.md).
+Initial preparation needs internet access. The normal classroom works offline
+once the chosen images and fixtures are prepared. Optional pretrained-model
+downloads, external services and Kubernetes cluster preparation are deliberate
+lesson workflows. See [offline use](docs/setup/offline.md).
 
-## Current validation
+## One home, every learning path
 
-The expanded library has 186 Python/SQL/bridge lessons and 412 module/book
-lessons across 11 subjects, with 30 additional PySpark implementations. The
-statistics book maps all 1,005 topics in its supplied outline. The grouped
-four-worker suite passed 2,011 tests in 127.16 seconds, with 244 explicit optional
-host-runtime skips; separate local Docker checks cover all 385 executable
-module/book references and all ten ordinary app-to-worker routes. See the
-[acceptance checkpoint](docs/implementation/CHECKPOINT.md) for exact scope,
-worked examples, browser/cluster evidence and platform limitations.
+The home page is the subject chooser. Every subject has its own color theme
+and a text label, so color is never the only way to identify a path. Opening a
+lesson keeps its guide, coding workspace or reading notes, and progress in the
+same classroom. Use **All subjects** to change direction without opening a
+second application.
 
-## New module labs
+| Subject | Start here | Main direction |
+| --- | --- | --- |
+| Python and data science | [Python](python/ds-60day/README.md) | First programs, NumPy, pandas, algorithms, analysis and delivery |
+| PostgreSQL | [SQL](sql/postgres-60day/README.md) | First queries, relational reasoning, analytics, performance and operations |
+| Python + PostgreSQL engineering | [Bridge](bridge/README.md) | Safe database access, transactions, testing and pipelines |
+| Statistics and machine learning | [Tutorial book](courses/statistics-ml/README.md) | Theory, modeling choices, worked Python examples and interview explanations |
+| C++ | [C++20](courses/cpp/README.md) | Language foundations, ownership, compilation and larger programs |
+| Java | [Java](courses/java/README.md) | Objects, types, collections, concurrency and practical engineering |
+| JavaScript and TypeScript | [JavaScript/TypeScript](courses/javascript-typescript/README.md) | Browser and Node concepts, types, asynchronous code and testing |
+| Kubernetes | [Kubernetes](courses/kubernetes/README.md) | Workloads, configuration, networking and bounded cluster practice |
+| Scala and Apache Spark | [Scala/Spark](courses/scala-spark/README.md) | Scala, distributed data processing and companion PySpark implementations |
+| TensorFlow | [TensorFlow/Keras](courses/deep-learning-tensorflow/README.md) | Tensors, optimization, architectures and model workflows |
+| PyTorch | [PyTorch](courses/deep-learning-pytorch/README.md) | Autograd, training state, architectures and reproducibility |
+| Natural language processing | [NLP](courses/nlp/README.md) | Text representation, classical baselines, neural methods and evaluation |
+| LLM mechanisms | [LLM theory](courses/llm-theory/README.md) | Tokens, Transformers, attention, generation and adaptation mechanics |
+| Applied LLM systems | [Applied LLMs](courses/llm-applied/README.md) | RAG, evaluation, fine-tuning, tools and subject assistants |
 
-The workspace at `/journeys` puts the guide, coding pad, notes, compiler
-diagnostics, and execution history together. C++ and Java compile in their
-Docker workers. JavaScript runs in Node.js; TypeScript passes a strict compiler
-check before its emitted JavaScript runs. Python, TensorFlow, PyTorch, and
-Spark use their declared worker profiles. A successful example run does not
-award automatic mastery; keep your explanation and transfer evidence too.
+The library contains **598 canonical lessons and chapters across 14 subjects**,
+with 30 additional PySpark implementations. The statistics book develops all
+1,005 topics in its supplied outline. The [72-chapter LLM reading route](docs/learning/llm-textbook.md)
+connects mechanisms to a running subject-assistant case study; [Inside a
+Transformer](docs/learning/inside-a-transformer.md) provides a connected
+numerical explanation of the architecture.
 
-**Start with the [one-command classroom walkthrough](docs/one-command-classroom.md).**
-Run `./classroom` on macOS, Linux or in a Windows WSL 2 terminal. The supplied
-Bash launcher uses your local Docker engine and Compose; the language runtimes
-are installed inside images, with no host Python or compiler installation. On Windows, `START_DOCKER_CLASSROOM.cmd` invokes the same entrypoint through
-WSL 2; the default prepares all ordinary language and framework workers.
+Prerequisites and estimated durations help you choose your next step. They do
+not impose a deadline or lock you into one subject. Read slowly, revisit a
+chapter, switch paths or combine them. A saved completion marker records your
+choice; running a sample or opening an answer does not certify mastery.
 
-The classroom keeps saved work in its own persistent Docker volume. Existing
-host-folder `.learning` work stays in the older launcher route; see the guide's
-export and transfer instructions before moving between them. Choose only the
-language or framework workers needed for your lesson and build each
-image with visible foreground logs.
+## Read, code and keep your work
+
+Mathematical explanations render as typeset equations, including fractions,
+subscripts, vectors and matrices. Fenced code examples carry language-aware
+syntax highlighting. Both work from bundled local rendering resources without
+an external CDN. Code remains selectable so you can copy an example into its
+appropriate workspace.
+
+C++ and Java compile in Docker workers. JavaScript runs in Node.js, and
+TypeScript is checked and compiled before execution. Python, TensorFlow,
+PyTorch and Spark use their declared profiles. Each lesson explains its own
+execution contract: a SQL script, a notebook, a standalone program and a
+reading chapter are different artifacts. Follow the capability notice and
+preparation steps, especially for disposable SQL schemas and optional cluster
+operations.
+
+Programming lessons combine explanations, worked examples, practice,
+progressive hints and separate solutions. The statistics/ML book is a tutorial
+with fully worked examples and answered interview discussions, without exams
+or a hidden-solution gate. Reading, code, prediction and notes stay within one
+subject workspace. See [the classroom guide](docs/classroom-experience.md).
+
+The standard classroom saves learner work in named Docker volumes. Rebuilding
+or replacing containers does not erase that work. Keep these volumes when
+cleaning images, and use the documented export/backup workflow before moving
+to a different machine or storage configuration. Earlier host-folder launchers
+retain their own `.learning` state; they are compatibility alternatives, not
+an additional required classroom. See [persistence and transfer](docs/one-command-classroom.md).
+
+## Optional tools and compatibility routes
+
+The static [START_HERE.html](START_HERE.html) remains an offline reading library.
+Native VS Code/Jupyter workflows remain available for learners who deliberately
+prepare those tools. Existing `/learn` and `/journeys` links are compatibility
+entrypoints into the unified classroom; new documentation uses `/classroom`.
+
+The optional [Codex MCP tutor](docs/mcp-tutor.md) can search content and help plan
+study. It is read-only by default, reveals official solutions only on request,
+and does not execute pad code. Codex is optional; every lesson must explain
+its topic without requiring an agent.
 
 The [implementation checkpoint](docs/implementation/CHECKPOINT.md) records
-completed content, actual runtime evidence, limitations, and the next batch.
-The [optional host-launcher runtime guide](docs/modules-runtime.md) covers the
-existing PowerShell/Bash workflow and the separate owned Kubernetes setup.
-Those launchers remain available for learners who want host-folder storage.
+current acceptance evidence and explicit platform limits. Historical test
+counts describe the version tested, not a guarantee about every future edit.
+The [curriculum map](docs/curriculum-map.md) and generated catalog describe the
+Python, SQL and bridge inventory; authored module manifests retain the newer
+subjects' stable IDs.
 
-## Start the guided coding application
-
-The Docker-managed classroom above is the primary module route. The optional
-alternatives below keep learning files in a visible host `.learning` folder.
-
-The course now includes a browser workspace with Python and PostgreSQL coding
-pads, a lesson guide beside your code, saved work and evidence, progressive
-hints, and a route generated from your goal's prerequisites. It runs locally
-and works offline after the required tools, images, and lesson packages have
-been prepared.
-
-**Docker browser lab on Windows, macOS, or Linux:** follow the
-[beginner walkthrough](docs/docker-beginners.md) to install the engine,
-prepare Windows WSL 2 if needed, and extract the course folder. No host Python,
-PostgreSQL, or course package installation is required for this route.
-
-**New Windows computer:** download the supplied Windows Starter ZIP (or a
-repository ZIP containing the first-run wizard), choose **Extract All**, then
-double-click **`START_DOCKER_LAB.cmd`** in the extracted folder. Its
-first-run wizard reuses a ready engine or offers prerequisite installation.
-No host Python or Git is needed. Windows may request installation approval or
-a restart; rerun the same launcher afterward to continue. See the
-[Windows first-run walkthrough](docs/docker-beginners.md#windows-start-with-the-first-run-wizard).
-
-With a configured engine, Mac users can double-click
-`START_DOCKER_LAB.command`. Runtime-only terminal alternatives, from the folder
-containing `compose.yaml`, are:
-
-```powershell
-# Windows PowerShell
-powershell -ExecutionPolicy Bypass -File .\scripts\docker_lab.ps1 start
-```
-
-```bash
-# macOS, Linux, or an integrated WSL 2 terminal
-bash scripts/docker_lab.sh start
-```
-
-The launcher builds when needed, waits for readiness, and opens
-[the local learning lab](http://127.0.0.1:8765/learn). The first build needs
-internet; later starts reuse local images. Saved pads, history, evidence, and
-progress live in the host `.learning` folder, so replacing a container keeps
-them. PostgreSQL has a separate persistent volume and uses the limited local
-course login `admin` / password `admin`. Use the same launcher with `stop` to
-pause without deleting either store. [Backup, custom folders, ports, and
-troubleshooting](docs/docker-beginners.md#6-find-the-host-files-that-preserve-your-work)
-are covered step by step.
-
-**Use native backends:** finish your [operating-system setup](docs/setup/first-success.md),
-then double-click `START_LEARNING_LAB.cmd` on Windows. On macOS/Linux:
-
-```bash
-.venv/bin/python scripts/learning_lab.py
-```
-
-**Build an executable:** use `python scripts/build_app.py` after installing the
-optional `desktop-build` extra, or `make app PYTHON=.app-build/bin/python`.
-Build on each target OS. The application bundles its own UI runtime and the
-complete course; coding pads connect to a supported Python environment and
-PostgreSQL. See [application and build instructions](docs/offline-app.md).
-
-**Use Codex as your coach:** the optional [stdio MCP tutor](docs/mcp-tutor.md)
-provides bounded course search, prerequisite planning, lessons, progressive
-hints, and explicitly requested solutions. It is read-only by default and does
-not execute pad code. Your Codex connection is separate from offline study.
-
-The static `START_HERE.html` library remains available for reading. For help
-choosing a route, use [learning paths and placement](docs/learning-paths.md).
-
-## Choose a track
-
-| Track | Start here | What it covers |
-| --- | --- | --- |
-| Python and data science | [Python track](python/ds-60day/README.md) | Core Python, notebooks, data work, statistics, machine learning, APIs, and production topics |
-| PostgreSQL | [SQL track](sql/postgres-60day/README.md) | Relational design, SQL fundamentals, analytics, performance, operations, and projects |
-| Python + PostgreSQL engineering | [Engineering bridge](bridge/README.md) | Typed configuration, safe database access, transactions, testing, ETL, concurrency, and production operations |
-| Both | Start with Python Days 1–15, then alternate tracks | A broader data-practitioner path |
-
-The human-readable overview is [docs/curriculum-map.md](docs/curriculum-map.md). The checked-in `curriculum/catalog.json` is a generated index for tools; lesson artifact filenames and the metadata rules in `src/ds60sqlpy/catalog_builder.py` are its inputs. Inspect the generated view with:
-
-```text
-python scripts/course.py catalog
-```
-
-After the shared lessons, use
-[professional and specialization paths](docs/professional-paths.md) for the
-named modules. A new SQL learner starts with `sql-start-01`, `sql-start-02`, and
-`sql-start-03` before `sql-01`; relational design
-(`sql-found-01`) is the milestone between Days 15 and 16, and safe versioned
-migrations (`sql-found-02`) sit between Days 39 and 40.
-
-## Quick start
+## Optional native development setup
 
 Run commands from the repository root - the directory containing this README.
 

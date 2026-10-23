@@ -26,7 +26,7 @@ The RoPE helper pairs adjacent features and uses inverse frequencies base**(-2*i
 
 ## Exercise 1: Rotate a two-dimensional vector
 
-The question is: Rotate[1, 0] by pi/2 and check length preservation.
+The question is: Rotate[1, 0] by \(\frac{\pi}{2}\) and check length preservation.
 
 A rotation changes direction while preserving the Euclidean norm. This separates position encoding from arbitrary magnitude scaling.
 
@@ -42,7 +42,7 @@ np.testing.assert_allclose(np.linalg.norm(rotated),1,atol=1e-12,rtol=0)
 
 ## Exercise 2: Verify the relative dot-product identity
 
-The question is: Use q[1, 2], k[3, -1], angles m=.3, n=1.1.
+The question is: Use q[1, 2], k[3, -1], angles \(m=0.3\), \(n=1.1\).
 
 The transpose of a rotation is its inverse, so the absolute angles combine into their difference. This is an algebraic property, not a measured long-context quality result.
 
@@ -60,16 +60,16 @@ np.testing.assert_allclose(left,right,atol=1e-12,rtol=0)
 
 The question is: Use zero content scores for query position 2, keys 0, 1, 2 and slope log 2.
 
-The distance penalties produce exponentials1/4, 1/2, 1 before normalization. The current key receives the largest weight under this illustrative slope.
+The distance penalties produce exponentials1/4, \(\frac{1}{2}\), 1 before normalization. The current key receives the largest weight under this illustrative slope.
 
 ```python
 positions=np.arange(3); score=-np.log(2)*(2-positions); mass=np.exp(score-score.max()); weights=mass/mass.sum()
 np.testing.assert_allclose(weights,[1/7,2/7,4/7],atol=1e-12,rtol=0)
 ```
 
-**Expected:** normalized weights[1/7, 2/7, 4/7].
+**Expected:** normalized weights[1/7, \(\frac{2}{7}\), 4/7].
 
-**Verify:** Compare the computed values or written argument with normalized weights[1/7, 2/7, 4/7].
+**Verify:** Compare the computed values or written argument with normalized weights[1/7, \(\frac{2}{7}\), 4/7].
 
 ## Exercise 4: Apply multi-frequency RoPE
 

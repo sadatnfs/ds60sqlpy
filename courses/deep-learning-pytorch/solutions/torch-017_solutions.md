@@ -16,23 +16,23 @@ The fixture uses weights 1, -2 and unit activations. It separates data loss from
 
 ## Reading the implementation
 
-nn.Dropout(p=.5) scales retained training activations by 1/(1-p). Call train or eval to select behavior. Compute sum(abs(w)) and sum(w²) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
+nn.Dropout(p=.5) scales retained training activations by \(\frac{1}{1-p}\). Call train or eval to select behavior. Compute sum(abs(w)) and \(\operatorname{sum}({w}^{2})\) for declared penalty conventions, then multiply by an explicit coefficient. A half-scaled squared penalty would have a different derivative. Keep metrics and penalty components separate in logs.
 
 ## Derive the objective, random transformation and gradient
 
-The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is sqrt(5). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At lambda=0.1 it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
+The fixture has w=[1, -2]. The absolute-value sum is three, the squared-value sum is five, and the Euclidean norm is \(\sqrt{5}\). These are different quantities. This chapter's squared L2 penalty is lambda times the sum of squared weights, without a one-half factor. At \(\lambda=0.1\) it contributes 0.5 to the objective and gradient[0.2, -0.4]. Doubling both weights doubles the L1 sum to six but quadruples the squared sum to twenty. That scale dependence matters when preprocessing changes the meaning of a unit weight.
 
-Suppose one coordinate has data gradient g=0.3, parameter w=1 and learning rate eta=0.1. Ordinary SGD on data loss plus 0.1*w² uses total gradient 0.3+0.2=0.5 and gives w'=0.95. The update can also be written (1-2*eta*lambda)w-eta*g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective's convention.
+Suppose one coordinate has data gradient \(g=0.3\), parameter \(w=1\) and learning rate \(\eta=0.1\). Ordinary SGD on data loss plus \(0.1\cdot {w}^{2}\) uses total gradient \(0.3+0.2=0.5\) and gives w'=0.95. The update can also be written (1-2*eta*lambda)w-eta*g. An SGD weight-decay coefficient 0.2 corresponds to this particular explicit penalty convention. A coefficient 0.1 would correspond to a half-scaled objective and would instead give 0.96 for this example. A shared name or numeric coefficient does not fix the objective's convention.
 
-For an adaptive optimizer, adding 2*lambda*w to g also changes the moment estimates and coordinatewise scaling. Decoupled AdamW applies its decay separately from those moment calculations. Consequently the SGD algebra above does not establish an Adam/AdamW equivalence. Compare the optimizer formula, update count, learning-rate schedule and decayed parameter groups. [PyTorch 2.9 AdamW](https://docs.pytorch.org/docs/2.9/generated/torch.optim.AdamW.html).
+For an adaptive optimizer, adding \(2\cdot \lambda\cdot w\) to g also changes the moment estimates and coordinatewise scaling. Decoupled AdamW applies its decay separately from those moment calculations. Consequently the SGD algebra above does not establish an Adam/AdamW equivalence. Compare the optimizer formula, update count, learning-rate schedule and decayed parameter groups. [PyTorch 2.9 AdamW](https://docs.pytorch.org/docs/2.9/generated/torch.optim.AdamW.html).
 
 Loss reduction adds another scale choice. Replacing a mean over B observations with a sum multiplies the data gradient by B but leaves a separately added fixed penalty unchanged. That reduces the relative penalty strength unless its coefficient is adjusted. Repeating the full penalty at each microbatch also changes its total contribution if the intent was one large-batch objective. Specify whether the penalty is applied once per optimizer step and how accumulated data gradients are normalized.
 
-For Dropout probability p<1, let m be a Bernoulli keep indicator with probability q=1-p. Inverted Dropout computes y=m*x/q during training. Thus E[y]=x and Var(y)=x²*p/q. This statement conditions on the input value; it does not assert that a finite collection of outputs has exactly the same mean. At p=0.5 and x=1, each output is zero or two, each with probability one-half. The derivative with respect to x is the same multiplier m/q, so the sampled backward path is either zero or two. During evaluation the transformation is identity. [PyTorch 2.9 Dropout](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Dropout.html).
+For Dropout probability \(p<1\), let m be a Bernoulli keep indicator with probability \(q=1-p\). Inverted Dropout computes \(y=\frac{m\cdot x}{q}\) during training. Thus E[y]=x and \(\operatorname{Var}(y)=\frac{{x}^{2}\cdot p}{q}\). This statement conditions on the input value; it does not assert that a finite collection of outputs has exactly the same mean. At \(p=0.5\) and \(x=1\), each output is zero or two, each with probability one-half. The derivative with respect to x is the same multiplier m/q, so the sampled backward path is either zero or two. During evaluation the transformation is identity. [PyTorch 2.9 Dropout](https://docs.pytorch.org/docs/2.9/generated/torch.nn.Dropout.html).
 
-The fixture contains 32 unit activations. Under independent elementwise masking, the count K of retained values has mean 16 and variance 8. The observed tensor mean is 2 K/32, so its expectation is one and its variance is 1/32. Its standard deviation is about 0.177. A particular call can retain 15 or 18 values without violating the contract. Even all-zero and all-two tensors are possible, though rare. That is why the executable assertion checks shape and allowed values rather than requiring exactly 16 survivors or a particular cross-platform random mask.
+The fixture contains 32 unit activations. Under independent elementwise masking, the count K of retained values has mean 16 and variance 8. The observed tensor mean is 2 \(\frac{K}{32}\), so its expectation is one and its variance is \(\frac{1}{32}\). Its standard deviation is about 0.177. A particular call can retain 15 or 18 values without violating the contract. Even all-zero and all-two tensors are possible, though rare. That is why the executable assertion checks shape and allowed values rather than requiring exactly 16 survivors or a particular cross-platform random mask.
 
-Expected activation preservation also does not imply preservation after nonlinear downstream operations. If a scalar activation is always one without Dropout, its square is one. With p=0.5, its squared dropped value is zero or four and has expectation two. Therefore a model's expected squared loss need not equal its loss at the expected activation. Dropout changes the stochastic training objective, not just the way an unchanged loss is sampled.
+Expected activation preservation also does not imply preservation after nonlinear downstream operations. If a scalar activation is always one without Dropout, its square is one. With \(p=0.5\), its squared dropped value is zero or four and has expectation two. Therefore a model's expected squared loss need not equal its loss at the expected activation. Dropout changes the stochastic training objective, not just the way an unchanged loss is sampled.
 
 The state table helps prevent accidental coupling of unrelated controls:
 
@@ -57,9 +57,9 @@ The squared L2penalty is not the square root norm. Naming the convention avoids 
 w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5
 ```
 
-**Expected:** L1=3; squared L2=5.
+**Expected:** \(L_{1}=3\); squared \(L_{2}=5\).
 
-**Verify:** Compare the computed values or written argument with L1=3; squared L2=5.
+**Verify:** Compare the computed values or written argument with \(L_{1}=3\); squared \(L_{2}=5\).
 
 ## Exercise 2: Check evaluation dropout
 
@@ -108,7 +108,7 @@ assert penalty.item()==.5 and (data_loss+penalty).item()==2.5
 
 ## Exercise 5: Differentiate the explicit penalty
 
-The question is: Differentiate .1*sum(v*v) at v=[1, -2].
+The question is: Differentiate \(0.1\cdot \operatorname{sum}(v\cdot v)\) at v=[1, -2].
 
 The derivative contains 2*coefficient*v under this definition. Copying a coefficient from a half-scaled objective would change the update.
 

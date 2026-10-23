@@ -84,9 +84,9 @@ if result.returncode: raise RuntimeError('child process failed: '+result.stderr)
 restored=json.loads(result.stdout.strip().splitlines()[-1]); np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0)
 ```
 
-**Expected:** child weight agrees within1e-6.
+**Expected:** child weight agrees within 1e-6.
 
-**Verify:** Compare the computed values or written argument with child weight agrees within1e-6.
+**Verify:** Compare the computed values or written argument with child weight agrees within 1e-6.
 
 ## Exercise 5: Expose weights-only continuation
 

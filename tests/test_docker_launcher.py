@@ -105,7 +105,7 @@ def test_start_preserves_host_progress_builds_locally_and_opens_browser(
     assert any("build" in entry["args"] for entry in recorded)
     assert any("up" in entry["args"] and "--wait" in entry["args"] for entry in recorded)
     assert not any("push" in entry["args"] for entry in recorded)
-    assert opened == ["http://127.0.0.1:18888/learn"]
+    assert opened == ["http://127.0.0.1:18888/classroom"]
     assert evidence.read_bytes() == b"previous learner evidence"
     assert next(entry for entry in recorded if "up" in entry["args"])["state"] == str(data)
 

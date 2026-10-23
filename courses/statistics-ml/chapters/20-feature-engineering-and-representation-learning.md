@@ -8,7 +8,7 @@ A feature is a measurement available when a decision is made. Its transformation
 
 ### Derive PCA as reconstruction
 
-Center X by subtracting training column means and compute X=U S V-transpose. The first k right singular vectors form loading directions V_k; scores are X V_k. Reconstruct with scores times V_k-transpose and add the training means. This minimizes squared reconstruction error among rank-k linear approximations. Explained variances are s_j^2/(n-1), so retained variance ratios follow directly from singular values.
+Center X by subtracting training column means and compute \(X=U\Sigma V^{\mathsf T}\). The first k right singular vectors form loading directions V_k; scores are X V_k. Reconstruct with scores times V_k-transpose and add the training means. This minimizes squared reconstruction error among rank-k linear approximations. Explained variances are \(\frac{s_j^2}{n-1}\), so retained variance ratios follow directly from singular values.
 
 PCA maximizes variance, not predictive value, independence or causal relevance. A low-variance feature can strongly predict the target. Raw-unit PCA lets large-scale features dominate; standardized PCA answers a correlation-scale question instead. Component signs are arbitrary, and nearly tied singular values make individual directions unstable even when the subspace is stable. Select dimension inside the training process and evaluate the downstream task.
 
@@ -158,7 +158,7 @@ Probe whether representations encode labels, future information or sensitive ide
 
 ### Case study: derive the first principal component numerically
 
-For rows (1,2),(2,4),(3,6),(4,8), the column means are (2.5,5). The sample covariance is [[5/3,10/3],[10/3,20/3]]. Its trace is 25/3, the total sample variance. The vector (1,2)/sqrt(5) is an eigenvector with eigenvalue 25/3, and its orthogonal direction has eigenvalue zero. Every centered observation lies on the first direction, so one component reconstructs the data exactly.
+For rows (1,2),(2,4),(3,6),(4,8), the column means are (2.5,5). The sample covariance is \([[\frac{5}{3},\frac{10}{3}],[\frac{10}{3},\frac{20}{3}]]\). Its trace is \(\frac{25}{3}\), the total sample variance. The vector \(\frac{(1,2)}{\sqrt{5}}\) is an eigenvector with eigenvalue \(\frac{25}{3}\), and its orthogonal direction has eigenvalue zero. Every centered observation lies on the first direction, so one component reconstructs the data exactly.
 
 The loading vector tells how original coordinates combine into a component. The score is each row's projection onto that direction. A sign-flipped loading and sign-flipped scores reconstruct the same matrix, so component signs have no intrinsic meaning. With two nearly equal eigenvalues, even orientations within their shared subspace can rotate substantially across samples. Compare subspaces or align components before interpreting instability as a changed phenomenon.
 

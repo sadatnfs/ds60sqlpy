@@ -61,9 +61,9 @@ with torch.no_grad():
         full,_=model(torch.tensor([tokens])); incremental=torch.cat(outputs[request],dim=1); torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)
 ```
 
-**Expected:** both requests match within1e-6.
+**Expected:** both requests match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with both requests match within1e-6.
+**Verify:** Compare the computed values or written argument with both requests match within 1e-6.
 
 ## Exercise 4: Invalidate a tokenizer change
 

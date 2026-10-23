@@ -8,7 +8,7 @@ Time-series analysis begins by preserving information order. Let y_t denote an o
 
 ### Dependence changes uncertainty
 
-For n observations with common variance sigma^2 and lag-h correlation rho_h, Var(mean)=sigma^2/n * [1+2 sum_(h=1)^(n-1)(1-h/n)rho_h]. Positive serial correlation increases variance relative to independent observations. This is why randomly shuffling adjacent rows can exaggerate both effective sample size and validation performance. The formula assumes a covariance-stationary setting; a strong evolving trend needs separate treatment.
+For n observations with common variance \({\sigma}^{2}\) and lag-h correlation rho_h, \(\operatorname{Var}(\bar{Y})=\frac{\sigma^2}{n}\left[1+2\sum_{h=1}^{n-1}\left(1-\frac{h}{n}\right)\rho_h\right]\). Positive serial correlation increases variance relative to independent observations. This is why randomly shuffling adjacent rows can exaggerate both effective sample size and validation performance. The formula assumes a covariance-stationary setting; a strong evolving trend needs separate treatment.
 
 ### Stationarity is a model property with several meanings
 
@@ -26,7 +26,7 @@ The demonstrations isolate exact algebraic mechanisms: differencing a trend-plus
 
 **Temporal dependence**
 
-Temporal dependence means observations carry information about one another across time. In an AR(1), y_t=phi*y_(t-1)+epsilon_t, a shock influences later observations through powers of phi. Inspect dependence at the same cadence used by the decision, and keep entire related trajectories together in validation. Treating hourly measurements as independent can understate uncertainty even when the sample contains millions of rows.
+Temporal dependence means observations carry information about one another across time. In an AR(1), \(y_t=\phi y_{t-1}+\epsilon_t\), a shock influences later observations through powers of phi. Inspect dependence at the same cadence used by the decision, and keep entire related trajectories together in validation. Treating hourly measurements as independent can understate uncertainty even when the sample contains millions of rows.
 
 ### stat-25-02
 
@@ -38,7 +38,7 @@ Strict stationarity requires the joint law of (Y_t1,...,Y_tk) to equal that of (
 
 **Weak stationarity**
 
-Weak stationarity requires finite second moments, constant E[Y_t]=mu and Cov(Y_t,Y_(t-h))=gamma(h). It supports covariance-based tools such as ACF analysis and linear prediction. A constant mean alone is insufficient if variance changes. Strict stationarity with finite second moments implies weak stationarity; weak stationarity need not imply strict stationarity outside special families such as jointly Gaussian processes.
+Weak stationarity requires finite second moments, constant \(\mathbb{E}[Y_t]=\mu\) and \(\operatorname{Cov}(Y_t,Y_{t-h})=\gamma(h)\). It supports covariance-based tools such as ACF analysis and linear prediction. A constant mean alone is insufficient if variance changes. Strict stationarity with finite second moments implies weak stationarity; weak stationarity need not imply strict stationarity outside special families such as jointly Gaussian processes.
 
 ### stat-25-04
 
@@ -62,7 +62,7 @@ Cycles are rises and falls without a fixed calendar period. Economic expansions 
 
 **Autocorrelation functions**
 
-The autocorrelation function rho(h)=gamma(h)/gamma(0) describes linear association between values h steps apart. Estimate it after addressing relevant level changes and missing timestamps. Slow ACF decay can arise from persistence, trend or a unit root, so it does not uniquely identify a model. Standard reference bands depend on assumptions and multiple-lag inspection is not one isolated hypothesis test.
+The autocorrelation function \(\rho(h)=\frac{\gamma(h)}{\gamma(0)}\) describes linear association between values h steps apart. Estimate it after addressing relevant level changes and missing timestamps. Slow ACF decay can arise from persistence, trend or a unit root, so it does not uniquely identify a model. Standard reference bands depend on assumptions and multiple-lag inspection is not one isolated hypothesis test.
 
 ### stat-25-08
 
@@ -80,7 +80,7 @@ White noise has constant mean, constant finite variance and zero autocovariance 
 
 **Differencing**
 
-First differencing forms Delta y_t=y_t-y_(t-1), removing one unit of integration in appropriate models and converting a deterministic linear trend into a constant. It loses the first observation and changes the forecast target, so predictions must be integrated back to levels. Differencing stationary noise can introduce negative lag-one correlation and increase noise. Choose differencing using a model argument and residual/forecast evidence.
+First differencing forms \(\Delta y_t=y_t-y_{t-1}\), removing one unit of integration in appropriate models and converting a deterministic linear trend into a constant. It loses the first observation and changes the forecast target, so predictions must be integrated back to levels. Differencing stationary noise can introduce negative lag-one correlation and increase noise. Choose differencing using a model argument and residual/forecast evidence.
 
 ### stat-25-11
 
@@ -92,7 +92,7 @@ Seasonal differencing forms y_t-y_(t-m) for period m. It cancels an exactly repe
 
 **Unit roots**
 
-A unit root in an autoregressive polynomial makes shocks persistent rather than geometrically decaying. A random walk y_t=y_(t-1)+epsilon_t has variance growing with t and is not covariance-stationary. Near-unit-root stationary processes can resemble it in short samples. The distinction affects long-horizon uncertainty and whether level relationships require cointegration analysis, not just which button transforms the data.
+A unit root in an autoregressive polynomial makes shocks persistent rather than geometrically decaying. A random walk \(y_t=y_{t-1}+\epsilon_t\) has variance growing with t and is not covariance-stationary. Near-unit-root stationary processes can resemble it in short samples. The distinction affects long-horizon uncertainty and whether level relationships require cointegration analysis, not just which button transforms the data.
 
 ### stat-25-13
 
@@ -110,7 +110,7 @@ KPSS starts from a null of level or trend stationarity and examines cumulative r
 
 **Cointegration**
 
-Cointegration occurs when individually integrated series have a stationary linear combination, such as y_t-beta*x_t. The combination represents an equilibrium relation even though levels wander. Regressing unrelated trending series can look convincing without cointegration. Define integration order, deterministic terms and testing method, then use an error-correction model when short-run changes adjust toward a supported long-run relation.
+Cointegration occurs when individually integrated series have a stationary linear combination, such as \(y_{t}-\beta\cdot x_{t}\). The combination represents an equilibrium relation even though levels wander. Regressing unrelated trending series can look convincing without cointegration. Define integration order, deterministic terms and testing method, then use an error-correction model when short-run changes adjust toward a supported long-run relation.
 
 ### stat-25-16
 
@@ -140,7 +140,7 @@ A periodogram estimates power from squared Fourier coefficients. Its raw values 
 
 **Fourier representations**
 
-Fourier terms sin(2*pi*k*t/m) and cos(2*pi*k*t/m) encode smooth periodic components with period m and harmonic k. Regression coefficients set amplitude and phase. A small number of harmonics can represent long seasonal periods parsimoniously, while too many terms can fit noise. Future time indices are known, but choosing harmonics using the full future evaluation period leaks model-selection information.
+Fourier terms \(\sin(\frac{2\cdot \pi\cdot k\cdot t}{m})\) and \(\cos(\frac{2\cdot \pi\cdot k\cdot t}{m})\) encode smooth periodic components with period m and harmonic k. Regression coefficients set amplitude and phase. A small number of harmonics can represent long seasonal periods parsimoniously, while too many terms can fit noise. Future time indices are known, but choosing harmonics using the full future evaluation period leaks model-selection information.
 
 ### stat-25-21
 
@@ -152,7 +152,7 @@ Wavelets localize variation in both time and scale using translated, rescaled ba
 
 **Time-series decomposition**
 
-Decomposition writes a series as trend, seasonal and remainder components, often additively as y_t=T_t+S_t+R_t. This is a representation, not a unique physical separation. Smoothing choices change each component, and a small remainder does not guarantee forecastability. Retrospective centered smoothers use future observations, so refit decomposition within each forecast origin for honest forecasting evaluation.
+Decomposition writes a series as trend, seasonal and remainder components, often additively as \(y_t=T_t+S_t+R_t\). This is a representation, not a unique physical separation. Smoothing choices change each component, and a small remainder does not guarantee forecastability. Retrospective centered smoothers use future observations, so refit decomposition within each forecast origin for honest forecasting evaluation.
 
 ### stat-25-23
 
@@ -182,7 +182,7 @@ python courses/statistics-ml/examples/chapter_25.py
 
 ### Remove a known seasonal component without guessing
 
-The fixture is 10+3t plus a four-position pattern [0,2,0,-2]. Comparing y_t with y_(t-4) cancels the repeating pattern and leaves 3*4=12. First differencing those increments then gives zero. This exact algebra explains the transformation; it does not justify differencing an arbitrary observed series twice.
+The fixture is 10+3t plus a four-position pattern [0,2,0,-2]. Comparing y_t with y_(t-4) cancels the repeating pattern and leaves \(3\cdot 4=12\). First differencing those increments then gives zero. This exact algebra explains the transformation; it does not justify differencing an arbitrary observed series twice.
 
 ### Read a frequency in the correct units
 

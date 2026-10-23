@@ -26,12 +26,12 @@ For constant c and one-based rank r, this fixture contributes1/(c+r) from each l
 
 | Document | Contributions | Fused score |
 | --- | --- | --- |
-| b | 1/62+1/61 | about0.032522 |
-| a | 1/61+1/63 | about0.032266 |
-| d | 1/62 | about0.016129 |
-| c | 1/63 | about0.015873 |
+| b | \(\frac{1}{62}+\frac{1}{61}\) | about0.032522 |
+| a | \(\frac{1}{61}+\frac{1}{63}\) | about0.032266 |
+| d | \(\frac{1}{62}\) | about0.016129 |
+| c | \(\frac{1}{63}\) | about0.015873 |
 
-The b-minus-a gap is1/62-1/63=1/3906, about0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf).
+The b-minus-a gap is1/62-\(\frac{1}{63}\)=1/3906, about0.000256. Their common rank-one contribution cancels. This exact difference is useful for detecting an off-by-one or list-order mistake even when both scores round to0.032 in a display. The reciprocal-rank fusion paper supplies the original method; the table is a calculation from the local fixture. [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf).
 
 The constant changes how strongly rank gaps matter. With a large constant relative to the list depth, each appearance contributes roughly1/c, so cross-list occurrence count becomes influential and nearby ranks differ little. With a small positive constant, top ranks have much stronger relative weight. Neither setting is universally optimal. The fixture's60 is a declared choice, not a calibrated relevance probability or a domain-independent threshold.
 

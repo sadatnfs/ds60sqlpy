@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "deep-learning-pytorch",
   "title": "Deep Learning with PyTorch: tensors to reliable model releases",
-  "summary": "A full36lesson PyTorch journey with depth comparable to the TensorFlow route. The sequence teaches idiomatic autograd, data loading, training, CNNs, sequences, transformers, diagnosis, checkpoints, performance and deployment with paired framework comparisons.",
+  "summary": "36 lessons in PyTorch, from tensors and autograd to training, neural architectures, diagnosis, checkpoints and deployment. Paired TensorFlow examples help explain where the frameworks differ.",
   "lessons": [
     {
       "id": "torch-001",

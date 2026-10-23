@@ -1,5 +1,13 @@
 # Python and data-science track
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Python and data science** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This track preserves 60 ordered lessons covering practical Python, data
 analysis, statistics, machine learning, and selected production topics.
 Four named foundation checkpoints slow the early learning ramp, and thirteen

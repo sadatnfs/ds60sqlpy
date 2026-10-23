@@ -8,13 +8,13 @@ A forecast is a conditional distribution for future observations, not merely an 
 
 ### Recursions make model assumptions visible
 
-Simple exponential smoothing updates a level through l_t=alpha*y_t+(1-alpha)*l_(t-1). Here alpha is between zero and one and determines responsiveness: a larger alpha discounts history faster. Holt adds a trend state; Holt-Winters adds seasonal state. A state is an unobserved summary updated by new information. Different error, trend and seasonal specifications imply different likelihoods and forecast distributions even if point-recursion notation looks similar.
+Simple exponential smoothing updates a level through \(\ell_t=\alpha y_t+(1-\alpha)\ell_{t-1}\). Here alpha is between zero and one and determines responsiveness: a larger alpha discounts history faster. Holt adds a trend state; Holt-Winters adds seasonal state. A state is an unobserved summary updated by new information. Different error, trend and seasonal specifications imply different likelihoods and forecast distributions even if point-recursion notation looks similar.
 
-ARIMA starts from lag relations and differencing. An AR(1) with intercept c obeys y_t=c+phi*y_(t-1)+epsilon_t. If |phi|<1, its long-run mean is c/(1-phi), and forecasts shrink toward that mean rather than automatically toward zero. A moving-average time-series model uses past innovations; it is not the moving window used for smoothing a chart. Confusing these two meanings leads to wrong implementations.
+ARIMA starts from lag relations and differencing. An AR(1) with intercept c obeys \(y_t=c+\phi y_{t-1}+\epsilon_t\). If \(|\phi|<1\), its long-run mean is \(\frac{c}{1-\phi}\), and forecasts shrink toward that mean rather than automatically toward zero. A moving-average time-series model uses past innovations; it is not the moving window used for smoothing a chart. Confusing these two meanings leads to wrong implementations.
 
 ### State estimation and uncertainty
 
-A linear Gaussian state-space model writes x_t=F*x_(t-1)+w_t and y_t=H*x_t+v_t. The latent state x may include level, trend or other components, while Q and R describe process and observation noise covariance. Kalman filtering first predicts the state and covariance, then uses the innovation to update them. Smoothing conditions on future observations too, making it appropriate for retrospective state reconstruction but not a real-time forecasting feature without refitting.
+A linear Gaussian state-space model writes \(x_t=Fx_{t-1}+w_t\) and \(y_t=Hx_t+v_t\). The latent state x may include level, trend or other components, while Q and R describe process and observation noise covariance. Kalman filtering first predicts the state and covariance, then uses the innovation to update them. Smoothing conditions on future observations too, making it appropriate for retrospective state reconstruction but not a real-time forecasting feature without refitting.
 
 ### Select the whole forecasting procedure
 
@@ -56,7 +56,7 @@ Simple exponential smoothing maintains a weighted level with weights decaying ge
 
 **Holt’s method**
 
-Holt updates both level and slope, then forecasts l_T+h*b_T. The trend update estimates how the level is changing after adjusting for the previous slope. This separates a gradual increase from noise more flexibly than endpoint drift. Undamped extrapolation can become unrealistic at long horizons, so inspect slope stability and compare a damped alternative under the same validation origins.
+Holt updates both level and slope, then forecasts \(l_{T}+h\cdot b_{T}\). The trend update estimates how the level is changing after adjusting for the previous slope. This separates a gradual increase from noise more flexibly than endpoint drift. Undamped extrapolation can become unrealistic at long horizons, so inspect slope stability and compare a damped alternative under the same validation origins.
 
 ### stat-26-07
 
@@ -68,7 +68,7 @@ Holt-Winters adds seasonal states to level and trend. Additive seasonality is na
 
 **Damped-trend methods**
 
-A damped trend forecasts with b_T times the sum phi+phi^2+...+phi^h for damping factor 0<phi<1. The total trend contribution approaches a finite limit as horizon increases, unlike linear extrapolation. This is a modeling choice about long-run behavior, not a universal correction. Estimate and validate damping over useful horizons, especially when short history cannot identify it well.
+A damped trend forecasts with b_T times the sum \(\phi+\phi^2+\cdots+\phi^h\) for damping factor \(0<\phi<1\). The total trend contribution approaches a finite limit as horizon increases, unlike linear extrapolation. This is a modeling choice about long-run behavior, not a universal correction. Estimate and validate damping over useful horizons, especially when short history cannot identify it well.
 
 ### stat-26-09
 
@@ -86,7 +86,7 @@ An AR(p) predicts from p earlier observations plus an innovation. Its lag-polyno
 
 **Moving-average time-series models**
 
-An MA(q) time-series model writes y_t=mu+epsilon_t+theta_1*epsilon_(t-1)+...+theta_q*epsilon_(t-q). Past errors, not past observed values, form the dependence mechanism. Invertibility identifies a stable representation of innovations from observations. Once the horizon exceeds q, known past innovations no longer affect the conditional mean, although forecast uncertainty remains.
+An MA(q) time-series model writes \(y_t=\mu+\epsilon_t+\sum_{j=1}^{q}\theta_j\epsilon_{t-j}\). Past errors, not past observed values, form the dependence mechanism. Invertibility identifies a stable representation of innovations from observations. Once the horizon exceeds q, known past innovations no longer affect the conditional mean, although forecast uncertainty remains.
 
 ### stat-26-12
 
@@ -146,7 +146,7 @@ A state-space model separates latent system evolution from noisy observations. T
 
 **Kalman filtering**
 
-Kalman filtering updates a linear Gaussian state using the innovation y_t-H*x_pred and gain K=P_pred*H_transpose*(H*P_pred*H_transpose+R)^(-1). Higher measurement noise lowers the weight on the observation. The covariance update quantifies remaining state uncertainty under the model. Nonlinearity, heavy tails or misspecified noise covariance require additional methods or robustness checks.
+Kalman filtering updates a linear Gaussian state using the innovation \(y_t-Hx_{\mathrm{pred}}\) and gain \(K=P_{\mathrm{pred}}H^{\mathsf T}(HP_{\mathrm{pred}}H^{\mathsf T}+R)^{-1}\). Higher measurement noise lowers the weight on the observation. The covariance update quantifies remaining state uncertainty under the model. Nonlinearity, heavy tails or misspecified noise covariance require additional methods or robustness checks.
 
 ### stat-26-22
 
@@ -176,7 +176,7 @@ Dynamic linear models use time-varying linear states and coefficients, often wit
 
 **ARCH and GARCH**
 
-ARCH/GARCH models describe conditional variance, often while conditional mean follows a separate model. A GARCH(1,1) uses sigma_t^2=omega+alpha*epsilon_(t-1)^2+beta*sigma_(t-1)^2, with positivity constraints and suitable persistence conditions. Volatility clustering can exist with nearly zero return autocorrelation. Heavy-tailed innovations, leverage effects and structural changes require checking beyond the variance recursion.
+ARCH/GARCH models describe conditional variance, often while conditional mean follows a separate model. A GARCH(1,1) uses \(\sigma_t^2=\omega+\alpha\epsilon_{t-1}^2+\beta\sigma_{t-1}^2\), with positivity constraints and suitable persistence conditions. Volatility clustering can exist with nearly zero return autocorrelation. Heavy-tailed innovations, leverage effects and structural changes require checking beyond the variance recursion.
 
 ## Worked Python demonstrations
 
@@ -188,7 +188,7 @@ python courses/statistics-ml/examples/chapter_26.py
 
 ### Compare assumptions on one visible series
 
-For [10,12,14,16], naive predicts [16,16,16], drift predicts [18,20,22], and alpha=0.5 smoothing ends at 14.25. The level trace is 10,11,12.5,14.25. Smoothing lags this deterministic rise because it has no trend state. These are different structural assumptions, not contradictory arithmetic.
+For [10,12,14,16], naive predicts [16,16,16], drift predicts [18,20,22], and \(\alpha=0.5\) smoothing ends at 14.25. The level trace is 10,11,12.5,14.25. Smoothing lags this deterministic rise because it has no trend state. These are different structural assumptions, not contradictory arithmetic.
 
 ### Follow autoregressive shrinkage
 
@@ -196,11 +196,11 @@ With intercept two and phi one-half, the long-run mean is four. Starting from te
 
 ### Weight a noisy measurement
 
-A prior mean zero with variance four meets measurement three with variance one. Gain 4/(4+1)=0.8 gives posterior mean 2.4 and variance 0.8. Raising measurement variance to sixteen reduces gain to 0.2. The update demonstrates how uncertainty controls trust, conditional on a correctly specified linear Gaussian model.
+A prior mean zero with variance four meets measurement three with variance one. Gain \(\frac{4}{4+1}=0.8\) gives posterior mean 2.4 and variance 0.8. Raising measurement variance to sixteen reduces gain to 0.2. The update demonstrates how uncertainty controls trust, conditional on a correctly specified linear Gaussian model.
 
 ### Separate mean and variance prediction
 
-A shock of three enters GARCH through its square, nine. With omega=0.1, alpha=0.2, beta=0.7 and previous variance one, the next variance is 2.6. The calculation says volatility rises; it does not predict whether the next signed return will be positive.
+A shock of three enters GARCH through its square, nine. With \(\omega=0.1\), \(\alpha=0.2\), \(\beta=0.7\) and previous variance one, the next variance is 2.6. The calculation says volatility rises; it does not predict whether the next signed return will be positive.
 
 ### Complete executable example
 

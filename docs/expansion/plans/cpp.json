@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "cpp",
   "title": "C++20: from first program to reliable systems",
-  "summary": "42 planned lessons teach language fundamentals, ownership, portable builds, testing, concurrency and evidence-based performance. No compiler adapter is activated.",
+  "summary": "42 lessons in modern C++, from first compiled programs to ownership, portable builds, testing, concurrency and performance. Learn how to compile, inspect diagnostics and verify program behavior.",
   "north_star": "Build, test, explain and deliver a portable bounded C++20 program whose ownership, failure and performance claims survive independent review.",
   "entry_prerequisites": [],
   "runtime_profiles": [

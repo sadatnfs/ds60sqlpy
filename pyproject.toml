@@ -18,7 +18,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Topic :: Education",
 ]
-dependencies = []
+dependencies = ["latex2mathml>=3.81.1,<4", "pygments>=2.19,<3"]
 
 [project.optional-dependencies]
 notebooks = [
@@ -108,6 +108,7 @@ geo = [
   "networkx>=3.3",
 ]
 quality = [
+  "types-Pygments>=2.19,<3",
   "mypy>=1.14",
   "pre-commit>=4.0",
   "pytest>=8.0",
@@ -124,7 +125,7 @@ ds60-app = "ds60sqlpy.desktop:main"
 ds60-mcp = "ds60sqlpy.mcp_server:main"
 
 [tool.setuptools.package-data]
-ds60sqlpy = ["assets/*.html"]
+ds60sqlpy = ["assets/*.html", "assets/*.css", "assets/*.js"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

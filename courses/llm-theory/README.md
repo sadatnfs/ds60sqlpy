@@ -1,5 +1,13 @@
 # Language-model mechanisms and evidence
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Language-model mechanisms and evidence** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 All **48 chapters** are authored, from probability and tokenization through actual tiny-model training, inference, evaluation and modern Transformer mechanisms. The route has 27 Core/NumPy lessons, 16 PyTorch CPU lessons and 5 reading lessons. The index below is generated from the reviewed plan and complete authored manifest.
 
 ## Start in the Docker classroom

@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
 
-The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at 56/3, the derivative is-56/3, the new weight is 28/15, and the new loss is 56/675. A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
+The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at \(\frac{56}{3}\), the derivative is-\(\frac{56}{3}\), the new weight is \(\frac{28}{15}\), and the new loss is \(\frac{56}{675}\). A mistakenly broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
 
 **Optimizer membership:** The exact parameter objects whose gradients an optimizer consumes.
 
@@ -24,24 +24,24 @@ The hypothesis is prediction_i=w x_i for x=[1, 2, 3] and y=2x. With a mean over 
 
 `L(w) = (1²+2²+3²)(w-2)²/3 = (14/3)(w-2)²`.
 
-Its derivative is`g(w)=(28/3)(w-2)`. At w=0, the predictions are zeros, residuals[-2, -4, -6], squared errors[4, 16, 36], loss 56/3 and gradient-56/3. The input features can remain ordinary constant tensors because the requested derivative is with respect to w. Targets also remain fixed labels rather than state the optimizer is allowed to change.
+Its derivative is`g(w)=(28/3)(w-2)`. At \(w=0\), the predictions are zeros, residuals[-2, -4, -6], squared errors[4, 16, 36], loss \(\frac{56}{3}\) and gradient-\(\frac{56}{3}\). The input features can remain ordinary constant tensors because the requested derivative is with respect to w. Targets also remain fixed labels rather than state the optimizer is allowed to change.
 
-For learning rateη=1/10, plain SGD gives w_new=w-ηg=28/15. The new residual is(w_new-2)x=(-2/15)x, so its entries are[-2/15, -4/15, -6/15]. Squaring and averaging gives 56/675. The before-loss, gradient, new parameter and after-loss are four separately inspected observations:
+For learning rateη=1/10, plain SGD gives w_new=w-ηg=28/15. The new residual is(w_new-2)x=(-2/15)x, so its entries are[-2/15, \(\frac{-4}{15}\), -6/15]. Squaring and averaging gives \(\frac{56}{675}\). The before-loss, gradient, new parameter and after-loss are four separately inspected observations:
 
 | Stage | Weight | Quantity observed |
 | --- | --- | --- |
-| Forward | 0 | L=56/3 |
-| Backward | 0 | stored gradient=-56/3 |
-| Step | 28/15 | parameter changed by 28/15 |
-| New forward | 28/15 | L=56/675 |
+| Forward | 0 | \(L=\frac{56}{3}\) |
+| Backward | 0 | stored \(\mathrm{gradient}=\frac{-56}{3}\) |
+| Step | \(\frac{28}{15}\) | parameter changed by \(\frac{28}{15}\) |
+| New forward | \(\frac{28}{15}\) | \(L=\frac{56}{675}\) |
 
 Backward does not perform the update, and step does not recompute the loss. The old loss tensor still records the earlier forward result after the parameter changes. The fresh Parameter starts with no stored gradient, which makes the first backward unambiguous; repeated independent steps need an explicit clearing policy. The SGD API specifies how momentum, weight decay and other options would change this simpler transition. [PyTorch 2.9 SGD](https://docs.pytorch.org/docs/2.9/generated/torch.optim.SGD.html).
 
-The exact quadratic also permits a stability calculation. Let e=w-2 be the error from the optimum. One update gives e_new=(1-28η/3)e. Repeated full-batch updates contract this error only when|1-28η/3|<1, or 0<η<3/14. Atη=0.1, the contraction factor is 1/15. Atη=0.25, it is-4/3: the parameter crosses the optimum and its error grows. The first weight becomes 14/3 and the new loss 896/27, larger than the initial 56/3 despite a correct derivative.
+The exact quadratic also permits a stability calculation. Let \(e=w-2\) be the error from the optimum. One update gives e_new=(1-28η/3)e. Repeated full-batch updates contract this error only when|1-28η/3|<1, or 0<η<3/14. Atη=0.1, the contraction factor is \(\frac{1}{15}\). Atη=0.25, it is-4/3: the parameter crosses the optimum and its error grows. The first weight becomes \(\frac{14}{3}\) and the new loss \(\frac{896}{27}\), larger than the initial \(\frac{56}{3}\) despite a correct derivative.
 
 Changing to a summed objective changes that bound because the gradient is three times larger. This is why learning-rate claims require a declared denominator. The result is exact for this fixed convex scalar objective; it is not a universal neural-network learning-rate rule.
 
-The mistaken column target produces a different objective over every input-target pair. Its mean can be expanded as`L_bad(w)=(14/3)w²-16w+56/3`. At zero, it shares the correct initial loss 56/3, but its derivative is-16. Its optimum is 12/7 rather than two, and its minimum is 104/21 rather than zero. This is a changed statistical pairing, not merely an objective-scale factor. Adjusting the learning rate to disguise the first gradient difference cannot restore the intended optimum.
+The mistaken column target produces a different objective over every input-target pair. Its mean can be expanded as`L_bad(w)=(14/3)w²-16w+56/3`. At zero, it shares the correct initial loss \(\frac{56}{3}\), but its derivative is-16. Its optimum is \(\frac{12}{7}\) rather than two, and its minimum is \(\frac{104}{21}\) rather than zero. This is a changed statistical pairing, not merely an objective-scale factor. Adjusting the learning rate to disguise the first gradient difference cannot restore the intended optimum.
 
 An audit should therefore check the residual shape and per-record identity before reducing to a scalar. It should then compare the derivative with the independent NumPy probe and verify that the optimizer owns the exact Parameter object whose gradient was computed. Only after those boundaries pass does a longer loop add useful evidence.
 
@@ -56,13 +56,13 @@ x=torch.tensor([1.,2.,3.],dtype=torch.float64); y=2*x; w=nn.Parameter(torch.tens
 loss=((w*x-y)**2).mean(); np.testing.assert_allclose(loss.item(),56/3,atol=1e-12,rtol=0)
 ```
 
-**Expected:** mean squared loss 56/3.
+**Expected:** mean squared loss \(\frac{56}{3}\).
 
-**Verify:** Compare the computed values or written argument with mean squared loss 56/3.
+**Verify:** Compare the computed values or written argument with mean squared loss \(\frac{56}{3}\).
 
 ## Exercise 2: Inspect the gradient before updating
 
-The question is: Back propagate the initial loss and compare with-56/3.
+The question is: Back propagate the initial loss and compare with-\(\frac{56}{3}\).
 
 Backward computes derivatives but does not update the parameter. Separating these observations helps diagnose a missing optimizer step.
 
@@ -71,9 +71,9 @@ loss.backward(); np.testing.assert_allclose(w.grad.item(),-56/3,atol=1e-12,rtol=
 assert w.item()==0
 ```
 
-**Expected:** gradient-56/3; weight still 0.
+**Expected:** gradient-\(\frac{56}{3}\); weight still 0.
 
-**Verify:** Compare the computed values or written argument with gradient-56/3; weight still 0.
+**Verify:** Compare the computed values or written argument with gradient-\(\frac{56}{3}\); weight still 0.
 
 ## Exercise 3: Apply exactly one SGD update
 
@@ -87,9 +87,9 @@ np.testing.assert_allclose(w.item(),28/15,atol=1e-12,rtol=0)
 np.testing.assert_allclose(((w*x-y)**2).mean().item(),56/675,atol=1e-12,rtol=0)
 ```
 
-**Expected:** w28/15; loss 56/675.
+**Expected:** w28/15; loss \(\frac{56}{675}\).
 
-**Verify:** Compare the computed values or written argument with w28/15; loss 56/675.
+**Verify:** Compare the computed values or written argument with w28/15; loss \(\frac{56}{675}\).
 
 ## Exercise 4: Expose the broadcast counterexample
 
@@ -102,9 +102,9 @@ wrong=nn.Parameter(torch.tensor(0.,dtype=torch.float64)); broken=((wrong*x-y[:,N
 np.testing.assert_allclose(broken.item(),56/3,atol=1e-12,rtol=0); assert wrong.grad.item()==-16
 ```
 
-**Expected:** initial loss still 56/3, but gradient-16.
+**Expected:** initial loss still \(\frac{56}{3}\), but gradient-16.
 
-**Verify:** Compare the computed values or written argument with initial loss still 56/3, but gradient-16.
+**Verify:** Compare the computed values or written argument with initial loss still \(\frac{56}{3}\), but gradient-16.
 
 ## Exercise 5: Check a finite-difference gradient
 
@@ -118,9 +118,9 @@ slope=(objective(h)-objective(-h))/(2*h)
 np.testing.assert_allclose(slope,-56/3,atol=1e-9,rtol=0)
 ```
 
-**Expected:** slope-56/3 within 1e-9.
+**Expected:** slope-\(\frac{56}{3}\) within 1e-9.
 
-**Verify:** Compare the computed values or written argument with slope-56/3 within 1e-9.
+**Verify:** Compare the computed values or written argument with slope-\(\frac{56}{3}\) within 1e-9.
 
 ## Exercise 6: Clear the consumed gradient
 

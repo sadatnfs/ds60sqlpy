@@ -1,5 +1,13 @@
 # Deep Learning with PyTorch
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Deep Learning with PyTorch** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This complete36-lesson authored route gives PyTorch the same broad subject coverage as the [36-lesson TensorFlow course](../deep-learning-tensorflow/README.md). It progresses from tensor storage and gradients through data loading,training,classifiers,convolutions,recurrent sequences,attention,custom autograd,transfer,checkpointing,numerics,profiling,export and a model-release capstone. Each topic is paired with its TensorFlow counterpart so you can compare the mathematical contract and the framework-specific implementation separately.
 
 The [authored manifest](lessons.json) lists real guide,learner and separate solution artifacts. The [track plan](track.json) preserves prerequisites and paired IDs. Every guide has three worked examples,six concrete exercises,progressive hints,answered interview reasoning and a copy-ready Codex prompt. Read the [comparison guide](COMPARISON.md) for layout,reduction,state and mode differences. Source completion does not imply runtime acceptance;the [execution checkpoint](../../docs/implementation/pytorch-content-status.md) records actual receipts.

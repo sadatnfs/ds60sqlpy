@@ -34,7 +34,7 @@ Full SFT describes the parameter set available for optimization. It does not req
 
 ## Adam adds optimizer state to model state
 
-Ordinary gradient descent uses the current gradient directly. Adam also maintains moving estimates of its first and second moments. In a coordinatewise description, m_t=beta 1*m_(t-1)+(1-beta 1)*g_t and v_t=beta 2*v_(t-1)+(1-beta 2)*g_t². Bias-corrected versions divide by 1-beta 1^t and 1-beta 2^t. The update then scales the first-moment estimate by the square root of the second-moment estimate plus epsilon. The versioned PyTorch documentation specifies the concrete implementation options. [PyTorch 2.9 Adam](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Adam.html).
+Ordinary gradient descent uses the current gradient directly. Adam also maintains moving estimates of its first and second moments. In a coordinatewise description, \(m_t=\beta_1m_{t-1}+(1-\beta_1)g_t\) and v_t=beta 2*v_(t-1)+(1-beta 2)*g_t². Bias-corrected versions divide by 1-beta \({1}^{t}\) and 1-beta \({2}^{t}\). The update then scales the first-moment estimate by the square root of the second-moment estimate plus epsilon. The versioned PyTorch documentation specifies the concrete implementation options. [PyTorch 2.9 Adam](https://docs.pytorch.org/docs/2.9/generated/torch.optim.Adam.html).
 
 Those moments are part of a training restart, even though they are not needed for ordinary model inference. Restoring only model weights and restarting Adam from empty state can produce a different trajectory. Learning-rate scheduling, random state and data order can add further restart requirements. The tiny exercise starts from a declared initial state and uses a fixed update count; it does not claim to implement a complete resumable training service.
 
@@ -86,7 +86,7 @@ Construct shifted inputs and answer-only labels, using-100 for the prompt-predic
 
 ## Trace the full-SFT state and objective
 
-The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with B=2, T=3, token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
+The model uses vocabulary 16, width 32, two attention heads and context capacity 32. For a training batch with \(B=2\), \(T=3\), token and position embeddings combine into[2, 3, 32]. The QKV projection produces[2, 3, 96], then each component becomes[2, 2, 3, 16] after splitting into two heads. Attention scores have shape[2, 2, 3, 3], with a causal allowed-position relation. The output logits return to[2, 3, 16].
 
 The trainable parameter ledger is explicit:
 
@@ -103,7 +103,7 @@ The trainable parameter ledger is explicit:
 
 No weights are tied in this decoder. Parameter count does not equal total training memory: gradients, Adam moment state, activations and temporary attention tensors contribute separately. The CPU example does not measure GPU peak allocation or optimizer sharding.
 
-The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability 1/16 and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(1/16-1)/4=-15/64, and every other class gradient is 1/64. The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
+The two sequences yield four active targets:5, 3, 6, 3. For an independent zero-logit probe, each class initially has probability \(\frac{1}{16}\) and each active event has loss log16. The mean over the four active events is still log16. At an active position, the target-logit gradient is(\(\frac{1}{16}\)-1)/4=-15/64, and every other class gradient is \(\frac{1}{64}\). The ignored prompt-prediction positions have zero direct logit gradient. These derivatives explain both the mask and the denominator without relying on the trained decoder's internal state.
 
 Each optimizer iteration computes loss at the current parameters, records it, backpropagates and then updates. Thus a 20-entry curve records states before updates 1 through 20: its final element describes the model after 19 updates. It is useful optimization history, but it is not the post-twentieth-update loss. The repaired final evaluation recomputes training and held-out objectives from the same frozen final state. This prevents a reporting label from mixing two parameter versions.
 

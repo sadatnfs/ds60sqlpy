@@ -14,11 +14,11 @@ A point anomaly asks whether one value is unusual relative to a reference distri
 
 A reconstruction error, isolation depth or local-density ratio ranks observations under a chosen mechanism. It does not automatically equal the probability that an incident is real. Feature scaling, reference-window contamination and changing operational mix alter score distributions. Fit preprocessing on the reference data and test thresholds on representative held-out periods, including known benign changes and missing-data incidents.
 
-For a binary alert, positive predictive value depends on prevalence. With event prevalence pi, sensitivity s and false-positive rate f, PPV=pi*s/[pi*s+(1-pi)*f]. A 90 percent sensitive detector with a one percent false-positive rate has PPV about 8.3 percent when real events occur in only one-tenth of one percent of cases. This base-rate calculation explains why seemingly excellent classification metrics can overwhelm a monitoring team.
+For a binary alert, positive predictive value depends on prevalence. With event prevalence pi, sensitivity s and false-positive rate f, \(\mathrm{PPV}=\frac{\pi s}{\pi s+(1-\pi)f}\). A 90 percent sensitive detector with a one percent false-positive rate has PPV about 8.3 percent when real events occur in only one-tenth of one percent of cases. This base-rate calculation explains why seemingly excellent classification metrics can overwhelm a monitoring team.
 
 ### Sequential evidence is different from one-shot testing
 
-A CUSUM retains positive evidence of a shift through C_t=max(0,C_(t-1)+x_t-mu0-k). The reference value k discounts fluctuations too small to matter; an alarm occurs when C exceeds a threshold h. An EWMA instead maintains a decaying weighted level. Repeated monitoring changes false-alarm behavior, so choose thresholds using run-length or event-level evaluation rather than interpreting every point as an isolated 5 percent test.
+A CUSUM retains positive evidence of a shift through \(C_t=\max\bigl(0,C_{t-1}+x_t-\mu_0-k\bigr)\). The reference value k discounts fluctuations too small to matter; an alarm occurs when C exceeds a threshold h. An EWMA instead maintains a decaying weighted level. Repeated monitoring changes false-alarm behavior, so choose thresholds using run-length or event-level evaluation rather than interpreting every point as an isolated 5 percent test.
 
 ### An operational investigation path
 
@@ -54,7 +54,7 @@ A robust z-score centers at the median and scales by median absolute deviation, 
 
 **Mahalanobis distance**
 
-Mahalanobis distance measures displacement through the inverse covariance: d_squared=(x-mu)_transpose*Sigma_inverse*(x-mu). It accounts for scale and linear correlation, so a point can be unusual jointly even when each coordinate is ordinary. Covariance estimation is fragile with contamination or many features relative to observations. Use regularization or robust estimates and calibrate scores without assuming Gaussian tails by default.
+Mahalanobis distance measures displacement through the inverse covariance: \(d^2=(x-\mu)^{\mathsf T}\Sigma^{-1}(x-\mu)\). It accounts for scale and linear correlation, so a point can be unusual jointly even when each coordinate is ordinary. Covariance estimation is fragile with contamination or many features relative to observations. Use regularization or robust estimates and calibrate scores without assuming Gaussian tails by default.
 
 ### stat-29-06
 
@@ -114,7 +114,7 @@ A CUSUM accumulates evidence for a sustained shift while resetting negative accu
 
 **EWMA charts**
 
-An EWMA chart tracks z_t=lambda*x_t+(1-lambda)*z_(t-1), giving exponentially decaying weight to older observations. Smaller lambda emphasizes sustained small shifts but responds more slowly. Control limits depend on the in-control variance and initialization, with early-time variance differing from its long-run value. It is a monitoring procedure, not merely a smoothed plot with arbitrary horizontal lines.
+An EWMA chart tracks \(z_t=\lambda x_t+(1-\lambda)z_{t-1}\), giving exponentially decaying weight to older observations. Smaller lambda emphasizes sustained small shifts but responds more slowly. Control limits depend on the in-control variance and initialization, with early-time variance differing from its long-run value. It is a monitoring procedure, not merely a smoothed plot with arbitrary horizontal lines.
 
 ### stat-29-16
 
@@ -166,7 +166,7 @@ The reference [9,10,10,11,12] has median ten and MAD one. A value thirty has a n
 
 ### Accumulate a small persistent shift
 
-After three zeros, observations become one. With k=0.25 the CUSUM adds 0.75 each shifted period, reaching 2.25 at index five and crossing threshold two. One shifted observation is not enough; three consistent observations trigger the signal. The example shows the mechanism, not a calibrated production average run length.
+After three zeros, observations become one. With \(k=0.25\) the CUSUM adds 0.75 each shifted period, reaching 2.25 at index five and crossing threshold two. One shifted observation is not enough; three consistent observations trigger the signal. The example shows the mechanism, not a calibrated production average run length.
 
 ### Explain an apparently disappointing alert stream
 

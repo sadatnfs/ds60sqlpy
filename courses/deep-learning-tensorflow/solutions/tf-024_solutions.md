@@ -14,7 +14,7 @@ A classifier experiment needs more than an accuracy number. Define which rows ar
 
 ## Reading the implementation
 
-Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with logit>=0, equivalent to probability>=.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.
+Binary logits feed sigmoid cross entropy during training. After a fixed step budget, classify with \(\mathrm{logit}\ge 0\), equivalent to probability>=.5. Compute true-positive, false-positive, true-negative and false-negative counts with boolean masks. Keep counts as integers and divide only after establishing their denominators. Save the split IDs before any training operation.
 
 ## Exercise 1: Freeze geometry and groups
 

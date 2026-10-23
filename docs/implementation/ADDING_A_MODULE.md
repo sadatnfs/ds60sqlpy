@@ -1,5 +1,13 @@
 # Add or extend a learning module
 
+The public learner shell is `/classroom` for all fourteen current subjects.
+Register a new subject in that same home and workspace with a distinct theme
+and a visible text label. Preserve IDs and progress; do not add a separate
+public application. The shared [content-authoring contract](../content-authoring.md)
+requires explicit LaTeX mathematics and correctly tagged code fences. Native
+commands and design previews remain optional developer or compatibility tools.
+
+
 Read the [checkpoint](CHECKPOINT.md) and
 [expansion architecture](../expansion/architecture.md) first. Reuse one existing
 runtime when it fits. A new subject, a new lesson and a new execution backend

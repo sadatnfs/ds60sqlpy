@@ -47,9 +47,9 @@ incremental=torch.cat(outputs,dim=1)
 torch.testing.assert_close(incremental,full,atol=1e-6,rtol=0)
 ```
 
-**Expected:** incremental logits match full within1e-6.
+**Expected:** incremental logits match full within 1e-6.
 
-**Verify:** Compare the computed values or written argument with incremental logits match full within1e-6.
+**Verify:** Compare the computed values or written argument with incremental logits match full within 1e-6.
 
 ## Exercise 3: Inspect cache growth
 

@@ -28,21 +28,21 @@ Finally, every path feeding an earlier output must respect the intended visibili
 
 Use the shape convention Q:[Tq,Dk], K:[Tk,Dk], V:[Tk,Dv]. Scores have shape [Tq,Tk], one comparison for each query/key pair. Row-wise softmax reduces the key axis, so every query receives a distribution over allowed keys. Multiplying weights [Tq,Tk] by V [Tk,Dv] gives output [Tq,Dv]. The key and value row counts must match because each attention weight selects a corresponding value row. Query count need not equal key count in cross-attention, although this lesson's main self-attention fixture uses both equal to three.
 
-The score rule is S = Q K^T / sqrt(Dk). Stable softmax subtracts each row maximum before exponentiation. Subtracting a common row constant preserves the normalized probabilities, while reducing the risk of overflow. A Boolean allowed matrix has the score shape. Forbidden scores become negative infinity, giving zero exponential mass. Each query needs at least one allowed key: an all-forbidden row has no normalized distribution and is rejected instead of silently producing NaN.
+The score rule is S = Q \(K^{\mathsf T}\) / \(\sqrt{D_k}\). Stable softmax subtracts each row maximum before exponentiation. Subtracting a common row constant preserves the normalized probabilities, while reducing the risk of overflow. A Boolean allowed matrix has the score shape. Forbidden scores become negative infinity, giving zero exponential mass. Each query needs at least one allowed key: an all-forbidden row has no normalized distribution and is rejected instead of silently producing NaN.
 
-For feature normalization of X:[B,T,D], the mean and variance have shape [B,T,1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is sigma_squared/(sigma_squared+epsilon), not exactly one when epsilon is positive.
+For feature normalization of X:[B,T,D], the mean and variance have shape [B,T,1]. They reduce only D, leaving batch and token dimensions distinct. keepdims=True retains the singleton axis so subtraction broadcasts over the intended features. The variance here divides by D, not D-1, because the operation normalizes the features of this token rather than estimating a population variance from independent sampled cases. The output has the same shape as X. Its mean is zero up to floating-point error; its variance is \(\frac{\sigma^2}{\sigma^2+\epsilon}\), not exactly one when epsilon is positive.
 
 ### Deriving the permutation identity
 
-Let P be a permutation matrix reordering token rows. Replacing Q,K,V by P Q,P K,P V gives scores P S P^T. This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: softmax(P S P^T) = P softmax(S) P^T. The output is therefore P softmax(S) P^T P V = P softmax(S) V, because P^T P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.
+Let P be a permutation matrix reordering token rows. Replacing Q,K,V by P Q,P K,P V gives scores P S \({P}^{T}\). This reorders both the query rows and the key columns. A row-wise softmax commutes with those reorders: \(\operatorname{softmax}(PSP^{\mathsf T})=P\operatorname{softmax}(S)P^{\mathsf T}\). The output is therefore \(P\operatorname{softmax}(S)P^{\mathsf T}PV=P\operatorname{softmax}(S)V\), because \({P}^{T}\) P is the identity. Reordering only Q, or forgetting to reorder V with K, is a different experiment and does not test this identity.
 
-If a mask M is present, the corresponding relabelling identity requires reordering the mask too, as P M P^T. Keeping a causal triangle fixed is intentionally different: it keeps the visibility graph attached to row positions while moving content. Similarly, adding a fixed position table E gives input P X + E after a content reorder, while a pure reorder of the original positioned input would be P(X+E) = P X + P E. Unless E happens to remain unchanged under P, those expressions differ.
+If a mask M is present, the corresponding relabelling identity requires reordering the mask too, as P M \({P}^{T}\). Keeping a causal triangle fixed is intentionally different: it keeps the visibility graph attached to row positions while moving content. Similarly, adding a fixed position table E gives input P X + E after a content reorder, while a pure reorder of the original positioned input would be \(P(X+E)=PX+PE\). Unless E happens to remain unchanged under P, those expressions differ.
 
 ## Exercise 1: Permute content-only attention
 
-The question is: Use Q=K=[[1,0],[0,1],[1,1]] and V=[[1,2],[3,4],[5,6]]. Reorder all three by [2,0,1] and compare outputs.
+The question is: Use \(Q=K=[[1,0],[0,1],[1,1]]\) and \(V=[[1,2],[3,4],[5,6]]\). Reorder all three by [2,0,1] and compare outputs.
 
-The first query has scores [1/sqrt(2),0,1/sqrt(2)], so keys one and three receive equal weight. Their values are symmetric around [3,4], and the middle value is [3,4] itself, making the first weighted result exactly [3,4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.
+The first query has scores \([\frac{1}{\sqrt{2}},0,\frac{1}{\sqrt{2}}]\), so keys one and three receive equal weight. Their values are symmetric around [3,4], and the middle value is [3,4] itself, making the first weighted result exactly [3,4] in real arithmetic. The row permutation preserves these relationships. This is an unmasked calculation; a fixed causal triangle would change the experiment.
 
 ```python
 query = np.array([[1., 0.], [0., 1.], [1., 1.]])
@@ -80,9 +80,9 @@ np.testing.assert_allclose(layer_norm(changed)[0], normalized[0], atol=1e-12, rt
 assert normalized.shape == values.shape
 ```
 
-**Expected:** the first normalized row remains [-1,1]/sqrt(1+1e-5), approximately [-0.999995,0.999995].
+**Expected:** the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995,0.999995].
 
-**Verify:** Compare the computed values or written argument with the first normalized row remains [-1,1]/sqrt(1+1e-5), approximately [-0.999995,0.999995].
+**Verify:** Compare the computed values or written argument with the first normalized row remains \(\frac{[-1,1]}{\sqrt{1+1\times10^{-5}}}\), approximately [-0.999995,0.999995].
 
 ## Exercise 3: Expose sequence-wide leakage
 
@@ -107,7 +107,7 @@ assert not np.allclose(original_first, changed_first)
 
 ## Exercise 4: Attach fixed positions
 
-The question is: Add E=[[0,0],[1,0],[0,2]] to query/key content, then reorder content while keeping E attached to the original row positions.
+The question is: Add \(E=[[0,0],[1,0],[0,2]]\) to query/key content, then reorder content while keeping E attached to the original row positions.
 
 The position vector is part of the input to the score computation. Moving content to a new location while preserving the location table is different from relabelling all rows of an already positioned representation. The fixture adds positions only to query/key construction to isolate score effects; a full Transformer commonly adds token and position representations before all projections, including values.
 

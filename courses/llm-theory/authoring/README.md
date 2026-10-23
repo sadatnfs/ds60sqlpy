@@ -23,3 +23,15 @@ in `specs.py`, the guide helpers and the executable references, with dedicated
 regressions and fresh Docker receipts. The other13 reviewed program/reference
 sets remain byte-identical to the pre-review snapshot. See
 `docs/implementation/llm-expert-status.md` for current evidence and limits.
+
+## Unified classroom presentation
+
+Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
+`\[ ... \]` delimiters. Tag every fenced code example with its actual language.
+After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+from the repository root before rebuilding HTML readers. The reviewed
+`curriculum/math-prose.json` registry preserves this migration across regeneration;
+it does not change executable fences, notebook code or the supplied statistics
+outline. The public learner entrypoint is `/classroom`, shared by every subject.
+See [the content contract](../../../docs/content-authoring.md) for the rendering
+and subject-theme requirements.

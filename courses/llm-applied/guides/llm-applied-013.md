@@ -28,7 +28,7 @@ A difficult question tends to affect both candidates. Comparing their results on
 
 Pairing requires more than equal row counts. The question, source snapshot, policy, rubric and relevant evaluation conditions must correspond. If one candidate sees an updated policy or a different context budget, the comparison may still be useful as a system comparison, but it no longer isolates the same component change. Preserve those conditions alongside the question ID.
 
-The variance identity for a paired difference explains the role of correlation. Var(A-B)=Var(A)+Var(B)-2Cov(A,B). If the candidates tend to succeed and fail on the same questions, that covariance can materially affect uncertainty. Independently resampling A and B destroys the correspondence that the study deliberately created.
+The variance identity for a paired difference explains the role of correlation. \(\operatorname{Var}(A-B)=\operatorname{Var}(A)+\operatorname{Var}(B)-2\operatorname{Cov}(A,B)\). If the candidates tend to succeed and fail on the same questions, that covariance can materially affect uncertainty. Independently resampling A and B destroys the correspondence that the study deliberately created.
 
 ## Preserve the dependence among related questions
 
@@ -100,16 +100,16 @@ The bootstrap draws two family indices with replacement. There are four equally 
 
 | Resampled families | Mean difference | Probability |
 | --- | --- | --- |
-| F, F | -1 | 1/4 |
-| F, G | 0 | 1/4 |
-| G, F | 0 | 1/4 |
-| G, G | +1 | 1/4 |
+| F, F | -1 | \(\frac{1}{4}\) |
+| F, G | 0 | \(\frac{1}{4}\) |
+| G, F | 0 | \(\frac{1}{4}\) |
+| G, G | +1 | \(\frac{1}{4}\) |
 
-The exact bootstrap mean is zero and variance is 1/2. Its standard deviation is sqrt(1/2), about 0.7071. The 2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.
+The exact bootstrap mean is zero and variance is \(\frac{1}{2}\). Its standard deviation is \(\sqrt{\frac{1}{2}}\), about 0.7071. The 2000 seeded draws approximate this very coarse distribution; increasing the draw count only reduces Monte Carlo noise in that approximation. It does not create more than the two observed independent families or establish that those families represent the deployment population.
 
-Pairing preserves the relationship between candidate errors. The variance identity Var(A-B)=Var(A)+Var(B)-2Cov(A, B) explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.
+Pairing preserves the relationship between candidate errors. The variance identity \(\operatorname{Var}(A-B)=\operatorname{Var}(A)+\operatorname{Var}(B)-2\operatorname{Cov}(A,B)\) explains why independently resampling each candidate can change uncertainty. Family resampling must likewise keep all within-family candidate observations together. If question families have unequal intended population weights, specify the weighted estimator and a resampling design that matches it rather than selecting the narrowest interval after the fact.
 
-Selective answering introduces more denominators. With ten questions, six answers and five correct answers, coverage is 6/10=0.6 and accuracy among answers is 5/6. Correct answers per all requests is 5/10. A system that answers only the easiest one correctly has conditional accuracy one but coverage 0.1. It may or may not be useful under the task's costs. Always retain how many refusals were appropriate and how many answerable cases were declined.
+Selective answering introduces more denominators. With ten questions, six answers and five correct answers, coverage is \(\frac{6}{10}=0.6\) and accuracy among answers is \(\frac{5}{6}\). Correct answers per all requests is \(\frac{5}{10}\). A system that answers only the easiest one correctly has conditional accuracy one but coverage 0.1. It may or may not be useful under the task's costs. Always retain how many refusals were appropriate and how many answerable cases were declined.
 
 The saved errors here are teaching data. Their bootstrap computation is real arithmetic, but the arrays are not receipts from running a named model. A real comparison should preserve question IDs, predictions, rubric decisions, candidate configuration and family labels. Review label disagreements, because uncertainty over sampled questions does not automatically account for systematic rubric error.
 
@@ -166,7 +166,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Align paired errors.** Use systemA errors q1=0, q2=0, q3=1 andB q1=1, q2=1, q3=0.
+1. **Align paired errors.** Use systemA errors \(q_{1}=0\), \(q_{2}=0\), \(q_{3}=1\) andB \(q_{1}=1\), \(q_{2}=1\), \(q_{3}=0\).
    **Expected:** differences[-1, -1, 1] by sortedID.
    **Verify:** Save the assertion results for exercise 1, including differences[-1, -1, 1] by sortedID.
 
@@ -179,8 +179,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 3, including all estimates are-1, 0 or 1; repeatable with same seed.
 
 4. **Report coverage and answered accuracy.** For 10 questions, answer 6 with 5 correct and abstain on 4.
-   **Expected:** coverage.6; answered accuracy 5/6; overall correct answers 5.
-   **Verify:** Save the assertion results for exercise 4, including coverage.6; answered accuracy 5/6; overall correct answers 5.
+   **Expected:** coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
+   **Verify:** Save the assertion results for exercise 4, including coverage.6; answered accuracy \(\frac{5}{6}\); overall correct answers 5.
 
 5. **Block a severe boundary failure.** Combine a favorable mean comparison withone access leak and apply a zero-access-leak gate.
    **Expected:** release decision False.

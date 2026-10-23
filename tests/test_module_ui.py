@@ -1,4 +1,4 @@
-"""Run behavior regressions against the actual inline module UI JavaScript."""
+"""Run behavior regressions against the actual unified classroom JavaScript."""
 
 from __future__ import annotations
 
@@ -12,15 +12,15 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_async_module_ui_behaviors() -> None:
+def test_async_classroom_ui_behaviors() -> None:
     node = shutil.which("node")
     if node is None:
         pytest.skip("Node.js is needed only for the deterministic UI development harness.")
     result = subprocess.run(
         [
             node,
-            str(ROOT / "scripts/check_module_ui.mjs"),
-            str(ROOT / "src/ds60sqlpy/assets/learning_modules.html"),
+            str(ROOT / "scripts/check_classroom_ui.mjs"),
+            str(ROOT / "src/ds60sqlpy/assets/classroom.js"),
         ],
         cwd=ROOT,
         capture_output=True,
@@ -30,4 +30,4 @@ def test_async_module_ui_behaviors() -> None:
     )
     assert result.returncode == 0, result.stdout + result.stderr
     receipt = json.loads(result.stdout.splitlines()[-1])
-    assert receipt == {"checks": 36, "passed": True, "final": True}
+    assert receipt == {"checks": 55, "passed": True, "final": True}

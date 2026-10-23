@@ -13,6 +13,15 @@
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **PostgreSQL** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 The rendered lesson page is a reading surface; PostgreSQL runs the real learner
 file. The safest beginner route is the private course portal because it checks
 the database target, creates an ignored working copy, and shows the complete

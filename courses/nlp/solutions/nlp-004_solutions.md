@@ -12,7 +12,7 @@ The `pay` match begins at index 6 and ends at 9 in the unchanged input. Each mat
 
 ## Exercise 2: Weight counts by observed frequency
 
-Both training word types contain the adjacent pairs `l,o` and `o,w`. The word `low` occurs three times and `lower` once, so each pair contributes 3+1=4 weighted occurrences. Only `low` has `w` adjacent to the terminal marker, giving that pair count 3.
+Both training word types contain the adjacent pairs `l,o` and `o,w`. The word `low` occurs three times and `lower` once, so each pair contributes \(3+1=4\) weighted occurrences. Only `low` has `w` adjacent to the terminal marker, giving that pair count 3.
 
 If each dictionary key were counted once, the first two pair counts would be 2 and the terminal pair count 1. That would treat a type inventory as though it were the token-frequency corpus. The code explicitly multiplies each adjacency by the stored frequency so its statistic corresponds to the stated training data. Positive integer count validation rejects zero, negative and Boolean frequencies rather than quietly changing their meaning.
 

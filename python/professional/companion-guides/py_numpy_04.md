@@ -14,6 +14,15 @@ By the end, explain the mechanism in your own words, implement each bounded cont
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Open the [learner script](../lessons/py_numpy_04.py) in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored `.learning/` copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
 
 Windows PowerShell:
@@ -47,7 +56,7 @@ Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the wo
 
 Scientific programs represent most real values approximately. An algorithm can be mathematically correct and still lose useful digits through cancellation, overflow or an inappropriate data type. Numerical stability asks whether the computation adds avoidable error. Conditioning asks whether the underlying problem itself is sensitive. A stable solver cannot recover a well-determined answer from nearly indistinguishable input columns without additional assumptions.
 
-Exponentials illustrate avoidable overflow. A softmax divides exp(x_i) by the sum of all exponentials. Adding the same constant to every score leaves the probabilities unchanged, so subtract the maximum before exponentiating. The largest exponent becomes zero and all others are nonpositive. The log-sum-exp identity similarly writes log(sum(exp(x))) as m+log(sum(exp(x-m))). The transformation preserves the mathematical result while avoiding huge intermediate exponentials.
+Exponentials illustrate avoidable overflow. A softmax divides \(e^{x_i}\) by the sum of all exponentials. Adding the same constant to every score leaves the probabilities unchanged, so subtract the maximum before exponentiating. The largest exponent becomes zero and all others are nonpositive. The log-sum-exp identity similarly writes \(\log\sum_i e^{x_i}\) as \(m+\log\sum_i e^{x_i-m}\). The transformation preserves the mathematical result while avoiding huge intermediate exponentials.
 
 Summation order matters because floating addition is not associative. For values 1e16, one and -1e16, an ordinary sequential or array sum can lose the one. math.fsum tracks partial sums to recover more accurate results for this example. It is not arbitrary-precision arithmetic and cannot represent a final result outside the floating range. Explicitly distinguish a recoverable rounding problem from a genuinely unrepresentable answer.
 
@@ -90,9 +99,9 @@ The summation counterexample exposes lost low-order information. The diagonal sy
 
 ## Exercises
 
-1. **Aggregate log weights without overflow.** Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.
+1. **Aggregate log weights without overflow.** Implement stable \(\log\sum_i e^{\mathrm{values}_i}\) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.
 
-**Expected:** [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.
+**Expected:** [1000,1000] yields \(1000+\log2\) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.
 
 2. **Normalize large scores.** Return softmax probabilities for a nonempty finite vector using a maximum shift. Preserve the source and reject NaN, infinity, empty or nonvector inputs. Test invariance when a constant is added to every score.
 

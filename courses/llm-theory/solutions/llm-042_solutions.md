@@ -66,9 +66,9 @@ torch.testing.assert_close(torch.cat(parts,1),full,atol=1e-6,rtol=0)
 assert sum(p.numel() for p in model.parameters())<50000 and elapsed>=0
 ```
 
-**Expected:** parity within1e-6;parameters below50000.
+**Expected:** parity within 1e-6;parameters below50000.
 
-**Verify:** Compare the computed values or written argument with parity within1e-6;parameters below50000.
+**Verify:** Compare the computed values or written argument with parity within 1e-6;parameters below50000.
 
 ## Exercise 4: Bind lineage and budgets
 

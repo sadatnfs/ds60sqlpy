@@ -1,6 +1,6 @@
 # The journey and teacher experience
 
-Status: interactive design prototype. Open `/journey-preview` in the learning app. The preview reads the five validated plans and provides real prediction feedback, incremental hints, and local draft recovery. Runtime execution, mastery grading, and job orchestration remain future implementation.
+Status: historical developer design prototype. Its standalone generated preview reads the original five plans and illustrates prediction feedback, incremental hints and local draft recovery. The public learner experience is now the unified `/classroom` shell for all subjects, including Python and SQL. `/journey-preview` is a compatibility alias to that shell. Statements below about future runtime execution describe the prototype's original design, not the current implementation status; consult [the checkpoint](../implementation/CHECKPOINT.md) for verified runtime evidence.
 
 ## Learner journey
 

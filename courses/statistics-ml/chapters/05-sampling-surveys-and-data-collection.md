@@ -62,13 +62,13 @@ Base weights invert inclusion probabilities; later adjustments may address nonre
 
 **Horvitz–Thompson estimation**
 
-Estimate a finite population total by summing observed y_i/pi_i. Design unbiasedness follows because E[I_i]=pi_i. Zero inclusion probability for some population units prevents identification of their contribution.
+Estimate a finite population total by summing observed \(\frac{y_i}{\pi_i}\). Design unbiasedness follows because \(\mathbb{E}[I_i]=\pi_i\). Zero inclusion probability for some population units prevents identification of their contribution.
 
 ### stat-05-10
 
 **Hájek estimation**
 
-Normalize inverse-probability weights and compute sum(w*y)/sum(w). This ratio often stabilizes mean estimation but is generally not exactly design unbiased. It differs from dividing a Horvitz-Thompson total by a known population size.
+Normalize inverse-probability weights and compute \(\frac{\sum_i w_i y_i}{\sum_i w_i}\). This ratio often stabilizes mean estimation but is generally not exactly design unbiased. It differs from dividing a Horvitz-Thompson total by a known population size.
 
 ### stat-05-11
 
@@ -92,13 +92,13 @@ Choose weights close to base weights while satisfying known auxiliary totals. Us
 
 **Design effects**
 
-Compare the design-based variance with simple-random-sampling variance for the same nominal sample size. For equal clusters, 1+(m-1)*ICC is a useful approximation, not a universal formula for every design.
+Compare the design-based variance with simple-random-sampling variance for the same nominal sample size. For equal clusters, \(1+(m-1)\cdot \mathrm{ICC}\) is a useful approximation, not a universal formula for every design.
 
 ### stat-05-15
 
 **Finite population correction**
 
-Without-replacement sampling reduces uncertainty as the sampled fraction grows. The variance correction is approximately 1-n/N; use only for an appropriate finite target and design, not an unlimited superpopulation claim.
+Without-replacement sampling reduces uncertainty as the sampled fraction grows. The variance correction is approximately \(1-\frac{n}{N}\); use only for an appropriate finite target and design, not an unlimited superpopulation claim.
 
 ### stat-05-16
 
@@ -128,7 +128,7 @@ Conditioning on inclusion can distort associations when inclusion depends on cau
 
 **Capture–recapture estimation**
 
-Two lists with sizes n1 and n2 and overlap m suggest population size near n1*n2/m. Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.
+Two lists with sizes n1 and n2 and overlap m suggest population size near \(\frac{n_{1}\cdot n_{2}}{m}\). Dependence between captures or heterogeneous capture probabilities can strongly bias this estimate; tiny overlap is unstable.
 
 ### stat-05-21
 
@@ -170,7 +170,7 @@ Report weight ranges, effective sample information and sensitivity to trimming. 
 
 ### Case study: sampling costs and precision targets
 
-A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because 800*1 equals 200*4. Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.
+A population contains 800 low-variability units with SD one and 200 high-variability units with SD four. For a population mean with equal collection cost, Neyman allocation is proportional to stratum size times SD. Both strata receive the same allocation because \(800\cdot 1\) equals \(200\cdot 4\). Sampling strictly in proportion to size would devote most observations to the lower-variability stratum.
 
 If the high-variability stratum costs four times as much per observation, a cost-constrained allocation adjusts for the square root of cost. If the objective is instead a precise estimate for the small stratum, the optimal allocation changes again. There is no universally optimal sample independent of the target and budget.
 
@@ -178,7 +178,7 @@ Adaptive sampling can improve discovery of rare clusters, but the selection proc
 
 ### Case study: capture-recapture and list dependence
 
-Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is 100*80/20=400 entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.
+Suppose one search finds 100 entities, another finds 80 and they overlap in 20. The elementary estimate is \(\frac{100\cdot 80}{20}=400\) entities. If highly visible entities are likely to appear in both lists while hidden entities appear in neither, the overlap can be too large relative to the independent-capture model and the simple estimator can underestimate the population.
 
 If the second search deliberately avoids entities found by the first, overlap can be too small and the estimate can be exaggerated. Heterogeneous capture probabilities and list dependence are therefore central assumptions, not minor corrections. Use additional lists, covariates or sensitivity analysis where appropriate, and communicate uncertainty when overlap is sparse.
 

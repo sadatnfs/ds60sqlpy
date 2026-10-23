@@ -96,9 +96,9 @@ with torch.no_grad():
 torch.testing.assert_close(prefix,full[:,:2],atol=1e-6,rtol=0)
 ```
 
-**Expected:** prefix agreement within1e-6.
+**Expected:** prefix agreement within 1e-6.
 
-**Verify:** Compare the computed values or written argument with prefix agreement within1e-6.
+**Verify:** Compare the computed values or written argument with prefix agreement within 1e-6.
 
 ## Exercise 6: Record model identity and limits
 

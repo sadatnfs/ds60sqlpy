@@ -10,7 +10,7 @@ from ds60sqlpy.reader_math import render_math
 @pytest.mark.parametrize(
     ("expression", "tag", "text"),
     [
-        (r"P(A\mid B)", "mo", "|"),
+        (r"P(A\mid B)", "mo", "∣"),
         (r"P(\text{disease}\mid\text{positive})", "mtext", "disease"),
         ("R^2", "msup", ""),
         ("x_{12}", "msub", ""),
@@ -31,7 +31,7 @@ def test_supported_math_preserves_structure(expression: str, tag: str, text: str
     assert annotation is not None and annotation.text == expression
 
 
-@pytest.mark.parametrize("expression", [r"\unknown{a}", "a^^2", "{a", "}", "x" * 2049])
+@pytest.mark.parametrize("expression", [r"\unknown{a}", "a^^2", "{a", "}", "x" * 8193])
 def test_unsupported_math_preserves_original_notation(expression: str) -> None:
     rendered = render_math(expression)
 

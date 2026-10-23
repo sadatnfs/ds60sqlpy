@@ -102,7 +102,7 @@ assert generated==[2,2,2]
 
 The question is: Handle temperature0 with argmax rather than division.
 
-Greedy decoding has a valid definition at zero temperature as a separate policy. Evaluating logits/0 first would create invalid values before that policy could act.
+Greedy decoding has a valid definition at zero temperature as a separate policy. Evaluating \(\frac{\mathrm{logits}}{0}\) first would create invalid values before that policy could act.
 
 ```python
 logits=torch.tensor([2.,1.,0.]); temperature=0

@@ -6,7 +6,7 @@ Advanced; approximately 120 minutes. Direct prerequisites: `torch-030`. The prer
 
 ## Learning objectives
 
-Compilation and profiling answer different questions. The central investigation is concrete: Evaluatef(x)=x*x+1 at float32[1, 2]. The finish condition is output[2, 5]. receipt does not claim universal speedup. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Compilation and profiling answer different questions. The central investigation is concrete: Evaluatef(x)=\(x\cdot x+1\) at float32[1, 2]. The finish condition is output[2, 5]. receipt does not claim universal speedup. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -48,7 +48,7 @@ torch.compile(function, backend=counting_backend, fullgraph=True, dynamic=False)
 
 ## Separate capture, guards, execution and measurement
 
-The eager function computes x*x+1. For[1, 2], the result is[2, 5]; for[3, 4], it is[10, 17]. These literal values establish correctness without relying on the compiled wrapper as its own oracle. The selected backend receives a captured FX graph and example inputs, appends that graph to a diagnostic list, and returns graph.forward. Tensor operations then execute through that eager graph function. No optimized native kernel generation is requested by this backend.
+The eager function computes \(x\cdot x+1\). For[1, 2], the result is[2, 5]; for[3, 4], it is[10, 17]. These literal values establish correctness without relying on the compiled wrapper as its own oracle. The selected backend receives a captured FX graph and example inputs, appends that graph to a diagnostic list, and returns graph.forward. Tensor operations then execute through that eager graph function. No optimized native kernel generation is requested by this backend.
 
 torch.compile is the entry to a larger capture/guard/backend system. fullgraph=True asks this function to be captured as one graph and reports unsupported graph breaks rather than quietly presenting a partly captured program as the intended full graph. dynamic=False specializes the relevant shapes in this example. Those options do not remove Python dispatch and guard workaround every later call. [PyTorch 2.9 torch.compile](https://docs.pytorch.org/docs/2.9/generated/torch.compile.html).
 
@@ -58,7 +58,7 @@ Data-dependent Python control is a different issue from merely changing tensor v
 
 The measured interval starts after a warm float32 call and contains twenty repeated calls at the same input. The current reference checks the final observed output after that interval; it does not retain a separate per-call output ledger. CPU tensor operations in this path complete before the observed result is used. The elapsed time includes wrapper dispatch and guard/execution costs, but excludes initial capture, model construction and a realistic input pipeline. It is a small diagnostic sample, not a latency distribution.
 
-Setup amortization can be expressed without inventing a benchmark. If setup cost is C, an eager call costs E, and a prepared alternative costs G, then N calls cost approximately NE versus C+NG under a simple stationary model. A break-even N>C/(E-G) exists only if E>G. Hypothetical C=200ms, E=1ms, G=0.5ms would require more than 400 calls. Those are illustrative units, not measurements from this lesson, and the eager graph backend may have no positive speedup to amortize at all.
+Setup amortization can be expressed without inventing a benchmark. If setup cost is C, an eager call costs E, and a prepared alternative costs G, then N calls cost approximately NE versus C+NG under a simple stationary model. A break-even \(N>\frac{C}{E-G}\) exists only if \(E>G\). Hypothetical C=200ms, E=1ms, G=0.5ms would require more than 400 calls. Those are illustrative units, not measurements from this lesson, and the eager graph backend may have no positive speedup to amortize at all.
 
 Real measurements need a fixed mode, dtype, shape distribution, thread setting and input/output boundary. Dynamic request shapes can trigger additional setup that a one-signature loop omits. Memory allocation, caches, JIT warmup and concurrent host load also matter. If a future accelerator path launches asynchronously, a host timer without an appropriate completion boundary can measure enqueue time rather than finished work. This CPU lesson does not qualify that device timing path.
 
@@ -117,7 +117,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Establish an eager oracle.** Evaluatef(x)=x*x+1 at float32[1, 2].
+1. **Establish an eager oracle.** Evaluatef(x)=\(x\cdot x+1\) at float32[1, 2].
    **Expected:** output[2, 5].
    **Verify:** Save the assertion results for exercise 1, including output[2, 5].
 

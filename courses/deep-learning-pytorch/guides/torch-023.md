@@ -6,7 +6,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-022`. The 
 
 ## Learning objectives
 
-A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. The central investigation is concrete: Detach (w-2)**2 before backward and inspect tracking. The finish condition is detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. The central investigation is concrete: Detach \({\left(w-2\right)}^{2}\) before backward and inspect tracking. The finish condition is detached loss requires_grad False; backward raises RuntimeError. nonnegative and below \(\frac{56}{675}\). A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -46,24 +46,24 @@ Check loss.requires_grad and parameter.grad before calling step. Use optimizer.z
 
 ## Trace the optimizer state transition and objective denominator
 
-Example A computes a numeric loss from w=0 and detaches it. Its value is still four, but its dependency on w is no longer in the recorded graph. Setting requires_grad on that detached scalar would create a new leaf; it would not reconstruct the missing operation. The failed backward leaves the original parameter unchanged, so the sequential Example B still begins at w=0.
+Example A computes a numeric loss from \(w=0\) and detaches it. Its value is still four, but its dependency on w is no longer in the recorded graph. Setting requires_grad on that detached scalar would create a new leaf; it would not reconstruct the missing operation. The failed backward leaves the original parameter unchanged, so the sequential Example B still begins at \(w=0\).
 
-For x=[1, 2, 3], y=2x and mean squared error, the objective is L(w)=(14/3)(w-2)^2. Its derivative is(28/3)(w-2). With learning rate 1/10, the update is w_next=w/15+28/15. The exact trace is:
+For x=[1, 2, 3], y=2x and mean squared error, the objective is \(L(w)=\frac{14}{3}(w-2)^2\). Its derivative is \(\frac{28}{3}(w-2)\). With learning rate \(\frac{1}{10}\), the update is \(w_{\mathrm{next}}=\frac{w}{15}+\frac{28}{15}\). The exact trace is:
 
 | Step | Weight before | Loss before | Gradient | Weight after |
 | --- | --- | --- | --- | --- |
-| first | 0 | 56/3 | -56/3 | 28/15 |
-| second | 28/15 | 56/675 | -56/45 | 448/225 |
+| first | 0 | \(\frac{56}{3}\) | \(\frac{-56}{3}\) | \(\frac{28}{15}\) |
+| second | \(\frac{28}{15}\) | \(\frac{56}{675}\) | \(\frac{-56}{45}\) | \(\frac{448}{225}\) |
 
-The loss at the final weight is 56/151875. A logged loss tensor calculated before step still represents the earlier state after the parameter changes. Recompute the forward objective to report post-update loss; printing the new weight beside the old loss without labeling them mixes two different states.
+The loss at the final weight is \(\frac{56}{151875}\). A logged loss tensor calculated before step still represents the earlier state after the parameter changes. Recompute the forward objective to report post-update loss; printing the new weight beside the old loss without labeling them mixes two different states.
 
-backward adds to stored gradient buffers. If the second step does not clear the first gradient, the stored value becomes -56/3-56/45=-896/45, and the next weight becomes 868/225 rather than 448/225. That precise wrong trace distinguishes accidental accumulation from a wrong derivative formula. set_to_none=True also makes absence visible: None means no stored gradient was produced for that parameter in the relevant pass, whereas a connected derivative can be an actual zero. An optimizer may treat those cases differently, especially with state or decay.
+backward adds to stored gradient buffers. If the second step does not clear the first gradient, the stored value becomes \(\frac{-56}{3}-\frac{56}{45}=\frac{-896}{45}\), and the next weight becomes \(\frac{868}{225}\) rather than \(\frac{448}{225}\). That precise wrong trace distinguishes accidental accumulation from a wrong derivative formula. set_to_none=True also makes absence visible: None means no stored gradient was produced for that parameter in the relevant pass, whereas a connected derivative can be an actual zero. An optimizer may treat those cases differently, especially with state or decay.
 
-Intentional microbatch accumulation needs a global denominator. Split the same three rows into one row and two rows at w=0. The local mean gradients are -4 and -26. Averaging those means equally gives -15, but the full-data gradient is(1×(-4)+2×(-26))/3=-56/3. One correct implementation weights each local mean by its valid-example count divided by the total, or accumulates local summed losses and divides by the total valid count. For padded tokens or sample weights, the denominator is the valid weight mass, not necessarily the number of stored rows.
+Intentional microbatch accumulation needs a global denominator. Split the same three rows into one row and two rows at \(w=0\). The local mean gradients are -4 and -26. Averaging those means equally gives -15, but the full-data gradient is(1×(-4)+2×(-26))/3=\(\frac{-56}{3}\). One correct implementation weights each local mean by its valid-example count divided by the total, or accumulates local summed losses and divides by the total valid count. For padded tokens or sample weights, the denominator is the valid weight mass, not necessarily the number of stored rows.
 
 This algebra assumes an additive loss evaluated at the same parameter state with equivalent forward behavior. Updating parameters between microbatches is a different trajectory. BatchNorm statistics, dropout draws, contrastive in-batch negatives and other batch-dependent computations can make a large batch differ even when gradient normalization is correct. State the scope of an equivalence claim rather than using accumulation as a universal replacement.
 
-Norm clipping is another nonlinear boundary. Concatenate the participating parameter gradients into g. L2 clipping uses approximately g'=g×min(1, c/||g||), with a small numerical stabilizer in the implementation. For[3, 4], the norm is five and c=1 gives approximately[0.6, 0.8]. The function returns the original five while mutating gradients in place. Starting from zero, plain SGD at 0.1 then moves to approximately[-0.06, -0.08]. [PyTorch 2.9 clip_grad_norm_](https://docs.pytorch.org/docs/2.9/generated/torch.nn.utils.clip_grad_norm_.html).
+Norm clipping is another nonlinear boundary. Concatenate the participating parameter gradients into g. L2 clipping uses approximately g'=g×min(1, c/||g||), with a small numerical stabilizer in the implementation. For[3, 4], the norm is five and \(c=1\) gives approximately[0.6, 0.8]. The function returns the original five while mutating gradients in place. Starting from zero, plain SGD at 0.1 then moves to approximately[-0.06, -0.08]. [PyTorch 2.9 clip_grad_norm_](https://docs.pytorch.org/docs/2.9/generated/torch.nn.utils.clip_grad_norm_.html).
 
 Clipping each contribution before accumulation can change the result. Scalar contributions 100 and-99 sum to one; clipping their sum to magnitude one leaves one. Clipping each separately to±1 and then adding gives zero. Therefore clip at the declared update boundary after the intended weighting and accumulation. With scaled gradients, unscale before applying a threshold expressed in ordinary gradient units.
 
@@ -101,7 +101,7 @@ for _ in range(2):
 np.testing.assert_allclose(history,[28/15,448/225],atol=1e-12,rtol=0)
 ```
 
-**Expected:** weights 28/15 then 448/225.
+**Expected:** weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
 
 ### Example C: Inspect norm clipping
 
@@ -117,17 +117,17 @@ assert before.item()==5; torch.testing.assert_close(parameter.grad,torch.tensor(
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: detached loss requires_grad False; backward raises RuntimeError. nonnegative and below 56/675. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: detached loss requires_grad False; backward raises RuntimeError. nonnegative and below \(\frac{56}{675}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Expose detachment.** Detach (w-2)**2 before backward and inspect tracking.
+1. **Expose detachment.** Detach \({\left(w-2\right)}^{2}\) before backward and inspect tracking.
    **Expected:** detached loss requires_grad False; backward raises RuntimeError.
    **Verify:** Save the assertion results for exercise 1, including detached loss requires_grad False; backward raises RuntimeError.
 
 2. **Repair two exact updates.** Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
-   **Expected:** weights 28/15 then 448/225.
-   **Verify:** Save the assertion results for exercise 2, including weights 28/15 then 448/225.
+   **Expected:** weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
+   **Verify:** Save the assertion results for exercise 2, including weights \(\frac{28}{15}\) then \(\frac{448}{225}\).
 
 3. **Inspect norm clipping.** Assign gradient 3, 4 to a parameter vector and clip to norm 1.
    **Expected:** returned norm 5; new gradient approximately.6, .8.
@@ -142,8 +142,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 5, including RuntimeError before a valid update.
 
 6. **Recompute post-update loss.** Calculate current loss after the two scalar updates and compare with the one-step oracle.
-   **Expected:** nonnegative and below 56/675.
-   **Verify:** Save the assertion results for exercise 6, including nonnegative and below 56/675.
+   **Expected:** nonnegative and below \(\frac{56}{675}\).
+   **Verify:** Save the assertion results for exercise 6, including nonnegative and below \(\frac{56}{675}\).
 
 ## Common pitfalls and diagnosis
 

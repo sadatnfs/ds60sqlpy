@@ -737,7 +737,7 @@ def build_html(payload: dict[str, Any]) -> str:
         <span>Learning Guide</span>
       </a>
       <nav aria-label="Primary">
-        <a href="http://127.0.0.1:8765/learn" data-coding-lab-link>Coding lab</a>
+        <a href="http://127.0.0.1:8765/classroom" data-coding-lab-link>All subjects classroom</a>
         <a href="#setup">Set up</a>
         <a href="#run-sql">Run SQL</a>
         <a href="#paths">Choose a path</a>
@@ -814,7 +814,7 @@ def build_html(payload: dict[str, Any]) -> str:
       <span class="mode-icon" aria-hidden="true">✓</span>
       <div><strong>This is your coding lab's reading library.</strong>
         <p>Browse the complete course here, then
-          <a href="/learn" data-coding-lab-link>return to the coding lab</a>
+          <a href="/classroom" data-coding-lab-link>return to the classroom</a>
           to keep your attempt, phase evidence, and completion together.</p>
       </div>
     </div>
@@ -1126,7 +1126,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <p>Read a lesson, predict a result, write Python or SQL, and keep the evidence.</p></div>
         <div class="grid three">
           <article class="panel"><h3>Start the application</h3>
-            <p>Docker users open START_DOCKER_LAB.cmd on Windows or START_DOCKER_LAB.command on macOS. Native users run scripts/learning_lab.py with their course Python.</p>
+            <p>Run ./classroom to build and open every subject in one browser workspace. Windows uses WSL 2 or START_DOCKER_CLASSROOM.cmd. Native users can run scripts/learning_lab.py with their course Python.</p>
             <a href="docs/offline-app.md">Application, native builds, and Docker</a></article>
           <article class="panel"><h3>Choose a useful goal</h3>
             <p>Build a route from the real prerequisites and your available time. Beginner practice and advanced projects belong at different checkpoints.</p>
@@ -1408,7 +1408,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
     if (labMode) {
       document.querySelector("#static-mode-banner").hidden = true;
       document.querySelector("#lab-mode-banner").hidden = false;
-      document.querySelectorAll("[data-coding-lab-link]").forEach((link) => { link.href = "/learn"; });
+      document.querySelectorAll("[data-coding-lab-link]").forEach((link) => { link.href = "/classroom"; });
       ["import-progress", "clear-progress"].forEach((id) => { document.getElementById(id).hidden = true; });
     }
     const state = loadState();
@@ -1567,7 +1567,7 @@ $CoursePython = if (Test-Path .\.venv\Scripts\python.exe) {
           <div class="lesson-top">
             <span class="lesson-id">${escapeHtml(lesson.id)}</span>
             ${labMode
-              ? `<a href="/learn?lesson=${encodeURIComponent(lesson.id)}">Open in coding lab</a>`
+              ? `<a href="/classroom?lesson=${encodeURIComponent(lesson.id)}">Open in classroom</a>`
               : `<label class="completion">
               <input type="checkbox" data-complete="${escapeHtml(lesson.id)}" ${completed ? "checked" : ""}>
               Complete

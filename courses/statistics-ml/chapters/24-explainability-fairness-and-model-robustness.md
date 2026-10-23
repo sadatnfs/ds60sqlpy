@@ -8,13 +8,13 @@ An explanation describes a model's behavior relative to a question and reference
 
 ### Attribution requires a value function
 
-For two features, let v(S) be the prediction value assigned when coalition S is known under a specified reference construction. Shapley attribution averages each feature's marginal contribution over the possible orders. Thus phi1=[v({1})-v(empty)+v({1,2})-v({2})]/2, with a parallel expression for phi2. The attributions sum to v({1,2})-v(empty). Their values change when the reference background or dependence treatment changes. Conditional and interventional constructions answer different questions, especially for correlated features.
+For two features, let v(S) be the prediction value assigned when coalition S is known under a specified reference construction. Shapley attribution averages each feature's marginal contribution over the possible orders. Thus \(\phi_1=\frac{v(\{1\})-v(\varnothing)+v(\{1,2\})-v(\{2\})}{2}\), with a parallel expression for phi2. The attributions sum to \(v(\{1,2\})-v(\varnothing)\). Their values change when the reference background or dependence treatment changes. Conditional and interventional constructions answer different questions, especially for correlated features.
 
 Permutation importance asks how performance changes when a feature is disrupted. If another feature duplicates its information, marginal permutation importance can be small despite the signal being useful. PDP replaces one feature across all rows and averages predictions, potentially creating impossible combinations. ICE retains separate curves; ALE uses local changes within observed regions to reduce some extrapolation. None of these curves is automatically a causal response curve.
 
 ### Fairness criteria condition on different quantities
 
-Demographic parity compares P(predicted positive|group). Equalized odds compares prediction rates conditional on both group and true outcome; equal opportunity focuses on true positives. Group calibration compares actual outcome rates among people receiving the same predicted probability in different groups. When base rates differ and prediction is imperfect, desirable criteria can conflict. This is a consequence of conditioning, not simply an implementation bug.
+Demographic parity compares \(\Pr(\mathrm{predicted\ positive}\mid\mathrm{group})\). Equalized odds compares prediction rates conditional on both group and true outcome; equal opportunity focuses on true positives. Group calibration compares actual outcome rates among people receiving the same predicted probability in different groups. When base rates differ and prediction is imperfect, desirable criteria can conflict. This is a consequence of conditioning, not simply an implementation bug.
 
 Select criteria according to the decision, harms, affected people and quality of labels. Historical labels can encode unequal opportunity, so matching their error rates is not a complete ethical analysis. Quantify uncertainty and intersectional support before interpreting group differences. A feasible recourse plan must account for immutable attributes, costs, causal dependencies and whether the model will remain stable.
 
@@ -180,7 +180,7 @@ Costs differ among people. A recommendation to obtain a credential or reduce deb
 
 ### Case study: fairness tradeoffs are visible in a confusion table
 
-Consider two groups with prevalences .2 and .8. If both have sensitivity .8 and false-positive rate .1, their positive decision rates are .8*.2+.1*.8=.24 and .8*.8+.1*.2=.66. Equalized odds holds, while demographic parity does not. Their precision values are .16/.24 and .64/.66, which differ markedly.
+Consider two groups with prevalences .2 and .8. If both have sensitivity .8 and false-positive rate .1, their positive decision rates are \(0.8\cdot 0.2+0.1\cdot 0.8=0.24\) and \(0.8\cdot 0.8+0.1\cdot 0.2=0.66\). Equalized odds holds, while demographic parity does not. Their precision values are .16/.24 and .64/.66, which differ markedly.
 
 Changing thresholds to equalize positive decision rates generally changes the class-conditional error rates. Calibrated probabilities with unequal base rates also create constraints on which predictive-value and error-rate equalities can simultaneously hold under imperfect prediction. The appropriate choice depends on the allocation, harms and legal or organizational context, not an automatic preference for one mathematical criterion.
 

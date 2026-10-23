@@ -27,9 +27,9 @@ z=tf.constant([-2.,0.,2.]); p=tf.math.sigmoid(z).numpy()
 assert p[1]==.5 and np.all(np.diff(p)>0)
 ```
 
-**Expected:** middle probability.5; probabilities increase.
+**Expected:** middle probability 0.5; probabilities increase.
 
-**Verify:** Compare the computed values or written argument with middle probability.5; probabilities increase.
+**Verify:** Compare the computed values or written argument with middle probability 0.5; probabilities increase.
 
 ## Exercise 2: Check the midpoint loss
 
@@ -42,9 +42,9 @@ loss=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.]),logits=tf.
 np.testing.assert_allclose(loss.numpy(),[np.log(2)],atol=1e-6,rtol=0)
 ```
 
-**Expected:** loss log(2) within1e-6.
+**Expected:** loss \(\log(2)\) within 1e-6.
 
-**Verify:** Compare the computed values or written argument with loss log(2) within1e-6.
+**Verify:** Compare the computed values or written argument with loss \(\log(2)\) within 1e-6.
 
 ## Exercise 3: Move the threshold
 
@@ -63,7 +63,7 @@ assert (p>=.8).tolist()==[False,False,True]
 
 ## Exercise 4: Expose a convention mismatch
 
-The question is: Treat probability.5 as if it were a logit and compare the positive-label loss with log2.
+The question is: Treat probability 0.5 as if it were a logit and compare the positive-label loss with log2.
 
 The mistaken argument is interpreted as a score favoring the positive class. The API cannot infer that the caller intended a probability; explicit naming and shape contracts are necessary.
 
@@ -80,7 +80,7 @@ assert abs(wrong-np.log(2))>.1
 
 The question is: Calculate losses for logits1000,-1000 with labels1,0 using the logits-aware form.
 
-A naive log(sigmoid()) path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.
+A naive `log(sigmoid())` path can lose precision at extreme probabilities. The stable form handles the algebra before exponentiation creates overflow or logarithms receive rounded zero.
 
 ```python
 stable=tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.constant([1.,0.]),logits=tf.constant([1000.,-1000.])).numpy()

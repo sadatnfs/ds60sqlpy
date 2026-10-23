@@ -17,25 +17,25 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace the fixed conditionals
 
-The product is 0.5*0.25*0.8=0.1. Taking the negative natural log yields log(10), equivalently the sum of three negative log terms. The scored-target count is three. Each number belongs to its own preceding context in the probability chain. The arithmetic alone cannot check that a model produced the right contextual probability, so retain a prefix/target table as semantic evidence alongside the numeric assertions.
+The product is \(0.5\cdot 0.25\cdot 0.8=0.1\). Taking the negative natural log yields \(\log(10)\), equivalently the sum of three negative log terms. The scored-target count is three. Each number belongs to its own preceding context in the probability chain. The arithmetic alone cannot check that a model produced the right contextual probability, so retain a prefix/target table as semantic evidence alongside the numeric assertions.
 
-**Expected:** Likelihood 0.1, total NLL log(10), and three targets.
+**Expected:** Likelihood 0.1, total NLL \(\log(10)\), and three targets.
 
 **Verify:** Assert the product and log score within 1e-12 and name each preceding context in a short table.
 
 ## Exercise 2: Change the conditioning assumption
 
-Reusing 0.5 at every position gives 0.125 and total NLL 3*log(2). These differ from the supplied conditional table's 0.1 and log(10). The probability chain rule does not authorize replacing conditional values with marginals: that substitution changes the assumptions about context and defines a different distribution. It could accidentally match a special dataset, but it is not an identity. Compare the declared contexts rather than declaring either numeric result an implementation bug by itself.
+Reusing 0.5 at every position gives 0.125 and total NLL \(3\cdot \log(2)\). These differ from the supplied conditional table's 0.1 and \(\log(10)\). The probability chain rule does not authorize replacing conditional values with marginals: that substitution changes the assumptions about context and defines a different distribution. It could accidentally match a special dataset, but it is not an identity. Compare the declared contexts rather than declaring either numeric result an implementation bug by itself.
 
-**Expected:** The alternative product is 0.125 and its total NLL is 3*log(2), different from log(10).
+**Expected:** The alternative product is 0.125 and its total NLL is \(3\cdot \log(2)\), different from \(\log(10)\).
 
 **Verify:** Record both products and explain that the changed conditionals define a different model, not an algebraic shortcut.
 
 ## Exercise 3: Preserve a long log score
 
-For a thousand values of 0.01, a direct floating product rounds to zero, while adding the negative logs produces the finite total 1000*log(100). The reference uses math.fsum for the log terms to reduce accumulation error. Store the product and total as separate fields so the underflow is visible instead of hidden. Computing -log(product) afterward would either fail at zero or return infinity and would discard useful information already available in the individual factors.
+For a thousand values of 0.01, a direct floating product rounds to zero, while adding the negative logs produces the finite total \(1000\cdot \log(100)\). The reference uses math.fsum for the log terms to reduce accumulation error. Store the product and total as separate fields so the underflow is visible instead of hidden. Computing \(-\log(\mathrm{product})\) afterward would either fail at zero or return infinity and would discard useful information already available in the individual factors.
 
-**Expected:** Direct product is 0.0 from underflow; total NLL is finite and equals 1000*log(100) within 1e-9.
+**Expected:** Direct product is 0.0 from underflow; total NLL is finite and equals \(1000\cdot \log(100)\) within 1e-9.
 
 **Verify:** Assert the finite log-space value and keep the underflowed product labeled separately.
 
@@ -59,7 +59,7 @@ A helper must reject an empty sequence because its mean has no target count. Val
 
 Document A has total ln(2) over one target. Document B has total 3*ln(4)=6*ln(2) over three targets. Across all four targets, the mean is 7*ln(2)/4. Giving the two document means equal weight gives (ln(2)+2*ln(2))/2=3*ln(2)/2. Both calculations are valid under their different units. State the aggregation before comparing models, and do not switch the policy after seeing which answer supports a preferred conclusion.
 
-**Expected:** Token mean is 7*log(2)/4; equal-document mean is 3*log(2)/2.
+**Expected:** Token mean is \(\frac{7\cdot \log(2)}{4}\); equal-document mean is \(\frac{3\cdot \log(2)}{2}\).
 
 **Verify:** Write the four-target denominator and the two-document denominator explicitly and assert both values within 1e-12.
 

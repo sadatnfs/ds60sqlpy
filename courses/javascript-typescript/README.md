@@ -1,5 +1,13 @@
 # JavaScript and TypeScript
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **JavaScript and TypeScript** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 All **42 lessons** are authored, with standalone guides, two worked examples, six practice tasks, answer-free learner files and separate explained solutions. The route connects language fundamentals, Node programs, strict TypeScript, browser interaction and application engineering. [The local manifest](lessons.json) registers complete bundles; [the route plan](track.json) preserves their stable IDs and prerequisites.
 
 Start with [JavaScript, Node and the browser](guides/js-001.md). Predict the worked result, implement the tasks in a saved learner copy, then compare with the separate solution after an attempt.

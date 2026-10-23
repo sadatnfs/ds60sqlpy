@@ -21,3 +21,15 @@ python courses/llm-applied/authoring/build.py --guides-only
 ```
 
 This mode skips the plan writer, manifest writes, learner/reference writes and review-matrix writes. The ordinary build also includes the textbook narratives, but should be used only when intentionally regenerating the whole course. `textbook_protected_artifacts.json` records73 frozen files, including both course manifests, and97 pre-existing fences. The focused test checks every byte/hash. Earlier runtime receipts retain their historical full-guide hashes; their executed-program hashes remain exact after this prose edition. `textbook_parity_receipt.json` records the final verification.
+
+## Unified classroom presentation
+
+Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
+`\[ ... \]` delimiters. Tag every fenced code example with its actual language.
+After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+from the repository root before rebuilding HTML readers. The reviewed
+`curriculum/math-prose.json` registry preserves this migration across regeneration;
+it does not change executable fences, notebook code or the supplied statistics
+outline. The public learner entrypoint is `/classroom`, shared by every subject.
+See [the content contract](../../../docs/content-authoring.md) for the rendering
+and subject-theme requirements.

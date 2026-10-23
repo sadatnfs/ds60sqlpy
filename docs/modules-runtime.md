@@ -1,5 +1,12 @@
 # Optional module runtimes
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 The module application sends source to explicitly prepared private workers.
 The original Python/SQL pads and the reading path continue to work without
 these profiles. Preparing one subject does not install every framework.
@@ -28,7 +35,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\scripts\module_lab.ps1 start -Profiles python-core,cpp20 -NoBrowser
 ```
 
-Open `http://127.0.0.1:8765/journeys` after readiness succeeds. Use the same
+Open `http://127.0.0.1:8765/classroom` after readiness succeeds. Use the same
 profile list and project for later `status`, `start` or `stop` actions. Profile
 preparation needs a connected bootstrap; practice uses the prepared local
 images. Nothing uploads an image or downloads a model when you press Run.

@@ -162,7 +162,7 @@ unless you can explain why that output follows from the inputs.
 
 **Prompt:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
 
-**Reasoning before implementation:** Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.
+**Reasoning before implementation:** Compute \(1-(1-p)^n\) first. Treat each simulated experiment as one Bernoulli outcome and use \(\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}\) for its standard error.
 
 The complement is easier to model: “at least one” is one minus “zero.”
 Keeping the analytic and simulated calculations separate gives an immediate
@@ -193,7 +193,7 @@ an assumption; clustered events would require another model.
 a deliberately chosen boundary case. If it does not, revisit the
 assumption or data boundary rather than hiding the failure.
 
-**Verify:** Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
+**Verify:** Prediction and uncertainty — show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
 
 ### Exercise 5 — Implementation
 

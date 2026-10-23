@@ -128,7 +128,7 @@ class ModuleService:
                     repo_root=self.catalog.root,
                     targets=self.targets,
                     id_prefix="module-guide--",
-                    output_path="journeys",
+                    output_path="classroom",
                 ),
                 "source": session["source"] if "source" in session else self.catalog.source(lesson),
                 "session": session,
@@ -155,7 +155,7 @@ class ModuleService:
                         repo_root=self.catalog.root,
                         targets=self.targets,
                         id_prefix=f"module-solution-{i}--",
-                        output_path="journeys",
+                        output_path="classroom",
                     ),
                 }
                 for i, path in enumerate(lesson.solution_paths)

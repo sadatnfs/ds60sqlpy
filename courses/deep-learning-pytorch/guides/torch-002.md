@@ -64,7 +64,7 @@ Broadcasting provides a second independent counterexample. With v=[1, 2, 3] and 
 | 2 | [-1, 0, 1] |
 | 3 | [-2, -1, 0] |
 
-The intended paired differences are only the diagonal zeros. The broadcast operation instead creates nine comparisons whose squared mean is 12/9=4/3. Reducing that grid to one scalar cannot restore the lost pairing. A model can therefore optimize a nonzero objective even though every intended prediction equals its target.
+The intended paired differences are only the diagonal zeros. The broadcast operation instead creates nine comparisons whose squared mean is \(\frac{12}{9}=\frac{4}{3}\). Reducing that grid to one scalar cannot restore the lost pairing. A model can therefore optimize a nonzero objective even though every intended prediction equals its target.
 
 A practical tensor boundary should name every axis, required dtype, device and ownership rule. A shape check catches a column/vector mismatch, but it cannot detect that two equally shaped batches have different record orders or units. Keep those semantic checks beside the tensor metadata. The framework enforces legal arithmetic; the application defines which arithmetic corresponds to the task.
 

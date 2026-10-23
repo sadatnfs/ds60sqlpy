@@ -26,25 +26,25 @@ The next decoder chapter combines these operations with learned embeddings, posi
 
 ### Trace the split and inverse
 
-For X:[T,D] with T=2,D=4,H=2, the head width is d=D/H=2. Reshape [2,4] to [2,2,2] interpreted as [token,head,head_feature], then transpose to [head,token,head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
+For X:[T,D] with T=2,D=4,H=2, the head width is \(d=\frac{D}{H}=2\). Reshape [2,4] to [2,2,2] interpreted as [token,head,head_feature], then transpose to [head,token,head_feature]. These dimensions happen to have the same sizes, making axis names more informative than the printed shape alone.
 
 With rows [0,1,2,3] and [4,5,6,7], head zero contains [[0,1],[4,5]], while head one contains [[2,3],[6,7]]. The inverse must first transpose [head,token,feature] back to [token,head,feature], then merge the last two axes. Flattening the head-major tensor directly instead creates rows [0,1,4,5] and [2,3,6,7]. Both arrays have shape [2,4], but the wrong version mixes features from different tokens.
 
 ### Compute attention within each head
 
-The batched multiplication Q_h K_h^T produces [H,T,T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is sqrt(2), and a causal Boolean triangle [T,T] broadcasts across the head axis. Multiplying weights [H,T,T] by V [H,T,2] returns [H,T,2]. Rejoining produces [T,4], preserving the width needed by a residual path.
+The batched multiplication Q_h \({K_{h}}^{T}\) produces [H,T,T], one query-by-key matrix for each head. The normalization axis is the final key axis. For a width-two head the scale is \(\sqrt{2}\), and a causal Boolean triangle [T,T] broadcasts across the head axis. Multiplying weights [H,T,T] by V [H,T,2] returns [H,T,2]. Rejoining produces [T,4], preserving the width needed by a residual path.
 
-For the three-token identity-projection fixture, head zero contains [1,0],[0,1],[1,1], while head one contains [1,1],[1,0],[0,1]. At query row one, the causal mask permits keys zero and one. Head zero has scores [0,1/sqrt(2)] and weights [1/(1+a),a/(1+a)] with a=exp(1/sqrt(2)). Head one has equal allowed scores [1/sqrt(2),1/sqrt(2)] and weights [1/2,1/2]. Their mixtures are therefore approximately [0.33023845,0.66976155] and exactly [1,0.5]. Concatenation gives [0.33023845,0.66976155,1,0.5] before any learned output projection.
+For the three-token identity-projection fixture, head zero contains [1,0],[0,1],[1,1], while head one contains [1,1],[1,0],[0,1]. At query row one, the causal mask permits keys zero and one. Head zero has scores \([0,\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{1+a},\frac{a}{1+a}]\) with \(a=\exp(\frac{1}{\sqrt{2}})\). Head one has equal allowed scores \([\frac{1}{\sqrt{2}},\frac{1}{\sqrt{2}}]\) and weights \([\frac{1}{2},\frac{1}{2}]\). Their mixtures are therefore approximately [0.33023845,0.66976155] and exactly [1,0.5]. Concatenation gives [0.33023845,0.66976155,1,0.5] before any learned output projection.
 
 ### Residual and feed-forward equations
 
 A residual computes R(x)=x+F(x). If F(x)=2x, R(x)=3x and its Jacobian is 3I. If F(x)=0, the residual is the identity. If F(x)=-x, the sum is zero and the Jacobian is zero. Thus the identity contribution can improve the available path, but a residual connection is not a universal proof against vanishing, exploding or cancelled gradients.
 
-A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and b1=-2 so the first row [0,1,2,3] becomes [0,0,0,1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.
+A usual feed-forward branch has F(x_t)=activation(x_t W1+b1) W2+b2, using the same weights at every token t. W1 can expand the hidden feature width and W2 return it to D for residual addition. The teaching fixture chooses identity weights and \(b_{1}=-2\) so the first row [0,1,2,3] becomes [0,0,0,1]. This isolates nonlinearity and tokenwise independence. A pair of affine maps without a nonlinearity collapses to one affine map; adding width alone would not create that nonlinear behavior.
 
 ## Exercise 1: Split and rejoin
 
-The question is: Split X=[[0,1,2,3],[4,5,6,7]] into two heads, inspect membership, then invert the layout.
+The question is: Split \(X=[[0,1,2,3],[4,5,6,7]]\) into two heads, inspect membership, then invert the layout.
 
 Axis membership is the actual contract. Here every dimension has size two, so shape checks alone cannot distinguish a correct transpose from an incorrect one. Exact element placement supplies the missing evidence.
 
@@ -119,9 +119,9 @@ for length in [1, 2, 3]:
     np.testing.assert_allclose(prefix, output[:length], atol=1e-12, rtol=0)
 ```
 
-**Expected:** head distributions differ as derived, row-one output is [1/(1+a),a/(1+a),1,0.5], and every prefix matches.
+**Expected:** head distributions differ as derived, row-one output is \([\frac{1}{1+a},\frac{a}{1+a},1,0.5]\), and every prefix matches.
 
-**Verify:** Compare the computed values or written argument with head distributions differ as derived, row-one output is [1/(1+a),a/(1+a),1,0.5], and every prefix matches.
+**Verify:** Compare the computed values or written argument with head distributions differ as derived, row-one output is \([\frac{1}{1+a},\frac{a}{1+a},1,0.5]\), and every prefix matches.
 
 ## Exercise 5: Reject an indivisible width
 

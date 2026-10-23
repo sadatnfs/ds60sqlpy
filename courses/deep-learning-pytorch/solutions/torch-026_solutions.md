@@ -18,13 +18,13 @@ A custom differentiable function should be checked against independent derivativ
 
 ## Reading the implementation
 
-Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is 3*x² times the incoming gradient.
+Assign nn.Parameter in __init__, register a scale buffer, and implement forward without allocating new trainable state. Use named_parameters and named_buffers to inspect ownership. A torch.autograd.Function defines static forward and backward methods; save_for_backward stores inputs needed later. grad check perturbs double-precision inputs and should avoid kinks. The cube derivative is \(3\cdot {x}^{2}\) times the incoming gradient.
 
 ## Derive residual gradients and stable module identity
 
-For X shaped(B, D), a square kernel K shaped(D, D) and scalar scale s, the module computes Y=X+sXK. Both terms have shape(B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.
+For X shaped(B, D), a square kernel K shaped(D, D) and scalar scale s, the module computes \(Y=X+sXK\). Both terms have shape(B, D). A different branch width requires an explicit projection or a different architecture. Broadcasting an unrelated tensor into the residual sum may be legal arithmetic but would not satisfy this feature contract.
 
-At K=0 and s=1, the forward map is exactly Y=X. That does not make the branch untrainable. For upstream G=dL/dY, the matrix derivatives are dL/dX=G+sGK^T and dL/dK=sX^T G. With the fixture X=[[1, 2], [3, 4]] and L equal to the sum of output entries, G is all ones, so dL/dK=[[4, 4], [6, 6]] even at K=0. The input derivative is G because the zero branch adds no additional input sensitivity. The skip path preserves a direct derivative route while the branch can begin learning.
+At \(K=0\) and \(s=1\), the forward map is exactly Y=X. That does not make the branch untrainable. For upstream \(G=\frac{\partial L}{\partial Y}\), the matrix derivatives are \(\frac{\partial L}{\partial X}=G+{sGK}^{T}\) and \(\frac{\partial L}{\partial K}={sX}^{T}\) G. With the fixture X=[[1, 2], [3, 4]] and L equal to the sum of output entries, G is all ones, so dL/dK=[[4, 4], [6, 6]] even at \(K=0\). The input derivative is G because the zero branch adds no additional input sensitivity. The skip path preserves a direct derivative route while the branch can begin learning.
 
 Example C changes K to identity and s to 0.5. Its forward result is 1.5X. Under the same hypothetical summed loss, dL/dX=1.5G and dL/dK=[[2, 2], [3, 3]]. The paired TensorFlow residual has no scale buffer and therefore gives 2 X when its kernel is identity. That difference is an intentional mathematical configuration difference, not a framework disagreement. Match the scale before comparing corresponding derivatives.
 
@@ -36,7 +36,7 @@ Stable object identity matters as much as a stable parameter count. Replacing a 
 
 ## Treat a custom backward as a local vector-Jacobian product
 
-For f(x)=x^3, the local derivative is 3 x^2. backward receives the derivative from later computation, so it must return grad_output×3x^2. At x=2, the derivative of 2 f(x) is 2×12=24. Returning only 3 x^2 would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
+For \(f(x)=x^3\), the local derivative is 3 \({x}^{2}\). backward receives the derivative from later computation, so it must return \(\mathrm{grad\_output}\times3x^2\). At \(x=2\), the derivative of 2 f(x) is \(2\cdot 12=24\). Returning only 3 \({x}^{2}\) would pass a unit-upstream test but fail this composition. For a vector of independently cubed elements, the returned gradient has the same shape and multiplies each incoming component by its own local derivative.
 
 save_for_backward preserves the tensor values required by the rule and lets autograd enforce relevant lifetime/version checks. Do not mutate saved input storage between forward and backward or detach a value that must support a higher-order derivative. A function with several inputs returns a corresponding derivative entry for each differentiable input, and None where that input has no requested derivative under the declared contract. [Extending PyTorch 2.9 autograd](https://docs.pytorch.org/docs/2.9/notes/extending.html).
 
@@ -86,9 +86,9 @@ with torch.no_grad(): module.kernel.copy_(torch.eye(2,dtype=torch.float64)); mod
 torch.testing.assert_close(module(x),1.5*x,atol=1e-12,rtol=0)
 ```
 
-**Expected:** output 1.5*x.
+**Expected:** output \(1.5\cdot x\).
 
-**Verify:** Compare the computed values or written argument with output 1.5*x.
+**Verify:** Compare the computed values or written argument with output \(1.5\cdot x\).
 
 ## Exercise 4: Reject incompatible feature width
 
@@ -125,7 +125,7 @@ assert torch.autograd.gradcheck(Cube.apply,(probe,),eps=1e-6,atol=1e-5,rtol=1e-3
 
 The question is: Differentiate the sum of 2*Cube(x) atx 2.
 
-The local derivative 3*x² must be multiplied by the incoming derivative 2. Forgetting that factor can pass a simple standalone test but fail when the function is composed.
+The local derivative \(3\cdot {x}^{2}\) must be multiplied by the incoming derivative 2. Forgetting that factor can pass a simple standalone test but fail when the function is composed.
 
 ```python
 value=torch.tensor([2.],dtype=torch.float64,requires_grad=True); (2*Cube.apply(value)).sum().backward()

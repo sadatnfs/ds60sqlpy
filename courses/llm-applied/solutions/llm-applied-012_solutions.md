@@ -22,7 +22,7 @@ Recall@k is the number of relevant IDs retrieved divided by total relevant IDs. 
 
 ## Calculate metrics without losing the task's evidence structure
 
-For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank 1/2. If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
+For relevant IDs R={a, c} and retrieved list[b, c, a], both relevant documents appear, giving recall2/2=1. The first relevant item is at rank two, giving reciprocal rank \(\frac{1}{2}\). If the caller truncates to the first two items, recall becomes1/2 while reciprocal rank remains1/2. The helper accepts the supplied list as its evaluation depth; it has no separate k argument. Name that cutoff when reporting Recall@k.
 
 A first-hit metric cannot establish multi-evidence sufficiency. If a question requires both a definition and its exclusion rule, retrieving only one can give reciprocal rank one but an incomplete answer context. Conversely, a relevance set may contain several interchangeable documents, where any one is sufficient. The evaluation label should distinguish all required evidence from alternative supporting sources. The set arithmetic alone cannot infer that logic.
 

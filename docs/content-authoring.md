@@ -8,6 +8,80 @@ track-specific rules live in [python/AGENTS.md](../python/AGENTS.md),
 [curriculum design references](curriculum-design-references.md) record the
 external tutorial patterns that informed this contract.
 
+## One classroom across every subject
+
+The public browser entrypoint is `/classroom`. Python, PostgreSQL, the bridge
+and module/book subjects share its home, navigation, saved-work conventions
+and lesson workspace. A subject supplies identity, its individual theme and
+learning sequence; a runtime profile supplies execution. Do not create a new
+public application or hardcode an all-green theme for a new subject. Text labels
+must identify subjects independently of color. Prerequisites and estimated
+minutes support choice without imposing a study deadline.
+
+Lead run instructions with the supported classroom workflow and its capability
+notice. Keep native editor, Jupyter and command-line recipes under an explicit
+optional heading. Do not promise that a pad executes an entire notebook,
+stateful SQL workflow or cluster operation unless that route implements the
+artifact contract. Preserve stable lesson IDs and learner state when changing
+navigation. The tutorial-book exception still has no exam or solution gate.
+
+## Mathematical notation and code presentation
+
+Author mathematical statements with explicit LaTeX delimiters: `\( ... \)`
+for inline notation and `\[ ... \]` on separate lines for a displayed
+formula. These delimiters avoid ambiguity with monetary dollar signs. The
+reader converts supported notation into accessible native MathML using bundled
+local dependencies. No CDN or network request is required to read a formula.
+
+For example, write `\(\widehat{\delta}=\bar{x}_A-\bar{x}_B\)` for a mean
+difference. Give the larger uncertainty expression its own paragraph:
+
+```text
+\[
+\operatorname{SE}(\widehat{\delta})
+=\sqrt{\frac{s_A^2}{n_A}+\frac{s_B^2}{n_B}}.
+\]
+```
+
+Define each symbol, its units, indices and assumptions in nearby prose.
+Distinguish a population parameter, an estimate and a numerical approximation.
+Use `\frac`, `\sqrt`, subscripts and superscripts for actual mathematical
+structure; do not leave formulas as `sqrt(sA^2/nA+sB^2/nB)` in teaching prose.
+Keep program expressions inside code spans or fences when teaching literal
+syntax. Source code must remain exact, including its operators and indentation.
+Matrices, cases, sums, products and aligned derivations can use conventional
+LaTeX. Check the rendered page for fallback source rather than assuming a
+complicated macro is supported. Do not depend on custom macros or executable
+HTML. A currency amount such as `$20` remains ordinary prose.
+
+Every fenced code example needs an explicit language identifier. Use `python`,
+`sql`, `cpp`, `java`, `javascript`, `typescript`, `scala`, `bash`, `sh`, `powershell`,
+`yaml`, `json`, `dockerfile`, `makefile`, `html` or another supported lexer name.
+Use `text` for console output, error transcripts, copied coaching prompts and
+pseudocode that is intentionally not a real language. Syntax highlighting
+must preserve selectable text and work without a CDN. Unknown languages should
+remain readable escaped text; do not mislabel them as Python merely to obtain
+colors. Adding a syntax lexer does not implement execution for a new language.
+
+`curriculum/math-prose.json` is the reviewed migration source for older ASCII
+formulas. `scripts/normalize_math_prose.py` applies only exact scoped mappings,
+preserving existing math, links, inline code, fenced code, notebook code cells
+and the supplied statistics outline. New lessons should use explicit LaTeX at
+source. For legacy authoring generators, run the normalization step after
+regeneration and before building readers:
+
+```sh
+python scripts/normalize_math_prose.py --write --report work/math-prose-audit.json
+python scripts/build_lesson_readers.py
+```
+
+Without `--write`, the command checks whether a reviewed normalization is still
+pending. Its candidate report is an editorial aid, not a claim that every match
+is a mathematical error. Literal API calls and identifiers can resemble math.
+Review those cases in context, and retain the report's code-preservation check.
+Never solve a typography problem by changing an executable reference or hiding
+a failed rendering test.
+
 ## Before authoring
 
 1. Read the closest `AGENTS.md`.
@@ -71,7 +145,7 @@ of the following:
    can vary, explain the invariant instead of inventing an exact value.
 6. **A novice-safe run path.** Name the file or notebook, tool, kernel or
    database, command or button, where output appears, and what success looks
-   like. SQL guides must lead with the guided SQL notebook route and retain
+   like. SQL guides must lead with the classroom capability notice, then retain the optional guided SQL notebook route and
    separately labeled PowerShell and POSIX `psql` alternatives.
 7. **A practice ramp.** Move from prediction and tracing to a guided change,
    independent construction, debugging, an edge case, and transfer to a new

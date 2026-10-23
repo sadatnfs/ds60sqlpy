@@ -27,3 +27,15 @@ repairs selected prose spelling without touching executable exercise code.
 Reading chapters have written reasoning instructions and text examples, while
 executable worked examples retain their declared standalone contracts. The
 current content/evidence checkpoint is `docs/implementation/ml-content-status.md`.
+
+## Unified classroom presentation
+
+Author mathematical expressions with explicit LaTeX `\( ... \)` and standalone
+`\[ ... \]` delimiters. Tag every fenced code example with its actual language.
+After regenerating older prose sources, run `python scripts/normalize_math_prose.py --write`
+from the repository root before rebuilding HTML readers. The reviewed
+`curriculum/math-prose.json` registry preserves this migration across regeneration;
+it does not change executable fences, notebook code or the supplied statistics
+outline. The public learner entrypoint is `/classroom`, shared by every subject.
+See [the content contract](../../../docs/content-authoring.md) for the rendering
+and subject-theme requirements.

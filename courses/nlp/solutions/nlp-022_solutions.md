@@ -12,7 +12,7 @@ The repeated router token changes its term frequency but not the number of docum
 
 The short document gets a favorable length normalization, while repetition in d1 saturates. The exact formula check identifies errors in scaling or denominator terms before relying on a plausible ranking.
 
-**Expected:** Implementation matches the explicit formula; d0>d1>d2=0.
+**Expected:** Implementation matches the explicit formula; \(d_{0}>d_{1}>d_{2}=0\).
 
 ## Exercise 3: Handle unsupported queries
 

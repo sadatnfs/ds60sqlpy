@@ -1,5 +1,12 @@
 # Your first successful session
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](../classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 You do not need to know programming, SQL, or Git before starting. Set aside a
 first session for getting one Python cell and one SQL query to run. Setup is
 part of learning. The lesson sequence starts after those two small wins.

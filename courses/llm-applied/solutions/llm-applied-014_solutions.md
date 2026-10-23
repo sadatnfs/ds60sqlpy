@@ -22,7 +22,7 @@ Concatenate prompt IDs and answer IDs, then createinputs=sequence[:-1] andtarget
 
 ## Enumerate the target positions before training
 
-Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when i+1>=P, or equivalently i>=P-1. The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
+Let the prompt length be P and the concatenated sequence length be L. A causal next-token example at input index i predicts original sequence position i+1. It belongs to the answer when \(i+1\ge P\), or equivalently \(i\ge P-1\). The first answer token is therefore supervised from the final prompt position, not from the first answer input position.
 
 For prompt[1, 2] and answer[5, 6, 3], the complete sequence is[1, 2, 5, 6, 3]:
 

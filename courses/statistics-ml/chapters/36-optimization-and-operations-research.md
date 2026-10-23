@@ -8,13 +8,13 @@ Optimization translates an objective and constraints into a decision. Prediction
 
 ### Write the model before choosing a solver
 
-A linear program minimizes c_transpose*x subject to A*x<=b, equality constraints and variable bounds. Here x contains controllable decisions, c expresses per-unit objective contributions, and each row of A describes a resource or policy constraint. Integrality matters when a decision is indivisible. Relaxing a binary assignment to a fractional number can create a mathematically feasible answer that no operator can implement.
+A linear program minimizes \(c^{\mathsf T}\cdot x\) subject to \(A\cdot x\le b\), equality constraints and variable bounds. Here x contains controllable decisions, c expresses per-unit objective contributions, and each row of A describes a resource or policy constraint. Integrality matters when a decision is indivisible. Relaxing a binary assignment to a fractional number can create a mathematically feasible answer that no operator can implement.
 
 Convexity is valuable because a local optimum is global under the appropriate formulation, but it does not make poor data or objectives correct. A differentiable convex objective lies above its tangent plane. Nonconvex problems can have many stationary points, and a solver success flag generally does not certify the best global value. Read termination conditions, feasibility residuals and available optimality gaps.
 
 ### Constraints have economic meaning
 
-For a minimization problem with g_i(x)<=0, the Lagrangian is L=f(x)+sum_i lambda_i*g_i(x), with nonnegative multipliers for inequality constraints. KKT conditions combine stationarity, primal feasibility, dual feasibility and complementary slackness under suitable regularity. A multiplier can describe local sensitivity of the optimal value to a constraint bound, but sign conventions and degeneracy matter. It is not automatically a stable business price outside the local model.
+For a minimization problem with \(g_i(x)\le0\), the Lagrangian is \(\mathcal{L}=f(x)+\sum_i\lambda_i g_i(x)\), with nonnegative multipliers for inequality constraints. KKT conditions combine stationarity, primal feasibility, dual feasibility and complementary slackness under suitable regularity. A multiplier can describe local sensitivity of the optimal value to a constraint bound, but sign conventions and degeneracy matter. It is not automatically a stable business price outside the local model.
 
 ### Uncertainty belongs in the decision model
 
@@ -50,7 +50,7 @@ Mixed-integer programming combines continuous quantities with discrete choices, 
 
 **Quadratic programming**
 
-Quadratic programming adds a quadratic objective, often written one-half*x_transpose*Q*x+c_transpose*x, with constraints. Positive semidefinite Q yields a convex objective; an indefinite Q changes the global-optimization problem. Portfolio and least-squares formulations are common uses, but input covariance or cost estimates can be unstable. Check symmetry, scaling and whether the solver assumptions match Q.
+Quadratic programming adds a quadratic objective, often written one-half*x_transpose*Q*x+\(c^{\mathsf T}\cdot x\), with constraints. Positive semidefinite Q yields a convex objective; an indefinite Q changes the global-optimization problem. Portfolio and least-squares formulations are common uses, but input covariance or cost estimates can be unstable. Check symmetry, scaling and whether the solver assumptions match Q.
 
 ### stat-36-05
 
@@ -182,7 +182,7 @@ Scheduling and routing choose timing, sequencing or paths under resource and ser
 
 **Queueing theory**
 
-Queueing theory relates arrivals, service and congestion. In an M/M/1 queue with arrival rate lambda below service rate mu, mean system time is 1/(mu-lambda), showing nonlinear growth near full utilization. The model assumes Poisson arrivals and exponential independent service times. Real burstiness, priorities and multiple servers require other models or simulation, but the utilization lesson remains important.
+Queueing theory relates arrivals, service and congestion. In an M/M/1 queue with arrival rate lambda below service rate mu, mean system time is \(\frac{1}{\mu-\lambda}\), showing nonlinear growth near full utilization. The model assumes Poisson arrivals and exponential independent service times. Real burstiness, priorities and multiple servers require other models or simulation, but the utilization lesson remains important.
 
 ### stat-36-27
 
@@ -200,11 +200,11 @@ python courses/statistics-ml/examples/chapter_36.py
 
 ### Verify an actual solver result
 
-Maximize 3x+2y with x+y<=4, x<=2, y<=3 and nonnegative decisions. Negating the objective adapts it to SciPy's minimization API. The optimum is [2,2] with value ten; the code recomputes all constraint slacks and the objective. Solver success is checked before reading the solution.
+Maximize 3x+2y with \(x+y\le 4\), \(x\le 2\), \(y\le 3\) and nonnegative decisions. Negating the objective adapts it to SciPy's minimization API. The optimum is [2,2] with value ten; the code recomputes all constraint slacks and the objective. Solver success is checked before reading the solution.
 
 ### Read a binding constraint through KKT conditions
 
-Minimizing (x-3)^2 subject to x<=2 gives x=2. The Lagrangian derivative is 2(x-3)+lambda, so lambda=2 makes stationarity zero. Feasibility, nonnegative multiplier and complementary slackness also hold. This small convex example makes the certificate visible rather than relying on a status string.
+Minimizing \({\left(x-3\right)}^{2}\) subject to \(x\le 2\) gives \(x=2\). The Lagrangian derivative is 2(x-3)+lambda, so \(\lambda=2\) makes stationarity zero. Feasibility, nonnegative multiplier and complementary slackness also hold. This small convex example makes the certificate visible rather than relying on a status string.
 
 ### Connect allocation and congestion to decisions
 

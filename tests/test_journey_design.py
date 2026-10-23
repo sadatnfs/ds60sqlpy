@@ -144,7 +144,7 @@ def test_authored_script_text_cannot_escape_json_container(design_root: Path) ->
     assert "fetch(" not in html
 
 
-def test_preview_route_preserves_host_boundary_and_does_not_create_progress(
+def test_retired_preview_uses_unified_classroom_without_creating_progress(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     source = Catalog.load()
@@ -161,9 +161,9 @@ def test_preview_route_preserves_host_boundary_and_does_not_create_progress(
             assert response.status == 200
             assert "Content-Security-Policy" in response.headers
             assert "no-store" in response.headers["Cache-Control"]
-            assert "DS60 Studio" in html
-            assert "Planned; no code has run here" in html
-            assert server.token not in html
+            assert "/assets/classroom.js" in html
+            assert "Planned; no code has run here" not in html
+            assert server.token in html
         request = Request(server.url + "journey-preview", headers={"Host": "untrusted.example"})
         with pytest.raises(HTTPError) as caught:
             urlopen(request, timeout=5)

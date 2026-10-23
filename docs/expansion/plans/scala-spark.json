@@ -3,7 +3,7 @@
   "status": "planned",
   "id": "scala-spark",
   "title": "Scala and Apache Spark: Correct Data, Measured Execution, Recoverable Products",
-  "summary": "42 planned lessons with Scala-first and PySpark-first entry routes, paired DataFrame/SQL contracts, bounded local batch and streaming labs, and three evidence-driven capstones. No active runner or catalog registration is added.",
+  "summary": "42 lessons in Scala and Apache Spark, with Scala and PySpark entry routes. Connect language foundations to DataFrame and SQL contracts, local batch and streaming examples, and capstone projects.",
   "north_star": "A learner can explain, implement, test and operate the same correct bounded data product in Scala and PySpark, then justify its execution and recovery behavior with explicit evidence.",
   "entry_prerequisites": [],
   "runtime_profiles": [

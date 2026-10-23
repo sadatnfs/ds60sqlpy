@@ -18,17 +18,17 @@ This implementation uses lowercase ASCII word tokens and a fixed local corpus. I
 
 ## Reading the implementation
 
-For querytermq, BM25 usesidf=log(1+(N-df+.5)/(df+.5)). Each document contribution multipliesidf bytf*(k1+1)/(tf+k1*(1-b+b*length/avg_length)). The defaults here arek1=1.2, b=.75, declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
+For query term q, BM25 uses \(\mathrm{idf}=\log\left(1+\frac{N-\mathrm{df}+0.5}{\mathrm{df}+0.5}\right)\). Each document contribution multiplies idf by \(\frac{\mathrm{tf}(k_1+1)}{\mathrm{tf}+k_1(1-b+b\,\mathrm{length}/\mathrm{avg\_length})}\). The defaults here are \(k_1=1.2\), \(b=0.75\), declared as fixture choices. Count query terms once to avoid an accidental repeated-query weighting policy. Empty corpora and empty documents need explicit handling so average length never becomes an unexplained zero denominator.
 
 ## Calculate the score and isolate each modeling choice
 
-The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With N=3, df=1, the implemented IDF is log(1+2.5/1.5)=log(8/3), about0.980829. The matching document's normalized length ratio is one. With tf=1 and k1=1.2, its frequency factor is2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
+The three documents each have two tokens, so average document length is two. The query randomization appears once in document a and nowhere else. With \(N=3\), \(\partial f=1\), the implemented IDF is \(\log(1+\frac{2.5}{1.5})=\log(\frac{8}{3})\), about0.980829. The matching document's normalized length ratio is one. With \(\mathrm{tf}=1\) and \(k_{1}=1.2\), its frequency factor is2.2/(1+1.2)=1, so the final score is exactly that IDF. The other documents receive zero because the query term is absent.
 
-For account, df=2 and IDF is log(1+1.5/2.5)=log(1.6), about0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
+For account, \(\partial f=2\) and IDF is \(\log(1+\frac{1.5}{2.5})=\log(1.6)\), about0.470004. The rarer query term therefore receives more weight in this fixed corpus. Document frequency counts presence per document: repeating account ten times inside one document still contributes one to df. Token frequency and document frequency are different denominators.
 
-Write K=k1*(1-b+b*L/avgL). The frequency factor is f(tf)=(k1+1)*tf/(tf+K). Holding document length and corpus statistics fixed, its derivative for positive K is(k1+1)*K/(tf+K)^2, positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
+Write \(K=k_1\left(1-b+b\frac{L}{\overline L}\right)\). The frequency factor is \(f(\mathrm{tf})=\frac{(k_1+1)\mathrm{tf}}{\mathrm{tf}+K}\). Holding document length and corpus statistics fixed, its derivative for positive K is \(\frac{(k_1+1)K}{(\mathrm{tf}+K)^2}\), positive and decreasing. The second derivative is negative, so additional repetitions have diminishing gain. As tf becomes large under that fixed-length mathematical comparison, the factor approaches k1+1. If actual repetitions also lengthen the document, K changes too; do not silently hold one effect fixed while interpreting a real edit.
 
-With b=0, K=k1. For tf1, 2, 10 at k1=1.2, the factors are1, 1.375 and about1.964286. Ten repetitions do not create ten times the score. At b=1, the normalization depends fully on L/avgL; at b=0, document length does not enter K. For the same tf=1, k1=1.2 and b=0.75, a document twice the average length has K=2.1 and factor2.2/3.1, about0.709677. One half the average length has K=0.75 and factor2.2/1.75, about1.257143.
+With \(b=0\), \(K=k_{1}\). For tf1, 2, 10 at \(k_{1}=1.2\), the factors are1, 1.375 and about1.964286. Ten repetitions do not create ten times the score. At \(b=1\), the normalization depends fully on L/avgL; at \(b=0\), document length does not enter K. For the same \(\mathrm{tf}=1\), \(k_{1}=1.2\) and \(b=0.75\), a document twice the average length has \(K=2.1\) and factor2.2/3.1, about0.709677. One half the average length has \(K=0.75\) and factor2.2/1.75, about1.257143.
 
 This positive-IDF convention and the roles of k1 and b are documented in Lucene's versioned BM25 API. The fixture is its own transparent calculation and does not execute Lucene or claim identical index-analysis behavior. [Lucene10.3.1 BM25Similarity](https://lucene.apache.org/core/10_3_1/core/org/apache/lucene/search/similarities/BM25Similarity.html).
 
@@ -76,7 +76,7 @@ assert rare>common>0
 
 ## Exercise 3: Verify saturation
 
-The question is: Disable length normalization with b=0 and compare term frequencies1, 2, 10 under the same IDF.
+The question is: Disable length normalization with \(b=0\) and compare term frequencies1, 2, 10 under the same IDF.
 
 The denominator grows with term frequency, creating diminishing returns. This reduces the effect of repeated terms without treating repetition as irrelevant.
 

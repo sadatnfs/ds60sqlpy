@@ -1,5 +1,13 @@
 # Python foundations and professional practice
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Python and data science** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 These named modules provide a gentler route into the numbered Python lessons
 and deeper practice beyond them. Foundation checkpoints appear at their
 prerequisite milestones; professional modules can take several sessions each.

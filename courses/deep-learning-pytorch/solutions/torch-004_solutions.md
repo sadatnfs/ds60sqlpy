@@ -20,19 +20,19 @@ F.mse_loss accepts prediction and target tensors; a paired-record application sh
 
 ## The denominator determines the gradient
 
-For predictions and targets with identical shape(B, D), let r_bd=prediction_bd-target_bd. The squared-error sum is S=Σ_bΣ_d r_bd². PyTorch's mean MSE divides byB×D, so L=S/(BD). Its derivative with respect to each prediction is 2 r_bd/(BD). The sum objective instead gives 2 r_bd. This is why changing a reduction changes every gradient even when the forward residuals are identical. [PyTorch 2.9 MSELoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.MSELoss.html).
+For predictions and targets with identical shape(B, D), let r_bd=prediction_bd-target_bd. The squared-error sum is S=Σ_bΣ_d \({r_{bd}}^{2}\). PyTorch's mean MSE divides byB×D, so \(L=\frac{S}{BD}\). Its derivative with respect to each prediction is 2 \(\frac{r_{bd}}{BD}\). The sum objective instead gives 2 r_bd. This is why changing a reduction changes every gradient even when the forward residuals are identical. [PyTorch 2.9 MSELoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.MSELoss.html).
 
-For the residual vector[1, -1, 2], S=6 and N=3. The sum gradient is[2, -2, 4], while the mean gradient is[2/3, -2/3, 4/3]. Duplicating every record doubles the sum and duplicates its derivative contributions. The mean objective remains two because both numerator and denominator double. This argument assumes equal replication of all participating entries; selectively repeating hard examples changes their weighting.
+For the residual vector[1, -1, 2], \(S=6\) and \(N=3\). The sum gradient is[2, -2, 4], while the mean gradient is[\(\frac{2}{3}\), \(\frac{-2}{3}\), \(\frac{4}{3}\)]. Duplicating every record doubles the sum and duplicates its derivative contributions. The mean objective remains two because both numerator and denominator double. This argument assumes equal replication of all participating entries; selectively repeating hard examples changes their weighting.
 
-A two-output example makes the semantic unit visible. WithB=2, D=2 and all residuals equal to one, the element mean is one, the total sum is four, and the mean of per-example feature sums is two. The first objective gives each scalar derivative 0.5; the last gives each scalar derivative 1. Both can be mathematically legitimate, but they encode different scaling. A framework cannot infer which one the application intended from the word mean.
+A two-output example makes the semantic unit visible. WithB=2, \(D=2\) and all residuals equal to one, the element mean is one, the total sum is four, and the mean of per-example feature sums is two. The first objective gives each scalar derivative 0.5; the last gives each scalar derivative 1. Both can be mathematically legitimate, but they encode different scaling. A framework cannot infer which one the application intended from the word mean.
 
-Masking must use the same participation rule in the numerator and denominator. Keeping only the first two residuals gives numerator 2, count 2 and loss 1. Zeroing the third contribution and then averaging the original three positions gives 2/3. The valid mean gradient for the retained residuals is[1, -1]; dividing by the padded length shrinks it to[2/3, -2/3]. Padding can therefore change both reported quality and training updates without adding any new observation.
+Masking must use the same participation rule in the numerator and denominator. Keeping only the first two residuals gives numerator 2, count 2 and loss 1. Zeroing the third contribution and then averaging the original three positions gives \(\frac{2}{3}\). The valid mean gradient for the retained residuals is[1, -1]; dividing by the padded length shrinks it to[\(\frac{2}{3}\), \(\frac{-2}{3}\)]. Padding can therefore change both reported quality and training updates without adding any new observation.
 
 An all-false mask is not the same as two accepted residuals equal to zero. The former has no defined mean denominator; the latter has a valid zero loss. Decide whether the surrounding pipeline should reject an empty objective orskip an update under an explicit policy. Silently calling it a perfect batch hides a missing-data condition.
 
-Group weighting provides another counterexample. If one group contains residual[2] and another contains[0, 0, 0], the all-record MSE is 4/4=1. The unweighted mean of group MSEs is(4+0)/2=2. The correct choice depends on whether equal influence belongs to observations or groups. Accumulation and distributed-gradient chapters return to this denominator problem when batch sizes differ.
+Group weighting provides another counterexample. If one group contains residual[2] and another contains[0, 0, 0], the all-record MSE is \(\frac{4}{4}=1\). The unweighted mean of group MSEs is(4+0)/2=2. The correct choice depends on whether equal influence belongs to observations or groups. Accumulation and distributed-gradient chapters return to this denominator problem when batch sizes differ.
 
-Finally, loss and evaluation metric need not rank candidates the same way. Residuals[0, 0, 4] have MAE 4/3 and MSE 16/3; residuals[2, 2, 2] have MAE 2 and MSE 4. Squared error prefers the second candidate because it penalizes the large miss more strongly, while absolute error prefers the first. State the objective and error costs before seeing the ranking.
+Finally, loss and evaluation metric need not rank candidates the same way. Residuals[0, 0, 4] have MAE \(\frac{4}{3}\) and MSE \(\frac{16}{3}\); residuals[2, 2, 2] have MAE 2 and MSE 4. Squared error prefers the second candidate because it penalizes the large miss more strongly, while absolute error prefers the first. State the objective and error costs before seeing the ranking.
 
 ## Exercise 1: Compute residual reductions
 
@@ -110,9 +110,9 @@ valid=losses[mask].sum()/mask.sum()
 assert valid.item()==2.5 and valid.item()!=5/3
 ```
 
-**Expected:** valid mean 2.5, not 5/3.
+**Expected:** valid mean 2.5, not \(\frac{5}{3}\).
 
-**Verify:** Compare the computed values or written argument with valid mean 2.5, not 5/3.
+**Verify:** Compare the computed values or written argument with valid mean 2.5, not \(\frac{5}{3}\).
 
 ## Exercise 6: Separate a metric from the objective
 
@@ -125,9 +125,9 @@ np.testing.assert_allclose(residual.abs().mean().item(),4/3,atol=1e-12,rtol=0)
 assert residual.square().mean().item()==2
 ```
 
-**Expected:** MAE 4/3; MSE 2.
+**Expected:** MAE \(\frac{4}{3}\); MSE 2.
 
-**Verify:** Compare the computed values or written argument with MAE 4/3; MSE 2.
+**Verify:** Compare the computed values or written argument with MAE \(\frac{4}{3}\); MSE 2.
 
 ## Review after comparison
 

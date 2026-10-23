@@ -14,7 +14,7 @@ An optimization loop can run without updating the intended parameter. A forward 
 
 ## Reading the implementation
 
-Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence w_next=w-.1*(28/3)*(w-2).
+Use a new tape for every step. w.assign_sub(rate*gradient) mutates the tracked variable. Keep before/after weights as Python floats only for logging; converting the forward result to a NumPy value inside the loss would sever differentiation. Recompute yhat after assignment. The scalar pilot has a closed-form recurrence \(w_{\mathrm{next}}=w-0.1\cdot \frac{28}{3}\cdot (w-2)\).
 
 ## Exercise 1: Expose a missing path
 

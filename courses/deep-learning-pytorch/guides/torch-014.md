@@ -42,13 +42,13 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Use F.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy 0<=target<C. For independent labels, use floating 0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log 3, while three independent binary logits at zero each give probability.5.
+Use F.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy \(0\le \mathrm{target}<C\). For independent labels, use floating 0/1 targets with F.binary_cross_entropy_with_logits. `softmax(dim=1)` creates a class distribution for reporting. A uniform three-class logit vector gives loss log 3, while three independent binary logits at zero each give probability 0.5.
 
 ## Derive the class competition and its tensor contract
 
-For a single multiclass record with logits z_0..z_(C-1), softmax assigns p_c=exp(z_c)/Σ_j exp(z_j). The indexed-target loss is`logsumexp(z)-z_y`. It compares the observed class with all alternatives through one shared normalization. Adding the same constant to every logit leaves the probabilities and loss unchanged, which is why a numerically stable implementation can subtract a row maximum.
+For a single multiclass record with logits z_0..z_(C-1), softmax assigns \(p_c=\frac{e^{z_c}}{\sum_j e^{z_j}}\). The indexed-target loss is`logsumexp(z)-z_y`. It compares the observed class with all alternatives through one shared normalization. Adding the same constant to every logit leaves the probabilities and loss unchanged, which is why a numerically stable implementation can subtract a row maximum.
 
-At three zero logits and target class 1, p=[1/3, 1/3, 1/3] and loss=log 3. The gradient with respect to the three logits is[1/3, -2/3, 1/3] before a batch reduction. The components sum to zero because raising every score equally cannot change class competition. This provides a derivative interpretation beyond the forward scalar.
+At three zero logits and target class 1, p=[\(\frac{1}{3}\), \(\frac{1}{3}\), \(\frac{1}{3}\)] and loss=log 3. The gradient with respect to the three logits is[\(\frac{1}{3}\), \(\frac{-2}{3}\), \(\frac{1}{3}\)] before a batch reduction. The components sum to zero because raising every score equally cannot change class competition. This provides a derivative interpretation beyond the forward scalar.
 
 PyTorch's indexed-target shapes are:
 
@@ -129,7 +129,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** shapes(2, ) and(2, 3); long versus floating.
    **Verify:** Save the assertion results for exercise 3, including shapes(2, ) and(2, 3); long versus floating.
 
-4. **Check class-axis normalization.** Apply softmax(dim 1) to a2x3matrix.
+4. **Check class-axis normalization.** Apply `softmax(dim=1)` to a 2-by-3 matrix.
    **Expected:** each row sums 1.
    **Verify:** Save the assertion results for exercise 4, including each row sums 1.
 

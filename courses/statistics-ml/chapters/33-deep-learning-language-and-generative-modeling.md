@@ -8,19 +8,19 @@ Deep learning learns compositions of numerical transformations from data. Langua
 
 ### Start with tensors and the chain rule
 
-A tensor is a multidimensional numerical array. For one dense layer, input x is multiplied by weights W and shifted by bias b, producing z=Wx+b. A nonlinear activation a=g(z) allows compositions to represent more than one overall linear transformation. A loss L compares the output with a target or training signal. Backpropagation applies the chain rule through the recorded computation, producing derivatives such as dL/dW. An optimizer then changes weights. Forward computation, gradient calculation and parameter update are three separate operations.
+A tensor is a multidimensional numerical array. For one dense layer, input x is multiplied by weights W and shifted by bias b, producing \(z=Wx+b\). A nonlinear activation \(a=g(z)\) allows compositions to represent more than one overall linear transformation. A loss L compares the output with a target or training signal. Backpropagation applies the chain rule through the recorded computation, producing derivatives such as \(\frac{\partial L}{\partial W}\). An optimizer then changes weights. Forward computation, gradient calculation and parameter update are three separate operations.
 
 The derivative is local: it describes how an infinitesimal parameter change affects the current objective on the current batch. It does not guarantee that a finite update improves validation performance or that the objective matches the real task. Check gradients on a tiny deterministic calculation, use numerically stable losses, and monitor training and held-out behavior separately. A decreasing training loss can accompany memorization, label leakage or an unsuitable target.
 
 ### Turn language into a prediction problem
 
-Text is converted into token IDs by a tokenizer. Tokens may be words, subwords, bytes or other units; one visible word can span several tokens. An embedding lookup maps IDs to learned vectors. Positional information tells a sequence model how order should matter. For an autoregressive language model, the sequence probability factorizes as p(x_1,...,x_T)=product_t p(x_t|x_<t). Training usually minimizes the negative log probability of observed next tokens. The target is shifted relative to the input, and a causal mask prevents a position from reading future target tokens.
+Text is converted into token IDs by a tokenizer. Tokens may be words, subwords, bytes or other units; one visible word can span several tokens. An embedding lookup maps IDs to learned vectors. Positional information tells a sequence model how order should matter. For an autoregressive language model, the sequence probability factorizes as \(p(x_1,\ldots,x_T)=\prod_{t=1}^{T}p(x_t\mid x_{<t})\). Training usually minimizes the negative log probability of observed next tokens. The target is shifted relative to the input, and a causal mask prevents a position from reading future target tokens.
 
 This objective rewards statistical prediction of text in the training distribution. It can produce useful internal representations and broad capabilities, but it is not a direct truth-verification objective. At generation time, the model emits a distribution over the next token. Greedy decoding selects the largest probability; temperature and sampling change the distribution of outputs. A low-temperature answer may be repeatable and still wrong. Confidence in one token is also not automatically confidence in a multi-claim answer.
 
 ### Understand attention without treating it as a metaphor
 
-For a sequence with n positions and representation dimension d, linear projections produce query, key and value matrices Q, K and V. Scaled dot-product attention computes softmax(Q*K_transpose/sqrt(d_k)+M)*V, where M encodes forbidden positions with negative infinity before softmax. Each query position obtains weights over allowed key positions and forms a weighted sum of their values. Multihead attention repeats this with different projections. Residual connections, normalization and feed-forward blocks surround attention in a transformer.
+For a sequence with n positions and representation dimension d, linear projections produce query, key and value matrices Q, K and V. Scaled dot-product attention computes \(\operatorname{softmax}\!\left(\frac{QK^{\mathsf T}}{\sqrt{d_k}}+M\right)V\), where M encodes forbidden positions with negative infinity before softmax. Each query position obtains weights over allowed key positions and forms a weighted sum of their values. Multihead attention repeats this with different projections. Residual connections, normalization and feed-forward blocks surround attention in a transformer.
 
 The matrix expression makes several failure modes concrete. A mask with the wrong triangle can leak future tokens. Softmax without subtracting the maximum can overflow numerically. Confusing batch, position and feature axes can produce valid-looking arrays with the wrong semantics. Attention weights describe one internal computation; they are not automatically faithful explanations of why a final answer was produced. Long context also creates memory and computation costs, and adding more documents can dilute useful evidence.
 
@@ -64,7 +64,7 @@ Convolutional networks apply shared local filters across positions, exploiting l
 
 **Recurrent neural networks**
 
-Recurrent networks maintain hidden state h_t=f(x_t,h_(t-1)), sharing parameters across sequence positions. This provides a compact sequential memory but makes training depend on gradients propagated through many transitions. Repeated multiplication by Jacobians can shrink or amplify gradients. Truncated backpropagation limits training history and memory cost. Reset state at true sequence boundaries, and distinguish a model's hidden state from a guaranteed record of every earlier fact.
+Recurrent networks maintain hidden state \(h_t=f(x_t,h_{t-1})\), sharing parameters across sequence positions. This provides a compact sequential memory but makes training depend on gradients propagated through many transitions. Repeated multiplication by Jacobians can shrink or amplify gradients. Truncated backpropagation limits training history and memory cost. Reset state at true sequence boundaries, and distinguish a model's hidden state from a guaranteed record of every earlier fact.
 
 ### stat-33-04
 
@@ -88,7 +88,7 @@ Transformers combine attention, position information, feed-forward layers, norma
 
 **Residual connections**
 
-A residual connection adds a block's input to its transformed output, such as y=x+F(x). This preserves a direct path for information and gradients while the block learns a correction. Shapes must match or use an explicit projection. Residual paths help optimization but do not ensure every layer learns a useful distinct function. Large activation scales or poorly placed normalization can still destabilize deep networks.
+A residual connection adds a block's input to its transformed output, such as \(y=x+F(x)\). This preserves a direct path for information and gradients while the block learns a correction. Shapes must match or use an explicit projection. Residual paths help optimization but do not ensure every layer learns a useful distinct function. Large activation scales or poorly placed normalization can still destabilize deep networks.
 
 ### stat-33-08
 
@@ -172,7 +172,7 @@ Diffusion models learn to reverse a specified progressive noise process, commonl
 
 **Energy-based models**
 
-Energy-based models assign a compatibility score E(x) and often define probability proportional to exp(-E(x)), with a normalization constant that may be intractable. Learning and sampling must address that normalization or use alternative objectives. An energy difference can rank examples without providing calibrated probabilities. Mixing behavior, negative-sample construction and numerical scale are central to whether the learned score represents the intended distribution.
+Energy-based models assign a compatibility score E(x) and often define probability proportional to \(\exp(-E(x))\), with a normalization constant that may be intractable. Learning and sampling must address that normalization or use alternative objectives. An energy difference can rank examples without providing calibrated probabilities. Mixing behavior, negative-sample construction and numerical scale are central to whether the learned score represents the intended distribution.
 
 ### stat-33-22
 
@@ -190,7 +190,7 @@ Fine-tuning updates a pretrained model using a narrower dataset or objective. SF
 
 **Parameter-efficient adaptation**
 
-Parameter-efficient adaptation changes a restricted parameter set or low-dimensional update. In LoRA, W_effective=W0+(alpha/r)*B*A with A of shape r by input_dimension and B of shape output_dimension by r. The base W0 is frozen, while A and B learn a rank-at-most-r correction. Savings depend on r and targeted layers. Adapter compatibility, initialization and optimizer state still matter, and reduced trainable count does not guarantee adequate capacity or generalization.
+Parameter-efficient adaptation changes a restricted parameter set or low-dimensional update. In LoRA, \(W_{\mathrm{effective}}=W_0+\frac{\alpha}{r}BA\) with A of shape r by input_dimension and B of shape output_dimension by r. The base W0 is frozen, while A and B learn a rank-at-most-r correction. Savings depend on r and targeted layers. Adapter compatibility, initialization and optimizer state still matter, and reduced trainable count does not guarantee adequate capacity or generalization.
 
 ### stat-33-25
 
@@ -232,7 +232,7 @@ The base matrix has shape 8 by 6 and 48 entries. A rank-two adapter uses A with 
 
 ### Separate prompt tokens from response supervision
 
-Four target-token probabilities are [0.01,0.02,0.8,0.5], but only the final two are assistant-response targets. The masked loss is -log(0.8*0.5)/2, about 0.458. Changing the prompt-token probabilities leaves it unchanged. Real SFT also needs shifted labels, padding/attention masks, consistent chat formatting and careful sequence packing.
+Four target-token probabilities are [0.01,0.02,0.8,0.5], but only the final two are assistant-response targets. The masked loss is \(-\frac{\log(0.8\times0.5)}{2}\), about 0.458. Changing the prompt-token probabilities leaves it unchanged. Real SFT also needs shifted labels, padding/attention masks, consistent chat formatting and careful sequence packing.
 
 ### Construct evidence without pretending to generate an answer
 

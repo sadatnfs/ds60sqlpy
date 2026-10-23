@@ -14,6 +14,15 @@ By the end, explain the mechanism in your own words, implement each bounded cont
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 Open the [learner script](../lessons/py_algo_02.py) in the prepared repository environment. The browser reader is a preview; save an attempt in an ignored `.learning/` copy if you want it preserved separately. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
 
 Windows PowerShell:
@@ -53,7 +62,7 @@ For a lower-bound search, maintain a half-open candidate interval[lo, hi). Every
 
 Upper bound changes the comparison to move past values equal to the target. Together the two boundaries count duplicates or values inside a closed numeric interval without scanning every match. Equality handling is not a cosmetic operator choice; it determines which side owns an endpoint.
 
-Merge algorithms combine two sorted runs by repeatedly taking the smaller front item. On equal keys, choosing from the left run first preserves stability if each run was already stable. Each item is consumed once, so merging costs linear work in total run length. Repeatedly merging runs doubles their size each round and gives merge sort its O(n log n) time bound.
+Merge algorithms combine two sorted runs by repeatedly taking the smaller front item. On equal keys, choosing from the left run first preserves stability if each run was already stable. Each item is consumed once, so merging costs linear work in total run length. Repeatedly merging runs doubles their size each round and gives merge sort its \(O(n\log n)\) time bound.
 
 The exercises use records(score, label) to keep identity visible when scores tie. Search fixtures include empty arrays, all-equal runs and targets outside the range. Reference checks compare manual binary-search results with standard-library bisect on deterministic cases, and compare the handwritten merge sort with Python's stable sorted result. Correctness is established by values, identity order and preserved inputs, not one happy-path printout.
 
@@ -112,7 +121,7 @@ The equal run occupies positions 1,2,3, represented by the half-open interval[1,
 
 ## Common mistakes and diagnosis
 
-If binary search loops forever, inspect whether every branch strictly shrinks[lo, hi). If the result points past the end, treat it as an insertion boundary rather than indexing immediately. If duplicate counts are off by one, compare lower and upper equality rules. If sorted output reverses equal-key labels, inspect a secondary tuple key or the merge tie condition. If odd-length merge sort loses a record, trace the final unpaired run. Validate sortedness once at the data boundary for repeated searches rather than hiding an O(n) scan inside a supposedly O(log n) query.
+If binary search loops forever, inspect whether every branch strictly shrinks[lo, hi). If the result points past the end, treat it as an insertion boundary rather than indexing immediately. If duplicate counts are off by one, compare lower and upper equality rules. If sorted output reverses equal-key labels, inspect a secondary tuple key or the merge tie condition. If odd-length merge sort loses a record, trace the final unpaired run. Validate sortedness once at the data boundary for repeated searches rather than hiding an \(O(n)\) scan inside a supposedly \(O(\log n)\) query.
 
 ## Self-check and retrieval
 

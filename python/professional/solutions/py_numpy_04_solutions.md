@@ -6,9 +6,9 @@ These answers implement the contracts in [Stable Numerical Computation and Hones
 
 ### Exercise 1: Aggregate log weights without overflow
 
-Implement stable log(sum(exp(values))) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.
+Implement stable \(\log\sum_i e^{\mathrm{values}_i}\) for a one-dimensional array. Allow finite values and negative infinity; reject NaN or positive infinity. Define the empty input and an all-negative-infinity input as negative infinity.
 
-**Expected:** [1000,1000] yields 1000+log(2) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.
+**Expected:** [1000,1000] yields \(1000+\log2\) without infinity; [-inf,-inf] and empty return-inf. [NaN] and [inf] raise ValueError.
 
 ```python
 def logsumexp(values: np.ndarray) -> float:

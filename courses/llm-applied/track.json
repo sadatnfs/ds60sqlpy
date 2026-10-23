@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "llm-applied",
   "title": "Applied LLMs: subject assistants, retrieval and adaptation",
-  "summary": "A detailed24-lesson path from task choice to grounded data-science assistants, with offline retrieval, actual tiny-model training and separately gated pretrained-model recipes.",
+  "summary": "24 detailed lessons in applied LLM systems, from choosing a task to building grounded subject assistants. Study retrieval, evaluation, fine-tuning and tools through offline examples and explicitly prepared model workflows.",
   "lessons": [
     {
       "id": "llm-applied-001",

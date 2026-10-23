@@ -12,13 +12,13 @@ Only one occurrence of the can be credited because the reference contains one. T
 
 The geometric mean is one because every candidate n-gram appears in the reference. The brevity penalty reduces the result for omitted content. This example isolates length handling from n-gram matching and documents the exact teaching convention.
 
-**Expected:** Both precisions1; BP and score exp(-.5).
+**Expected:** Both precisions1; BP and score \(\exp(-0.5)\).
 
 ## Exercise 3: Implement longest common subsequence
 
 A subsequence can skip not while preserving the other words in order. The resulting high score is mathematically correct under the metric. It demonstrates a limitation of the metric rather than a coding defect to be fixed by changing expected values.
 
-**Expected:** LCS3, precision1, recall.75, F1=6/7.
+**Expected:** LCS3, precision1, recall.75, \(F_{1}=\frac{6}{7}\).
 
 ## Exercise 4: Document semantic failure
 

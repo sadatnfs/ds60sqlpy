@@ -20,19 +20,19 @@ F.binary_cross_entropy_with_logits expects floating targets and logits of matchi
 
 ## Separate score, probability, loss and decision
 
-The binary logit z is unrestricted. Its sigmoid is p=1/(1+exp(-z)), and the unweighted binary cross entropy is -y log p-(1-y)log(1-p). For the declared binary targets y∈{0, 1}, the stable logit-space form is:
+The binary logit z is unrestricted. Its sigmoid is \(p=\frac{1}{1+\exp(-z)}\), and the unweighted binary cross entropy is \(-y\log p-(1-y)\log(1-p)\). For the declared binary targets y∈{0, 1}, the stable logit-space form is:
 
 `loss = max(z,0) - z*y + log1p(exp(-abs(z)))`.
 
-The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At z=0, y=1, the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
+The exponent is never applied to a large positive magnitude in the final term. This avoids first rounding a probability to zero or one and then taking its logarithm. The derivative with respect to z is p-y before any mean-reduction factor. At \(z=0\), \(y=1\), the loss is log 2 and the derivative is-0.5. A mean across N equally weighted binary entries divides that derivative contribution by N. [PyTorch 2.9 BCEWithLogitsLoss](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BCEWithLogitsLoss.html).
 
-For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary log(0.8/0.2)=log 4, about 1.3863. Moving that boundary changes decisions without changing any fitted parameter orscore.
+For logits[-2, 0, 2], the reported probabilities are approximately[0.1192, 0.5, 0.8808]. They preserve ranking. A threshold 0.5 with a greater-than-or-equal tie rule classifies the zero logit as positive. Threshold 0.8 corresponds to a logit boundary \(\log\!\left(\frac{0.8}{0.2}\right)=\log4\), about 1.3863. Moving that boundary changes decisions without changing any fitted parameter or score.
 
-The double-sigmoid error changes more than a label convention. At original z=0, the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability sigmoid(0.5), about 0.6225. The positive-label loss becomes log(1+exp(-0.5)), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective orgradient.
+The double-sigmoid error changes more than a label convention. At original \(z=0\), the first sigmoid gives 0.5. Passing that value as a logit asks the loss to interpret probability \(\sigma(0.5)\), about 0.6225. The positive-label loss becomes \(\log(1+\exp(-0.5))\), about 0.4741, instead of log 2. If the first sigmoid remains in the graph, the derivative with respect to the original z gains another factor p(1-p): at zero it is about-0.0944 rather than-0.5. Finite outputs therefore do not prove the intended objective orgradient.
 
 Stable arithmetic also does not imply a good prediction. A logit 1000 with label 1 has a loss near zero; the same logit with label 0 has loss near 1000. Both are valid finite outputs of the stable formulation. The extreme-score fixture checks numerical behavior, not whether the labels are correct or the model generalizes.
 
-Decision costs require an additional probability assumption. If p is a calibrated probability for the relevant population, correct decisions have zero cost, false positives cost C_FP and false negatives cost C_FN, then choosing positive has expected cost C_FP(1-p), while choosing negative costs C_FN p. The positive decision is favored when p≥C_FP/(C_FP+C_FN). This derivation does not apply unchanged when costs vary by record, abstention is allowed, capacity is constrained or the probabilities are miscalibrated.
+Decision costs require an additional probability assumption. If p is a calibrated probability for the relevant population, correct decisions have zero cost, false positives cost C_FP and false negatives cost C_FN, then choosing positive has expected cost C_FP(1-p), while choosing negative costs C_FN p. The positive decision is favored when p≥\(\frac{C_{\mathrm{FP}}}{C_{\mathrm{FP}}+C_{\mathrm{FN}}}\). This derivation does not apply unchanged when costs vary by record, abstention is allowed, capacity is constrained or the probabilities are miscalibrated.
 
 Positive-label weighting changes the loss itself. With positive-term multiplierα, the derivative for a positive target becomesα(p-1), while a negative target contributes p. The reduction convention still matters; do not silently replace the library's element-mean reduction with a sum-of-weights denominator. Such weighting can be useful for a declared fitting goal, but the resulting sigmoid should not be assumed to retain an unweighted population-probability interpretation without further calibration evidence.
 
@@ -49,9 +49,9 @@ logits=torch.tensor([-2.,0.,2.],dtype=torch.float64); probabilities=torch.sigmoi
 assert probabilities[1].item()==.5 and bool(torch.all(torch.diff(probabilities)>0))
 ```
 
-**Expected:** middle probability.5 and strictly increasing values.
+**Expected:** middle probability 0.5 and strictly increasing values.
 
-**Verify:** Compare the computed values or written argument with middle probability.5 and strictly increasing values.
+**Verify:** Compare the computed values or written argument with middle probability 0.5 and strictly increasing values.
 
 ## Exercise 2: Check the midpoint objective
 
@@ -85,7 +85,7 @@ assert (probabilities>=.8).tolist()==[False,False,True]
 
 ## Exercise 4: Expose a double-sigmoid mistake
 
-The question is: Feed probability.5 as though it were a logit and compare with log 2.
+The question is: Feed probability 0.5 as though it were a logit and compare with log 2.
 
 The API interprets.5 as a score favoring the positive class. It cannot infer that the caller already transformed the score.
 
@@ -102,7 +102,7 @@ assert abs(wrong.item()-np.log(2))>.1
 
 The question is: Use logits 1000, -1000 with labels 1, 0.
 
-The combined objective avoids an unstable log(sigmoid()) round trip. This protects arithmetic but does not validate labels or shapes.
+The combined objective avoids an unstable `log(sigmoid())` round trip. This protects arithmetic but does not validate labels or shapes.
 
 ```python
 extreme=F.binary_cross_entropy_with_logits(torch.tensor([1000.,-1000.]),torch.tensor([1.,0.]),reduction='none')

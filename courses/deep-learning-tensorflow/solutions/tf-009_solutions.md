@@ -49,7 +49,7 @@ assert sum((b for b in batches if len(b)==2),[])==[1,2,3,4]
 
 ## Exercise 3: Trace weight state
 
-The question is: Implement three batch updates for x=1..6,y=2x,w=0,rate=.01; record the weight before each update.
+The question is: Implement three batch updates for x=1..6,y=2x,\(w=0\),rate=.01; record the weight before each update.
 
 Each gradient depends on the current weight. Recording only the final loss would conceal whether the assignment happened. The finite and distinct states show real updates for this fixture without claiming that every possible dataset produces a different weight each time.
 
@@ -68,7 +68,7 @@ assert len(set(history))==3
 
 ## Exercise 4: Compare batch policies
 
-The question is: Repeat one epoch with sizes one and three from exactly w=0; compare update counts and endpoint weights.
+The question is: Repeat one epoch with sizes one and three from exactly \(w=0\); compare update counts and endpoint weights.
 
 Both runs process six records but perform different optimization experiments. Equal epochs are not equal compute budgets. Resetting the variable is necessary because otherwise the second run would begin with the first run's trained state.
 

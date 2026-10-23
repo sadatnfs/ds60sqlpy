@@ -44,9 +44,9 @@ loaded=tf.keras.models.load_model(keras_path)
 np.testing.assert_allclose(loaded(x).numpy(),expected,atol=1e-6,rtol=0)
 ```
 
-**Expected:** reloaded predictions match within1e-6.
+**Expected:** reloaded predictions match within 1e-6.
 
-**Verify:** Compare the computed values or written argument with reloaded predictions match within1e-6.
+**Verify:** Compare the computed values or written argument with reloaded predictions match within 1e-6.
 
 ## Exercise 3: Export an inference endpoint
 

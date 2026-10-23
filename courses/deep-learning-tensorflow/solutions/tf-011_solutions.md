@@ -46,9 +46,9 @@ np.testing.assert_allclose(model.get_weights()[0],[[28/15]],atol=1e-6,rtol=0)
 np.testing.assert_allclose(np.mean((model(x).numpy()-y)**2),56/675,atol=1e-6,rtol=0)
 ```
 
-**Expected:** kernel28/15 and post-update loss56/675 within1e-6.
+**Expected:** kernel28/15 and post-update loss56/675 within 1e-6.
 
-**Verify:** Compare the computed values or written argument with kernel28/15 and post-update loss56/675 within1e-6.
+**Verify:** Compare the computed values or written argument with kernel28/15 and post-update loss56/675 within 1e-6.
 
 ## Exercise 3: Inspect forward shape
 

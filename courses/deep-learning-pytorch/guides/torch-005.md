@@ -6,7 +6,7 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-004`. The prer
 
 ## Learning objectives
 
-A derivative measures local sensitivity: how much a function changes for a small input change. The central investigation is concrete: Differentiate (w-2)**2 at w=0 using autograd.grad. The finish condition is derivative -4; loss 4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A derivative measures local sensitivity: how much a function changes for a small input change. The central investigation is concrete: Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using autograd.grad. The finish condition is derivative -4; loss 4. all raise ValueError. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -42,19 +42,19 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-For f(w)=(w-2)^2, the analytic derivative is 2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.
+For \(f(w)=(w-2)^2\), the analytic derivative is \(2(w-2)\). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses \(\frac{f(w+h)-f(w-h)}{2h}\). Validate positive finite h and finite function values before comparing.
 
 ## Derive the slope before using it as an update
 
-For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=2(w-2). At w=0 the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
+For f(w)=(w-2)², expand the derivative or apply the square rule to obtain f'(w)=\(2(w-2)\). At \(w=0\) the loss is four and the derivative is -4. These are different quantities with different units: the derivative measures loss change per unit of w. A learning rate converts that sensitivity into a chosen parameter displacement. With rate 0.1, the update is 0-0.1(-4)=0.4 and the recomputed loss is(0.4-2)²=2.56.
 
 The central finite difference uses two probes separated by 2 h:
 
 `D_h = [f(w+h)-f(w-h)]/(2h)`.
 
-Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=2(w-2) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
+Expanding this particular quadratic gives f(w+h)-f(w-h)=4h(w-2), so D_h=\(2(w-2)\) exactly in real arithmetic. This special cancellation explains why the three supplied h values agree unusually well. It does not establish that central differences are exact for arbitrary nonlinear functions. For a sufficiently smooth general function, the leading truncation error is proportional to h² and a third derivative near the probe point.
 
-A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus h=0.1 gives -3.9, h=0.01 gives -3.99, and h=0.001 gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
+A forward difference has a different error even on this quadratic. At zero, [f(h)-f(0)]/h=-4+h. Thus \(h=0.1\) gives -3.9, \(h=0.01\) gives -3.99, and \(h=0.001\) gives -3.999. The visible offset is a property of the numerical approximation, not an autograd error. Deriving the approximation's expected bias prevents a correct implementation from being rejected for the wrong reason.
 
 Floating-point cancellation pushes in the opposite direction from truncation error. As h shrinks, the two function values can become nearly equal compared with their magnitude. Their subtraction can lose meaningful digits, and a sufficiently small perturbation may not change the represented point at all. Scaling, dtype and the function's local behavior all matter. Sweep several probe scales and inspect the error curve rather than applying a universal h or tolerance.
 
@@ -110,7 +110,7 @@ np.testing.assert_allclose(updated,.4,atol=1e-12,rtol=0)
 assert updated!=gradient.item()
 ```
 
-**Expected:** new w=0.4, not-4.
+**Expected:** new \(w=0.4\), not-4.
 
 ## Prediction before your attempt
 
@@ -118,17 +118,17 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Derive a scalar slope.** Differentiate (w-2)**2 at w=0 using autograd.grad.
+1. **Derive a scalar slope.** Differentiate \({\left(w-2\right)}^{2}\) at \(w=0\) using autograd.grad.
    **Expected:** derivative -4; loss 4.
    **Verify:** Save the assertion results for exercise 1, including derivative -4; loss 4.
 
-2. **Check three finite differences.** Use h=0.1, .01, .001 at w=0 and compare each slope with-4.
+2. **Check three finite differences.** Use \(h=0.1\), .01, .001 at \(w=0\) and compare each slope with-4.
    **Expected:** all agree within 1e-10.
    **Verify:** Save the assertion results for exercise 2, including all agree within 1e-10.
 
 3. **Separate gradient from update.** Use learning rate.1 and gradient-4 from w0.
-   **Expected:** new w=0.4, not-4.
-   **Verify:** Save the assertion results for exercise 3, including new w=0.4, not-4.
+   **Expected:** new \(w=0.4\), not-4.
+   **Verify:** Save the assertion results for exercise 3, including new \(w=0.4\), not-4.
 
 4. **Inspect a stationary point.** Differentiate the same objective atw 2.
    **Expected:** gradient 0 and loss 0.
@@ -138,7 +138,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** w.grad is None despite a returned derivative.
    **Verify:** Save the assertion results for exercise 5, including w.grad is None despite a returned derivative.
 
-6. **Reject invalid probes.** Pass h=0, negative h and a function returning infinity to the finite-difference helper.
+6. **Reject invalid probes.** Pass \(h=0\), negative h and a function returning infinity to the finite-difference helper.
    **Expected:** all raise ValueError.
    **Verify:** Save the assertion results for exercise 6, including all raise ValueError.
 

@@ -22,11 +22,11 @@ re.finditer over non-whitespace spans records exact start/end offsets in the ori
 
 ## Derive windows, duplication and citation coordinates
 
-Let a nonempty document have n whitespace-token spans, window size s and overlap o, with 0<=o<s. The advance is d=s-o. The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when n<=s and otherwise1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
+Let a nonempty document have n whitespace-token spans, window size s and overlap o, with \(0\le o<s\). The advance is \(d=s-o\). The first chunk covers up to s spans; further chunks begin at d, 2d and so on until one reaches the end. For this helper, the number of chunks is one when \(n\le s\) and otherwise1+ceil((n-s)/d). Empty input produces zero chunks under the declared policy.
 
-For n=7, s=3, o=1, d=2 and the chunk count is1+ceil(4/2)=3. The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions2 and4 are repeated once. The redundancy ratio for this finite fixture is9/7, about1.286; it is not nine independent observations supporting the answer.
+For \(n=7\), \(s=3\), \(o=1\), \(d=2\) and the chunk count is1+ceil(4/2)=3. The span-index groups are[0, 1, 2], [2, 3, 4], [4, 5, 6]. Stored token occurrences total nine while unique source positions total seven. Positions2 and4 are repeated once. The redundancy ratio for this finite fixture is9/7, about1.286; it is not nine independent observations supporting the answer.
 
-For a long uniform document with full windows, stored token occurrences per newly covered position approach s/(s-o). Overlap near the window size can therefore create a large storage and retrieval cost. At s=100, o=90, the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
+For a long uniform document with full windows, stored token occurrences per newly covered position approach \(\frac{s}{s-o}\). Overlap near the window size can therefore create a large storage and retrieval cost. At \(s=100\), \(o=90\), the advance is ten and the interior duplication factor approaches ten. That arithmetic does not prove an optimal overlap policy; it identifies a cost to measure beside evidence recall.
 
 The loop stops when a chunk reaches the end. Without that break, the range of starts could produce another tail containing only already-covered final tokens. For the seven-token example, continuing after the window beginning at four would add a window beginning at six containing only seven. Preventing that duplicate tail is a policy decision visible in the helper, not an automatic property of overlapping windows.
 

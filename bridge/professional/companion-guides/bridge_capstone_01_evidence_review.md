@@ -2,6 +2,15 @@
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python + PostgreSQL engineering** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 This capstone runs offline with the Python standard library. It does not open a
 database, contact a service, publish a real product, or download a dataset.
 Work from the repository root with the course interpreter. Open the

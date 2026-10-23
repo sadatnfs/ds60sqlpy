@@ -84,9 +84,9 @@ restored=json.loads(result.stdout.strip().splitlines()[-1])
 np.testing.assert_allclose(restored['weight'],expected,atol=1e-6,rtol=0); assert restored['iterations']==3
 ```
 
-**Expected:** child weight matches control within1e-6; child iterations3.
+**Expected:** child weight matches control within 1e-6; child iterations3.
 
-**Verify:** Compare the computed values or written argument with child weight matches control within1e-6; child iterations3.
+**Verify:** Compare the computed values or written argument with child weight matches control within 1e-6; child iterations3.
 
 ## Exercise 5: Expose a weights-only restart
 

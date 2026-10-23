@@ -17,9 +17,9 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace squared units
 
-Squaring [1,-1,2] gives [1,1,4]. The sum is 6 and division by three gives MSE 2. Root mean squared error is sqrt(2), in target units rather than squared target units. These values all describe the same residual fixture under different reporting transformations. A negative residual does not subtract error from a positive one after squaring; using the mean raw residual could hide cancellation and is a different statistic.
+Squaring [1,-1,2] gives [1,1,4]. The sum is 6 and division by three gives MSE 2. Root mean squared error is \(\sqrt{2}\), in target units rather than squared target units. These values all describe the same residual fixture under different reporting transformations. A negative residual does not subtract error from a positive one after squaring; using the mean raw residual could hide cancellation and is a different statistic.
 
-**Expected:** Squares [1,1,4], sum 6, mean 2 and root mean square sqrt(2).
+**Expected:** Squares [1,1,4], sum 6, mean 2 and root mean square \(\sqrt{2}\).
 
 **Verify:** Assert both reductions and state squared target units versus original target units.
 
@@ -33,9 +33,9 @@ The duplicated vector contains six residuals and squared sum 12. Dividing by six
 
 ## Exercise 3: Construct a masked reduction
 
-Index the accepted entries first, obtaining [1,-1]. Their squared sum is 2 and their mean is 1. A broken zero-fill approach retains three denominator positions, returning 2/3. The helper validates the boolean mask and its shape before selection, then rejects a selection with no entries. Keep a counterexample whose excluded residual is nonzero so the test checks a real mask/denominator mechanism rather than coincidentally matching values.
+Index the accepted entries first, obtaining [1,-1]. Their squared sum is 2 and their mean is 1. A broken zero-fill approach retains three denominator positions, returning \(\frac{2}{3}\). The helper validates the boolean mask and its shape before selection, then rejects a selection with no entries. Keep a counterexample whose excluded residual is nonzero so the test checks a real mask/denominator mechanism rather than coincidentally matching values.
 
-**Expected:** Masked sum 2 and masked mean 1; the zero-then-mean bug gives 2/3.
+**Expected:** Masked sum 2 and masked mean 1; the zero-then-mean bug gives \(\frac{2}{3}\).
 
 **Verify:** Assert the selected count is two and compare the three different scalar results.
 
@@ -49,9 +49,9 @@ A missing residual set and an all-false selection have no mean objective. Reject
 
 ## Exercise 5: Compare objective preferences
 
-A has squared sum 16 and MSE 16/3, while B has squared sum 12 and MSE 4, so squared error prefers B. Absolute sums are 4 and 6, yielding MAE 4/3 versus 2 and preferring A. The disagreement reflects how strongly the objective penalizes a single large error. Choose the metric from the intended use and cost of errors, not from whichever ranking flatters a preferred system.
+A has squared sum 16 and MSE \(\frac{16}{3}\), while B has squared sum 12 and MSE 4, so squared error prefers B. Absolute sums are 4 and 6, yielding MAE \(\frac{4}{3}\) versus 2 and preferring A. The disagreement reflects how strongly the objective penalizes a single large error. Choose the metric from the intended use and cost of errors, not from whichever ranking flatters a preferred system.
 
-**Expected:** MSE prefers B: 4 versus 16/3; MAE prefers A: 4/3 versus 2.
+**Expected:** MSE prefers B: 4 versus \(\frac{16}{3}\); MAE prefers A: \(\frac{4}{3}\) versus 2.
 
 **Verify:** Write a two-model/two-metric table with the explicit denominator three; do not choose the metric after seeing the ranking.
 

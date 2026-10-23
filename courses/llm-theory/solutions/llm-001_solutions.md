@@ -17,7 +17,7 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Classify six claims
 
-A fixed mask blocking later keys and a score matrix having one row per query are mechanism claims about a specified computation. They require inspection and tests under the stated assumptions. A 2/3 correctness table and a fixture with no observed failures are empirical descriptions of finite observations. All future outputs are true and zero observed failures means zero possible risk overreach the evidence. Classification does not make an empirical claim strong by itself; the set, metric and unit still need inspection.
+A fixed mask blocking later keys and a score matrix having one row per query are mechanism claims about a specified computation. They require inspection and tests under the stated assumptions. A \(\frac{2}{3}\) correctness table and a fixture with no observed failures are empirical descriptions of finite observations. All future outputs are true and zero observed failures means zero possible risk overreach the evidence. Classification does not make an empirical claim strong by itself; the set, metric and unit still need inspection.
 
 **Expected:** Mechanism, empirical, unsupported, empirical, unsupported, mechanism, in that order.
 
@@ -25,9 +25,9 @@ A fixed mask blocking later keys and a score matrix having one row per query are
 
 ## Exercise 2: Compute two accuracies
 
-The record-weighted calculation averages [1,1,0], giving 2/3. Family A has mean 1 and family B has mean 0; equal-family weighting gives 1/2. These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.
+The record-weighted calculation averages [1,1,0], giving \(\frac{2}{3}\). Family A has mean 1 and family B has mean 0; equal-family weighting gives \(\frac{1}{2}\). These are different weighting rules over the same records. A reviewer needs both the table and the chosen policy to understand the report. Selecting whichever average makes a system look better after seeing results would be a form of evaluation selection, not a neutral change of formatting.
 
-**Expected:** Record-weighted 2/3 and equal-family 1/2.
+**Expected:** Record-weighted \(\frac{2}{3}\) and equal-family \(\frac{1}{2}\).
 
 **Verify:** Inspect the three correctness values and the two separate family means before calculating the final averages.
 
@@ -53,13 +53,13 @@ An empty set has no mean correctness because its denominator is zero. Returning 
 
 **Expected:** The mean is undefined; the reference raises ValueError for an empty evaluation.
 
-**Verify:** Retain the empty-set diagnosis and then recompute the original 2/3 table to show the valid result remains available.
+**Verify:** Retain the empty-set diagnosis and then recompute the original \(\frac{2}{3}\) table to show the valid result remains available.
 
 ## Exercise 6: Transfer to a new family balance
 
-Three correct records from family A and one incorrect record from B give 3/4 by records. The two family means remain 1 and 0, so the equal-family average is 1/2. Report four observed questions from two authored families and the exact scoring rule. This table does not establish unseen-family accuracy, language-model factuality or complete-system safety. A fresh assessment should introduce held-out source families under a protocol chosen before inspecting which policy produces the preferred number.
+Three correct records from family A and one incorrect record from B give \(\frac{3}{4}\) by records. The two family means remain 1 and 0, so the equal-family average is \(\frac{1}{2}\). Report four observed questions from two authored families and the exact scoring rule. This table does not establish unseen-family accuracy, language-model factuality or complete-system safety. A fresh assessment should introduce held-out source families under a protocol chosen before inspecting which policy produces the preferred number.
 
-**Expected:** Record-weighted accuracy 3/4; equal-family accuracy 1/2. The report names four records and two families.
+**Expected:** Record-weighted accuracy \(\frac{3}{4}\); equal-family accuracy \(\frac{1}{2}\). The report names four records and two families.
 
 **Verify:** Inspect a four-row table, both denominators and a statement that unseen families remain untested.
 

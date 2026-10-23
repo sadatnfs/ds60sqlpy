@@ -60,7 +60,7 @@ For the first row[1, 2, 3], the products are 1, 0, -3. Adding bias 2 gives zero.
 
 Suppose an upstream loss supplies derivatives g1 and g2 for these two scalar outputs. The stored weight gradient is[g1, 2g1+g2, 3g1], and the bias gradient isg 1+g2. The bias gradient sums over the batch because one bias participates in both outputs. Each input-row gradient is its upstream scalar multiplied by[1, 0, -1]. These shapes can be predicted before using autograd: weight.grad must match(1, 3), bias.grad must match(1, ), and input derivatives match(2, 3).
 
-A feature-order mistake can remain invisible to every dimension check. If the first input is accidentally exported as[3, 2, 1], its output becomes 3-1+2=4 instead of zero while all shapes remain valid. Likewise, a centimeter-to-meter conversion requires a corresponding weight interpretation if the represented function is to stay the same. The data schema must therefore preserve names, order and units beside the width.
+A feature-order mistake can remain invisible to every dimension check. If the first input is accidentally exported as[3, 2, 1], its output becomes \(3-1+2=4\) instead of zero while all shapes remain valid. Likewise, a centimeter-to-meter conversion requires a corresponding weight interpretation if the represented function is to stay the same. The data schema must therefore preserve names, order and units beside the width.
 
 Autograd and module registration answer different questions. A plain tensor with requires_grad=True can participate in a differentiable computation, but model.parameters() will not discover it merely because it is an attribute. Assigning nn.Parameter registers it. Registration does not require that gradients currently be enabled: freezing can turn requires_grad off while retaining the parameter in the module's state. Buffers form another category of registered state introduced later.
 
@@ -70,7 +70,7 @@ The known-value initialization runs under no_grad so assignment is not recorded 
 
 ### Example A: Calculate a known affine layer
 
-The first output is 1-3+2=0, and the second is 0+2=2. This calculation checks orientation and bias independently of random initialization.
+The first output is \(1-3+2=0\), and the second is \(0+2=2\). This calculation checks orientation and bias independently of random initialization.
 
 ```python
 import numpy as np

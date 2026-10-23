@@ -22,7 +22,7 @@ A replay should answer: which inputs were available, which transformation ran, w
 
 Input drift is a change in observed features. Performance drift is a change in predictive or decision quality. They are related but not equivalent: a harmless seasonal mix shift can trigger a distribution alarm, while an unchanged feature distribution can accompany a changed outcome relationship. Labels may arrive weeks later, so monitor data quality, prediction distributions and mature outcome cohorts separately. Do not compare incomplete recent labels with fully matured historical labels as if they had equal follow-up.
 
-Calibration asks whether predicted probabilities retain their meaning. Decision thresholds convert them into actions based on cost and constraints. If false-positive cost is C_FP and false-negative cost is C_FN in a simple binary setting, acting positive minimizes expected classification cost when p>C_FP/(C_FP+C_FN). That formula assumes calibrated p, the specified cost structure and no other capacity or fairness constraints. The highest-AUC model is not automatically the best deployed decision policy.
+Calibration asks whether predicted probabilities retain their meaning. Decision thresholds convert them into actions based on cost and constraints. If false-positive cost is C_FP and false-negative cost is C_FN in a simple binary setting, acting positive minimizes expected classification cost when \(p>\frac{C_{\mathrm{FP}}}{C_{\mathrm{FP}}+C_{\mathrm{FN}}}\). That formula assumes calibrated p, the specified cost structure and no other capacity or fairness constraints. The highest-AUC model is not automatically the best deployed decision policy.
 
 ### Release with observable boundaries
 
@@ -240,7 +240,7 @@ A canonical JSON configuration includes the model, feature names and decision th
 
 ### Derive an action from costs
 
-With false-positive cost two and false-negative cost eight, the simple optimal threshold is 2/(2+8)=0.2. Probabilities [0.1,0.4,0.8] imply actions [false,true,true]. The program separately computes expected positive and negative costs and verifies the same decision, making the threshold derivation inspectable.
+With false-positive cost two and false-negative cost eight, the simple optimal threshold is \(\frac{2}{2+8}=0.2\). Probabilities [0.1,0.4,0.8] imply actions [false,true,true]. The program separately computes expected positive and negative costs and verifies the same decision, making the threshold derivation inspectable.
 
 ### Separate extraction validity from analytical truth
 

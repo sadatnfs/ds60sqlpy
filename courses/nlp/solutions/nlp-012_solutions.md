@@ -16,9 +16,9 @@ Flattening all tokens would treat unrelated boundary words as adjacent. The corr
 
 ## Exercise 3: Implement finite PPMI
 
-PMI compares joint frequency with independence. Masking positive cells prevents log(0) warnings and defines the positive-PMI boundary explicitly. An all-zero matrix contains no empirical context distribution; returning zeros is a documented representation convention, not an estimate of semantic relationships.
+PMI compares joint frequency with independence. Masking positive cells prevents \(\log(0)\) warnings and defines the positive-PMI boundary explicitly. An all-zero matrix contains no empirical context distribution; returning zeros is a documented representation convention, not an estimate of semantic relationships.
 
-**Expected:** First cell log(80/49); all values finite/nonnegative; zero-count cells and empty matrix remain zero.
+**Expected:** First cell \(\log(\frac{80}{49})\); all values finite/nonnegative; zero-count cells and empty matrix remain zero.
 
 ## Exercise 4: Handle cosine carefully
 

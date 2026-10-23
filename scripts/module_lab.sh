@@ -151,7 +151,7 @@ case "$ACTION" in
     done ;;
   start)
     "${COMPOSE[@]}" up -d --no-build --pull never --wait --wait-timeout 180 lab "${SERVICES[@]}"
-    URL="http://127.0.0.1:${DS60_LAB_PORT:-8765}/journeys"
+    URL="http://127.0.0.1:${DS60_LAB_PORT:-8765}/classroom"
     printf 'Module labs: %s\nSaved learner work: %s\n' "$URL" "$DS60_LEARNING_DIR"
     if ((NO_BROWSER == 0)); then
       if command -v open >/dev/null; then open "$URL"; elif command -v xdg-open >/dev/null; then xdg-open "$URL"; else printf 'Open the URL above in your browser.\n'; fi

@@ -1,5 +1,13 @@
 # C++ from first compilation to complete projects
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **C++ from first compilation to complete projects** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This 42-lesson journey begins with source files, the compiler, the linker and
 a running process. It develops values and control flow into ownership, standard
 containers, generic programming, error handling, concurrency and maintainable

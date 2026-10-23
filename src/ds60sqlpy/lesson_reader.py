@@ -1,7 +1,7 @@
 """Generate safe, portable HTML readers for every cataloged lesson.
 
-The readers deliberately use only the Python standard library.  They render
-checked-in Markdown, notebooks, Python, and SQL into escaped HTML so a learner
+The readers typeset math and highlight source on the server. They render
+checked-in Markdown, notebooks, and source languages into escaped HTML so a learner
 can read the complete lesson over ``file://`` without a Markdown extension,
 notebook server, or network connection.  Running code still belongs in VS Code,
 Jupyter, or PostgreSQL; the optional loopback portal can launch those fixed
@@ -24,6 +24,7 @@ from urllib.parse import quote, unquote, urlsplit
 
 from ds60sqlpy.catalog import Catalog, Lesson
 from ds60sqlpy.curriculum_framework import RUNNERS, validate_content_path
+from ds60sqlpy.reader_content import render_code_block, rich_content_styles
 from ds60sqlpy.reader_math import INLINE_MATH, render_math
 
 LESSON_PAGES_DIR = "lesson-pages"
@@ -93,6 +94,7 @@ _LIST_RE = re.compile(r"^\s*(?P<marker>[-+*]|\d+[.)])\s+(?P<body>.*)$")
 _TABLE_SEPARATOR_RE = re.compile(r"^:?-{3,}:?$")
 _LINK_OR_CODE_RE = re.compile(
     r"(?P<code>`+)(?P<code_text>.+?)(?P=code)"
+    r"|(?P<math>" + INLINE_MATH.pattern + r")"
     r"|(?P<image>!)?\[(?P<label>[^\]]*)\]\((?P<target>[^)]+)\)"
 )
 _SAFE_ID_RE = re.compile(r"[^a-z0-9]+")
@@ -206,7 +208,11 @@ def _linked_reference_sources(
     """Yield safe local authored-text link targets rendered by this module."""
 
     for match in _LINK_OR_CODE_RE.finditer(source):
-        if match.group("code") is not None or match.group("image"):
+        if (
+            match.group("code") is not None
+            or match.group("math") is not None
+            or match.group("image")
+        ):
             continue
         raw_target = match.group("target") or ""
         target = _split_markdown_target(raw_target)
@@ -440,14 +446,7 @@ class LinkResolver:
 def _format_plain_inline(text: str) -> str:
     """Escape plain inline text and support a small safe emphasis subset."""
 
-    parts: list[str] = []
-    position = 0
-    for match in INLINE_MATH.finditer(text):
-        parts.append(html.escape(text[position : match.start()], quote=True))
-        parts.append(render_math(match.group("expression")))
-        position = match.end()
-    parts.append(html.escape(text[position:], quote=True))
-    escaped = "".join(parts)
+    escaped = html.escape(text, quote=True)
     escaped = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", escaped)
     escaped = re.sub(r"__(.+?)__", r"<strong>\1</strong>", escaped)
     escaped = re.sub(r"(?<!\*)\*([^*\n]+?)\*(?!\*)", r"<em>\1</em>", escaped)
@@ -458,35 +457,42 @@ def _format_plain_inline(text: str) -> str:
 def render_inline(text: str, resolver: LinkResolver) -> str:
     """Render safe inline Markdown."""
 
+    # Protected tokens are restored only after prose emphasis, so underscores,
+    # asterisks, links, and dollar signs inside code/math never become Markdown.
+    marker = "\x00DS60_TOKEN"
+    while marker in text:
+        marker += "X"
+    protected: dict[str, str] = {}
     output: list[str] = []
     position = 0
     for match in _LINK_OR_CODE_RE.finditer(text):
-        output.append(_format_plain_inline(text[position : match.start()]))
+        output.append(text[position : match.start()])
+        key = f"{marker}{len(protected)}\x00"
         if match.group("code") is not None:
-            output.append(f"<code>{html.escape(match.group('code_text'), quote=True)}</code>")
+            value = f"<code>{html.escape(match.group('code_text'), quote=True)}</code>"
+        elif match.group("math") is not None:
+            value = render_math(match.group("expression") or match.group("dollar"))
         else:
             label = render_inline(match.group("label") or "", resolver)
             if match.group("image"):
-                output.append(
+                value = (
                     '<span class="image-note" role="note">'
-                    f"Image reference: {label or 'unnamed image'}"
-                    "</span>"
+                    f"Image reference: {label or 'unnamed image'}</span>"
                 )
             else:
                 href = resolver.href(match.group("target") or "")
-                if href is None:
-                    output.append(label)
-                else:
-                    output.append(f'<a href="{html.escape(href, quote=True)}">{label}</a>')
+                value = (
+                    label
+                    if href is None
+                    else f'<a href="{html.escape(href, quote=True)}">{label}</a>'
+                )
+        protected[key] = value
+        output.append(key)
         position = match.end()
-    output.append(_format_plain_inline(text[position:]))
-    rendered = "".join(output)
-    # Emphasis can intentionally span inline-code or link tokens, for example
-    # ``**`pip` installs here:**``. Finish those safe, already-escaped spans
-    # after token rendering so Markdown markers do not leak into the reader.
-    rendered = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", rendered)
-    rendered = re.sub(r"__(.+?)__", r"<strong>\1</strong>", rendered)
-    rendered = re.sub(r"~~(.+?)~~", r"<del>\1</del>", rendered)
+    output.append(text[position:])
+    rendered = _format_plain_inline("".join(output))
+    for key, value in protected.items():
+        rendered = rendered.replace(key, value)
     return rendered
 
 
@@ -497,7 +503,20 @@ def _split_table_row(line: str) -> list[str]:
     cells: list[str] = []
     current: list[str] = []
     escaped = False
-    for character in source:
+    protected = {
+        match.start(): match
+        for match in _LINK_OR_CODE_RE.finditer(source)
+        if match.group("code") is not None or match.group("math") is not None
+    }
+    index = 0
+    while index < len(source):
+        token = protected.get(index)
+        if token is not None:
+            current.append(token.group())
+            index = token.end()
+            continue
+        character = source[index]
+        index += 1
         if escaped:
             if character != "|":
                 current.append("\\")
@@ -529,6 +548,7 @@ def _starts_block(lines: list[str], index: int) -> bool:
         not line.strip()
         or _FENCE_RE.match(line)
         or _HEADING_RE.match(line)
+        or line.strip().startswith((r"\[", "$$"))
         or _LIST_RE.match(line)
         or line.lstrip().startswith(">")
         or line.strip() in {"---", "***", "___"}
@@ -644,15 +664,30 @@ def render_markdown(
                 index += 1
             if index < len(lines):
                 index += 1
-            language_class = (
-                f' class="language-{html.escape(language, quote=True)}"' if language else ""
-            )
+            code = chr(10).join(code_lines)
             output.append(
-                f"<pre><code{language_class}>"
-                f"{html.escape(chr(10).join(code_lines), quote=True)}"
-                "</code></pre>"
+                render_math(code, display=True)
+                if language == "math"
+                else render_code_block(code, language)
             )
             continue
+
+        stripped = line.strip()
+        display_open = r"\[" if stripped.startswith(r"\[") else "$$"
+        if stripped.startswith(display_open):
+            display_close = r"\]" if display_open == r"\[" else "$$"
+            math_lines = [stripped[len(display_open) :]]
+            end = index
+            while display_close not in math_lines[-1] and end + 1 < len(lines):
+                end += 1
+                math_lines.append(lines[end])
+            if display_close in math_lines[-1]:
+                expression_tail, remainder = math_lines[-1].split(display_close, 1)
+                if not remainder.strip():
+                    math_lines[-1] = expression_tail
+                    output.append(render_math("\n".join(math_lines).strip(), display=True))
+                    index = end + 1
+                    continue
 
         heading = _HEADING_RE.match(line)
         if heading:
@@ -756,14 +791,7 @@ def render_markdown(
 def _render_source_code(source: str, *, language: str) -> str:
     """Render source with copy-friendly CSS line numbers."""
 
-    lines = source.replace("\r\n", "\n").replace("\r", "\n").split("\n")
-    rendered_lines = "\n".join(
-        f"<span>{html.escape(line, quote=True) if line else ' '}</span>" for line in lines
-    )
-    return (
-        f'<pre class="source-code language-{html.escape(language, quote=True)}">'
-        f"<code>{rendered_lines}</code></pre>"
-    )
+    return render_code_block(source, language, line_numbers=True)
 
 
 def _notebook_output_text(output: Mapping[str, Any]) -> tuple[str, str] | None:
@@ -813,6 +841,11 @@ def render_notebook(
         "Code cells are not running in this browser page. Use the run controls above "
         "to open the real notebook with the course kernel.</div>"
     ]
+    metadata = payload.get("metadata", {})
+    language_info = metadata.get("language_info", {}) if isinstance(metadata, Mapping) else {}
+    notebook_language = (
+        str(language_info.get("name", "python")) if isinstance(language_info, Mapping) else "python"
+    )
     code_count = 0
     markdown_count = 0
     for position, raw_cell in enumerate(raw_cells, start=1):
@@ -834,7 +867,7 @@ def render_notebook(
             output.append(
                 '<article class="notebook-cell code-cell">'
                 f'<div class="cell-label">Code cell {code_count}</div>'
-                f"{_render_source_code(source, language='python')}"
+                f"{_render_source_code(source, language='sql' if source.lstrip().startswith('%%sql') else notebook_language)}"
             )
             raw_outputs = raw_cell.get("outputs", [])
             if isinstance(raw_outputs, list):
@@ -1564,6 +1597,7 @@ def build_lesson_html(
       .artifact-panel {{ display: block !important; border: 0; box-shadow: none; break-before: page; }}
       .solution-notice {{ break-after: avoid; }}
     }}
+    {rich_content_styles()}
   </style>
 </head>
 <body>
@@ -2071,6 +2105,7 @@ def build_reference_html(
       body {{ background: #fff; }}
       .document {{ border: 0; box-shadow: none; }}
     }}
+    {rich_content_styles()}
   </style>
 </head>
 <body>

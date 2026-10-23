@@ -8,7 +8,7 @@ Specialized methods become useful when the observational object or evidence stru
 
 ### Synthesize compatible evidence before averaging it
 
-A meta-analysis combines study estimates only after defining a common estimand or a meaningful distribution of effects. If study i estimates theta_i with sampling variance v_i, a common-effect inverse-variance mean weights by 1/v_i. A random-effects model adds between-study variance tau_squared, using weights 1/(v_i+tau_squared) in a basic formulation. This changes both interpretation and relative weights. More precise aggregation cannot repair biased studies or incompatible outcome definitions.
+A meta-analysis combines study estimates only after defining a common estimand or a meaningful distribution of effects. If study i estimates theta_i with sampling variance v_i, a common-effect inverse-variance mean weights by \(\frac{1}{v_{i}}\). A random-effects model adds between-study variance tau_squared, using weights \(\frac{1}{v_{i}+\tau^2}\) in a basic formulation. This changes both interpretation and relative weights. More precise aggregation cannot repair biased studies or incompatible outcome definitions.
 
 A systematic review therefore begins before the model: search strategy, eligibility, duplicate-study handling, risk-of-bias assessment and extraction protocol. Publication and selective-reporting mechanisms can distort the available evidence. An LLM can help locate candidate passages or draft an extraction table, but a human-reviewed source record should establish study identity, design, sample size, effect scale and uncertainty. Unsupported extracted numbers would contaminate the analysis before any estimator is fitted.
 
@@ -218,15 +218,15 @@ python courses/statistics-ml/examples/chapter_39.py
 
 ### See how heterogeneity changes relative study weights
 
-Effects 0.2 and 0.5 with standard errors 0.1 and 0.2 receive common-effect weights 100 and 25, giving mean 0.26 and standard error sqrt(1/125). Adding an illustrative between-study variance 0.04 produces weights 20 and 12.5, moving the mean toward the second study. The fixed tau-squared is a teaching input, not an estimated heterogeneity result.
+Effects 0.2 and 0.5 with standard errors 0.1 and 0.2 receive common-effect weights 100 and 25, giving mean 0.26 and standard error \(\sqrt{\frac{1}{125}}\). Adding an illustrative between-study variance 0.04 produces weights 20 and 12.5, moving the mean toward the second study. The fixed tau-squared is a teaching input, not an estimated heterogeneity result.
 
 ### Preserve relative and circular geometry
 
-Multiplying [1,2,7] by ten leaves its composition and log ratio log(1/2) unchanged. Angles 359 and 1 degrees have arithmetic mean 180 but a circular mean near zero. These checks show why the correct representation changes the result even before any sophisticated model is fitted.
+Multiplying [1,2,7] by ten leaves its composition and log ratio \(\log(\frac{1}{2})\) unchanged. Angles 359 and 1 degrees have arithmetic mean 180 but a circular mean near zero. These checks show why the correct representation changes the result even before any sophisticated model is fitted.
 
 ### Inspect one privacy-mechanism identity
 
-For a count with add/remove-one sensitivity one and epsilon one, Laplace scale is one. At output seven, the density ratio for adjacent true counts six and five is exp(1), matching the theoretical bound in this case. This is synthetic algebra, not a complete privacy implementation; composition, random-number generation and data access remain outside the demonstration.
+For a count with add/remove-one sensitivity one and epsilon one, Laplace scale is one. At output seven, the density ratio for adjacent true counts six and five is \(\exp(1)\), matching the theoretical bound in this case. This is synthetic algebra, not a complete privacy implementation; composition, random-number generation and data access remain outside the demonstration.
 
 ### Complete executable example
 

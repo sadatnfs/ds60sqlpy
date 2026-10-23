@@ -1,5 +1,12 @@
 # Docker learning lab, from a new computer to your first lesson
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 For the current classroom, use the [one-command guide](one-command-classroom.md).
 `./classroom` builds, starts, checks readiness and opens the browser. Windows
 uses a normal Ubuntu/WSL 2 distribution with Docker engine integration. The
@@ -84,7 +91,7 @@ managed installation policies use the manual vendor/IT route below.
    again. It rechecks what is installed and continues from the current machine
    state. The wizard does not force a restart.
 6. Once the engine and app are ready, the browser opens at the printed local
-   address, normally `http://127.0.0.1:8765/learn`. Continue with
+   address, normally `http://127.0.0.1:8765/classroom`. Continue with
    [your first Python and SQL results](#5-get-one-python-result-and-one-sql-result).
 
 This is one entry point for setup and later starts. Windows can still require
@@ -320,7 +327,7 @@ On a first start, expect an announced connected build, package/image download
 output, database startup, and an HTTP-readiness check. Wait for the printed
 ready address. The launcher opens the browser **on your computer** after the
 app responds. The normal address is
-[http://127.0.0.1:8765/learn](http://127.0.0.1:8765/learn).
+[http://127.0.0.1:8765/classroom](http://127.0.0.1:8765/classroom).
 If the browser does not open, copy that exact printed URL into its address bar.
 Use `127.0.0.1`, rather than substituting a different host label, because the
 app validates its local Host header.
@@ -648,7 +655,7 @@ To use the Linux-terminal workflow:
 
    No Windows `.venv` or host Python is needed. Use this Linux checkout for
    later Bash starts, and back up its `.learning` folder from the same place.
-5. Open `http://127.0.0.1:8765/learn` in the Windows browser if automatic browser
+5. Open `http://127.0.0.1:8765/classroom` in the Windows browser if automatic browser
    opening is unavailable. The launcher also prints its actual ready URL.
 
 Microsoft recommends keeping files in the filesystem matching the terminal

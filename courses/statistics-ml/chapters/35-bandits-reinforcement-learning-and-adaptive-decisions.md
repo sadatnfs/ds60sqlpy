@@ -10,7 +10,7 @@ Adaptive decisions differ from ordinary prediction because the chosen action cha
 
 A bandit chooses an action and receives a reward without modeling a lasting state transition relevant to later decisions. A contextual bandit conditions that choice on observed context. A Markov decision process adds a state transition: today's action can change tomorrow's opportunities and rewards. If those consequences matter, optimizing immediate reward can be shortsighted. If they do not, a full reinforcement-learning system may add unnecessary complexity.
 
-For policy pi, discounted return is G_t=sum_(k>=0) gamma^k R_(t+k+1), with discount factor gamma between zero and one in an infinite-horizon discounted formulation. Value V_pi(s) is the expected return starting in state s and following pi. The Bellman equation separates immediate reward from discounted next-state value. It is a consistency relation under the environment model, not a guarantee that a learned estimate is correct.
+For policy pi, discounted return is \(G_t=\sum_{k=0}^{\infty}\gamma^k R_{t+k+1}\), with discount factor gamma between zero and one in an infinite-horizon discounted formulation. Value V_pi(s) is the expected return starting in state s and following pi. The Bellman equation separates immediate reward from discounted next-state value. It is a consistency relation under the environment model, not a guarantee that a learned estimate is correct.
 
 ### Exploration buys information at a cost
 
@@ -176,7 +176,7 @@ python courses/statistics-ml/examples/chapter_35.py
 
 ### Separate a Bellman value from one learning update
 
-A two-step deterministic path earns one now and two next, with discount 0.9, so its value is 1+0.9*2=2.8. A Q estimate initially zero with learning rate one-half moves only to 1.4 after one update toward that target. The value equation and the finite learning procedure are different objects.
+A two-step deterministic path earns one now and two next, with discount 0.9, so its value is \(1+0.9\cdot 2=2.8\). A Q estimate initially zero with learning rate one-half moves only to 1.4 after one update toward that target. The value equation and the finite learning procedure are different objects.
 
 ### Correct a logging-policy mixture
 

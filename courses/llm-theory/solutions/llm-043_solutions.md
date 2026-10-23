@@ -22,7 +22,7 @@ This lesson implements the three attention information patterns on literal vecto
 
 ## Reading the implementation
 
-The attention helper accepts Q shaped(Tq, d), K shaped(Tk, d), V shaped(Tk, dv) and a boolean allowed matrix(Tq, Tk). It validates nonempty legal rows, then uses a stable row-wise softmax of Q@K.T/sqrt(d). Encoder self-attention has Tq=Tk=source length and an all-allowed source mask. Causal decoder self-attention has a lower triangle over target-prefix positions. Cross-attention can be rectangular, with target queries and source keys/values. Labels and loss masks are constructed independently from these attention masks.
+The attention helper accepts Q shaped(Tq, d), K shaped(Tk, d), V shaped(Tk, dv) and a boolean allowed matrix(Tq, Tk). It validates nonempty legal rows, then uses a stable row-wise softmax of `Q @ K.T / sqrt(d)`. Encoder self-attention has Tq=Tk=source length and an all-allowed source mask. Causal decoder self-attention has a lower triangle over target-prefix positions. Cross-attention can be rectangular, with target queries and source keys/values. Labels and loss masks are constructed independently from these attention masks.
 
 ## Exercise 1: Compare bidirectional and causal mixtures
 

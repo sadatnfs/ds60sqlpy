@@ -8,11 +8,11 @@ An online experiment is a measurement system wrapped around random assignment. E
 
 ### Derive CUPED adjustment
 
-Let X be a pretreatment covariate and Y the experiment outcome. Define Y_adjusted=Y-theta*(X-E[X]). The adjustment has the same expectation when E[X] is correctly centered. Its variance is Var(Y)+theta^2 Var(X)-2 theta Cov(X,Y), minimized at theta=Cov(X,Y)/Var(X). The resulting variance is Var(Y)*(1-rho^2). The covariate must not be affected by treatment, and practical estimation, missing preperiod values and adaptive reuse require care.
+Let X be a pretreatment covariate and Y the experiment outcome. Define \(Y_{\mathrm{adjusted}}=Y-\theta\bigl(X-\mathbb{E}[X]\bigr)\). The adjustment has the same expectation when E[X] is correctly centered. Its variance is \(\operatorname{Var}(Y)+\theta^2\operatorname{Var}(X)-2\theta\operatorname{Cov}(X,Y)\), minimized at \(\theta=\frac{\operatorname{Cov}(X,Y)}{\operatorname{Var}(X)}\). The resulting variance is \(\operatorname{Var}(Y)(1-\rho^2)\). The covariate must not be affected by treatment, and practical estimation, missing preperiod values and adaptive reuse require care.
 
 ### Ratios and randomization units
 
-Revenue per visit is a ratio of totals, sum(R_i)/sum(V_i), not generally the average of customer ratios R_i/V_i. For independent customers, the first-order ratio influence is (R_i-r*V_i)/mean(V). Its sample standard deviation divided by sqrt(n) estimates a delta-method standard error. This retains numerator-denominator covariance and customer-level dependence among visits. If treatment changes visits, the ratio and total revenue answer different questions.
+Revenue per visit is a ratio of totals, \(\frac{\sum_i R_i}{\sum_i V_i}\), not generally the average of customer ratios \(\frac{R_i}{V_i}\). For independent customers, the first-order ratio influence is \(\frac{R_i-rV_i}{\bar{V}}\). Its sample standard deviation divided by \(\sqrt{n}\) estimates a delta-method standard error. This retains numerator-denominator covariance and customer-level dependence among visits. If treatment changes visits, the ratio and total revenue answer different questions.
 
 An experiment decision should combine an effect interval, practical threshold, mature outcomes, integrity checks and guardrails. A statistically clear metric gain can coexist with unacceptable reliability or user harms. Those tradeoffs need explicit owners and criteria.
 
@@ -202,7 +202,7 @@ Triggered analysis can be valid when a trigger identifies a relevant opportunity
 
 Existing users have a previous-month activity measure that strongly predicts experiment activity. New users have no preperiod record. Dropping new users yields a different population; filling their covariate with zero treats absence of history as genuine zero activity. A practical design can include a missing-history indicator and define adjustment separately or model the baseline information available for each group.
 
-CUPED's ideal variance reduction factor 1-rho-squared describes a linear adjustment with the relevant covariance. If rho=.8, the remaining variance is .36 of the original, which can substantially improve precision. That does not imply every metric or user segment receives the same gain. Sparse counts, outliers and low pre/post correlation may yield little benefit. Estimate and validate the adjustment without permitting outcome-informed exclusion rules or future data to enter the baseline.
+CUPED's ideal variance reduction factor 1-rho-squared describes a linear adjustment with the relevant covariance. If \(\rho=0.8\), the remaining variance is .36 of the original, which can substantially improve precision. That does not imply every metric or user segment receives the same gain. Sparse counts, outliers and low pre/post correlation may yield little benefit. Estimate and validate the adjustment without permitting outcome-informed exclusion rules or future data to enter the baseline.
 
 The adjustment coefficient can be estimated from pooled data with an appropriate analysis, from a separate historical sample, or using cross-fitting in more flexible variants. The precise inferential treatment should follow the implemented estimator. The central scientific condition is that the covariate precedes and is unaffected by the intervention, not that it happens to have a column name containing pre.
 

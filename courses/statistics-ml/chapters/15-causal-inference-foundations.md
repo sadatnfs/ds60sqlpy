@@ -8,7 +8,7 @@ A causal question compares interventions, not merely rows with different labels.
 
 ### Derive backdoor standardization
 
-Suppose X contains a sufficient set of pretreatment common causes. Under consistency, conditional exchangeability Y(a) independent of A given X, and positivity P(A=a|X=x)>0, the intervention mean is E[Y(a)]=sum_x E[Y|A=a,X=x]P(X=x). Consistency connects observed outcomes to potential outcomes, exchangeability permits using comparable observed groups, and positivity ensures each required conditional mean is supported. The formula averages both interventions over the same target covariate distribution.
+Suppose X contains a sufficient set of pretreatment common causes. Under consistency, conditional exchangeability Y(a) independent of A given X, and positivity \(\Pr(A=a\mid X=x)>0\), the intervention mean is \(\mathbb{E}[Y(a)]=\sum_x\mathbb{E}[Y\mid A=a,X=x]\Pr(X=x)\). Consistency connects observed outcomes to potential outcomes, exchangeability permits using comparable observed groups, and positivity ensures each required conditional mean is supported. The formula averages both interventions over the same target covariate distribution.
 
 ### Read a graph before adjusting
 

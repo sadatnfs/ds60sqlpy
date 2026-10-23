@@ -60,7 +60,7 @@ esac
 case "$data_dir" in /*) ;; *) data_dir="$PWD/$data_dir" ;; esac
 export DS60_LEARNING_DIR="$data_dir" DS60_LAB_PORT="$lab_port" DS60_POSTGRES_PORT="$database_port"
 compose=("$docker_cli" compose --project-directory "$repo_dir" --project-name "$project_name" --file "$repo_dir/compose.yaml" --profile lab)
-url="http://127.0.0.1:$lab_port/learn"
+url="http://127.0.0.1:$lab_port/classroom"
 echo "Local lab: $url"
 echo "Saved progress and pads: $data_dir"
 case "$action" in

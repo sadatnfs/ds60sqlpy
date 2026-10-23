@@ -14,7 +14,7 @@ For n nodes, an adjacency matrix A has entry A_ij describing an edge from i to j
 
 Degree measures immediate connections. Betweenness measures participation in chosen shortest paths. Eigenvector-style scores reward connection to influential neighbors. Each answers a different operational question. A node can be a low-degree bridge between communities and therefore important for connectivity while having modest popularity. Before ranking, state the assumed flow, direction and edge meaning that make the selected centrality useful.
 
-PageRank illustrates a probabilistic interpretation. With row-stochastic transition matrix P, damping alpha and teleportation distribution v, the stationary score satisfies r=alpha*P_transpose*r+(1-alpha)*v. Teleportation avoids trapping all mass in isolated closed components under standard positive-support choices. A dangling node with no outgoing links requires an explicit transition rule. The score is a stationary visitation probability under this constructed walk, not an intrinsic moral or causal importance measure.
+PageRank illustrates a probabilistic interpretation. With row-stochastic transition matrix P, damping alpha and teleportation distribution v, the stationary score satisfies \(r=\alpha P^{\mathsf T}r+(1-\alpha)v\). Teleportation avoids trapping all mass in isolated closed components under standard positive-support choices. A dangling node with no outgoing links requires an explicit transition rule. The score is a stationary visitation probability under this constructed walk, not an intrinsic moral or causal importance measure.
 
 ### Prediction requires a time boundary
 
@@ -84,7 +84,7 @@ Latent-space models place nodes in an unobserved geometric space where distance 
 
 **Exponential random graph models**
 
-Exponential random graph models assign probabilities proportional to exp(theta_transpose*g(graph)), where statistics g can count edges, triangles or other configurations. They model dependence between edges through global graph features. Some specifications exhibit degeneracy, concentrating probability on nearly empty or complete graphs. Simulation-based fit checks and a substantively justified statistic set are essential.
+Exponential random graph models assign probabilities proportional to \(\exp\bigl(\theta^{\mathsf T}g(\mathrm{graph})\bigr)\), where statistics g can count edges, triangles or other configurations. They model dependence between edges through global graph features. Some specifications exhibit degeneracy, concentrating probability on nearly empty or complete graphs. Simulation-based fit checks and a substantively justified statistic set are essential.
 
 ### stat-31-11
 

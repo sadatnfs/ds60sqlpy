@@ -1,5 +1,13 @@
 # PostgreSQL track
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **PostgreSQL** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 The historical core contains 60 ordered PostgreSQL lessons, companion guides,
 and projects. Complete beginners first use the three small-fixture lessons in
 the [SQL on-ramp](../professional/README.md#learning-path), then begin Day 1.

@@ -1,55 +1,29 @@
 # Windows setup
 
-This guide assumes a new Windows 10 or Windows 11 machine and PowerShell. The recommended course baseline is Python 3.12, PostgreSQL 16 or newer, and Visual Studio Code.
+The primary course experience is the unified Docker classroom. Every subject,
+including Python and SQL, opens from the same `/classroom` page. You only need
+a local Docker-compatible engine, Linux containers, and the documented Compose
+version. The language runtimes live inside the images.
 
-Run course commands from the repository root, the directory containing `README.md`.
+On Windows, install WSL 2 with Ubuntu and enable your Docker engine's integration for that distribution. Run the command in its Ubuntu terminal.
 
-If terminals, packages, or notebooks are new to you, follow
-[Your first successful session](first-success.md) alongside this guide. Use
-**Windows PowerShell** from the Start menu for PowerShell blocks. Keep native
-Windows and WSL environments separate; this guide uses native Windows Python,
-not a Python interpreter inside WSL.
+From the extracted course folder or checkout, run:
 
-## Browser lab: download, extract, and double-click
+```sh
+./classroom
+```
 
-For a new supported Windows 11 x64 machine, use the course's first-run
-Docker wizard. Existing compatible engines are reused without reinstalling:
+The command builds locally, starts the services, checks readiness and opens the
+actual browser address. Follow the [one-command walkthrough](../one-command-classroom.md)
+for first-time engine installation, WSL integration, stopping, backups and
+recovery. Saved work in the standard classroom uses persistent named Docker
+volumes. Use `./classroom status` to rediscover its address.
 
-1. Download the supplied **`DS60LearningLab-0.3.0-Windows-Starter.zip`**, or
-   use **Code**, then **Download ZIP** on a
-   [repository version](https://github.com/sadatnfs/ds60sqlpy) containing the
-   Windows first-run wizard. No Git installation is needed.
-2. In File Explorer, use **Extract All** and open the extracted course folder.
-   Do not launch from the compressed ZIP preview.
-3. Double-click **`START_DOCKER_LAB.cmd`**. No host Python, native PostgreSQL,
-   or VS Code installation is needed for the browser route.
-4. The wizard reuses a compatible local engine when ready. If prerequisites
-   are missing, follow its offered installation choices and consent prompts.
-   A fresh Windows setup recommends Rancher Desktop with Moby; Docker Desktop
-   with its WSL 2 backend is another choice.
-5. Windows may need administrator approval for installation or WSL 2 and may
-   require a restart. Save other work, restart yourself when asked, and rerun
-   the **same launcher** afterward. It re-detects the current setup rather
-   than deleting state or starting the course over.
+## Optional native environment
 
-The wizard uses WSL 2 without requiring a user Ubuntu distribution, so no Linux
-account or terminal is necessary for this Windows-folder route. If WinGet is
-missing or installation is managed by your organization, follow the official
-installer/IT route shown in the setup guidance, then run the launcher again.
-See the [complete Windows Docker walkthrough](../docker-beginners.md#windows-start-with-the-first-run-wizard)
-for the exact requirements, manual alternative, and first visible results.
-
-Once ready, the launcher opens `http://127.0.0.1:8765/learn`. Saved pads,
-history, evidence, and progress live in the host `.learning` folder; the
-PostgreSQL database uses a separate persistent volume. The fresh Docker course
-login is the limited `admin` account with password `admin`. The browser supplies
-that connection internally.
-
-Existing engine settings, saved files, and database volumes are preserved.
-Updating the image or rerunning setup does not reset lesson progress. If you
-already work in an Ubuntu/WSL terminal, the separate Linux-home workflow in
-the Docker guide remains available. The native Windows Python instructions
-below are optional and apply when you want host notebooks or editor execution.
+The remainder of this page is for learners who also want host Python, Jupyter,
+VS Code or PostgreSQL. These installations are not classroom prerequisites.
+Keep a native environment's `.learning` files separate from Docker-volume state.
 
 ## Native notebook route: double-click the guided launcher
 

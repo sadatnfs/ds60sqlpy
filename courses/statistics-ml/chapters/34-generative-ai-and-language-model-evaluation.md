@@ -72,7 +72,7 @@ Pairwise preference testing asks which of two outputs better satisfies a rubric,
 
 **Bradley–Terry models**
 
-The Bradley-Terry model assigns a latent strength s_i to each system and models P(i beats j)=logistic(s_i-s_j). One reference level or sum constraint is needed for identifiability. The comparison graph should connect systems adequately, and repeated tasks/raters create dependence beyond a simple independent model. Ties and nontransitive preferences need explicit extensions or diagnostics rather than forced binary labels.
+The Bradley-Terry model assigns a latent strength s_i to each system and models \(\Pr(i\text{ beats }j)=\operatorname{logistic}(s_i-s_j)\). One reference level or sum constraint is needed for identifiability. The comparison graph should connect systems adequately, and repeated tasks/raters create dependence beyond a simple independent model. Ties and nontransitive preferences need explicit extensions or diagnostics rather than forced binary labels.
 
 ### stat-34-07
 

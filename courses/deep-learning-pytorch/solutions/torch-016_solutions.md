@@ -22,11 +22,11 @@ Use F.relu after a matrix product. In nn.Linear, the columns of a mathematical p
 
 ## Prove the capacity boundary and then inspect optimization
 
-Suppose a classifier uses an affine score s=a x1+b x2+c and predicts class 1 when s>0. XOR requires(1, 0) and(0, 1) positive, so a+c>0 and b+c>0. It requires(0, 0) and(1, 1) nonpositive, so c≤0 and a+b+c≤0. Summing the positive requirements gives a+b+2c>0; summing the negative requirements gives the same quantity≤0. The contradiction proves that no such affine separator exists, independent of a random seed or training budget.
+Suppose a classifier uses an affine score \(s=a\) x1+b x2+c and predicts class 1 when \(s>0\). XOR requires(1, 0) and(0, 1) positive, so \(a+c>0\) and \(b+c>0\). It requires(0, 0) and(1, 1) nonpositive, so c≤0 and a+b+c≤0. Summing the positive requirements gives a+b+2c>0; summing the negative requirements gives the same quantity≤0. The contradiction proves that no such affine separator exists, independent of a random seed or training budget.
 
 Stacking affine layers does not remove that boundary. `(XW1+b1)W2+b2 = X(W1W2)+(b1W2+b2)` is still affine in the input. A bottleneck can even restrict the possible rank. Nonlinear parameterization of the weights may change optimization behavior, but it does not create a nonlinear input function. Adding an engineered interaction feature would change the input representation and therefore the problem being considered.
 
-The manual construction uses d=x1-x2, h1=max(d, 0), h2=max(-d, 0), and output=h1+h2:
+The manual construction uses \(d=x_{1}-x_{2}\), h1=max(d, 0), h2=max(-d, 0), and \(\mathrm{output}=h_{1}+h_{2}\):
 
 | Input | Raw difference pair | ReLU features | Output |
 | --- | --- | --- | --- |
@@ -43,7 +43,7 @@ Activation gradients distinguish a dead region from a broken graph. ReLU at a ne
 
 Identical hidden rows produce identical features on the same input. Equal gradients additionally require symmetric downstream influence and other state; unequal output weights can break that symmetry. If a whole ReLU network is initialized in a zero/symmetric configuration, both hidden activations and upstream signals can vanish, leaving ordinary gradient descent unable to create useful differences. Separate Parameter objects are not by themselves evidence of diverse features.
 
-Variance-aware initialization gives a useful approximation. For independent zero-mean inputs and weights, a preactivation's variance scales roughly with fan_in×Var(weight)×Var(input). ReLU discards about half the second moment under a symmetric distribution, motivating an initialization scale near 2/fan_in for that simplified setting. Those assumptions need not hold exactly for correlated finite data. Choose the documented initializer and gain for the intended activation rather than assuming every layer's default initialization implements that exact rule. [PyTorch 2.9 initialization APIs](https://docs.pytorch.org/docs/2.9/nn.init.html).
+Variance-aware initialization gives a useful approximation. For independent zero-mean inputs and weights, a preactivation's variance scales roughly with \(\mathrm{fan}_{\mathrm{in}}\cdot \operatorname{Var}(\mathrm{weight})\cdot \operatorname{Var}(\mathrm{input})\). ReLU discards about half the second moment under a symmetric distribution, motivating an initialization scale near \(\frac{2}{\mathrm{fan}_{\mathrm{in}}}\) for that simplified setting. Those assumptions need not hold exactly for correlated finite data. Choose the documented initializer and gain for the intended activation rather than assuming every layer's default initialization implements that exact rule. [PyTorch 2.9 initialization APIs](https://docs.pytorch.org/docs/2.9/nn.init.html).
 
 ## Exercise 1: Construct XOR by hand
 

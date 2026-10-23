@@ -14,7 +14,7 @@ Attention mixes value vectors using weights derived from query-key scores. A cau
 
 ## Reading the implementation
 
-Q@transpose(K) forms query-by-key scores, scaled by square root of key width. tf.linalg.band_part constructs the lower triangle. tf.where replaces forbidden scores with negative infinity before tf.nn.softmax(axis=-1). Multiplying weights by V returns one output vector per query. The supplied helper accepts only square, nonempty self-attention with matching row counts and finite data.
+Q@transpose(K) forms query-by-key scores, scaled by square root of key width. tf.linalg.band_part constructs the lower triangle. tf.where replaces forbidden scores with negative infinity before `tf.nn.softmax(axis=-1)`. Multiplying weights by V returns one output vector per query. The supplied helper accepts only square, nonempty self-attention with matching row counts and finite data.
 
 ## Exercise 1: Calculate uniform mixtures
 
@@ -91,9 +91,9 @@ full=attention(non,non,v).numpy()
 for cut in range(1,4): np.testing.assert_allclose(attention(non[:cut],non[:cut],v[:cut]).numpy(),full[:cut],atol=1e-6,rtol=0)
 ```
 
-**Expected:** prefix comparisons pass within1e-6.
+**Expected:** prefix comparisons pass within 1e-6.
 
-**Verify:** Compare the computed values or written argument with prefix comparisons pass within1e-6.
+**Verify:** Compare the computed values or written argument with prefix comparisons pass within 1e-6.
 
 ## Exercise 6: Refuse malformed input
 

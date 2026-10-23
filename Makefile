@@ -16,6 +16,7 @@ setup:
 	bash scripts/setup.sh
 
 generate:
+	$(PYTHON) scripts/normalize_math_prose.py --write
 	$(PYTHON) scripts/build_catalog.py
 	$(PYTHON) scripts/build_journey_preview.py
 	$(PYTHON) scripts/audit_practice.py --write-report
@@ -51,13 +52,13 @@ windows-starter: generate
 	$(PYTHON) scripts/build_windows_starter.py
 
 docker:
-	bash scripts/docker_lab.sh start --build
+	bash classroom
 
 docker-stop:
-	bash scripts/docker_lab.sh stop
+	bash classroom stop
 
 docker-status:
-	bash scripts/docker_lab.sh status
+	bash classroom status
 
 modules-build:
 	bash scripts/module_lab.sh build --profiles "$(MODULE_PROFILES)"
@@ -70,21 +71,20 @@ modules-stop:
 
 modules-check:
 	$(PYTHON) scripts/check_modules.py
-	node scripts/check_module_ui.mjs
+	node scripts/check_classroom_ui.mjs
 
-CLASSROOM_PROFILES ?= python-core cpp20 tensorflow-cpu llm-torch-cpu scala-jvm spark-local-scala spark-local-python java21 javascript-node typescript-node
+# Empty means all ordinary profiles, as defined once in the shared launcher.
+CLASSROOM_PROFILES ?=
 CLASSROOM_FLAGS = $(foreach profile,$(CLASSROOM_PROFILES),--profile $(profile))
 
 classroom-build:
-	docker image inspect postgres:17 >/dev/null 2>&1 || docker compose -f compose.classroom.yaml pull postgres
-	docker compose --progress plain -f compose.classroom.yaml $(CLASSROOM_FLAGS) --parallel 1 build
+	bash classroom build $(CLASSROOM_FLAGS)
 
 classroom-start:
-	docker compose -f compose.classroom.yaml $(CLASSROOM_FLAGS) up -d --no-build --pull never --wait
+	bash classroom --no-build $(CLASSROOM_FLAGS)
 
 classroom-stop:
-	docker compose -f compose.classroom.yaml $(CLASSROOM_FLAGS) stop
+	bash classroom stop
 
-# One command for build, readiness, browser opening and persistent learning data.
 classroom:
-	bash classroom
+	bash classroom $(CLASSROOM_FLAGS)

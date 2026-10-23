@@ -16,7 +16,7 @@ Cohorts preserve time since an entry event so retention comparisons do not confu
 
 A churn model predicts who may leave under the observed policy. A retention intervention should target people whose outcome is improved by the intervention after accounting for cost, not automatically those with highest baseline risk. Similarly, attribution allocates credit among observed touchpoints, while incrementality asks what would have happened without an action. The latter requires an experimental or credible causal identification strategy.
 
-Customer lifetime value is a discounted expectation of future contribution over a stated horizon. Write CLV=sum_t E[margin_t*active_t]/(1+r)^t minus relevant acquisition or service costs. The discount rate, margin definition, churn process and forecast horizon are assumptions. A point prediction is not a known customer asset value, and a high-revenue customer can have low contribution after costly service or incentives.
+Customer lifetime value is a discounted expectation of future contribution over a stated horizon. Write \(\mathrm{CLV}=\sum_t\frac{\mathbb{E}[\mathrm{margin}_t\,\mathrm{active}_t]}{(1+r)^t}\) minus relevant acquisition or service costs. The discount rate, margin definition, churn process and forecast horizon are assumptions. A point prediction is not a known customer asset value, and a high-revenue customer can have low contribution after costly service or incentives.
 
 ### Model market response with its identification limits
 
@@ -38,7 +38,7 @@ Report volume, rate and mix changes separately when an aggregate moves. Include 
 
 **Metric trees**
 
-A metric tree links an outcome to component drivers through explicit arithmetic or causal hypotheses. An arithmetic identity such as revenue=orders*revenue_per_order is exact only when units and populations align. A causal arrow requires additional evidence. Use the tree to locate where a change occurred, then investigate why. Avoid double-counting correlated branches as independent contributions to the same business improvement.
+A metric tree links an outcome to component drivers through explicit arithmetic or causal hypotheses. An arithmetic identity such as \(\mathrm{revenue}=\mathrm{orders}\times\mathrm{revenue\ per\ order}\) is exact only when units and populations align. A causal arrow requires additional evidence. Use the tree to locate where a change occurred, then investigate why. Avoid double-counting correlated branches as independent contributions to the same business improvement.
 
 ### stat-38-02
 
@@ -158,7 +158,7 @@ Marketing mix modeling relates aggregate outcomes to media and other drivers, of
 
 **Adstock models**
 
-Adstock models represent carryover by accumulating current and decayed past exposure, for example a_t=x_t+lambda*a_(t-1). The decay parameter controls persistence and the chosen time unit matters. Alternative kernels can allow delayed peaks. Carryover can be confused with seasonality or autocorrelated demand, so infer it with controls, experiments or sensitivity rather than only a better in-sample fit.
+Adstock models represent carryover by accumulating current and decayed past exposure, for example \(a_t=x_t+\lambda a_{t-1}\). The decay parameter controls persistence and the chosen time unit matters. Alternative kernels can allow delayed peaks. Carryover can be confused with seasonality or autocorrelated demand, so infer it with controls, experiments or sensitivity rather than only a better in-sample fit.
 
 ### stat-38-22
 
@@ -224,11 +224,11 @@ python courses/statistics-ml/examples/chapter_38.py
 
 ### Keep funnel and cohort denominators visible
 
-One thousand entrants produce four hundred intermediate events and one hundred completions. Step conversions are 0.4 and 0.25, whose product is the overall 0.1. For the retention example, only the first cohort has mature follow-up, so the reported mature-cohort rate is 60/100=0.6. The second cohort is not silently treated as a completed observation.
+One thousand entrants produce four hundred intermediate events and one hundred completions. Step conversions are 0.4 and 0.25, whose product is the overall 0.1. For the retention example, only the first cohort has mature follow-up, so the reported mature-cohort rate is \(\frac{60}{100}=0.6\). The second cohort is not silently treated as a completed observation.
 
 ### Separate carryover from diminishing response
 
-A one-time exposure of ten decays through adstock values [10,5,2.5,1.25] when lambda=0.5. Separately, x/(1+x) gives responses [0,0.5,2/3,0.8] at exposures [0,1,2,4]. These curves demonstrate chosen mechanisms. Their parameters would need estimation and causal assumptions before supporting a marketing allocation.
+A one-time exposure of ten decays through adstock values [10,5,2.5,1.25] when \(\lambda=0.5\). Separately, \(\frac{x}{1+x}\) gives responses \([0,0.5,\frac{2}{3},0.8]\) at exposures [0,1,2,4]. These curves demonstrate chosen mechanisms. Their parameters would need estimation and causal assumptions before supporting a marketing allocation.
 
 ### Reconcile the interaction term
 
@@ -236,7 +236,7 @@ Price rises from ten to twelve and quantity from one hundred to one hundred ten.
 
 ### Reject a polished but wrong numerical claim
 
-An assistant-written claim of 25 percent conversion conflicts with the executed counts 100/1000=10 percent. The program produces a small report packet containing both counts and the derived rate. A narrative should cite this packet and explain its scope; it should not override the arithmetic because the text sounds plausible.
+An assistant-written claim of 25 percent conversion conflicts with the executed counts \(\frac{100}{1000}=10\) percent. The program produces a small report packet containing both counts and the derived rate. A narrative should cite this packet and explain its scope; it should not override the arithmetic because the text sounds plausible.
 
 ### Complete executable example
 

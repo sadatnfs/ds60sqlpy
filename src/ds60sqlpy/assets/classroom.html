@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>DS60 Classroom · Choose your next idea</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20width%3D%2264%22%20height%3D%2264%22%20rx%3D%2216%22%20fill%3D%22%2322242b%22%2F%3E%3Ctext%20x%3D%2212%22%20y%3D%2247%22%20font-family%3D%22Georgia%2Cserif%22%20font-size%3D%2248%22%20font-weight%3D%22700%22%20font-style%3D%22italic%22%20fill%3D%22%23ffffff%22%3Ed.%3C%2Ftext%3E%3C%2Fsvg%3E" />
+    <link rel="stylesheet" href="/assets/classroom.css" />
+    <link rel="stylesheet" href="/assets/rich-content.css" />
+  </head>
+  <body data-mode="light">
+    <a class="skip" href="#main">Skip to learning content</a>
+    <header class="site-header">
+      <button
+        id="home-button"
+        class="brand"
+        aria-label="DS60 Classroom, all learning paths"
+      >
+        <span class="brand-mark" aria-hidden="true">d.</span
+        ><span
+          >DS60 <strong>Classroom</strong
+          ><small>A place to understand, build, and grow.</small></span
+        >
+      </button>
+      <nav aria-label="Classroom">
+        <button id="paths-button">All learning paths</button
+        ><a href="/reference-pages/docs/docker-classroom.md.html"
+          >Setup &amp; saved work</a
+        ><button id="theme-toggle" aria-pressed="false">Dark appearance</button>
+      </nav>
+    </header>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <main id="main" tabindex="-1">
+      <section id="home-view" class="home-view" aria-labelledby="home-title">
+        <div class="home-intro">
+          <div>
+            <p class="eyebrow">YOUR CURIOSITY. YOUR PACE.</p>
+            <h1 id="home-title" tabindex="-1">
+              What will you<br /><em>understand next?</em>
+            </h1>
+            <p class="intro-copy">
+              Start with a first line of code. Follow a question into the
+              theory. Build something that makes it click. Every path belongs
+              here, and you choose where to begin.
+            </p>
+            <p id="catalog-summary" class="catalog-summary">
+              Loading the classroom library...
+            </p>
+          </div>
+          <aside class="pace-card">
+            <span class="tiny-heading">MAKE IT YOURS</span>
+            <h2>A little time.<br />A meaningful next step.</h2>
+            <label for="pace">Time for a typical study session</label
+            ><select id="pace">
+              <option value="15">15 minutes · one idea</option>
+              <option value="30" selected>30 minutes · room to explore</option>
+              <option value="60">60 minutes · a deeper session</option>
+              <option value="90">90 minutes · settle into a project</option>
+            </select>
+            <p id="pace-note">
+              Session estimates are suggestions. Nothing is locked, timed, or
+              graded by your pace.
+            </p>
+            <button id="resume" class="primary" hidden></button>
+          </aside>
+        </div>
+        <div class="browse-heading">
+          <div>
+            <p class="eyebrow">THE LEARNING LIBRARY</p>
+            <h2>Find a path that speaks to you.</h2>
+          </div>
+          <div class="search-control">
+            <label for="catalog-search">Search every subject and lesson</label
+            ><input
+              id="catalog-search"
+              type="search"
+              placeholder="Try Python, Transformers, joins, or C++"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <p id="search-summary" class="muted" role="status"></p>
+        <div id="subject-cards" class="subject-cards"></div>
+        <section
+          id="search-lessons"
+          class="search-lessons"
+          aria-labelledby="search-lessons-title"
+          hidden
+        >
+          <h3 id="search-lessons-title">Matching lessons</h3>
+          <div id="search-lesson-list"></div>
+        </section>
+        <p id="no-results" class="notice" hidden>
+          No subjects or lessons match yet. Try a shorter topic, a language, or
+          a lesson ID.
+        </p>
+        <div class="home-footnote">
+          <strong>Pick up where you left off.</strong>
+          <p>
+            Your saved code and notes stay in this classroom's local learning
+            workspace. Reading, experimenting, and revisiting an idea all count
+            as learning. Completion labels describe your own records, not
+            automatic certification.
+          </p>
+        </div>
+      </section>
+      <section
+        id="workspace-view"
+        class="workspace-view"
+        hidden
+        aria-label="Learning workspace"
+      >
+        <div class="workspace-top">
+          <button id="back-paths" class="quiet">← All paths</button
+          ><span id="subject-label"></span
+          ><button
+            id="lesson-menu"
+            aria-expanded="false"
+            aria-controls="lesson-sidebar"
+          >
+            Browse lessons
+          </button>
+        </div>
+        <div class="workspace-grid">
+          <aside
+            id="lesson-sidebar"
+            class="lesson-sidebar"
+            aria-label="Lesson navigation"
+          >
+            <p class="eyebrow">YOUR PATH</p>
+            <h2 id="path-title"></h2>
+            <p id="path-description" class="muted"></p>
+            <label for="subject-select">Switch subject</label
+            ><select id="subject-select"></select
+            ><label for="lesson-query">Find in this path</label
+            ><input
+              id="lesson-query"
+              type="search"
+              placeholder="Topic or lesson ID"
+              autocomplete="off"
+            /><label for="stage">Learning stage</label
+            ><select id="stage">
+              <option value="all">All stages</option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+            <p id="lesson-count" class="muted"></p>
+            <nav id="lessons" class="lessons" aria-label="Lessons"></nav>
+          </aside>
+          <div class="workspace-content">
+            <section class="lesson-heading">
+              <div id="badges" class="badges"></div>
+              <h1 id="title" tabindex="-1">Your learning workspace</h1>
+              <p id="outcome" class="outcome"></p>
+              <div id="prerequisites" class="prerequisites"></div>
+              <p id="llm-reading-route" hidden>
+                <a href="/reference-pages/docs/learning/llm-textbook.md.html"
+                  >LLM textbook: reading order, notation, and chapter map</a
+                >
+              </p>
+              <nav class="pager" aria-label="Lesson progression">
+                <button id="previous-lesson" disabled>← Previous</button
+                ><span id="journey-position"></span
+                ><button id="next-lesson" disabled>Next →</button>
+              </nav>
+              <p id="capability" class="notice"></p>
+              <details id="runtime-setup" class="notice" hidden>
+                <summary>Prepare this lesson's runtime</summary>
+                <p>
+                  With your Docker engine running, open a terminal in the
+                  repository folder. On Windows, use WSL. Your saved progress is
+                  retained.
+                </p>
+                <pre id="runtime-commands"></pre>
+                <p id="runtime-setup-note"></p>
+                <a href="/reference-pages/docs/docker-classroom.md.html"
+                  >Cross-platform setup instructions</a
+                >
+              </details>
+            </section>
+            <section id="planned" class="panel" hidden></section>
+            <div id="authored" class="panes" hidden>
+              <section class="panel reading-pane">
+                <div class="panel-head">
+                  <div>
+                    <span class="tiny-heading">UNDERSTAND</span>
+                    <h2>The lesson</h2>
+                  </div>
+                  <button id="reading-toggle" aria-pressed="false">
+                    Focus on reading
+                  </button>
+                </div>
+                <div class="reader-tools">
+                  <label for="section-jump">Jump to a section</label
+                  ><select id="section-jump">
+                    <option value="">Choose a section</option></select
+                  ><label id="chapter-read-label" class="check-label" hidden
+                    ><input id="read-chapter" type="checkbox" /> I have read
+                    this chapter</label
+                  >
+                </div>
+                <article id="guide" class="guide"></article>
+                <div id="solution-section" class="solution-section">
+                  <p class="muted">
+                    Try your own approach first. Use the lesson's hints before
+                    comparing with the worked solution.
+                  </p>
+                  <button id="reveal">Reveal separate solutions</button>
+                  <div id="solutions" hidden></div>
+                </div>
+              </section>
+              <section class="panel practice-pane">
+                <div class="panel-head">
+                  <div>
+                    <span class="tiny-heading">EXPLORE</span>
+                    <h2 id="pad-title">Code and reflection</h2>
+                  </div>
+                  <span id="language" class="badge"></span>
+                </div>
+                <div class="pad-body">
+                  <div id="legacy-workspace" hidden>
+                    <label for="runner">Execution language</label
+                    ><select id="runner"></select>
+                    <div id="mode-control" hidden>
+                      <label for="pad-mode">SQL workspace</label
+                      ><select id="pad-mode"></select>
+                    </div>
+                  </div>
+                  <label id="variant-label" for="variant" hidden
+                    >Language variant</label
+                  ><select id="variant" hidden></select
+                  ><label id="prediction-label" for="prediction"
+                    >Predict before you run</label
+                  ><textarea
+                    id="prediction"
+                    class="reflection"
+                    maxlength="12000"
+                    placeholder="What do you expect to happen, and why?"
+                  ></textarea>
+                  <div id="source-section">
+                    <div class="source-heading">
+                      <label for="source">Source or worksheet</label>
+                      <div>
+                        <button
+                          id="syntax-toggle"
+                          class="quiet"
+                          aria-pressed="false"
+                          aria-controls="syntax-preview"
+                        >
+                          Syntax preview</button
+                        ><button id="download-source" class="quiet">
+                          Download
+                        </button>
+                      </div>
+                    </div>
+                    <textarea
+                      id="source"
+                      class="source"
+                      spellcheck="false"
+                      autocapitalize="off"
+                      autocomplete="off"
+                      aria-describedby="source-help"
+                    ></textarea>
+                    <div id="syntax-preview" hidden>
+                      <p id="preview-status" class="muted" role="status"></p>
+                      <div id="syntax-code"></div>
+                    </div>
+                    <p id="source-help" class="muted">
+                      Tab indents. Escape then Tab leaves the editor. Ctrl/Cmd+S
+                      saves; Ctrl/Cmd+Enter runs.
+                    </p>
+                    <details id="runtime-details">
+                      <summary>How this code runs</summary>
+                      <p id="runtime-guidance"></p>
+                    </details>
+                    <div id="legacy-pad-tools" hidden>
+                      <button id="starter">Load lesson starter</button>
+                      <details class="history">
+                        <summary>Recover an earlier saved pad</summary>
+                        <label for="pad-history">Earlier version</label
+                        ><select id="pad-history"></select>
+                        <div class="toolbar">
+                          <button id="load-history" disabled>Load a copy</button
+                          ><button id="refresh-history">
+                            Refresh versions
+                          </button>
+                        </div>
+                      </details>
+                      <details id="sql-setup" class="notice" hidden>
+                        <summary>Prepare SQL training data</summary>
+                        <p>
+                          This resets only the disposable course training schema
+                          in advanced_sql_training. Saved pads remain in your
+                          workspace.
+                        </p>
+                        <button id="prepare-sql">
+                          Reset and verify training schema
+                        </button>
+                      </details>
+                    </div>
+                  </div>
+                  <p
+                    id="save-state"
+                    class="save-state"
+                    role="status"
+                    aria-live="polite"
+                  ></p>
+                  <div class="toolbar run-tools">
+                    <button id="run" class="primary">Run code</button
+                    ><label class="sr-only" for="timeout">Run deadline</label
+                    ><select id="timeout" aria-label="Run deadline">
+                      <option value="15">15 seconds</option>
+                      <option value="60" selected>60 seconds</option>
+                      <option value="120">120 seconds</option></select
+                    ><button id="cancel" disabled>Cancel job</button
+                    ><button id="save">Save work</button
+                    ><button id="refresh">Check runtime</button
+                    ><button id="reconnect" hidden>Reconnect saved job</button
+                    ><button id="recover" hidden>
+                      Confirm manual recovery
+                    </button>
+                  </div>
+                  <label id="explanation-label" for="explanation"
+                    >Explain the evidence</label
+                  ><textarea
+                    id="explanation"
+                    class="reflection"
+                    maxlength="12000"
+                    placeholder="What did you observe? How would you explain it in your own words?"
+                  ></textarea>
+                  <div id="legacy-evidence" hidden>
+                    <label for="phase">Other learning notes</label
+                    ><select id="phase">
+                      <option value="read">Reading notes</option>
+                      <option value="attempt">Attempt and observations</option>
+                      <option value="compare">Comparison notes</option></select
+                    ><label for="phase-note" id="phase-label"
+                      >Reading notes</label
+                    ><textarea
+                      id="phase-note"
+                      class="reflection"
+                      maxlength="12000"
+                    ></textarea>
+                    <div class="hint-area">
+                      <button id="hint-button">Give me one hint</button>
+                      <p id="hint" role="status"></p>
+                    </div>
+                    <details>
+                      <summary>Continue with Codex</summary>
+                      <pre id="coaching-prompt"></pre>
+                    </details>
+                    <div class="completion-area">
+                      <label class="check-label"
+                        ><input id="confirmed" type="checkbox" /> I checked my
+                        result and can explain it. My prediction, attempt, and
+                        explanation are saved.</label
+                      ><button id="complete">Record demonstrated lesson</button>
+                    </div>
+                  </div>
+                  <p id="learning-guidance" class="muted"></p>
+                </div>
+                <section class="results" aria-labelledby="results-title">
+                  <h3 id="results-title">What actually happened</h3>
+                  <p id="job-status" class="muted">
+                    No run yet for this lesson.
+                  </p>
+                  <pre
+                    id="output"
+                    class="result-log"
+                    tabindex="0"
+                    aria-label="Runtime output"
+                  >
+Your output and compiler diagnostics will appear here.</pre
+                  >
+                  <div id="sql-results" class="sql-results"></div>
+                  <div id="figures"></div>
+                  <ul id="checks" class="checks"></ul>
+                  <button id="error-line" hidden>Inspect source line</button>
+                  <details id="job-history" class="history">
+                    <summary>Saved job receipts</summary>
+                    <div id="history"></div>
+                  </details>
+                </section>
+              </section>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <span>DS60 Classroom</span>
+      <p>One library. Many ways to learn. Built for your local machine.</p>
+      <a href="/reference-pages/docs/one-command-classroom.md.html"
+        >Classroom guide</a
+      >
+    </footer>
+    <noscript
+      ><p>
+        This interactive classroom needs JavaScript. Read the
+        <a href="/START_HERE.html">static lesson library</a> without running
+        code.
+      </p></noscript
+    >
+    <script>
+      const SERVER_TOKEN = "";
+    </script>
+    <script src="/assets/classroom.js" defer></script>
+  </body>
+</html>

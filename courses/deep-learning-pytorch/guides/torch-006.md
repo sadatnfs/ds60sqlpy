@@ -6,11 +6,11 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-005`. The prer
 
 ## Learning objectives
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use w=1, z=2*w, a=z*z and loss=(a-1)**2. The finish condition is z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Autograd follows the chain of tensor operations from a scalar objective back to its inputs. The central investigation is concrete: Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\). The finish condition is z2, a4, loss 9, gradient 48. at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\). A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, a=z², loss=(a-1)², the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
+Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with.data.
 
 Graph state is also temporary. After a normal backward pass, the saved intermediates are released; reusing the same graph for another backward usually requires an explicit retention policy or a fresh forward computation. Most training loops should recompute the forward graph per batch. Nonlinearities such as ReLU introduce points where a derivative convention matters.
 
@@ -46,17 +46,17 @@ Build every intermediate from a requires_grad leaf. autograd.grad(loss, w) compo
 
 ## Trace the graph and its saved values
 
-The chain is w→z→a→L, with z=2w, a=z² and L=(a-1)². At w=1, the full trace is:
+The chain is w→z→a→L, with z=2w, \(a={z}^{2}\) and \(L={\left(a-1\right)}^{2}\). At \(w=1\), the full trace is:
 
 | Operation | Forward value | Immediate derivative |
 | --- | --- | --- |
-| z=2w | z=2 | dz/dw=2 |
-| a=z² | a=4 | da/dz=2z=4 |
-| L=(a-1)² | L=9 | dL/da=2(a-1)=6 |
+| z=2w | \(z=2\) | \(\frac{\partial z}{\partial w}=2\) |
+| \(a={z}^{2}\) | \(a=4\) | da/dz=2z=4 |
+| \(L={\left(a-1\right)}^{2}\) | \(L=9\) | dL/da=2(a-1)=6 |
 
-Backward composes sensitivities in reverse dependency order: dL/dw=6×4×2=48. Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives z=3, a=9, L=64 and derivative 16×6×3=288. A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.
+Backward composes sensitivities in reverse dependency order: \(\frac{\partial L}{\partial w}=6\cdot 4\cdot 2=48\). Omitting the inner scale gives 24, even though every forward value remains correct. Changing the inner scale to three gives \(z=3\), \(a=9\), \(L=64\) and derivative \(16\cdot 6\cdot 3=288\). A learning-rate adjustment that hides the missing factor for scale 2 would not repair the algorithm for scale 3.
 
-The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding a=4 fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.
+The scalar expression can also be expanded to L=16w⁴-8w²+1. Its derivative 64 w³-16w equals 48 at one, providing a symbolic check independent of the local-factor table. The finite-difference check recomputes the complete expression at 1+h and 1-h. Holding \(a=4\) fixed while perturbing w would instead probe a constant function with slope zero. Equal forward values at one point do not establish equal dependencies.
 
 For larger tensors, reverse-mode differentiation propagates vector-Jacobian products rather than materializing every possible derivative matrix. A scalar loss supplies the initial sensitivity one; each operation transforms the incoming sensitivity using its saved forward values. This explains why the graph must retain information from the actual forward pass and why asking for derivatives of a nonscalar result requires an explicit upstream-gradient convention.
 
@@ -72,7 +72,7 @@ ReLU adds a separate mathematical boundary. At a negative input the derivative i
 
 ### Example A: Trace the chain rule
 
-The factors are dL/da=2(a-1)=6, da/dz=2z=4 and dz/dw=2. Multiplying 6*4*2 gives 48 at the supplied point.
+The factors are dL/da=2(a-1)=6, da/dz=2z=4 and \(\frac{\partial z}{\partial w}=2\). Multiplying \(6\cdot 4\cdot 2\) gives 48 at the supplied point.
 
 ```python
 import numpy as np
@@ -114,11 +114,11 @@ else: raise AssertionError('unsafe leaf mutation accepted')
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new w=1.5, gradient -1 for (w-2)**2. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: z2, a4, loss 9, gradient 48. at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\). Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Trace the chain rule.** Use w=1, z=2*w, a=z*z and loss=(a-1)**2.
+1. **Trace the chain rule.** Use \(w=1\), \(z=2\cdot w\), \(a=z\cdot z\) and \(\mathrm{loss}={\left(a-1\right)}^{2}\).
    **Expected:** z2, a4, loss 9, gradient 48.
    **Verify:** Save the assertion results for exercise 1, including z2, a4, loss 9, gradient 48.
 
@@ -130,7 +130,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** RuntimeError.
    **Verify:** Save the assertion results for exercise 3, including RuntimeError.
 
-4. **Expose saved-value invalidation.** Build loss=x*x, mutate x under no_grad before backward, and inspect the failure.
+4. **Expose saved-value invalidation.** Build \(\mathrm{loss}=x\cdot x\), mutate x under no_grad before backward, and inspect the failure.
    **Expected:** RuntimeError from a changed saved tensor version.
    **Verify:** Save the assertion results for exercise 4, including RuntimeError from a changed saved tensor version.
 
@@ -139,8 +139,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 5, including gradients 0, 0, 1.
 
 6. **Recompute after an update.** Update a scalar under no_grad, then build a fresh quadratic objective and request its derivative.
-   **Expected:** at new w=1.5, gradient -1 for (w-2)**2.
-   **Verify:** Save the assertion results for exercise 6, including at new w=1.5, gradient -1 for (w-2)**2.
+   **Expected:** at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
+   **Verify:** Save the assertion results for exercise 6, including at new \(w=1.5\), gradient -1 for \({\left(w-2\right)}^{2}\).
 
 ## Common pitfalls and diagnosis
 

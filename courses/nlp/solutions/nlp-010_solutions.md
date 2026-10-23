@@ -4,7 +4,7 @@ The executable reference checks the declared fixtures. It is separate from the l
 
 ## Exercise 1: Trace the first column
 
-The N partial path begins with .6*.6=.36 and the V path with .4*.1=.04. These scores include both starting plausibility and observation likelihood. Choosing only the largest emission would omit part of the model. Store one score per ending state rather than one global winner.
+The N partial path begins with \(0.6\cdot 0.6=0.36\) and the V path with \(0.4\cdot 0.1=0.04\). These scores include both starting plausibility and observation likelihood. Choosing only the largest emission would omit part of the model. Store one score per ending state rather than one global winner.
 
 **Expected:** Exponentiated initial scores are [0.36,0.04].
 
@@ -36,13 +36,13 @@ The validator checks structural continuity. It does not know the words or whethe
 
 The gold entity covers token positions [0,2), while the predicted entity covers [0,1). They overlap but are not equal typed spans. Exact entity scoring therefore counts a false positive and false negative despite two matching token labels. The evaluation unit must match the extraction use case.
 
-**Expected:** Token accuracy 2/3 but zero exactly recovered two-token ORG entities.
+**Expected:** Token accuracy \(\frac{2}{3}\) but zero exactly recovered two-token ORG entities.
 
 ## Transfer and limits
 
 Sequence labeling assigns a label to every token while accounting for relationships among neighboring labels. Part-of-speech tagging, entity tagging and some segmentation tasks have this shape. A document classifier returns one label for a whole document; a sequence tagger returns an ordered label sequence aligned with tokens. Losing that alignment can make a numerically valid output unusable.
 
-A hidden Markov model separates hidden label transitions from observed token emissions. For labels s_1,...,s_T and observations x_1,...,x_T, its joint probability is pi(s_1)*b_s1(x_1)*product_(t=2)^T a_(s_(t-1),s_t)*b_st(x_t). The initial distribution pi chooses the first state, a describes state transitions, and b describes token likelihood within a state. Conditional independence assumptions make this model tractable but limit its linguistic realism.
+A hidden Markov model separates hidden label transitions from observed token emissions. For labels s_1,...,s_T and observations x_1,...,x_T, its joint probability is \(\pi(s_1)b_{s_1}(x_1)\prod_{t=2}^T a_{s_{t-1},s_t}b_{s_t}(x_t)\). The initial distribution pi chooses the first state, a describes state transitions, and b describes token likelihood within a state. Conditional independence assumptions make this model tractable but limit its linguistic realism.
 
 Viterbi decoding finds the single highest-probability complete path. It does not compute the marginal probability of each token's label, and choosing the most likely label at each position independently can produce a different sequence. This lesson implements the actual dynamic program on tiny authored probability tables, compares it with exhaustive enumeration and then examines BIO entity constraints.
 

@@ -14,7 +14,7 @@ Quantization represents approximate values with a limited set of integers and a 
 
 ## Reading the implementation
 
-For a nonzero block, scale=max(abs(W))/127. Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].
+For a nonzero block, \(\mathrm{scale}=\frac{\max(\left|W\right|)}{127}\). Quantize with rint(W/scale), clip and cast toint8. Dequantize by multiplying the integer array by its scale. Row scales use keepdims=True to preserve broadcasting along columns. A zero block needs an explicit nonzero scale convention. Compare against full precision W@x for x[1,-2].
 
 ## Exercise 1: Compute the full-precision reference
 

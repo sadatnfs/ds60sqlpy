@@ -101,9 +101,9 @@ Outputs: V0,(V0+V1)/2,(V0+V1+V2)/3.
 Compare float32 atatol1e-6 and float64 atatol1e-12.
 ```
 
-**Expected:** [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.
+**Expected:** \([[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]\) within declared dtype tolerance.
 
-**Verify:** Compare the computed values or written argument with [[2,0],[1,1],[8/3,8/3]] within declared dtype tolerance.
+**Verify:** Compare the computed values or written argument with \([[2,0],[1,1],[\frac{8}{3},\frac{8}{3}]]\) within declared dtype tolerance.
 
 ## Exercise 6: Preserve optionality
 

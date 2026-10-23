@@ -48,7 +48,7 @@ class _VisibleTextParser(HTMLParser):
 def _visible_text(document: str) -> str:
     parser = _VisibleTextParser()
     parser.feed(document)
-    return " ".join(parser.parts)
+    return "".join(parser.parts)
 
 
 def test_every_catalog_entry_has_a_current_portable_reader() -> None:
@@ -84,9 +84,9 @@ def test_reader_renders_notebooks_and_sql_as_html_not_raw_downloads() -> None:
 
     assert "Code cell 1" in python_reader
     assert "Readable preview." in python_reader
-    assert "1 + 1" in python_reader
+    assert "1 + 1" in _visible_text(python_reader)
     assert 'class="source-code language-sql"' in sql_reader
-    assert "SELECT customer_id" in sql_reader
+    assert "SELECT customer_id" in _visible_text(sql_reader)
     assert "psql -X -v ON_ERROR_STOP=1" in sql_reader
     assert "START_DS60.cmd" in sql_reader
     assert "Create/open guided SQL notebook" in sql_reader
@@ -181,7 +181,7 @@ def test_math_in_tables_keeps_conditional_probability_and_superscripts() -> None
     )
 
     assert '<math xmlns="http://www.w3.org/1998/Math/MathML"' in document
-    assert "<mo>|</mo>" in document and "<msup>" in document
+    assert "<mo>∣</mo>" in document and "<msup>" in document
     assert "Amid B" not in document and "<td>a|b</td>" in document
     assert render_inline(r"`\(R^2\)`", resolver) == r"<code>\(R^2\)</code>"
 
@@ -206,7 +206,7 @@ def test_authored_text_reference_is_escaped_and_rendered(
     reference = reference_relative_path(f"courses/future/fixture{suffix}")
 
     assert reference in references
-    assert "&lt;script&gt;example&lt;/script&gt;" in references[reference]
+    assert "<script>example</script>" in _visible_text(references[reference])
     assert "<script>example</script>" not in references[reference]
     plan_reference = references[reference_relative_path("courses/future/README.md")]
     assert f"fixture{suffix}.html" in plan_reference

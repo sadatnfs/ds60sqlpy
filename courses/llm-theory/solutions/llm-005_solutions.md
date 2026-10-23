@@ -17,9 +17,9 @@ regardless of the optional arithmetic checker.
 
 ## Exercise 1: Trace a perplexity
 
-The two negative log terms are ln(2) and ln(4), so total NLL is 3*ln(2). Divide by the two active targets to obtain 1.5*ln(2), then exponentiate for perplexity 2**1.5. Each field has a different interpretation. Keeping the count next to the result makes later padding and batching errors visible. The perplexity is not a count of correct predictions or a probability that the observed text is factually true.
+The two negative log terms are ln(2) and ln(4), so total NLL is 3*ln(2). Divide by the two active targets to obtain 1.5*ln(2), then exponentiate for perplexity \({2}^{1.5}\). Each field has a different interpretation. Keeping the count next to the result makes later padding and batching errors visible. The perplexity is not a count of correct predictions or a probability that the observed text is factually true.
 
-**Expected:** Total 3*log(2), count 2, mean 1.5*log(2), perplexity 2**1.5.
+**Expected:** Total \(3\cdot \log(2)\), count 2, mean \(1.5\cdot \log(2)\), perplexity \({2}^{1.5}\).
 
 **Verify:** Assert all four fields with explicit tolerances rather than comparing one unlabeled number.
 
@@ -35,7 +35,7 @@ The ignored third slot contributes neither a negative log term nor a target coun
 
 Document A has total ln(2) over one target; B has total 6*ln(2) over three. Combining all targets gives 7*ln(2)/4. Averaging the two document means gives (ln(2)+2*ln(2))/2, or 3*ln(2)/2. The discrepancy is weighting, not floating-point error. Declare whether documents or targets are the primary units before comparing systems. The later corpus split should also preserve source families rather than pretending repeated paraphrases are independent evidence.
 
-**Expected:** Token-weighted mean is 7*log(2)/4, while equal-document mean is 3*log(2)/2.
+**Expected:** Token-weighted mean is \(\frac{7\cdot \log(2)}{4}\), while equal-document mean is \(\frac{3\cdot \log(2)}{2}\).
 
 **Verify:** Record both the four-target denominator and two-document denominator in a labeled table.
 
@@ -43,7 +43,7 @@ Document A has total ln(2) over one target; B has total 6*ln(2) over three. Comb
 
 A zero-probability active target is impossible under the supplied distribution, so mean NLL and perplexity are infinite. If the zero slot is explicitly ignored, only the probability 0.5 remains, giving ln(2) and perplexity 2. This distinction relies on the mask policy, not on silently clipping probabilities. Ignoring an inconvenient real target after seeing its score would be selection bias; only predeclared padding or exclusion rules justify its removal.
 
-**Expected:** Active zero gives infinite mean and perplexity; ignoring it leaves mean log(2) and perplexity 2.
+**Expected:** Active zero gives infinite mean and perplexity; ignoring it leaves mean \(\log(2)\) and perplexity 2.
 
 **Verify:** Use math.isinf for the first case and assert active count 1 in the second.
 
@@ -57,7 +57,7 @@ An all-false mask and an empty sequence have no defined empirical mean. A value 
 
 ## Exercise 6: Challenge a tokenizer ranking
 
-A assigns probability 0.25 to its one token, so mean NLL is ln(4) and perplexity 4. B assigns 0.5 to each of three character targets, yielding perplexity 2 but complete-string probability 0.5**3=0.125. The smaller B perplexity did not mean it assigned more probability to the same complete string. Neither alone proves answer quality. A compatible comparison must state representation and unit, or use an independently justified common scoring basis rather than sorting raw token perplexities.
+A assigns probability 0.25 to its one token, so mean NLL is ln(4) and perplexity 4. B assigns 0.5 to each of three character targets, yielding perplexity 2 but complete-string probability \({0.5}^{3}=0.125\). The smaller B perplexity did not mean it assigned more probability to the same complete string. Neither alone proves answer quality. A compatible comparison must state representation and unit, or use an independently justified common scoring basis rather than sorting raw token perplexities.
 
 **Expected:** A perplexity 4 with string probability 0.25; B perplexity 2 with string probability 0.125.
 

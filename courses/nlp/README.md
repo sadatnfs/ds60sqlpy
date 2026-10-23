@@ -1,5 +1,13 @@
 # Natural Language Processing
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Natural Language Processing** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 All 24 lessons are available in the browser journey, with guides, local examples,
 learner sources and separate explanations. [track.json](track.json) describes
 prerequisites and order; [lessons.json](lessons.json) lists the teaching files.

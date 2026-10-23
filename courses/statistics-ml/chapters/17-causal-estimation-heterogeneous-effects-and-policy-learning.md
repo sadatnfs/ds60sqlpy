@@ -46,7 +46,7 @@ Match units with comparable assignment scores and define the resulting target po
 
 **Inverse-probability treatment weighting**
 
-Weight treated by 1/e and controls by 1/(1-e) for an ATE target. Stabilization or normalization changes finite-sample behavior. Extreme scores indicate weak support and high variance.
+Weight treated by \(\frac{1}{e}\) and controls by \(\frac{1}{1-e}\) for an ATE target. Stabilization or normalization changes finite-sample behavior. Extreme scores indicate weak support and high variance.
 
 ### stat-17-06
 
@@ -198,11 +198,11 @@ Infer candidate graphs from conditional independences, functional restrictions o
 
 ### Case study: trace an AIPW score by hand
 
-For one treated observation with outcome eight, estimated treatment probability .5, predicted treated outcome six and predicted control outcome three, the score is 6-3+(8-6)/.5=7. For one control observation with outcome four and the same nuisance predictions, the score is 6-3-(4-3)/.5=1. Their average is four. The outcome model contributes a baseline contrast three, and observed residuals adjust that contrast using assignment probabilities.
+For one treated observation with outcome eight, estimated treatment probability .5, predicted treated outcome six and predicted control outcome three, the score is \(6-3+\frac{8-6}{0.5}=7\). For one control observation with outcome four and the same nuisance predictions, the score is \(6-3-\frac{4-3}{0.5}=1\). Their average is four. The outcome model contributes a baseline contrast three, and observed residuals adjust that contrast using assignment probabilities.
 
 Each score is not an individual treatment effect. It can lie outside the outcome range and can be noisy because inverse probabilities amplify residuals. Averaging many appropriately sampled scores estimates the population target under assumptions. Treating a large score as proof that one person benefits greatly would confuse an estimating-equation contribution with a personal causal quantity.
 
-With true propensity e and estimated propensity e_hat, let delta_a=m_hat_a-m_a be outcome-model error. Conditional bias in the AIPW score can be written as (e_hat-e)*[delta_1/e_hat+delta_0/(1-e_hat)]. This product structure explains double robustness: either correct nuisance component makes this expression zero. It also explains failure when both errors are substantial, especially near propensity boundaries.
+With true propensity e and estimated propensity e_hat, let \(\delta_{a}=m_{\mathrm{hat\_a}}-m_{a}\) be outcome-model error. Conditional bias in the AIPW score can be written as (e_hat-e)*[delta_1/e_hat+delta_0/(1-e_hat)]. This product structure explains double robustness: either correct nuisance component makes this expression zero. It also explains failure when both errors are substantial, especially near propensity boundaries.
 
 Cross-fitting helps control the relationship between learned nuisance errors and evaluation noise. It does not make arbitrary slow or inconsistent learners satisfy the asymptotic conditions. In a practical report, include overlap, effective weight behavior, nuisance diagnostics, score tails and sensitivity to modeling choices. A standard error computed from the score's sample variability is meaningful only when the assumptions supporting that approximation hold.
 

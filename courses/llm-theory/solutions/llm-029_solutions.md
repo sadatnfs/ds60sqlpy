@@ -14,7 +14,7 @@ A scaling law is an empirical relationship measured under a specified family of 
 
 ## Reading the implementation
 
-Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is log(L2/L1)/log(C2/C1), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.
+Read each row as one experiment with parametersP,tokensD,stepsS,computeC and held-out lossL. Compare rows only after marking which columns differ. A ratio compares multiplicative change. A log-log slope is \(\frac{\log(\frac{L_{2}}{L_{1}})}{\log(\frac{C_{2}}{C_{1}})}\), meaningful only for the specified quantities and regime. Do not hide a changed tokenizer or test distribution inside a loss column.
 
 ## Exercise 1: Read a controlled comparison
 

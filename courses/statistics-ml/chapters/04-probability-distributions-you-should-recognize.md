@@ -104,7 +104,7 @@ Uniform density is constant over a chosen interval, but uniformity depends on pa
 
 **Exponential distribution**
 
-Exponential waiting time has constant hazard and the memoryless property. Its mean is scale=1/rate. Aging hardware or customer learning violates constant hazard even if average waiting time matches.
+Exponential waiting time has constant hazard and the memoryless property. Its mean is \(\mathrm{scale}=\frac{1}{\mathrm{rate}}\). Aging hardware or customer learning violates constant hazard even if average waiting time matches.
 
 ### stat-04-17
 
@@ -116,7 +116,7 @@ Gamma distributions model positive skew and sum independent exponential waits wi
 
 **Beta distribution**
 
-A beta distribution lives between zero and one, with mean alpha/(alpha+beta). It can represent uncertainty about a probability. Observed values exactly zero or one need special treatment in continuous beta regression.
+A beta distribution lives between zero and one, with mean \(\frac{\alpha}{\alpha+\beta}\). It can represent uncertainty about a probability. Observed values exactly zero or one need special treatment in continuous beta regression.
 
 ### stat-04-19
 
@@ -128,7 +128,7 @@ The Dirichlet places probability mass on vectors of nonnegative proportions summ
 
 **Lognormal distribution**
 
-Exponentiating a normal variable creates a lognormal variable with mean exp(mu+sigma-squared/2), not exp(mu). Multiplicative mechanisms motivate it. Large log-scale variance produces a long right tail and unstable arithmetic averages.
+Exponentiating a normal variable creates a lognormal variable with mean \(\exp\!\left(\mu+\frac{\sigma^2}{2}\right)\), not \(\exp(\mu)\). Multiplicative mechanisms motivate it. Large log-scale variance produces a long right tail and unstable arithmetic averages.
 
 ### stat-04-21
 
@@ -186,7 +186,7 @@ A positive duration can be exponential, gamma, Weibull or lognormal depending on
 
 ### Case study: why t, chi-square and F appear together
 
-If Z is standard normal and U is independent chi-square with nu degrees of freedom, then T=Z/sqrt(U/nu) has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.
+If Z is standard normal and U is independent chi-square with nu degrees of freedom, then \(T=\frac{Z}{\sqrt{U/\nu}}\) has a t distribution. Estimating a normal population mean replaces the unknown sigma by a sample SD, creating this random denominator. With few degrees of freedom, denominator uncertainty produces heavier tails and larger critical values.
 
 A normal sample's residual sum of squares divided by sigma-squared has a chi-square distribution with the appropriate residual degrees of freedom. Ratios of independent scaled chi-square quantities produce F distributions, which underlie classical variance comparisons and ANOVA. Independence, normal errors and correct degrees of freedom are doing the work; the named reference distribution is not a universal property of every ratio statistic.
 
@@ -202,9 +202,9 @@ Zero inflation makes a particular mixture claim: one mechanism produces structur
 
 ### Case study: truncation and censoring yield different likelihoods
 
-If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by P(Y>10). This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.
+If a dataset contains only purchases above ten dollars, the density of an included purchase must be divided by \(\Pr(Y>10)\). This is truncation: smaller purchases are absent from the dataset. Fitting an ordinary positive-value model without that normalizing factor treats the observed tail as the full population and biases estimates.
 
-If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is P(Y<10), not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.
+If every purchase is recorded but amounts below ten are stored only as less than ten, those observations are censored. Their likelihood contribution is \(\Pr(Y<10)\), not a point density at ten and not a reason to drop the row. Right-censored lifetimes similarly contribute survival probability beyond the last observation time. The observation rule determines the likelihood contribution.
 
 A simple imputation such as replacing every censored value by the boundary creates artificial point masses and distorts means, variances and regression relationships. If the decision depends on the tail, model the observation mechanism directly or present bounds and sensitivity assumptions.
 

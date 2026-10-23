@@ -32,13 +32,13 @@ Rank counts linearly independent columns or rows. Full column rank gives unique 
 
 **Eigenvalues and eigenvectors**
 
-For Av=lambda v, the direction v is preserved by A. Covariance eigenvectors define principal directions and eigenvalues their variances. Repeated eigenvalues make individual eigenvector orientations nonunique even when the subspace is meaningful.
+For \(A v=\lambda v\), the direction v is preserved by A. Covariance eigenvectors define principal directions and eigenvalues their variances. Repeated eigenvalues make individual eigenvector orientations nonunique even when the subspace is meaningful.
 
 ### stat-02-05
 
 **Singular value decomposition**
 
-Write X=U S V-transpose, with nonnegative singular values. Small singular values reveal weakly identified directions; truncating them creates a lower-rank approximation. SVD-based least squares avoids explicitly inverting X-transpose X.
+Write \(X=U\Sigma V^{\mathsf T}\), with nonnegative singular values. Small singular values reveal weakly identified directions; truncating them creates a lower-rank approximation. SVD-based least squares avoids explicitly inverting \(X^{\mathsf T}X\).
 
 ### stat-02-06
 
@@ -50,7 +50,7 @@ A symmetric matrix is positive definite when v-transpose A v is positive for eve
 
 **Matrix calculus**
 
-For squared loss, the gradient is 2 X-transpose(X beta-y). The transpose maps observation errors back into coefficient coordinates. Confirm shapes and finite-difference checks before implementing more elaborate gradient code.
+For squared loss, the gradient is 2 \(X^{\mathsf T}(X\beta-y)\). The transpose maps observation errors back into coefficient coordinates. Confirm shapes and finite-difference checks before implementing more elaborate gradient code.
 
 ### stat-02-08
 
@@ -110,7 +110,7 @@ A probability space specifies outcomes, measurable events and a probability meas
 
 **Differential equations**
 
-A differential equation specifies a rate of change, such as dN/dt=rN. Its solution requires an initial condition. Discrete numerical steps approximate the trajectory, and large steps can introduce artificial instability.
+A differential equation specifies a rate of change, such as \(\frac{dN}{dt}=rN\). Its solution requires an initial condition. Discrete numerical steps approximate the trajectory, and large steps can introduce artificial instability.
 
 ### stat-02-18
 
@@ -124,23 +124,23 @@ Entropy averages negative log probabilities; KL divergence averages a log densit
 
 ### Case study: projections connect geometry to regression
 
-A vector in R^n can be understood as n numbers describing one quantity across observations. Each column of X is such a vector. The possible predictions X beta form the column space of X, a set closed under addition and scalar multiplication. Least squares finds the point in that space closest to y under squared Euclidean distance.
+A vector in \(\mathbb{R}^n\) can be understood as n numbers describing one quantity across observations. Each column of X is such a vector. The possible predictions X beta form the column space of X, a set closed under addition and scalar multiplication. Least squares finds the point in that space closest to y under squared Euclidean distance.
 
-At the closest point, any small movement along a feature column cannot improve squared distance. Differentiating in each column direction gives X-transpose(y-X beta)=0. This is why residuals are orthogonal to every fitted direction. If an intercept is present, the all-ones vector is one of those directions, so residuals sum to zero. Without an intercept, that property need not hold.
+At the closest point, any small movement along a feature column cannot improve squared distance. Differentiating in each column direction gives \(X^{\mathsf T}(y-X\beta)=0\). This is why residuals are orthogonal to every fitted direction. If an intercept is present, the all-ones vector is one of those directions, so residuals sum to zero. Without an intercept, that property need not hold.
 
 When columns are redundant, the closest prediction can still be unique although coefficients are not. Adding a vector from the null space of X to beta leaves X beta unchanged. A pseudoinverse chooses one convention, often a minimum-norm coefficient solution, but that convention does not make separate redundant effects scientifically identified. Rank and null-space reasoning explain this before any software is run.
 
 ### Case study: SVD explains regularization and conditioning
 
-Write X=U S V-transpose. In a full-rank least-squares solution, coordinates of y along left singular directions are divided by the singular values. A tiny singular value therefore amplifies a small perturbation in the corresponding data direction into a large coefficient change. This is an information-sensitivity problem, not merely a bug in the solver.
+Write \(X=U\Sigma V^{\mathsf T}\). In a full-rank least-squares solution, coordinates of y along left singular directions are divided by the singular values. A tiny singular value therefore amplifies a small perturbation in the corresponding data direction into a large coefficient change. This is an information-sensitivity problem, not merely a bug in the solver.
 
-Ridge regression replaces the reciprocal singular-value factor 1/s with s/(s-squared+lambda). Large singular directions remain influential, while tiny directions are suppressed. Truncated SVD takes a harder approach by dropping directions below a threshold. Both stabilize the solution by changing the estimation problem and introducing bias relative to unpenalized coefficients.
+Ridge regression replaces the reciprocal singular-value factor \(\frac{1}{s}\) with s/(s-squared+lambda). Large singular directions remain influential, while tiny directions are suppressed. Truncated SVD takes a harder approach by dropping directions below a threshold. Both stabilize the solution by changing the estimation problem and introducing bias relative to unpenalized coefficients.
 
-The condition number compares the largest and smallest relevant singular values. Forming X-transpose X squares this ratio, which can worsen numerical behavior. QR or SVD solves the least-squares problem without explicitly taking that path. Stable algorithms limit added arithmetic error, but they cannot recover information absent from nearly indistinguishable predictors.
+The condition number compares the largest and smallest relevant singular values. Forming \(X^{\mathsf T}X\) squares this ratio, which can worsen numerical behavior. QR or SVD solves the least-squares problem without explicitly taking that path. Stable algorithms limit added arithmetic error, but they cannot recover information absent from nearly indistinguishable predictors.
 
 ### Case study: gradients, curvature and step size
 
-For f(beta)=one-half*||X beta-y||^2, the gradient is X-transpose(X beta-y) and the Hessian is X-transpose X. The Hessian is positive semidefinite because v-transpose X-transpose X v equals ||Xv||^2, which cannot be negative. It is positive definite exactly when X has full column rank. Thus the objective is convex, and strict convexity determines coefficient uniqueness.
+For \(f(\beta)=\frac12\lVert X\beta-y\rVert_2^2\), the gradient is \(X^{\mathsf T}(X\beta-y)\) and the Hessian is \(X^{\mathsf T}X\). The Hessian is positive semidefinite because \(v^{\mathsf T}X^{\mathsf T}Xv\) equals \(\lVert Xv\rVert_2^2\), which cannot be negative. It is positive definite exactly when X has full column rank. Thus the objective is convex, and strict convexity determines coefficient uniqueness.
 
 Gradient descent updates beta by subtracting eta times the gradient. For a quadratic, a step size below two divided by the largest Hessian eigenvalue gives the usual stable convergence condition in the positive-definite case. If feature scales differ wildly, the Hessian eigenvalues can span a wide range, forcing small steps along steep directions and slow progress along shallow ones. Standardization or preconditioning changes that geometry.
 
@@ -148,9 +148,9 @@ Newton's method uses inverse curvature to rescale the gradient. It can solve an 
 
 ### Case study: expectations are integrals, not informal averages
 
-For a discrete variable, E[g(X)] sums g(x)P(X=x). For a continuous variable, it integrates g(x)f(x) over support. A probability density can exceed one because probability is area, not point height. For example, a uniform distribution on an interval of width .1 has density ten and total probability one.
+For a discrete variable, \(\mathbb{E}[g(X)]\) sums \(g(x)\Pr(X=x)\). For a continuous variable, it integrates g(x)f(x) over support. A probability density can exceed one because probability is area, not point height. For example, a uniform distribution on an interval of width .1 has density ten and total probability one.
 
-The law of the unconscious statistician allows computing E[g(X)] from X's distribution without first deriving g(X)'s density. This is useful for transformed outcomes, utility and moment calculations. But exchanging integrals, derivatives and limits requires conditions. A familiar algebraic manipulation can fail when tails are too heavy or convergence lacks an integrable bound.
+The law of the unconscious statistician allows computing \(\mathbb{E}[g(X)]\) from X's distribution without first deriving g(X)'s density. This is useful for transformed outcomes, utility and moment calculations. But exchanging integrals, derivatives and limits requires conditions. A familiar algebraic manipulation can fail when tails are too heavy or convergence lacks an integrable bound.
 
 Measure-theoretic language formalizes which events and functions can be assigned probabilities and integrated. Conditional expectation is a projection onto available information in an appropriate function space. This connects abstract probability back to regression: a conditional mean is the squared-loss optimal prediction among functions of the observed information, even when no finite linear model represents it exactly.
 
@@ -158,7 +158,7 @@ Measure-theoretic language formalizes which events and functions can be assigned
 
 Entropy measures expected surprise under a distribution, and cross-entropy measures expected negative log probability assigned by another distribution. Their difference is KL divergence when the relevant densities exist. This gives log loss a practical interpretation: a model pays for assigning low probability to outcomes that actually occur.
 
-Jensen's inequality explains why E[exp(X)] is generally larger than exp(E[X]). For a normal X with mean mu and variance sigma-squared, the exact lognormal mean is exp(mu+sigma-squared/2). Back-transforming a fitted log mean without accounting for variability can therefore underestimate an arithmetic mean. The mathematical distinction becomes an operational bias in cost forecasts.
+Jensen's inequality explains why \(\mathbb{E}[e^X]\) is generally larger than \(e^{\mathbb{E}[X]}\). For a normal X with mean mu and variance sigma-squared, the exact lognormal mean is \(\exp\!\left(\mu+\frac{\sigma^2}{2}\right)\). Back-transforming a fitted log mean without accounting for variability can therefore underestimate an arithmetic mean. The mathematical distinction becomes an operational bias in cost forecasts.
 
 <!-- detailed-case-studies:end -->
 
@@ -235,7 +235,7 @@ if __name__ == "__main__":
 
 ## Data science interview discussions
 
-**Interview: Why avoid the inverse formula for regression?** Forming X-transpose X squares the condition number, and explicit inversion adds unnecessary computation. QR or SVD solves the least-squares problem more reliably. Poor conditioning remains an information problem even with a stable algorithm.
+**Interview: Why avoid the inverse formula for regression?** Forming \(X^{\mathsf T}X\) squares the condition number, and explicit inversion adds unnecessary computation. QR or SVD solves the least-squares problem more reliably. Poor conditioning remains an information problem even with a stable algorithm.
 
 **Interview: Does a small singular value mean a feature should always be deleted?** No. It identifies a poorly determined direction, which may combine several scientifically essential variables. Scaling, redesign, regularization or reporting uncertainty may be more appropriate than mechanically dropping one column.
 

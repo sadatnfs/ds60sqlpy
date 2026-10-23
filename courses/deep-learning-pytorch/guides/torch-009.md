@@ -48,9 +48,9 @@ Slice the leading observation axis into batches. For each independent update, ca
 
 Six records with batch size two produce three batches per epoch: IDs[1, 2], [3, 4], [5, 6]. With one optimizer step per batch, one epoch means three updates. At batch size one, the same epoch means six updates. Neither count identifies the resulting parameter trajectory without the data order, loss reduction and learning rate.
 
-For this scalar fixture, y=2x and each batch mean loss has derivative 2 mean(x²)(w-2). With rate 0.01, the exact correct trajectory is:
+For this scalar fixture, y=2x and each batch mean loss has derivative 2 \(\operatorname{mean}({x}^{2})\)(w-2). With rate 0.01, the exact correct trajectory is:
 
-| Batch inputs | mean(x²) | Weight before | Fresh gradient | Weight after |
+| Batch inputs | \(\operatorname{mean}({x}^{2})\) | Weight before | Fresh gradient | Weight after |
 | --- | --- | --- | --- | --- |
 | [1, 2] | 2.5 | 0 | -10 | 0.1 |
 | [3, 4] | 12.5 | 0.1 | -47.5 | 0.575 |
@@ -62,7 +62,7 @@ Without clearing, the first step is still 0.1. The next backward adds -47.5 to t
 
 Interestingly, the incorrect endpoint happens to lie closer to the known optimum two on this tiny sequence. That does not make the implementation correct. It violated the declared update rule, and another sequence can behave very differently. An acceptance test must inspect the mechanism and state trace rather than reward whichever accidental final training loss is smaller.
 
-Intentional accumulation is different. Hold w fixed, compute each microbatch's contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at w=0, the gradient is 2 mean(x²)(-2)=-182/3. One rate 0.01 step gives 91/150, about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.
+Intentional accumulation is different. Hold w fixed, compute each microbatch's contribution to one declared objective, accumulate the scaled gradients, and call step once. For the full six-record mean at \(w=0\), the gradient is 2 \(\operatorname{mean}({x}^{2})\)(-2)=-182/3. One rate 0.01 step gives \(\frac{91}{150}\), about 0.606667. This differs from the three-step minibatch result because it is one update from one fixed state. When microbatch sizes differ, weight each microbatch mean by its participating count divided by the total count.
 
 Metric reporting needs the same denominator discipline. A mean loss two from two records contributes numerator four; mean loss eight from one record contributes numerator eight. The record-weighted mean is(4+8)/3=4, not the unweighted batch-mean average five. But there is another interpretation boundary: losses measured before successive updates belong to different model states. Their weighted average is an online training statistic, not necessarily the loss of the final model. A final-model metric requires a separate fixed-state evaluation pass.
 

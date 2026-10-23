@@ -186,7 +186,7 @@ def test_default_command_builds_all_profiles_then_starts_health_checks_before_br
     port_queries = [i for i, command in enumerate(commands) if "port" in command]
     assert commands.index(starts[0]) < port_queries[0] < commands.index(starts[1])
     assert commands.index(next(a for a in commands if "exec" in a)) < port_queries[-1]
-    assert launcher.opened()[0][-1] == "http://127.0.0.1:49152/journeys"
+    assert launcher.opened()[0][-1] == "http://127.0.0.1:49152/classroom"
     assert "DUMMY_NEVER_LOG_THIS" not in result.stdout + result.stderr
     state = launcher.directory / ".classroom/ds60-classroom"
     assert (state / "ports.env").read_text() == "DS60_CLASSROOM_PORT=0\nDS60_POSTGRES_PORT=0\n"
@@ -229,7 +229,7 @@ def test_explicit_env_settings_and_cli_precedence_preserve_local_configuration(
     starts = [c for c in launcher.calls() if "up" in c["args"]]
     assert all(c["port"] == "8877" and c["db_port"] == "55434" for c in starts)
     assert local.read_text() == original and not (launcher.directory / "should-not-exist").exists()
-    assert "http://127.0.0.1:8877/journeys" in result.stdout
+    assert "http://127.0.0.1:8877/classroom" in result.stdout
     assert not launcher.opened()
 
 
@@ -243,7 +243,7 @@ def test_saved_zero_ports_remain_dynamic_on_restart_and_existing_ports_are_adopt
     assert state.read_text() == "DS60_CLASSROOM_PORT=8877\nDS60_POSTGRES_PORT=55434\n"
     state.write_text("DS60_CLASSROOM_PORT=0\nDS60_POSTGRES_PORT=0\n")
     result = launcher.run("--starter", "--no-build", "--no-browser")
-    assert result.returncode == 0 and "49152/journeys" in result.stdout
+    assert result.returncode == 0 and "49152/classroom" in result.stdout
     assert not any("build" in c["args"] or "pull" in c["args"] for c in launcher.calls())
 
 

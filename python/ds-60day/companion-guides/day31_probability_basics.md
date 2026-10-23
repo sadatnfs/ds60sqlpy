@@ -64,6 +64,15 @@ not as a replacement for the formulas.
 
 ## How to run this lesson
 
+**Primary browser route:** run `./classroom` from the repository root and
+choose **Python** on `/classroom`. Open this lesson in the shared workspace,
+read its capability notice, and use its supported coding or reading workflow.
+The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+
+**Optional native notebook/editor route:** the instructions below describe
+separately prepared host tools. They are useful alternatives, not prerequisites
+for opening this lesson in the Docker classroom.
+
 1. Open the Day 31 learner notebook from this guide's **Next
    step** section in VS Code or JupyterLab.
 2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
@@ -225,9 +234,9 @@ Predict or plan before you run code. Use the hint only after an honest
 attempt, and record the evidence that would prove your result correct.
 
 4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
-   **Progressive hint:** Compute 1-(1-p)**n first. Treat each simulated experiment as one Bernoulli outcome and use sqrt(p_hat*(1-p_hat)/runs) for its standard error.
+   **Progressive hint:** Compute \(1-(1-p)^n\) first. Treat each simulated experiment as one Bernoulli outcome and use \(\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}\) for its standard error.
 
-**Verify:** Prediction and uncertainty — show the analytic probability 1 - (1 - 0.002)^1000 (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
+**Verify:** Prediction and uncertainty — show the analytic probability \(1-(1-0.002)^{1000}\) (about 0.8648); with seed 731 and 20,000 experiments, report the simulated rate and Monte Carlo standard error and require the analytic value to fall within three standard errors.
 
 5. **Implementation:** Estimate P(A|B) from two Boolean arrays without using a probability library. Return both the estimate and the denominator so a caller can judge support.
    **Progressive hint:** Count rows where B is true, then count rows where A and B are both true. Decide explicitly what happens when B never occurs.

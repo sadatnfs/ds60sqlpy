@@ -12,7 +12,7 @@ With treated/control groups and before/after periods, compute (treated_after-tre
 
 ### Instrumental variables
 
-Let Z be a randomized encouragement, A treatment uptake and Y outcome. The Wald ratio [E(Y|Z=1)-E(Y|Z=0)]/[E(A|Z=1)-E(A|Z=0)] divides the outcome intention-to-treat effect by the treatment first stage. With independence, exclusion, relevance, monotonicity and well-defined interventions, it identifies a complier average effect. A tiny first stage amplifies noise and makes ordinary normal approximations unreliable. The exclusion restriction is a substantive pathway claim, not a statistical test the instrument can prove.
+Let Z be a randomized encouragement, A treatment uptake and Y outcome. The Wald ratio \(\frac{\mathbb{E}[Y\mid Z=1]-\mathbb{E}[Y\mid Z=0]}{\mathbb{E}[A\mid Z=1]-\mathbb{E}[A\mid Z=0]}\) divides the outcome intention-to-treat effect by the treatment first stage. With independence, exclusion, relevance, monotonicity and well-defined interventions, it identifies a complier average effect. A tiny first stage amplifies noise and makes ordinary normal approximations unreliable. The exclusion restriction is a substantive pathway claim, not a statistical test the instrument can prove.
 
 ### Regression discontinuity
 
@@ -132,7 +132,7 @@ LATE targets compliers whose treatment changes with the instrument, under monoto
 
 **Weak instrument diagnostics**
 
-Assess first-stage strength with diagnostics appropriate to the instrument count, error structure and identification setting. A universal F>10 rule is not a proof. Weak-IV-robust intervals can be very wide or unbounded.
+Assess first-stage strength with diagnostics appropriate to the instrument count, error structure and identification setting. A universal \(F>10\) rule is not a proof. Weak-IV-robust intervals can be very wide or unbounded.
 
 ### stat-16-20
 

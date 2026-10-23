@@ -6,7 +6,7 @@ Attempt `python-perf-01` before opening
 The solution first fixes the workload and output semantics. The quadratic
 duplicate search repeatedly scans prefixes; the set-based implementation keeps
 the value whose second occurrence appears first while changing expected
-complexity from O(n squared) to O(n). Correctness tests compare varied edge
+complexity from O(n squared) to \(O(n)\). Correctness tests compare varied edge
 cases before any timing is interpreted.
 
 `timeit` performs warmups and repeated batches. Minimum, median, and maximum are
@@ -284,7 +284,7 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget. Preserve 'first second occurrence' semantics and report time/peak memory across unique-heavy and duplicate-early inputs.
 
-**Reasoning path:** An algorithm with lower expected time can retain O(n) state. Alternative semantics or external sorting must be stated honestly.
+**Reasoning path:** An algorithm with lower expected time can retain \(O(n)\) state. Alternative semantics or external sorting must be stated honestly.
 
 The set solution is the correct linear baseline under available memory. If the
 budget cannot hold all seen values, exact streaming detection may need disk/

@@ -1,5 +1,12 @@
 # One command from source to a ready classroom
 
+> **One classroom:** the browser opens `/classroom`, where Python, PostgreSQL,
+> the engineering bridge and every module/book subject share one home and
+> individually themed workspaces. Choose any path and set your own pace.
+> Start with `./classroom`; see the [classroom guide](classroom-experience.md) for reading, code,
+> saved work and compatibility bookmarks.
+
+
 After Docker is installed and running, open a terminal in the extracted course
 folder or repository and run:
 

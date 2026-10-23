@@ -174,7 +174,7 @@ A sensitivity model can shift imputed missing salaries by delta relative to the 
 
 ### Case study: multiple imputation combines two uncertainties
 
-Each completed dataset contains a plausible version of missing values. Fitting the analysis model yields estimate Q_m and variance U_m. Pool estimates by their average Q_bar. The within-imputation variance W is the average U_m, and between-imputation variance B is the sample variance of Q_m. Rubin's total variance is W+(1+1/M)*B under the relevant framework.
+Each completed dataset contains a plausible version of missing values. Fitting the analysis model yields estimate Q_m and variance U_m. Pool estimates by their average Q_bar. The within-imputation variance W is the average U_m, and between-imputation variance B is the sample variance of Q_m. Rubin's total variance is \(W+(1+\frac{1}{M})\cdot B\) under the relevant framework.
 
 The multiplier accounts for using a finite number of imputations. More imputations reduce Monte Carlo variability in the pooling calculation; they do not create more observed information. If all completed datasets use the same deterministic mean replacement, B is zero because the imputation procedure failed to express missing-value uncertainty, not because the missing values are known.
 
@@ -182,9 +182,9 @@ Include variables needed to preserve the analysis relationships, such as interac
 
 ### Case study: derive attenuation from classical predictor error
 
-Let the true model be Y=beta*X+epsilon, but observe W=X+U. Assume X, U and epsilon are appropriately independent with zero-mean errors. Cov(W,Y)=beta*Var(X), while Var(W)=Var(X)+Var(U). The population regression slope of Y on W is therefore beta*Var(X)/(Var(X)+Var(U)). Noise in the predictor shrinks the slope toward zero in this simple setting.
+Let the true model be \(Y=\beta X+\epsilon\), but observe \(W=X+U\). Assume X, U and epsilon are appropriately independent with zero-mean errors. \(\operatorname{Cov}(W,Y)=\beta\operatorname{Var}(X)\), while \(\operatorname{Var}(W)=\operatorname{Var}(X)+\operatorname{Var}(U)\). The population regression slope of Y on W is therefore \(\frac{\beta\operatorname{Var}(X)}{\operatorname{Var}(X)+\operatorname{Var}(U)}\). Noise in the predictor shrinks the slope toward zero in this simple setting.
 
-If beta=2 and true-signal and measurement-error variances are both one, the observed slope is one. Increasing sample size estimates that attenuated slope more precisely; it does not restore beta. Repeated measurements or validation data can estimate the error variance and support regression calibration, errors-in-variables methods or SIMEX under additional assumptions.
+If \(\beta=2\) and true-signal and measurement-error variances are both one, the observed slope is one. Increasing sample size estimates that attenuated slope more precisely; it does not restore beta. Repeated measurements or validation data can estimate the error variance and support regression calibration, errors-in-variables methods or SIMEX under additional assumptions.
 
 The direction is not universal in multivariable, nonlinear or differential-error settings. Correlated error or error related to the outcome can bias estimates away from zero or reverse associations. State the error model explicitly before repeating the slogan that measurement error attenuates effects.
 

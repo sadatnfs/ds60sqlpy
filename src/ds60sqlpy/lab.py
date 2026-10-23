@@ -15,6 +15,7 @@ from urllib.parse import urlsplit
 
 from ds60sqlpy.capabilities import CapabilityService
 from ds60sqlpy.catalog import Catalog
+from ds60sqlpy.classroom import ClassroomService
 from ds60sqlpy.coaching import CoachingService
 from ds60sqlpy.curriculum_framework import RUNNERS
 from ds60sqlpy.execution import ALLOWED_TIMEOUT_SECONDS, PadRunner
@@ -84,6 +85,7 @@ class LabServer(PortalServer):
         self._module_state_directory = (
             progress_path.parent / "modules" if progress_path is not None else None
         )
+        self._classroom = ClassroomService(catalog, self.action, self.targets)
 
     def server_close(self) -> None:
         lock = getattr(self, "_module_lock", None)
@@ -99,6 +101,8 @@ class LabServer(PortalServer):
         """Dispatch only catalog-bound operations, with strict input types."""
 
         action = payload.get("action")
+        if isinstance(action, str) and action.startswith("classroom-"):
+            return self._classroom.action(payload)
         if isinstance(action, str) and action.startswith("module-"):
             with self._module_lock:
                 if self._modules_closing:
@@ -161,7 +165,7 @@ class LabServer(PortalServer):
                     repo_root=self.repo_root,
                     targets=self.targets,
                     id_prefix="lab-guide--",
-                    output_path="learn",
+                    output_path="classroom",
                 ),
             }
         if action == "save":
@@ -268,38 +272,54 @@ class LabRequestHandler(PortalRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
-        if route not in {"/learn", "/journey-preview", "/journeys"}:
+        classroom_routes = {"/", "/classroom", "/learn", "/journeys", "/journey-preview"}
+        assets = {
+            "/assets/classroom.css": ("classroom.css", "text/css; charset=utf-8"),
+            "/assets/classroom.js": ("classroom.js", "text/javascript; charset=utf-8"),
+        }
+        if route not in classroom_routes | set(assets) | {
+            "/assets/rich-content.css",
+        }:
             super().do_GET()
             return
         if self.headers.get("Host") != self.lab.expected_host:
             self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
             return
-        asset = {
-            "/learn": "learning_lab.html",
-            "/journey-preview": "journey_preview.html",
-            "/journeys": "learning_modules.html",
-        }[route]
-        document = files("ds60sqlpy").joinpath(f"assets/{asset}").read_text(encoding="utf-8")
-        if route in {"/learn", "/journeys"}:
-            document = document.replace(
-                'const SERVER_TOKEN = "";', f"const SERVER_TOKEN = {json.dumps(self.lab.token)};", 1
+        content_type = "text/html; charset=utf-8"
+        if route == "/assets/rich-content.css":
+            from ds60sqlpy.reader_content import rich_content_styles
+
+            document = rich_content_styles()
+            content_type = "text/css; charset=utf-8"
+        elif route in assets:
+            asset, content_type = assets[route]
+            document = files("ds60sqlpy").joinpath(f"assets/{asset}").read_text(encoding="utf-8")
+        else:
+            document = (
+                files("ds60sqlpy").joinpath("assets/classroom.html").read_text(encoding="utf-8")
             )
+            if route in classroom_routes:
+                document = document.replace(
+                    'const SERVER_TOKEN = "";',
+                    f"const SERVER_TOKEN = {json.dumps(self.lab.token)};",
+                    1,
+                )
         encoded = document.encode("utf-8")
         self.send_response(HTTPStatus.OK)
-        self._security_headers("text/html; charset=utf-8", len(encoded))
-        if route == "/journey-preview":
-            self.send_header(
-                "Content-Security-Policy",
-                "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
-                "img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; "
-                "object-src 'none'; frame-ancestors 'none'",
-            )
+        self._security_headers(content_type, len(encoded))
+        policy = (
+            "default-src 'none'; script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+            "connect-src 'self'; font-src 'self'; base-uri 'none'; "
+            "form-action 'none'; object-src 'none'; frame-ancestors 'none'"
+        )
+        self.send_header("Content-Security-Policy", policy)
         self.end_headers()
         self.wfile.write(encoded)
 
     def do_POST(self) -> None:  # noqa: N802
         route = urlsplit(self.path).path
-        if route not in {"/api/lab", "/api/modules"}:
+        if route not in {"/api/lab", "/api/modules", "/api/classroom"}:
             super().do_POST()
             return
         if not self._authorized_api_request(require_origin=True):
@@ -307,14 +327,18 @@ class LabRequestHandler(PortalRequestHandler):
         try:
             payload = (
                 self._read_json(max_bytes=512 * 1024)
-                if route == "/api/modules"
+                if route in {"/api/modules", "/api/classroom"}
                 else self._read_json()
             )
-            if route == "/api/modules" and (
+            required_prefix = {
+                "/api/modules": "module-",
+                "/api/classroom": "classroom-",
+            }.get(route)
+            if required_prefix is not None and (
                 not isinstance(payload.get("action"), str)
-                or not payload["action"].startswith("module-")
+                or not payload["action"].startswith(required_prefix)
             ):
-                raise ValueError("The module endpoint accepts module actions only.")
+                raise ValueError("This endpoint accepts only its own application actions.")
             self._send_json(self.lab.action(payload))
         except (KeyError, OSError, PortalError, TypeError, ValueError) as exc:
             self._send_error(HTTPStatus.BAD_REQUEST, str(exc))
@@ -333,7 +357,7 @@ def serve_lab(
     if not 0 <= port <= 65535:
         raise ValueError("Port must be between 0 and 65535.")
     server = LabServer(catalog, port=port, python=python, container=container)
-    url = f"{server.url}learn"
+    url = f"{server.url}classroom"
     print(f"DS60 Learning Lab: {url}")
     print("Coding pads run trusted local code. Saved work is in .learning/. Press Ctrl+C to stop.")
     if open_browser:

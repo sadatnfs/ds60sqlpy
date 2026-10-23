@@ -1,5 +1,13 @@
 # Deep learning with TensorFlow and Keras
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Deep learning with TensorFlow and Keras** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 This 36-lesson journey connects arrays, derivatives and exact scalar updates to
 Keras models, convolution, sequence masks, attention, custom loops, checkpoint
 recovery, inference export and evidence-based model release. Start with

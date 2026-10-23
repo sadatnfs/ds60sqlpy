@@ -179,7 +179,7 @@ def main(argv: list[str] | None = None) -> int:
             "--profile",
             "lab",
         ]
-        url = f"http://127.0.0.1:{args.port}/learn"
+        url = f"http://127.0.0.1:{args.port}/classroom"
         print(f"Local lab: {url}\nSaved progress and pads: {env['DS60_LEARNING_DIR']}", flush=True)
         if args.action == "doctor":
             print("Docker engine and Compose are ready (Linux containers).")

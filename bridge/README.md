@@ -1,5 +1,13 @@
 # Python + PostgreSQL engineering bridge
 
+> **Study in the unified classroom:** run `./classroom` from the repository
+> root, then choose **Python + PostgreSQL engineering** on `/classroom`. Python, SQL and all other
+> subjects share this home and workspace. Each subject has its own theme;
+> prerequisites guide your choices and you set the pace. The
+> [one-command setup](../docs/one-command-classroom.md) prepares the Docker runtimes and preserves saved
+> work. Native terminal/editor commands below are optional alternatives.
+
+
 The main Python and SQL tracks teach each language well. This optional
 eight-lesson bridge teaches the engineering habits needed to use them together
 safely in an application, data pipeline, or command-line tool. Four named
