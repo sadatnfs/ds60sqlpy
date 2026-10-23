@@ -28,6 +28,7 @@ from ds60sqlpy.modules import LANGUAGES, MAX_SOURCE_BYTES, ModuleCatalog, Module
 from scripts.check_classroom_profiles import TERMINAL, ClassroomClient  # noqa: E402
 
 ORDINARY_PROFILES = frozenset(LANGUAGES) - {"reading", "k8s-kind"}
+CONFIRMED_TERMINAL = TERMINAL - {"blocked", "interrupted"}
 EXTERNAL_REASONS = {
     "reading": "Reading or separately documented manual workflow; no ordinary worker execution.",
     "k8s-kind": "Owned-cluster operation; qualified by the separate Kubernetes workflow.",
@@ -172,17 +173,27 @@ def wait_for_job(client: Client, job_id: str, deadline: float) -> dict[str, Any]
         time.sleep(0.25)
 
 
-def cancel_unconfirmed_job(client: Client, job_id: str) -> dict[str, Any]:
+def confirmed_terminal_receipt(case: ReferenceCase, job_id: str, job: dict[str, Any]) -> bool:
+    return (
+        job.get("job_id") == job_id
+        and job.get("lesson_id") == case.lesson_id
+        and job.get("profile") == case.profile
+        and job.get("source_sha256") == case.source_sha256
+        and job.get("status") in CONFIRMED_TERMINAL
+    )
+
+
+def cancel_unconfirmed_job(client: Client, case: ReferenceCase, job_id: str) -> dict[str, Any]:
     """Bound recovery of this test's job without replaying its source."""
     try:
         job = client.call("module-cancel", job_id=job_id)
         deadline = time.monotonic() + 15
-        while job.get("status") not in TERMINAL:
+        while job.get("status") not in CONFIRMED_TERMINAL:
             if time.monotonic() >= deadline:
                 return {"confirmed": False, "outcome": "unknown"}
             time.sleep(0.25)
             job = client.call("module-job", job_id=job_id)
-        if job.get("job_id") != job_id:
+        if not confirmed_terminal_receipt(case, job_id, job):
             return {"confirmed": False, "outcome": "unknown"}
         return {"confirmed": True, "outcome": job["status"]}
     except (OSError, ValueError, KeyError, TypeError):
@@ -257,8 +268,8 @@ def run_cases(
             )
         except (OSError, ValueError, KeyError, TypeError) as error:
             result.update(status="failed", failure=f"{type(error).__name__}: {error}")
-            if job_id is not None and job.get("status") not in TERMINAL:
-                result["cleanup"] = cancel_unconfirmed_job(client, job_id)
+            if job_id is not None and not confirmed_terminal_receipt(case, job_id, job):
+                result["cleanup"] = cancel_unconfirmed_job(client, case, job_id)
                 if not result["cleanup"]["confirmed"]:
                     report["failure"] = "Job outcome remains unknown; later cases were not started."
                     stop_after_failure = True

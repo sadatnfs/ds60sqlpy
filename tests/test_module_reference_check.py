@@ -273,7 +273,7 @@ def test_transport_failure_cancels_owned_job_before_another_case(
                 self.calls.append((action, fields))
                 if not confirm_cleanup:
                     raise OSError("Synthetic unavailable cancellation")
-                return {"job_id": fields["job_id"], "status": "cancelled"}
+                return {**self.jobs[fields["job_id"]], "status": "cancelled"}
             return super().call(action, **fields)
 
     client = BrokenPoll(cases)
@@ -292,3 +292,53 @@ def test_transport_failure_cancels_owned_job_before_another_case(
         assert report["results"][1]["status"] == "pending"
         assert report["complete"] is False
         assert "unknown" in report["failure"]
+
+
+@pytest.mark.parametrize("status", ["blocked", "interrupted"])
+def test_unresolved_receipts_do_not_confirm_cleanup_or_start_later_cases(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, status: str
+) -> None:
+    cases = [reference(), reference("example-002")]
+
+    class Unresolved(FakeClient):
+        def call(self, action: str, **fields: Any) -> dict[str, Any]:
+            if action in {"module-job", "module-cancel"}:
+                self.calls.append((action, fields))
+                return {**self.jobs[fields["job_id"]], "status": status}
+            return super().call(action, **fields)
+
+    ticks = iter(range(500))
+    monkeypatch.setattr("scripts.check_module_references.time.monotonic", lambda: next(ticks))
+    monkeypatch.setattr("scripts.check_module_references.time.sleep", lambda _seconds: None)
+    client = Unresolved(cases)
+    report = report_for(cases)
+    assert not probe.run_cases(client, cases, report, tmp_path / "report.json")
+    assert report["results"][0]["cleanup"] == {"confirmed": False, "outcome": "unknown"}
+    assert report["results"][1]["status"] == "pending"
+    assert not report["complete"]
+    assert sum(action == "module-run" for action, _ in client.calls) == 1
+    assert any(action == "module-cancel" for action, _ in client.calls)
+
+
+@pytest.mark.parametrize("field", ["job_id", "lesson_id", "profile", "source_sha256"])
+def test_another_terminal_receipt_cannot_bypass_owned_job_cancellation(
+    tmp_path: Path, field: str
+) -> None:
+    case = reference()
+
+    class WrongReceipt(FakeClient):
+        def call(self, action: str, **fields: Any) -> dict[str, Any]:
+            if action == "module-job":
+                self.calls.append((action, fields))
+                return {**self.jobs[fields["job_id"]], "status": "failed", field: "other"}
+            if action == "module-cancel":
+                self.calls.append((action, fields))
+                return {**self.jobs[fields["job_id"]], "status": "cancelled"}
+            return super().call(action, **fields)
+
+    client = WrongReceipt([case])
+    report = report_for([case])
+    assert not probe.run_cases(client, [case], report, tmp_path / "report.json")
+    assert report["results"][0]["cleanup"] == {"confirmed": True, "outcome": "cancelled"}
+    assert any(action == "module-cancel" for action, _ in client.calls)
+    assert sum(action == "module-run" for action, _ in client.calls) == 1

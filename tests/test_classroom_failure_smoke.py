@@ -116,6 +116,11 @@ def run_probe(
     timeout: bool = False,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     monkeypatch.setattr(time, "monotonic", client.clock.now)
+
+    def advance(seconds: float) -> None:
+        client.clock.value += seconds
+
+    monkeypatch.setattr(time, "sleep", advance)
     report: dict[str, Any] = {"cases": [], "errors": [], "passed": False}
     snapshots: list[dict[str, Any]] = []
     smoke.qualify(
