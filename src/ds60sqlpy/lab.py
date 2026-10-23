@@ -231,21 +231,29 @@ class LabRequestHandler(PortalRequestHandler):
         return cast(LabServer, self.server)
 
     def do_GET(self) -> None:  # noqa: N802
-        if urlsplit(self.path).path != "/learn":
+        route = urlsplit(self.path).path
+        if route not in {"/learn", "/journey-preview"}:
             super().do_GET()
             return
         if self.headers.get("Host") != self.lab.expected_host:
             self._send_error(HTTPStatus.BAD_REQUEST, "Unexpected Host header.")
             return
-        document = (
-            files("ds60sqlpy").joinpath("assets/learning_lab.html").read_text(encoding="utf-8")
-        )
-        document = document.replace(
-            'const SERVER_TOKEN = "";', f"const SERVER_TOKEN = {json.dumps(self.lab.token)};", 1
-        )
+        asset = "learning_lab.html" if route == "/learn" else "journey_preview.html"
+        document = files("ds60sqlpy").joinpath(f"assets/{asset}").read_text(encoding="utf-8")
+        if route == "/learn":
+            document = document.replace(
+                'const SERVER_TOKEN = "";', f"const SERVER_TOKEN = {json.dumps(self.lab.token)};", 1
+            )
         encoded = document.encode("utf-8")
         self.send_response(HTTPStatus.OK)
         self._security_headers("text/html; charset=utf-8", len(encoded))
+        if route == "/journey-preview":
+            self.send_header(
+                "Content-Security-Policy",
+                "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; "
+                "img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; "
+                "object-src 'none'; frame-ancestors 'none'",
+            )
         self.end_headers()
         self.wfile.write(encoded)
 

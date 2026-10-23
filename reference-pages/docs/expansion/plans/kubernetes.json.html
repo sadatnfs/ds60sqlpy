@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Kubernetes · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Kubernetes</h1>
+      <p class="source-path">Generated from <code>docs/expansion/plans/kubernetes.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;schema_version&quot;: 1,</span>
+<span>  &quot;status&quot;: &quot;planned&quot;,</span>
+<span>  &quot;id&quot;: &quot;kubernetes&quot;,</span>
+<span>  &quot;title&quot;: &quot;Kubernetes: from first object to platform reasoning&quot;,</span>
+<span>  &quot;summary&quot;: &quot;42 planned lessons teach observable reconciliation, workload networking, identity, state, release and recovery on host-owned disposable kind fixtures. No cluster or adapter is installed.&quot;,</span>
+<span>  &quot;north_star&quot;: &quot;Declare an owned workload, prove desired state, ready traffic paths and data behavior, then diagnose and recover a bounded failure without touching another target.&quot;,</span>
+<span>  &quot;entry_prerequisites&quot;: [],</span>
+<span>  &quot;runtime_profiles&quot;: [</span>
+<span>    &quot;reading&quot;,</span>
+<span>    &quot;k8s-kind&quot;</span>
+<span>  ],</span>
+<span>  &quot;stages&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;Build a reliable mental model&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Predict small examples, perform bounded changes and independently verify the first capstone.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;Compose and debug real systems&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Combine the mechanisms with explicit ownership, tests, failure cases and repeatable delivery.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;Defend engineering decisions&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Reason about concurrency or distributed control, measure tradeoffs and present a reviewed recovery/release capstone.&quot;</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;lessons&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;Terminal, files and an owned lab receipt&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 75,</span>
+<span>      &quot;prerequisites&quot;: [],</span>
+<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Identify the file being edited and the exact disposable target before any cluster action.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Read an example host preparation receipt and trace command, context, namespace and output on a worksheet.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Reject an expired or mismatched receipt and explain why an ambient current-context is never a course target.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;terminal&quot;,</span>
+<span>        &quot;file&quot;,</span>
+<span>        &quot;context&quot;,</span>
+<span>        &quot;ownership&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Processes, containers, images and ports&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-001&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish an image from a running process and a container port from a host port.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Trace supplied offline container/network diagrams and an image-cache inventory.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Correctly locate a process, an image digest and both sides of one port mapping; no engine installation is implied.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;process&quot;,</span>
+<span>        &quot;container&quot;,</span>
+<span>        &quot;image&quot;,</span>
+<span>        &quot;port&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Kubernetes objects and YAML anatomy&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-002&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Read apiVersion, kind, metadata and spec as an API request.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Validate and apply a tiny namespaced fixture through the prepared worker credential.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A deliberate indentation/type error is rejected; the accepted object&#x27;s returned UID and namespace match the lease.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;API&quot;,</span>
+<span>        &quot;YAML&quot;,</span>
+<span>        &quot;metadata&quot;,</span>
+<span>        &quot;spec&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Identity, namespaces and explicit targeting&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-003&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Demonstrate the difference between a namespace and permission to act in it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use the private worker kubeconfig to create one allowed object and attempt a denied cluster action.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The own-namespace action succeeds; namespace creation and cluster-role modification are forbidden; no credential is copied into progress.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;RBAC&quot;,</span>
+<span>        &quot;namespace&quot;,</span>
+<span>        &quot;identity&quot;,</span>
+<span>        &quot;lease&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Pods, image locality and logs&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-004&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain Pod phase, container state and image availability separately.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run a preloaded nonroot HTTP fixture, inspect its logs and compare a host-provided missing-image negative case.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The valid container starts offline; the negative case reports image absence without an automatic pull, and the learner distinguishes phase from readiness.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Pod&quot;,</span>
+<span>        &quot;imagePullPolicy&quot;,</span>
+<span>        &quot;logs&quot;,</span>
+<span>        &quot;container state&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;Deployments and reconciliation&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Predict how a controller restores declared replica count.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a two-replica Deployment and delete one owned Pod by recorded UID.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A new Pod UID appears while Deployment UID stays fixed and observed generation/ready replica evidence converges.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Deployment&quot;,</span>
+<span>        &quot;ReplicaSet&quot;,</span>
+<span>        &quot;reconciliation&quot;,</span>
+<span>        &quot;desired state&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Labels, selectors and Services&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-006&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Connect a Service selector to a set of Pods rather than to an image name.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create an internal Service and compare matching and nonmatching label fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The selector matches exactly the intended Pod UIDs and Service ports resolve to the documented container port.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;label&quot;,</span>
+<span>        &quot;selector&quot;,</span>
+<span>        &quot;Service&quot;,</span>
+<span>        &quot;ClusterIP&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;Readiness and eligible Service backends&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-007&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Diagnose why a running process can be ineligible for Service traffic.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Complete the pilot: observe two ready backends, break a readiness path and repair a selector mismatch.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Deployment/Pod state, ready EndpointSlice entries and an in-cluster HTTP client agree; port-forward alone is not accepted as routing proof.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;readiness&quot;,</span>
+<span>        &quot;EndpointSlice&quot;,</span>
+<span>        &quot;reconciliation&quot;,</span>
+<span>        &quot;traffic&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;ConfigMaps and configuration boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-008&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate configuration data from the immutable image and observe when an application reloads it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Change a synthetic message through environment and mounted-file fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The expected process sees the correct value; a snapshot records which update required a rollout and which required application reload support.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;ConfigMap&quot;,</span>
+<span>        &quot;environment&quot;,</span>
+<span>        &quot;volume&quot;,</span>
+<span>        &quot;configuration&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;Requests, limits and namespace budgets&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-006&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish scheduling requests, enforcement limits and quota admission.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare a schedulable Pod with a quota-rejected and memory-limited fixture inside the lease.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Events distinguish FailedScheduling, admission rejection and OOMKilled; the learner does not label all three as a readiness error.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;request&quot;,</span>
+<span>        &quot;limit&quot;,</span>
+<span>        &quot;quota&quot;,</span>
+<span>        &quot;scheduling&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Jobs and scheduled work&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose a completion-oriented workload instead of an endlessly restarted service.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run a deterministic Job and inspect a preconfigured CronJob schedule/time-zone worksheet.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Succeeded/failed counts and bounded retry/deadline behavior match the fixture; suspension prevents further scheduled runs before cleanup.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Job&quot;,</span>
+<span>        &quot;CronJob&quot;,</span>
+<span>        &quot;backoff&quot;,</span>
+<span>        &quot;deadline&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Debug from conditions, events and logs&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-008&quot;,</span>
+<span>        &quot;k8s-010&quot;,</span>
+<span>        &quot;k8s-011&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Select evidence that distinguishes a configuration error from a runtime failure.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Triage three offline/live paired fixtures: missing config, wrong probe and failed Job.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Each diagnosis names a discriminating condition/event/log line and one minimal repair; unrelated resources remain unchanged.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;condition&quot;,</span>
+<span>        &quot;event&quot;,</span>
+<span>        &quot;log&quot;,</span>
+<span>        &quot;hypothesis&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Rollouts, revisions and recovery&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-009&quot;,</span>
+<span>        &quot;k8s-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Change declared state and verify rollout completion rather than trusting apply success.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Roll a two-replica fixture between preloaded versions, introduce a bad readiness configuration and revert the manifest.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Generation, updated/ready counts and response version agree after recovery; rollback evidence records the restored declarative file.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;rollout&quot;,</span>
+<span>        &quot;revision&quot;,</span>
+<span>        &quot;generation&quot;,</span>
+<span>        &quot;recovery&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 1: observable stateless service&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-009&quot;,</span>
+<span>        &quot;k8s-010&quot;,</span>
+<span>        &quot;k8s-011&quot;,</span>
+<span>        &quot;k8s-012&quot;,</span>
+<span>        &quot;k8s-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Deliver a small service and prove both convergence and reachability.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Assemble Deployment, Service, ConfigMap and a bounded verifier Job, then repair one teacher-selected fault.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Two eligible backends, correct HTTP payload, observed desired state and owner-scoped cleanup all pass from a fresh namespace.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;reconciliation&quot;,</span>
+<span>        &quot;verification&quot;,</span>
+<span>        &quot;cleanup&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;Startup, liveness and readiness are different&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-008&quot;,</span>
+<span>        &quot;k8s-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Select a probe by the action Kubernetes should take after failure.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare a slow-start fixture with a temporarily unready fixture and a permanently unhealthy fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Restart counts and endpoint readiness demonstrate the intended difference; thresholds are justified from fixture startup evidence.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;startup probe&quot;,</span>
+<span>        &quot;liveness&quot;,</span>
+<span>        &quot;readiness&quot;,</span>
+<span>        &quot;restart&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Init containers and ephemeral shared files&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-005&quot;,</span>
+<span>        &quot;k8s-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain container ordering and the lifetime of emptyDir data.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use a finite init step and an application sharing a synthetic generated file.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The application starts after initialization; container restart versus Pod replacement produces the documented file lifetime.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;init container&quot;,</span>
+<span>        &quot;emptyDir&quot;,</span>
+<span>        &quot;lifecycle&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Nonroot workloads and Pod Security&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-010&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Relate a security context to admission and actual process identity.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare a restricted-compatible fixture with denied privilege/host-path variants supplied by the host.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Allowed workload identity is nonroot; forbidden host namespaces, privileged mode and unapproved mounts fail before execution.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;securityContext&quot;,</span>
+<span>        &quot;Pod Security&quot;,</span>
+<span>        &quot;least privilege&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;ServiceAccounts and RBAC boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-004&quot;,</span>
+<span>        &quot;k8s-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Prove a worker can perform its job without access to cluster administration.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Inspect the provided Role/RoleBinding explanation and run positive/negative authorization checks.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Own-object actions succeed while cross-namespace, Secret-reading and role-escalation actions are denied; workload tokens are not mounted by default.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;ServiceAccount&quot;,</span>
+<span>        &quot;RBAC&quot;,</span>
+<span>        &quot;TokenRequest&quot;,</span>
+<span>        &quot;authorization&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Synthetic Secrets and reload semantics&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-009&quot;,</span>
+<span>        &quot;k8s-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain why base64 is encoding and why access paths matter more than a field name.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Inspect offline fake-secret bytes and observe a host-provided synthetic Secret mount without collecting real credentials.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Decoded dummy value is exact; the evidence names who can obtain it and distinguishes a mounted update from application reload.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Secret&quot;,</span>
+<span>        &quot;encoding&quot;,</span>
+<span>        &quot;exposure&quot;,</span>
+<span>        &quot;reload&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;DNS and layered network diagnosis&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-007&quot;,</span>
+<span>        &quot;k8s-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate DNS resolution, Service backend selection and application response.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use an in-cluster client to test a service name, a wrong port and an HTTP error endpoint.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The report identifies which layer failed using DNS/result/backend evidence, with bounded timeouts and no external network dependency.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;DNS&quot;,</span>
+<span>        &quot;Service&quot;,</span>
+<span>        &quot;port&quot;,</span>
+<span>        &quot;HTTP&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;NetworkPolicy with enforcement evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-018&quot;,</span>
+<span>        &quot;k8s-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Prove a policy changes permitted connectivity on a policy-capable fixture.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;In a dedicated policy-enabled lease, compare allowed and denied TCP client paths before and after default deny.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The intended connection changes from success to bounded failure while the permitted path remains good; the lab is unavailable on an unqualified CNI.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;NetworkPolicy&quot;,</span>
+<span>        &quot;CNI&quot;,</span>
+<span>        &quot;allow&quot;,</span>
+<span>        &quot;deny&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Volumes, claims and stateful identity&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-010&quot;,</span>
+<span>        &quot;k8s-016&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish Pod replacement, persistent data and a storage class&#x27;s guarantees.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use an owned synthetic PVC fixture and replace its application Pod without touching host personal directories.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The expected marker survives Pod replacement; deletion/reclaim behavior is verified separately and is not called a backup.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;PVC&quot;,</span>
+<span>        &quot;StatefulSet&quot;,</span>
+<span>        &quot;StorageClass&quot;,</span>
+<span>        &quot;reclaim&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Gateway, Ingress and the external route&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-013&quot;,</span>
+<span>        &quot;k8s-017&quot;,</span>
+<span>        &quot;k8s-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish an internal Service from a host-facing HTTP route and the controller that implements it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;In a dedicated lease with host-installed Gateway API/controller fixtures, attach an owned HTTPRoute and compare a matching route, an unmatched path and a synthetic TLS termination case; contrast an Ingress fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Gateway/Route Accepted and ResolvedRefs conditions plus the bounded client response agree; the host listener is loopback-only, the synthetic certificate is verified without bypassing TLS, and no external IP or controller installation is assumed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Gateway API&quot;,</span>
+<span>        &quot;HTTPRoute&quot;,</span>
+<span>        &quot;Ingress&quot;,</span>
+<span>        &quot;TLS termination&quot;,</span>
+<span>        &quot;controller&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Kustomize and field ownership&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-003&quot;,</span>
+<span>        &quot;k8s-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Review the full rendered resource before applying an overlay.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Render dev/test overlays offline and inspect server-side apply ownership/conflict fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Only declared fields differ, no namespace escapes appear and a field-manager conflict is explained instead of force-overwritten.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Kustomize&quot;,</span>
+<span>        &quot;overlay&quot;,</span>
+<span>        &quot;server-side apply&quot;,</span>
+<span>        &quot;field manager&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-025&quot;,</span>
+<span>      &quot;title&quot;: &quot;Helm values without hidden side effects&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-019&quot;,</span>
+<span>        &quot;k8s-024&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Treat a chart render as reviewable manifests rather than an opaque install.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Render a pinned vendored chart offline; review values, hooks and cluster-scoped objects before namespaced apply.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Rendered objects meet the allowlist; a fixture with a forbidden hook/CRD fails review without executing plugins or downloading a chart.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Helm&quot;,</span>
+<span>        &quot;values&quot;,</span>
+<span>        &quot;template&quot;,</span>
+<span>        &quot;review&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-026&quot;,</span>
+<span>      &quot;title&quot;: &quot;Placement and node-local DaemonSets&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-010&quot;,</span>
+<span>        &quot;k8s-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Compare a replica-count workload with one Pod per eligible node and explain affinity/taint constraints.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use host-supplied node facts to compare a Deployment with a restricted synthetic DaemonSet, then inspect affinity and taint/toleration negative fixtures without editing Nodes.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;DaemonSet desiredNumberScheduled and numberReady match qualified eligible-node facts; Pod placement or Pending events explain constraints, and the worker never patches shared Nodes.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;DaemonSet&quot;,</span>
+<span>        &quot;affinity&quot;,</span>
+<span>        &quot;taint&quot;,</span>
+<span>        &quot;toleration&quot;,</span>
+<span>        &quot;scheduler&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-027&quot;,</span>
+<span>      &quot;title&quot;: &quot;Observability and service-level evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-012&quot;,</span>
+<span>        &quot;k8s-015&quot;,</span>
+<span>        &quot;k8s-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Define a meaningful availability/latency observation and connect it to a failure hypothesis.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Collect bounded synthetic request results and, where provisioned, namespace metrics.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Error counts and latency summaries match raw samples; missing metrics capability is reported explicitly and no monitoring stack is silently installed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;SLI&quot;,</span>
+<span>        &quot;metrics&quot;,</span>
+<span>        &quot;logs&quot;,</span>
+<span>        &quot;latency&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-028&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 2: stateful change with policy&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-017&quot;,</span>
+<span>        &quot;k8s-018&quot;,</span>
+<span>        &quot;k8s-021&quot;,</span>
+<span>        &quot;k8s-022&quot;,</span>
+<span>        &quot;k8s-023&quot;,</span>
+<span>        &quot;k8s-025&quot;,</span>
+<span>        &quot;k8s-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Release and recover an owned stateful fixture with explicit access and data boundaries.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Combine a small app, synthetic datastore, PVC, reviewed chart/overlay and policy-enabled clients.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Connectivity, stored marker hashes, limited authorization and failed-change recovery all pass; cleanup respects the declared data retention choice.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;state&quot;,</span>
+<span>        &quot;policy&quot;,</span>
+<span>        &quot;change&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-029&quot;,</span>
+<span>      &quot;title&quot;: &quot;Custom resources and structural schemas&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish a custom resource instance from cluster-scoped API registration.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;In a dedicated advanced lease, request a reviewed host-provisioned CRD fixture and submit valid/invalid namespaced instances.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Invalid fields are rejected by the schema; worker credentials cannot create arbitrary CRDs or widen their own privileges.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;CRD&quot;,</span>
+<span>        &quot;schema&quot;,</span>
+<span>        &quot;custom resource&quot;,</span>
+<span>        &quot;scope&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-030&quot;,</span>
+<span>      &quot;title&quot;: &quot;Operators and reconciliation contracts&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-006&quot;,</span>
+<span>        &quot;k8s-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain an operator&#x27;s idempotent reconcile loop and status conditions without assuming Go knowledge.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Drive a preloaded namespaced controller with repeated, changed and deleted custom resource fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Observed resources and conditions converge without duplicate side effects; a supplied reconciliation trace explains requeue/finalizer behavior.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;operator&quot;,</span>
+<span>        &quot;idempotence&quot;,</span>
+<span>        &quot;status&quot;,</span>
+<span>        &quot;finalizer&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-031&quot;,</span>
+<span>      &quot;title&quot;: &quot;Admission policy and controlled denial&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-017&quot;,</span>
+<span>        &quot;k8s-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate API validation, authorization and admission decisions.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use a host-installed, lease-scoped policy fixture to deny an unsafe workload and allow its corrected form.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The denial reason matches the policy, an allowed request succeeds and no arbitrary webhook endpoint or cluster-wide policy is installed by the worker.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;admission&quot;,</span>
+<span>        &quot;CEL&quot;,</span>
+<span>        &quot;validation&quot;,</span>
+<span>        &quot;policy&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-032&quot;,</span>
+<span>      &quot;title&quot;: &quot;Disruptions and availability budgets&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-026&quot;,</span>
+<span>        &quot;k8s-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Predict what an eviction budget protects and what it cannot prevent.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Request an allowlisted drain of an owned worker node in an exclusive multi-node lease.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Eviction behavior respects the PDB, readiness recovers and the learner distinguishes voluntary eviction from node loss.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;PDB&quot;,</span>
+<span>        &quot;eviction&quot;,</span>
+<span>        &quot;drain&quot;,</span>
+<span>        &quot;availability&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-033&quot;,</span>
+<span>      &quot;title&quot;: &quot;Autoscaling with a qualified metrics path&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-010&quot;,</span>
+<span>        &quot;k8s-027&quot;,</span>
+<span>        &quot;k8s-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Relate resource requests, measured load and stabilization to an HPA decision.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Drive a bounded local load fixture against a host-provisioned metrics-enabled service.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;HPA status and replica movement fall within declared ranges and stabilize; no exact timing or production capacity claim is invented.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;HPA&quot;,</span>
+<span>        &quot;metrics&quot;,</span>
+<span>        &quot;stabilization&quot;,</span>
+<span>        &quot;load&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-034&quot;,</span>
+<span>      &quot;title&quot;: &quot;Traffic changes and progressive delivery&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-013&quot;,</span>
+<span>        &quot;k8s-021&quot;,</span>
+<span>        &quot;k8s-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Design a release gate from application evidence instead of replica count alone.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare rolling and two-version Service-selection fixtures with a synthetic failing release.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Version/error samples meet the declared gate; a failed candidate is removed and finite samples are not claimed to prove an exact traffic ratio.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;canary&quot;,</span>
+<span>        &quot;blue-green&quot;,</span>
+<span>        &quot;traffic&quot;,</span>
+<span>        &quot;release gate&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-035&quot;,</span>
+<span>      &quot;title&quot;: &quot;Watches and optimistic concurrency&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-003&quot;,</span>
+<span>        &quot;k8s-018&quot;,</span>
+<span>        &quot;k8s-030&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Handle resource-version conflicts and watch expiration without losing state.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Apply conditional edits to an owned object and replay a supplied expired-watch trace.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;One stale update receives409, relist/reconcile recovers and resourceVersion is not treated as a user-defined clock.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;watch&quot;,</span>
+<span>        &quot;resourceVersion&quot;,</span>
+<span>        &quot;conflict&quot;,</span>
+<span>        &quot;relist&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-036&quot;,</span>
+<span>      &quot;title&quot;: &quot;Control-plane snapshots and data backups&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-018&quot;,</span>
+<span>        &quot;k8s-022&quot;,</span>
+<span>        &quot;k8s-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;State what an etcd snapshot includes and which workload data it does not back up.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;In a dedicated synthetic cluster, request fixed host snapshot/restore operations and compare state with an independent PVC backup fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Restored API objects and application marker hashes are checked separately; private snapshot material is never exported as portable progress.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;etcd&quot;,</span>
+<span>        &quot;snapshot&quot;,</span>
+<span>        &quot;backup&quot;,</span>
+<span>        &quot;restore boundary&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-037&quot;,</span>
+<span>      &quot;title&quot;: &quot;Version skew and replacement-cluster rehearsal&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-024&quot;,</span>
+<span>        &quot;k8s-028&quot;,</span>
+<span>        &quot;k8s-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Test API compatibility across qualified versions without calling kind a production upgrade system.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Render/validate fixtures against two separately owned pinned kind clusters and migrate only synthetic manifests/data.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Compatibility differences are explained and the replacement cluster passes acceptance; no in-place production upgrade or HA proof is claimed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;version skew&quot;,</span>
+<span>        &quot;API compatibility&quot;,</span>
+<span>        &quot;replacement&quot;,</span>
+<span>        &quot;upgrade&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-038&quot;,</span>
+<span>      &quot;title&quot;: &quot;Image provenance and offline verification&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-017&quot;,</span>
+<span>        &quot;k8s-025&quot;,</span>
+<span>        &quot;k8s-031&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish content integrity from publisher provenance and policy enforcement.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Evaluate prewarmed digest/signature-bundle fixtures with a qualified offline verification tool.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Expected signed content is accepted, a tampered artifact is rejected and the report records trust inputs rather than equating a digest with authorship.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;digest&quot;,</span>
+<span>        &quot;signature&quot;,</span>
+<span>        &quot;provenance&quot;,</span>
+<span>        &quot;offline trust&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-039&quot;,</span>
+<span>      &quot;title&quot;: &quot;Multitenancy and threat boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-018&quot;,</span>
+<span>        &quot;k8s-021&quot;,</span>
+<span>        &quot;k8s-031&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain why namespaces/RBAC alone are not an arbitrary-code isolation guarantee.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Analyze adversarial supplied manifests and compare them with admission/runtime/network controls in an exclusive fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Each rejected behavior names its control; no learner can mount host paths, run privileged or obtain another lease&#x27;s credentials.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;multitenancy&quot;,</span>
+<span>        &quot;threat model&quot;,</span>
+<span>        &quot;isolation&quot;,</span>
+<span>        &quot;defense in depth&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-040&quot;,</span>
+<span>      &quot;title&quot;: &quot;Incident response and bounded fault injection&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-027&quot;,</span>
+<span>        &quot;k8s-032&quot;,</span>
+<span>        &quot;k8s-035&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose a reversible investigation from a specific symptom and preserve evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Request one host-allowlisted synthetic fault, diagnose it and restore the last verified desired state.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A timestamped evidence timeline distinguishes cause from symptom; unrelated namespaces and cluster settings are unchanged.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;incident&quot;,</span>
+<span>        &quot;fault injection&quot;,</span>
+<span>        &quot;diagnosis&quot;,</span>
+<span>        &quot;recovery&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-041&quot;,</span>
+<span>      &quot;title&quot;: &quot;Recovery objectives and reviewable runbooks&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-036&quot;,</span>
+<span>        &quot;k8s-037&quot;,</span>
+<span>        &quot;k8s-040&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Measure a recovery objective with both service and data evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Execute a documented synthetic recovery drill with explicit start/finish definitions and missing-step negative control.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Observed recovery time and data-loss boundary are reported with source timestamps and marker hashes; a ready Pod alone is insufficient.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;RTO&quot;,</span>
+<span>        &quot;RPO&quot;,</span>
+<span>        &quot;runbook&quot;,</span>
+<span>        &quot;evidence&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-042&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 3: platform release and incident review&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 300,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;k8s-030&quot;,</span>
+<span>        &quot;k8s-031&quot;,</span>
+<span>        &quot;k8s-033&quot;,</span>
+<span>        &quot;k8s-034&quot;,</span>
+<span>        &quot;k8s-038&quot;,</span>
+<span>        &quot;k8s-039&quot;,</span>
+<span>        &quot;k8s-041&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;k8s-kind&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Defend an end-to-end Kubernetes change and recovery story within a bounded owned environment.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Release a policy-compliant custom-resource application, respond to a teacher-selected incident and perform a synthetic recovery drill.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Application/data/authorization gates pass, every privileged operation has a dedicated lease receipt and cleanup removes only owned disposable resources.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;platform&quot;,</span>
+<span>        &quot;incident&quot;,</span>
+<span>        &quot;review&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;capstones&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-capstone-01&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;Observable stateless service&quot;,</span>
+<span>      &quot;brief&quot;: &quot;k8s-014 combines namespace-scoped workload, configuration and verification from a fresh lease.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;Deployment/Service/ConfigMap manifests&quot;,</span>
+<span>        &quot;Desired-state, ready-endpoint and HTTP evidence&quot;,</span>
+<span>        &quot;Minimal fault diagnosis and owner-scoped cleanup receipt&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Two eligible backend Pod UIDs agree with ready EndpointSlice entries.&quot;,</span>
+<span>        &quot;An in-cluster client Job receives the expected payload.&quot;,</span>
+<span>        &quot;A teacher-selected configuration fault is repaired and no outside resource is changed.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-capstone-02&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;Stateful change with policy&quot;,</span>
+<span>      &quot;brief&quot;: &quot;k8s-028 combines controlled configuration, synthetic persistent data and policy-capable networking.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;Reviewed vendored chart/overlay and resource inventory&quot;,</span>
+<span>        &quot;Synthetic data marker/backup contract&quot;,</span>
+<span>        &quot;Policy positive/negative tests and limited-identity evidence&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Data and service results survive the declared supported change.&quot;,</span>
+<span>        &quot;Allowed/denied traffic proves actual CNI enforcement.&quot;,</span>
+<span>        &quot;Failed change is recovered with explicit data retention and cleanup decisions.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;k8s-capstone-03&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;Platform release and incident review&quot;,</span>
+<span>      &quot;brief&quot;: &quot;k8s-042 uses an exclusive advanced lease for reviewed API/policy and recovery operations.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;Custom-resource release and policy/provenance evidence&quot;,</span>
+<span>        &quot;Incident timeline and measured synthetic recovery drill&quot;,</span>
+<span>        &quot;Privileged-operation lease receipts and final cleanup inventory&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Application/data/authorization gates are independently inspectable.&quot;,</span>
+<span>        &quot;Only the host provisioner performs reviewed cluster-level operations.&quot;,</span>
+<span>        &quot;Recovery and cleanup prove the owned boundary; a kind lab is not presented as production HA acceptance.&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;pilot&quot;: {</span>
+<span>    &quot;lesson_id&quot;: &quot;k8s-008&quot;,</span>
+<span>    &quot;guide_path&quot;: &quot;docs/expansion/samples/kubernetes-pilot.md&quot;,</span>
+<span>    &quot;solution_path&quot;: &quot;docs/expansion/samples/kubernetes-pilot-solutions.md&quot;,</span>
+<span>    &quot;language&quot;: &quot;yaml&quot;,</span>
+<span>    &quot;code&quot;: &quot;apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: echo\n  labels:\n    app: echo\nspec:\n  replicas: 2\n  selector:\n    matchLabels:\n      app: echo\n  template:\n    metadata:\n      labels:\n        app: echo\n    spec:\n      automountServiceAccountToken: false\n      securityContext:\n        runAsNonRoot: true\n        runAsUser: 65532\n        seccompProfile:\n          type: RuntimeDefault\n      containers:\n        - name: echo\n          image: ds60-http-fixture:v1\n          imagePullPolicy: Never\n          args: [\&quot;serve\&quot;, \&quot;--port=8080\&quot;]\n          ports:\n            - name: http\n              containerPort: 8080\n          readinessProbe:\n            httpGet:\n              path: /ready\n              port: http\n            periodSeconds: 2\n            failureThreshold: 2\n          resources:\n            requests: {cpu: 10m, memory: 16Mi}\n            limits: {cpu: 100m, memory: 64Mi}\n          securityContext:\n            allowPrivilegeEscalation: false\n            readOnlyRootFilesystem: true\n            capabilities:\n              drop: [\&quot;ALL\&quot;]\n---\napiVersion: v1\nkind: Service\nmetadata:\n  name: echo\nspec:\n  selector:\n    app: echo\n  ports:\n    - name: http\n      port: 8080\n      targetPort: http\n&quot;,</span>
+<span>    &quot;concept&quot;: {</span>
+<span>      &quot;title&quot;: &quot;Running is not the same as ready for traffic&quot;,</span>
+<span>      &quot;explanation&quot;: &quot;The Deployment controller reconciles replica intent. A readiness probe controls whether a Pod is eligible for normal Service traffic. Service selectors and EndpointSlice ready conditions connect those separate mechanisms; apply success alone proves none of them.&quot;,</span>
+<span>      &quot;worked_example&quot;: &quot;Healthy replicas 2 yield two ready backend Pod UIDs. In a separate empty owned namespace, starting both replicas with probe /missing yields Running processes but zero eligible ready backends. A rolling change to an existing healthy Deployment can retain old Ready replicas and must be diagnosed by revision.&quot;</span>
+<span>    },</span>
+<span>    &quot;prediction&quot;: {</span>
+<span>      &quot;prompt&quot;: &quot;In the controlled all-unready fixture, no old Ready Pods match the Service. Both HTTP processes run, but both readiness probes return404. What should normal Service verification observe with publishNotReadyAddresses unset?&quot;,</span>
+<span>      &quot;choices&quot;: [</span>
+<span>        &quot;Two healthy backends because Pod phase is Running.&quot;,</span>
+<span>        &quot;Zero eligible ready backends; the containers need not restart.&quot;,</span>
+<span>        &quot;The Deployment is automatically deleted.&quot;</span>
+<span>      ],</span>
+<span>      &quot;correct_index&quot;: 1,</span>
+<span>      &quot;explanation&quot;: &quot;A readiness failure removes normal traffic eligibility. EndpointSlice objects may still contain unready addresses, so count ready conditions rather than object existence.&quot;</span>
+<span>    },</span>
+<span>    &quot;hint_steps&quot;: [</span>
+<span>      &quot;Inspect desired replicas, Pod Ready conditions and Service selector separately.&quot;,</span>
+<span>      &quot;Match ready EndpointSlice targetRef UIDs to Ready Pods; do not count all endpoints or use port-forward as a Service-routing proof.&quot;,</span>
+<span>      &quot;Change one cause at a time, restore /ready and app:echo, then require both convergence and a successful in-cluster client Job before cleanup.&quot;</span>
+<span>    ],</span>
+<span>    &quot;transfer_prompt&quot;: &quot;Design evidence for a second service named metrics whose Pods are Running but whose selector points at the wrong label, without changing the first service.&quot;,</span>
+<span>    &quot;rubric&quot;: [</span>
+<span>      &quot;Predict the distinction between Running, Ready and eligible backend correctly.&quot;,</span>
+<span>      &quot;Use only the explicit lease target and worker credential; never copy credentials into evidence.&quot;,</span>
+<span>      &quot;Verify controller convergence, endpoint UID membership and in-cluster HTTP results independently.&quot;,</span>
+<span>      &quot;Diagnose selector and readiness failures without confusing them with a container restart.&quot;,</span>
+<span>      &quot;Clean up only owned resources and record that the runtime/fixture matrix is still pending.&quot;</span>
+<span>    ]</span>
+<span>  },</span>
+<span>  &quot;sources&quot;: [</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;kind Quick Start&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kind.sigs.k8s.io/docs/user/quick-start/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Host preparation, platform binaries, owned cluster names and loading local images.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;kind v0.33.0 release&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://github.com/kubernetes-sigs/kind/releases/tag/v0.33.0&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Version qualification candidate and release-published node image digests.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;kind Working Offline&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kind.sigs.k8s.io/docs/user/working-offline/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Preload node/workload images and record exact content digests before disconnected study.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;kind Using WSL2&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kind.sigs.k8s.io/docs/user/using-wsl2/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Windows Linux-container/WSL2 route; current engine prerequisites require separate verification.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes supported releases&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/releases/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Recheck supported minor/patch versions at implementation;1.37/1.36/1.35 are listed at review.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes Deployments&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/workloads/controllers/deployment/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Desired/observed state, rollout generation and controller-managed Pods.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes probes&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Readiness traffic eligibility versus liveness/startup restart behavior.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes EndpointSlices&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/services-networking/endpoint-slices/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Ready/serving/terminating endpoint conditions and UID-based backend checks.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes RBAC good practices&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/security/rbac-good-practices/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Least privilege, namespace escalation risks and separation of worker/admin identities.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes ServiceAccounts&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Bound short-lived tokens and credential lifecycle; requested duration is not a fabricated expiration guarantee.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes NetworkPolicy&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/services-networking/network-policies/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;A policy object does not prove enforcement without a capable networking implementation.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;agnhost netexec source&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://raw.githubusercontent.com/kubernetes/kubernetes/master/test/images/agnhost/netexec/netexec.go&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;The test server exposes shell/upload endpoints, motivating a smaller course-owned HTTP fixture instead.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes Gateway API&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/services-networking/gateway/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Gateway/Route roles and the need for a separately qualified implementing controller.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes Ingress&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/services-networking/ingress/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Ingress is a stable but frozen API; compare existing deployments with the recommended Gateway direction.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Kubernetes DaemonSet&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;One Pod per eligible node, node selection and DaemonSet scheduling/toleration semantics.&quot;</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

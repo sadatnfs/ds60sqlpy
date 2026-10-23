@@ -785,6 +785,29 @@ def check_professional_lessons(catalog: Catalog) -> list[CheckResult]:
 MARKDOWN_LINK = re.compile(r"\[[^\]]+\]\((?P<target>[^)]+)\)")
 
 
+def _markdown_link_text(source: str) -> str:
+    """Exclude literal code examples before scanning prose for Markdown links."""
+    visible: list[str] = []
+    fence: str | None = None
+    for line in source.splitlines(keepends=True):
+        if fence is not None:
+            if re.fullmatch(
+                r" {0,3}" + re.escape(fence[0]) + "{" + str(len(fence)) + r",}[ \t]*",
+                line.rstrip("\r\n"),
+            ):
+                fence = None
+            visible.append("\n")
+            continue
+        opening = re.match(r" {0,3}(`{3,}|~{3,})(.*)$", line.rstrip("\r\n"))
+        if opening and not (opening[1][0] == "`" and "`" in opening[2]):
+            fence = opening[1]
+            visible.append("\n")
+        else:
+            visible.append(line)
+    # Code spans use matching runs of backticks, including multiline examples.
+    return re.sub(r"(?<!`)(`+)(?!`)[\s\S]*?(?<!`)\1(?!`)", "code", "".join(visible))
+
+
 def check_markdown_links(catalog: Catalog) -> list[CheckResult]:
     """Check repository-local Markdown links."""
 
@@ -812,7 +835,7 @@ def check_markdown_links(catalog: Catalog) -> list[CheckResult]:
         paths.extend(Path(directory) / name for name in files if name.endswith(".md"))
     for path in sorted(paths):
         source = path.read_text(encoding="utf-8")
-        for match in MARKDOWN_LINK.finditer(source):
+        for match in MARKDOWN_LINK.finditer(_markdown_link_text(source)):
             target = match.group("target").strip().strip("<>")
             if not target or target.startswith(("#", "http://", "https://", "mailto:")):
                 continue

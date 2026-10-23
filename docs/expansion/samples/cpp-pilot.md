@@ -1,0 +1,325 @@
+# cpp-009 pilot: vectors own; references borrow
+
+Design preview, checked 2026-10-22. This is a complete sample lesson for the [planned C++ track](../tracks/cpp.md), not an active catalog lesson or an implemented compiler runner. No tool is installed by opening it. The future app must show compile and run as separate actions. The commands below are a manual path only when a qualified compiler/CMake environment already exists.
+
+## Level and prerequisites
+
+Beginner, about 120 minutes plus retrieval practice. Direct planned prerequisites are `cpp-006` (integer input and conversions) and `cpp-008` (copies, const references and lifetimes). No Python or SQL prerequisite is required. You should be able to read a small function, a loop and `std::vector<int>`. The optional-return and bounds helpers used here are explained below.
+
+Use an owned scratch project, proposed as `.learning/projects/cpp-009/`, after the future workspace feature is implemented. This guide does not create that directory. Keep the [explanatory solution](cpp-pilot-solutions.md) closed until an attempt or an explicit reveal. The learner source is the set of code blocks in this guide; no future `courses/cpp/` file is claimed to exist yet.
+
+## Purpose and mental model
+
+A vector is an object that owns a sequence of elements. Its destructor releases the storage it owns when its lifetime ends. This is an example of RAII: resource ownership is tied to object lifetime, including early returns and exceptions. It is usually easier to compose such owning objects than to manually match every `new` with a `delete`.
+
+A copy is another owning vector with independent element values. A reference is another way to access an existing object; it is not another owner. A reference to a particular element is valid only while that element's lifetime and the container's invalidation rules allow it. Growing a vector can move its elements to new storage. A previously borrowed element reference can then dangle even though the vector itself still exists.
+
+An index is a position, starting at zero. For a vector of size 3, valid indices are 0,1 and 2. Index3 is already outside the sequence. `values.at(index)` checks this boundary and throws `std::out_of_range` when the index is invalid. `values[index]` does not supply this check. An invalid unchecked access is undefined behavior, not a reliable exception or a predictable value.
+
+`const std::vector<int>&` means a borrowed vector that this function cannot mutate through that parameter. It does not make the original object globally immutable. `std::optional<int>` is a value that either contains an integer or contains no value; `std::nullopt` names the empty case. Check `has_value()` before using a contained value. `std::in_range<std::size_t>(index)`, from `<utility>` in C++20, asks whether an integer can be represented by that unsigned index type before a cast.
+
+These ideas follow the ownership guidance in the [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines). The lesson's examples and checks below are original fixtures, not a claim that a diagnostic tool proves every lifetime correct.
+
+## Predict before running
+
+Given `values{3,8}`, an independent copy named `snapshot`, and `const auto& alias = values`, change `values.at(0)` to4. Write the first values observed through `snapshot` and `alias`, with one sentence explaining which object each name refers to. Do not run it until you have committed a prediction.
+
+## Worked example 1: an independent copy
+
+In `main.cpp`, construct `original{4,7,9}`, copy it, then change only the original's first element. The copy must still contain4; the original must contain5. The expression `const auto copy = original` asks the compiler to infer the vector type, creates a value copy and prevents later mutation through `copy`.
+
+## Worked example 2: reject one-past-the-end access
+
+The same program deliberately calls `original.at(original.size())`. This is exactly one past the last valid position. The program catches `std::out_of_range` and prints `bounds rejected`. It never tries an unchecked invalid access. The standard exception's detailed `what()` text is implementation-specific, so the check uses its type rather than matching a vendor's whole message.
+
+Save the complete starter as `main.cpp`:
+
+```cpp
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+int main() {
+    std::vector<int> original{4, 7, 9};
+    const auto copy = original;
+    original.at(0) = 5;
+    if (copy.at(0) != 4 || original.at(0) != 5) return 1;
+    std::cout << "copy=" << copy.at(0)
+              << " original=" << original.at(0) << '\n';
+    try {
+        (void)original.at(original.size());
+        return 2;
+    } catch (const std::out_of_range&) {
+        std::cout << "bounds rejected\n";
+    }
+}
+```
+
+**Expected:** exit 0, with exactly these two lines:
+
+```text
+copy=4 original=5
+bounds rejected
+```
+
+If the exception is not thrown, the program returns 2. These checks use ordinary control flow, so a Release build cannot remove them by defining `NDEBUG`.
+
+## A small portable build and test project
+
+Save `CMakeLists.txt` next to `main.cpp`. It uses only target-scoped properties and already-installed tools. No configure-time network download is allowed.
+
+```cmake
+cmake_minimum_required(VERSION 3.28)
+project(ds60_cpp_pilot LANGUAGES CXX)
+include(CTest)
+option(DS60_BUILD_EXERCISE_TESTS "Build the learner exercise checks" OFF)
+
+function(ds60_target target)
+  set_target_properties(${target} PROPERTIES
+    CXX_STANDARD 20 CXX_STANDARD_REQUIRED ON CXX_EXTENSIONS OFF)
+  if(MSVC)
+    target_compile_options(${target} PRIVATE /W4 /permissive-)
+  else()
+    target_compile_options(${target} PRIVATE -Wall -Wextra -Wconversion -Wpedantic)
+  endif()
+endfunction()
+
+add_executable(pilot_examples main.cpp)
+ds60_target(pilot_examples)
+add_test(NAME worked-examples COMMAND pilot_examples)
+set_tests_properties(worked-examples PROPERTIES TIMEOUT 5)
+
+if(DS60_BUILD_EXERCISE_TESTS)
+  add_executable(exercise_checks exercises.cpp exercise_checks.cpp)
+  ds60_target(exercise_checks)
+  add_test(NAME exercise-contracts COMMAND exercise_checks)
+  set_tests_properties(exercise-contracts PROPERTIES TIMEOUT 5)
+endif()
+```
+
+In Bash on macOS/Linux/WSL, or PowerShell in an already-qualified Windows developer environment, these CMake commands have the same argument syntax:
+
+```text
+cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON
+cmake --build build/pilot --target pilot_examples
+ctest --test-dir build/pilot --output-on-failure --no-tests=error
+```
+
+**Expected:** configure succeeds, the target compiles, then CTest reports one passed test. Each is a separate phase. If Ninja is absent, report the missing tool; do not install one from this lesson. A qualified MSVC environment may use its documented multi-configuration generator instead, in which case build/CTest require the matching `--config Debug`/`-C Debug`. Do not mix those build directories.
+
+CMake documents why [requiring the standard](https://cmake.org/cmake/help/v3.28/prop_tgt/CXX_STANDARD_REQUIRED.html) matters. The [CTest manual](https://cmake.org/cmake/help/v3.28/manual/ctest.1.html) describes test selection and output. These commands are instructions, not a claim that CMake or a native Windows toolchain was run in this design phase.
+
+## Learner exercise interface
+
+Save `exercises.hpp`:
+
+```cpp
+#pragma once
+#include <cstddef>
+#include <optional>
+#include <vector>
+
+namespace ds60 {
+long long positive_sum(const std::vector<int>& readings);
+bool replace_at(std::vector<int>& readings, std::size_t index, int replacement);
+std::optional<int> checked_read(const std::vector<int>& readings, long long index);
+std::vector<int> nonnegative_copy(const std::vector<int>& readings);
+}
+```
+
+Save `exercises.cpp` with explicit incomplete bodies. Replace one body at a time after its prediction; a stub is supposed to fail the exercise test, not to masquerade as a solution.
+
+```cpp
+#include "exercises.hpp"
+#include <stdexcept>
+
+namespace ds60 {
+long long positive_sum(const std::vector<int>&) {
+    throw std::logic_error("Exercise 2 is not implemented");
+}
+bool replace_at(std::vector<int>&, std::size_t, int) {
+    throw std::logic_error("Exercise 3 is not implemented");
+}
+std::optional<int> checked_read(const std::vector<int>&, long long) {
+    throw std::logic_error("Exercise 5 is not implemented");
+}
+std::vector<int> nonnegative_copy(const std::vector<int>&) {
+    throw std::logic_error("Exercise 6 is not implemented");
+}
+}
+```
+
+The independent check program appears after the exercises so it can verify your implementation without opening the solution.
+
+## Exercises
+
+### 1. Prediction and an ownership trace
+
+Use `values{3,8}`, `auto snapshot = values`, `const auto& alias = values`, then assign `values.at(0)=4`. Predict both first values. Draw two vector objects and the alias arrow, then write and run a tiny program to check the trace.
+
+**Expected:** `snapshot.at(0)==3` and `alias.at(0)==4`; the original remains size 2. Explain why `const` did not prevent mutation through `values`.
+
+**Verify:** use explicit `if`/nonzero-return checks for both values and size; compare the drawing with the addresses of the vector objects if useful, without requiring a particular address value.
+
+Hints: (1) count owning objects, not variable names; (2) a reference aliases an object; (3) `const` limits that access path, while the copy owns independent elements.
+
+### 2. Read a batch without changing it
+
+Implement `positive_sum`. Accept at most 10000 integers, each between -1000000 and 1000000. Return the sum of values strictly greater than zero as `long long`; preserve the input. For `{4,-2,7,0,9}`, the answer is 20.
+
+**Expected:** mixed input20, empty input0, all-negative input0 and 10000 copies of 1000000 produce 10000000000. Adding zero is observably equivalent for this sum, so the output checks do not claim to prove an internal branch choice. These bounds keep the accumulator representable.
+
+**Verify:** run all four published checks and compare the input with a saved copy after the call. Do not use a32-bit accumulator and hope that a small fixture hides overflow.
+
+Hints: (1) identify the accumulator's type before the loop; (2) the parameter is a const reference, so the function only reads; (3) start at zero and add only strictly positive values.
+
+### 3. Replace exactly one valid element
+
+Implement `replace_at`. For a valid index, replace that element and return true. Otherwise return false and leave the vector unchanged. `{4,7,9}`, index 1 and replacement8 must become `{4,8,9}`.
+
+**Expected:** the normal case returns true; index 3 for a size 3 vector returns false with unchanged values; an empty vector at index 0 also returns false and stays empty.
+
+**Verify:** check both the returned Boolean and the entire vector for each case. The equality case `index==size()` is invalid, not just values greater than size.
+
+Hints: (1) valid positions satisfy `index < size`; (2) guard before writing; (3) no allocation or insertion is needed to replace an existing integer.
+
+### 4. Debug a borrowed element without executing undefined behavior
+
+Review this unsafe proposal. Do not run the last line to see whether it happens to work:
+
+```cpp
+std::vector<int> values{4, 7, 9};
+const int& first = values.at(0);
+values.push_back(11);  // May reallocate and invalidate first.
+// std::cout << first; // Unsafe after a possible reallocation.
+```
+
+Write two safe variants: one keeps the old value as an owned integer; the other keeps an index and reacquires the current element after append-only growth. After the append, set `values.at(0)=6` and explain the difference between old and current observations.
+
+**Expected:** the owned snapshot remains4; the reacquired current element is 6; vector size is 4. Explain why the original reference cannot be used to decide whether it was invalidated. Reacquiring by index is valid under the stated append-only change, not after arbitrary erasure/reordering.
+
+**Verify:** run explicit checks on the two safe variants only, and retain a short lifetime diagram. A sanitizer report is optional supporting evidence, not permission to execute an arbitrary dangling read.
+
+Hints: (1) the borrow points to an element's storage, not to a forever-stable logical record; (2) ownership is appropriate when you need the old value; (3) fetch through the vector after growth when you need the current value at a still-valid position.
+
+### 5. Accept a signed external index safely
+
+Implement `checked_read` for a `long long` index. Return an optional copy of the element when the index can be represented as `std::size_t` and is within the vector; otherwise return `std::nullopt`. Do not change the input.
+
+**Expected:** `{4,7,9}`, index 1 returns an optional containing7; indices -1 and 3 return no value; empty input at0 returns no value. A value too large for the platform's size type must not wrap into a valid small index.
+
+**Verify:** inspect `has_value()` before using a returned value, run all four fixtures, and explain the conversion check before the cast. `std::in_range<std::size_t>` is a C++20 helper for that representability check.
+
+Hints: (1) negative values cannot be valid unsigned indices; (2) a cast is not validation and can wrap on a narrower target; (3) first check representability, then the collection boundary, then read.
+
+### 6. Transfer ownership to a new temperature batch
+
+Implement `nonnegative_copy`. Preserve order, keep zero, omit negative values and return an independently owned result. For `{3,-1,0,5}`, return `{3,0,5}` without changing the source. Mutating the returned vector afterward must not change the source.
+
+**Expected:** the mixed result is exact, an empty input yields empty output and all-negative input yields empty output. The input bytes/values remain unchanged.
+
+**Verify:** compare result and source separately, mutate only the result's first element when it is nonempty, and check that the original still starts with 3.
+
+Hints: (1) the return value should own storage; (2) borrowing the input is useful only while reading it; (3) build a new vector in input order and return that value.
+
+## Independent check program
+
+Save `exercise_checks.cpp`. These checks express the contracts; they do not implement the functions for you.
+
+```cpp
+#include "exercises.hpp"
+#include <exception>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
+
+int main() {
+    int checks = 0;
+    const auto require = [&checks](bool ok, const char* message) {
+        if (!ok) throw std::runtime_error(message);
+        ++checks;
+    };
+    try {
+        const std::vector<int> mixed{4, -2, 7, 0, 9};
+        const auto before = mixed;
+        require(ds60::positive_sum(mixed) == 20 && mixed == before, "mixed sum/input");
+        require(ds60::positive_sum({}) == 0, "empty sum");
+        require(ds60::positive_sum({-4, -1}) == 0, "negative sum");
+        require(ds60::positive_sum(std::vector<int>(10000, 1000000)) == 10000000000LL,
+                "wide accumulator");
+
+        std::vector<int> values{4, 7, 9};
+        require(ds60::replace_at(values, 1, 8) && values == std::vector<int>({4, 8, 9}),
+                "valid replacement");
+        const auto saved = values;
+        require(!ds60::replace_at(values, 3, 8) && values == saved, "one-past replacement");
+        std::vector<int> empty;
+        require(!ds60::replace_at(empty, 0, 8) && empty.empty(), "empty replacement");
+
+        const std::vector<int> readings{4, 7, 9};
+        require(ds60::checked_read(readings, 1) == std::optional<int>(7), "valid read");
+        require(!ds60::checked_read(readings, -1).has_value(), "negative read");
+        require(!ds60::checked_read(readings, 3).has_value(), "one-past read");
+        require(!ds60::checked_read({}, 0).has_value(), "empty read");
+
+        const std::vector<int> temperatures{3, -1, 0, 5};
+        auto result = ds60::nonnegative_copy(temperatures);
+        const bool correct = result == std::vector<int>({3, 0, 5}) &&
+                             temperatures == std::vector<int>({3, -1, 0, 5});
+        if (!result.empty()) result.at(0) = 99;
+        require(correct && temperatures.at(0) == 3, "filter and independent ownership");
+        require(ds60::nonnegative_copy({}).empty(), "empty filter");
+        require(ds60::nonnegative_copy({-3, -1}).empty(), "negative filter");
+        std::cout << checks << " checks passed\n";
+        return 0;
+    } catch (const std::exception& error) {
+        std::cerr << "FAIL: " << error.what() << '\n';
+        return 1;
+    }
+}
+```
+
+After writing your function bodies, enable the exercise target:
+
+```text
+cmake -S . -B build/pilot -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DDS60_BUILD_EXERCISE_TESTS=ON
+cmake --build build/pilot
+ctest --test-dir build/pilot --output-on-failure --no-tests=error
+```
+
+**Expected:** two CTest tests pass; `exercise_checks` prints `14 checks passed`. A stub produces a clear nonzero failure. Repeat in a separate Release build directory and do not delete your sources when changing profiles. Exercise4 also needs its safe-variant transcript and explanation; the fourteen function checks cannot prove that lifetime argument by themselves.
+
+## Diagnosis and self-check
+
+| Observation | Likely mechanism | First useful check |
+| --- | --- | --- |
+| Original and copy both appear changed | You probably kept a reference or compared the wrong object | Inspect the declaration containing `&` and check both vector values |
+| Index equal to size was accepted | The guard used `>` instead of `>=` | Run the size 3/index 3 fixture |
+| Large sum differs between builds | A too-narrow accumulator or undefined behavior may exist | Inspect accumulator type and run a supported UBSan profile later |
+| Linker reports an undefined function | Declaration and definition are different or implementation was omitted | Compare namespace/signature and target source list |
+| A repeated run prints a different borrowed value | You may be using invalidated storage | Stop the unsafe read and draw lifetimes before repairing it |
+
+## Retrieval and transfer review
+
+Close the code and explain: which object owns the elements, why `const` on an alias is not global immutability, why `at(size())` fails, why a cast is not an index check, and when appending can invalidate an element reference. Then apply the reasoning to a different vector of sensor records with no solution open. If the explanation relies on one particular address or one lucky run, revisit the lifetime model.
+
+## Rubric
+
+Score each item 0,1 or 2: ownership prediction; all fourteen normal/boundary checks; safe lifetime repair; separate compile/test/run evidence; and transfer explanation. A ready-for-next-lesson result needs at least 8/10, every published function check passing, no executed dangling read, and an explanation of both snapshot versus current-value strategies. Compiler execution alone is not mastery. Native Windows/Linux builds, CMake/CTest execution and sanitizer matrices are pending unless a separate actual transcript is supplied; a local snippet compile cannot establish the whole future runner.
+
+## Design-phase code check
+
+On 2026-10-22, the existing Apple Clang 21.0.0 toolchain on Darwin arm64 directly compiled and ran the worked program and complete solution/check program in Debug and Release (`-DNDEBUG`). The exact two worked-example lines and `14 checks passed` were observed; the unchanged learner stubs returned a clear nonzero failure. This is a narrow snippet check. CMake/Ninja/CTest were not installed or run, and no Windows/Linux build, sanitizer profile or browser compiler adapter was qualified.
+
+## Ask Codex about this lesson
+
+```text
+Use $guide-ds60sqlpy-learning to coach planned lesson cpp-009, Vectors own; references borrow.
+Read docs/expansion/samples/cpp-pilot.md, which contains the learner main.cpp and exercise project snippets.
+This is an unregistered design preview; do not claim an active Run button or query it as an existing catalog ID.
+Direct planned prerequisites are cpp-006 and cpp-008; assume a beginner who knows only those concepts.
+Explain one ownership or bounds idea, ask me to predict, let me attempt one exercise, then give one hint at a time.
+Do not read docs/expansion/samples/cpp-pilot-solutions.md or any solutions/ content until I ask or make an honest attempt.
+Review exact outputs/tests and my lifetime diagram; never ask me to execute a possibly dangling read.
+Finish with a transfer example and retrieval in my own words, and distinguish source checks from unverified platform/runner claims.
+```

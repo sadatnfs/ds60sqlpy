@@ -1,0 +1,999 @@
+{
+  "schema_version": 1,
+  "status": "planned",
+  "id": "llm-theory",
+  "title": "Language models: mechanisms, training and evidence",
+  "summary": "A 42-lesson design from NumPy probability and causal attention to a small PyTorch transformer and a defensible system evaluation.",
+  "north_star": "Explain what each language-model component computes, test its information boundary and make a scoped system decision from reproducible evidence.",
+  "entry_prerequisites": [
+    "python-16"
+  ],
+  "runtime_profiles": [
+    "reading",
+    "python-core",
+    "llm-torch-cpu"
+  ],
+  "stages": [
+    {
+      "id": "beginner",
+      "title": "Compute the mechanism and challenge the claim",
+      "outcome": "Trace token probabilities, tokenization, attention and a count baseline with NumPy."
+    },
+    {
+      "id": "intermediate",
+      "title": "Train and inspect a tiny transformer",
+      "outcome": "Build one bounded PyTorch decoder and prove mask, loss, split, restart and cache contracts."
+    },
+    {
+      "id": "advanced",
+      "title": "Evaluate adaptation and complete language systems",
+      "outcome": "Assess adaptation, retrieval, tools and reliability without conflating a small test with a safety guarantee."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "llm-001",
+      "title": "Language-model claims and evaluation units",
+      "level": "beginner",
+      "minutes": 75,
+      "prerequisites": [
+        "python-16"
+      ],
+      "runtime": "reading",
+      "outcome": "Separate predicting tokens from evidence of knowledge, reasoning or reliability.",
+      "lab": "Label six statements as architectural, empirical or unsupported; define a token, document and task as distinct evaluation units.",
+      "verification": "Every claim names its measurement unit and a counterexample; a fluent answer alone is not marked as a correctness test.",
+      "concepts": [
+        "language model",
+        "claim",
+        "evidence",
+        "evaluation unit"
+      ]
+    },
+    {
+      "id": "llm-002",
+      "title": "Scores, stable softmax and probability mass",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "llm-001"
+      ],
+      "runtime": "python-core",
+      "outcome": "Convert finite scores into a stable categorical distribution with an explicit axis.",
+      "lab": "Compute softmax for [0,0] and [1000,1000], subtracting the maximum before exponentiation; try an invalid all-masked row.",
+      "verification": "Both finite score vectors produce [0.5,0.5] within 1e-12; an all-masked row must be rejected instead of returning NaN.",
+      "concepts": [
+        "logit",
+        "softmax",
+        "axis",
+        "normalization",
+        "numerical stability"
+      ]
+    },
+    {
+      "id": "llm-003",
+      "title": "Conditional probability and a sequence likelihood",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "llm-002"
+      ],
+      "runtime": "python-core",
+      "outcome": "Expand a sequence probability without treating tokens as independent.",
+      "lab": "Use a fixed conditional table with probabilities 0.5,0.25,0.8 and calculate the product and negative log probability.",
+      "verification": "Sequence probability=0.1 and total negative log likelihood=log(10) within 1e-12; changing a prefix may change the next conditional.",
+      "concepts": [
+        "conditional probability",
+        "chain rule",
+        "likelihood",
+        "log probability"
+      ]
+    },
+    {
+      "id": "llm-004",
+      "title": "A count-based next-token baseline",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-003"
+      ],
+      "runtime": "python-core",
+      "outcome": "Fit and inspect a tiny bigram model before adding neural machinery.",
+      "lab": "Count transitions in fixed local token sequences; apply a declared add-one smoothing policy using training counts only.",
+      "verification": "Every conditional row sums to 1; an unseen context follows the declared uniform fallback, and validation text never changes the counts.",
+      "concepts": [
+        "bigram",
+        "smoothing",
+        "baseline",
+        "training counts"
+      ]
+    },
+    {
+      "id": "llm-005",
+      "title": "Cross entropy, perplexity and denominator traps",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-004"
+      ],
+      "runtime": "python-core",
+      "outcome": "Compute token loss and compare models only under compatible tokenization and scoring units.",
+      "lab": "Average NLL for target probabilities [0.5,0.25], then compare document-weighted and token-weighted averages for unequal lengths.",
+      "verification": "Mean NLL=1.5*log(2), perplexity=2**1.5 within 1e-12. Report token count; perplexity across different tokenizers is not a direct ranking.",
+      "concepts": [
+        "cross entropy",
+        "perplexity",
+        "token denominator",
+        "document weighting"
+      ]
+    },
+    {
+      "id": "llm-006",
+      "title": "Unicode, bytes and tokenizer round trips",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-005"
+      ],
+      "runtime": "python-core",
+      "outcome": "Trace text through a reversible representation without confusing characters and bytes.",
+      "lab": "Encode fixed ASCII, accented and emoji strings as UTF-8; retain exact bytes while comparing NFC normalization as an explicit data policy.",
+      "verification": "Every input round-trips byte-for-byte when normalization is off. The chosen normalization changes identity deliberately and is recorded before splitting.",
+      "concepts": [
+        "Unicode",
+        "UTF-8",
+        "normalization",
+        "token identity",
+        "round trip"
+      ]
+    },
+    {
+      "id": "llm-007",
+      "title": "A tiny train-only subword vocabulary",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-006"
+      ],
+      "runtime": "python-core",
+      "outcome": "Learn deterministic merge rules without leaking evaluation text into a tokenizer.",
+      "lab": "Implement a small BPE merge table with a declared lexical tie-break on a local training fixture; freeze vocabulary before encoding validation.",
+      "verification": "Tied pairs choose the same merge after a fresh run. Validation-only strings cannot change the vocabulary hash or merge count.",
+      "concepts": [
+        "BPE",
+        "merge rule",
+        "tie-break",
+        "vocabulary freeze",
+        "leakage"
+      ]
+    },
+    {
+      "id": "llm-008",
+      "title": "Embedding lookup is a learned table",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "llm-007"
+      ],
+      "runtime": "python-core",
+      "outcome": "Map token IDs to rows and track the feature axis independently of vocabulary size.",
+      "lab": "Index a fixed 4x2 embedding table with IDs [2,0,2]; compare repeated-token rows and an out-of-range ID.",
+      "verification": "Output shape=(3,2); first and third rows match exactly. ID 4 is rejected under the four-entry vocabulary.",
+      "concepts": [
+        "embedding",
+        "lookup",
+        "vocabulary axis",
+        "feature axis"
+      ]
+    },
+    {
+      "id": "llm-009",
+      "title": "Causal attention and prefix invariance",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-008"
+      ],
+      "runtime": "python-core",
+      "outcome": "Prove that a query cannot use later token positions and diagnose a mask that only looks plausible.",
+      "lab": "Implement scaled dot-product attention on fixed 3x2 Q/K/V arrays and test each prefix independently.",
+      "verification": "Equal-logit causal outputs are [[2,0],[1,1],[8/3,8/3]] within 1e-12; arbitrary future-only changes leave earlier outputs invariant.",
+      "concepts": [
+        "attention",
+        "causal mask",
+        "prefix invariance",
+        "information boundary"
+      ]
+    },
+    {
+      "id": "llm-010",
+      "title": "Position, order and tokenwise normalization",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-009"
+      ],
+      "runtime": "python-core",
+      "outcome": "Explain why content attention alone does not identify position and preserve causal normalization.",
+      "lab": "Jointly permute Q, K and V for unmasked content-only attention, then add a fixed position table. Separately compare tokenwise LayerNorm with sequence-wide normalization under causal-prefix checks.",
+      "verification": "Without positions or a causal mask, jointly permuting inputs permutes outputs. A causal mask itself imposes an order boundary. Sequence-wide normalization can change earlier prefix values and is rejected for this decoder.",
+      "concepts": [
+        "position encodings",
+        "permutation equivariance",
+        "causal order boundary",
+        "LayerNorm",
+        "prefix invariance"
+      ]
+    },
+    {
+      "id": "llm-011",
+      "title": "Multiple heads, residuals and a decoder block",
+      "level": "beginner",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-010"
+      ],
+      "runtime": "python-core",
+      "outcome": "Trace every dimension through a small decoder block and keep residual paths valid.",
+      "lab": "Split a width 4 vector into two heads, rejoin it, apply a fixed feed-forward transformation and residual addition.",
+      "verification": "Split/rejoin is an exact round trip; head width=2. Residual operands have the same shape, and every operation is tokenwise or causally masked.",
+      "concepts": [
+        "multihead",
+        "head width",
+        "residual",
+        "feed-forward block",
+        "decoder-only versus encoder/cross-attention roles"
+      ]
+    },
+    {
+      "id": "llm-012",
+      "title": "Greedy decoding, temperature and sampling",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-011"
+      ],
+      "runtime": "python-core",
+      "outcome": "Separate a distribution from the algorithm that selects a token.",
+      "lab": "Use scores [2,1,0], fixed random draws and explicit tie rules; compare greedy choice with temperature and top-k filtering.",
+      "verification": "Greedy chooses index 0; temperature changes probabilities but not this ranking. A fixed draw with a fixed cumulative table yields a reproducible choice.",
+      "concepts": [
+        "decoding",
+        "temperature",
+        "sampling",
+        "top-k",
+        "tie-break"
+      ]
+    },
+    {
+      "id": "llm-013",
+      "title": "A leakage audit before a model score",
+      "level": "beginner",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-012"
+      ],
+      "runtime": "python-core",
+      "outcome": "Identify target leakage, duplicate documents and test-set reuse independently of mask correctness.",
+      "lab": "Split a fixed corpus by source document; compare shifted labels with copying the input as its own target and introduce one duplicate document.",
+      "verification": "Inputs [2,5,7] pair with labels [5,7,3]; document sets are disjoint and the injected duplicate is detected. Prefix invariance alone does not establish these conditions.",
+      "concepts": [
+        "shifted target",
+        "document split",
+        "contamination",
+        "data leakage"
+      ]
+    },
+    {
+      "id": "llm-014",
+      "title": "Capstone: a small language-model evidence notebook",
+      "level": "beginner",
+      "minutes": 180,
+      "prerequisites": [
+        "llm-013"
+      ],
+      "runtime": "python-core",
+      "outcome": "Present a count-based model and an independently tested attention mechanism with bounded claims.",
+      "lab": "Fit a tiny bigram baseline from local text, freeze its tokenizer/split and produce causal-mask, loss and counterexample evidence.",
+      "verification": "Conditional probabilities sum to 1, held-out units are declared, mask/prefix tests pass, and the report does not claim foundation-model competence.",
+      "concepts": [
+        "capstone",
+        "baseline",
+        "causal contract",
+        "evidence notebook"
+      ]
+    },
+    {
+      "id": "llm-015",
+      "title": "PyTorch tensors and automatic gradients",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-014"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Translate a NumPy calculation to tensors without requiring another deep-learning course.",
+      "lab": "Derive 2*(w-2) with a finite-difference check, reproduce that squared-loss gradient in PyTorch CPU, and compare a fixed embedding lookup; inspect requires_grad and detach.",
+      "verification": "For (w-2)^2 at w=0, gradient=-4. Detached values have no path to w, and the embedding output matches llm-008.",
+      "concepts": [
+        "tensor",
+        "requires_grad",
+        "autograd",
+        "detach",
+        "CPU"
+      ]
+    },
+    {
+      "id": "llm-016",
+      "title": "A tiny causal transformer from explicit parts",
+      "level": "intermediate",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-015"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Assemble one decoder block and verify its shape and information boundary before training.",
+      "lab": "Build a decoder with width 32, two heads, one block and vocabulary<=128; retain the NumPy mask test as a reference.",
+      "verification": "Parameter count<50000, logits shape=(batch,time,vocabulary), and prefix outputs agree in eval mode within 1e-6.",
+      "concepts": [
+        "decoder",
+        "parameter count",
+        "causal attention",
+        "logits contract"
+      ]
+    },
+    {
+      "id": "llm-017",
+      "title": "Shifted batches, padding and token loss",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-016"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Align inputs, targets and ignored padding without changing the evaluation denominator.",
+      "lab": "Build inputs/labels from fixed token sequences and add ignored padding labels; compare sum/mean cross entropy over active targets.",
+      "verification": "For [2,5,7,3], input=[2,5,7], target=[5,7,3]. Appending ignored targets changes neither the active count of 3 nor the mean loss.",
+      "concepts": [
+        "target shift",
+        "padding",
+        "ignore_index",
+        "active-token loss"
+      ]
+    },
+    {
+      "id": "llm-018",
+      "title": "A bounded training loop with visible state",
+      "level": "intermediate",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-017"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Implement forward, loss, zero_grad, backward and optimizer.step in the correct order.",
+      "lab": "Train on at most 128 local sequences for at most 200 steps; log an initial loss and a gradient norm on a fixed diagnostic batch.",
+      "verification": "Weights change after a real step; gradients do not accumulate accidentally. All loss/gradient values remain finite, and stopped budgets are reported without a convergence claim.",
+      "concepts": [
+        "optimizer",
+        "AdamW",
+        "zero_grad",
+        "gradient clipping",
+        "budget"
+      ]
+    },
+    {
+      "id": "llm-019",
+      "title": "Overfit one batch to diagnose the loop",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-018"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Use a deliberately tiny overfit experiment to separate implementation failure from generalization.",
+      "lab": "Repeat one fixed batch with dropout off; compare a no-update control and a functioning loop under the same declared step cap.",
+      "verification": "The no-update control leaves weights identical. Record the observed loss curve and first failed invariant; do not interpret memorizing this batch as held-out quality.",
+      "concepts": [
+        "overfit diagnostic",
+        "control",
+        "memorization",
+        "invariant"
+      ]
+    },
+    {
+      "id": "llm-020",
+      "title": "Initialization and residual scale",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-019"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Locate unstable activations and gradients without blaming data first.",
+      "lab": "Compare a fixed small weight scale with an exaggerated scale on the same tiny batch; inspect finite norms and residual dimensions.",
+      "verification": "The report contains layerwise activation/gradient norms and a named first nonfinite location if present. A claimed repair must restore finite output on the same input.",
+      "concepts": [
+        "initialization",
+        "activation norm",
+        "residual scale",
+        "stability"
+      ]
+    },
+    {
+      "id": "llm-021",
+      "title": "Document splits and contamination controls",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-020"
+      ],
+      "runtime": "python-core",
+      "outcome": "Design a corpus split around the source unit and freeze it before model selection.",
+      "lab": "Hash and deduplicate a hand-authored local corpus; add near-duplicate examples with known document-family IDs and construct grouped splits.",
+      "verification": "No exact hash or family ID crosses train/validation/test. The original partition manifest is unchanged after evaluation.",
+      "concepts": [
+        "deduplication",
+        "document family",
+        "split hash",
+        "contamination"
+      ]
+    },
+    {
+      "id": "llm-022",
+      "title": "Reproducibility, evaluation mode and restart",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-021"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Distinguish repeatable inference from repeatable training and preserve optimizer state.",
+      "lab": "Record seed/profile/dtype, disable dropout with model.eval(), and use Adam state plus model weights to compare an uninterrupted next update with a fresh-process restore on the same fixed batch.",
+      "verification": "Eval-mode prefix tests pass with dropout disabled. Restored next-step tensors agree within 1e-6; cross-platform bitwise equality is not promised.",
+      "concepts": [
+        "eval mode",
+        "dropout",
+        "checkpoint",
+        "optimizer state",
+        "reproducibility"
+      ]
+    },
+    {
+      "id": "llm-023",
+      "title": "Top-p, termination and decoding failure cases",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-022"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Implement a bounded decoder with explicit sampling and stop conditions.",
+      "lab": "Use token probabilities [0.5,0.3,0.2], top-p=0.6 and a seeded CPU generator; add explicit EOS and maximum-length cases, retaining the threshold-crossing token.",
+      "verification": "The retained nucleus contains the first two tokens, with original mass 0.8. Zero-temperature greedy mode is separate; output respects the token cap and EOS prevents a further token.",
+      "concepts": [
+        "top-p",
+        "EOS",
+        "token cap",
+        "sampling boundary"
+      ]
+    },
+    {
+      "id": "llm-024",
+      "title": "KV caches and incremental equivalence",
+      "level": "intermediate",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-023"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Prove a cache optimization preserves the uncached causal computation.",
+      "lab": "Run full-prefix and one-token-at-a-time inference on fixed weights, tracking position offsets and cache ownership by request.",
+      "verification": "Per-position logits agree within 1e-6. A fresh request receives an empty cache; a deliberately reused foreign cache fails the isolation check.",
+      "concepts": [
+        "KV cache",
+        "position offset",
+        "incremental inference",
+        "request isolation",
+        "absolute/relative position offsets",
+        "rotary-position cache assumptions"
+      ]
+    },
+    {
+      "id": "llm-025",
+      "title": "Memory and compute without a GPU",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-024"
+      ],
+      "runtime": "python-core",
+      "outcome": "Estimate attention and cache costs before choosing a context size.",
+      "lab": "Count score elements and KV-cache bytes for declared T,H,dtype; compare T=16 and 32 while model width stays fixed.",
+      "verification": "Doubling context quadruples the T-by-T score count and doubles KV storage. State exclusions such as allocator overhead and batching.",
+      "concepts": [
+        "quadratic attention",
+        "KV storage",
+        "dtype bytes",
+        "cost model"
+      ]
+    },
+    {
+      "id": "llm-026",
+      "title": "What a representation probe establishes",
+      "level": "intermediate",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-025"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Distinguish accessible information from a causal explanation of a model decision.",
+      "lab": "Probe frozen tiny-model representations on a synthetic local label with a shuffled-label control and a held-out document split.",
+      "verification": "Report the control result and split unit. Even a successful probe is not described as proof that the model used that feature causally.",
+      "concepts": [
+        "representation",
+        "probe",
+        "control",
+        "causation",
+        "interpretation"
+      ]
+    },
+    {
+      "id": "llm-027",
+      "title": "Calibration and comparable evaluation",
+      "level": "intermediate",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-026"
+      ],
+      "runtime": "python-core",
+      "outcome": "Report predictive confidence under an explicit scoring and grouping policy.",
+      "lab": "Compute token-weighted loss, a small calibration table and paired errors for fixed saved predictions; contrast a tokenizer change.",
+      "verification": "Bins report counts, confidence and observed frequency; empty bins are explicit. Token losses across incompatible vocabularies are not directly ranked.",
+      "concepts": [
+        "calibration",
+        "confidence",
+        "tokenizer comparability",
+        "grouped errors"
+      ]
+    },
+    {
+      "id": "llm-028",
+      "title": "Capstone: train and audit a tiny transformer",
+      "level": "intermediate",
+      "minutes": 240,
+      "prerequisites": [
+        "llm-027"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Defend a bounded local training run with a frozen corpus and diagnostic evidence.",
+      "lab": "Train a decoder with fewer than 50000 parameters, context at most 32 and at most 200 updates; compare held-out loss with the count baseline and submit failure analysis.",
+      "verification": "Tokenizer/split/model hashes, masks, loss denominator, seed/profile and exact step count are recorded. Any quality conclusion names the held-out unit and uncertainty.",
+      "concepts": [
+        "capstone",
+        "tiny transformer",
+        "baseline",
+        "reproducible run",
+        "evaluation"
+      ]
+    },
+    {
+      "id": "llm-029",
+      "title": "Scaling laws and the limits of a toy experiment",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-028"
+      ],
+      "runtime": "reading",
+      "outcome": "Interpret a scaling claim without extrapolating a tiny classroom fit to frontier systems.",
+      "lab": "Read a supplied small loss-versus-compute table and identify which constants, data distributions and budgets changed between runs.",
+      "verification": "Every comparison controls or labels parameter count, data and steps. The report explicitly refuses a frontier-performance prediction from the toy table.",
+      "concepts": [
+        "scaling law",
+        "compute budget",
+        "confounding",
+        "extrapolation"
+      ]
+    },
+    {
+      "id": "llm-030",
+      "title": "Pretraining data provenance and evaluation contamination",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-029"
+      ],
+      "runtime": "reading",
+      "outcome": "Specify provenance and removal policies before training or evaluating on collected text.",
+      "lab": "Build a manifest for local authored snippets with source, permission, split and duplicate-family fields; analyze a benchmark-answer contamination case.",
+      "verification": "All fixture documents have provenance and a split. Benchmark answers and derived paraphrases are excluded from the training/selection source set.",
+      "concepts": [
+        "provenance",
+        "permission",
+        "benchmark contamination",
+        "data lifecycle"
+      ]
+    },
+    {
+      "id": "llm-031",
+      "title": "Instruction tuning and loss masks",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-030"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Explain how a supervised objective changes when only answer tokens receive loss.",
+      "lab": "Use short fixed instruction/answer records on the tiny model; compare full-sequence and answer-only loss masks.",
+      "verification": "The answer-only denominator equals the number of answer targets, not prompt+answer length. Evaluation tasks are held out by template family.",
+      "concepts": [
+        "SFT",
+        "instruction tuning",
+        "answer mask",
+        "template split"
+      ]
+    },
+    {
+      "id": "llm-032",
+      "title": "Low-rank adaptation without a package download",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-031"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Derive and test a low-rank update while keeping base weights frozen.",
+      "lab": "Use base W=I8, x=ones(8), target=zeros(8), A=ones((8,2))/8 and B=zeros((2,8)); form W+A@B and take one squared-loss SGD update of the adapter only.",
+      "verification": "A and B have 32 parameters versus 64 in W. At initialization, zero delta matches the base. On the first step B changes, A may have zero gradient, and frozen W stays unchanged.",
+      "concepts": [
+        "LoRA",
+        "rank",
+        "frozen base",
+        "adapter parameters"
+      ]
+    },
+    {
+      "id": "llm-033",
+      "title": "Preference objectives and what they do not prove",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-032"
+      ],
+      "runtime": "python-core",
+      "outcome": "Compute a preference loss and separate preference evidence from factual correctness.",
+      "lab": "Calculate a DPO-style logistic loss from fixed policy/reference log probabilities; reverse chosen/rejected labels and inspect the change.",
+      "verification": "Equal preference margins produce log(2); swapping labels reverses the margin. No online RL, reward model service or factuality guarantee is claimed.",
+      "concepts": [
+        "preference data",
+        "reference policy",
+        "DPO",
+        "reward hacking",
+        "claim boundary"
+      ]
+    },
+    {
+      "id": "llm-034",
+      "title": "Precision and quantization error budgets",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-033"
+      ],
+      "runtime": "python-core",
+      "outcome": "Measure a toy quantization tradeoff rather than claiming universal compression quality.",
+      "lab": "Quantize W=[[0.1,-0.9],[1.7,-0.2]] with signed int8, maximum-absolute scales per tensor and per row, and nearest-even rounding; compare dequantized outputs on x=[1,-2].",
+      "verification": "Retain the full-precision output [1.9,2.1]. Report scales, byte-storage assumptions, maximum absolute output error and saturation count for each policy; one fixture does not establish universal quality.",
+      "concepts": [
+        "quantization",
+        "scale",
+        "rounding",
+        "saturation",
+        "error budget"
+      ]
+    },
+    {
+      "id": "llm-035",
+      "title": "Inference scheduling and cache isolation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-034"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Keep request ownership and stop conditions correct when batching inference.",
+      "lab": "Interleave two tiny requests with different prefix lengths; compare batched output with independent inference and invalidate caches on model/tokenizer version changes.",
+      "verification": "Each request matches its independent logits within 1e-6 and retains its own token cap. Cache keys include model, tokenizer and request identity.",
+      "concepts": [
+        "batching",
+        "request ownership",
+        "cache key",
+        "inference scheduling"
+      ]
+    },
+    {
+      "id": "llm-036",
+      "title": "Retrieval: what RAG changes and what it cannot supply",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-035"
+      ],
+      "runtime": "python-core",
+      "outcome": "Separate retrieval coverage from generation faithfulness and model knowledge.",
+      "lab": "Rank a fixed six-document corpus for answerable and unanswerable questions; include a missing-evidence case and a malicious-looking document string as data.",
+      "verification": "Report retrieval recall@k against authored relevance labels. The missing-evidence question remains unanswered; text instructions in documents never become actions.",
+      "concepts": [
+        "retrieval",
+        "RAG",
+        "coverage",
+        "grounding",
+        "untrusted context"
+      ]
+    },
+    {
+      "id": "llm-037",
+      "title": "Evaluate retrieval and answers separately",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-036"
+      ],
+      "runtime": "python-core",
+      "outcome": "Identify whether an observed failure came from retrieval, reasoning or unsupported citation.",
+      "lab": "Score saved retrieval results and deterministic answer records with document IDs and claim spans; compare an oracle-context control.",
+      "verification": "A table separately counts retrieval misses, unsupported claims, incorrect answers and appropriate abstentions, keyed by question ID.",
+      "concepts": [
+        "retrieval evaluation",
+        "oracle context",
+        "faithfulness",
+        "abstention",
+        "citation support"
+      ]
+    },
+    {
+      "id": "llm-038",
+      "title": "Tools, structured output and trust boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-037"
+      ],
+      "runtime": "python-core",
+      "outcome": "Represent a tool request as untrusted data and require a separate authorization boundary.",
+      "lab": "Validate fixed JSON proposals against a tiny allowlist; include unknown tools, path traversal and injected instructions in retrieved text.",
+      "verification": "Only the declared read-only fixture operation is accepted as data. Unknown fields/operations and unsafe paths are rejected; no process, shell or external service is invoked.",
+      "concepts": [
+        "tool proposal",
+        "schema",
+        "authorization",
+        "prompt injection",
+        "trust boundary"
+      ]
+    },
+    {
+      "id": "llm-039",
+      "title": "Robustness, fairness and finite safety evidence",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "llm-038"
+      ],
+      "runtime": "reading",
+      "outcome": "Turn a broad safety claim into a scoped test plan with explicit missing coverage.",
+      "lab": "Analyze fixed adversarial, subgroup and counterfactual prompt families; separate an observed pass from a guarantee.",
+      "verification": "Every result reports family, group, count and severity. Zero observed failures is not described as zero risk; no private/personally identifying data is collected.",
+      "concepts": [
+        "robustness",
+        "subgroup",
+        "counterfactual",
+        "red team",
+        "coverage limits"
+      ]
+    },
+    {
+      "id": "llm-040",
+      "title": "A statistical evaluation and reliability argument",
+      "level": "advanced",
+      "minutes": 135,
+      "prerequisites": [
+        "llm-039"
+      ],
+      "runtime": "python-core",
+      "outcome": "Choose paired units and uncertainty before comparing complete systems.",
+      "lab": "Compare two fixed system result tables by question family using paired resampling; keep prompt and retrieval tuning on validation only.",
+      "verification": "Pairs retain the same question IDs, repeated paraphrases remain in their family, and a final holdout is used once. The report includes failures and an abstention policy.",
+      "concepts": [
+        "paired evaluation",
+        "bootstrap",
+        "evaluation family",
+        "selection bias",
+        "reliability"
+      ]
+    },
+    {
+      "id": "llm-041",
+      "title": "Optional framework comparison without a second prerequisite",
+      "level": "advanced",
+      "minutes": 105,
+      "prerequisites": [
+        "llm-040"
+      ],
+      "runtime": "reading",
+      "outcome": "Translate attention contracts without requiring TensorFlow to complete the LLM route.",
+      "lab": "Map shapes, weight layouts, mask polarity and training/evaluation flags between NumPy, PyTorch and documented Keras APIs; optionally run TensorFlow only if separately prepared.",
+      "verification": "The worksheet names API-specific boolean-mask meanings and exact weight/layout assumptions. TensorFlow execution is explicitly optional and absent from llm-042 prerequisites.",
+      "concepts": [
+        "framework comparison",
+        "mask polarity",
+        "weight layout",
+        "optional study"
+      ]
+    },
+    {
+      "id": "llm-042",
+      "title": "Capstone: a defensible language-system decision",
+      "level": "advanced",
+      "minutes": 270,
+      "prerequisites": [
+        "llm-040"
+      ],
+      "runtime": "llm-torch-cpu",
+      "outcome": "Recommend a bounded system only when its evidence and operating limits support the intended use.",
+      "lab": "Compare the tiny transformer, count baseline and a local retrieval variant on frozen questions; deliver reproducible artifacts, trust-boundary tests and a reviewer-facing decision.",
+      "verification": "Acceptance requires lineage/split hashes, paired held-out results, mask/cache tests, latency/token budgets, failure examples and an explicit go/no-go with limitations. A no-go is a valid evidence-based result.",
+      "concepts": [
+        "capstone",
+        "system comparison",
+        "reliability case",
+        "go-no-go",
+        "limitations"
+      ]
+    }
+  ],
+  "capstones": [
+    {
+      "id": "llm-014",
+      "level": "beginner",
+      "title": "A language-model evidence notebook",
+      "brief": "Use local counts and attention invariants to distinguish implementation evidence from a broad model claim.",
+      "deliverables": [
+        "training-only tokenizer/count baseline",
+        "fixed document split and NLL/perplexity worksheet",
+        "causal-mask tests and a leakage counterexample"
+      ],
+      "acceptance": [
+        "Every conditional distribution sums to 1.",
+        "Token and document denominators are declared.",
+        "Prefix invariance and malformed-mask checks pass.",
+        "No online model or pretrained asset is needed."
+      ]
+    },
+    {
+      "id": "llm-028",
+      "level": "intermediate",
+      "title": "A tiny transformer under a hard budget",
+      "brief": "Train and inspect one CPU decoder on a small local corpus.",
+      "deliverables": [
+        "model/tokenizer/split hashes and configuration",
+        "<=200-step log and held-out baseline comparison",
+        "mask/cache/restore tests and error analysis"
+      ],
+      "acceptance": [
+        "Parameter count<50000 and context<=32.",
+        "Training, selection and test documents are disjoint.",
+        "Fresh inference and cache equivalence match within 1e-6.",
+        "A completed budget is not reported as proof of useful generalization."
+      ]
+    },
+    {
+      "id": "llm-042",
+      "level": "advanced",
+      "title": "A defensible language-system decision",
+      "brief": "Compare bounded alternatives and recommend a system or a justified no-go.",
+      "deliverables": [
+        "frozen question-family evaluation set",
+        "paired baseline/transformer/retrieval result table",
+        "retrieval/support/abstention and trust-boundary evidence",
+        "resource manifest, limitations and go/no-go rationale"
+      ],
+      "acceptance": [
+        "No test-set prompt tuning or document-family leakage occurs.",
+        "Claims cite the evaluation unit and preserve paired samples.",
+        "Unsupported answers, missing retrieval and unsafe tool proposals are counted separately.",
+        "No TensorFlow installation or hosted service is required."
+      ]
+    }
+  ],
+  "pilot": {
+    "lesson_id": "llm-009",
+    "guide_path": "docs/expansion/samples/llm-theory-pilot.md",
+    "solution_path": "docs/expansion/samples/llm-theory-pilot-solutions.md",
+    "language": "python",
+    "code": "import numpy as np\n\ndef attention(q, k, v, allowed):\n    q, k, v = (np.asarray(value, dtype=np.float64) for value in (q, k, v))\n    allowed = np.asarray(allowed)\n    if any(value.ndim != 2 for value in (q, k, v)):\n        raise ValueError(\"q, k and v must be matrices\")\n    count, width = q.shape\n    if count == 0 or width == 0 or v.shape[1] == 0:\n        raise ValueError(\"nonempty token and feature axes required\")\n    if k.shape != (count, width) or v.shape[0] != count:\n        raise ValueError(\"self-attention shapes do not agree\")\n    if allowed.dtype != np.bool_:\n        raise TypeError(\"allowed must be boolean\")\n    if allowed.shape != (count, count):\n        raise ValueError(\"allowed must have shape (tokens, tokens)\")\n    if not allowed.any(axis=1).all():\n        raise ValueError(\"each query needs at least one key\")\n    if not all(np.isfinite(value).all() for value in (q, k, v)):\n        raise ValueError(\"finite inputs required\")\n    scores = (q @ k.T) / np.sqrt(width)\n    if not np.isfinite(scores[allowed]).all():\n        raise ValueError(\"finite allowed scores required\")\n    masked = np.where(allowed, scores, -np.inf)\n    shifted = masked - masked.max(axis=1, keepdims=True)\n    weights = np.exp(shifted)\n    weights /= weights.sum(axis=1, keepdims=True)\n    return weights @ v, weights\n\nq = np.zeros((3, 2), dtype=np.float64)\nk = q.copy()\nv = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])\nallowed = np.tri(3, dtype=bool)\noutput, weights = attention(q, k, v, allowed)\nexpected = np.array([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]])\nnp.testing.assert_allclose(output, expected, rtol=0, atol=1e-12)\nnp.testing.assert_allclose(weights.sum(axis=1), 1.0, rtol=0, atol=1e-12)\nfor cut in range(1, 4):\n    prefix, _ = attention(q[:cut], k[:cut], v[:cut], np.tri(cut, dtype=bool))\n    np.testing.assert_allclose(output[:cut], prefix, rtol=0, atol=1e-12)\nprint(output)\n",
+    "concept": {
+      "title": "A causal mask is an information contract",
+      "explanation": "Each query row may combine only its own and earlier key positions. Mask forbidden score entries before softmax, normalize along the key axis and reject fully masked rows. A useful independent check recomputes every prefix and compares it with the matching rows of the full computation.",
+      "worked_example": "With zero Q/K and V=[[2,0],[0,2],[6,6]], allowed rows are [1,0,0], [1,1,0] and [1,1,1]. The outputs are [2,0], [1,1] and [8/3,8/3], checked with NumPy float64 and atol 1e-12."
+    },
+    "prediction": {
+      "prompt": "When the diagonal is allowed, what should the three equal-score attention rows produce?",
+      "choices": [
+        "Every output row is the global average [8/3,8/3].",
+        "The first two rows are [2,0] and [1,1]; the third averages all three values.",
+        "The first query has no keys and should silently produce zeros."
+      ],
+      "correct_index": 1,
+      "explanation": "The diagonal lets the first query use its current input. Later rows gain earlier keys, while future positions remain forbidden; an all-masked row is an error, not an invented zero output."
+    },
+    "hint_steps": [
+      "Draw rows as queries and columns as keys. Mark exactly which positions are at or before each query.",
+      "For each prefix, slice Q, K and V as well as the square mask, then compare the prefix result with the same rows of the full result.",
+      "Mask scores before exponentiation and inspect each row sum. A post-softmax multiplication can leave a subnormalized row and still look triangular."
+    ],
+    "transfer_prompt": "For token IDs [2,5,7,3], build shifted inputs and labels. Explain why a diagonal causal mask is appropriate for next-token prediction, and name one leakage failure it does not prevent.",
+    "rubric": [
+      "Name query/key/value axes and the include-True mask convention.",
+      "Match fixed outputs and row sums within 1e-12 with no NaNs.",
+      "Test future-only perturbations and independent prefixes, including nonzero scores.",
+      "Reject malformed, nonboolean and fully masked rows explicitly.",
+      "Explain target shifting and why causal correctness alone proves neither dataset isolation nor language-model reliability."
+    ]
+  },
+  "sources": [
+    {
+      "title": "Attention Is All You Need",
+      "url": "https://arxiv.org/abs/1706.03762",
+      "checked": "2026-10-22",
+      "supports": "Scaled dot-product attention, positional information, multihead composition and decoder masking; the course adds independent causal invariants."
+    },
+    {
+      "title": "PyTorch scaled dot-product attention",
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html",
+      "checked": "2026-10-22",
+      "supports": "API-specific mask polarity, causal behavior and explicit dropout_p control. The stable alias resolved to 2.14 at review; this is not a dependency upgrade request."
+    },
+    {
+      "title": "PyTorch cross entropy",
+      "url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html",
+      "checked": "2026-10-22",
+      "supports": "Class-index targets, ignore_index and reduction semantics."
+    },
+    {
+      "title": "Subword units with byte pair encoding",
+      "url": "https://arxiv.org/abs/1508.07909",
+      "checked": "2026-10-22",
+      "supports": "Subword segmentation by learned merge operations; training-only vocabulary fitting is an explicit course evaluation rule."
+    },
+    {
+      "title": "The Curious Case of Neural Text Degeneration",
+      "url": "https://arxiv.org/abs/1904.09751",
+      "checked": "2026-10-22",
+      "supports": "Nucleus sampling as a decoding method, not a correctness guarantee."
+    },
+    {
+      "title": "Retrieval-Augmented Generation",
+      "url": "https://arxiv.org/abs/2005.11401",
+      "checked": "2026-10-22",
+      "supports": "Retrieval plus generation as distinct mechanisms; retrieval does not establish answer support by itself."
+    },
+    {
+      "title": "LoRA",
+      "url": "https://arxiv.org/abs/2106.09685",
+      "checked": "2026-10-22",
+      "supports": "Low-rank adaptation with a frozen base; the course uses a tiny explicit matrix experiment."
+    },
+    {
+      "title": "Direct Preference Optimization",
+      "url": "https://arxiv.org/abs/2305.18290",
+      "checked": "2026-10-22",
+      "supports": "Preference loss relative to a reference policy; preference optimization is not proof of factual accuracy."
+    },
+    {
+      "title": "Training Compute-Optimal Large Language Models",
+      "url": "https://arxiv.org/abs/2203.15556",
+      "checked": "2026-10-22",
+      "supports": "Controlled parameter/data/compute tradeoffs and the limits of extrapolating classroom experiments."
+    }
+  ]
+}

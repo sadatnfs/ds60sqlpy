@@ -1,0 +1,992 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Deep Learning Tensorflow · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Deep Learning Tensorflow</h1>
+      <p class="source-path">Generated from <code>docs/expansion/plans/deep-learning-tensorflow.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;schema_version&quot;: 1,</span>
+<span>  &quot;status&quot;: &quot;planned&quot;,</span>
+<span>  &quot;id&quot;: &quot;deep-learning-tensorflow&quot;,</span>
+<span>  &quot;title&quot;: &quot;Deep learning with TensorFlow and Keras&quot;,</span>
+<span>  &quot;summary&quot;: &quot;A 36-lesson design from explicit arithmetic and gradients to a bounded, reproducible small-model release.&quot;,</span>
+<span>  &quot;north_star&quot;: &quot;Explain a model computation, prove its training/inference contracts and make only the claims supported by its held-out evidence.&quot;,</span>
+<span>  &quot;entry_prerequisites&quot;: [</span>
+<span>    &quot;python-16&quot;</span>
+<span>  ],</span>
+<span>  &quot;runtime_profiles&quot;: [</span>
+<span>    &quot;reading&quot;,</span>
+<span>    &quot;python-core&quot;,</span>
+<span>    &quot;tensorflow-cpu&quot;</span>
+<span>  ],</span>
+<span>  &quot;stages&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;From arrays to an auditable update&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Derive and inspect a tiny learning step before relying on a training API.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;Build, debug and evaluate small networks&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose objectives, data pipelines and architectures with explicit information and shape contracts.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;Reproduce, export and defend a model release&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Prove restart/inference behavior and bound reliability claims with controlled evidence.&quot;</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;lessons&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;A bounded deep-learning investigation&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 75,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;python-16&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish fitting a function from evidence that it generalizes.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Inspect a three-point training set and a four-point holdout; write the prediction unit, intended use and forbidden claims before touching a framework.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Record 3 training points, 4 untouched holdout points and one claim that the tiny exercise cannot establish.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;prediction unit&quot;,</span>
+<span>        &quot;training&quot;,</span>
+<span>        &quot;generalization&quot;,</span>
+<span>        &quot;evidence&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Tensors, axes, dtypes and units&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-001&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Trace each axis and unit through vector arithmetic without accidental broadcasting.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use NumPy arrays shaped (3,), (3,1) and (1,3); build a table of addition/multiplication result shapes and label the observation axis.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The vector/column subtraction produces (3,3); a paired-record subtraction requires equal (3,) shapes. Integer-to-float conversion is explicit.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;tensor&quot;,</span>
+<span>        &quot;axis&quot;,</span>
+<span>        &quot;dtype&quot;,</span>
+<span>        &quot;broadcasting&quot;,</span>
+<span>        &quot;units&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Linear neurons and matrix contracts&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-002&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Relate a scalar slope to a batched affine layer and verify dimensions.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Multiply a fixed (2,3) input by a (3,1) weight and add a scalar bias; calculate the first output by hand.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For X=[[1,2,3],[0,1,0]], W=[[1],[0],[-1]], b=2, outputs are [[0],[2]] with shape (2,1).&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;affine map&quot;,</span>
+<span>        &quot;batch axis&quot;,</span>
+<span>        &quot;matrix product&quot;,</span>
+<span>        &quot;bias&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Loss, reduction and what a number measures&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-003&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Compute loss with an explicit example denominator and distinguish it from a metric.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare squared residual sums and means for residuals [1,-1,2], then duplicate the batch and compare both reductions.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Sum=6 and mean=2; duplication doubles the sum but leaves the mean at 2. Report squared target units.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;residual&quot;,</span>
+<span>        &quot;loss&quot;,</span>
+<span>        &quot;mean reduction&quot;,</span>
+<span>        &quot;metric&quot;,</span>
+<span>        &quot;denominator&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Derivatives as local sensitivity&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-004&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Check a scalar derivative against a finite difference away from a kink.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Evaluate f(w)=(w-2)^2 at w=0 with central differences h=0.1,0.01,0.001; contrast absolute slope with a learning step.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Analytic derivative=-4; all three central differences agree within 1e-10. A derivative is not itself the new parameter.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;derivative&quot;,</span>
+<span>        &quot;finite difference&quot;,</span>
+<span>        &quot;sensitivity&quot;,</span>
+<span>        &quot;learning rate&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;The chain rule and activation boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain how local derivatives compose and where a derivative convention matters.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Trace z=2w, a=z*z, loss=(a-1)^2 at w=1; compare with a ReLU example at a positive value and at zero.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The polynomial derivative at w=1 is 48 within 1e-8. State that the ReLU kink needs an explicit convention; do not use a finite-difference equality there.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;chain rule&quot;,</span>
+<span>        &quot;activation&quot;,</span>
+<span>        &quot;Jacobian&quot;,</span>
+<span>        &quot;nondifferentiability&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Eager tensors, variables and a tape&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-006&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Identify which forward operations and variables are recorded for differentiation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run scalar Variable examples inside and outside GradientTape; inspect a disconnected gradient and an actual zero gradient.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For loss=(w-2)^2, gradients at w=0 and w=2 are -4 and 0. A forward result built outside the tape gives None, which is a different observation.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;eager execution&quot;,</span>
+<span>        &quot;Variable&quot;,</span>
+<span>        &quot;GradientTape&quot;,</span>
+<span>        &quot;watched operation&quot;,</span>
+<span>        &quot;None gradient&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;One gradient step you can audit&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-007&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Derive, execute and independently check one SGD update before using a training API.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use x=[1,2,3], y=[2,4,6], float64, w=0 and learning rate 0.1; compare an equal-shape target with a mistakenly broadcast column target.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Correct loss=56/3, gradient=-56/3, updated w=28/15 and new loss=56/675 within 1e-12. The broadcast bug has gradient=-16 despite the same initial loss.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;SGD&quot;,</span>
+<span>        &quot;autodiff&quot;,</span>
+<span>        &quot;shape contract&quot;,</span>
+<span>        &quot;independent oracle&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;Batches and repeated updates&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-008&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish examples, batches, epochs and optimizer steps.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use six fixed paired records x=[1,2,3,4,5,6], y=2*x and compare batch sizes 1, 2 and 3, logging example IDs and update numbers instead of assuming equal trajectories.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Six examples with batch size 2 yield 3 updates per epoch; a final short batch is included unless drop_remainder is chosen and documented.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;batch&quot;,</span>
+<span>        &quot;epoch&quot;,</span>
+<span>        &quot;step&quot;,</span>
+<span>        &quot;shuffle&quot;,</span>
+<span>        &quot;short batch&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;A split is part of the experiment&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Detect duplicate/group leakage before reporting held-out performance.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Assign a fixed eight-record fixture with four account IDs to train/validation by account; fit a mean only on train.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;No account ID occurs in both sets. A validation-only extreme changes the all-data mean but not the recorded training normalization.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;split unit&quot;,</span>
+<span>        &quot;leakage&quot;,</span>
+<span>        &quot;training-only fit&quot;,</span>
+<span>        &quot;holdout&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Keras models and explicit training contracts&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-010&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Map compile/fit/evaluate to the explicit forward-loss-gradient-update sequence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a one-Dense-unit model with fixed zero initializer; perform exactly one full-batch SGD step on the pilot points with shuffling disabled.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The zero-bias, no-intercept configuration matches tf-008 within 1e-6 in float32; report dtype and reduction before comparing values.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;tf.keras&quot;,</span>
+<span>        &quot;Dense&quot;,</span>
+<span>        &quot;compile&quot;,</span>
+<span>        &quot;fit&quot;,</span>
+<span>        &quot;optimizer&quot;,</span>
+<span>        &quot;initializer&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone: an auditable tiny regressor&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-011&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Present a reproducible training experiment with arithmetic and held-out evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a local three-feature synthetic regression investigation, compare a mean baseline, save the split and explain every update in a tiny diagnostic subset.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Deliver a clean-run transcript, immutable split IDs, analytic pilot check and separate training/holdout errors; no holdout-driven tuning is allowed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;baseline&quot;,</span>
+<span>        &quot;split manifest&quot;,</span>
+<span>        &quot;evidence report&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Binary logits, probabilities and thresholds&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use a binary loss with the correct logit/probability convention.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare logits [-2,0,2], sigmoid probabilities and thresholds 0.5 versus 0.8 on fixed labels; deliberately mismatch from_logits.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;At logit 0 the probability is 0.5 and positive-label BCE is log(2) within 1e-6. Threshold changes predictions, not the already fitted logits.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;logit&quot;,</span>
+<span>        &quot;sigmoid&quot;,</span>
+<span>        &quot;binary cross entropy&quot;,</span>
+<span>        &quot;threshold&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Multiclass and multilabel are different tasks&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose target shape and loss from the task rather than the final layer name.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Contrast one-of-three integer targets with three independent binary labels; compute cross entropy for uniform three-class logits.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Uniform three-class CE=log(3); sparse targets are class indices. Multilabel targets have one binary value per class and need independent decisions.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;softmax&quot;,</span>
+<span>        &quot;sparse targets&quot;,</span>
+<span>        &quot;multilabel&quot;,</span>
+<span>        &quot;cross entropy&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;A reproducible tf.data pipeline&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-014&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Keep preprocessing, cardinality and order visible in a bounded dataset pipeline.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Construct a Dataset from fixed arrays; normalize using only training statistics; batch with a remainder and prefetch 1.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For five records batched by 2, batch sizes are [2,2,1]. Normalization statistics and IDs are identical after a fresh run; no download/map side effect occurs.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;tf.data&quot;,</span>
+<span>        &quot;cardinality&quot;,</span>
+<span>        &quot;adapt&quot;,</span>
+<span>        &quot;prefetch&quot;,</span>
+<span>        &quot;pipeline leakage&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Nonlinearity and initialization&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-015&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain why an affine-only network cannot express XOR and inspect a nonlinear construction.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use all four XOR inputs; compare an affine threshold with h1=ReLU(x1-x2), h2=ReLU(x2-x1), output=h1+h2 before optional fitting.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The nonlinear construction produces labels [0,1,1,0] for [(0,0),(0,1),(1,0),(1,1)]; no affine separator can satisfy all four inequalities.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capacity&quot;,</span>
+<span>        &quot;ReLU&quot;,</span>
+<span>        &quot;XOR&quot;,</span>
+<span>        &quot;initialization&quot;,</span>
+<span>        &quot;representation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Regularization and training/evaluation behavior&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-016&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate regularization penalties from data loss and switch stochastic layers correctly.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare one fixed weight vector under L1/L2 penalties; call a dropout layer with training=False and training=True.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For weights [1,-2], L1 sum=3 and L2 squared sum=5. Repeated evaluation calls match; training behavior is tested by invariants, not a cross-platform random bit pattern.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;regularization&quot;,</span>
+<span>        &quot;dropout&quot;,</span>
+<span>        &quot;training flag&quot;,</span>
+<span>        &quot;data loss&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;Normalization state and batch dependence&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish BatchNorm moving statistics from per-example LayerNorm.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use momentum 0.5 and a fixed batch mean [2,4]; inspect the first BatchNorm moving-mean update and compare per-row normalization.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Starting from zeros, moving mean becomes [1,2]. Evaluation does not update it. Adding an unrelated batch row cannot alter another row under LayerNorm.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;BatchNorm&quot;,</span>
+<span>        &quot;LayerNorm&quot;,</span>
+<span>        &quot;moving statistics&quot;,</span>
+<span>        &quot;batch coupling&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Convolution as a local, shared computation&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Trace a convolution kernel, channels and receptive field on a tiny array.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Apply kernel [[1,0],[0,-1]] to the fixed 3x3 image containing 1 through 9 with VALID padding and no bias.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The 2x2 output is all -4. TensorFlow uses cross-correlation convention; rotating the kernel would change this example to +4.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Conv2D&quot;,</span>
+<span>        &quot;kernel sharing&quot;,</span>
+<span>        &quot;padding&quot;,</span>
+<span>        &quot;stride&quot;,</span>
+<span>        &quot;receptive field&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;Pooling and augmentation without label leakage&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-019&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Apply only label-preserving training transforms and keep evaluation deterministic.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Pool a fixed 2x2 patch and horizontally flip a hand-authored image; explain a case where flipping would change the label.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For [[1,3],[2,4]], max pooling yields 4 and average pooling 2.5. Evaluation receives the original image; unsafe semantic flips are rejected in the data contract.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;pooling&quot;,</span>
+<span>        &quot;augmentation&quot;,</span>
+<span>        &quot;label invariance&quot;,</span>
+<span>        &quot;evaluation transform&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;Sequences, embeddings and padding&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Carry a padding mask through a small sequence model and loss denominator.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use token IDs [2,3,0], where 0 is padding; compare final valid state and masked loss before/after appending padding.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The valid-token mask is [true,true,false]; two equal log(2) token losses average to log(2), not 2*log(2)/3.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Embedding&quot;,</span>
+<span>        &quot;padding mask&quot;,</span>
+<span>        &quot;sequence state&quot;,</span>
+<span>        &quot;valid-token denominator&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Attention with an explicit information boundary&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-021&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Verify causal masking independently of apparent model accuracy.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement one fixed attention head in TensorFlow and compare its equal-logit result with a NumPy oracle; change only future values.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Outputs for V=[[2,0],[0,2],[6,6]] are [[2,0],[1,1],[8/3,8/3]] within 1e-6; future changes leave earlier rows unchanged.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;attention&quot;,</span>
+<span>        &quot;causal mask&quot;,</span>
+<span>        &quot;prefix invariance&quot;,</span>
+<span>        &quot;oracle&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Debugging a custom training loop&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-022&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Diagnose a silent missing update and distinguish graph tracing from tensor execution.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a short custom loop with one intentionally disconnected forward value, then repair it and log weights before/after each step.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The disconnected gradient is None, not zero. The repaired first two pilot updates end at w=448/225 within 1e-12; loss is recomputed after every assignment.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;custom loop&quot;,</span>
+<span>        &quot;gradient diagnosis&quot;,</span>
+<span>        &quot;state update&quot;,</span>
+<span>        &quot;trace&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone: a small classifier with honest evaluation&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 210,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-023&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Deliver a bounded classifier with a baseline, leakage checks and error analysis.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Generate local geometric arrays with frozen seeds and group IDs; train at most two small hidden layers and compare a simple baseline on an untouched test split.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Report confusion counts summing to the test cardinality, per-group errors, training-only preprocessing and the chosen validation decision. No promised accuracy threshold substitutes for these checks.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;classification&quot;,</span>
+<span>        &quot;baseline&quot;,</span>
+<span>        &quot;error analysis&quot;,</span>
+<span>        &quot;test freeze&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-025&quot;,</span>
+<span>      &quot;title&quot;: &quot;Embedding objectives and negative examples&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-024&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Connect embedding similarity to the objective and negative sampling policy.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use a=[1,0], positive=[1,1] and negative=[0,1]; calculate dot products and cosines, then replace the negative with a duplicate of the positive.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Dot products are 1 and 0; cosine similarities are 1/sqrt(2) and 0. A negative identical to the positive is flagged before a contrastive loss is interpreted.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;embedding objective&quot;,</span>
+<span>        &quot;contrastive loss&quot;,</span>
+<span>        &quot;negative sampling&quot;,</span>
+<span>        &quot;cosine similarity&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-026&quot;,</span>
+<span>      &quot;title&quot;: &quot;Custom layers, residuals and trainable state&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-025&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Create weights once and keep build/call responsibilities separate.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement a tiny residual layer, call it twice with the same feature dimension and inspect its tracked variables.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Variable count does not grow on the second call. A residual addition requires matching trailing dimensions; incompatible inputs produce a declared validation failure.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Layer&quot;,</span>
+<span>        &quot;build&quot;,</span>
+<span>        &quot;call&quot;,</span>
+<span>        &quot;residual&quot;,</span>
+<span>        &quot;tracked state&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-027&quot;,</span>
+<span>      &quot;title&quot;: &quot;Transfer learning without a model download&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-026&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Freeze and adapt a locally trained feature extractor with an explicit gradient boundary.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Reuse the small classifier from tf-024, freeze its base, train a new head for a relabeled local task and compare gradient/weight changes.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Frozen-base weights remain byte-identical while at least one head weight changes; an unfreeze phase uses a new, declared optimizer policy.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;transfer learning&quot;,</span>
+<span>        &quot;freezing&quot;,</span>
+<span>        &quot;fine-tuning&quot;,</span>
+<span>        &quot;optimizer state&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-028&quot;,</span>
+<span>      &quot;title&quot;: &quot;Restartable training and checkpoint evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Prove a checkpoint restores the next update rather than only the current predictions.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Train a tiny model for two Adam updates with dropout disabled; save model and optimizer state, restore in a fresh process and compare the next update on the identical batch.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Uninterrupted and restored next-step weights agree within declared 1e-6 float32 tolerance. A weights-only restart intentionally exposes missing optimizer state.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;checkpoint&quot;,</span>
+<span>        &quot;optimizer slots&quot;,</span>
+<span>        &quot;random state&quot;,</span>
+<span>        &quot;next-step equivalence&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-029&quot;,</span>
+<span>      &quot;title&quot;: &quot;Precision, overflow and stable objectives&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Locate overflow before it becomes a misleading training conclusion.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare naive exp/log cross entropy with a stable logits-based form at logits [1000,999]; inspect finite values and gradients.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The naive exponential path overflows; the stable positive-first-class loss is log(1+exp(-1)) within 1e-6. Mixed precision is an optional hardware study, not a default speed claim.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;precision&quot;,</span>
+<span>        &quot;overflow&quot;,</span>
+<span>        &quot;log-sum-exp&quot;,</span>
+<span>        &quot;loss scaling&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-030&quot;,</span>
+<span>      &quot;title&quot;: &quot;Distributed gradient semantics on one CPU&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish a mean over examples from an unweighted mean over unequal shards.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Simulate shards of sizes 1 and 3 with fixed gradients; compare naive shard averaging with example-weighted aggregation and gradient accumulation.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Shard means 2 and 6 combine to 5 when weighted 1:3, not 4. A microbatch accumulator matches the full-batch mean before any optional distributed runtime.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;replica&quot;,</span>
+<span>        &quot;gradient aggregation&quot;,</span>
+<span>        &quot;unequal shards&quot;,</span>
+<span>        &quot;accumulation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-031&quot;,</span>
+<span>      &quot;title&quot;: &quot;Graphs, retracing and measurement&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-030&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate trace/setup cost from steady-state execution and preserve equivalent results.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Wrap the stateless tensor function f(x)=x*x+1 with tf.function; record tracing counts for repeated float32 signatures and a float64 signature, then measure warmup separately.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;For x=[1,2], both eager and graph outputs are [2,5]. Repeated equal signatures reuse a trace; changed dtype is reported separately. No universal speedup is asserted.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;tf.function&quot;,</span>
+<span>        &quot;signature&quot;,</span>
+<span>        &quot;retracing&quot;,</span>
+<span>        &quot;warmup&quot;,</span>
+<span>        &quot;measurement&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-032&quot;,</span>
+<span>      &quot;title&quot;: &quot;Saving, export and inference parity&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-031&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose the correct Keras 3 save/export API and verify a restored prediction contract.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Save a tiny model as .keras, export an inference artifact with model.export, and compare fixed inputs in a fresh process.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Both restored paths match the reference predictions within 1e-6. Keras 3 model.save(directory) is not presented as a SavedModel export workflow.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;Keras 3&quot;,</span>
+<span>        &quot;.keras&quot;,</span>
+<span>        &quot;SavedModel&quot;,</span>
+<span>        &quot;signature&quot;,</span>
+<span>        &quot;parity&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-033&quot;,</span>
+<span>      &quot;title&quot;: &quot;Inference contracts and bounded batching&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Validate an inference request independently of training success.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement a local predict function with shape, dtype, finite-value and maximum-batch checks; no web server or deployment is started.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Batch 1 and batched predictions agree per record; empty, nonfinite and over-limit inputs produce named validation errors rather than silent coercion.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;inference contract&quot;,</span>
+<span>        &quot;batch limit&quot;,</span>
+<span>        &quot;schema&quot;,</span>
+<span>        &quot;input validation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-034&quot;,</span>
+<span>      &quot;title&quot;: &quot;Robustness, privacy and model evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-033&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Bound a reliability or privacy claim to the observations actually collected.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build an error table over fixed perturbations, rare groups and a duplicate-data counterexample; draft a model card for the tiny classifier.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The report names the evaluation unit, each tested group, sample count and untested conditions. It makes no differential-privacy or production-safety claim from a small red-team set.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;robustness&quot;,</span>
+<span>        &quot;privacy&quot;,</span>
+<span>        &quot;provenance&quot;,</span>
+<span>        &quot;model card&quot;,</span>
+<span>        &quot;claim boundary&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-035&quot;,</span>
+<span>      &quot;title&quot;: &quot;Comparing models with uncertainty&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-034&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;python-core&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use paired evidence and keep model selection separate from final assessment.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare two saved prediction vectors on the same held-out IDs; use a seeded paired resampling calculation and trace which decisions consumed validation data.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Paired differences are keyed by the same IDs, bootstrap samples preserve pairs, and no test result is used to choose a new configuration.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;paired comparison&quot;,</span>
+<span>        &quot;bootstrap&quot;,</span>
+<span>        &quot;selection bias&quot;,</span>
+<span>        &quot;evaluation unit&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-036&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone: release a small, reproducible model&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;tf-035&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;tensorflow-cpu&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Defend a local model release with reproducibility, inference and rollback evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Package the tiny trained model, preprocessing schema, split hashes and next-step checkpoint proof; run a fresh-process prediction contract and a deliberately failing release check.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Acceptance requires all deterministic contract checks, frozen-test evidence, limitations and a rollback artifact. A failed schema or hash blocks the release recommendation.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;reproducibility&quot;,</span>
+<span>        &quot;release gate&quot;,</span>
+<span>        &quot;rollback&quot;,</span>
+<span>        &quot;limitations&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;capstones&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-012&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;An auditable tiny regressor&quot;,</span>
+<span>      &quot;brief&quot;: &quot;Build a tiny regression experiment with an independent arithmetic oracle.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;learner code and clean-run transcript&quot;,</span>
+<span>        &quot;training/holdout IDs and preprocessing statistics&quot;,</span>
+<span>        &quot;baseline comparison and an error explanation&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;The tf-008 oracle matches within its stated tolerance.&quot;,</span>
+<span>        &quot;Training statistics use training IDs only.&quot;,</span>
+<span>        &quot;Held-out results are reported separately and never used for another tuning decision.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-024&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;A small classifier with honest evaluation&quot;,</span>
+<span>      &quot;brief&quot;: &quot;Compare a small local classifier with a transparent baseline.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;bounded model/data configuration&quot;,</span>
+<span>        &quot;frozen split and confusion/group-error tables&quot;,</span>
+<span>        &quot;failure case and a revision justified on validation only&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Model has at most two hidden layers and uses only local fixtures.&quot;,</span>
+<span>        &quot;Confusion counts sum to test cardinality and groups remain disjoint.&quot;,</span>
+<span>        &quot;A weak model is reported honestly; no arbitrary accuracy target conceals errors.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;tf-036&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;A reproducible local model release&quot;,</span>
+<span>      &quot;brief&quot;: &quot;Assemble a release decision from training, inference, provenance and rollback evidence.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;model and preprocessing/split manifest hashes&quot;,</span>
+<span>        &quot;next-step checkpoint proof&quot;,</span>
+<span>        &quot;fresh-process .keras/export parity transcript&quot;,</span>
+<span>        &quot;model card, release decision and rollback artifact&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Schema/hash failures block recommendation.&quot;,</span>
+<span>        &quot;Fresh predictions agree within declared tolerance.&quot;,</span>
+<span>        &quot;Optimizer-state restoration reproduces the next step.&quot;,</span>
+<span>        &quot;The model card separates tested behavior, untested conditions and intended use.&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;pilot&quot;: {</span>
+<span>    &quot;lesson_id&quot;: &quot;tf-008&quot;,</span>
+<span>    &quot;guide_path&quot;: &quot;docs/expansion/samples/deep-learning-tensorflow-pilot.md&quot;,</span>
+<span>    &quot;solution_path&quot;: &quot;docs/expansion/samples/deep-learning-tensorflow-pilot-solutions.md&quot;,</span>
+<span>    &quot;language&quot;: &quot;python&quot;,</span>
+<span>    &quot;code&quot;: &quot;import math\nimport tensorflow as tf\n\n# A CPU-only arithmetic experiment, not a model-quality benchmark.\nwith tf.device(\&quot;/CPU:0\&quot;):\n    x = tf.constant([1.0, 2.0, 3.0], dtype=tf.float64)\n    y = tf.constant([2.0, 4.0, 6.0], dtype=tf.float64)\n    w = tf.Variable(0.0, dtype=tf.float64)\n    learning_rate = tf.constant(0.1, dtype=tf.float64)\n\n    with tf.GradientTape() as tape:\n        prediction = w * x\n        loss = tf.reduce_mean(tf.square(prediction - y))\n    gradient = tape.gradient(loss, w)\n    if gradient is None:\n        raise ValueError(\&quot;The loss is disconnected from w\&quot;)\n    before = float(loss.numpy())\n    grad = float(gradient.numpy())\n    w.assign_sub(learning_rate * gradient)\n    after = float(tf.reduce_mean(tf.square(w * x - y)).numpy())\n\nassert math.isclose(before, 56 / 3, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(grad, -56 / 3, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(float(w.numpy()), 28 / 15, rel_tol=0, abs_tol=1e-12)\nassert math.isclose(after, 56 / 675, rel_tol=0, abs_tol=1e-12)\nprint({\&quot;loss_before\&quot;: before, \&quot;gradient\&quot;: grad,\n       \&quot;weight_after\&quot;: float(w.numpy()), \&quot;loss_after\&quot;: after})\n&quot;,</span>
+<span>    &quot;concept&quot;: {</span>
+<span>      &quot;title&quot;: &quot;One learning step is an inspectable state transition&quot;,</span>
+<span>      &quot;explanation&quot;: &quot;The forward computation produces a mean squared loss. GradientTape records how that loss depends on the scalar Variable w. The gradient is sensitivity at the old w; assign_sub applies a separate state update. Recompute loss after the update. Equal observation shapes are part of the mathematical contract.&quot;,</span>
+<span>      &quot;worked_example&quot;: &quot;For x=[1,2,3], y=2x and w=0, L=56/3 and dL/dw=-56/3. With learning rate 0.1, w becomes 28/15 and the recomputed loss becomes 56/675. Use float64 and absolute tolerance 1e-12.&quot;</span>
+<span>    },</span>
+<span>    &quot;prediction&quot;: {</span>
+<span>      &quot;prompt&quot;: &quot;Before running the fixed three-point example, which gradient and update should you expect?&quot;,</span>
+<span>      &quot;choices&quot;: [</span>
+<span>        &quot;The gradient is -56/3 and w becomes 28/15.&quot;,</span>
+<span>        &quot;The gradient is +56/3 and w becomes -28/15.&quot;,</span>
+<span>        &quot;The gradient is None because x is a constant tensor.&quot;</span>
+<span>      ],</span>
+<span>      &quot;correct_index&quot;: 0,</span>
+<span>      &quot;explanation&quot;: &quot;The tape follows operations from watched Variable w to the loss. The gradient is negative at w=0, so subtracting it increases w toward 2; x does not have to be trainable.&quot;</span>
+<span>    },</span>
+<span>    &quot;hint_steps&quot;: [</span>
+<span>      &quot;Write the three residuals at w=0, square them and divide their sum by 3.&quot;,</span>
+<span>      &quot;Differentiate each residual square with respect to w; keep the same denominator 3 and inspect whether every forward operation is inside the tape.&quot;,</span>
+<span>      &quot;The new weight is old_weight minus learning_rate times gradient. Check shapes before interpreting a matching scalar loss.&quot;</span>
+<span>    ],</span>
+<span>    &quot;transfer_prompt&quot;: &quot;Add a scalar bias for targets y=2x+1. Derive both gradients and inspect one held-out prediction without tuning on that held-out point.&quot;,</span>
+<span>    &quot;rubric&quot;: [</span>
+<span>      &quot;State tensor shapes, float64 dtype, loss reduction and units.&quot;,</span>
+<span>      &quot;Match the independent loss/gradient/update oracle within 1e-12.&quot;,</span>
+<span>      &quot;Distinguish None, a legitimate zero gradient and an overly large step.&quot;,</span>
+<span>      &quot;Detect a broadcasting bug even when initial scalar losses agree.&quot;,</span>
+<span>      &quot;Separate arithmetic correctness and training loss from held-out or production-quality claims.&quot;</span>
+<span>    ]</span>
+<span>  },</span>
+<span>  &quot;sources&quot;: [</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;TensorFlow pip installation&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://www.tensorflow.org/install/pip&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;CPU routes, native Windows GPU boundary, macOS architecture support and disclosed platform differences.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;TensorFlow tested build configurations&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://www.tensorflow.org/install/source&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;The checked table lists TensorFlow 2.21.0 with Python 3.10-3.13; Python 3.12 is the proposed course baseline, not a performed wheel-install test.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Keras getting started&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://keras.io/getting_started/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;TensorFlow 2.16+ uses Keras 3 by default; choose TensorFlow backend explicitly and avoid accidental legacy tf_keras.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;TensorFlow automatic differentiation&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://www.tensorflow.org/guide/autodiff&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;GradientTape records operations, variables are watched, disconnected gradients differ from zero and integer tensors are not ordinary differentiable weights.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Keras 3 migration guide&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://keras.io/guides/migrating_to_keras_3/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Keras 3 save/export differences and backend-specific migration boundaries.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;TensorFlow data guide&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://www.tensorflow.org/guide/data&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Finite Dataset pipelines, batching and data transformations.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;TensorFlow checkpoint guide&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://www.tensorflow.org/guide/checkpoint&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Model/optimizer checkpoint objects and restoring training state.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Keras reproducibility recipes&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://keras.io/examples/keras_recipes/reproducibility_recipes/&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Seed/deterministic-operation controls do not by themselves prove cross-platform bitwise equality.&quot;</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>

@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Scala and Apache Spark track design · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Scala and Apache Spark track design</h1>
+      <p class="source-path">Generated from <code>docs/expansion/tracks/scala-spark.md</code></p>
+    </header>
+    <article class="document"><h2 id="scala-and-apache-spark-track-design">Scala and Apache Spark track design<a class="heading-anchor" href="#scala-and-apache-spark-track-design" aria-label="Link to this section">#</a></h2>
+<p>Status: planned, reviewed against primary documentation on 2026-10-22. This is a design artifact, not an active catalog extension. The existing 168 lessons and current runner capabilities are unchanged. The machine-readable companion is <a href="../plans/scala-spark.json.html">scala-spark.json</a>; the complete sample is <a href="../samples/scala-spark-pilot.md.html">the pilot guide</a> with <a href="../samples/scala-spark-pilot-solutions.md.html">separate solutions</a>.</p>
+<h3 id="purpose-and-entry-routes">Purpose and entry routes<a class="heading-anchor" href="#purpose-and-entry-routes" aria-label="Link to this section">#</a></h3>
+<p>The outcome is a learner who can preserve the meaning of data, implement the same product in Scala and PySpark, test it independently, explain its execution, and recover it after a controlled failure. Forty-two lessons are intentional: ten short JVM/Scala foundations prevent Spark syntax from becoming an unexplained language barrier; fourteen beginner lessons establish a trustworthy row model; fourteen intermediate lessons connect correctness to physical execution; fourteen advanced lessons develop recovery and operational judgment. Three capstones require a reviewable product rather than a list of APIs.</p>
+<p>There are no mandatory entry prerequisites. A person new to programming starts with <code>spark-001</code>, completes Scala lessons <code>spark-002</code> through <code>spark-010</code>, then enters <code>spark-012</code>. A learner who already writes and tests Python can take <code>spark-001</code>, the PySpark bridge <code>spark-011</code>, then <code>spark-012</code>. The bridge names existing <code>python-10</code> as a concrete Python competency checkpoint. A new Python learner can use the existing Python foundation route before taking that branch. Neither route requires the complete historical SQL course. SQL syntax is introduced where used; existing <code>sql-02</code>, <code>sql-quality-01</code> and <code>sql-test-01</code> provide optional deeper practice.</p>
+<p>Shared Spark lessons have a default preview/runtime language and paired Scala/PySpark implementations. Completing both languages is a parity challenge after the primary route works; a learner may first demonstrate each concept in the language they understand. Scala typed <code>Dataset[T]</code> is taught as a Scala/Java API. PySpark uses DataFrames and explicit schemas, with no invented typed Dataset equivalent. <a href="https://spark.apache.org/docs/4.2.0/sql-programming-guide.html">Spark SQL programming guide</a>.</p>
+<p>The current plan schema supports AND prerequisites only. Therefore <code>spark-012</code> lists the common structural prerequisite <code>spark-001</code> and states its visible readiness gate in the lab: demonstrate <code>spark-010</code> competency <strong>or</strong> complete <code>spark-011</code>. The teacher must check that gate; this preview does not pretend that an OR edge has been enforced by the active catalog.</p>
+<h3 id="proposed-compatibility-and-execution-boundary">Proposed compatibility and execution boundary<a class="heading-anchor" href="#proposed-compatibility-and-execution-boundary" aria-label="Link to this section">#</a></h3>
+<p>The proposed course tuple is Spark <strong>4.2.0</strong>, Scala <strong>2.13.18</strong>, JDK <strong>21</strong>, and Python <strong>3.12</strong>. Apache documents Spark 4.2.0 with Java 17/21/25, Scala 2.13 and Python 3.10+. Its tagged build selects Scala 2.13.18. Scala&#x27;s compatibility table supports this Scala line on JDK 21. These facts justify a candidate tuple; they do not prove an image, Windows host, CPU architecture, Scala compiler or course adapter has passed acceptance. No JDK, Spark distribution or image is installed by this design phase. <a href="https://spark.apache.org/docs/4.2.0/">Spark supported environments</a>, <a href="https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml">tagged build configuration</a>, <a href="https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html">Scala/JDK compatibility</a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Proposed profile</th>
+<th>Use</th>
+<th>Required future acceptance</th>
+</tr></thead><tbody>
+<tr>
+<td><code>reading</code></td>
+<td>Explanations, version/deployment worksheets, planning</td>
+<td>Preview and notes work without a runtime</td>
+</tr>
+<tr>
+<td><code>scala-jvm</code></td>
+<td>Scala 2.13 foundations, assertions, compilation</td>
+<td>Pinned compiler/JDK, bounded child process, truthful source errors, no arbitrary dependency downloads</td>
+</tr>
+<tr>
+<td><code>spark-local-scala</code></td>
+<td>Scala Spark batch and finite streaming labs</td>
+<td>Pinned Spark/JVM tuple, local[2], loopback binding, private work/checkpoints, bounded resources and teardown</td>
+</tr>
+<tr>
+<td><code>spark-local-python</code></td>
+<td>PySpark equivalents and Python bridge</td>
+<td>The same Spark engine, pinned Python, bounded child/JVM process tree, API and fixture parity</td>
+</tr>
+</tbody></table></div>
+<p>These names are planned runtime profiles, not newly registered executable runners. The teacher preview must show unavailable/planned status and keep Run disabled until an adapter passes its tests. Saving an attempt, prediction, notes and retrieval answers is still useful. Actual provisioning must make one connected, checksum-verified preparation step explicit, then prove offline reuse. It must not silently reuse a remote Spark session, install dependencies on Run, inherit cloud credentials, start a Spark UI on a public interface, or modify a learner&#x27;s unrelated JVM installation.</p>
+<p>The initial budget proposal is <code>local[2]</code>, a proposed 2 GiB JVM driver heap within the shared 4 to 6 GiB whole-worker experiment envelope, normal generated fixtures no larger than 20000 rows, skew fixtures capped at 100000 rows, at most four input batches per streaming scenario, and a course-owned scratch root. These are proposed test budgets to validate on supported platforms, not claims of measured memory or speed. Every streaming query must be awaited with a deadline and stopped in <code>finally</code>. Checkpoints are durable evidence until the learner explicitly resets that lesson; cleanup is restricted to the query&#x27;s own root. Default labs use inline/generated rows and local files. Kafka, object stores, JDBC services and real clusters are discussed as separate integrations, not prerequisites.</p>
+<h3 id="coverage-and-lesson-sequence">Coverage and lesson sequence<a class="heading-anchor" href="#coverage-and-lesson-sequence" aria-label="Link to this section">#</a></h3>
+<p>Every row below gives a concrete outcome, bounded lab and inspectable check. Times are working estimates excluding first-time provisioning and include prediction, implementation, retrieval and review. Dependency IDs refer to the JSON plan, with the alternative entry gate described above.</p>
+<h4 id="language-foundations-and-trustworthy-rows">Language foundations and trustworthy rows<a class="heading-anchor" href="#language-foundations-and-trustworthy-rows" aria-label="Link to this section">#</a></h4>
+<p>Enter through Scala foundations or a tested Python bridge, then preserve identity, NULL meaning and a deterministic report contract.</p>
+<h5 id="spark-001-choose-a-scala-first-or-pyspark-first-local-route">spark-001: Choose a Scala-first or PySpark-first local route<a class="heading-anchor" href="#spark-001-choose-a-scala-first-or-pyspark-first-local-route" aria-label="Link to this section">#</a></h5>
+<p>45 minutes; proposed profile <code>reading</code>; prerequisites: none.</p>
+<p><strong>Objective:</strong> Explain the JVM, Scala binary version, Python driver, Spark engine, and the difference between a proposed profile and an available runner.</p>
+<p><strong>Lab:</strong> Annotate a provided version report and choose a route. Scala-first takes 002-010 before 012; PySpark-first demonstrates python-10 skills, takes 011, then 012. Record that no Spark runtime is currently registered.</p>
+<p><strong>Expected check:</strong> The worksheet identifies Spark 4.2.0, Scala binary 2.13, proposed Scala patch 2.13.18, JDK 21 and Python 3.12; it rejects a Scala 3 Spark artifact and a remote master URL. No installation is required.</p>
+<h5 id="spark-002-scala-values-types-expressions-and-the-repl">spark-002: Scala values, types, expressions, and the REPL<a class="heading-anchor" href="#spark-002-scala-values-types-expressions-and-the-repl" aria-label="Link to this section">#</a></h5>
+<p>60 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-001</code>.</p>
+<p><strong>Objective:</strong> Read Scala 2.13 syntax and use immutable typed values and expression results.</p>
+<p><strong>Lab:</strong> Calculate a three-item basket using val, Int, Long, String and an if expression. Change a price and predict the inferred result type before compiling in the future local profile.</p>
+<p><strong>Expected check:</strong> Prices 125L, 200L and 75L sum to 400L; a 450L budget leaves 50L. A deliberate reassignment to val fails at compile time and the learner explains the message.</p>
+<h5 id="spark-003-functions-arguments-and-explicit-return-contracts">spark-003: Functions, arguments, and explicit return contracts<a class="heading-anchor" href="#spark-003-functions-arguments-and-explicit-return-contracts" aria-label="Link to this section">#</a></h5>
+<p>60 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-002</code>.</p>
+<p><strong>Objective:</strong> Write small pure Scala functions with named inputs and explicit return types.</p>
+<p><strong>Lab:</strong> Implement feeCents(amount: Long, isMember: Boolean): Long. Nonpositive amounts have zero fee; members pay zero below 500 cents and 5 percent at or above 500 (integer division); nonmembers pay a flat 20 cents on positive amounts. Table-test the boundaries.</p>
+<p><strong>Expected check:</strong> For amounts 0, 100 and 500, member fees are 0, 0 and 25, while nonmember fees are 0, 20 and 20. Tests distinguish Boolean branches and the zero amount boundary.</p>
+<h5 id="spark-004-immutable-collections-and-transformations">spark-004: Immutable collections and transformations<a class="heading-anchor" href="#spark-004-immutable-collections-and-transformations" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-003</code>.</p>
+<p><strong>Objective:</strong> Use Seq and Map with map, filter and fold without mutating shared state.</p>
+<p><strong>Lab:</strong> Transform five local order amounts, reject negatives into a separate collection, and produce a count and total from the accepted bag.</p>
+<p><strong>Expected check:</strong> Input Seq(100L, -5L, 0L, 100L, 25L) yields accepted Seq(100L, 0L, 100L, 25L), rejected Seq(-5L), count 4 and sum 225L. Duplicate 100L values remain.</p>
+<h5 id="spark-005-option-missing-values-and-total-functions">spark-005: Option, missing values, and total functions<a class="heading-anchor" href="#spark-005-option-missing-values-and-total-functions" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-004</code>.</p>
+<p><strong>Objective:</strong> Represent absence explicitly and distinguish None, zero, empty text and JVM null.</p>
+<p><strong>Lab:</strong> Parse optional amount text into Option[Long]; retain a rejected-input ledger rather than converting every invalid value to zero.</p>
+<p><strong>Expected check:</strong> Inputs Some(&quot;0&quot;), Some(&quot;25&quot;), None and Some(&quot;bad&quot;) produce observed 0L and 25L, one missing value and one rejected token. No .get is used on an unchecked Option.</p>
+<h5 id="spark-006-case-classes-pattern-matching-and-domain-states">spark-006: Case classes, pattern matching, and domain states<a class="heading-anchor" href="#spark-006-case-classes-pattern-matching-and-domain-states" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-005</code>.</p>
+<p><strong>Objective:</strong> Model a small event domain with case classes and exhaustive pattern matching.</p>
+<p><strong>Lab:</strong> Create Paid and Voided event states using a sealed trait; classify four fixtures and carry event identity independently from amount.</p>
+<p><strong>Expected check:</strong> Two paid events with equal values retain separate IDs. Every defined state has a match branch; adding a Refunded state makes the omitted-case warning visible before the match is repaired.</p>
+<h5 id="spark-007-either-and-validation-without-hidden-data-loss">spark-007: Either and validation without hidden data loss<a class="heading-anchor" href="#spark-007-either-and-validation-without-hidden-data-loss" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-006</code>.</p>
+<p><strong>Objective:</strong> Return accepted data or an explicit validation reason without throwing away invalid rows.</p>
+<p><strong>Lab:</strong> Combine ID, status and amount parsers with Either and a for comprehension for six bounded CSV-like records.</p>
+<p><strong>Expected check:</strong> The fixture has 3 accepted and 3 rejected records; rejection reasons are missing_id, invalid_amount and unknown_status, one each. Accepted plus rejected equals 6 and original IDs remain in evidence.</p>
+<h5 id="spark-008-assertions-numeric-boundaries-and-independent-oracles">spark-008: Assertions, numeric boundaries, and independent oracles<a class="heading-anchor" href="#spark-008-assertions-numeric-boundaries-and-independent-oracles" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-007</code>.</p>
+<p><strong>Objective:</strong> Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.</p>
+<p><strong>Lab:</strong> Build assertion helpers for sequences and bags; compare a hand-calculated fixture with a fold, then investigate Int overflow without using floating-point money.</p>
+<p><strong>Expected check:</strong> A bag comparison treats Seq(1,1,2) as different from Seq(1,2), while sorting makes Seq(2,1,1) equivalent. 2147483647L + 1L is 2147483648L; the Int example demonstrates why the type matters.</p>
+<h5 id="spark-009-packages-build-inputs-and-closure-serialization">spark-009: Packages, build inputs, and closure serialization<a class="heading-anchor" href="#spark-009-packages-build-inputs-and-closure-serialization" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-008</code>.</p>
+<p><strong>Objective:</strong> Separate source code, compiled artifacts and dependency coordinates before distributing functions.</p>
+<p><strong>Lab:</strong> Inspect a small proposed Scala build and a closure that accidentally captures a nonserializable owner. Rewrite it to capture a plain value, without downloading dependencies in this design preview.</p>
+<p><strong>Expected check:</strong> The dependency uses a _2.13 artifact with the selected Spark version; the rewritten function has only a serializable numeric capture. A dependency lock/report records Scala, Java and Spark versions.</p>
+<h5 id="spark-010-laziness-iterators-and-safe-side-effects">spark-010: Laziness, iterators, and safe side effects<a class="heading-anchor" href="#spark-010-laziness-iterators-and-safe-side-effects" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>scala-jvm</code>; prerequisites: <code>spark-009</code>.</p>
+<p><strong>Objective:</strong> Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.</p>
+<p><strong>Lab:</strong> Trace an Iterator pipeline and a pure collection pipeline over four values; compare a repeated evaluation with an external counter as a deliberately unsafe design.</p>
+<p><strong>Expected check:</strong> A lazy iterator emits no trace before consumption, produces accepted doubled values Seq(4,8), and is exhausted after one traversal. The learner rejects a counter as an exactly-once payment mechanism.</p>
+<h5 id="spark-011-pyspark-bridge-python-values-versus-spark-columns">spark-011: PySpark bridge: Python values versus Spark Columns<a class="heading-anchor" href="#spark-011-pyspark-bridge-python-values-versus-spark-columns" aria-label="Link to this section">#</a></h5>
+<p>75 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-001</code>, <code>python-10</code>.</p>
+<p><strong>Objective:</strong> Translate known Python collections and tests into explicit Spark expressions while keeping Python and engine execution distinct.</p>
+<p><strong>Lab:</strong> In the proposed Python profile, compare a Python Boolean with a Column predicate over IDs 1-4. Read the paired Scala syntax card rather than completing every Scala foundation lesson first.</p>
+<p><strong>Expected check:</strong> Filtering amounts greater than 10 keeps IDs [2,4] from [(1,0),(2,20),(3,None),(4,20)]. Python and/or on Columns is diagnosed and replaced with parenthesized &amp;, | or ~ as appropriate.</p>
+<h5 id="spark-012-sparksession-explicit-schemas-and-bounded-actions">spark-012: SparkSession, explicit schemas, and bounded actions<a class="heading-anchor" href="#spark-012-sparksession-explicit-schemas-and-bounded-actions" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-001</code>.</p>
+<p><strong>Objective:</strong> Create an owned local session and a typed schema, then distinguish transformations from actions in either API.</p>
+<p><strong>Lab:</strong> Entry gate: demonstrate Scala 010 competency OR complete the PySpark 011 branch. Create four explicit-schema rows, filter lazily, inspect schema, collect only this tiny result, and stop the owned session. Provide Scala and PySpark variants.</p>
+<p><strong>Expected check:</strong> Both variants report fields event_id: long, team: string and amount_cents: long with declared nullability; an action returns IDs [1,3]. Session master is local[2], UI is disabled, and teardown stops only the session this lab created.</p>
+<h5 id="spark-013-one-row-one-event-null-aware-aggregates">spark-013: One row, one event: NULL-aware aggregates<a class="heading-anchor" href="#spark-013-one-row-one-event-null-aware-aggregates" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-012</code>.</p>
+<p><strong>Objective:</strong> Preserve event grain and compare NULL-aware aggregates using Scala, PySpark and SQL with deterministic result ordering.</p>
+<p><strong>Lab:</strong> Use the seven-row pilot fixture. Reconcile raw and paid rows, aggregate by team, isolate NULL and zero cases, expose projection-plus-distinct loss, and compare canonical results after repartitioning.</p>
+<p><strong>Expected check:</strong> Paid metrics are (rows=6, valued=4, total_cents=250); ordered groups are A:(3,2,200), B:(1,1,0), C:(1,0,NULL), NULL:(1,1,50). A wrong projected distinct yields 5 rows and 150 cents. Both APIs and SQL match the golden fixture.</p>
+<h5 id="spark-014-capstone-a-reconciled-local-revenue-report">spark-014: Capstone: a reconciled local revenue report<a class="heading-anchor" href="#spark-014-capstone-a-reconciled-local-revenue-report" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-013</code>.</p>
+<p><strong>Objective:</strong> Build and explain a small revenue product whose input, rejected and reported rows reconcile.</p>
+<p><strong>Lab:</strong> Extend the pilot to 12 documented events with one invalid status, one missing ID, a zero amount and repeated equal-valued events. Deliver paired implementations, a tiny plain-language oracle and a report contract.</p>
+<p><strong>Expected check:</strong> Input count 12 equals 10 accepted plus 2 quarantined; each rejection has a reason. Both API outputs match the declared golden groups and cents totals, and a NULL-only group remains distinguishable from a zero group.</p>
+<h4 id="relational-correctness-and-measured-execution">Relational correctness and measured execution<a class="heading-anchor" href="#relational-correctness-and-measured-execution" aria-label="Link to this section">#</a></h4>
+<p>Test equivalent Scala/PySpark/SQL results and explain plans, partitions, shuffles, join strategy and columnar I/O using bounded evidence.</p>
+<h5 id="spark-015-sql-and-dataframe-expressions-with-ansi-boundaries">spark-015: SQL and DataFrame expressions with ANSI boundaries<a class="heading-anchor" href="#spark-015-sql-and-dataframe-expressions-with-ansi-boundaries" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-014</code>.</p>
+<p><strong>Objective:</strong> Express the same relational result with SQL and Columns and make casting/error policy explicit.</p>
+<p><strong>Lab:</strong> Create a temporary view from eight local rows, compare SQL and DataFrame projections, and exercise invalid integer casts with ANSI behavior explicitly set. Use SQL syntax introduced in the lesson; sql-02 is optional enrichment.</p>
+<p><strong>Expected check:</strong> Both paths produce the same six valid IDs and exact cents. Invalid casts either raise under the declared strict mode or enter a separately counted tolerant parse branch; no silent zero replacement occurs.</p>
+<h5 id="spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys">spark-016: Join cardinality, fanout, semi joins and NULL-safe keys<a class="heading-anchor" href="#spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-015</code>.</p>
+<p><strong>Objective:</strong> Predict join output counts from key multiplicities before running a join.</p>
+<p><strong>Lab:</strong> Join six fact rows to a dimension with a deliberately duplicated key and a NULL key. Compare inner, left, semi, anti and null-safe equality variants in both APIs and SQL.</p>
+<p><strong>Expected check:</strong> For the supplied multiplicity ledger, key A has 2 facts and 3 dimension matches, so that key contributes 6 inner rows. A semi join retains only the 2 fact rows for A; the NULL match is present only in the explicit null-safe branch.</p>
+<h5 id="spark-017-nested-records-json-and-explode-row-accounting">spark-017: Nested records, JSON and explode row accounting<a class="heading-anchor" href="#spark-017-nested-records-json-and-explode-row-accounting" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-016</code>.</p>
+<p><strong>Objective:</strong> Flatten nested data while preserving parent identity and accounting for empty or missing arrays.</p>
+<p><strong>Lab:</strong> Parse four inline JSON strings with an explicit nested schema; compare explode and explode_outer for arrays of lengths 2, 0, NULL and 1. Implement the same schema and transformations in Scala.</p>
+<p><strong>Expected check:</strong> explode yields 3 rows; explode_outer yields 5 rows and retains one placeholder for each empty or NULL array. Rejected malformed input is counted separately from valid nested records.</p>
+<h5 id="spark-018-timestamp-types-time-zones-and-interval-boundaries">spark-018: Timestamp types, time zones and interval boundaries<a class="heading-anchor" href="#spark-018-timestamp-types-time-zones-and-interval-boundaries" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-017</code>.</p>
+<p><strong>Objective:</strong> Distinguish an instant from a local timestamp and define event windows with explicit time-zone policy.</p>
+<p><strong>Lab:</strong> Use UTC strings and documented daylight-saving boundary fixtures, compare timestamp and timestamp_ntz semantics, and filter a half-open daily interval. Cross-check the same inputs in PySpark.</p>
+<p><strong>Expected check:</strong> An event exactly at the lower boundary is included and one at the upper boundary is excluded. Two textual offsets denoting the same instant compare equal after the declared parse; local-clock ambiguity is surfaced rather than guessed.</p>
+<h5 id="spark-019-windows-ties-and-deterministic-deduplication">spark-019: Windows, ties and deterministic deduplication<a class="heading-anchor" href="#spark-019-windows-ties-and-deterministic-deduplication" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-018</code>.</p>
+<p><strong>Objective:</strong> Choose a stable winner per key without relying on partition arrival order.</p>
+<p><strong>Lab:</strong> Rank eight events with a duplicated timestamp using row_number over a complete order (event_time, event_id). Compare a deterministic winner policy with an intentionally incomplete order in both APIs.</p>
+<p><strong>Expected check:</strong> The declared winners are event IDs [3,6,8]; repartitioning does not change them when the final tie-breaker is included. The learner explains why dropDuplicates alone cannot promise the newest row.</p>
+<h5 id="spark-020-partitions-repartition-coalesce-and-output-order">spark-020: Partitions, repartition, coalesce and output order<a class="heading-anchor" href="#spark-020-partitions-repartition-coalesce-and-output-order" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-019</code>.</p>
+<p><strong>Objective:</strong> Separate logical rows, physical partitions and a presentation order.</p>
+<p><strong>Lab:</strong> Distribute a 24-row fixture through repartition and coalesce; compare per-partition evidence with canonical content. Demonstrate sortWithinPartitions versus a final global order.</p>
+<p><strong>Expected check:</strong> All variants retain 24 IDs with the same multiset and sum. Only final orderBy with a complete tie-breaker is accepted as the global display contract; no fixed raw collect sequence is asserted.</p>
+<h5 id="spark-021-read-logical-and-physical-plans">spark-021: Read logical and physical plans<a class="heading-anchor" href="#spark-021-read-logical-and-physical-plans" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-020</code>.</p>
+<p><strong>Objective:</strong> Use explain output to connect filters, projections and exchanges to the written query.</p>
+<p><strong>Lab:</strong> Run a filtered projection and grouped aggregate over the same bounded file fixture, capture explain formatted and extended views, and annotate relevant operators. Record configuration and normalize unstable operator IDs.</p>
+<p><strong>Expected check:</strong> The evidence locates the requested filter, projected columns and aggregate in each plan, and identifies any Exchange rather than assuming one exact plan string. Logical output is checked independently of the plan.</p>
+<h5 id="spark-022-shuffles-stages-tasks-and-aggregation-cost">spark-022: Shuffles, stages, tasks and aggregation cost<a class="heading-anchor" href="#spark-022-shuffles-stages-tasks-and-aggregation-cost" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-021</code>.</p>
+<p><strong>Objective:</strong> Explain why a wide transformation moves data and distinguish partition count from row count.</p>
+<p><strong>Lab:</strong> Aggregate a generated 20000-row fixture by a high-cardinality key, compare two shuffle-partition settings with AQE explicitly disabled for the controlled observation, and inspect bounded task evidence.</p>
+<p><strong>Expected check:</strong> Both configurations produce the same 1000 groups and total 20000. Recorded task and shuffle metrics are tied to the run configuration; elapsed-time variation alone is not treated as proof of improvement.</p>
+<h5 id="spark-023-broadcast-joins-statistics-and-strategy-evidence">spark-023: Broadcast joins, statistics and strategy evidence<a class="heading-anchor" href="#spark-023-broadcast-joins-statistics-and-strategy-evidence" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-022</code>.</p>
+<p><strong>Objective:</strong> Choose and verify a join strategy without turning a hint into a correctness assumption.</p>
+<p><strong>Lab:</strong> Join 20000 facts to a 20-row dimension, compare automatic planning with a broadcast hint, and capture plans plus bounded metrics. Record the estimated dimension size and the configured threshold.</p>
+<p><strong>Expected check:</strong> Both outputs retain 20000 fact identities and the same exact aggregate. The learner reports the observed strategy, including when a hint is ignored, and rejects broadcasting an unbounded table.</p>
+<h5 id="spark-024-aqe-skew-and-bounded-salting-experiments">spark-024: AQE, skew and bounded salting experiments<a class="heading-anchor" href="#spark-024-aqe-skew-and-bounded-salting-experiments" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-023</code>.</p>
+<p><strong>Objective:</strong> Diagnose a skewed key and compare adaptive execution with an explicit, reversible skew strategy.</p>
+<p><strong>Lab:</strong> Generate at most 100000 rows with one hot key, record a key-frequency ledger, then compare AQE on/off and a small salted-join design. Keep correctness and runtime evidence separate.</p>
+<p><strong>Expected check:</strong> All variants match the reference bag and cents total. Evidence includes the hot-key fraction, initial and final adaptive plans when available, and task-size imbalance; salting must remove the helper key from the final contract.</p>
+<h5 id="spark-025-parquet-column-pruning-and-file-layout">spark-025: Parquet, column pruning and file layout<a class="heading-anchor" href="#spark-025-parquet-column-pruning-and-file-layout" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-024</code>.</p>
+<p><strong>Objective:</strong> Use a columnar local file layout and verify that schema and logical results survive round trips.</p>
+<p><strong>Lab:</strong> Write at most 20000 explicit-schema rows into a fresh owned directory, read only two columns with a filter, inspect plan evidence and file counts, then compare a deliberately excessive partition layout.</p>
+<p><strong>Expected check:</strong> Round-trip canonical content matches the input contract, filtered output has the declared IDs, and plan evidence identifies selected columns and supported pushdown. The report distinguishes directory partitions, Spark partitions and file counts.</p>
+<h5 id="spark-026-built-ins-udfs-and-python-jvm-columnar-boundaries">spark-026: Built-ins, UDFs and Python-JVM columnar boundaries<a class="heading-anchor" href="#spark-026-built-ins-udfs-and-python-jvm-columnar-boundaries" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-025</code>.</p>
+<p><strong>Objective:</strong> Prefer engine expressions when possible and make Python/JVM conversion and NULL behavior measurable.</p>
+<p><strong>Lab:</strong> Implement the same normalized-label rule using a built-in expression, Scala UDF and Python UDF over 12 edge-case rows. Inspect the Arrow/pandas path only in an explicitly provisioned optional profile.</p>
+<p><strong>Expected check:</strong> All enabled variants match 12 golden values including NULL, empty and Unicode inputs. A plan annotation identifies Python evaluation when present; no claim is made that Arrow eliminates serialization or that a UDF is automatically faster.</p>
+<h5 id="spark-027-persistence-lifecycle-and-cross-language-golden-tests">spark-027: Persistence lifecycle and cross-language golden tests<a class="heading-anchor" href="#spark-027-persistence-lifecycle-and-cross-language-golden-tests" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-026</code>.</p>
+<p><strong>Objective:</strong> Cache only reusable work and test Scala/PySpark results with schema and bag-aware comparisons.</p>
+<p><strong>Lab:</strong> Reuse a bounded transform twice with and without persistence, materialize it deliberately, unpersist in finally, and run shared golden fixtures across both implementations. Introduce one type mismatch and one dropped duplicate.</p>
+<p><strong>Expected check:</strong> The correct variants pass schema, multiplicity and value checks; the deliberate Long/String mismatch and duplicate loss each fail a named assertion. The cache lifecycle records materialization and cleanup without relying on a speed threshold.</p>
+<h5 id="spark-028-capstone-a-skewed-join-with-correctness-and-cost-evidence">spark-028: Capstone: a skewed join with correctness and cost evidence<a class="heading-anchor" href="#spark-028-capstone-a-skewed-join-with-correctness-and-cost-evidence" aria-label="Link to this section">#</a></h5>
+<p>150 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-027</code>.</p>
+<p><strong>Objective:</strong> Deliver a defensible batch-optimization change backed by a reference result and bounded measurements.</p>
+<p><strong>Lab:</strong> Process a generated fact/dimension product with duplicate dimension keys, a hot key and a nullable amount. Repair the data contract first, then compare a baseline with one chosen strategy in Scala and PySpark.</p>
+<p><strong>Expected check:</strong> Accepted, rejected and joined grains reconcile; both APIs match the independent golden result. A before/after evidence packet includes configuration, plans, key frequencies and resource metrics, with a rollback and no unbounded collect.</p>
+<h4 id="recoverable-batch-and-streaming-products">Recoverable batch and streaming products<a class="heading-anchor" href="#recoverable-batch-and-streaming-products" aria-label="Link to this section">#</a></h4>
+<p>Design finite streaming tests, explicit state and recovery policies, operational evidence and a defensible handoff without overstating delivery guarantees.</p>
+<h5 id="spark-029-restartable-batch-writes-and-data-quality-contracts">spark-029: Restartable batch writes and data-quality contracts<a class="heading-anchor" href="#spark-029-restartable-batch-writes-and-data-quality-contracts" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-028</code>.</p>
+<p><strong>Objective:</strong> Make a bounded batch product repeatable without confusing overwrite, append and transactional publication.</p>
+<p><strong>Lab:</strong> Write a 30-row local product into run-specific staging directories, validate schema and counts, publish a small manifest only after validation, and inject a failure before publication. Use Scala and Python writer variants.</p>
+<p><strong>Expected check:</strong> A successful run publishes one manifest with row count 30 and a declared schema; an interrupted run leaves the prior manifest intact. Re-running the same input does not append another 30 rows to the published logical product.</p>
+<h5 id="spark-030-deployment-topology-and-dependency-boundaries">spark-030: Deployment topology and dependency boundaries<a class="heading-anchor" href="#spark-030-deployment-topology-and-dependency-boundaries" aria-label="Link to this section">#</a></h5>
+<p>90 minutes; proposed profile <code>reading</code>; prerequisites: <code>spark-029</code>.</p>
+<p><strong>Objective:</strong> Explain driver/executor responsibilities and distinguish local classic Spark from Connect and cluster deployment.</p>
+<p><strong>Lab:</strong> Annotate three provided deployment diagrams and a sanitized submit specification. Trace where Scala jars, Python dependencies, credentials and local paths must exist. No cluster or cloud account is required.</p>
+<p><strong>Expected check:</strong> The design correctly locates driver and executor work, rejects a driver-only local file as executor-visible storage, and labels Connect support as a separate adapter with its own compatibility and lifecycle tests.</p>
+<h5 id="spark-031-structured-streaming-with-finite-microbatches">spark-031: Structured Streaming with finite microbatches<a class="heading-anchor" href="#spark-031-structured-streaming-with-finite-microbatches" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-030</code>.</p>
+<p><strong>Objective:</strong> Model an unbounded relation while running a finite, reproducible local streaming exercise.</p>
+<p><strong>Lab:</strong> Place three known files atomically into an owned input directory and use a bounded available-now microbatch run. Compare input, processed and sink counts with a batch oracle in Scala and PySpark.</p>
+<p><strong>Expected check:</strong> The run terminates after processing the finite files, reports exactly 9 input records and produces the declared batch-equivalent aggregate. Every query is awaited and stopped in finally; no socket or Kafka service is required.</p>
+<h5 id="spark-032-event-time-watermarks-and-late-data-policy">spark-032: Event time, watermarks and late-data policy<a class="heading-anchor" href="#spark-032-event-time-watermarks-and-late-data-policy" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-031</code>.</p>
+<p><strong>Objective:</strong> State what a watermark does and test a declared late-event policy with controlled event-time progression.</p>
+<p><strong>Lab:</strong> Use three explicit microbatches containing on-time, out-of-order and far-late events. Add a final event-time-advancing batch, inspect progress watermarks and compare append/update output-mode eligibility.</p>
+<p><strong>Expected check:</strong> The event ledger distinguishes accepted late data from data outside the tested state-retention policy. The learner records actual watermark advancement and does not equate the configured delay with a universal wall-clock drop deadline.</p>
+<h5 id="spark-033-stateful-deduplication-and-event-identity">spark-033: Stateful deduplication and event identity<a class="heading-anchor" href="#spark-033-stateful-deduplication-and-event-identity" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-032</code>.</p>
+<p><strong>Objective:</strong> Bound deduplication state while distinguishing duplicate delivery from legitimate equal-valued events.</p>
+<p><strong>Lab:</strong> Replay an event twice within the declared watermark policy, include two distinct equal-valued events and a NULL event ID, then compare the stream with a hand-written identity ledger.</p>
+<p><strong>Expected check:</strong> The repeated delivery contributes once, the two distinct event IDs both contribute, and the NULL ID enters a quarantine result. Evidence states the deduplication horizon and avoids promising perpetual deduplication.</p>
+<h5 id="spark-034-stream-stream-joins-and-bounded-state">spark-034: Stream-stream joins and bounded state<a class="heading-anchor" href="#spark-034-stream-stream-joins-and-bounded-state" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-033</code>.</p>
+<p><strong>Objective:</strong> Express a time-bounded streaming join and explain which unmatched rows can be finalized.</p>
+<p><strong>Lab:</strong> Join finite impression and click file streams with explicit event-time bounds and watermarks. Provide a match ledger with one unmatched and one outside-window click; compare inner and supported outer behavior.</p>
+<p><strong>Expected check:</strong> Only pairs meeting both identity and interval predicates appear. The report explains delayed outer-row emission and records state/progress evidence rather than assuming immediate unmatched output.</p>
+<h5 id="spark-035-checkpoints-restart-and-delivery-guarantees">spark-035: Checkpoints, restart and delivery guarantees<a class="heading-anchor" href="#spark-035-checkpoints-restart-and-delivery-guarantees" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-034</code>.</p>
+<p><strong>Objective:</strong> Explain how source offsets, state, checkpoints and sink behavior jointly determine recovery semantics.</p>
+<p><strong>Lab:</strong> Run two finite batches, stop the owned query, restart the same compatible query with the same checkpoint, then compare with a new checkpoint in a separate output namespace.</p>
+<p><strong>Expected check:</strong> Same-checkpoint recovery does not treat processed file offsets as fresh input. New-checkpoint behavior is recorded separately and never pointed at an existing append sink without an idempotency plan. A recovery ledger names source and sink assumptions.</p>
+<h5 id="spark-036-foreachbatch-idempotent-sinks-and-failure-injection">spark-036: foreachBatch, idempotent sinks and failure injection<a class="heading-anchor" href="#spark-036-foreachbatch-idempotent-sinks-and-failure-injection" aria-label="Link to this section">#</a></h5>
+<p>135 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-035</code>.</p>
+<p><strong>Objective:</strong> Design an idempotent microbatch sink instead of assuming foreachBatch is exactly once.</p>
+<p><strong>Lab:</strong> Use an owned local batch ledger keyed by query identity and batch ID. Inject a failure after a staged write and before publication, replay, and compare against an intentionally non-idempotent append implementation.</p>
+<p><strong>Expected check:</strong> The repaired sink publishes each logical batch once under the documented recovery model; the unsafe append variant visibly duplicates rows. The report separates a local teaching ledger from a transactional production sink guarantee.</p>
+<h5 id="spark-037-deterministic-streaming-tests-without-sleep-based-guesses">spark-037: Deterministic streaming tests without sleep-based guesses<a class="heading-anchor" href="#spark-037-deterministic-streaming-tests-without-sleep-based-guesses" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-036</code>.</p>
+<p><strong>Objective:</strong> Test finite streaming scenarios with explicit batch progression and bounded cleanup.</p>
+<p><strong>Lab:</strong> Build a shared case matrix for restart, duplicate delivery, late events and invalid input using local files or the deterministic rate-micro-batch source. Keep every checkpoint and sink inside the test-owned root.</p>
+<p><strong>Expected check:</strong> Four scenario tests compare exact canonical results and progress evidence, terminate within a declared timeout, and remove only their own temporary roots. Tests fail meaningfully when duplicate suppression or publication is deliberately broken.</p>
+<h5 id="spark-038-observability-plans-progress-event-logs-and-incidents">spark-038: Observability: plans, progress, event logs and incidents<a class="heading-anchor" href="#spark-038-observability-plans-progress-event-logs-and-incidents" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-python</code>; prerequisites: <code>spark-037</code>.</p>
+<p><strong>Objective:</strong> Turn a slow or stalled job report into a bounded evidence-based diagnosis.</p>
+<p><strong>Lab:</strong> Inspect sanitized batch event logs and streaming progress for three seeded incidents: skew, a growing state store and an input starvation case. Capture equivalent local evidence where the future profile supports it.</p>
+<p><strong>Expected check:</strong> Each incident report cites a relevant metric or operator, distinguishes observation from hypothesis, proposes one reversible check and names a success condition. No UI screenshot alone is accepted as an end-to-end correctness check.</p>
+<h5 id="spark-039-resource-budgets-spill-and-cost-tradeoffs">spark-039: Resource budgets, spill and cost tradeoffs<a class="heading-anchor" href="#spark-039-resource-budgets-spill-and-cost-tradeoffs" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-038</code>.</p>
+<p><strong>Objective:</strong> Choose a resource-aware strategy from measured work rather than a single elapsed time.</p>
+<p><strong>Lab:</strong> Compare two bounded configurations for the same generated dataset, recording rows, file counts, shuffle bytes, spill and task imbalance. Use a hypothetical unit-price sheet only as a separate cost model.</p>
+<p><strong>Expected check:</strong> Both runs pass the same correctness oracle; the report has explicit units and assumptions and distinguishes measured local resource work from an estimated cloud bill. It proposes a stop condition before increasing data size.</p>
+<h5 id="spark-040-sql-bridge-jdbc-boundaries-and-data-handling">spark-040: SQL bridge, JDBC boundaries and data handling<a class="heading-anchor" href="#spark-040-sql-bridge-jdbc-boundaries-and-data-handling" aria-label="Link to this section">#</a></h5>
+<p>105 minutes; proposed profile <code>reading</code>; prerequisites: <code>spark-039</code>.</p>
+<p><strong>Objective:</strong> Design a bounded database handoff with explicit row, type, concurrency and privacy contracts.</p>
+<p><strong>Lab:</strong> Review a supplied PostgreSQL export and JDBC design without opening a live connection. Map cents, decimals, timestamps and NULLs; identify predicate pushdown and partitioned-read assumptions and redact a fake secret from logs.</p>
+<p><strong>Expected check:</strong> The contract limits source concurrency, defines a consistent-read strategy, maps four tricky types, and rejects credentials in source or an unbounded collect. sql-quality-01 and sql-test-01 are optional cross-track enrichment, not entry requirements.</p>
+<h5 id="spark-041-compatibility-and-recovery-change-rehearsal">spark-041: Compatibility and recovery change rehearsal<a class="heading-anchor" href="#spark-041-compatibility-and-recovery-change-rehearsal" aria-label="Link to this section">#</a></h5>
+<p>120 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-040</code>.</p>
+<p><strong>Objective:</strong> Assess a Spark/runtime change without reusing incompatible state or trusting a version string alone.</p>
+<p><strong>Lab:</strong> Compare a documented source/target compatibility report and run the shared golden suite in each future provisioned profile. Rehearse a checkpoint-incompatible query change using a separate owned recovery path and an explicit rollback.</p>
+<p><strong>Expected check:</strong> The evidence records Spark, Scala binary/patch, JDK, Python and optional Arrow versions; all golden fixtures pass or the change is rejected. No existing checkpoint is silently reset, migrated or deleted.</p>
+<h5 id="spark-042-capstone-a-recoverable-late-event-data-product">spark-042: Capstone: a recoverable late-event data product<a class="heading-anchor" href="#spark-042-capstone-a-recoverable-late-event-data-product" aria-label="Link to this section">#</a></h5>
+<p>180 minutes; proposed profile <code>spark-local-scala</code>; prerequisites: <code>spark-041</code>.</p>
+<p><strong>Objective:</strong> Deliver a bounded streaming product with credible correctness, recovery and operational evidence.</p>
+<p><strong>Lab:</strong> Combine finite late and duplicate events, paired Scala/PySpark implementations, a state policy, an idempotent sink and failure injection. Hand off a runbook and a cost/evidence packet to a second learner acting as reviewer.</p>
+<p><strong>Expected check:</strong> The product matches an independent identity-and-event-time oracle before and after one injected restart. The packet accounts for accepted, duplicate, late and invalid rows, proves cleanup ownership and explains every source/sink guarantee without a blanket exactly-once claim.</p>
+<h3 id="three-capstones-and-evidence-standards">Three capstones and evidence standards<a class="heading-anchor" href="#three-capstones-and-evidence-standards" aria-label="Link to this section">#</a></h3>
+<p>The beginner capstone (<code>spark-014</code>) submits a twelve-event report, two quarantined rows with reasons, paired implementations and a hand-written oracle. The intermediate capstone (<code>spark-028</code>) fixes join correctness before proposing one optimization and submits comparable plans, configurations and measured resource work. The advanced capstone (<code>spark-042</code>) submits a finite late-event product, an interruption/recovery transcript, explicit sink assumptions and a runbook that another learner can reproduce. The JSON specifies exact deliverable and acceptance lists for all three.</p>
+<p>A correct answer must account for duplicate multiplicity, schema, NULL meaning and the requested order. A physical plan alone cannot establish correctness. A faster local run alone cannot establish lower cost. AQE and hints are observed decisions: hints do not guarantee a strategy, and adaptive execution can change a final plan. <a href="https://spark.apache.org/docs/4.2.0/sql-performance-tuning.html">Performance tuning guide</a>.</p>
+<p>Streaming acceptance combines source replay, checkpoint/state recovery and sink behavior. <code>foreachBatch</code> is treated as at-least-once by default; an idempotent batch ledger is a teaching implementation with stated assumptions, not a blanket transaction guarantee. A watermark is tested through event-time progression and state evidence rather than described as a universal processing-clock deadline. <a href="https://spark.apache.org/docs/4.2.0/streaming/apis-on-dataframes-and-datasets.html">Structured Streaming guide</a>.</p>
+<h3 id="teacher-preview-and-learning-loop">Teacher preview and learning loop<a class="heading-anchor" href="#teacher-preview-and-learning-loop" aria-label="Link to this section">#</a></h3>
+<p>The preview should open the planned lesson&#x27;s concept before showing the coding surface, ask for a prediction, then let the learner save an attempt. Three progressive hints unlock one at a time. Retrieval questions ask for an explanation without copying code; a transfer fixture tests whether the idea generalizes. Official solutions are a separate document revealed after an attempt or an explicit learner request. The selected language must remain visible, and switching Scala/PySpark must preserve separate attempts. Runtime capability comes from the future adapter registry, never from guessing a filename.</p>
+<p>For the pilot, the teacher starts with row grain and the distinction between zero and missing. A diagnostic wrong answer of five rows or 150 cents should trigger the identity hint. A claim that the all-missing group totals zero should trigger a NULL/business-rule question. A correct table with no order clause should trigger a reproducibility question. Completion is based on the six rubric items and a transfer explanation, not whether code printed without errors. The plan&#x27;s <code>pilot</code> object supplies a bounded concept card, prediction, Scala starter, three hints, transfer and rubric for this workflow; the guide includes the equivalent PySpark starter.</p>
+<h3 id="release-gates-for-a-future-implementation">Release gates for a future implementation<a class="heading-anchor" href="#release-gates-for-a-future-implementation" aria-label="Link to this section">#</a></h3>
+<p>Before activation, author all learner/guide/solution surfaces and register real practice-expansion baselines. Run both language golden suites and independent batch oracles. Verify source mapping, timeouts, child/JVM cleanup, memory limits, dependency failure messages, loopback-only sockets, offline reuse, state preservation and explicit reset ownership. Run finite restart and late-event scenarios on each supported packaged platform. Compare schema and bag multiplicity, not only sorted display strings; use official test utilities where useful and add course-specific identity checks. <a href="https://spark.apache.org/docs/4.2.0/api/python/getting_started/testing_pyspark.html">Testing PySpark</a>.</p>
+<p>Inspect file layout and plan evidence for columnar labs rather than promising a specific pushdown optimization. Keep monitoring evidence bounded and redact secret-bearing configuration before learner export. <a href="https://spark.apache.org/docs/4.2.0/sql-data-sources-parquet.html">Parquet guide</a>, <a href="https://spark.apache.org/docs/4.2.0/monitoring.html">monitoring guide</a>.</p>
+<p>Design checks can validate plan IDs, prerequisite references, fixtures and code syntax now. They cannot establish Spark execution, Scala compilation, distributed fault tolerance, real-cluster performance or operating-system provisioning. Those remain explicit implementation acceptance work.</p>
+<h3 id="primary-references-checked-2026-10-22">Primary references checked 2026-10-22<a class="heading-anchor" href="#primary-references-checked-2026-10-22" aria-label="Link to this section">#</a></h3>
+<ul>
+<li><a href="https://spark.apache.org/docs/4.2.0/">Spark 4.2.0 overview and supported environments</a>: Spark version, supported Java/Scala/Python lines, local mode and classic versus Connect distinction.</li>
+<li><a href="https://raw.githubusercontent.com/apache/spark/v4.2.0/pom.xml">Spark 4.2.0 tagged build configuration</a>: Tagged Scala 2.13.18 build and Scala binary 2.13; source-level compatibility evidence, not a tested course image.</li>
+<li><a href="https://docs.scala-lang.org/overviews/jdk-compatibility/overview.html">Scala JDK compatibility</a>: Scala 2.13 and JDK 21 compatibility; keep the Spark-specific binary line distinct from Scala 3.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/sql-programming-guide.html">Spark SQL, DataFrames and Datasets</a>: Shared SQL/DataFrame engine and the Scala/Java typed Dataset versus Python DataFrame API distinction.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/sql-ref-null-semantics.html">Spark SQL NULL semantics</a>: NULL predicates, NULL-safe equality, grouping, aggregate behavior and ordering used in the pilot.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/sql-performance-tuning.html">Spark SQL performance tuning</a>: Statistics, broadcast hints, partition tuning, persistence, AQE and skew experiments.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/sql-data-sources-parquet.html">Spark Parquet data source</a>: Columnar file reading, schema handling and Parquet-specific I/O evidence.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/streaming/index.html">Structured Streaming overview</a>: Microbatch conceptual model and the need to distinguish processing modes.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/streaming/apis-on-dataframes-and-datasets.html">Structured Streaming DataFrame and Dataset guide</a>: Watermarks, stateful operations, file sources, checkpoints, recovery and foreachBatch delivery assumptions.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/api/python/getting_started/testing_pyspark.html">Testing PySpark</a>: Local testing patterns and schema/value comparison utilities; supplement with multiplicity-aware course oracles.</li>
+<li><a href="https://spark.apache.org/docs/4.2.0/monitoring.html">Spark monitoring and instrumentation</a>: Event logs, metrics and observable execution evidence for incident and resource labs.</li>
+<li><a href="https://docs.scala-lang.org/tour/basics.html">Scala Tour: basics</a>: Scala 2-compatible values, types, expression blocks, functions and entry-level syntax for the language-first route.</li>
+<li><a href="https://docs.scala-lang.org/tour/case-classes.html">Scala Tour: case classes</a>: Immutable domain records, structural equality and the distinction between equal values and application-defined event identity.</li>
+<li><a href="https://docs.scala-lang.org/tour/higher-order-functions.html">Scala Tour: higher-order functions</a>: Function values and collection transformations used before introducing distributed expression execution.</li>
+</ul></article>
+  </main>
+</body>
+</html>

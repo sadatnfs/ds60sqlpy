@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Worked solutions: planned pilot llm-009 · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Worked solutions: planned pilot llm-009</h1>
+      <p class="source-path">Generated from <code>docs/expansion/samples/llm-theory-pilot-solutions.md</code></p>
+    </header>
+    <article class="document"><h2 id="worked-solutions-planned-pilot-llm-009">Worked solutions: planned pilot llm-009<a class="heading-anchor" href="#worked-solutions-planned-pilot-llm-009" aria-label="Link to this section">#</a></h2>
+<p>Open this file after an attempt or an explicit request for comparison. The <a href="llm-theory-pilot.md.html">learner guide</a> contains the prediction, two examples and six independent exercise contracts. Preserve the learner&#x27;s own explanation and failed checks. This is a design sample, not an active catalog lesson or a claim that a complete language model has been validated.</p>
+<h3 id="runtime-and-shared-reference">Runtime and shared reference<a class="heading-anchor" href="#runtime-and-shared-reference" aria-label="Link to this section">#</a></h3>
+<p>Use the already prepared NumPy interpreter and the Windows or POSIX command in the guide. No framework installation, tokenizer download, trained weights, service, key or GPU is involved. The Shared reference and Exercises 1 through 6 code blocks form one executable Python script in order. Every comparison uses <code>rtol=0, atol=1e-12</code>. Exact rational mixtures and independently recomputed prefixes provide different forms of evidence.</p>
+<p>The helper enforces square self-attention. It does not claim to support batched attention, a cache, cross-attention or a full decoder. A boolean True means allowed here. Transfer to a different API requires checking that API&#x27;s mask contract.</p>
+<pre><code class="language-python">import numpy as np
+
+def attention(q, k, v, allowed):
+    q, k, v = (np.asarray(value, dtype=np.float64) for value in (q, k, v))
+    allowed = np.asarray(allowed)
+    if any(value.ndim != 2 for value in (q, k, v)):
+        raise ValueError(&quot;q, k and v must be matrices&quot;)
+    count, width = q.shape
+    if count == 0 or width == 0 or v.shape[1] == 0:
+        raise ValueError(&quot;nonempty token and feature axes required&quot;)
+    if k.shape != (count, width) or v.shape[0] != count:
+        raise ValueError(&quot;self-attention shapes do not agree&quot;)
+    if allowed.dtype != np.bool_:
+        raise TypeError(&quot;allowed must be boolean&quot;)
+    if allowed.shape != (count, count):
+        raise ValueError(&quot;allowed must have shape (tokens, tokens)&quot;)
+    if not allowed.any(axis=1).all():
+        raise ValueError(&quot;each query needs at least one key&quot;)
+    if not all(np.isfinite(value).all() for value in (q, k, v)):
+        raise ValueError(&quot;finite inputs required&quot;)
+    scores = (q @ k.T) / np.sqrt(width)
+    if not np.isfinite(scores[allowed]).all():
+        raise ValueError(&quot;finite allowed scores required&quot;)
+    masked = np.where(allowed, scores, -np.inf)
+    shifted = masked - masked.max(axis=1, keepdims=True)
+    weights = np.exp(shifted)
+    weights /= weights.sum(axis=1, keepdims=True)
+    return weights @ v, weights
+
+q = np.zeros((3, 2), dtype=np.float64)
+k = q.copy()
+v = np.array([[2.0, 0.0], [0.0, 2.0], [6.0, 6.0]])
+allowed = np.tri(3, dtype=bool)
+output, weights = attention(q, k, v, allowed)
+expected = np.array([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]])
+np.testing.assert_allclose(output, expected, rtol=0, atol=1e-12)
+np.testing.assert_allclose(weights.sum(axis=1), 1.0, rtol=0, atol=1e-12)
+for cut in range(1, 4):
+    prefix, _ = attention(q[:cut], k[:cut], v[:cut], np.tri(cut, dtype=bool))
+    np.testing.assert_allclose(output[:cut], prefix, rtol=0, atol=1e-12)
+print(output)</code></pre>
+<h3 id="exercise-1-trace-three-mixtures">Exercise 1: trace three mixtures<a class="heading-anchor" href="#exercise-1-trace-three-mixtures" aria-label="Link to this section">#</a></h3>
+<p>Score row 0 can use only key 0, so its softmax puts all mass there. Row 1 has two equal legal scores and therefore two weights of <code>1/2</code>. Row 2 has three weights of <code>1/3</code>. Multiplying these rows by V gives the value at position 0, the first-two mean, and then the three-value mean.</p>
+<pre><code class="language-python">expected_weights = np.array([
+    [1.0, 0.0, 0.0],
+    [0.5, 0.5, 0.0],
+    [1 / 3, 1 / 3, 1 / 3],
+])
+expected_output = np.array([[2.0, 0.0], [1.0, 1.0], [8 / 3, 8 / 3]])
+np.testing.assert_allclose(weights, expected_weights, rtol=0, atol=1e-12)
+np.testing.assert_allclose(output, expected_output, rtol=0, atol=1e-12)
+np.testing.assert_allclose(weights.sum(axis=1), [1.0, 1.0, 1.0],
+                           rtol=0, atol=1e-12)
+print(&quot;exercise 1: mixtures and row masses agree&quot;)</code></pre>
+<p><strong>Expected:</strong> every assertion passes. <strong>Verify:</strong> the rows index queries and the columns index keys. Each output has two feature coordinates inherited from V. Their sum need not be 1; they are not probabilities over a token vocabulary. Only the attention weights have that normalization contract.</p>
+<h3 id="exercise-2-change-only-the-future">Exercise 2: change only the future<a class="heading-anchor" href="#exercise-2-change-only-the-future" aria-label="Link to this section">#</a></h3>
+<p>A causal earlier query has no legal route to the third value. Its output therefore cannot depend on that value. The final query can use all values, so its new average is <code>[(2+0+100)/3, (0+2+200)/3] = [34,202/3]</code>.</p>
+<pre><code class="language-python">original_v = v.copy()
+future_v = v.copy()
+future_v[2] = [100.0, 200.0]
+causal, _ = attention(q, k, future_v, np.tri(3, dtype=bool))
+unmasked, _ = attention(q, k, future_v, np.ones((3, 3), dtype=bool))
+np.testing.assert_allclose(causal[:2], expected_output[:2], rtol=0, atol=1e-12)
+np.testing.assert_allclose(causal[2], [34.0, 202 / 3], rtol=0, atol=1e-12)
+np.testing.assert_allclose(unmasked, np.tile([34.0, 202 / 3], (3, 1)),
+                           rtol=0, atol=1e-12)
+np.testing.assert_array_equal(v, original_v)
+assert not np.allclose(unmasked[:2], expected_output[:2])
+print(&quot;exercise 2: causal prefix unchanged; unmasked prefix changed&quot;)</code></pre>
+<p><strong>Expected:</strong> the first two causal rows stay fixed while the unmasked prefix changes. <strong>Verify:</strong> the original V remains unchanged; otherwise a later test might compare two accidentally mutated fixtures and pass for the wrong reason. A causal failure is demonstrated by the changed early outputs, independently of whether a generated sentence would appear plausible.</p>
+<h3 id="exercise-3-construct-a-nonuniform-prefix-oracle">Exercise 3: construct a nonuniform prefix oracle<a class="heading-anchor" href="#exercise-3-construct-a-nonuniform-prefix-oracle" aria-label="Link to this section">#</a></h3>
+<p>The new Q and K make scores unequal, so a bug cannot pass merely by producing a uniform average. Each prefix call below starts from sliced Q, K and V and computes its own scores, normalization and matrix product. It never reuses weights calculated from the full sequence.</p>
+<pre><code class="language-python">def check_prefixes(query, key, value):
+    count = len(query)
+    full, _ = attention(query, key, value, np.tri(count, dtype=bool))
+    for cut in range(1, count + 1):
+        prefix, _ = attention(query[:cut], key[:cut], value[:cut],
+                              np.tri(cut, dtype=bool))
+        np.testing.assert_allclose(full[:cut], prefix, rtol=0, atol=1e-12)
+    return full
+
+
+nonuniform_q = np.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0], [-1.0, 1.0]])
+nonuniform_k = nonuniform_q.copy()
+nonuniform_v = np.array([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0], [7.0, 8.0]])
+full = check_prefixes(nonuniform_q, nonuniform_k, nonuniform_v)
+future_q, future_k, future_values = (value.copy() for value in
+                                      (nonuniform_q, nonuniform_k, nonuniform_v))
+future_q[2:] += 3.0
+future_k[2:] *= -4.0
+future_values[2:] += 100.0
+changed = check_prefixes(future_q, future_k, future_values)
+np.testing.assert_allclose(changed[:2], full[:2], rtol=0, atol=1e-12)
+assert not np.allclose(changed[2:], full[2:])
+print(&quot;exercise 3: all four cuts and future perturbations passed&quot;)</code></pre>
+<p><strong>Expected:</strong> every cut passes; changing future-only Q, K and V preserves the first two outputs. <strong>Verify:</strong> later rows really do change, so the perturbation was not a no-op. This validates this attention function on the supplied fixtures, not every implementation or every possible input. A full decoder also needs tokenwise normalization, positions and cache behavior that respect the same boundary.</p>
+<h3 id="exercise-4-diagnose-a-plausible-looking-triangle">Exercise 4: diagnose a plausible-looking triangle<a class="heading-anchor" href="#exercise-4-diagnose-a-plausible-looking-triangle" aria-label="Link to this section">#</a></h3>
+<p>The broken computation assigns <code>1/3</code> to every key before applying a mask. Removing forbidden mass afterward leaves the first two rows with less than unit mass. The last row happens to be correct because it has no forbidden keys. Seeing some correct output or a lower triangle therefore is insufficient.</p>
+<pre><code class="language-python">broken_weights = np.full((3, 3), 1 / 3) * np.tri(3, dtype=bool)
+broken_output = broken_weights @ v
+np.testing.assert_allclose(broken_weights.sum(axis=1), [1 / 3, 2 / 3, 1.0],
+                           rtol=0, atol=1e-12)
+np.testing.assert_allclose(broken_output,
+                           [[2 / 3, 0.0], [2 / 3, 2 / 3], [8 / 3, 8 / 3]],
+                           rtol=0, atol=1e-12)
+repaired, repaired_weights = attention(q, k, v, np.tri(3, dtype=bool))
+np.testing.assert_allclose(repaired, expected_output, rtol=0, atol=1e-12)
+np.testing.assert_allclose(repaired_weights.sum(axis=1), 1.0,
+                           rtol=0, atol=1e-12)
+print(&quot;exercise 4: masked-before-normalization repair passed&quot;)</code></pre>
+<p><strong>Expected:</strong> broken row sums are <code>[1/3,2/3,1]</code> and the repaired output matches the original oracle. <strong>Verify:</strong> the reference removes forbidden scores before exponentiation, subtracts a row maximum, then normalizes over legal keys. Post-softmax removal followed by explicit renormalization can be mathematically equivalent for finite ordinary cases, but first computing forbidden exponentials creates avoidable overflow/underflow and empty-row hazards. Keep the pre-normalization mask as the canonical implementation here.</p>
+<h3 id="exercise-5-make-invalid-inputs-fail-clearly">Exercise 5: make invalid inputs fail clearly<a class="heading-anchor" href="#exercise-5-make-invalid-inputs-fail-clearly" aria-label="Link to this section">#</a></h3>
+<p>An empty input has no attention distribution. A fully masked query has no legal key to normalize. Neither should be silently converted into zeros or NaNs. An integer mask is rejected because accepting arbitrary numeric values would hide ambiguity about its meaning.</p>
+<pre><code class="language-python">def expect_failure(error_type, operation, message=None):
+    try:
+        operation()
+    except error_type as error:
+        if message is not None:
+            assert message in str(error)
+    else:
+        raise AssertionError(&quot;invalid input was accepted&quot;)
+
+
+empty = np.empty((0, 2))
+expect_failure(ValueError,
+               lambda: attention(empty, empty, empty, np.empty((0, 0), dtype=bool)))
+expect_failure(TypeError,
+               lambda: attention(q, k, v, np.tri(3, dtype=int)))
+expect_failure(ValueError,
+               lambda: attention(q, k, v, np.ones((3, 2), dtype=bool)))
+no_key = np.tri(3, dtype=bool)
+no_key[1] = False
+expect_failure(ValueError, lambda: attention(q, k, v, no_key),
+               &quot;each query needs at least one key&quot;)
+nonfinite = v.copy()
+nonfinite[0, 0] = np.nan
+expect_failure(ValueError, lambda: attention(q, k, nonfinite, allowed),
+               &quot;finite inputs required&quot;)
+valid_again, _ = attention(q, k, v, allowed)
+assert np.isfinite(valid_again).all()
+np.testing.assert_allclose(valid_again, expected_output, rtol=0, atol=1e-12)
+print(&quot;exercise 5: five rejected cases; valid fixture still works&quot;)</code></pre>
+<p><strong>Expected:</strong> exactly the stated exception classes, the specific fully masked message, and a valid finite result afterward. <strong>Verify:</strong> each invalid call is isolated. An unexpected exception is not swallowed by a broad catch, and returning a default matrix would fail the rejection contract. Finiteness checks also do not mean every finite input can be represented safely: the helper rejects overflow in allowed scores rather than claiming universal precision.</p>
+<h3 id="exercise-6-transfer-to-next-token-labels">Exercise 6: transfer to next-token labels<a class="heading-anchor" href="#exercise-6-transfer-to-next-token-labels" aria-label="Link to this section">#</a></h3>
+<p>The current token is the input from which the next token is predicted. A query may therefore use its own input position, including the diagonal. Giving it the next input position would expose the label it is supposed to predict. The causal boundary and the training/evaluation data boundary are separate contracts.</p>
+<pre><code class="language-python">ids = np.array([2, 5, 7, 3], dtype=np.int64)
+inputs, labels = ids[:-1], ids[1:]
+np.testing.assert_array_equal(inputs, [2, 5, 7])
+np.testing.assert_array_equal(labels, [5, 7, 3])
+pairs = list(zip(inputs.tolist(), labels.tolist()))
+assert pairs == [(2, 5), (5, 7), (7, 3)]
+assert labels.size == 3
+label_mask = np.tri(len(inputs), dtype=bool)
+assert label_mask[0, 0]
+assert not label_mask[0, 1]
+np.testing.assert_array_equal(label_mask[0], [True, False, False])
+
+# Two different filenames still belong to the same source-document family.
+family = {&quot;doc-a&quot;: &quot;A&quot;, &quot;doc-a-copy&quot;: &quot;A&quot;}
+training_ids, validation_ids = [&quot;doc-a&quot;], [&quot;doc-a-copy&quot;]
+training_families = {family[name] for name in training_ids}
+validation_families = {family[name] for name in validation_ids}
+assert training_families &amp; validation_families == {&quot;A&quot;}
+print(&quot;exercise 6:&quot;, pairs, &quot;duplicate-family leakage detected&quot;)</code></pre>
+<p><strong>Expected:</strong> three shifted pairs, an allowed diagonal, a forbidden next key, and detected family overlap. <strong>Verify:</strong> a random file split alone would miss this counterexample. Training a tokenizer on validation text is another form of contamination even when every attention mask is correct. Freeze source families and fit preprocessing on training only before selecting a model.</p>
+<h3 id="retrieval-and-evidence-review">Retrieval and evidence review<a class="heading-anchor" href="#retrieval-and-evidence-review" aria-label="Link to this section">#</a></h3>
+<p>For the guide&#x27;s fresh two-row V fixture <code>[[4,0],[0,4]]</code> with zero Q/K, the causal outputs are <code>[[4,0],[2,2]]</code>. A teacher should choose a new fixture after this answer is revealed. Ask for a drawn allowed row, an independently recomputed prefix, and a leakage counterexample without opening the helper.</p>
+<p>Use the guide&#x27;s five-dimension rubric and its causal/leakage gates. Accept other code when its axes, mask meaning, row mass, independent tests and failure behavior satisfy the contracts. A successful local attention test is useful implementation evidence. It does not establish language-model quality, factual correctness, fairness, privacy or complete-system safety.</p>
+<h3 id="sources-and-execution-status">Sources and execution status<a class="heading-anchor" href="#sources-and-execution-status" aria-label="Link to this section">#</a></h3>
+<p>Reviewed <strong>2026-10-22</strong>: <a href="https://arxiv.org/abs/1706.03762">Attention Is All You Need</a> supports the attention and causal-decoder background. The <a href="https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html">PyTorch attention documentation</a> shows why API mask polarity and dropout need explicit interpretation. All NumPy code blocks in this reference were executed together with an existing prepared interpreter. No package, model or data download was performed.</p></article>
+  </main>
+</body>
+</html>

@@ -275,6 +275,10 @@ Keep durable truth in checked-in artifacts, authoring metadata, docs, and the re
 
 ## Guided application and Codex adapter
 
+- Read [the expansion design hub](docs/expansion/README.md) before adding Kubernetes, TensorFlow, LLM, C++, or Scala/Spark content. Subject plans, pilot lessons, typed job boundaries, profile qualification, and publication gates live there.
+- Planning JSON under `docs/expansion/plans/` is design-only. Validate it with `scripts/build_journey_preview.py --check`. Never copy it into active extensions or advertise runtime support until the lesson and profile pass the documented gates.
+- Keep `journey_preview.html` generated from its template and validated plans. The `/journey-preview` route is read-only, performs no language execution, and uses browser-local preview drafts separately from real course progress. Preserve this distinction in its UI and tests.
+
 - `scripts/learning_lab.py` and `src/ds60sqlpy/lab.py` are the explicit trusted-code coding application. The original portal retains its fixed action allowlist.
 - The coding lab executes learner-submitted Python and SQL through bounded backend processes. Preserve exact Host, origin, token, request-size, output-size, and target-database checks. Do not describe this personal environment as a security sandbox for untrusted code.
 - Only explicit container mode binds the coding app inside its container namespace; Compose publishes only loopback host ports. Native mode stays loopback-only.

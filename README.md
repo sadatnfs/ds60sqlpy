@@ -19,6 +19,13 @@ The repository is designed for:
 - A one-time connected setup followed by offline study
 - Optional guidance from Codex without requiring Codex to run the lessons
 
+**Next learning journeys:** the [expansion design hub](docs/expansion/README.md)
+plans full beginner, intermediate, and advanced courses in Kubernetes, C++, deep
+learning with TensorFlow, LLM theory in Python, and Scala/Apache Spark. Each has
+a detailed pilot and stage capstones. Open `/journey-preview` in the learning
+application for an interactive teaching preview. These are planned courses;
+the existing 168 published lessons and execution profiles remain the active course.
+
 Each Python, SQL, and bridge guide is designed to stand on its own: it defines the
 mental model and vocabulary, breaks down syntax or query anatomy, provides
 runnable examples and visible checks, diagnoses common mistakes, and supplies

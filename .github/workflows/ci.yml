@@ -82,6 +82,8 @@ jobs:
         run: uv run --no-sync python scripts/build_course_guide.py --check
       - name: Check generated lesson reader drift
         run: uv run --no-sync python scripts/build_lesson_readers.py --check
+      - name: Validate expansion designs and teaching preview
+        run: uv run --no-sync python scripts/build_journey_preview.py --check
       - name: Lint
         run: uv run --no-sync ruff check src scripts tests bridge python/professional
       - name: Check formatting

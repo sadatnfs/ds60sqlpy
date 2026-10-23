@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.checks import (
     check_bridge,
@@ -59,3 +61,25 @@ def test_link_check_skips_generated_builds_but_checks_authored_docs(tmp_path: Pa
     failures = [item for item in results if item.severity == "fail" and item.path is not None]
     assert len(failures) == 1
     assert failures[0].path == "README.md"
+
+
+@pytest.mark.parametrize("fence", ["```", "~~~", "````"])
+def test_markdown_link_checker_ignores_code_but_keeps_real_links(
+    tmp_path: Path, fence: str
+) -> None:
+    source = (
+        f"{fence}cpp\n"
+        "const auto require = [&checks](bool ok, const char* message) {};\n"
+        + ("```\n[still code](not-a-link.md)\n" if fence == "````" else "")
+        + f"{fence}\n\n"
+        + "Inline `[capture](argument)` and ``[example](literal)`` are code.\n"
+        + "[Real broken link](missing.md)\n[Real valid link](exists.md)\n"
+        + "[`Code label`](second-missing.md)\n"
+    )
+    (tmp_path / "README.md").write_text(source, encoding="utf-8")
+    (tmp_path / "exists.md").write_text("# Exists\n", encoding="utf-8")
+    failures = [r for r in check_markdown_links(Catalog(tmp_path, ())) if r.code == "markdown.link"]
+    assert [item.message for item in failures] == [
+        "Broken link target: missing.md",
+        "Broken link target: second-missing.md",
+    ]

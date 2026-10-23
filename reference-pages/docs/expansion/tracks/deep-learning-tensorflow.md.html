@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Design: deep learning with TensorFlow and Keras · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course document</p>
+      <h1>Design: deep learning with TensorFlow and Keras</h1>
+      <p class="source-path">Generated from <code>docs/expansion/tracks/deep-learning-tensorflow.md</code></p>
+    </header>
+    <article class="document"><h2 id="design-deep-learning-with-tensorflow-and-keras">Design: deep learning with TensorFlow and Keras<a class="heading-anchor" href="#design-deep-learning-with-tensorflow-and-keras" aria-label="Link to this section">#</a></h2>
+<p>Status: <strong>planned</strong>, checked against active catalog baseline <code>75ec445</code> on <strong>2026-10-22</strong>. This document and its <a href="../plans/deep-learning-tensorflow.json.html">structured plan</a> are a review proposal. They add no active lesson, runtime adapter, dependency, model download, image build or completion record. The active catalog remains 168 lessons. The <a href="../samples/deep-learning-tensorflow-pilot.md.html">pilot</a> is a full teaching sample, not a registered course artifact.</p>
+<h3 id="north-star-and-the-gap-being-closed">North star and the gap being closed<a class="heading-anchor" href="#north-star-and-the-gap-being-closed" aria-label="Link to this section">#</a></h3>
+<p>A learner should be able to explain a network computation, inspect the update that changes its parameters, and defend the evidence behind a small model release. A high-level training call must not hide a malformed target, a missing gradient or a reused test set.</p>
+<p>The existing Python course contains an overview (<code>python-46</code>), a PyTorch loop (<code>python-47</code>), CNN transfer learning (<code>python-48</code>) and broad model evaluation. It does not provide a progressive TensorFlow/Keras path through tape semantics, Keras 3 state/export behavior, training-only preprocessing, mask propagation, checkpoint continuation and a release decision. These are the reasons for the 36 units below. There is no target of sixty for its own sake.</p>
+<h3 id="entry-placement-and-reuse">Entry, placement and reuse<a class="heading-anchor" href="#entry-placement-and-reuse" aria-label="Link to this section">#</a></h3>
+<p>The hard entry prerequisite is active <code>python-16</code>: its prerequisite chain already supplies Python syntax, functions, files, tests and NumPy arrays. The new track teaches its required derivative and tensor reasoning explicitly; prior calculus, GPU experience and PyTorch are not assumed.</p>
+<p>Use a short placement interview: trace a <code>(3,)</code> versus <code>(3,1)</code> subtraction, explain a mean&#x27;s denominator and run a small NumPy assertion from a fresh process. A learner missing these skills returns to <code>python-16</code> or the applicable beginner on-ramp. A learner who already knows them still predicts the shape failure before continuing.</p>
+<p>Reuse active material as targeted retrieval rather than copying whole lessons: <code>python-31</code> for probability, <code>python-32</code> and <code>python-stats-01</code> for inference and resampling, <code>python-33</code> for matrix vocabulary, <code>python-35</code> and <code>python-ml-02</code> for evaluation/leakage, and <code>python-ml-01</code> for reproducible delivery. These are explicit review links, not hidden hard prerequisites or claims of completion. The legacy catalog has a broad transitive chain, including a geospatial unit; forcing that whole chain before the first gradient experiment would obscure the entry goal. Promotion to an active track must review that prerequisite policy with the planner, not silently waive any active ID.</p>
+<h3 id="framework-platform-and-resource-decisions">Framework, platform and resource decisions<a class="heading-anchor" href="#framework-platform-and-resource-decisions" aria-label="Link to this section">#</a></h3>
+<p>As of <strong>2026-10-22</strong>, the proposed modern reference is <strong>Python 3.12, TensorFlow 2.21.0 and Keras 3 APIs with the TensorFlow backend</strong>. The official <a href="https://www.tensorflow.org/install/source">tested-build table</a> lists Python 3.10-3.13 for TensorFlow 2.21.0. That source-build table is evidence of an API and interpreter target; it is not evidence that we installed every platform wheel. Keras documents that TensorFlow 2.16 onward uses Keras 3 by default. Use <code>tf.keras</code> consistently in this track. Legacy <code>tf_keras</code>, JAX and a second backend are outside its required path. Exact compatible Keras/NumPy patches must be locked with TensorFlow during implementation.</p>
+<p>The <a href="https://www.tensorflow.org/install/pip">official installation guide</a> documents these important differences:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Platform</th>
+<th>Proposed default</th>
+<th>Implementation gate</th>
+</tr></thead><tbody>
+<tr>
+<td>Windows x86-64</td>
+<td>Native CPU is sufficient; WSL 2 Linux is an alternative</td>
+<td>Verify the exact CPU wheel/profile and a clean first run. TensorFlow 2.10 was the last native-Windows GPU release; this course does not send beginners to that old GPU stack.</td>
+</tr>
+<tr>
+<td>macOS arm64</td>
+<td>CPU on a supported macOS version</td>
+<td>Verify the exact Python 3.12 wheel and small gradients; no Metal/GPU plugin is required.</td>
+</tr>
+<tr>
+<td>macOS Intel</td>
+<td>Separate legacy CPU compatibility lane, or an explicitly prepared supported Linux CPU environment</td>
+<td>The official guide identifies TensorFlow 2.16 as the last macOS x86 line and lists a 2.16.2 Python 3.12 wheel. Do not claim the modern 2.21 profile runs natively here. The legacy lane needs its own lock and API/parity checks.</td>
+</tr>
+<tr>
+<td>Linux x86-64</td>
+<td>CPU-only environment</td>
+<td>Verify wheel/glibc/architecture compatibility and the declared small workload; CUDA is optional.</td>
+</tr>
+<tr>
+<td>Linux arm64</td>
+<td>CPU only, subject to vendor-wheel verification</td>
+<td>The guide identifies AWS-maintained ARM CPU distribution paths. Record the actual wheel/provider; a green x86 test does not prove arm64 readiness.</td>
+</tr>
+</tbody></table></div>
+<p><code>tensorflow-cpu</code> in the proposal is a <strong>logical runtime ID</strong>, not a promise that one pip distribution name or one wheel works on all these platforms. No runtime profile is activated by these files. <code>python-core</code> reuses the normal selected Python and NumPy/data setup; it does not mean that NumPy is in the standard library. Keep the TensorFlow environment separate from unrelated backend/GPU experiments. Installation is a deliberate future bootstrap, never a notebook cell or an automatic response to an import failure.</p>
+<p>The required experiments use literal arrays or authored local fixtures. The pilot has three scalar observations and one update. Later default labs use at most 512 examples, two hidden layers of at most 64 units, and 200 optimizer steps. A proposed run has a 120-second wall cap, a bounded output/artifact size and explicit stopped-budget reporting. These are design budgets to implement and measure, not benchmark results. Cold framework import is included in runtime acceptance. A slow machine may continue an authored checkpointed exercise across runs; it must not relabel a timeout as convergence.</p>
+<p>GPU/TPU work, real multi-host training, pretrained application weights, large image corpora and external serving infrastructure are optional follow-ons. Transfer learning defaults to the locally trained tiny base. No service key, private dataset or first-use network download is needed after bootstrap.</p>
+<h3 id="the-teacher-and-learner-journey">The teacher and learner journey<a class="heading-anchor" href="#the-teacher-and-learner-journey" aria-label="Link to this section">#</a></h3>
+<p>The first screen states the stage outcome, prerequisites, runtime readiness, expected budget and where saved work lives. The teacher starts with a concrete prediction, not a package installation tour. For <code>tf-008</code>, the learner commits to a gradient sign and shape explanation before executing the three-point example. The teacher then asks what the same scalar loss failed to reveal in the broadcasting counterexample.</p>
+<p>For every unit, use this sequence:</p>
+<ol>
+<li><strong>Explain:</strong> introduce its mental model and the units/axes of one example.</li>
+<li><strong>Predict:</strong> save a result, shape or failure prediction before execution.</li>
+<li><strong>Attempt:</strong> modify the learner&#x27;s own working copy and retain the actual output, parameter state and smallest failing input.</li>
+<li><strong>One hint:</strong> ask for a single next investigation, such as checking the watched forward path or the target shape. Do not open the solution first.</li>
+<li><strong>Compare:</strong> reveal the separate reasoning only after an attempt or an explicit request; preserve both the learner version and reference.</li>
+<li><strong>Retrieve and transfer:</strong> explain the mechanism without the reference and apply it to new numbers, a new reduction or a new target shape.</li>
+</ol>
+<p>Every third unit includes a five-minute closed-reference retrieval of an earlier mechanism. After each capstone, use a fresh transfer fixture and an oral explanation before recommending the next stage. Worked-example numbers are public teaching material; reproducing them is not a blind assessment. Evidence remains a learner/teacher record, never an automatic mastery claim.</p>
+<h3 id="coverage-and-pacing">Coverage and pacing<a class="heading-anchor" href="#coverage-and-pacing" aria-label="Link to this section">#</a></h3>
+<p>The structured plan is the source of IDs, direct prerequisites, runtime, objective, concrete lab, verification and concepts. The overview below is derived from it. Estimates include prediction, diagnosis and explanation; capstones span multiple sessions. Units 1-12 are beginner within this subject, 13-24 intermediate and 25-36 advanced.</p>
+<h4 id="from-arrays-to-an-auditable-update">From arrays to an auditable update<a class="heading-anchor" href="#from-arrays-to-an-auditable-update" aria-label="Link to this section">#</a></h4>
+<p>Derive and inspect a tiny learning step before relying on a training API.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Observable finish</th>
+</tr></thead><tbody>
+<tr>
+<td><code>tf-001</code></td>
+<td>A bounded deep-learning investigation</td>
+<td>75</td>
+<td>Distinguish fitting a function from evidence that it generalizes.</td>
+</tr>
+<tr>
+<td><code>tf-002</code></td>
+<td>Tensors, axes, dtypes and units</td>
+<td>90</td>
+<td>Trace each axis and unit through vector arithmetic without accidental broadcasting.</td>
+</tr>
+<tr>
+<td><code>tf-003</code></td>
+<td>Linear neurons and matrix contracts</td>
+<td>90</td>
+<td>Relate a scalar slope to a batched affine layer and verify dimensions.</td>
+</tr>
+<tr>
+<td><code>tf-004</code></td>
+<td>Loss, reduction and what a number measures</td>
+<td>90</td>
+<td>Compute loss with an explicit example denominator and distinguish it from a metric.</td>
+</tr>
+<tr>
+<td><code>tf-005</code></td>
+<td>Derivatives as local sensitivity</td>
+<td>105</td>
+<td>Check a scalar derivative against a finite difference away from a kink.</td>
+</tr>
+<tr>
+<td><code>tf-006</code></td>
+<td>The chain rule and activation boundaries</td>
+<td>105</td>
+<td>Explain how local derivatives compose and where a derivative convention matters.</td>
+</tr>
+<tr>
+<td><code>tf-007</code></td>
+<td>Eager tensors, variables and a tape</td>
+<td>105</td>
+<td>Identify which forward operations and variables are recorded for differentiation.</td>
+</tr>
+<tr>
+<td><code>tf-008</code></td>
+<td>One gradient step you can audit</td>
+<td>120</td>
+<td>Derive, execute and independently check one SGD update before using a training API.</td>
+</tr>
+<tr>
+<td><code>tf-009</code></td>
+<td>Batches and repeated updates</td>
+<td>105</td>
+<td>Distinguish examples, batches, epochs and optimizer steps.</td>
+</tr>
+<tr>
+<td><code>tf-010</code></td>
+<td>A split is part of the experiment</td>
+<td>105</td>
+<td>Detect duplicate/group leakage before reporting held-out performance.</td>
+</tr>
+<tr>
+<td><code>tf-011</code></td>
+<td>Keras models and explicit training contracts</td>
+<td>120</td>
+<td>Map compile/fit/evaluate to the explicit forward-loss-gradient-update sequence.</td>
+</tr>
+<tr>
+<td><code>tf-012</code></td>
+<td>Capstone: an auditable tiny regressor</td>
+<td>180</td>
+<td>Present a reproducible training experiment with arithmetic and held-out evidence.</td>
+</tr>
+</tbody></table></div>
+<h4 id="build-debug-and-evaluate-small-networks">Build, debug and evaluate small networks<a class="heading-anchor" href="#build-debug-and-evaluate-small-networks" aria-label="Link to this section">#</a></h4>
+<p>Choose objectives, data pipelines and architectures with explicit information and shape contracts.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Observable finish</th>
+</tr></thead><tbody>
+<tr>
+<td><code>tf-013</code></td>
+<td>Binary logits, probabilities and thresholds</td>
+<td>105</td>
+<td>Use a binary loss with the correct logit/probability convention.</td>
+</tr>
+<tr>
+<td><code>tf-014</code></td>
+<td>Multiclass and multilabel are different tasks</td>
+<td>105</td>
+<td>Choose target shape and loss from the task rather than the final layer name.</td>
+</tr>
+<tr>
+<td><code>tf-015</code></td>
+<td>A reproducible tf.data pipeline</td>
+<td>120</td>
+<td>Keep preprocessing, cardinality and order visible in a bounded dataset pipeline.</td>
+</tr>
+<tr>
+<td><code>tf-016</code></td>
+<td>Nonlinearity and initialization</td>
+<td>120</td>
+<td>Explain why an affine-only network cannot express XOR and inspect a nonlinear construction.</td>
+</tr>
+<tr>
+<td><code>tf-017</code></td>
+<td>Regularization and training/evaluation behavior</td>
+<td>105</td>
+<td>Separate regularization penalties from data loss and switch stochastic layers correctly.</td>
+</tr>
+<tr>
+<td><code>tf-018</code></td>
+<td>Normalization state and batch dependence</td>
+<td>120</td>
+<td>Distinguish BatchNorm moving statistics from per-example LayerNorm.</td>
+</tr>
+<tr>
+<td><code>tf-019</code></td>
+<td>Convolution as a local, shared computation</td>
+<td>120</td>
+<td>Trace a convolution kernel, channels and receptive field on a tiny array.</td>
+</tr>
+<tr>
+<td><code>tf-020</code></td>
+<td>Pooling and augmentation without label leakage</td>
+<td>105</td>
+<td>Apply only label-preserving training transforms and keep evaluation deterministic.</td>
+</tr>
+<tr>
+<td><code>tf-021</code></td>
+<td>Sequences, embeddings and padding</td>
+<td>120</td>
+<td>Carry a padding mask through a small sequence model and loss denominator.</td>
+</tr>
+<tr>
+<td><code>tf-022</code></td>
+<td>Attention with an explicit information boundary</td>
+<td>120</td>
+<td>Verify causal masking independently of apparent model accuracy.</td>
+</tr>
+<tr>
+<td><code>tf-023</code></td>
+<td>Debugging a custom training loop</td>
+<td>120</td>
+<td>Diagnose a silent missing update and distinguish graph tracing from tensor execution.</td>
+</tr>
+<tr>
+<td><code>tf-024</code></td>
+<td>Capstone: a small classifier with honest evaluation</td>
+<td>210</td>
+<td>Deliver a bounded classifier with a baseline, leakage checks and error analysis.</td>
+</tr>
+</tbody></table></div>
+<h4 id="reproduce-export-and-defend-a-model-release">Reproduce, export and defend a model release<a class="heading-anchor" href="#reproduce-export-and-defend-a-model-release" aria-label="Link to this section">#</a></h4>
+<p>Prove restart/inference behavior and bound reliability claims with controlled evidence.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>ID</th>
+<th>Lesson</th>
+<th>Minutes</th>
+<th>Observable finish</th>
+</tr></thead><tbody>
+<tr>
+<td><code>tf-025</code></td>
+<td>Embedding objectives and negative examples</td>
+<td>120</td>
+<td>Connect embedding similarity to the objective and negative sampling policy.</td>
+</tr>
+<tr>
+<td><code>tf-026</code></td>
+<td>Custom layers, residuals and trainable state</td>
+<td>120</td>
+<td>Create weights once and keep build/call responsibilities separate.</td>
+</tr>
+<tr>
+<td><code>tf-027</code></td>
+<td>Transfer learning without a model download</td>
+<td>120</td>
+<td>Freeze and adapt a locally trained feature extractor with an explicit gradient boundary.</td>
+</tr>
+<tr>
+<td><code>tf-028</code></td>
+<td>Restartable training and checkpoint evidence</td>
+<td>135</td>
+<td>Prove a checkpoint restores the next update rather than only the current predictions.</td>
+</tr>
+<tr>
+<td><code>tf-029</code></td>
+<td>Precision, overflow and stable objectives</td>
+<td>120</td>
+<td>Locate overflow before it becomes a misleading training conclusion.</td>
+</tr>
+<tr>
+<td><code>tf-030</code></td>
+<td>Distributed gradient semantics on one CPU</td>
+<td>120</td>
+<td>Distinguish a mean over examples from an unweighted mean over unequal shards.</td>
+</tr>
+<tr>
+<td><code>tf-031</code></td>
+<td>Graphs, retracing and measurement</td>
+<td>120</td>
+<td>Separate trace/setup cost from steady-state execution and preserve equivalent results.</td>
+</tr>
+<tr>
+<td><code>tf-032</code></td>
+<td>Saving, export and inference parity</td>
+<td>135</td>
+<td>Choose the correct Keras 3 save/export API and verify a restored prediction contract.</td>
+</tr>
+<tr>
+<td><code>tf-033</code></td>
+<td>Inference contracts and bounded batching</td>
+<td>120</td>
+<td>Validate an inference request independently of training success.</td>
+</tr>
+<tr>
+<td><code>tf-034</code></td>
+<td>Robustness, privacy and model evidence</td>
+<td>120</td>
+<td>Bound a reliability or privacy claim to the observations actually collected.</td>
+</tr>
+<tr>
+<td><code>tf-035</code></td>
+<td>Comparing models with uncertainty</td>
+<td>135</td>
+<td>Use paired evidence and keep model selection separate from final assessment.</td>
+</tr>
+<tr>
+<td><code>tf-036</code></td>
+<td>Capstone: release a small, reproducible model</td>
+<td>240</td>
+<td>Defend a local model release with reproducibility, inference and rollback evidence.</td>
+</tr>
+</tbody></table></div>
+<h3 id="capstone-review-gates">Capstone review gates<a class="heading-anchor" href="#capstone-review-gates" aria-label="Link to this section">#</a></h3>
+<h4 id="tf-012-an-auditable-tiny-regressor">tf-012: An auditable tiny regressor<a class="heading-anchor" href="#tf-012-an-auditable-tiny-regressor" aria-label="Link to this section">#</a></h4>
+<p>Build a tiny regression experiment with an independent arithmetic oracle.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>learner code and clean-run transcript</li>
+<li>training/holdout IDs and preprocessing statistics</li>
+<li>baseline comparison and an error explanation</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>The tf-008 oracle matches within its stated tolerance.</li>
+<li>Training statistics use training IDs only.</li>
+<li>Held-out results are reported separately and never used for another tuning decision.</li>
+</ul>
+<h4 id="tf-024-a-small-classifier-with-honest-evaluation">tf-024: A small classifier with honest evaluation<a class="heading-anchor" href="#tf-024-a-small-classifier-with-honest-evaluation" aria-label="Link to this section">#</a></h4>
+<p>Compare a small local classifier with a transparent baseline.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>bounded model/data configuration</li>
+<li>frozen split and confusion/group-error tables</li>
+<li>failure case and a revision justified on validation only</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Model has at most two hidden layers and uses only local fixtures.</li>
+<li>Confusion counts sum to test cardinality and groups remain disjoint.</li>
+<li>A weak model is reported honestly; no arbitrary accuracy target conceals errors.</li>
+</ul>
+<h4 id="tf-036-a-reproducible-local-model-release">tf-036: A reproducible local model release<a class="heading-anchor" href="#tf-036-a-reproducible-local-model-release" aria-label="Link to this section">#</a></h4>
+<p>Assemble a release decision from training, inference, provenance and rollback evidence.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>model and preprocessing/split manifest hashes</li>
+<li>next-step checkpoint proof</li>
+<li>fresh-process .keras/export parity transcript</li>
+<li>model card, release decision and rollback artifact</li>
+</ul>
+<p><strong>Acceptance</strong></p>
+<ul>
+<li>Schema/hash failures block recommendation.</li>
+<li>Fresh predictions agree within declared tolerance.</li>
+<li>Optimizer-state restoration reproduces the next step.</li>
+<li>The model card separates tested behavior, untested conditions and intended use.</li>
+</ul>
+<h3 id="failure-cases-the-author-must-preserve">Failure cases the author must preserve<a class="heading-anchor" href="#failure-cases-the-author-must-preserve" aria-label="Link to this section">#</a></h3>
+<p>The sequence deliberately includes wrong target broadcasting, None versus zero gradients, stale/reused gradients, too-large steps, from_logits mismatches, validation preprocessing leakage, short-batch denominators, stochastic layers left in training mode, padding loss contamination, weights-only restarts, retracing mistaken for execution, and broken export/input contracts. These failures must remain observable in authored fixtures. Do not hide them behind a generic training metric or a random accuracy target.</p>
+<h3 id="from-plan-to-an-implemented-course">From plan to an implemented course<a class="heading-anchor" href="#from-plan-to-an-implemented-course" aria-label="Link to this section">#</a></h3>
+<p>Before promotion, author real guides, learner artifacts, separate executable and explanatory solutions, and fixed local fixtures under the proposed course folder. Meet two worked examples and six distinct exercise contracts per unit. Register only completed artifacts through an additive manifest, extend the practice ledger and regenerate the catalog/library/readers. The planned IDs in this design are not valid active MCP/course CLI lesson requests yet.</p>
+<p>Prove actual runtime readiness, fresh-process execution, persistence, failure cleanup, output/time budgets and the three OS/architecture lanes. If a profile is missing, keep reading/notes available and report execution unavailable. Run reproducibility and leakage checks before calling a capstone ready. These design files deliberately do not install packages or build images.</p>
+<h3 id="design-phase-verification-record">Design-phase verification record<a class="heading-anchor" href="#design-phase-verification-record" aria-label="Link to this section">#</a></h3>
+<p>Checked <strong>2026-10-22</strong> in the original repository:</p>
+<ul>
+<li>The structured plan has 36 unique lessons, 12 per stage, and three capstones. The shared design validator accepts its references and prerequisite graph. All sample links resolve and the active catalog remains byte-identical to baseline <code>75ec445</code>, with 168 lessons.</li>
+<li>Python syntax parsing succeeds for the JSON pilot, both guide examples and all seven solution code blocks. This establishes Python syntax only.</li>
+<li>An independent standard-library <code>fractions.Fraction</code> calculation verifies the loss and gradient at zero, rate-0.1 update, rate-0.25 overshoot, fresh two-step recurrence, broadcast objective&#x27;s gradient, and every bias/held-out oracle. These checks do not import TensorFlow or substitute for framework execution.</li>
+<li><strong>TensorFlow was not installed or run.</strong> No wheel/platform acceptance, checkpoint/export behavior, memory use or elapsed-time claim is established. There was no package/model/data download or image build for this track.</li>
+</ul>
+<p>The full pilot has two worked examples, six distinct Expected/Verify contracts, three progressive hints, a retrieval transfer and a separate six-section solution reference. These are reviewed teaching samples; implementation of the other 35 lessons and runtime qualification are still future work.</p>
+<h3 id="primary-sources-and-compatibility-review">Primary sources and compatibility review<a class="heading-anchor" href="#primary-sources-and-compatibility-review" aria-label="Link to this section">#</a></h3>
+<p>Every source below was opened during the design review on <strong>2026-10-22</strong>. Version/platform guidance is time-sensitive and must be checked again when creating a runtime lock. A primary document supports a design choice; it is not proof that a particular machine executed the course.</p>
+<ul>
+<li><a href="https://www.tensorflow.org/install/pip">TensorFlow pip installation</a>, checked 2026-10-22. CPU routes, native Windows GPU boundary, macOS architecture support and disclosed platform differences.</li>
+<li><a href="https://www.tensorflow.org/install/source">TensorFlow tested build configurations</a>, checked 2026-10-22. The checked table lists TensorFlow 2.21.0 with Python 3.10-3.13; Python 3.12 is the proposed course baseline, not a performed wheel-install test.</li>
+<li><a href="https://keras.io/getting_started/">Keras getting started</a>, checked 2026-10-22. TensorFlow 2.16+ uses Keras 3 by default; choose TensorFlow backend explicitly and avoid accidental legacy tf_keras.</li>
+<li><a href="https://www.tensorflow.org/guide/autodiff">TensorFlow automatic differentiation</a>, checked 2026-10-22. GradientTape records operations, variables are watched, disconnected gradients differ from zero and integer tensors are not ordinary differentiable weights.</li>
+<li><a href="https://keras.io/guides/migrating_to_keras_3/">Keras 3 migration guide</a>, checked 2026-10-22. Keras 3 save/export differences and backend-specific migration boundaries.</li>
+<li><a href="https://www.tensorflow.org/guide/data">TensorFlow data guide</a>, checked 2026-10-22. Finite Dataset pipelines, batching and data transformations.</li>
+<li><a href="https://www.tensorflow.org/guide/checkpoint">TensorFlow checkpoint guide</a>, checked 2026-10-22. Model/optimizer checkpoint objects and restoring training state.</li>
+<li><a href="https://keras.io/examples/keras_recipes/reproducibility_recipes/">Keras reproducibility recipes</a>, checked 2026-10-22. Seed/deterministic-operation controls do not by themselves prove cross-platform bitwise equality.</li>
+</ul></article>
+  </main>
+</body>
+</html>

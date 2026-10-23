@@ -1,0 +1,1115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action 'none'"
+  >
+  <title>Cpp · DS60 reference</title>
+  <style>
+    :root {
+      --paper: #f6f2e8; --surface: #fffdf8; --ink: #17221e; --muted: #59655f;
+      --line: #d7d7ca; --navy: #173f5f; --green: #0f6b4f; --gold: #9d6515;
+      --navy-soft: #e8f0f5; --gold-soft: #f7ead2;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0; color: var(--ink); line-height: 1.65;
+      background:
+        radial-gradient(circle at 0 0, rgb(15 107 79 / 10%), transparent 24rem),
+        radial-gradient(circle at 100% 0, rgb(23 63 95 / 10%), transparent 27rem),
+        var(--paper);
+    }
+    a { color: var(--navy); text-underline-offset: .18em; }
+    a:hover { color: var(--green); }
+    :focus-visible { outline: 3px solid #efb74c; outline-offset: 3px; }
+    code, pre { font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace; }
+    code { border-radius: .35rem; padding: .08rem .3rem; background: rgb(23 63 95 / 8%); }
+    .shell { width: min(980px, calc(100% - 2rem)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--line);
+      background: rgb(246 242 232 / 94%); backdrop-filter: blur(12px);
+    }
+    .topbar .shell {
+      display: flex; min-height: 4rem; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand { color: var(--ink); font-weight: 850; text-decoration: none; }
+    .brand span {
+      display: inline-grid; width: 2.25rem; height: 2.25rem; place-items: center;
+      margin-right: .55rem; border-radius: .65rem; color: #fff;
+      background: linear-gradient(145deg, var(--navy), var(--green)); font-size: .73rem;
+    }
+    .hero { padding: clamp(2.6rem, 7vw, 5rem) 0 1.5rem; }
+    .eyebrow {
+      margin: 0 0 .45rem; color: var(--green); font-size: .78rem; font-weight: 850;
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    h1, h2, h3, h4, h5, h6 { line-height: 1.2; text-wrap: balance; }
+    h1 { max-width: 22ch; margin: .4rem 0 .8rem; font-size: clamp(2.2rem, 6vw, 4rem); letter-spacing: -.045em; }
+    h2 { margin-top: 2.5rem; font-size: 1.75rem; }
+    h3 { margin-top: 2rem; font-size: 1.4rem; }
+    .source-path { color: var(--muted); overflow-wrap: anywhere; }
+    .document {
+      margin: 0 0 4rem; border: 1px solid var(--line); border-radius: 20px;
+      padding: clamp(1rem, 4vw, 2.4rem); background: var(--surface);
+      box-shadow: 0 18px 46px rgb(28 45 37 / 10%);
+    }
+    .heading-anchor { margin-left: .4rem; color: var(--line); font-size: .75em; text-decoration: none; }
+    h2:hover .heading-anchor, h3:hover .heading-anchor { color: var(--green); }
+    pre {
+      overflow: auto; border: 1px solid #294958; border-radius: 12px; padding: 1rem;
+      color: #eaf4ef; background: #152d35; line-height: 1.55; white-space: pre;
+    }
+    pre code { padding: 0; color: inherit; background: transparent; }
+    .source-code { padding: 1rem 0; }
+    .source-code code { display: block; counter-reset: source-line; }
+    .source-code code > span { display: block; min-height: 1.55em; padding: 0 1rem 0 4.2rem; }
+    .source-code code > span::before {
+      float: left; width: 2.8rem; margin-left: -3.5rem; color: #81a0a8;
+      text-align: right; counter-increment: source-line; content: counter(source-line);
+      user-select: none;
+    }
+    .source-code code > span:target, .source-code code > span:hover { background: rgb(255 255 255 / 6%); }
+    .preview-note {
+      border-left: 4px solid var(--gold); border-radius: 0 10px 10px 0;
+      padding: .8rem 1rem; color: #594217; background: var(--gold-soft);
+    }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid var(--line); padding: .65rem; text-align: left; vertical-align: top; }
+    th { background: var(--navy-soft); }
+    blockquote {
+      margin-left: 0; border-left: 4px solid var(--navy); padding: .2rem 1rem;
+      color: var(--muted); background: var(--navy-soft);
+    }
+    .image-note {
+      display: inline-block; border: 1px dashed var(--line); border-radius: .4rem;
+      padding: .15rem .4rem; color: var(--muted);
+    }
+    @media (max-width: 620px) {
+      .topbar .shell { align-items: flex-start; flex-direction: column; padding-block: .7rem; }
+    }
+    @media print {
+      .topbar { display: none; }
+      body { background: #fff; }
+      .document { border: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="../../../../START_HERE.html#catalog"><span>DS60</span>Learning guide</a>
+      <a href="../../../../START_HERE.html#catalog">Back to lessons</a>
+    </div>
+  </header>
+  <main class="shell">
+    <header class="hero">
+      <p class="eyebrow">Rendered course artifact</p>
+      <h1>Cpp</h1>
+      <p class="source-path">Generated from <code>docs/expansion/plans/cpp.json</code></p>
+    </header>
+    <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the run controls above in the real course environment.</div><pre class="source-code language-json"><code><span>{</span>
+<span>  &quot;schema_version&quot;: 1,</span>
+<span>  &quot;status&quot;: &quot;planned&quot;,</span>
+<span>  &quot;id&quot;: &quot;cpp&quot;,</span>
+<span>  &quot;title&quot;: &quot;C++20: from first program to reliable systems&quot;,</span>
+<span>  &quot;summary&quot;: &quot;42 planned lessons teach language fundamentals, ownership, portable builds, testing, concurrency and evidence-based performance. No compiler adapter is activated.&quot;,</span>
+<span>  &quot;north_star&quot;: &quot;Build, test, explain and deliver a portable bounded C++20 program whose ownership, failure and performance claims survive independent review.&quot;,</span>
+<span>  &quot;entry_prerequisites&quot;: [],</span>
+<span>  &quot;runtime_profiles&quot;: [</span>
+<span>    &quot;reading&quot;,</span>
+<span>    &quot;cpp20&quot;</span>
+<span>  ],</span>
+<span>  &quot;stages&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;Build a reliable mental model&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Predict small examples, perform bounded changes and independently verify the first capstone.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;Compose and debug real systems&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Combine the mechanisms with explicit ownership, tests, failure cases and repeatable delivery.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;Defend engineering decisions&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Reason about concurrency or distributed control, measure tradeoffs and present a reviewed recovery/release capstone.&quot;</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;lessons&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-001&quot;,</span>
+<span>      &quot;title&quot;: &quot;Files, terminals and the compile-to-run journey&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 75,</span>
+<span>      &quot;prerequisites&quot;: [],</span>
+<span>      &quot;runtime&quot;: &quot;reading&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish source, compiler output and a running process without requiring another programming language.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Trace a supplied hello.cpp, compiler transcript and exit-status worksheet; identify which file is editable.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Label source/object/executable correctly and classify one compile error, one link error and one runtime failure.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;source&quot;,</span>
+<span>        &quot;compiler&quot;,</span>
+<span>        &quot;linker&quot;,</span>
+<span>        &quot;process&quot;,</span>
+<span>        &quot;exit status&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-002&quot;,</span>
+<span>      &quot;title&quot;: &quot;Your first C++20 target&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-001&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Build and run a small program through a named CMake target.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Configure a clean out-of-source Debug build, compile hello and run it with fixed input.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;CTest passes and stdout is exactly hello, learner; rebuilding after one source edit changes only the intended output.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;C++20&quot;,</span>
+<span>        &quot;CMake&quot;,</span>
+<span>        &quot;target&quot;,</span>
+<span>        &quot;standard output&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-003&quot;,</span>
+<span>      &quot;title&quot;: &quot;Values, types and conversions&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-002&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose an integer or floating type and predict conversions before executing.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Trace integer division, explicit conversion and a signed-versus-unsigned comparison over small fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Explain 7/2 versus 7.0/2 and reject a negative count before conversion to an unsigned size.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;types&quot;,</span>
+<span>        &quot;initialization&quot;,</span>
+<span>        &quot;conversion&quot;,</span>
+<span>        &quot;numeric limits&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-004&quot;,</span>
+<span>      &quot;title&quot;: &quot;Branches, loops and state traces&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-003&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Write a bounded loop with an explicit invariant.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement positive-value counting over empty, mixed and all-negative vectors using supplied loop scaffolding.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Counts are 0, 3 and 0 for the published fixtures; no input is modified and each loop terminates.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;control flow&quot;,</span>
+<span>        &quot;invariant&quot;,</span>
+<span>        &quot;boundary&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-005&quot;,</span>
+<span>      &quot;title&quot;: &quot;Functions and parameter contracts&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-004&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate input, output, precondition and postcondition in a function.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Extract a unit-conversion function and compare value and reference parameters.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Normal and boundary cases return the specified values; tests demonstrate which argument can change.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;functions&quot;,</span>
+<span>        &quot;parameters&quot;,</span>
+<span>        &quot;return value&quot;,</span>
+<span>        &quot;contracts&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-006&quot;,</span>
+<span>      &quot;title&quot;: &quot;Strings and trustworthy integer input&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate valid input from a failed parse without guessing from a numeric result.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Parse whole integer tokens with from_chars and reject trailing characters, overflow and empty input.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;42 succeeds; 42x, empty text and an out-of-range decimal are rejected with distinct recorded reasons.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;string&quot;,</span>
+<span>        &quot;from_chars&quot;,</span>
+<span>        &quot;error code&quot;,</span>
+<span>        &quot;full consumption&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-007&quot;,</span>
+<span>      &quot;title&quot;: &quot;Vectors and standard algorithms&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-005&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use an owning sequence and choose an algorithm with a clear order contract.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Sort a copy, find a value and accumulate a supplied integer sequence.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Original order is unchanged, sorted output is exact, and empty input has the specified identity result.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;vector&quot;,</span>
+<span>        &quot;ownership&quot;,</span>
+<span>        &quot;algorithm&quot;,</span>
+<span>        &quot;iterator&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-008&quot;,</span>
+<span>      &quot;title&quot;: &quot;Copies, const references and lifetimes&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-007&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain which object is owned and which name borrows it.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare an independent vector copy with a const reference, then draw their lifetimes.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A mutation changes the referenced original but not its copy; a returned reference to a local is rejected in review.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;value semantics&quot;,</span>
+<span>        &quot;const&quot;,</span>
+<span>        &quot;reference&quot;,</span>
+<span>        &quot;lifetime&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-009&quot;,</span>
+<span>      &quot;title&quot;: &quot;Vectors own; references borrow&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-006&quot;,</span>
+<span>        &quot;cpp-008&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Preserve ownership and perform checked access at collection boundaries.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Complete the pilot&#x27;s positive sum, replacement, checked read and filtered-copy contracts; diagnose an invalidated element reference.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Fourteen explicit checks pass, including a 10000-element sum, negative indices and immutable input; explain why a dangling read must not be executed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;RAII&quot;,</span>
+<span>        &quot;vector&quot;,</span>
+<span>        &quot;checked access&quot;,</span>
+<span>        &quot;invalidation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-010&quot;,</span>
+<span>      &quot;title&quot;: &quot;Structs, enums and meaningful states&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-005&quot;,</span>
+<span>        &quot;cpp-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Represent a record and distinguish valid states from arbitrary strings.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Model a reading with an enum status and validate its construction boundary.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Published valid records round-trip and malformed states cannot enter the accepted collection.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;struct&quot;,</span>
+<span>        &quot;enum class&quot;,</span>
+<span>        &quot;invariant&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-011&quot;,</span>
+<span>      &quot;title&quot;: &quot;Files, streams and scoped resources&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-006&quot;,</span>
+<span>        &quot;cpp-009&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Read a text fixture while distinguishing EOF, parse failure and an I/O error.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Load a small readings file with line numbers and deterministic error output.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Missing file returns a nonzero status; final newline/no-final-newline fixtures yield the same records and all streams close on exit.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;RAII&quot;,</span>
+<span>        &quot;stream&quot;,</span>
+<span>        &quot;EOF&quot;,</span>
+<span>        &quot;I/O error&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-012&quot;,</span>
+<span>      &quot;title&quot;: &quot;Headers, translation units and the linker&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-005&quot;,</span>
+<span>        &quot;cpp-010&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Distinguish a declaration from a definition and diagnose a link failure.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Split a record parser into a header and implementation, then repair a missing definition fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A clean two-translation-unit build links once, and the negative fixture fails at the link phase rather than being misreported as a runtime failure.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;translation unit&quot;,</span>
+<span>        &quot;header&quot;,</span>
+<span>        &quot;ODR&quot;,</span>
+<span>        &quot;linker&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-013&quot;,</span>
+<span>      &quot;title&quot;: &quot;Warnings and CTest as feedback&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 90,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-009&quot;,</span>
+<span>        &quot;cpp-012&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Turn behavioral contracts into tests that still run in Release builds.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Add explicit failing-return checks and target-scoped warnings; repair a supplied conversion bug.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;CTest fails before the repair and passes afterward in Debug and Release; no correctness check depends on assert remaining enabled.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;CTest&quot;,</span>
+<span>        &quot;warnings&quot;,</span>
+<span>        &quot;NDEBUG&quot;,</span>
+<span>        &quot;test failure&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-014&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 1: auditable readings CLI&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;minutes&quot;: 180,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-010&quot;,</span>
+<span>        &quot;cpp-011&quot;,</span>
+<span>        &quot;cpp-013&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Deliver a deterministic small CLI from source and explain its failure behavior.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a readings summarizer with clean input, malformed rows and an empty file.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A fresh build passes normal/error fixtures, prints exact totals, returns documented statuses and preserves the input bytes.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;CLI&quot;,</span>
+<span>        &quot;parsing&quot;,</span>
+<span>        &quot;tests&quot;,</span>
+<span>        &quot;review&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-015&quot;,</span>
+<span>      &quot;title&quot;: &quot;RAII and unique ownership&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-014&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Tie resource lifetime to an object and justify unique ownership.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Wrap a fake handle with an observable close counter and use unique_ptr where dynamic lifetime is needed.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Each acquired handle closes exactly once on normal return and exception paths; no raw owning new/delete is required.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;RAII&quot;,</span>
+<span>        &quot;unique_ptr&quot;,</span>
+<span>        &quot;destructor&quot;,</span>
+<span>        &quot;exception safety&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-016&quot;,</span>
+<span>      &quot;title&quot;: &quot;Move semantics and the rule of zero&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-015&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose copying, moving or borrowing from an ownership contract.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Instrument a value type, then replace unnecessary manual special members with standard members.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Behavioral tests remain exact and the learner states which moved-from guarantees are used instead of assuming an empty source.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;move&quot;,</span>
+<span>        &quot;rule of zero&quot;,</span>
+<span>        &quot;value category&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-017&quot;,</span>
+<span>      &quot;title&quot;: &quot;Errors as values and exceptions&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-006&quot;,</span>
+<span>        &quot;cpp-015&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Select optional, variant or an exception according to the caller&#x27;s information needs.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement an error-bearing parse result and a boundary that translates exceptions to a CLI status.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Valid data, expected invalid input and unexpected I/O failure follow three specified paths without losing context.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;optional&quot;,</span>
+<span>        &quot;variant&quot;,</span>
+<span>        &quot;exception&quot;,</span>
+<span>        &quot;error boundary&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-018&quot;,</span>
+<span>      &quot;title&quot;: &quot;Views, iterators and invalidation&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-009&quot;,</span>
+<span>        &quot;cpp-016&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use spans and string views without extending the lifetime of their storage.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Review invalidation cases and build a safe view-based scan over stable owned storage.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Tests match the owning implementation, and a lifetime diagram identifies vector reallocation and temporary-string hazards.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;span&quot;,</span>
+<span>        &quot;string_view&quot;,</span>
+<span>        &quot;iterator&quot;,</span>
+<span>        &quot;invalidation&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-019&quot;,</span>
+<span>      &quot;title&quot;: &quot;Ranges and deliberate algorithms&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate a lazy view from a materialized result and preserve ordering contracts.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compose filter/transform views and materialize a deterministic result using a qualified C++20 subset.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Expected records match a simple reference loop; the view never outlives its owner and single-pass assumptions are identified.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;ranges&quot;,</span>
+<span>        &quot;laziness&quot;,</span>
+<span>        &quot;algorithm&quot;,</span>
+<span>        &quot;projection&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-020&quot;,</span>
+<span>      &quot;title&quot;: &quot;Templates and concepts&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-005&quot;,</span>
+<span>        &quot;cpp-018&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Express a useful generic contract and read a constraint diagnostic.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Write a constrained aggregation function and compile a deliberately unsupported call in a negative fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Valid integral and floating calls pass; an invalid type fails at the intended constraint with the documented diagnostic category.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;template&quot;,</span>
+<span>        &quot;deduction&quot;,</span>
+<span>        &quot;concept&quot;,</span>
+<span>        &quot;constraint&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-021&quot;,</span>
+<span>      &quot;title&quot;: &quot;Strong types and generic value APIs&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-010&quot;,</span>
+<span>        &quot;cpp-020&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Prevent mixing semantically different values with the same representation.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Model identifiers and quantities as distinct value types with explicit operations.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;An invalid unit/identifier mix is rejected at compile time; equality and ordering obey the published laws.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;strong type&quot;,</span>
+<span>        &quot;operator&quot;,</span>
+<span>        &quot;law&quot;,</span>
+<span>        &quot;value API&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-022&quot;,</span>
+<span>      &quot;title&quot;: &quot;Portable files and serialization&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-011&quot;,</span>
+<span>        &quot;cpp-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Define a durable wire format rather than dumping object memory.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Encode a tiny versioned record with fixed widths, explicit byte order and length bounds.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A published byte fixture decodes exactly; truncated, oversized and unknown-version records fail without out-of-bounds access.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;filesystem&quot;,</span>
+<span>        &quot;serialization&quot;,</span>
+<span>        &quot;endianness&quot;,</span>
+<span>        &quot;versioning&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-023&quot;,</span>
+<span>      &quot;title&quot;: &quot;Library boundaries and ABI&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-012&quot;,</span>
+<span>        &quot;cpp-017&quot;,</span>
+<span>        &quot;cpp-021&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate source compatibility from binary compatibility.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Export a small library with public/private headers and an explicit C-compatible boundary example.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A separate consumer compiles against the public target; the learner identifies why a foreign STL object is not a portable C ABI.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;API&quot;,</span>
+<span>        &quot;ABI&quot;,</span>
+<span>        &quot;visibility&quot;,</span>
+<span>        &quot;C interface&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-024&quot;,</span>
+<span>      &quot;title&quot;: &quot;Property tests and bounded fuzzing&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-013&quot;,</span>
+<span>        &quot;cpp-017&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Test invariants across more than hand-picked examples while preserving a reproducible failure.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run a deterministic generated corpus and, where the qualified profile supports it, a time-bounded libFuzzer job.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A minimized bad fixture is retained, its seed/corpus hash reproduces it, and no fuzzer is reported passed when the tool is unavailable.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;property&quot;,</span>
+<span>        &quot;corpus&quot;,</span>
+<span>        &quot;fuzzing&quot;,</span>
+<span>        &quot;reproduction&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-025&quot;,</span>
+<span>      &quot;title&quot;: &quot;Sanitizers and observable memory failures&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-015&quot;,</span>
+<span>        &quot;cpp-018&quot;,</span>
+<span>        &quot;cpp-024&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use diagnostic builds to distinguish a memory error from a successful test run.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run curated lifetime/overflow negative fixtures under supported ASan/UBSan builds and fix the source.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Positive fixtures pass; each negative fixture exits nonzero with the expected error class and symbolized source location; supported tools are recorded.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;ASan&quot;,</span>
+<span>        &quot;UBSan&quot;,</span>
+<span>        &quot;undefined behavior&quot;,</span>
+<span>        &quot;symbolization&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-026&quot;,</span>
+<span>      &quot;title&quot;: &quot;Debugging and measurement tools&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-013&quot;,</span>
+<span>        &quot;cpp-025&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Form a hypothesis from a stack, breakpoint or profile before editing code.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Use a supplied crash and hot-loop fixture with the profile&#x27;s available debugger and profiler.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The selected frame/variable explains the failure, and an independent test distinguishes the proposed fix from the original behavior.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;debugger&quot;,</span>
+<span>        &quot;stack&quot;,</span>
+<span>        &quot;profile&quot;,</span>
+<span>        &quot;hypothesis&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-027&quot;,</span>
+<span>      &quot;title&quot;: &quot;Reproducible dependencies and delivery&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 105,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-013&quot;,</span>
+<span>        &quot;cpp-023&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Build offline from reviewed inputs and name license/version obligations.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Consume a pre-vendored tiny dependency through target-based CMake without configure-time downloads.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Disconnected configure/build/CTest succeed; dependency versions and hashes are recorded and a missing fixture fails explicitly.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;vendoring&quot;,</span>
+<span>        &quot;CMake target&quot;,</span>
+<span>        &quot;offline&quot;,</span>
+<span>        &quot;license&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-028&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 2: reusable record library&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;minutes&quot;: 240,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-022&quot;,</span>
+<span>        &quot;cpp-024&quot;,</span>
+<span>        &quot;cpp-025&quot;,</span>
+<span>        &quot;cpp-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Ship an installable library with robust parsing and an independent consumer.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Deliver a versioned record library, corpus, package configuration and a relocation test.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;A clean consumer build and all corpus/property/sanitizer checks pass; no source-tree absolute path is required after installation.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;library&quot;,</span>
+<span>        &quot;packaging&quot;,</span>
+<span>        &quot;testing&quot;,</span>
+<span>        &quot;compatibility&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-029&quot;,</span>
+<span>      &quot;title&quot;: &quot;Threads, joining and cancellation&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-028&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Make thread lifetime and cancellation ownership explicit.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a bounded task pair using jthread/stop_token when feature probes pass, with a documented joining alternative.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Every worker terminates before its owner; cancellation reaches the intended checkpoint and no unsupported native library feature is silently assumed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;thread&quot;,</span>
+<span>        &quot;jthread&quot;,</span>
+<span>        &quot;stop_token&quot;,</span>
+<span>        &quot;lifetime&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-030&quot;,</span>
+<span>      &quot;title&quot;: &quot;Mutexes, conditions and producer-consumer flow&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-029&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Protect an invariant and use a predicate while waiting.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Implement a bounded queue with condition_variable and deterministic close semantics.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;No item is lost or duplicated, queue capacity is never exceeded, and waiting threads exit after close without busy spinning.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;mutex&quot;,</span>
+<span>        &quot;condition variable&quot;,</span>
+<span>        &quot;invariant&quot;,</span>
+<span>        &quot;queue&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-031&quot;,</span>
+<span>      &quot;title&quot;: &quot;Atomics and the memory model&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-030&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Separate atomicity, ordering and visibility in an argument about a concurrent program.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Analyze published litmus cases and implement a small acquire/release handoff.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;The happens-before argument names each synchronization edge; passing stress tests is not offered as proof of every allowed execution.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;atomic&quot;,</span>
+<span>        &quot;memory order&quot;,</span>
+<span>        &quot;happens-before&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-032&quot;,</span>
+<span>      &quot;title&quot;: &quot;Bounded parallel work and failure propagation&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-017&quot;,</span>
+<span>        &quot;cpp-030&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Bound concurrency and transfer failures without abandoning owned work.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Create a fixed-size executor with a bounded queue, cancellation and a failing task fixture.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;At most the configured worker count runs; a task failure is reported, all workers join and queued jobs follow the documented cancellation policy.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;executor&quot;,</span>
+<span>        &quot;backpressure&quot;,</span>
+<span>        &quot;cancellation&quot;,</span>
+<span>        &quot;failure&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-033&quot;,</span>
+<span>      &quot;title&quot;: &quot;Testing concurrent code&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-025&quot;,</span>
+<span>        &quot;cpp-031&quot;,</span>
+<span>        &quot;cpp-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Use deterministic scheduling evidence and separate race diagnostics from timing luck.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Run controlled interleavings, stress fixtures and a separate TSan build where supported.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Exact item-accounting checks pass and the curated race fixture is detected by TSan; no ASan/TSan combination is used.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;TSan&quot;,</span>
+<span>        &quot;schedule&quot;,</span>
+<span>        &quot;stress&quot;,</span>
+<span>        &quot;race&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-034&quot;,</span>
+<span>      &quot;title&quot;: &quot;Data layout, allocation and locality&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-019&quot;,</span>
+<span>        &quot;cpp-026&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Explain a measured cost using layout and allocation evidence.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare equivalent array-of-struct and struct-of-array scans on fixed datasets.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Results are identical; allocation counts and repeated timing distributions are reported with hardware/compiler/build metadata.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;layout&quot;,</span>
+<span>        &quot;cache&quot;,</span>
+<span>        &quot;allocation&quot;,</span>
+<span>        &quot;measurement&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-035&quot;,</span>
+<span>      &quot;title&quot;: &quot;Algorithmic and representation choices&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-034&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose an optimization from growth behavior and measured constraints.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare two lookup strategies across fixed input sizes and adversarial duplicates.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Correctness matches a reference implementation and measured operation counts explain the crossover without a universal speed claim.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;complexity&quot;,</span>
+<span>        &quot;representation&quot;,</span>
+<span>        &quot;benchmark&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-036&quot;,</span>
+<span>      &quot;title&quot;: &quot;Compile-time computation with a budget&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-020&quot;,</span>
+<span>        &quot;cpp-026&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Choose runtime or compile-time work according to observable cost and constraints.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a constexpr lookup table and contrast a bounded consteval validation step.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Runtime output matches its reference, invalid constant input fails compilation, and compile time remains within the declared job budget.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;constexpr&quot;,</span>
+<span>        &quot;consteval&quot;,</span>
+<span>        &quot;compile budget&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-037&quot;,</span>
+<span>      &quot;title&quot;: &quot;Composing generic interfaces&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-019&quot;,</span>
+<span>        &quot;cpp-020&quot;,</span>
+<span>        &quot;cpp-036&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Balance reusable templates with comprehensible ownership and diagnostics.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Design a constrained range pipeline with an explicitly owned result boundary.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Several valid container inputs pass; an invalid borrow is rejected in review and an unsupported type produces the intended constraint failure.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;concepts&quot;,</span>
+<span>        &quot;ranges&quot;,</span>
+<span>        &quot;API&quot;,</span>
+<span>        &quot;ownership&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-038&quot;,</span>
+<span>      &quot;title&quot;: &quot;Numerical and integer correctness&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-017&quot;,</span>
+<span>        &quot;cpp-025&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;State a numeric error/overflow contract instead of assuming one machine result.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Compare exact integer accumulation and floating algorithms on cancellation and large-magnitude fixtures.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Integer overflow is prevented, not relied upon; floating results satisfy justified absolute/relative tolerances and a failure counterexample is explained.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;overflow&quot;,</span>
+<span>        &quot;floating point&quot;,</span>
+<span>        &quot;tolerance&quot;,</span>
+<span>        &quot;stability&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-039&quot;,</span>
+<span>      &quot;title&quot;: &quot;C interfaces and loading boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 120,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-017&quot;,</span>
+<span>        &quot;cpp-023&quot;,</span>
+<span>        &quot;cpp-027&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Define ownership and error transport across a language/binary boundary.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Expose a small C ABI with paired acquire/release operations using only reviewed fixture libraries.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;An independent consumer observes the same contract, each handle is released once and no arbitrary host library path is accepted.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;C ABI&quot;,</span>
+<span>        &quot;handle&quot;,</span>
+<span>        &quot;ownership&quot;,</span>
+<span>        &quot;plugin boundary&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-040&quot;,</span>
+<span>      &quot;title&quot;: &quot;Hardening parsers and execution boundaries&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 135,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-022&quot;,</span>
+<span>        &quot;cpp-024&quot;,</span>
+<span>        &quot;cpp-025&quot;,</span>
+<span>        &quot;cpp-032&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Treat input lengths, paths and external effects as part of correctness.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Attack a supplied parser with oversized lengths and traversal strings inside the isolated fixture workspace.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Rejected inputs produce bounded errors, no write escapes the fixture output root and process/output/time limits are tested rather than assumed.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;bounds&quot;,</span>
+<span>        &quot;path validation&quot;,</span>
+<span>        &quot;resource limits&quot;,</span>
+<span>        &quot;security&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-041&quot;,</span>
+<span>      &quot;title&quot;: &quot;Portable release and performance evidence&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 150,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-027&quot;,</span>
+<span>        &quot;cpp-033&quot;,</span>
+<span>        &quot;cpp-035&quot;,</span>
+<span>        &quot;cpp-040&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Publish a source release with precise platform and performance claims.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Produce reproducible CMake presets, offline inputs, correctness checks and per-platform evidence records.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Clean builds pass on each claimed target; unsupported sanitizer/toolchain cells stay marked pending and timing data includes uncertainty.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;portability&quot;,</span>
+<span>        &quot;release&quot;,</span>
+<span>        &quot;evidence&quot;,</span>
+<span>        &quot;reproducibility&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-042&quot;,</span>
+<span>      &quot;title&quot;: &quot;Capstone 3: bounded parallel analyzer&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;minutes&quot;: 300,</span>
+<span>      &quot;prerequisites&quot;: [</span>
+<span>        &quot;cpp-033&quot;,</span>
+<span>        &quot;cpp-035&quot;,</span>
+<span>        &quot;cpp-038&quot;,</span>
+<span>        &quot;cpp-039&quot;,</span>
+<span>        &quot;cpp-041&quot;</span>
+<span>      ],</span>
+<span>      &quot;runtime&quot;: &quot;cpp20&quot;,</span>
+<span>      &quot;outcome&quot;: &quot;Deliver a correct concurrent analyzer and defend its lifetime, failure and performance decisions.&quot;,</span>
+<span>      &quot;lab&quot;: &quot;Build a fixed-memory record analyzer with cancellation, malformed-input handling and an independent consumer.&quot;,</span>
+<span>      &quot;verification&quot;: &quot;Reference output, cancellation/failure cleanup, sanitizer profiles and repeated benchmarks pass; no throughput gain is claimed without comparable evidence.&quot;,</span>
+<span>      &quot;concepts&quot;: [</span>
+<span>        &quot;capstone&quot;,</span>
+<span>        &quot;concurrency&quot;,</span>
+<span>        &quot;performance&quot;,</span>
+<span>        &quot;review&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;capstones&quot;: [</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-capstone-01&quot;,</span>
+<span>      &quot;level&quot;: &quot;beginner&quot;,</span>
+<span>      &quot;title&quot;: &quot;Auditable readings CLI&quot;,</span>
+<span>      &quot;brief&quot;: &quot;cpp-014 combines parsing, files, meaningful records and testable CLI behavior.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;CMake project and clean source tree&quot;,</span>
+<span>        &quot;Valid/empty/malformed offline fixtures&quot;,</span>
+<span>        &quot;CTest transcript and one-page failure contract&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;Fresh Debug and Release builds pass exact output/status checks.&quot;,</span>
+<span>        &quot;Malformed input is identified by line and does not partially overwrite input.&quot;,</span>
+<span>        &quot;The learner explains a copy, a borrow and a scoped resource without opening the solution.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-capstone-02&quot;,</span>
+<span>      &quot;level&quot;: &quot;intermediate&quot;,</span>
+<span>      &quot;title&quot;: &quot;Reusable record library&quot;,</span>
+<span>      &quot;brief&quot;: &quot;cpp-028 produces a versioned installable library and an independent consumer.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;Public/private target boundary and package configuration&quot;,</span>
+<span>        &quot;Versioned byte fixtures and generated/fuzz corpus&quot;,</span>
+<span>        &quot;Supported sanitizer evidence and relocated consumer build&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;A consumer builds without source-tree absolute paths.&quot;,</span>
+<span>        &quot;Malformed/truncated/oversized fixtures fail without memory errors.&quot;,</span>
+<span>        &quot;Supported diagnostic profiles pass; unavailable native profiles are explicitly pending.&quot;</span>
+<span>      ]</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;id&quot;: &quot;cpp-capstone-03&quot;,</span>
+<span>      &quot;level&quot;: &quot;advanced&quot;,</span>
+<span>      &quot;title&quot;: &quot;Bounded parallel analyzer&quot;,</span>
+<span>      &quot;brief&quot;: &quot;cpp-042 integrates ownership, concurrent flow, failure propagation and defensible measurement.&quot;,</span>
+<span>      &quot;deliverables&quot;: [</span>
+<span>        &quot;Bounded worker/queue implementation and cancellation contract&quot;,</span>
+<span>        &quot;Reference results, malformed-input corpus and resource ledger&quot;,</span>
+<span>        &quot;Repeated benchmark distributions and portability review&quot;</span>
+<span>      ],</span>
+<span>      &quot;acceptance&quot;: [</span>
+<span>        &quot;No item is lost/duplicated and output matches the reference for every fixture.&quot;,</span>
+<span>        &quot;Task failure/cancellation join all workers and preserve completed evidence.&quot;,</span>
+<span>        &quot;Performance comparisons preserve semantics and record uncertainty, architecture and build flags.&quot;</span>
+<span>      ]</span>
+<span>    }</span>
+<span>  ],</span>
+<span>  &quot;pilot&quot;: {</span>
+<span>    &quot;lesson_id&quot;: &quot;cpp-009&quot;,</span>
+<span>    &quot;guide_path&quot;: &quot;docs/expansion/samples/cpp-pilot.md&quot;,</span>
+<span>    &quot;solution_path&quot;: &quot;docs/expansion/samples/cpp-pilot-solutions.md&quot;,</span>
+<span>    &quot;language&quot;: &quot;cpp&quot;,</span>
+<span>    &quot;code&quot;: &quot;#include &lt;iostream&gt;\n#include &lt;stdexcept&gt;\n#include &lt;vector&gt;\n\nint main() {\n    std::vector&lt;int&gt; original{4, 7, 9};\n    const auto copy = original;\n    original.at(0) = 5;\n    if (copy.at(0) != 4 || original.at(0) != 5) return 1;\n    std::cout &lt;&lt; \&quot;copy=\&quot; &lt;&lt; copy.at(0)\n              &lt;&lt; \&quot; original=\&quot; &lt;&lt; original.at(0) &lt;&lt; &#x27;\\n&#x27;;\n    try {\n        (void)original.at(original.size());\n        return 2;\n    } catch (const std::out_of_range&amp;) {\n        std::cout &lt;&lt; \&quot;bounds rejected\\n\&quot;;\n    }\n}\n&quot;,</span>
+<span>    &quot;concept&quot;: {</span>
+<span>      &quot;title&quot;: &quot;Owning values and borrowed access&quot;,</span>
+<span>      &quot;explanation&quot;: &quot;A vector owns its elements. Copying it creates independent values; a reference borrows an existing object and does not extend arbitrary element lifetimes. at() checks a boundary and reports out_of_range instead of allowing an unchecked access.&quot;,</span>
+<span>      &quot;worked_example&quot;: &quot;Copy {4,7,9}, change original.at(0) to 5, then observe copy=4 original=5. Access at(original.size()) must throw std::out_of_range and print bounds rejected.&quot;</span>
+<span>    },</span>
+<span>    &quot;prediction&quot;: {</span>
+<span>      &quot;prompt&quot;: &quot;values is {3,8}; snapshot is a copy, alias is a const reference to values, then values.at(0)=4. What are snapshot.at(0) and alias.at(0)?&quot;,</span>
+<span>      &quot;choices&quot;: [</span>
+<span>        &quot;3 and 4: the copy is independent and the alias sees the original.&quot;,</span>
+<span>        &quot;4 and 4: all vector assignments share storage.&quot;,</span>
+<span>        &quot;3 and 3: const prevents any name from changing the original.&quot;</span>
+<span>      ],</span>
+<span>      &quot;correct_index&quot;: 0,</span>
+<span>      &quot;explanation&quot;: &quot;const restricts mutation through alias; it does not freeze the original through other valid names. The vector copy owns separate elements.&quot;</span>
+<span>    },</span>
+<span>    &quot;hint_steps&quot;: [</span>
+<span>      &quot;Draw two owning vector boxes and one arrow before changing any code.&quot;,</span>
+<span>      &quot;Check a signed index before converting it to a vector size; test empty input and index==size.&quot;,</span>
+<span>      &quot;Keep an owned value or reacquire an element after a growth operation; never use a possibly invalidated reference to discover whether it dangles.&quot;</span>
+<span>    ],</span>
+<span>    &quot;transfer_prompt&quot;: &quot;Apply the same ownership/boundary reasoning to a filtered temperature batch whose output must survive later mutation of its input.&quot;,</span>
+<span>    &quot;rubric&quot;: [</span>
+<span>      &quot;Predict copy/reference behavior correctly before execution.&quot;,</span>
+<span>      &quot;Pass14normal/boundary checks without mutating read-only inputs.&quot;,</span>
+<span>      &quot;Explain an invalidated-element lifetime and two safe repair strategies.&quot;,</span>
+<span>      &quot;Use CMake/CTest with explicit nonzero failures, including Release.&quot;,</span>
+<span>      &quot;State which platform/compiler/sanitizer claims remain unverified.&quot;</span>
+<span>    ]</span>
+<span>  },</span>
+<span>  &quot;sources&quot;: [</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;C++ Core Guidelines&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Resource ownership, RAII, value semantics and interface/lifetime reasoning.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;CMake 3.28 CXX_STANDARD_REQUIRED&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://cmake.org/cmake/help/v3.28/prop_tgt/CXX_STANDARD_REQUIRED.html&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Require the selected C++ standard rather than allowing silent decay.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;CMake 3.28 CTest manual&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://cmake.org/cmake/help/v3.28/manual/ctest.1.html&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Portable test invocation and bounded test execution.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Clang C++ implementation status&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://clang.llvm.org/cxx_status.html&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;A dialect switch is not evidence that every language/library feature is available.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Clang AddressSanitizer&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://clang.llvm.org/docs/AddressSanitizer.html&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Diagnostic build/link flags, symbolization and platform boundaries.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Clang ThreadSanitizer&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://clang.llvm.org/docs/ThreadSanitizer.html&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Separate race-diagnostic profile, supported 64-bit platforms and limitations.&quot;</span>
+<span>    },</span>
+<span>    {</span>
+<span>      &quot;title&quot;: &quot;Microsoft AddressSanitizer&quot;,</span>
+<span>      &quot;url&quot;: &quot;https://learn.microsoft.com/en-us/cpp/sanitizers/asan?view=msvc-170&quot;,</span>
+<span>      &quot;checked&quot;: &quot;2026-10-22&quot;,</span>
+<span>      &quot;supports&quot;: &quot;Windows x86/x64 ASan support and incompatible compiler/link options; no implied MSVC TSan/UBSan support.&quot;</span>
+<span>    }</span>
+<span>  ]</span>
+<span>}</span>
+<span> </span></code></pre></article>
+  </main>
+</body>
+</html>
