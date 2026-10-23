@@ -105,3 +105,25 @@ and actual receipts, rather than infer completion from the number of plan entrie
 Run the grouped four-worker suite after integration. Add platform-specific CI
 or execution rows deliberately; leave untested rows unqualified. Preserve the
 historical baseline, ignored learner work and unrelated services throughout.
+
+## One classroom for future subjects
+
+Register the new subject in the existing catalog/module contract. The unified
+`classroom.py` directory derives its lessons and guide links automatically;
+`classroom.js` renders every subject through the same navigation, editor,
+reflection and result panels. Add a distinct accessible theme keyed by subject
+ID and verify both appearances. Do not create a separate language application.
+
+Use tagged code fences and explicit LaTeX for mathematical prose. The shared
+renderer typesets mathematics and highlights code without network access.
+Run the reviewed prose normalization pipeline after authoring generators,
+then the publication rendering gate before regenerating readers and packaging.
+A rendering change must preserve copied source characters and executable data.
+
+Choose the declared runtime and persistence adapter deliberately. Python/SQL
+retain their existing pads, coaching phases and context-specific run receipts;
+module runtimes retain saved jobs and recovery semantics. Future adapters need
+bounded execution and actual acceptance evidence. A syntax lexer alone is not
+an execution adapter. Navigation must save or retain recoverable drafts before
+switching lessons, languages or modes, and past-result views must never execute
+code or replace a current draft.

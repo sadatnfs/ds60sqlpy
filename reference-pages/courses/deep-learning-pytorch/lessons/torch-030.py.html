@@ -176,7 +176,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: global mean 5.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Accumulate one full-batch gradient</span></span>
-<span class="source-line"><span class="syntax-comment"># At w=0, usex 1..4, y2x, accumulate squared-loss sums forshards 1 and 3, and divide by 4.</span></span>
+<span class="source-line"><span class="syntax-comment"># At w = 0, usex 1..4, y = 2x, accumulate squared-loss sums forshards 1 and 3, and divide</span></span>
+<span class="source-line"><span class="syntax-comment"># by 4.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: gradient-30, matching full-batch mean.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Apply one accumulated update</span></span>

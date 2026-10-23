@@ -419,3 +419,35 @@ def test_reader_script_can_write_and_check_external_output(tmp_path: Path) -> No
     assert main(["--output-dir", str(output), "--check"]) == 0
     assert (output / "lesson-pages" / "python-01.html").is_file()
     assert (output / "reference-pages" / "docs" / "setup" / "windows.md.html").is_file()
+
+
+def test_reference_build_reuses_one_validated_closure_for_all_links(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ds60sqlpy import lesson_reader
+
+    monkeypatch.setattr(lesson_reader, "COURSE_GUIDE_REFERENCE_PATHS", ())
+    folder = tmp_path / "courses" / "fixture"
+    folder.mkdir(parents=True)
+    (folder / "README.md").write_text("# Fixture\n\n[Related](reference.md)\n", encoding="utf-8")
+    (folder / "reference.md").write_text("# Related\n\n[Back](README.md)\n", encoding="utf-8")
+    catalog = Catalog(
+        tmp_path, [], tracks={"fixture": {"title": "Fixture", "plan": "courses/fixture/README.md"}}
+    )
+    discover = lesson_reader.reference_source_paths
+    calls = 0
+
+    def count_discovery(selected: Catalog) -> tuple[Path, ...]:
+        nonlocal calls
+        calls += 1
+        return discover(selected)
+
+    monkeypatch.setattr(lesson_reader, "reference_source_paths", count_discovery)
+    pages = build_reference_files(catalog)
+    assert calls == 1
+    assert set(pages) == {
+        "reference-pages/courses/fixture/README.md.html",
+        "reference-pages/courses/fixture/reference.md.html",
+    }
+    assert 'href="reference.md.html"' in pages["reference-pages/courses/fixture/README.md.html"]
+    assert 'href="README.md.html"' in pages["reference-pages/courses/fixture/reference.md.html"]

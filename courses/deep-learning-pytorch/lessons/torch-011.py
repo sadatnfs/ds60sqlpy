@@ -13,7 +13,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: three zero outputs; weight unchanged.
 
 # Exercise 3: Run one explicit loop step
-# Use SGD.1 and mean squared error, clearing gradients before backward.
+# Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.
 # Expected: weight 28/15; buffer still 0.
 
 # Exercise 4: Move dtype through registered state

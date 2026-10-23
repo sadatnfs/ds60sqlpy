@@ -6,6 +6,7 @@ from pathlib import Path
 from xml.etree import ElementTree
 
 import pytest
+from pygments.token import Token
 
 from ds60sqlpy.lesson_reader import (
     LinkResolver,
@@ -14,7 +15,12 @@ from ds60sqlpy.lesson_reader import (
     render_inline,
     render_markdown,
 )
-from ds60sqlpy.reader_content import highlight_source, render_code_block, rich_content_styles
+from ds60sqlpy.reader_content import (
+    _token_class,
+    highlight_source,
+    render_code_block,
+    rich_content_styles,
+)
 from ds60sqlpy.reader_math import render_math
 
 
@@ -258,3 +264,18 @@ def test_static_html_cleanup_keeps_code_line_ending_whitespace(language: str) ->
     cleaned = _clean_generated_html(rendered).removesuffix("\n")
     assert "".join(parse(cleaned).text) == source
     assert all(line == line.rstrip() for line in cleaned.splitlines())
+
+
+def test_token_classification_cache_is_bounded_and_preserves_subtypes() -> None:
+    _token_class.cache_clear()
+    try:
+        for number in range(512):
+            token = type(Token.Comment)(("Comment", f"Fixture{number}"))
+            assert _token_class(token) == "comment"
+        assert _token_class.cache_info().currsize <= 256
+        assert _token_class(Token.Keyword) == "keyword"
+        previous_hits = _token_class.cache_info().hits
+        assert _token_class(Token.Keyword) == "keyword"
+        assert _token_class.cache_info().hits == previous_hits + 1
+    finally:
+        _token_class.cache_clear()

@@ -4,7 +4,9 @@
 
 Maintain a beginner-friendly, offline-after-setup curriculum spanning data
 science, statistics, machine learning, languages and systems. The primary
-application is the Docker browser classroom on Windows, macOS and Linux. Accuracy and reproducibility matter more than preserving the
+application is one Docker browser classroom at `/classroom` on Windows, macOS
+and Linux. Python, PostgreSQL, bridge, languages, systems and the tutorial books
+share its subject chooser and workspace. Accuracy and reproducibility matter more than preserving the
 historical “60-day” shape.
 
 ## Start here
@@ -315,7 +317,9 @@ budget. Do not start unrelated containers or change the engine configuration.
 
 - Read [the expansion design hub](docs/expansion/README.md) before adding Kubernetes, TensorFlow, LLM, C++, or Scala/Spark content. Subject plans, pilot lessons, typed job boundaries, profile qualification, and publication gates live there.
 - Planning JSON under `docs/expansion/plans/` is design-only. Validate it with `scripts/build_journey_preview.py --check`. Never copy it into active extensions or advertise runtime support until the lesson and profile pass the documented gates.
-- Keep `journey_preview.html` generated from its template and validated plans. The `/journey-preview` route is read-only, performs no language execution, and uses browser-local preview drafts separately from real course progress. Preserve this distinction in its UI and tests.
+- The journey preview generator and templates are developer-only design archives.
+  `/journey-preview`, `/learn` and `/journeys` are compatibility aliases for the
+  same `/classroom` shell. Do not restore separate learner interfaces.
 
 - `scripts/learning_lab.py` and `src/ds60sqlpy/lab.py` are the explicit trusted-code coding application. The original portal retains its fixed action allowlist.
 - The coding lab executes learner-submitted Python and SQL through bounded backend processes. Preserve exact Host, origin, token, request-size, output-size, and target-database checks. Do not describe this personal environment as a security sandbox for untrusted code.
@@ -325,3 +329,32 @@ budget. Do not start unrelated containers or change the engine configuration.
 - `scripts/build_app.py` bundles only an allowlisted course payload. Never package learner pads, progress, credentials, Git history, caches, or a developer environment. Existing workspaces are preserved.
 - New lessons use the separate `curriculum/practice_expansion.json`; the July historical baseline stays unchanged. Both structural and depth audits apply.
 - Run the app, backend, and MCP tests after changes. A native build validates only its actual OS and architecture. Docker configuration or CI definitions do not prove that an image was built or started.
+
+## Unified presentation and saved work
+
+- `src/ds60sqlpy/classroom.py` derives the combined subject directory from both
+  canonical catalogs. Add metadata through the existing catalog or module
+  contract; never maintain a second hand-written lesson list in the UI.
+- `assets/classroom.html`, `classroom.css` and `classroom.js` own the single
+  learner interface. Subject themes, keyboard navigation, save barriers and
+  language/mode-specific drafts must remain coherent. The two superseded UI
+  templates are removed. Run `node scripts/check_classroom_ui.mjs` after changes.
+- `lesson_reader.py`, `reader_math.py` and `reader_content.py` provide shared
+  offline math and syntax rendering for the app and static readers. Use explicit
+  LaTeX delimiters and tagged code fences. Never reinterpret code as equations,
+  enable raw active HTML, load a CDN, or edit executable examples to fix typography.
+- Run `python scripts/normalize_lesson_prose.py --write` after subject authoring
+  generators and before HTML generation. Its reviewed registries are durable
+  inputs; ambiguous words require editorial review, never automatic splitting.
+  `python scripts/check_content_rendering.py` rejects unsupported published math.
+- `ClassroomRunStore` retains immutable Python/SQL run receipts beneath the
+  learning-state directory. It complements saved source versions and the module
+  job store. A completed execution and a failed receipt write are distinct
+  outcomes. Never replay code automatically to repair storage or reconnect.
+- Preserve existing lesson IDs, old saved pads, coaching phases, module drafts,
+  job receipts and all named Docker learning volumes. Code/result history is
+  scoped by lesson, language and SQL mode. Viewing past results must not replace
+  the current editor or claim automatic mastery.
+- `make classroom`, `classroom-build`, `classroom-start` and `classroom-stop`
+  delegate to the shared `./classroom` entrypoint. Keep build, readiness and
+  published-port logic in that single implementation.

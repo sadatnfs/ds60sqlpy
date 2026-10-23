@@ -9,7 +9,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: detached loss requires_grad False; backward raises RuntimeError.
 
 # Exercise 2: Repair two exact updates
-# Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+# Usex 1, 2, 3, y = 2x, w = 0 and two SGD.1 steps with gradient clearing.
 # Expected: weights 28/15 then 448/225.
 
 # Exercise 3: Inspect norm clipping
@@ -17,7 +17,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: returned norm 5; new gradient approximately.6, .8.
 
 # Exercise 4: Apply the clipped update
-# Use SGD.1 after clipping and inspect the parameter.
+# Use SGD with rate 0.1 after clipping and inspect the parameter.
 # Expected: approximately-.06, -.08.
 
 # Exercise 5: Reject nonfinite gradient norms

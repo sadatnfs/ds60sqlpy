@@ -318,9 +318,13 @@ def test_real_stdio_discovers_modules_without_network_processes_or_progress(tmp_
                 "PYTHONDONTWRITEBYTECODE": "1",
             },
         )
+        # The first tools/list validates every authored module path in the real
+        # corpus. Four parallel workers can make its filesystem traversal exceed
+        # 20 seconds. Keep a bounded protocol deadline without relaxing any audit
+        # restriction on network, child processes, or learner-state access.
         async with (
             stdio_client(params) as (read, write),
-            ClientSession(read, write, read_timeout_seconds=20) as session,
+            ClientSession(read, write, read_timeout_seconds=60) as session,
         ):
             await session.initialize()
             names = {tool.name for tool in (await session.list_tools()).tools}

@@ -5,8 +5,8 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Freeze the scalar experiment
-# Use train x1, 2, 3 and holdout 4, 5 with target 2 x and disjoint IDs.
-# Expected: 3training and 2 holdout records.
+# Use train x = [1, 2, 3] and holdout 4, 5 with target 2 x and disjoint IDs.
+# Expected: 3 training and 2 holdout records.
 
 # Exercise 2: Train within a declared budget
 # Zero-initialize float64 Linear and run 30 SGD.01 updates.

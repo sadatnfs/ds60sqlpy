@@ -13,7 +13,8 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: batch sizes 2, 2, 1.
 
 # Exercise 3: Run three independent updates
-# Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.
+# Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each
+# batch.
 # Expected: three finite distinct weights.
 
 # Exercise 4: Expose accidental accumulation

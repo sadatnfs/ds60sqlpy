@@ -2149,7 +2149,12 @@ def build_reference_files(catalog: Catalog) -> dict[str, str]:
     """Return every deterministic rendered reference path and document."""
 
     sources = reference_source_paths(catalog)
-    targets = rendered_targets(catalog)
+    # The closure above already validates every source. Reuse it for links
+    # instead of walking the entire authored corpus a second time.
+    targets = artifact_targets(catalog)
+    for source in sources:
+        relative = source.relative_to(catalog.repo_root)
+        targets[source] = ReaderTarget(reference_relative_path(relative), "")
     return {
         reference_relative_path(source.relative_to(catalog.repo_root)): _clean_generated_html(
             build_reference_html(

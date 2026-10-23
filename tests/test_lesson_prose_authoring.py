@@ -57,26 +57,25 @@ def test_display_metadata_changes_do_not_mutate_identity_or_execution(tmp_path: 
         json.dumps({"repairs": {"andcorrection": "and correction"}})
     )
     path = tmp_path / "courses/example/track.json"
+    original_lesson: dict[str, str | list[str]] = {
+        "id": "andcorrection",
+        "source_path": "andcorrection.py",
+        "runtime": "python-core",
+        "prerequisites": ["andcorrection"],
+        "title": "Trace andcorrection",
+        "lab": "Explain andcorrection.",
+    }
     original = {
         "id": "andcorrection",
         "summary": "Learn andcorrection.",
-        "lessons": [
-            {
-                "id": "andcorrection",
-                "source_path": "andcorrection.py",
-                "runtime": "python-core",
-                "prerequisites": ["andcorrection"],
-                "title": "Trace andcorrection",
-                "lab": "Explain andcorrection.",
-            }
-        ],
+        "lessons": [original_lesson],
     }
     path.write_text(json.dumps(original))
     report = PIPELINE.run(tmp_path, True)
     updated = json.loads(path.read_text())
     assert updated["id"] == original["id"]
     for key in ("id", "source_path", "runtime", "prerequisites"):
-        assert updated["lessons"][0][key] == original["lessons"][0][key]
+        assert updated["lessons"][0][key] == original_lesson[key]
     assert updated["summary"] == "Learn and correction."
     assert report["protected_code_unchanged"]
     assert PIPELINE.run(tmp_path, False)["files_changed"] == 0

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -63,8 +64,33 @@ def _canonical_field(label: str) -> str:
     return "verify"
 
 
+_PROSE_REPAIRS = json.loads((REPO_ROOT / "curriculum/prose-repairs.json").read_text())["repairs"]
+# SQL files retain their exact executable bytes, including historical comments.
+# Only approved alphabetic joins may gain spaces during this prose comparison.
+# Numbers, operators, identifiers with underscores and word spelling stay strict.
+_CONTRACT_SPACING = {
+    source: target
+    for source, target in _PROSE_REPAIRS.items()
+    if source.isalpha() and re.sub(r"\s+", "", target) == source
+}
+_CONTRACT_SPACING_PATTERN = re.compile(
+    r"\b(?:" + "|".join(re.escape(word) for word in _CONTRACT_SPACING) + r")\b"
+)
+
+
 def _normalize_contract(body: str) -> str:
+    body = _CONTRACT_SPACING_PATTERN.sub(lambda match: _CONTRACT_SPACING[match.group()], body)
     return re.sub(r"\s+", " ", body).strip()
+
+
+def test_contract_typography_does_not_relax_numbers_operators_or_identifiers() -> None:
+    assert _normalize_contract("As ofJanuary 10, compare values andNULL.") == (
+        "As of January 10, compare values and NULL."
+    )
+    assert _normalize_contract("Return 10 rows.") != _normalize_contract("Return 100 rows.")
+    assert _normalize_contract("amount > 0") != _normalize_contract("amount >= 0")
+    assert _normalize_contract("user_id") != _normalize_contract("user id")
+    assert _normalize_contract("NULL") != _normalize_contract("0")
 
 
 def _exercise_section(source: str, *, markdown: bool) -> str:

@@ -9,7 +9,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: A1/2errors; B0/1.
 
 # Exercise 2: Expose repeated identities
-# Repeatcorrectrecordc five times and compare row count with unique IDs.
+# Repeat correct record c five times and compare row count with unique IDs.
 # Expected: 8rows but 3 unique IDs.
 
 # Exercise 3: Trace a controlled perturbation

@@ -6,7 +6,8 @@ import vm from "node:vm";
 const filename = process.argv[2] || "src/ds60sqlpy/assets/classroom.js";
 const script = fs.readFileSync(filename, "utf8");
 class Element {
-  constructor() {
+  constructor(tag = "div") {
+    this.tagName = tag.toUpperCase();
     this.value = "";
     this.textContent = "";
     this.hidden = false;
@@ -115,7 +116,7 @@ function environment() {
     },
     document: {
       getElementById: element,
-      createElement: () => new Element(),
+      createElement: (tag) => new Element(tag),
       addEventListener: () => {},
       body: element("body"),
       documentElement: element("documentElement"),
@@ -1371,11 +1372,17 @@ await test("late syntax preview responses never paint a newer draft", async () =
   e.element("source").value = "second";
   const second = e.run("renderSyntaxPreview()");
   const latest = e.next("classroom-highlight");
-  e.resolve(latest, { html: "SECOND" });
+  const coloredSource =
+    '<span class="syntax-keyword">print</span>("second")\n    <span class="syntax-number">2</span>\n';
+  e.resolve(latest, { html: coloredSource });
   await second;
   e.resolve(old, { html: "FIRST" });
   await first;
-  assert.equal(e.element("syntax-code").innerHTML, "SECOND");
+  const block = e.element("syntax-code").children[0];
+  assert.equal(block.tagName, "PRE");
+  assert.equal(block.className, "highlighted-code");
+  assert.equal(block.children[0].tagName, "CODE");
+  assert.equal(block.children[0].innerHTML, coloredSource);
   assert.equal(e.element("source").value, "second");
 });
 await test("syntax previews reject responses belonging to another language workspace", async () => {
@@ -1918,10 +1925,21 @@ await test("choosing an earlier receipt shows its recorded source without replac
   await clicked;
   assert.equal(e.element("source").value, "newer code");
   assert.equal(
-    e.element("receipt-source").children[0].textContent,
+    e.element("receipt-source").children[0].children[0].textContent,
     'print("old code")\n',
   );
   assert.equal(e.element("output").textContent, "earlier output");
+  const sourceBlock = e.element("receipt-source").children[0];
+  const coloredSource =
+    '<span class="syntax-builtin">print</span>("old code")\n';
+  e.resolve(e.next("classroom-highlight"), { html: coloredSource });
+  await settle();
+  assert.equal(e.element("receipt-source").children[0], sourceBlock);
+  assert.equal(sourceBlock.tagName, "PRE");
+  assert.equal(sourceBlock.className, "highlighted-code");
+  assert.equal(sourceBlock.children[0].tagName, "CODE");
+  assert.equal(sourceBlock.children[0].innerHTML, coloredSource);
+  assert.equal(e.element("source").value, "newer code");
   assert.equal(
     e.requests.some((request) =>
       ["run", "run-lesson", "module-run", "save-pad"].includes(

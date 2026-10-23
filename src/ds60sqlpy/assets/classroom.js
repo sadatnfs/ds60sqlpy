@@ -1400,6 +1400,14 @@ async function poll() {
 }
 
 const legacyReceipts = new Map();
+function highlightedSourceBlock(source, highlightedHtml = null) {
+  const pre = node("pre", undefined, "highlighted-code"),
+    code = node("code");
+  if (highlightedHtml === null) code.textContent = source;
+  else code.innerHTML = highlightedHtml;
+  pre.append(code);
+  return { pre, code };
+}
 function showLegacyResult(result, context, source) {
   legacyReceipts.set(context.key, { result, context, source });
   if (workspaceKey() !== context.key) {
@@ -1427,12 +1435,12 @@ function showLegacyResult(result, context, source) {
           " No automatic retry was started."
         : "A durable receipt was not confirmed for this run. Keep a copy of any output you need.";
   $("receipt-source-details").hidden = false;
-  const submitted = node("pre", source, "result-log");
-  $("receipt-source").replaceChildren(submitted);
+  const submitted = highlightedSourceBlock(source);
+  $("receipt-source").replaceChildren(submitted.pre);
   classroom("classroom-highlight", { source, language: context.language })
     .then((data) => {
       if (workspaceKey() === context.key && resultRevision === displayRevision)
-        $("receipt-source").innerHTML = data.html;
+        submitted.code.innerHTML = data.html;
     })
     .catch(() => {});
   $("job-status").textContent =
@@ -2309,7 +2317,9 @@ async function renderSyntaxPreview() {
       $("source").value !== source
     )
       return;
-    $("syntax-code").innerHTML = result.html;
+    $("syntax-code").replaceChildren(
+      highlightedSourceBlock(source, result.html).pre,
+    );
     $("preview-status").textContent =
       "Read-only syntax preview. Edit in the coding pad above.";
   } catch (error) {

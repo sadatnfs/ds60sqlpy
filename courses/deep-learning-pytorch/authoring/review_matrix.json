@@ -243,7 +243,7 @@
       "status": "reviewed_and_deepened",
       "findings": [
         "The decision section was empty.",
-        "Class-axis andtarget contracts needed a spatial/batched shape table.",
+        "Class-axis and target contracts needed a spatial/batched shape table.",
         "Cross-entropy gradients,soft targets andweighted denominators needed clearer boundaries."
       ],
       "paired_guide_reviewed": "tf-014",
@@ -270,7 +270,7 @@
       "status": "reviewed_and_deepened",
       "findings": [
         "The decision section was empty.",
-        "Sampler state,collation masks andtail populations needed distinct contracts.",
+        "Sampler state,collation masks and tail populations needed distinct contracts.",
         "The collator silently truncated floating token IDs into a Long tensor."
       ],
       "paired_guide_reviewed": "tf-015",

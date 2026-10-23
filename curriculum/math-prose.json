@@ -10310,6 +10310,14 @@
     {
       "source": "R W_d^T",
       "latex": "RW_d^{\\mathsf T}"
+    },
+    {
+      "source": "w = 0",
+      "latex": "w=0",
+      "paths": [
+        "courses/deep-learning-pytorch/guides/torch-030.md",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ]
     }
   ]
 }

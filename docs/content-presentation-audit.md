@@ -57,14 +57,20 @@ The final source-preservation audit compared the current content with the
 previously delivered `DS60LearningLab-0.3.0-One-Command-Classroom.zip`, whose
 SHA-256 is
 `6b5a62f502d810dace0ceefb9ecbedfd2a5f850d52037fd55b439c98034a22cb`.
-It verified the following protected surfaces without drift:
+The initial presentation checkpoint found no protected drift. Final portable-generator
+reconciliation then deliberately updated comments in twelve PyTorch learner
+scaffolds. Each Python AST remains identical; executable reference programs and
+worked-example fences retain their exact historical hashes. The final scope
+below distinguishes those approved byte changes from the earlier checkpoint:
 
 | Surface | Compared |
 | --- | ---: |
 | Markdown sources | 1,320 |
 | Existing code blocks | 5,895 |
 | Existing inline code spans | 40,427 |
-| Executable program files, byte for byte | 1,178 |
+| Program files compared | 1,178 |
+| Byte-identical program files | 1,166 |
+| Approved comment-only PyTorch learner changes, identical ASTs | 12 |
 | Notebook code cells, outputs and metadata | 122 notebooks |
 | Authoring Python executable structure and non-prose strings | 75 files |
 
@@ -72,7 +78,12 @@ The stateful scanner independently recognized 121 indented code blocks and
 99 multiline inline-code spans in that earlier package. It also has regression
 tests for longer closing fences and unterminated fences through end of file.
 These cases remain protected even when a simple triple-backtick regular
-expression would miss them. New code annotations in prose do not replace or
+expression would miss them. The twelve learner-comment changes are recorded
+as post-proofreading generator reconciliation, not as zero byte drift.
+Historical runtime receipts remain unchanged. The explicit
+`curriculum/presentation-parity.json` bindings connect revised Markdown and
+display metadata to historical identities and unchanged code-block/structural
+hashes; these bindings do not claim a new runtime execution. New code annotations in prose do not replace or
 modify an existing executable example.
 
 ## Validation and limits

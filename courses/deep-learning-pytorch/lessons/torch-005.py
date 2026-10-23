@@ -13,7 +13,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: all agree within 1e-10.
 
 # Exercise 3: Separate gradient from update
-# Use learning rate.1 and gradient-4 from w0.
+# Use learning rate 0.1 and gradient-4 from w = 0.
 # Expected: new w=0.4, not-4.
 
 # Exercise 4: Inspect a stationary point

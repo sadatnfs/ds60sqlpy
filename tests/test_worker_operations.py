@@ -171,17 +171,28 @@ def test_fixed_cpp_compile_failure_cannot_run_stale_binary(tmp_path: Path) -> No
 def test_real_cpp_reference_and_typed_ownership_checks(tmp_path: Path) -> None:
     if not (shutil.which("g++") or shutil.which("clang++")):
         pytest.skip("No preinstalled C++ compiler; no installation is attempted.")
+
+    def verify(directory: Path, source: str) -> Any:
+        # Each typed harness compiles two translation units and links a program.
+        # Use the existing 60-second classroom deadline under parallel host load:
+        # this assertion concerns ownership semantics, not compiler throughput.
+        phases: list[str] = []
+        result = execute_operation(
+            "cpp20", source, directory, 60, threading.Event(), phases.append, "cpp-ownership-v1"
+        )
+        assert phases == ["compiling", "compiling", "compiling", "running", "verifying"], (
+            result.output
+        )
+        return result
+
     source = (ROOT / "courses/cpp/solutions/cpp-009_solution.cpp").read_text()
-    result = execute(
-        tmp_path / "reference", source, profile="cpp20", verification="cpp-ownership-v1"
-    )
+    result = verify(tmp_path / "reference", source)
     assert result.status == "succeeded", result.output
     assert len(result.checks) == 14 and all(check["passed"] for check in result.checks)
     learner = (ROOT / "courses/cpp/lessons/cpp-009.cpp").read_text()
-    failed = execute(
-        tmp_path / "learner", learner, profile="cpp20", verification="cpp-ownership-v1"
-    )
-    assert failed.status == "failed" and any(not check["passed"] for check in failed.checks)
+    failed = verify(tmp_path / "learner", learner)
+    assert failed.status == "failed", failed.output
+    assert any(not check["passed"] for check in failed.checks)
 
 
 def test_attention_reference_against_numeric_and_negative_oracles(tmp_path: Path) -> None:

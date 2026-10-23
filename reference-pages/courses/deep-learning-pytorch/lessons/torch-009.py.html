@@ -176,7 +176,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: batch sizes 2, 2, 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Run three independent updates</span></span>
-<span class="source-line"><span class="syntax-comment"># Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.</span></span>
+<span class="source-line"><span class="syntax-comment"># Train x = 1..6, y = 2x, w = 0 with batch size 2, rate 0.01, clearing gradients each</span></span>
+<span class="source-line"><span class="syntax-comment"># batch.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: three finite distinct weights.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Expose accidental accumulation</span></span>

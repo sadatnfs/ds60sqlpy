@@ -254,6 +254,14 @@ def test_portable_authoring_recreates_all_published_artifacts(tmp_path: Path) ->
         (destination / directory).mkdir(parents=True)
     for filename in ["track.json", "lessons.json", "authoring/review_runtime_evidence.json"]:
         shutil.copyfile(BASE / filename, destination / filename)
+    # Reproduce the published authoring pipeline, including reviewed prose/math
+    # normalization, in the isolated root rather than copying published output.
+    (tmp_path / "scripts").mkdir()
+    (tmp_path / "curriculum").mkdir()
+    for filename in ("normalize_lesson_prose.py", "normalize_math_prose.py"):
+        shutil.copyfile(ROOT / "scripts" / filename, tmp_path / "scripts" / filename)
+    for filename in ("prose-repairs.json", "math-prose.json"):
+        shutil.copyfile(ROOT / "curriculum" / filename, tmp_path / "curriculum" / filename)
     program = "\n".join(
         [
             "import sys",
@@ -276,6 +284,14 @@ def test_portable_authoring_recreates_all_published_artifacts(tmp_path: Path) ->
         check=False,
     )
     assert completed.returncode == 0, completed.stderr
+    normalized = subprocess.run(
+        [sys.executable, "-B", str(tmp_path / "scripts/normalize_lesson_prose.py"), "--write"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert normalized.returncode == 0, normalized.stderr
     files = ["track.json", "lessons.json", "authoring/review_matrix.json"]
     for entry in ENTRIES:
         files.extend(
@@ -334,6 +350,10 @@ def test_review_runtime_evidence_matches_current_references_and_worked_programs(
         "torch-015",
         "torch-016",
     }
+    from scripts.normalize_math_prose import protected_code
+
+    presentation = json.loads((ROOT / "curriculum/presentation-parity.json").read_text())
+    bindings = {row["path"]: row for row in presentation["records"]}
     for record in evidence:
         assert record["status"] == "succeeded" and record["runtime_profile"] == "llm-torch-cpu"
         assert record["image_id"].startswith("sha256:")
@@ -341,7 +361,19 @@ def test_review_runtime_evidence_matches_current_references_and_worked_programs(
             source = (ROOT / record["source_path"]).read_bytes()
         else:
             guide = (ROOT / record["guide_path"]).read_bytes()
-            assert hashlib.sha256(guide).hexdigest() == record["guide_sha256"]
+            guide_digest = hashlib.sha256(guide).hexdigest()
+            if record["guide_path"] in bindings:
+                # The runtime receipt keeps the historical guide hash. A
+                # separate typography binding proves current prose/code parity.
+                binding = bindings[record["guide_path"]]
+                assert binding["historical_sha256"] == record["guide_sha256"]
+                assert guide_digest == binding["presentation_sha256"]
+                assert [
+                    hashlib.sha256(block.encode()).hexdigest()
+                    for block in protected_code(guide.decode())
+                ] == binding["code_block_sha256"]
+            else:
+                assert guide_digest == record["guide_sha256"]
             section = guide.decode().split("## Worked example / walkthrough\n", 1)[1]
             section = section.split("## Prediction before your attempt", 1)[0]
             blocks = re.findall(r"```python\n(.*?)\n```", section, re.DOTALL)

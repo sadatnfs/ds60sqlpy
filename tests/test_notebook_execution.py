@@ -267,6 +267,26 @@ def test_inline_matplotlib_uses_headless_shell_support(tmp_path: Path) -> None:
     pytest.importorskip("IPython")
     if importlib.util.find_spec("matplotlib_inline") is None:
         pytest.skip("The selected test profile lacks optional inline plotting.")
+    # This test exercises headless inline-shell semantics, not discovery of
+    # every system font. Prepare the actual isolated cache in its own bounded
+    # setup phase; the notebook child still retains its 25-second deadline.
+    cache = tmp_path / "matplotlib-cache"
+    prepared = subprocess.run(
+        [sys.executable, "-c", "import matplotlib.font_manager"],
+        cwd=tmp_path,
+        env={
+            **os.environ,
+            "MPLBACKEND": "Agg",
+            "MPLCONFIGDIR": str(cache),
+            "PYTHONDONTWRITEBYTECODE": "1",
+        },
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert prepared.returncode == 0, prepared.stdout + prepared.stderr
+    cache_files = {path.name: path.read_bytes() for path in cache.glob("fontlist-v*.json")}
+    assert cache_files, "Matplotlib setup did not write its isolated font cache."
     result, _ = child(
         tmp_path,
         "# %%\n%matplotlib inline\nimport matplotlib.pyplot as plt\n"
@@ -275,6 +295,7 @@ def test_inline_matplotlib_uses_headless_shell_support(tmp_path: Path) -> None:
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "inline succeeded" in result.stdout
+    assert {path.name: path.read_bytes() for path in cache.glob("fontlist-v*.json")} == cache_files
 
 
 def test_interactive_gui_event_loops_fail_with_a_clear_boundary(tmp_path: Path) -> None:

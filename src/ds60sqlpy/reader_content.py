@@ -52,6 +52,7 @@ def normalize_language(language: str) -> str:
     return _ALIASES.get(value, value)
 
 
+@lru_cache(maxsize=256)
 def _token_class(token: _TokenType) -> str:
     for family, name in (
         (Token.Comment, "comment"),

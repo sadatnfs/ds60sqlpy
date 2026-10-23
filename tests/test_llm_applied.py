@@ -12,6 +12,7 @@ import subprocess
 import sys
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 import numpy as np
 import pytest
@@ -359,13 +360,47 @@ def test_optional_reading_has_a_written_case_contract() -> None:
     assert "separate, deliberately prepared execution path" in guide
 
 
+def _nonprose_metadata(value: Any, key: str = "") -> Any:
+    from scripts.normalize_lesson_prose import TEXT_FIELDS
+
+    if isinstance(value, dict):
+        return {name: _nonprose_metadata(item, name) for name, item in value.items()}
+    if isinstance(value, list):
+        return [_nonprose_metadata(item, key) for item in value]
+    if isinstance(value, str) and key in TEXT_FIELDS:
+        return "<display prose>"
+    return value
+
+
 def test_textbook_expansion_preserves_all_frozen_files_and_fences() -> None:
     proof = json.loads((BASE / "authoring/textbook_protected_artifacts.json").read_text())
     assert len(proof["guide_fences"]) == 24
+    from scripts.normalize_math_prose import protected_code
+
+    presentation = json.loads((ROOT / "curriculum/presentation-parity.json").read_text())
+    bindings = {row["path"]: row for row in presentation["records"]}
     for record in proof["protected_files"]:
-        assert (
-            hashlib.sha256((ROOT / record["path"]).read_bytes()).hexdigest() == record["sha256"]
-        ), record["path"]
+        source = (ROOT / record["path"]).read_bytes()
+        digest = hashlib.sha256(source).hexdigest()
+        if record["path"] in bindings:
+            # Whole-Markdown typography changed after the textbook freeze.
+            # Preserve the historical identity and all original code blocks.
+            binding = bindings[record["path"]]
+            assert binding["historical_sha256"] == record["sha256"], record["path"]
+            assert digest == binding["presentation_sha256"], record["path"]
+            if binding["kind"] == "markdown":
+                assert [
+                    hashlib.sha256(block.encode()).hexdigest()
+                    for block in protected_code(source.decode())
+                ] == binding["code_block_sha256"], record["path"]
+            else:
+                assert binding["kind"] == "display_metadata"
+                metadata = json.dumps(
+                    _nonprose_metadata(json.loads(source)), sort_keys=True, ensure_ascii=False
+                ).encode()
+                assert hashlib.sha256(metadata).hexdigest() == binding["protected_metadata_sha256"]
+        else:
+            assert digest == record["sha256"], record["path"]
     total_fences = 0
     for record in proof["guide_fences"]:
         guide = (ROOT / record["path"]).read_text()

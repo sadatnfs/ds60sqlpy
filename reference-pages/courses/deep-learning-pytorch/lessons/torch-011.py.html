@@ -176,7 +176,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: three zero outputs; weight unchanged.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Run one explicit loop step</span></span>
-<span class="source-line"><span class="syntax-comment"># Use SGD.1 and mean squared error, clearing gradients before backward.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use SGD with rate 0.1 and mean squared error, clearing gradients before backward.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: weight 28/15; buffer still 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Move dtype through registered state</span></span>

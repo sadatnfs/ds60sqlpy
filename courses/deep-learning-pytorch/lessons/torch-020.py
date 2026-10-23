@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compare local reductions
-# Pool patch 1, 3; 2, 4 with a2x2window.
+# Pool patch 1, 3; 2, 4 with a 2-by-2 window.
 # Expected: max 4; average 2.5.
 
 # Exercise 2: Inspect a horizontal flip

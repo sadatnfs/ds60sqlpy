@@ -50,24 +50,25 @@ class ClassroomService:
             return self.index()
         if action == "classroom-solutions":
             return self.solutions(payload)
-        if action == "classroom-history":
-            return {
-                "history": self.runs.history(
-                    payload.get("lesson_id"),
-                    payload.get("language"),
-                    payload.get("mode", "snippet"),
-                    limit=payload.get("limit", 10),
-                )
-            }
-        if action == "classroom-run-result":
-            return {
-                "receipt": self.runs.get(
-                    payload.get("lesson_id"),
-                    payload.get("language"),
-                    payload.get("mode", "snippet"),
-                    payload.get("receipt_id"),
-                )
-            }
+        if action in {"classroom-history", "classroom-run-result"}:
+            lesson_id, language = payload.get("lesson_id"), payload.get("language")
+            mode = payload.get("mode", "snippet")
+            if (
+                not isinstance(lesson_id, str)
+                or not isinstance(language, str)
+                or not isinstance(mode, str)
+            ):
+                raise ValueError("Choose a lesson, language and source mode for saved runs.")
+            if action == "classroom-history":
+                return {
+                    "history": self.runs.history(
+                        lesson_id, language, mode, limit=payload.get("limit", 10)
+                    )
+                }
+            receipt_id = payload.get("receipt_id")
+            if not isinstance(receipt_id, str):
+                raise ValueError("Choose an existing saved run receipt.")
+            return {"receipt": self.runs.get(lesson_id, language, mode, receipt_id)}
         if action == "classroom-highlight":
             source, language = payload.get("source"), payload.get("language", "text")
             if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_CODE_BYTES:

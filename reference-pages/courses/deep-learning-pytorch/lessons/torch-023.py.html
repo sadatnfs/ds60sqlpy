@@ -172,7 +172,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: detached loss requires_grad False; backward raises RuntimeError.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 2: Repair two exact updates</span></span>
-<span class="source-line"><span class="syntax-comment"># Usex 1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.</span></span>
+<span class="source-line"><span class="syntax-comment"># Usex 1, 2, 3, y = 2x, w = 0 and two SGD.1 steps with gradient clearing.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: weights 28/15 then 448/225.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 3: Inspect norm clipping</span></span>
@@ -180,7 +180,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-comment"># Expected: returned norm 5; new gradient approximately.6, .8.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 4: Apply the clipped update</span></span>
-<span class="source-line"><span class="syntax-comment"># Use SGD.1 after clipping and inspect the parameter.</span></span>
+<span class="source-line"><span class="syntax-comment"># Use SGD with rate 0.1 after clipping and inspect the parameter.</span></span>
 <span class="source-line"><span class="syntax-comment"># Expected: approximately-.06, -.08.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment"># Exercise 5: Reject nonfinite gradient norms</span></span>

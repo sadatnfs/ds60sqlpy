@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Calculate two penalties
-# Use weights 1, -2 and compute L1and squared L2sums.
+# Use weights 1, -2 and compute L1 and squared L2 sums.
 # Expected: L1=3; squared L2=5.
 
 # Exercise 2: Check evaluation dropout
