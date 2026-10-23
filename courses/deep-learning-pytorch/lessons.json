@@ -312,6 +312,162 @@
         "courses/deep-learning-pytorch/solutions/torch-024_solutions.md"
       ],
       "verification_id": null
+    },
+    {
+      "id": "torch-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-025.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-025.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-025_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-026.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-026.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-026_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-027.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-027.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-027_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-028.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-028.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-028_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-029",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-029.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-029.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-029_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-030",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-030.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-030.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-030_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-031.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-031.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-031_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-032",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-032.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-032.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-032_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-033.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-033.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-033_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-034",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-034.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-034.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-034_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-035",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-035.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-035.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-035_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "torch-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/deep-learning-pytorch/guides/torch-036.md",
+      "source_path": "courses/deep-learning-pytorch/lessons/torch-036.py",
+      "solution_paths": [
+        "courses/deep-learning-pytorch/solutions/torch-036_solution.py",
+        "courses/deep-learning-pytorch/solutions/torch-036_solutions.md"
+      ],
+      "verification_id": null
     }
   ]
 }

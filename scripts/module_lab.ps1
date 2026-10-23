@@ -138,7 +138,7 @@ switch ($Action) {
             $env:COMPOSE_PROGRESS = 'plain'; $env:BUILDKIT_PROGRESS = 'plain'
             if ($Service -eq 'k8s-fixture') {
                 $Base = if ($env:DS60_PYTHON_IMAGE) { $env:DS60_PYTHON_IMAGE } else { 'python:3.12.12-slim-bookworm' }
-                & docker build --progress plain -f (Join-Path $Root 'docker/kubernetes/Dockerfile.fixture') --build-arg "DS60_PYTHON_IMAGE=$Base" -t ds60sqlpy-k8s-fixture:0.1.0 $Root
+                & docker build --progress plain -f (Join-Path $Root 'docker/kubernetes/Dockerfile.fixture') --build-arg "DS60_PYTHON_IMAGE=$Base" -t ds60sqlpy-k8s-fixture:0.2.0 $Root
             } else { & docker @Compose build $Service }
             if ($LASTEXITCODE -ne 0) { throw "Build failed for $Service. Saved progress was preserved." }
         }

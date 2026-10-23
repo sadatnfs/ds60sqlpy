@@ -18,11 +18,11 @@ The functional API also applies dropout according to its dropout_p argument; cal
 
 ## Reading the implementation
 
-The checked helper accepts nonempty2D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.
+The checked helper accepts nonempty2 D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.
 
 ## Exercise 1: Compute uniform causal mixtures
 
-The question is: Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.
+The question is: Use zero3 x2 queries/keys and values2, 0; 0, 2; 6, 6.
 
 Each query averages its allowed values. The fixture exposes the meaning of both axes and the included diagonal.
 

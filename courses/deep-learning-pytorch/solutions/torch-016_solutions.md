@@ -53,7 +53,7 @@ assert (x@w).sum(1).tolist()==[0.,0.,0.,0.]
 
 ## Exercise 3: Map the construction into Linear
 
-The question is: Seta2-to-2bias-free Linear weight to W.T and apply ReLU.
+The question is: Seta2-to-2 bias-free Linear weight to W.T and apply ReLU.
 
 The explicit transpose checks PyTorch's stored layout. A correct mathematical matrix with the wrong assignment orientation can change a function silently when shapes are square.
 

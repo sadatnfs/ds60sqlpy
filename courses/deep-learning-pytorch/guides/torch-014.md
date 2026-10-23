@@ -42,7 +42,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0<=target<C. For independent labels, use floating0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.
+UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0<=target<C. For independent labels, use floating0/1 targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.
 
 ## Worked example / walkthrough
 
@@ -102,13 +102,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** shapes(2, ) and(2, 3); long versus floating.
    **Verify:** Save the assertion results for exercise 3, including shapes(2, ) and(2, 3); long versus floating.
 
-4. **Check class-axis normalization.** Apply softmax(dim1) to a2x3matrix.
+4. **Check class-axis normalization.** Apply softmax(dim1) to a2 x3 matrix.
    **Expected:** each row sums1.
    **Verify:** Save the assertion results for exercise 4, including each row sums1.
 
 5. **Name the multi label denominator.** Compute B C E over two rows and three labels of zero logits.
-   **Expected:** sum6log2; mean log2.
-   **Verify:** Save the assertion results for exercise 5, including sum6log2; mean log2.
+   **Expected:** sum6 log2; mean log2.
+   **Verify:** Save the assertion results for exercise 5, including sum6 log2; mean log2.
 
 6. **Reject an out-of-vocabulary class.** Use class index3 for a three-class row.
    **Expected:** IndexError or RuntimeError identifying an invalid target.

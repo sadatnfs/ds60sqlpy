@@ -8,13 +8,13 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-018`. The 
 
 ## Learning objectives
 
-Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout. The finish condition is output shape1, 1, 2, 2; all values-4. 8trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Convolution applies a shared local kernel across spatial positions. The central investigation is concrete: Apply kernel1, 0; 0, -1 to image1..9 in3 x3 NCHW layout. The finish condition is output shape1, 1, 2, 2; all values-4. 8 trainable scalars. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Convolution applies a shared local kernel across spatial positions. PyTorch C on v2d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
+Convolution applies a shared local kernel across spatial positions. PyTorch C on v2 d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
 
-The operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3x3ramp image and asymmetric2x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.
+The operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3 x3 ramp image and asymmetric2 x2 kernel produce an exact output of-4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.
 
 ## Design decisions and when to use this method
 
@@ -24,7 +24,7 @@ The operation is cross-correlation:the kernel slide s without spatial rotation. 
 
 Compare [tf-019](../../deep-learning-tensorflow/guides/tf-019.md) after deriving the shared numerical contract.
 
-TensorFlow's common C on v2D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.
+TensorFlow's common C on v2 D layout is NHWC with kernels HWIO; PyTorch uses NCHW and OIHW. Translate images with axis permutation and kernels with the corresponding permutation. Both use cross-correlation semantics despite the convolution name.
 
 ## Vocabulary and concepts
 
@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2d with stride1, padding0. nn.Conv2d register s weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
+Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2 d with stride1, padding0. nn.Conv2 d register s weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
 
 ## Worked example / walkthrough
 
@@ -89,11 +89,11 @@ assert torch.equal(nhwc.permute(0,3,1,2),image)
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: output shape1, 1, 2, 2; all values-4. 8trainable scalars. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: output shape1, 1, 2, 2; all values-4. 8 trainable scalars. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
-1. **Compute the fixed spatial filter.** Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.
+1. **Compute the fixed spatial filter.** Apply kernel1, 0; 0, -1 to image1..9 in3 x3 NCHW layout.
    **Expected:** output shape1, 1, 2, 2; all values-4.
    **Verify:** Save the assertion results for exercise 1, including output shape1, 1, 2, 2; all values-4.
 
@@ -109,13 +109,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** output shape1, 1, 1, 1.
    **Verify:** Save the assertion results for exercise 4, including output shape1, 1, 1, 1.
 
-5. **Trace one pixel influence.** Add10to the top-left pixel and compare output delta.
+5. **Trace one pixel influence.** Add10 to the top-left pixel and compare output delta.
    **Expected:** only top-left output increases10.
    **Verify:** Save the assertion results for exercise 5, including only top-left output increases10.
 
-6. **Count shared parameters.** Build a1-input-channel, 2-output-channel, 2x2bias-free C on v2d.
-   **Expected:** 8trainable scalars.
-   **Verify:** Save the assertion results for exercise 6, including 8trainable scalars.
+6. **Count shared parameters.** Build a1-input-channel, 2-output-channel, 2 x2 bias-free C on v2 d.
+   **Expected:** 8 trainable scalars.
+   **Verify:** Save the assertion results for exercise 6, including 8 trainable scalars.
 
 ## Common pitfalls and diagnosis
 

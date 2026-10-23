@@ -49,7 +49,7 @@ preflight is approved. Both Dockerfiles accept a previously qualified
 performs an image pull or dependency installation.
 
 ```text
-docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.1.0 .
+docker build --progress=plain -f docker/kubernetes/Dockerfile.fixture -t ds60sqlpy-k8s-fixture:0.2.0 .
 docker build --progress=plain -f docker/kubernetes/Dockerfile.worker -t ds60sqlpy-worker-k8s-kind:0.3.0 .
 ```
 

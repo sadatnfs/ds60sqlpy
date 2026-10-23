@@ -8,7 +8,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-021`. The 
 
 ## Learning objectives
 
-Attention forms weighted combinations of value vectors using query-key comparisons. The central investigation is concrete: Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6. The finish condition is outputs2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Attention forms weighted combinations of value vectors using query-key comparisons. The central investigation is concrete: Use zero3 x2 queries/keys and values2, 0; 0, 2; 6, 6. The finish condition is outputs2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -24,7 +24,7 @@ The functional API also applies dropout according to its dropout_p argument; cal
 
 Compare [tf-022](../../deep-learning-tensorflow/guides/tf-022.md) after deriving the shared numerical contract.
 
-Keras MultiHead Attention attention_mask uses True/1for allowed positions, matching the course allowed convention. PyTorch functional SDPA also uses True allowed, but Multihead Attention key_padding_mask uses True ignored. Functional PyTorch dropout must be set explicitly for inference.
+Keras MultiHead Attention attention_mask uses True/1 for allowed positions, matching the course allowed convention. PyTorch functional SDPA also uses True allowed, but Multihead Attention key_padding_mask uses True ignored. Functional PyTorch dropout must be set explicitly for inference.
 
 ## Vocabulary and concepts
 
@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-The checked helper accepts nonempty2D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.
+The checked helper accepts nonempty2 D self-attention matrices and a boolean square allowed mask. Reject fully masked rows before normalization. F.scaled_dot_product_attention supplies the1/sqrt(key_width) scaling and normalizes over the key axis. A causal lower triangle includes its diagonal for shifted next-token targets. Independently recompute each prefix rather than slicing full weights.
 
 ## Worked example / walkthrough
 
@@ -99,7 +99,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Compute uniform causal mixtures.** Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.
+1. **Compute uniform causal mixtures.** Use zero3 x2 queries/keys and values2, 0; 0, 2; 6, 6.
    **Expected:** outputs2, 0; 1, 1; 8/3, 8/3.
    **Verify:** Save the assertion results for exercise 1, including outputs2, 0; 1, 1; 8/3, 8/3.
 

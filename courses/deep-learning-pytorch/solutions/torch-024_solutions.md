@@ -18,7 +18,7 @@ Report confusion counts and their denominator, not only accuracy. A mean baselin
 
 ## Reading the implementation
 
-UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
+UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
 
 ## Exercise 1: Freeze the geometric task
 
@@ -32,15 +32,15 @@ test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={
 assert not train_ids&test_ids and len(test_ids)==2
 ```
 
-**Expected:** 4training records, 2test records.
+**Expected:** 4 training records, 2 test records.
 
-**Verify:** Compare the computed values or written argument with 4training records, 2test records.
+**Verify:** Compare the computed values or written argument with 4 training records, 2 test records.
 
 ## Exercise 2: Fit explicit normalization
 
 The question is: Calculate training mean and population standard deviation.
 
-PyTorch's default sample correction would produce a different scale. Specifying correction0aligns this fixture with the paired TensorFlow/NumPy calculation.
+PyTorch's default sample correction would produce a different scale. Specifying correction0 aligns this fixture with the paired TensorFlow/NumPy calculation.
 
 ```python
 mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
@@ -53,7 +53,7 @@ assert mean.item()==0; np.testing.assert_allclose(scale.item(),np.sqrt(2.5),atol
 
 ## Exercise 3: Train a fixed classifier
 
-The question is: Zero-initialize the weight and run40SGD.1 steps with binary logits loss.
+The question is: Zero-initialize the weight and run40 SGD.1 steps with binary logits loss.
 
 The fixed budget is part of the experiment. It is not repeated until the test happens to look favorable.
 
@@ -89,7 +89,7 @@ assert counts=={'tp':1,'tn':1,'fp':0,'fn':0} and sum(counts.values())==2
 
 ## Exercise 5: Compare a constant baseline
 
-The question is: Predict class0for both test rows and count mistakes.
+The question is: Predict class0 for both test rows and count mistakes.
 
 The comparison uses identical test units. It does not justify a population claim from two cases.
 
@@ -98,9 +98,9 @@ baseline=torch.zeros(2,dtype=torch.bool)
 assert int((baseline!=truth).sum())==1 and int((prediction!=truth).sum())==0
 ```
 
-**Expected:** baseline1error; model0on this fixture.
+**Expected:** baseline1 error; model0 on this fixture.
 
-**Verify:** Compare the computed values or written argument with baseline1error; model0on this fixture.
+**Verify:** Compare the computed values or written argument with baseline1 error; model0 on this fixture.
 
 ## Exercise 6: Reveal a group-specific failure
 
@@ -114,9 +114,9 @@ report={group:(int(broken[i]!=truth[i]),1) for i,group in enumerate(['negative',
 assert report=={'negative':(0,1),'positive':(1,1)}
 ```
 
-**Expected:** negative0/1errors; positive1/1.
+**Expected:** negative0/1 errors; positive1/1.
 
-**Verify:** Compare the computed values or written argument with negative0/1errors; positive1/1.
+**Verify:** Compare the computed values or written argument with negative0/1 errors; positive1/1.
 
 ## Review after comparison
 

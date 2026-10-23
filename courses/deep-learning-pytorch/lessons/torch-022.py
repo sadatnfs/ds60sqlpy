@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compute uniform causal mixtures
-# Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.
+# Use zero3 x2 queries/keys and values2, 0; 0, 2; 6, 6.
 # Expected: outputs2, 0; 1, 1; 8/3, 8/3.
 
 # Exercise 2: Perturb only the future

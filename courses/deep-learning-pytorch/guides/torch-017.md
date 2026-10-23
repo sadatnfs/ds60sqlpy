@@ -8,11 +8,11 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-016`. The 
 
 ## Learning objectives
 
-Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights1, -2 and compute L1and squared L2sums. The finish condition is L1=3; squared L2=5. output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Regularization and training mode affect different parts of the experiment. The central investigation is concrete: Use weights1, -2 and compute L1 and squared L2 sums. The finish condition is L1=3; squared L2=5. output still requires grad; backward gives ones. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
+Regularization and training mode affect different parts of the experiment. An explicit L1 orL2 penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
 
 The fixture uses weights1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.
 
@@ -48,7 +48,7 @@ nn.Dropout(p=.5) scales retained training activations by 1/(1-p). Call train or 
 
 ### Example A: Calculate two penalties
 
-The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
+The squared L2 penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
 
 ```python
 import numpy as np
@@ -81,7 +81,7 @@ drop.train(); sampled=drop(x)
 assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}
 ```
 
-**Expected:** shape(4, 8); only0or2.
+**Expected:** shape(4, 8); only0 or2.
 
 ## Prediction before your attempt
 
@@ -89,7 +89,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Calculate two penalties.** Use weights1, -2 and compute L1and squared L2sums.
+1. **Calculate two penalties.** Use weights1, -2 and compute L1 and squared L2 sums.
    **Expected:** L1=3; squared L2=5.
    **Verify:** Save the assertion results for exercise 1, including L1=3; squared L2=5.
 
@@ -98,8 +98,8 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Verify:** Save the assertion results for exercise 2, including both outputs exactly ones.
 
 3. **Check training invariants.** Switch the same layer to train mode and inspect output values.
-   **Expected:** shape(4, 8); only0or2.
-   **Verify:** Save the assertion results for exercise 3, including shape(4, 8); only0or2.
+   **Expected:** shape(4, 8); only0 or2.
+   **Verify:** Save the assertion results for exercise 3, including shape(4, 8); only0 or2.
 
 4. **Separate data and penalty terms.** Combine data loss2 with coefficient.1 times squared L2.
    **Expected:** penalty.5; total2.5.

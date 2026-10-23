@@ -8,7 +8,7 @@ Intermediate; approximately 210 minutes. Direct prerequisites: `torch-023`. The 
 
 ## Learning objectives
 
-A classifier capstone must connect the task definition to training and evaluation evidence. The central investigation is concrete: Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3. The finish condition is 4training records, 2test records. negative0/1errors; positive1/1. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A classifier capstone must connect the task definition to training and evaluation evidence. The central investigation is concrete: Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3. The finish condition is 4 training records, 2 test records. negative0/1 errors; positive1/1. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
+UseX shaped(4, 1), floating binary targets and nn.Linear(1, 1, bias=False). Calculate x.std(dim=0, correction=0)to match the declared population normalization fixture. Train with BCEWithLogitsLoss for40 fixed SGD updates. Evaluate with model.eval and no_grad, then classify logits>=0. Count TP, TN, FP, FN with boolean masks and verify their sum.
 
 ## Worked example / walkthrough
 
@@ -63,11 +63,11 @@ test_x=torch.tensor([[-3.],[3.]]); truth=torch.tensor([False,True]); train_ids={
 assert not train_ids&test_ids and len(test_ids)==2
 ```
 
-**Expected:** 4training records, 2test records.
+**Expected:** 4 training records, 2 test records.
 
 ### Example B: Fit explicit normalization
 
-PyTorch's default sample correction would produce a different scale. Specifying correction0aligns this fixture with the paired TensorFlow/NumPy calculation.
+PyTorch's default sample correction would produce a different scale. Specifying correction0 aligns this fixture with the paired TensorFlow/NumPy calculation.
 
 ```python
 mean=x.mean(0); scale=x.std(0,correction=0); tx=(x-mean)/scale; vx=(test_x-mean)/scale
@@ -93,19 +93,19 @@ assert model.weight.item()>0 and torch.isfinite(model.weight).all()
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 4training records, 2test records. negative0/1errors; positive1/1. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: 4 training records, 2 test records. negative0/1 errors; positive1/1. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Freeze the geometric task.** Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.
-   **Expected:** 4training records, 2test records.
-   **Verify:** Save the assertion results for exercise 1, including 4training records, 2test records.
+   **Expected:** 4 training records, 2 test records.
+   **Verify:** Save the assertion results for exercise 1, including 4 training records, 2 test records.
 
 2. **Fit explicit normalization.** Calculate training mean and population standard deviation.
    **Expected:** mean0; scale sqrt2.5.
    **Verify:** Save the assertion results for exercise 2, including mean0; scale sqrt2.5.
 
-3. **Train a fixed classifier.** Zero-initialize the weight and run40SGD.1 steps with binary logits loss.
+3. **Train a fixed classifier.** Zero-initialize the weight and run40 SGD.1 steps with binary logits loss.
    **Expected:** positive finite weight after40 updates.
    **Verify:** Save the assertion results for exercise 3, including positive finite weight after40 updates.
 
@@ -113,13 +113,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** TP1, TN1, FP0, FN0, total2.
    **Verify:** Save the assertion results for exercise 4, including TP1, TN1, FP0, FN0, total2.
 
-5. **Compare a constant baseline.** Predict class0for both test rows and count mistakes.
-   **Expected:** baseline1error; model0on this fixture.
-   **Verify:** Save the assertion results for exercise 5, including baseline1error; model0on this fixture.
+5. **Compare a constant baseline.** Predict class0 for both test rows and count mistakes.
+   **Expected:** baseline1 error; model0 on this fixture.
+   **Verify:** Save the assertion results for exercise 5, including baseline1 error; model0 on this fixture.
 
 6. **Reveal a group-specific failure.** Flip only the positive group decision and report group counts.
-   **Expected:** negative0/1errors; positive1/1.
-   **Verify:** Save the assertion results for exercise 6, including negative0/1errors; positive1/1.
+   **Expected:** negative0/1 errors; positive1/1.
+   **Verify:** Save the assertion results for exercise 6, including negative0/1 errors; positive1/1.
 
 ## Common pitfalls and diagnosis
 

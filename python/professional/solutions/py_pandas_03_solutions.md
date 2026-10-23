@@ -12,7 +12,7 @@ For nonmissing customer_id and finite nonnegative amount, return each row amount
 
 ```python
 def group_shares(frame: pd.DataFrame) -> pd.Series:
-    if frame["customer_id"].isna().any() or not np.isfinite(frame["amount"]).all() or (frame["amount"]<0).any():
+    if frame["customer_id"].isna().any() or frame["amount"].isna().any() or not np.isfinite(frame["amount"]).all() or (frame["amount"]<0).any():
         raise ValueError("Expected known customers and finite nonnegative amounts")
     total=frame.groupby("customer_id",sort=False)["amount"].transform("sum")
     return frame["amount"].div(total.where(total.ne(0)))
@@ -26,6 +26,8 @@ r=group_shares(f)
 assert np.allclose(r.iloc[:2],[.25,.75]) and r.iloc[2:].isna().all() and r.index.equals(f.index)
 bad=f.copy();bad.iloc[0,1]=-1
 expect_value_error(lambda:group_shares(bad))
+missing=pd.DataFrame({"customer_id":["a"],"amount":pd.Series([pd.NA],dtype="Float64")})
+expect_value_error(lambda:group_shares(missing))
 ```
 
 ### Exercise 2: Lag within customer using a stable tie break
@@ -61,7 +63,7 @@ Return event_id and prior_amount for each event over its customer interval[at-wi
 ```python
 def prior_window_sum(events: pd.DataFrame, window: pd.Timedelta) -> pd.DataFrame:
     ordered_lag(events)
-    if pd.isna(window) or window<=pd.Timedelta(0) or not np.isfinite(events["amount"]).all():
+    if pd.isna(window) or window<=pd.Timedelta(0) or events["amount"].isna().any() or not np.isfinite(events["amount"]).all():
         raise ValueError("Expected a positive window and finite amounts")
     by_time=events.groupby(["customer_id","at"],as_index=False,sort=True)["amount"].sum()
     parts=[]
@@ -134,7 +136,7 @@ assert last_event_per_customer(tied).event_id.tolist()==[2] and len(e)==4
 
 ### Exercise 6: Distinguish no rows from no known measurements
 
-Summarize declared unique categories in their declared order with category, row_count, known_count, total. Reject missing/undeclared category labels. Include unobserved categories with row_count0, known_count0, total missing; an observed all-missing category also has missing total.
+Summarize declared unique categories in their declared order with category, row_count, known_count, total. Reject missing/undeclared category labels and nonnumeric or nonfinite known measurements. Include unobserved categories with row_count0, known_count0, total missing; an observed all-missing category also has missing total.
 
 **Expected:** Rows a:1, a:NA, b:NA and declared [a, b, c] yield counts(2,1),(1,0),(0,0) and totals 1, missing, missing. Unknown category z is rejected.
 
@@ -142,6 +144,8 @@ Summarize declared unique categories in their declared order with category, row_
 def category_summary(frame: pd.DataFrame, categories: list[str]) -> pd.DataFrame:
     if len(categories)!=len(set(categories)) or frame["category"].isna().any() or not frame["category"].isin(categories).all():
         raise ValueError("Expected unique declared categories and valid labels")
+    if not pd.api.types.is_numeric_dtype(frame["value"].dtype) or not np.isfinite(frame["value"].dropna().to_numpy(dtype=float)).all():
+        raise ValueError("Known category measurements must be finite numeric values")
     f=frame[["category","value"]].copy();f["category"]=pd.Categorical(f["category"],categories=categories,ordered=True)
     result=f.groupby("category",observed=False,sort=True)["value"].agg(row_count="size",known_count="count",total=lambda values:values.sum(min_count=1))
     return result.reset_index()

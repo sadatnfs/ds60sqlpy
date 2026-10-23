@@ -24,7 +24,7 @@ This course uses num_workers=0 so all loading occurs in the same process and req
 
 Compare [tf-015](../../deep-learning-tensorflow/guides/tf-015.md) after deriving the shared numerical contract.
 
-TensorFlow tf.data combines dataset transformations and pre fetching in its pipeline API. PyTorch commonly separates Dataset retrieval from DataLoader sampling/collation. Both need explicit cardinality, ordering and training-only preprocessing checks; num_workers0is this course's bounded default, not a throughput recommendation.
+TensorFlow tf.data combines dataset transformations and pre fetching in its pipeline API. PyTorch commonly separates Dataset retrieval from DataLoader sampling/collation. Both need explicit cardinality, ordering and training-only preprocessing checks; num_workers0 is this course's bounded default, not a throughput recommendation.
 
 ## Vocabulary and concepts
 

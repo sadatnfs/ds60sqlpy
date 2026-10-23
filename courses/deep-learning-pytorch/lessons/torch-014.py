@@ -17,12 +17,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: shapes(2, ) and(2, 3); long versus floating.
 
 # Exercise 4: Check class-axis normalization
-# Apply softmax(dim1) to a2x3matrix.
+# Apply softmax(dim1) to a2 x3 matrix.
 # Expected: each row sums1.
 
 # Exercise 5: Name the multi label denominator
 # Compute B C E over two rows and three labels of zero logits.
-# Expected: sum6log2; mean log2.
+# Expected: sum6 log2; mean log2.
 
 # Exercise 6: Reject an out-of-vocabulary class
 # Use class index3 for a three-class row.

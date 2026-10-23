@@ -8,7 +8,7 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-001`. The prer
 
 ## Learning objectives
 
-A PyTorch tensor has values plus metadata:shape, dtype, device, strides and gradient-tracking state. The central investigation is concrete: Create a2x3 float64CPU tensor from values0..5. The finish condition is shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A PyTorch tensor has values plus metadata:shape, dtype, device, strides and gradient-tracking state. The central investigation is concrete: Create a2 x3 float64 CPU tensor from values0..5. The finish condition is shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -92,7 +92,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Inspect shape and stride.** Create a2x3 float64CPU tensor from values0..5.
+1. **Inspect shape and stride.** Create a2 x3 float64 CPU tensor from values0..5.
    **Expected:** shape(2, 3), stride(3, 1), CPU, float64.
    **Verify:** Save the assertion results for exercise 1, including shape(2, 3), stride(3, 1), CPU, float64.
 

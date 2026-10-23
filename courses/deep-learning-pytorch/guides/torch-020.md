@@ -8,7 +8,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-019`. The 
 
 ## Learning objectives
 
-Pooling reduces local spatial information. The central investigation is concrete: Pool patch1, 3; 2, 4 with a2x2window. The finish condition is max4; average2.5. left->right->left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Pooling reduces local spatial information. The central investigation is concrete: Pool patch1, 3; 2, 4 with a2 x2 window. The finish condition is max4; average2.5. left->right->left. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -42,7 +42,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.
+F.max_pool2 d and avg_pool2 d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.
 
 ## Worked example / walkthrough
 
@@ -89,7 +89,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Compare local reductions.** Pool patch1, 3; 2, 4 with a2x2window.
+1. **Compare local reductions.** Pool patch1, 3; 2, 4 with a2 x2 window.
    **Expected:** max4; average2.5.
    **Verify:** Save the assertion results for exercise 1, including max4; average2.5.
 
@@ -101,7 +101,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** exact original values.
    **Verify:** Save the assertion results for exercise 3, including exact original values.
 
-4. **Expose discarded information.** Change only the non maximum pixel1to0 and compare pool s.
+4. **Expose discarded information.** Change only the non maximum pixel1 to0 and compare pool s.
    **Expected:** max still4; average2.25.
    **Verify:** Save the assertion results for exercise 4, including max still4; average2.25.
 

@@ -24,7 +24,7 @@ Finite differences involve a tradeoff:large steps measure a wider region, while 
 
 Compare [tf-005](../../deep-learning-tensorflow/guides/tf-005.md) after deriving the shared numerical contract.
 
-TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64finite-difference oracle applies to either framework.
+TensorFlow GradientTape.gradient returns gradients explicitly, while PyTorch autograd.grad also returns them and backward accumulates into leaf.grad. Both must record the relevant forward computation. The same float64 finite-difference oracle applies to either framework.
 
 ## Vocabulary and concepts
 
@@ -42,7 +42,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.
+Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2 h). Validate positive finite h and finite function values before comparing.
 
 ## Worked example / walkthrough
 

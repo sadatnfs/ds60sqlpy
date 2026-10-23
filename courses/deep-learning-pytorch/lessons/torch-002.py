@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Inspect shape and stride
-# Create a2x3 float64CPU tensor from values0..5.
+# Create a2 x3 float64 CPU tensor from values0..5.
 # Expected: shape(2, 3), stride(3, 1), CPU, float64.
 
 # Exercise 2: Expose shared storage

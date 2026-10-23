@@ -8,11 +8,11 @@ Beginner; approximately 180 minutes. Direct prerequisites: `torch-011`. The prer
 
 ## Learning objectives
 
-An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The central investigation is concrete: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c. The finish condition is targets0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The central investigation is concrete: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2 a-b+c. The finish condition is targets0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
-An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target2a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed100-step budget without using the holdout to choose settings.
+An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target2 a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed100-step budget without using the holdout to choose settings.
 
 The capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.
 
@@ -95,7 +95,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Create the three-feature fixture.** Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c.
+1. **Create the three-feature fixture.** Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2 a-b+c.
    **Expected:** targets0, 2, -1, 1, 2, 4.
    **Verify:** Save the assertion results for exercise 1, including targets0, 2, -1, 1, 2, 4.
 
@@ -103,17 +103,17 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** mean.5; holdout MSE7.25.
    **Verify:** Save the assertion results for exercise 2, including mean.5; holdout MSE7.25.
 
-3. **Train a bounded linear model.** Initialize a bias-free3-to-1Linear layer at zero and run100SGD.1 updates.
+3. **Train a bounded linear model.** Initialize a bias-free3-to-1 Linear layer at zero and run100 SGD.1 updates.
    **Expected:** 100 finite updates; training loss decreases.
    **Verify:** Save the assertion results for exercise 3, including 100 finite updates; training loss decreases.
 
 4. **Open the holdout after fitting.** Calculate final training and holdout MSE without updates.
-   **Expected:** finite errors; holdout error below7.25on this fixture.
-   **Verify:** Save the assertion results for exercise 4, including finite errors; holdout error below7.25on this fixture.
+   **Expected:** finite errors; holdout error below7.25 on this fixture.
+   **Verify:** Save the assertion results for exercise 4, including finite errors; holdout error below7.25 on this fixture.
 
 5. **Retain an independent pilot oracle.** Calculate the scalar first update directly from NumPy without using the module.
-   **Expected:** w28/15and loss56/675.
-   **Verify:** Save the assertion results for exercise 5, including w28/15and loss56/675.
+   **Expected:** w28/15 and loss56/675.
+   **Verify:** Save the assertion results for exercise 5, including w28/15 and loss56/675.
 
 6. **Write the bounded evidence report.** Record split IDs, 100 steps, errors and the two-row limitation.
    **Expected:** disjoint IDs; holdout count 2; explicit limited scope.

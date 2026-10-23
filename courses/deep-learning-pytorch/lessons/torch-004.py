@@ -17,7 +17,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: sum gradient equals3 times mean gradient.
 
 # Exercise 4: Inspect a feature denominator
-# Use a2x2 residual matrix of ones and mean reduction.
+# Use a2 x2 residual matrix of ones and mean reduction.
 # Expected: loss1 and4 participating elements.
 
 # Exercise 5: Mask numerator and denominator together

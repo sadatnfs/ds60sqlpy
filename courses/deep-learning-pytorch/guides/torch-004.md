@@ -106,7 +106,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** sum gradient equals3 times mean gradient.
    **Verify:** Save the assertion results for exercise 3, including sum gradient equals3 times mean gradient.
 
-4. **Inspect a feature denominator.** Use a2x2 residual matrix of ones and mean reduction.
+4. **Inspect a feature denominator.** Use a2 x2 residual matrix of ones and mean reduction.
    **Expected:** loss1 and4 participating elements.
    **Verify:** Save the assertion results for exercise 4, including loss1 and4 participating elements.
 

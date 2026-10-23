@@ -8,7 +8,7 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-006`. The prer
 
 ## Learning objectives
 
-PyTorch distinguishes graph tracking from gradient storage. The central investigation is concrete: Create leaf w0 and intermediate2w, retain the intermediate gradient and backpropagate its sum. The finish condition is w leaf True; intermediate False; gradients2 and1. output still requires_grad True. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+PyTorch distinguishes graph tracking from gradient storage. The central investigation is concrete: Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate its sum. The finish condition is w leaf True; intermediate False; gradients2 and1. output still requires_grad True. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -91,7 +91,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Inspect leaf and nonleaf state.** Create leaf w0 and intermediate2w, retain the intermediate gradient and backpropagate its sum.
+1. **Inspect leaf and nonleaf state.** Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate its sum.
    **Expected:** w leaf True; intermediate False; gradients2 and1.
    **Verify:** Save the assertion results for exercise 1, including w leaf True; intermediate False; gradients2 and1.
 

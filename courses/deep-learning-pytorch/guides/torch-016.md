@@ -102,7 +102,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** all four outputs0.
    **Verify:** Save the assertion results for exercise 2, including all four outputs0.
 
-3. **Map the construction into Linear.** Seta2-to-2bias-free Linear weight to W.T and apply ReLU.
+3. **Map the construction into Linear.** Seta2-to-2 bias-free Linear weight to W.T and apply ReLU.
    **Expected:** module features equal manual features.
    **Verify:** Save the assertion results for exercise 3, including module features equal manual features.
 

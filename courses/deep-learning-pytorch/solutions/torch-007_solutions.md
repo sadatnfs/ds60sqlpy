@@ -22,7 +22,7 @@ Set requires_grad on floating-point inputs that need derivatives. Use backward f
 
 ## Exercise 1: Inspect leaf and nonleaf state
 
-The question is: Create leaf w0 and intermediate2w, retain the intermediate gradient and backpropagate its sum.
+The question is: Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate its sum.
 
 Leaf status follows graph construction, not whether a tensor is assigned to a Python variable. retain_grad explicitly requests storage for the intermediate diagnostic.
 

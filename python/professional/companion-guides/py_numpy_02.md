@@ -98,7 +98,7 @@ The inserted singleton axes form every a-row/b-row pair. The final axis still re
 
 **Expected:** [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise ValueError; shape(0,3) with an empty vector returns (0,3).
 
-3. **Create all pairs with a declared contraction.** Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions. Use the tiny broadcasted difference, not Python nested loops.
+3. **Create all pairs with a declared contraction.** Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.
 
 **Expected:** [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns shape(0,1); two versus three features raises ValueError.
 

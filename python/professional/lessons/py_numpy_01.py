@@ -15,7 +15,7 @@ def copy_window(values: np.ndarray, start: int, stop: int) -> np.ndarray:
     raise NotImplementedError("Implement copy_window")
 
 def row_center_owned(values: np.ndarray) -> np.ndarray:
-    """Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction."""
+    """Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction. Reject an unrepresentable centered result with ValueError."""
     raise NotImplementedError("Implement row_center_owned")
 
 def read_only_view(values: np.ndarray) -> np.ndarray:
@@ -58,7 +58,7 @@ if __name__ == "__main__":
 # Expected: For [10,20,30,40] and bounds 1,3 return [20,30]. Changing output[0] leaves source[1]=20. Bounds 2,2 return shape(0,); bounds 3,2 raise ValueError.
 
 # Exercise 3: Transform without mutating callers
-# Prompt: Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction.
+# Prompt: Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction. Reject an unrepresentable centered result with ValueError.
 # Expected: [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.
 
 # Exercise 4: Distinguish access restriction from a snapshot

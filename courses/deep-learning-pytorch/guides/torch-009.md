@@ -100,7 +100,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** batch sizes2, 2, 1.
    **Verify:** Save the assertion results for exercise 2, including batch sizes2, 2, 1.
 
-3. **Run three independent updates.** Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.
+3. **Run three independent updates.** Train x1..6, y2 x, w0 with batch size 2, rate.01, clearing gradients each batch.
    **Expected:** three finite distinct weights.
    **Verify:** Save the assertion results for exercise 3, including three finite distinct weights.
 
@@ -112,7 +112,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** every shuffled target equals twice its input.
    **Verify:** Save the assertion results for exercise 5, including every shuffled target equals twice its input.
 
-6. **Aggregate unequal batch means.** Combine mean loss2 over2examples and mean loss8 over1example.
+6. **Aggregate unequal batch means.** Combine mean loss2 over2 examples and mean loss8 over1 example.
    **Expected:** epoch mean4, not5.
    **Verify:** Save the assertion results for exercise 6, including epoch mean4, not5.
 

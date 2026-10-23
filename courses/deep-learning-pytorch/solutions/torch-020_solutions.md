@@ -16,11 +16,11 @@ This lesson uses only torch operations on literal images, not torch vision or a 
 
 ## Reading the implementation
 
-F.max_pool2d and avg_pool2d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.
+F.max_pool2 d and avg_pool2 d operate on NCHW tensors. torch.flip(image, dims=(-1, )) reverses width, and flipping twice restores the original. A training flag or a separate transform object should decide whether augmentation applies. Inspect the label transformation beside the image:geometry alone cannot prove semantic invariance.
 
 ## Exercise 1: Compare local reductions
 
-The question is: Pool patch1, 3; 2, 4 with a2x2window.
+The question is: Pool patch1, 3; 2, 4 with a2 x2 window.
 
 The two operators retain different information despite identical output shape. The average uses all four values while the maximum ignores three smaller ones.
 
@@ -64,7 +64,7 @@ assert torch.equal(torch.flip(flipped,dims=(-1,)),image)
 
 ## Exercise 4: Expose discarded information
 
-The question is: Change only the non maximum pixel1to0 and compare pool s.
+The question is: Change only the non maximum pixel1 to0 and compare pool s.
 
 The perturbation is invisible to max pooling. That can be useful robustness or harmful information loss, depending on the task.
 

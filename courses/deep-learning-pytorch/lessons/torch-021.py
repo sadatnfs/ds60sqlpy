@@ -5,12 +5,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Lookup and mark padding
-# Use IDs2, 3, 0 and a fixed4x2table with zero padding row.
+# Use IDs2, 3, 0 and a fixed4 x2 table with zero padding row.
 # Expected: embedding shape1, 3, 2; mask True, True, False.
 
 # Exercise 2: Verify padding-row gradient behavior
 # Sum embedding outputs and backpropagate.
-# Expected: padding row gradient zero; rows2and3nonzero.
+# Expected: padding row gradient zero; rows2 and3 nonzero.
 
 # Exercise 3: Compare packed and valid-prefix GRU state
 # Use fixed GRU parameters.1 and length2; compare packed run with the unpadded first two
@@ -22,7 +22,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: final state differs from the valid-prefix state.
 
 # Exercise 5: Average only valid token losses
-# Use losses log2, log2, 100with the valid mask.
+# Use losses log2, log2, 100 with the valid mask.
 # Expected: mean log2, unchanged by the padding loss.
 
 # Exercise 6: Reject zero-length recurrent input

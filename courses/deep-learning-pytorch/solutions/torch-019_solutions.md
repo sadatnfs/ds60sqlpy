@@ -4,9 +4,9 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Convolution applies a shared local kernel across spatial positions. PyTorch C on v2d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
+Convolution applies a shared local kernel across spatial positions. PyTorch C on v2 d expects NCHW layout:batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
 
-The operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3x3ramp image and asymmetric2x2kernel produce an exact output of-4at all four positions, making orientation and layout mistakes visible before introducing learned filters.
+The operation is cross-correlation:the kernel slide s without spatial rotation. VALID-style padding0 includes only fully contained patches. Stride controls the gap between patch starts. The3 x3 ramp image and asymmetric2 x2 kernel produce an exact output of-4 at all four positions, making orientation and layout mistakes visible before introducing learned filters.
 
 **NCHW:** Batch, channel, height, width axis order for PyTorch images.
 
@@ -18,11 +18,11 @@ The operation is cross-correlation:the kernel slide s without spatial rotation. 
 
 ## Reading the implementation
 
-Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2d with stride1, padding0. nn.Conv2d register s weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
+Build image with shape(1, 1, 3, 3) and kernel(1, 1, 2, 2), then use F.conv2 d with stride1, padding0. nn.Conv2 d register s weight and optional bias. Count parameters as out_channels*in_channels*kernel_area plus bias entries. torch.flip(kernel, (-2, -1)) rotates both spatial axes for the convolution-versus-correlation counterexample.
 
 ## Exercise 1: Compute the fixed spatial filter
 
-The question is: Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.
+The question is: Apply kernel1, 0; 0, -1 to image1..9 in3 x3 NCHW layout.
 
 Each patch subtracts its bottom-right value from its top-left value. The difference is four throughout this ramp fixture.
 
@@ -82,7 +82,7 @@ assert tuple(F.conv2d(image,kernel,stride=2).shape)==(1,1,1,1)
 
 ## Exercise 5: Trace one pixel influence
 
-The question is: Add10to the top-left pixel and compare output delta.
+The question is: Add10 to the top-left pixel and compare output delta.
 
 The controlled perturbation demonstrates locality directly. A global normalization or other layer could introduce additional dependencies in a complete network.
 
@@ -97,7 +97,7 @@ torch.testing.assert_close(delta[0,0],torch.tensor([[10.,0.],[0.,0.]],dtype=torc
 
 ## Exercise 6: Count shared parameters
 
-The question is: Build a1-input-channel, 2-output-channel, 2x2bias-free C on v2d.
+The question is: Build a1-input-channel, 2-output-channel, 2 x2 bias-free C on v2 d.
 
 Increasing image height creates more applications of the same kernel, not a separate weight set for each position.
 
@@ -106,9 +106,9 @@ layer=nn.Conv2d(1,2,2,bias=False)
 assert sum(p.numel() for p in layer.parameters())==8
 ```
 
-**Expected:** 8trainable scalars.
+**Expected:** 8 trainable scalars.
 
-**Verify:** Compare the computed values or written argument with 8trainable scalars.
+**Verify:** Compare the computed values or written argument with 8 trainable scalars.
 
 ## Review after comparison
 

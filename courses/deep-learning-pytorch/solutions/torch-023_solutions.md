@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.
 
-Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4gradient vector so all observations have independent oracles.
+Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4 gradient vector so all observations have independent oracles.
 
 **Disconnected loss:** A value with no gradient path to the intended parameters.
 
@@ -38,7 +38,7 @@ else: raise AssertionError('detached loss backpropagated')
 
 ## Exercise 2: Repair two exact updates
 
-The question is: Usex1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+The question is: Usex1, 2, 3, y2 x, w0 and two SGD.1 steps with gradient clearing.
 
 Comparing each state finds the first divergence. A final-value-only check can hide wrong intermediate logging or compensating errors.
 

@@ -7,7 +7,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Exercise 1: Inspect a literal Dataset
 # Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22,
 # 30, 32.
-# Expected: length8; item0has ID0, group A, value 1.
+# Expected: length8; item0 has ID0, group A, value 1.
 
 # Exercise 2: Select whole groups
 # Train on accounts A, B and holdout C, D using Subset.

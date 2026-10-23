@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Calculate the initial loss
-# Use float64x1, 2, 3, y2x and scalar w0.
+# Use float64 x1, 2, 3, y2 x and scalar w0.
 # Expected: mean squared loss56/3.
 
 # Exercise 2: Inspect the gradient before updating

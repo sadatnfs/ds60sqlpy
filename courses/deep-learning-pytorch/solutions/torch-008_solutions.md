@@ -6,7 +6,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself:backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
 
-The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
+The scalar fixture x1, 2, 3, y2 x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
 
 **Optimizer membership:** The exact parameter objects whose gradients an optimizer consumes.
 
@@ -20,7 +20,7 @@ Wrap the scalar weight innn.Parameter with float64. Use an SGD optimizer with mo
 
 ## Exercise 1: Calculate the initial loss
 
-The question is: Use float64x1, 2, 3, y2x and scalar w0.
+The question is: Use float64 x1, 2, 3, y2 x and scalar w0.
 
 The three squared residuals are4, 16, 36. Their sum56 divided by three defines the objective denominator.
 

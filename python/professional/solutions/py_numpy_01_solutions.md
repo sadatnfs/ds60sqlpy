@@ -50,7 +50,7 @@ expect_value_error(lambda:copy_window(np.ones((2,2)),0,1))
 
 ### Exercise 3: Transform without mutating callers
 
-Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction.
+Return a new floating-point matrix with each row mean subtracted. Require a finite two-dimensional numeric input with at least one column. Permit zero rows. Integer inputs must not fail because of in-place float subtraction. Reject an unrepresentable centered result with ValueError.
 
 **Expected:** [[1,3],[10,14]] becomes[[-1,1],[-2,2]]; source stays unchanged and result shares no memory. Shape(0,2) remains(0,2); a zero-column or NaN input raises ValueError.
 
@@ -59,15 +59,22 @@ def row_center_owned(values: np.ndarray) -> np.ndarray:
     array=np.asarray(values,dtype=float)
     if array.ndim != 2 or array.shape[1]==0 or not np.isfinite(array).all():
         raise ValueError("Expected finite rows with at least one column")
-    return array-array.mean(axis=1,keepdims=True)
+    mean=(array/array.shape[1]).sum(axis=1,keepdims=True)
+    with np.errstate(over="ignore",invalid="ignore"):
+        result=array-mean
+    if not np.isfinite(result).all():
+        raise ValueError("Centered result exceeds finite floating range")
+    return result
 ```
 
-Conversion to float permits fractional means without an integer casting error. Keeping the reduced axis gives an n-by-one mean array that broadcasts across each row. Subtraction creates the result rather than modifying the caller's array, even when the input conversion reused a float buffer. A row with no columns has an undefined mean and is rejected; a matrix with no rows has no row means to compute and preserves its valid column count.
+Conversion to float permits fractional means without an integer casting error. Dividing before summing avoids overflow in a large finite row mean; retaining the reduced axis gives an n-by-one mean that broadcasts across each row. A centered result outside floating range is rejected explicitly. Subtraction creates the result rather than modifying the caller's array, even when the input conversion reused a float buffer. A row with no columns has an undefined mean and is rejected; a matrix with no rows has no row means to compute and preserves its valid column count.
 
 ```python
 a=np.array([[1,3],[10,14]]);b=row_center_owned(a)
 assert np.allclose(b,[[-1,1],[-2,2]]) and a.tolist()==[[1,3],[10,14]]
 assert not np.shares_memory(a,b) and row_center_owned(np.empty((0,2))).shape==(0,2)
+assert np.allclose(row_center_owned(np.array([[1e308,1e308]])),[[0,0]])
+expect_value_error(lambda:row_center_owned(np.array([[1.7e308,-1.7e308,-1.7e308]])))
 expect_value_error(lambda:row_center_owned(np.empty((2,0))))
 expect_value_error(lambda:row_center_owned(np.array([[np.nan]])))
 ```

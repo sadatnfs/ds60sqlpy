@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
+Regularization and training mode affect different parts of the experiment. An explicit L1 orL2 penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
 
 The fixture uses weights1, -2 and unit activations. It separates data loss from penalty, checks stochastic outputs by allowed values rather than a fixed random mask, and confirms deterministic evaluation. None of these checks proves that regularization improves held-out quality; that requires a controlled validation comparison.
 
@@ -20,9 +20,9 @@ nn.Dropout(p=.5) scales retained training activations by 1/(1-p). Call train or 
 
 ## Exercise 1: Calculate two penalties
 
-The question is: Use weights1, -2 and compute L1and squared L2sums.
+The question is: Use weights1, -2 and compute L1 and squared L2 sums.
 
-The squared L2penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
+The squared L2 penalty is not the square root norm. Naming the convention avoids a factor or square-root mismatch when comparing implementations.
 
 ```python
 w=torch.tensor([1.,-2.]); assert w.abs().sum().item()==3 and w.square().sum().item()==5
@@ -58,9 +58,9 @@ drop.train(); sampled=drop(x)
 assert tuple(sampled.shape)==(4,8) and set(sampled.unique().tolist())<={0.,2.}
 ```
 
-**Expected:** shape(4, 8); only0or2.
+**Expected:** shape(4, 8); only0 or2.
 
-**Verify:** Compare the computed values or written argument with shape(4, 8); only0or2.
+**Verify:** Compare the computed values or written argument with shape(4, 8); only0 or2.
 
 ## Exercise 4: Separate data and penalty terms
 

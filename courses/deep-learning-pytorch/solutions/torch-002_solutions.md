@@ -22,7 +22,7 @@ torch.arange creates a one-dimensional tensor; reshape supplies the desired axes
 
 ## Exercise 1: Inspect shape and stride
 
-The question is: Create a2x3 float64CPU tensor from values0..5.
+The question is: Create a2 x3 float64 CPU tensor from values0..5.
 
 The last axis advances by one stored element and the first by three. These metadata explain the matrix layout without relying on a printed table alone.
 

@@ -72,7 +72,12 @@ class FakeCluster:
             result = {"metadata": {"uid": self.namespace_uid, "labels": {OWNER_LABEL: OWNER}}}
         elif args[0] == "create":
             assert payload is not None
-            kind = {"Deployment": "deployment", "Service": "service", "Job": "job"}[payload["kind"]]
+            kind = {
+                "Deployment": "deployment",
+                "Service": "service",
+                "Job": "job",
+                "ConfigMap": "configmap",
+            }[payload["kind"]]
             name = payload["metadata"]["name"]
             if (kind, name) in self.objects:
                 return CommandResult(1, "", "AlreadyExists")
@@ -89,14 +94,26 @@ class FakeCluster:
                 }
             if kind == "job":
                 self.had_job = True
-                result["status"] = {"succeeded": 1}
+                result["status"] = {
+                    "succeeded": 1,
+                    "conditions": [{"type": "Complete", "status": "True"}],
+                }
+                command = result["spec"]["template"]["spec"]["containers"][0]["command"]
+                if command[-1] == "failure":
+                    result["status"] = {
+                        "failed": 1,
+                        "conditions": [{"type": "Failed", "status": "True"}],
+                    }
             self.objects[(kind, name)] = result
         elif args[0] == "delete":
             assert args[1] == "--raw" and args[-2:] == ["-f", "-"]
             assert payload is not None
-            kind = {"deployments": "deployment", "services": "service", "jobs": "job"}[
-                args[2].split("/")[-2]
-            ]
+            kind = {
+                "deployments": "deployment",
+                "services": "service",
+                "jobs": "job",
+                "configmaps": "configmap",
+            }[args[2].split("/")[-2]]
             name = args[2].split("/")[-1]
             current = self.objects[(kind, name)]
             assert payload["preconditions"]["uid"] == current["metadata"]["uid"]
@@ -116,6 +133,36 @@ class FakeCluster:
                     }
                 ]
             }
+        elif args[:2] == ["get", "pods"] and "batch.kubernetes.io/job-name=" in args[3]:
+            name = args[3].split("batch.kubernetes.io/job-name=", 1)[1]
+            job = self.objects[("job", name)]
+            template = job["spec"]["template"]
+            result = {
+                "items": [
+                    {
+                        "metadata": {
+                            "name": name + "-pod",
+                            "namespace": NAMESPACE,
+                            "uid": name + "-pod-uid",
+                            "labels": copy.deepcopy(template["metadata"]["labels"]),
+                            "ownerReferences": [
+                                {"uid": job["metadata"]["uid"], "controller": True, "kind": "Job"}
+                            ],
+                        },
+                        "status": {
+                            "phase": "Succeeded",
+                            "containerStatuses": [
+                                {
+                                    "name": template["spec"]["containers"][0]["name"],
+                                    "state": {"terminated": {"exitCode": 0}},
+                                }
+                            ],
+                        },
+                    }
+                ]
+            }
+        elif args[0] == "logs":
+            result = {"accepted": 3, "rejected": 2, "total": 35, "fixture_contract": 2}
         elif args[:2] == ["get", "pods"]:
             deployment = self.objects[("deployment", "hello")]
             count = deployment["spec"]["replicas"]

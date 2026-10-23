@@ -8,13 +8,13 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-007`. The prer
 
 ## Learning objectives
 
-One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64x1, 2, 3, y2x and scalar w0. The finish condition is mean squared loss56/3. w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+One optimizer step is the smallest complete training experiment. The central investigation is concrete: Use float64 x1, 2, 3, y2 x and scalar w0. The finish condition is mean squared loss56/3. w.grad None; updated weight unchanged. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself:backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
 
-The scalar fixture x1, 2, 3, y2x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
+The scalar fixture x1, 2, 3, y2 x, w0 and rate.1 has an exact oracle. Mean squared loss starts at56/3, the derivative is-56/3, the new weight is28/15, and the new loss is56/675. A mistaken l y broadcast column target gives the same initial loss but a different gradient. This is why comparing only a printed initial objective is an inadequate correctness test.
 
 ## Design decisions and when to use this method
 
@@ -91,7 +91,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Calculate the initial loss.** Use float64x1, 2, 3, y2x and scalar w0.
+1. **Calculate the initial loss.** Use float64 x1, 2, 3, y2 x and scalar w0.
    **Expected:** mean squared loss56/3.
    **Verify:** Save the assertion results for exercise 1, including mean squared loss56/3.
 

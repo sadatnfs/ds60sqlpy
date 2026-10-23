@@ -9,7 +9,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: detached loss requires_grad False; backward raises RuntimeError.
 
 # Exercise 2: Repair two exact updates
-# Usex1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+# Usex1, 2, 3, y2 x, w0 and two SGD.1 steps with gradient clearing.
 # Expected: weights28/15 then448/225.
 
 # Exercise 3: Inspect norm clipping

@@ -57,7 +57,7 @@ MSE=216/4=54
 
 ## Exercise 3: Separate an exact relation from learned evidence
 
-The question is: Compare a hand-specified rule y=2x with a model trained on the three points.
+The question is: Compare a hand-specified rule y=2 x with a model trained on the three points.
 
 A correct formula is useful as an oracle. It must not be presented as a trained-model result when no training occurred.
 

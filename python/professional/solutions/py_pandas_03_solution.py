@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 def group_shares(frame: pd.DataFrame) -> pd.Series:
-    if frame["customer_id"].isna().any() or not np.isfinite(frame["amount"]).all() or (frame["amount"]<0).any():
+    if frame["customer_id"].isna().any() or frame["amount"].isna().any() or not np.isfinite(frame["amount"]).all() or (frame["amount"]<0).any():
         raise ValueError("Expected known customers and finite nonnegative amounts")
     total=frame.groupby("customer_id",sort=False)["amount"].transform("sum")
     return frame["amount"].div(total.where(total.ne(0)))
@@ -19,7 +19,7 @@ def ordered_lag(events: pd.DataFrame) -> pd.DataFrame:
 
 def prior_window_sum(events: pd.DataFrame, window: pd.Timedelta) -> pd.DataFrame:
     ordered_lag(events)
-    if pd.isna(window) or window<=pd.Timedelta(0) or not np.isfinite(events["amount"]).all():
+    if pd.isna(window) or window<=pd.Timedelta(0) or events["amount"].isna().any() or not np.isfinite(events["amount"]).all():
         raise ValueError("Expected a positive window and finite amounts")
     by_time=events.groupby(["customer_id","at"],as_index=False,sort=True)["amount"].sum()
     parts=[]
@@ -50,6 +50,8 @@ def last_event_per_customer(events: pd.DataFrame) -> pd.DataFrame:
 def category_summary(frame: pd.DataFrame, categories: list[str]) -> pd.DataFrame:
     if len(categories)!=len(set(categories)) or frame["category"].isna().any() or not frame["category"].isin(categories).all():
         raise ValueError("Expected unique declared categories and valid labels")
+    if not pd.api.types.is_numeric_dtype(frame["value"].dtype) or not np.isfinite(frame["value"].dropna().to_numpy(dtype=float)).all():
+        raise ValueError("Known category measurements must be finite numeric values")
     f=frame[["category","value"]].copy();f["category"]=pd.Categorical(f["category"],categories=categories,ordered=True)
     result=f.groupby("category",observed=False,sort=True)["value"].agg(row_count="size",known_count="count",total=lambda values:values.sum(min_count=1))
     return result.reset_index()
@@ -68,6 +70,8 @@ def main():
     assert np.allclose(r.iloc[:2],[.25,.75]) and r.iloc[2:].isna().all() and r.index.equals(f.index)
     bad=f.copy();bad.iloc[0,1]=-1
     expect_value_error(lambda:group_shares(bad))
+    missing=pd.DataFrame({"customer_id":["a"],"amount":pd.Series([pd.NA],dtype="Float64")})
+    expect_value_error(lambda:group_shares(missing))
     # Exercise 2: Lag within customer using a stable tie break
     e=pd.DataFrame({"event_id":[2,1,3,4],"customer_id":["a","a","a","b"],"at":pd.to_datetime(["2026-01-01T10:00Z","2026-01-01T10:00Z","2026-01-01T11:00Z","2026-01-01T10:00Z"]),"amount":[20.,10.,30.,99.]})
     r=ordered_lag(e)

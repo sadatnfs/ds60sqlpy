@@ -69,7 +69,7 @@ torch.testing.assert_close(gsum,3*gmean,atol=1e-12,rtol=0)
 
 ## Exercise 4: Inspect a feature denominator
 
-The question is: Use a2x2 residual matrix of ones and mean reduction.
+The question is: Use a2 x2 residual matrix of ones and mean reduction.
 
 The framework does not know whether columns are features, tasks or repeated observations. The author must define whether averaging over all entries matches the intended objective.
 

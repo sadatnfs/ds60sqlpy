@@ -18,7 +18,7 @@ PyTorch BatchNorm also distinguishes the variance estimate used for training nor
 
 ## Reading the implementation
 
-nn.BatchNorm1d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
+nn.BatchNorm1 d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
 
 ## Exercise 1: Update a running mean
 
@@ -53,7 +53,7 @@ assert torch.equal(before,bn.running_mean) and torch.equal(count,bn.num_batches_
 
 ## Exercise 3: Check LayerNorm row independence
 
-The question is: Normalize1, 3alone and beside100, 200.
+The question is: Normalize1, 3 alone and beside100, 200.
 
 LayerNorm uses only the current row's features in this configuration. A sequence-wide or batch-wide reduction would fail the perturbation test.
 
@@ -68,7 +68,7 @@ torch.testing.assert_close(alone[0],together[0],atol=1e-6,rtol=0)
 
 ## Exercise 4: Inspect running variance convention
 
-The question is: From initial running variance1, use batch values1, 3whose unbiased variance is2 and momentum.5.
+The question is: From initial running variance1, use batch values1, 3 whose unbiased variance is2 and momentum.5.
 
 Forward training normalization uses a biased variance estimate, but the running variance update uses an unbiased one. Comparing only the layer title would miss this detail.
 
@@ -83,7 +83,7 @@ assert x.var(0,correction=0).tolist()==[1.,1.] and x.var(0,correction=1).tolist(
 
 ## Exercise 5: Translate momentum explicitly
 
-The question is: Compute updates with old mean0, batch mean10 and PyTorch momentum.1versus Keras momentum.1.
+The question is: Compute updates with old mean0, batch mean10 and PyTorch momentum.1 versus Keras momentum.1.
 
 To match a PyTorch new-statistic coefficient.1, the Keras old-statistic retention coefficient would be.9. Equal argument names are not enough evidence of equivalence.
 

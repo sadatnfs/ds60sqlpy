@@ -13,7 +13,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: batch sizes2, 2, 1.
 
 # Exercise 3: Run three independent updates
-# Train x1..6, y2x, w0 with batch size 2, rate.01, clearing gradients each batch.
+# Train x1..6, y2 x, w0 with batch size 2, rate.01, clearing gradients each batch.
 # Expected: three finite distinct weights.
 
 # Exercise 4: Expose accidental accumulation
@@ -25,7 +25,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: every shuffled target equals twice its input.
 
 # Exercise 6: Aggregate unequal batch means
-# Combine mean loss2 over2examples and mean loss8 over1example.
+# Combine mean loss2 over2 examples and mean loss8 over1 example.
 # Expected: epoch mean4, not5.
 
 if __name__ == "__main__":

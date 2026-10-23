@@ -102,7 +102,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** mean4; holdout squared errors16, 36, 64, 100; MSE54.
    **Verify:** Save the reasoning table for exercise 2, including mean4; holdout squared errors16, 36, 64, 100; MSE54.
 
-3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2x with a model trained on the three points.
+3. **Separate an exact relation from learned evidence.** Compare a hand-specified rule y=2 x with a model trained on the three points.
    **Expected:** the hand rule predicts the fixture exactly but was not learned by running an optimizer.
    **Verify:** Save the reasoning table for exercise 3, including the hand rule predicts the fixture exactly but was not learned by running an optimizer.
 

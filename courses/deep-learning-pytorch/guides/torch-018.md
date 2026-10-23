@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-nn.BatchNorm1d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
+nn.BatchNorm1 d(2, momentum=.5) treats columns as features for an(N, C)input. train mode updates running_mean and running_var; eval mode uses stored state. nn.LayerNorm(2) reduces the last two-feature dimension independently for each row. Its default epsilon and affine parameters are part of the comparison. Track num_batches_tracked as a buffer, separate from trainable weight and bias.
 
 ## Worked example / walkthrough
 
@@ -101,15 +101,15 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** running mean and batch counter unchanged.
    **Verify:** Save the assertion results for exercise 2, including running mean and batch counter unchanged.
 
-3. **Check LayerNorm row independence.** Normalize1, 3alone and beside100, 200.
+3. **Check LayerNorm row independence.** Normalize1, 3 alone and beside100, 200.
    **Expected:** first row matches within1e-6.
    **Verify:** Save the assertion results for exercise 3, including first row matches within1e-6.
 
-4. **Inspect running variance convention.** From initial running variance1, use batch values1, 3whose unbiased variance is2 and momentum.5.
+4. **Inspect running variance convention.** From initial running variance1, use batch values1, 3 whose unbiased variance is2 and momentum.5.
    **Expected:** running variance1.5 for each feature.
    **Verify:** Save the assertion results for exercise 4, including running variance1.5 for each feature.
 
-5. **Translate momentum explicitly.** Compute updates with old mean0, batch mean10 and PyTorch momentum.1versus Keras momentum.1.
+5. **Translate momentum explicitly.** Compute updates with old mean0, batch mean10 and PyTorch momentum.1 versus Keras momentum.1.
    **Expected:** PyTorch1; Keras9 under their respective conventions.
    **Verify:** Save the assertion results for exercise 5, including PyTorch1; Keras9 under their respective conventions.
 

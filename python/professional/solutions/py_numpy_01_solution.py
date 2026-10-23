@@ -14,7 +14,12 @@ def row_center_owned(values: np.ndarray) -> np.ndarray:
     array=np.asarray(values,dtype=float)
     if array.ndim != 2 or array.shape[1]==0 or not np.isfinite(array).all():
         raise ValueError("Expected finite rows with at least one column")
-    return array-array.mean(axis=1,keepdims=True)
+    mean=(array/array.shape[1]).sum(axis=1,keepdims=True)
+    with np.errstate(over="ignore",invalid="ignore"):
+        result=array-mean
+    if not np.isfinite(result).all():
+        raise ValueError("Centered result exceeds finite floating range")
+    return result
 
 def read_only_view(values: np.ndarray) -> np.ndarray:
     result=values.view()
@@ -55,6 +60,8 @@ def main():
     a=np.array([[1,3],[10,14]]);b=row_center_owned(a)
     assert np.allclose(b,[[-1,1],[-2,2]]) and a.tolist()==[[1,3],[10,14]]
     assert not np.shares_memory(a,b) and row_center_owned(np.empty((0,2))).shape==(0,2)
+    assert np.allclose(row_center_owned(np.array([[1e308,1e308]])),[[0,0]])
+    expect_value_error(lambda:row_center_owned(np.array([[1.7e308,-1.7e308,-1.7e308]])))
     expect_value_error(lambda:row_center_owned(np.empty((2,0))))
     expect_value_error(lambda:row_center_owned(np.array([[np.nan]])))
     # Exercise 4: Distinguish access restriction from a snapshot

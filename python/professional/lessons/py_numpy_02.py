@@ -15,7 +15,7 @@ def scale_rows(values: np.ndarray, factors: np.ndarray) -> np.ndarray:
     raise NotImplementedError("Implement scale_rows")
 
 def pairwise_squared(left: np.ndarray, right: np.ndarray) -> np.ndarray:
-    """Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions. Use the tiny broadcasted difference, not Python nested loops."""
+    """Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops."""
     raise NotImplementedError("Implement pairwise_squared")
 
 def weighted_columns(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 # Expected: [[1,2,3],[4,5,6]] with [10,100] gives [[10,20,30],[400,500,600]]. Three factors raise ValueError; shape(0,3) with an empty vector returns (0,3).
 
 # Exercise 3: Create all pairs with a declared contraction
-# Prompt: Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions. Use the tiny broadcasted difference, not Python nested loops.
+# Prompt: Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.
 # Expected: [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns shape(0,1); two versus three features raises ValueError.
 
 # Exercise 4: Contract observations using valid weights

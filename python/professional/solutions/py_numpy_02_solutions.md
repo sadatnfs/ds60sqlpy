@@ -15,7 +15,12 @@ def column_center(values: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float)
     if x.ndim!=2 or x.shape[0]==0 or not np.isfinite(x).all():
         raise ValueError("Expected a finite matrix with observations")
-    return x-x.mean(axis=0,keepdims=True)
+    mean=(x/x.shape[0]).sum(axis=0,keepdims=True)
+    with np.errstate(over="ignore",invalid="ignore"):
+        result=x-mean
+    if not np.isfinite(result).all():
+        raise ValueError("Centered result exceeds finite floating range")
+    return result
 ```
 
 Each output column subtracts the average across observations, so axis zero is reduced. Keeping the dimension documents that the result has one row of feature means. Conversion makes fractional means representable. The nonsquare fixture prevents a row-centered result from having a misleadingly compatible interpretation, and the empty-observation rejection prevents an undefined mean from quietly producing NaNs.
@@ -24,6 +29,7 @@ Each output column subtracts the average across observations, so axis zero is re
 x=np.array([[1,10,100],[3,14,108]])
 assert np.allclose(column_center(x),[[-1,-2,-4],[1,2,4]])
 assert x[0,0]==1
+assert np.allclose(column_center(np.array([[1e308],[1e308]])),[[0],[0]])
 expect_value_error(lambda:column_center(np.empty((0,3))))
 expect_value_error(lambda:column_center(np.array([1,2])))
 ```
@@ -53,7 +59,7 @@ expect_value_error(lambda:scale_rows(x,np.array([1,2,3])))
 
 ### Exercise 3: Create all pairs with a declared contraction
 
-Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions. Use the tiny broadcasted difference, not Python nested loops.
+Return squared Euclidean distances between rows of two finite matrices with equal feature counts. Support empty row sets. Reject mismatched feature dimensions or unrepresentable squared distances with ValueError. Use the tiny broadcasted difference, not Python nested loops.
 
 **Expected:** [[0,0],[3,4]] against [[0,0]] yields [[0],[25]]. Empty left shape(0,2) returns shape(0,1); two versus three features raises ValueError.
 
@@ -62,8 +68,12 @@ def pairwise_squared(left: np.ndarray, right: np.ndarray) -> np.ndarray:
     a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)
     if a.ndim!=2 or b.ndim!=2 or a.shape[1]!=b.shape[1] or not np.isfinite(a).all() or not np.isfinite(b).all():
         raise ValueError("Expected finite matrices with equal feature dimensions")
-    difference=a[:,None,:]-b[None,:,:]
-    return np.sum(difference*difference,axis=-1)
+    with np.errstate(over="ignore",invalid="ignore"):
+        difference=a[:,None,:]-b[None,:,:]
+        result=np.sum(difference*difference,axis=-1)
+    if not np.isfinite(result).all():
+        raise ValueError("Squared distances exceed finite floating range")
+    return result
 ```
 
 The temporary has an axis for left rows, an axis for right rows and an axis for features. Squaring and summing only the feature axis preserves the pair table. The explicit feature-count check prevents unrelated coordinate spaces from being compared. For large row counts this temporary can be expensive; the exercise teaches shape correctness, while a later optimization should use blocking and numerical checks rather than assume broadcasting is always cheap.
@@ -84,17 +94,23 @@ Return weighted column means for a finite matrix using one nonnegative finite we
 ```python
 def weighted_columns(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float);w=np.asarray(weights,dtype=float)
-    if x.ndim!=2 or w.ndim!=1 or len(w)!=x.shape[0] or not np.isfinite(x).all() or not np.isfinite(w).all() or np.any(w<0) or w.sum()<=0:
+    if x.ndim!=2 or w.ndim!=1 or len(w)!=x.shape[0] or not np.isfinite(x).all() or not np.isfinite(w).all() or np.any(w<0) or not np.any(w>0):
         raise ValueError("Expected finite nonnegative weights with positive sum")
-    return np.einsum("n,nd->d",w,x)/w.sum()
+    scaled=w/w.max()
+    normalized=scaled/scaled.sum()
+    result=np.einsum("n,nd->d",normalized,x)
+    if not np.isfinite(result).all():
+        raise ValueError("Weighted result exceeds finite floating range")
+    return result
 ```
 
-The repeated n label in the einsum input is summed and the remaining d label names the output feature axis. Division by total weight normalizes a weighted sum into a mean. Scaling all weights equally must not change the result, giving an independent invariant. The nonnegative contract makes these weights interpretable as averaging weights; allowing signed weights would define a different operation with different denominator behavior.
+The repeated n label in the einsum input is summed and the remaining d label names the output feature axis. Scaling weights by their maximum before normalization prevents overflow in the total weight. Contracting normalized weights with values then forms a convex mean without multiplying two huge unnormalized operands. Scaling all weights equally must not change the result, giving an independent invariant. The nonnegative contract makes these weights interpretable as averaging weights; allowing signed weights would define a different operation with different denominator behavior.
 
 ```python
 x=np.array([[1,10],[3,30]])
 assert np.allclose(weighted_columns(x,np.array([1,3])),[2.5,25])
 assert np.allclose(weighted_columns(x,np.array([10,30])),[2.5,25])
+assert np.isclose(weighted_columns(np.array([[1e308],[1e308]]),np.array([1e308,1e308]))[0],1e308)
 expect_value_error(lambda:weighted_columns(x,np.array([0,0])))
 expect_value_error(lambda:weighted_columns(x,np.array([-1,2])))
 expect_value_error(lambda:weighted_columns(x,np.array([1])))

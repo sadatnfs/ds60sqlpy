@@ -113,7 +113,7 @@ The exact 30-minute gap remains in session one, while 31 minutes starts session 
 
 **Expected:** Two equal-time events for a with IDs 1 and 2 choose 2. Customer b keeps its own last event. Output contains each customer once and sorted customer IDs.
 
-6. **Distinguish no rows from no known measurements.** Summarize declared unique categories in their declared order with category, row_count, known_count, total. Reject missing/undeclared category labels. Include unobserved categories with row_count0, known_count0, total missing; an observed all-missing category also has missing total.
+6. **Distinguish no rows from no known measurements.** Summarize declared unique categories in their declared order with category, row_count, known_count, total. Reject missing/undeclared category labels and nonnumeric or nonfinite known measurements. Include unobserved categories with row_count0, known_count0, total missing; an observed all-missing category also has missing total.
 
 **Expected:** Rows a:1, a:NA, b:NA and declared [a, b, c] yield counts(2,1),(1,0),(0,0) and totals 1, missing, missing. Unknown category z is rejected.
 

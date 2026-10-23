@@ -31,9 +31,9 @@ dataset=Accounts(); assert len(dataset)==8
 identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.item()==1
 ```
 
-**Expected:** length8; item0has ID0, group A, value 1.
+**Expected:** length8; item0 has ID0, group A, value 1.
 
-**Verify:** Compare the computed values or written argument with length8; item0has ID0, group A, value 1.
+**Verify:** Compare the computed values or written argument with length8; item0 has ID0, group A, value 1.
 
 ## Exercise 2: Select whole groups
 

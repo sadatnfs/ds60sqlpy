@@ -13,16 +13,16 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: running mean and batch counter unchanged.
 
 # Exercise 3: Check LayerNorm row independence
-# Normalize1, 3alone and beside100, 200.
+# Normalize1, 3 alone and beside100, 200.
 # Expected: first row matches within1e-6.
 
 # Exercise 4: Inspect running variance convention
-# From initial running variance1, use batch values1, 3whose unbiased variance is2 and
+# From initial running variance1, use batch values1, 3 whose unbiased variance is2 and
 # momentum.5.
 # Expected: running variance1.5 for each feature.
 
 # Exercise 5: Translate momentum explicitly
-# Compute updates with old mean0, batch mean10 and PyTorch momentum.1versus Keras
+# Compute updates with old mean0, batch mean10 and PyTorch momentum.1 versus Keras
 # momentum.1.
 # Expected: PyTorch1; Keras9 under their respective conventions.
 

@@ -8,7 +8,7 @@ Beginner; approximately 120 minutes. Direct prerequisites: `torch-009`. The prer
 
 ## Learning objectives
 
-A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. The central investigation is concrete: Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32. The finish condition is length8; item0has ID0, group A, value 1. 16, 18, 26, 28. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. The central investigation is concrete: Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32. The finish condition is length8; item0 has ID0, group A, value 1. 16, 18, 26, 28. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -66,7 +66,7 @@ dataset=Accounts(); assert len(dataset)==8
 identity,group,value=dataset[0]; assert identity==0 and group=='A' and value.item()==1
 ```
 
-**Expected:** length8; item0has ID0, group A, value 1.
+**Expected:** length8; item0 has ID0, group A, value 1.
 
 ### Example B: Select whole groups
 
@@ -92,13 +92,13 @@ mean=torch.stack([row[2] for row in train]).mean(); assert mean.item()==4
 
 ## Prediction before your attempt
 
-For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: length8; item0has ID0, group A, value 1. 16, 18, 26, 28. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
+For the supplied fixture, name the input unit, the intermediate state and the final quantity that changes. Predict one normal result and one failure result before touching the code. In particular, explain this lesson's acceptance condition in your own words: length8; item0 has ID0, group A, value 1. 16, 18, 26, 28. Preserve the prediction beside your later observations so a correction is visible. A copied expected value is not a derivation.
 
 ## Exercises
 
 1. **Inspect a literal Dataset.** Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32.
-   **Expected:** length8; item0has ID0, group A, value 1.
-   **Verify:** Save the assertion results for exercise 1, including length8; item0has ID0, group A, value 1.
+   **Expected:** length8; item0 has ID0, group A, value 1.
+   **Verify:** Save the assertion results for exercise 1, including length8; item0 has ID0, group A, value 1.
 
 2. **Select whole groups.** Train on accounts A, B and holdout C, D using Subset.
    **Expected:** four records each; group intersection empty.

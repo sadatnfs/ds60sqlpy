@@ -18,11 +18,11 @@ pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a 
 
 ## Reading the implementation
 
-Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known4x2table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
+Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known4 x2 table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
 
 ## Exercise 1: Lookup and mark padding
 
-The question is: Use IDs2, 3, 0 and a fixed4x2table with zero padding row.
+The question is: Use IDs2, 3, 0 and a fixed4 x2 table with zero padding row.
 
 The mask comes from the vocabulary policy. A real token could have a zero vector, so vector magnitude is not a reliable padding detector.
 
@@ -48,9 +48,9 @@ assert torch.count_nonzero(embedding.weight.grad[0]).item()==0
 assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
 ```
 
-**Expected:** padding row gradient zero; rows2and3nonzero.
+**Expected:** padding row gradient zero; rows2 and3 nonzero.
 
-**Verify:** Compare the computed values or written argument with padding row gradient zero; rows2and3nonzero.
+**Verify:** Compare the computed values or written argument with padding row gradient zero; rows2 and3 nonzero.
 
 ## Exercise 3: Compare packed and valid-prefix GRU state
 
@@ -88,7 +88,7 @@ assert not torch.allclose(padded_state,prefix_state,atol=1e-6,rtol=0)
 
 ## Exercise 5: Average only valid token losses
 
-The question is: Use losses log2, log2, 100with the valid mask.
+The question is: Use losses log2, log2, 100 with the valid mask.
 
 The valid count is two. Zeroing the third numerator but dividing by three would make padding artificially improve the metric.
 

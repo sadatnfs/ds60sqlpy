@@ -38,7 +38,7 @@
         "Broadcasting"
       ],
       "outcome": "A PyTorch tensor has values plus metadata:shape, dtype, device, strides and gradient-tracking state.",
-      "lab": "Create a2x3 float64CPU tensor from values0..5.",
+      "lab": "Create a2 x3 float64 CPU tensor from values0..5.",
       "verification": "shape(2, 3), stride(3, 1), CPU, float64. RuntimeError for incompatible trailing dimensions.",
       "paired_lesson_id": "tf-002"
     },
@@ -134,7 +134,7 @@
         "Gradient mode"
       ],
       "outcome": "PyTorch distinguishes graph tracking from gradient storage.",
-      "lab": "Create leaf w0 and intermediate2w, retain the intermediate gradient and backpropagate its sum.",
+      "lab": "Create leaf w0 and intermediate2 w, retain the intermediate gradient and backpropagate its sum.",
       "verification": "w leaf True; intermediate False; gradients2 and1. output still requires_grad True.",
       "paired_lesson_id": "tf-007"
     },
@@ -153,7 +153,7 @@
         "Independent oracle"
       ],
       "outcome": "One optimizer step is the smallest complete training experiment.",
-      "lab": "Use float64x1, 2, 3, y2x and scalar w0.",
+      "lab": "Use float64 x1, 2, 3, y2 x and scalar w0.",
       "verification": "mean squared loss56/3. w.grad None; updated weight unchanged.",
       "paired_lesson_id": "tf-008"
     },
@@ -193,7 +193,7 @@
       ],
       "outcome": "A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free.",
       "lab": "Create eight records with groups A, A, B, B, C, C, D, D and values1, 3, 5, 7, 20, 22, 30, 32.",
-      "verification": "length8; item0has ID0, group A, value 1. 16, 18, 26, 28.",
+      "verification": "length8; item0 has ID0, group A, value 1. 16, 18, 26, 28.",
       "paired_lesson_id": "tf-010"
     },
     {
@@ -230,7 +230,7 @@
         "Frozen assessment"
       ],
       "outcome": "An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment.",
-      "lab": "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c.",
+      "lab": "Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2 a-b+c.",
       "verification": "targets0, 2, -1, 1, 2, 4. disjoint IDs; holdout count 2; explicit limited scope.",
       "paired_lesson_id": "tf-012"
     },
@@ -327,7 +327,7 @@
         "Weight decay"
       ],
       "outcome": "Regularization and training mode affect different parts of the experiment.",
-      "lab": "Use weights1, -2 and compute L1and squared L2sums.",
+      "lab": "Use weights1, -2 and compute L1 and squared L2 sums.",
       "verification": "L1=3; squared L2=5. output still requires grad; backward gives ones.",
       "paired_lesson_id": "tf-017"
     },
@@ -367,8 +367,8 @@
         "Cross-correlation"
       ],
       "outcome": "Convolution applies a shared local kernel across spatial positions.",
-      "lab": "Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.",
-      "verification": "output shape1, 1, 2, 2; all values-4. 8trainable scalars.",
+      "lab": "Apply kernel1, 0; 0, -1 to image1..9 in3 x3 NCHW layout.",
+      "verification": "output shape1, 1, 2, 2; all values-4. 8 trainable scalars.",
       "paired_lesson_id": "tf-019"
     },
     {
@@ -386,7 +386,7 @@
         "Label invariance"
       ],
       "outcome": "Pooling reduces local spatial information.",
-      "lab": "Pool patch1, 3; 2, 4 with a2x2window.",
+      "lab": "Pool patch1, 3; 2, 4 with a2 x2 window.",
       "verification": "max4; average2.5. left->right->left.",
       "paired_lesson_id": "tf-020"
     },
@@ -406,7 +406,7 @@
         "Valid-target denominator"
       ],
       "outcome": "A padded sequence contains real positions and artificial storage positions.",
-      "lab": "Use IDs2, 3, 0 and a fixed4x2table with zero padding row.",
+      "lab": "Use IDs2, 3, 0 and a fixed4 x2 table with zero padding row.",
       "verification": "embedding shape1, 3, 2; mask True, True, False. RuntimeError for invalid length.",
       "paired_lesson_id": "tf-021"
     },
@@ -426,7 +426,7 @@
         "Dropout argument"
       ],
       "outcome": "Attention forms weighted combinations of value vectors using query-key comparisons.",
-      "lab": "Use zero3x2queries/keys and values2, 0; 0, 2; 6, 6.",
+      "lab": "Use zero3 x2 queries/keys and values2, 0; 0, 2; 6, 6.",
       "verification": "outputs2, 0; 1, 1; 8/3, 8/3. repeated evaluation matches.",
       "paired_lesson_id": "tf-022"
     },
@@ -466,7 +466,7 @@
       ],
       "outcome": "A classifier capstone must connect the task definition to training and evaluation evidence.",
       "lab": "Use training x-2, -1, 1, 2 with labels0, 0, 1, 1 and test x-3, 3.",
-      "verification": "4training records, 2test records. negative0/1errors; positive1/1.",
+      "verification": "4 training records, 2 test records. negative0/1 errors; positive1/1.",
       "paired_lesson_id": "tf-024"
     },
     {
@@ -479,15 +479,13 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "embedding objective",
-        "contrastive loss",
-        "negative sampling",
-        "cosine similarity",
-        "Contrastive embeddings and negative sampling"
+        "Contrastive objective",
+        "Cosine similarity",
+        "False negative"
       ],
-      "outcome": "Explain and implement contrastive embeddings and negative sampling with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Embedding objectives teach a representation to preserve selected relationships.",
+      "lab": "Use anchor[1, 0], positive[1, 1], negative[0, 1].",
+      "verification": "dots1, 0; cosines1/sqrt2, 0. positive probability increases; argmax remains0.",
       "paired_lesson_id": "tf-025"
     },
     {
@@ -500,16 +498,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "Layer",
-        "build",
-        "call",
-        "residual",
-        "tracked state",
-        "Custom modules, residual paths, buffers and autograd checks"
+        "Custom module",
+        "Buffer",
+        "Grad check",
+        "Incoming gradient"
       ],
-      "outcome": "Explain and implement custom modules, residual paths, buffers and autograd checks with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Custom modules should make state ownership and differentiation explicit.",
+      "lab": "Create a width2 residual with zero kernel and scale buffer1.",
+      "verification": "output equals input; one parameter and one buffer. gradient24.",
       "paired_lesson_id": "tf-026"
     },
     {
@@ -522,15 +518,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "transfer learning",
-        "freezing",
-        "fine-tuning",
-        "optimizer state",
-        "Transfer learning, frozen layers and optimizer membership"
+        "Frozen base",
+        "Optimizer membership",
+        "Mode-dependent buffer",
+        "Unfreeze phase"
       ],
-      "outcome": "Explain and implement transfer learning, frozen layers and optimizer membership with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Transfer learning reuses a representation while adapting a task-specific head.",
+      "lab": "Create a bias-free2-to-2 identity Linear base and disable its parameter gradients.",
+      "verification": "base output equals input; all base parameters frozen. base weight now changes.",
       "paired_lesson_id": "tf-027"
     },
     {
@@ -543,15 +538,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "checkpoint",
-        "optimizer slots",
-        "random state",
-        "next-step equivalence",
-        "Restartable training, optimizer state and RNG evidence"
+        "Training checkpoint",
+        "RNG state",
+        "Data position",
+        "Next-step parity"
       ],
-      "outcome": "Explain and implement restartable training, optimizer state and rng evidence with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction.",
+      "lab": "Take two Adam updates of a zero-weight linear model onx1, 2 andy2 x.",
+      "verification": "optimizer step2 and positive weight. directory absent; no distributed-loader claim.",
       "paired_lesson_id": "tf-028"
     },
     {
@@ -564,15 +558,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "precision",
-        "overflow",
-        "log-sum-exp",
-        "loss scaling",
-        "Stable objectives, precision and mixed-precision boundaries"
+        "Overflow",
+        "Log-sum-exp",
+        "Mixed precision",
+        "Gradient scaling"
       ],
-      "outcome": "Explain and implement stable objectives, precision and mixed-precision boundaries with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation.",
+      "lab": "Exponentiate float32 logits1000, 999 directly.",
+      "verification": "both exponentials infinite. ValueError before loss evaluation.",
       "paired_lesson_id": "tf-029"
     },
     {
@@ -585,15 +578,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "replica",
-        "gradient aggregation",
-        "unequal shards",
-        "accumulation",
-        "Distributed gradients and accumulation semantics on CPU"
+        "Global objective",
+        "Microbatch accumulation",
+        "Sha rd weighting",
+        "Distributed acceptance"
       ],
-      "outcome": "Explain and implement distributed gradients and accumulation semantics on cpu with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Distributed and accumulated gradients should represent a declared global objective.",
+      "lab": "Combine means2, 6 with counts1, 3.",
+      "verification": "global mean5; unweighted sha rd mean4. empty sha rd contributes0; global mean5.",
       "paired_lesson_id": "tf-030"
     },
     {
@@ -606,16 +598,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "tf.function",
-        "signature",
-        "retracing",
-        "warmup",
-        "measurement",
-        "Profiling, torch.compile and honest performance measurement"
+        "Graph capture",
+        "Backend",
+        "Warmup",
+        "Profiler overhead"
       ],
-      "outcome": "Explain and implement profiling, torch.compile and honest performance measurement with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Compilation and profiling answer different questions.",
+      "lab": "Evaluatef(x)=x*x+1 at float32[1, 2].",
+      "verification": "output[2, 5]. receipt does not claim universal speedup.",
       "paired_lesson_id": "tf-031"
     },
     {
@@ -628,16 +618,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "Keras 3",
-        ".keras",
-        "SavedModel",
-        "signature",
-        "parity",
-        "state_dict, torch.export and inference parity"
+        "state_dict",
+        "Exported program",
+        "Dynamic dimension",
+        "Inference parity"
       ],
-      "outcome": "Explain and implement state_dict, torch.export and inference parity with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "A state dictionary stores named parameters and buffers, not the complete Python architecture.",
+      "lab": "Set a 2-to-1 bias-free Linear weight to[2, -1] and predict rows1, 2 and3, 4.",
+      "verification": "outputs0, 2. three-row parity passes; temporary directory absent.",
       "paired_lesson_id": "tf-032"
     },
     {
@@ -650,15 +638,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "inference contract",
-        "batch limit",
-        "schema",
-        "input validation",
-        "Inference mode, model contracts and bounded batching"
+        "Inference mode",
+        "Input contract",
+        "Batch independence",
+        "Owned output"
       ],
-      "outcome": "Explain and implement inference mode, model contracts and bounded batching with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Inference is a bounded function with an input and output contract.",
+      "lab": "Use float32 CPU rows1, 2 and3, 4.",
+      "verification": "outputs0, 2 with shape(2, ). input unchanged.",
       "paired_lesson_id": "tf-033"
     },
     {
@@ -671,16 +658,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "robustness",
-        "privacy",
-        "provenance",
-        "model card",
-        "claim boundary",
-        "Robustness, privacy and evidence beyond a score"
+        "Subgroup denominator",
+        "Robustness condition",
+        "Finite safety evidence",
+        "Model card"
       ],
-      "outcome": "Explain and implement robustness, privacy and evidence beyond a score with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "A reliability report should preserve the conditions and denominators behind a score.",
+      "lab": "Use groups A, A, B with truth1, 1, 0 and prediction1, 0, 0.",
+      "verification": "A1/2 errors; B0/1. card explicitly has no privacy guarantee.",
       "paired_lesson_id": "tf-034"
     },
     {
@@ -693,15 +678,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "paired comparison",
-        "bootstrap",
-        "selection bias",
-        "evaluation unit",
-        "Paired model comparisons and uncertainty"
+        "Paired difference",
+        "Resampling unit",
+        "Selection bias",
+        "Local generator"
       ],
-      "outcome": "Explain and implement paired model comparisons and uncertainty with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "Model comparisons should preserve the pairing between predictions on the same held-out identities.",
+      "lab": "Use truth a0, b1, c2 with A0, 2, 2 andB1, 2, 3 in different dictionary order.",
+      "verification": "paired squared-loss differences-1, 0, -1. test selection violates the declared boundary.",
       "paired_lesson_id": "tf-035"
     },
     {
@@ -714,16 +698,14 @@
       ],
       "runtime": "llm-torch-cpu",
       "concepts": [
-        "capstone",
-        "reproducibility",
-        "release gate",
-        "rollback",
-        "limitations",
-        "Capstone: release a small reproducible PyTorch model"
+        "Release bundle",
+        "Integrity gate",
+        "Fresh-process inference",
+        "Rollback identity"
       ],
-      "outcome": "Explain and implement capstone: release a small reproducible pytorch model with inspectable state and a controlled counterexample.",
-      "lab": "Use bounded authored tensors or data to derive a result, run the PyTorch operation and compare the equivalent TensorFlow mechanism.",
-      "verification": "Inspect value/gradient/state or failure evidence and explain what the tiny CPU example does not establish.",
+      "outcome": "A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations.",
+      "lab": "Use train x1, 2, 3 and holdout4, 5 with target2 x and disjoint IDs.",
+      "verification": "3 training and2 holdout records. local checks True; production no-go; directory absent.",
       "paired_lesson_id": "tf-036"
     }
   ],

@@ -16,7 +16,7 @@ The class axis convention matters. For ordinary batches, logits have shape(N, C)
 
 ## Reading the implementation
 
-UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0<=target<C. For independent labels, use floating0/1targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.
+UseF.cross_entropy with long integer class indices and floating logits. Sparse target indices must satisfy0<=target<C. For independent labels, use floating0/1 targets with F.binary_cross_entropy_with_logits. softmax(dim=1) creates a class distribution for reporting. A uniform three-class logit vector gives loss log3, while three independent binary logits at zero each give probability.5.
 
 ## Exercise 1: Calculate uniform multiclass loss
 
@@ -65,7 +65,7 @@ assert tuple(classes.shape)==(2,) and tuple(labels.shape)==(2,3) and classes.dty
 
 ## Exercise 4: Check class-axis normalization
 
-The question is: Apply softmax(dim1) to a2x3matrix.
+The question is: Apply softmax(dim1) to a2 x3 matrix.
 
 Normalizing over the batch axis would couple unrelated observations. Row mass isa direct axis check.
 
@@ -89,9 +89,9 @@ per_entry=F.binary_cross_entropy_with_logits(torch.zeros_like(labels),labels,red
 np.testing.assert_allclose([per_entry.sum().item(),per_entry.mean().item()],[6*np.log(2),np.log(2)],atol=1e-6,rtol=0)
 ```
 
-**Expected:** sum6log2; mean log2.
+**Expected:** sum6 log2; mean log2.
 
-**Verify:** Compare the computed values or written argument with sum6log2; mean log2.
+**Verify:** Compare the computed values or written argument with sum6 log2; mean log2.
 
 ## Exercise 6: Reject an out-of-vocabulary class
 

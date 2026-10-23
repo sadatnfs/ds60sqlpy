@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compute the fixed spatial filter
-# Apply kernel1, 0; 0, -1 to image1..9 in3x3NCHW layout.
+# Apply kernel1, 0; 0, -1 to image1..9 in3 x3 NCHW layout.
 # Expected: output shape1, 1, 2, 2; all values-4.
 
 # Exercise 2: Rotate the kernel explicitly
@@ -21,12 +21,12 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: output shape1, 1, 1, 1.
 
 # Exercise 5: Trace one pixel influence
-# Add10to the top-left pixel and compare output delta.
+# Add10 to the top-left pixel and compare output delta.
 # Expected: only top-left output increases10.
 
 # Exercise 6: Count shared parameters
-# Build a1-input-channel, 2-output-channel, 2x2bias-free C on v2d.
-# Expected: 8trainable scalars.
+# Build a1-input-channel, 2-output-channel, 2 x2 bias-free C on v2 d.
+# Expected: 8 trainable scalars.
 
 if __name__ == "__main__":
     print("Read the guide and implement the six exercises in your saved copy.")

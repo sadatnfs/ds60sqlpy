@@ -16,7 +16,7 @@ Finite differences involve a tradeoff:large steps measure a wider region, while 
 
 ## Reading the implementation
 
-Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2h). Validate positive finite h and finite function values before comparing.
+Forf(w)=(w-2)^2, the analytic derivative is2(w-2). Construct a scalar float64 tensor with requires_grad=True, calculate f, and request autograd.grad(f, w). The returned tensor does not automatically populate w.grad. A central difference uses(f(w+h)-f(w-h))/(2 h). Validate positive finite h and finite function values before comparing.
 
 ## Exercise 1: Derive a scalar slope
 

@@ -167,7 +167,7 @@ def test_bash_build_prepares_fixture_without_a_cluster_or_lease(tmp_path: Path) 
     assert result.returncode == 0, result.stdout + result.stderr
     commands = records(log)
     fixture = [item for item in commands if item["args"][:1] == ["build"]]
-    assert len(fixture) == 1 and "ds60sqlpy-k8s-fixture:0.1.0" in fixture[0]["args"]
+    assert len(fixture) == 1 and "ds60sqlpy-k8s-fixture:0.2.0" in fixture[0]["args"]
     assert not any(item["tool"] == "host-python" for item in commands)
     assert not any("create" in item["args"] or "release" in item["args"] for item in commands)
 

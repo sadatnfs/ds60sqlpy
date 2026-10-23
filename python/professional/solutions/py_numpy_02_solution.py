@@ -6,7 +6,12 @@ def column_center(values: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float)
     if x.ndim!=2 or x.shape[0]==0 or not np.isfinite(x).all():
         raise ValueError("Expected a finite matrix with observations")
-    return x-x.mean(axis=0,keepdims=True)
+    mean=(x/x.shape[0]).sum(axis=0,keepdims=True)
+    with np.errstate(over="ignore",invalid="ignore"):
+        result=x-mean
+    if not np.isfinite(result).all():
+        raise ValueError("Centered result exceeds finite floating range")
+    return result
 
 def scale_rows(values: np.ndarray, factors: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float);f=np.asarray(factors,dtype=float)
@@ -18,14 +23,23 @@ def pairwise_squared(left: np.ndarray, right: np.ndarray) -> np.ndarray:
     a=np.asarray(left,dtype=float);b=np.asarray(right,dtype=float)
     if a.ndim!=2 or b.ndim!=2 or a.shape[1]!=b.shape[1] or not np.isfinite(a).all() or not np.isfinite(b).all():
         raise ValueError("Expected finite matrices with equal feature dimensions")
-    difference=a[:,None,:]-b[None,:,:]
-    return np.sum(difference*difference,axis=-1)
+    with np.errstate(over="ignore",invalid="ignore"):
+        difference=a[:,None,:]-b[None,:,:]
+        result=np.sum(difference*difference,axis=-1)
+    if not np.isfinite(result).all():
+        raise ValueError("Squared distances exceed finite floating range")
+    return result
 
 def weighted_columns(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float);w=np.asarray(weights,dtype=float)
-    if x.ndim!=2 or w.ndim!=1 or len(w)!=x.shape[0] or not np.isfinite(x).all() or not np.isfinite(w).all() or np.any(w<0) or w.sum()<=0:
+    if x.ndim!=2 or w.ndim!=1 or len(w)!=x.shape[0] or not np.isfinite(x).all() or not np.isfinite(w).all() or np.any(w<0) or not np.any(w>0):
         raise ValueError("Expected finite nonnegative weights with positive sum")
-    return np.einsum("n,nd->d",w,x)/w.sum()
+    scaled=w/w.max()
+    normalized=scaled/scaled.sum()
+    result=np.einsum("n,nd->d",normalized,x)
+    if not np.isfinite(result).all():
+        raise ValueError("Weighted result exceeds finite floating range")
+    return result
 
 def batched_projection(values: np.ndarray, weights: np.ndarray) -> np.ndarray:
     x=np.asarray(values,dtype=float);w=np.asarray(weights,dtype=float)
@@ -57,6 +71,7 @@ def main():
     x=np.array([[1,10,100],[3,14,108]])
     assert np.allclose(column_center(x),[[-1,-2,-4],[1,2,4]])
     assert x[0,0]==1
+    assert np.allclose(column_center(np.array([[1e308],[1e308]])),[[0],[0]])
     expect_value_error(lambda:column_center(np.empty((0,3))))
     expect_value_error(lambda:column_center(np.array([1,2])))
     # Exercise 2: Broadcast one factor per row
@@ -73,6 +88,7 @@ def main():
     x=np.array([[1,10],[3,30]])
     assert np.allclose(weighted_columns(x,np.array([1,3])),[2.5,25])
     assert np.allclose(weighted_columns(x,np.array([10,30])),[2.5,25])
+    assert np.isclose(weighted_columns(np.array([[1e308],[1e308]]),np.array([1e308,1e308]))[0],1e308)
     expect_value_error(lambda:weighted_columns(x,np.array([0,0])))
     expect_value_error(lambda:weighted_columns(x,np.array([-1,2])))
     expect_value_error(lambda:weighted_columns(x,np.array([1])))

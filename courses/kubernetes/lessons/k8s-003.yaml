@@ -21,7 +21,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: app
-          image: ds60sqlpy-k8s-fixture:0.1.0
+          image: ds60sqlpy-k8s-fixture:0.2.0
           imagePullPolicy: Never
           command: ["python", "/fixture.py", "server"]
           ports:

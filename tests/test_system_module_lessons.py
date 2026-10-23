@@ -125,7 +125,7 @@ def test_kubernetes_sources_use_the_offline_owned_fixture() -> None:
                 pod = doc["spec"]["template"]["spec"]
                 assert pod["automountServiceAccountToken"] is False
                 for container in pod["containers"]:
-                    assert container["image"] == "ds60sqlpy-k8s-fixture:0.1.0"
+                    assert container["image"] == "ds60sqlpy-k8s-fixture:0.2.0"
                     assert container["imagePullPolicy"] == "Never"
                     assert container["securityContext"]["allowPrivilegeEscalation"] is False
                     assert container["securityContext"]["readOnlyRootFilesystem"] is True

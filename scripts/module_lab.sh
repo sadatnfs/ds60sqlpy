@@ -144,7 +144,7 @@ case "$ACTION" in
       fi
       printf 'Building %s with foreground logs.\n' "$service"
       if [[ "$service" == k8s-fixture ]]; then
-        COMPOSE_PROGRESS=plain BUILDKIT_PROGRESS=plain docker build --progress plain -f "$ROOT/docker/kubernetes/Dockerfile.fixture" --build-arg "DS60_PYTHON_IMAGE=${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}" -t ds60sqlpy-k8s-fixture:0.1.0 "$ROOT"
+        COMPOSE_PROGRESS=plain BUILDKIT_PROGRESS=plain docker build --progress plain -f "$ROOT/docker/kubernetes/Dockerfile.fixture" --build-arg "DS60_PYTHON_IMAGE=${DS60_PYTHON_IMAGE:-python:3.12.12-slim-bookworm}" -t ds60sqlpy-k8s-fixture:0.2.0 "$ROOT"
       else
         COMPOSE_PROGRESS=plain BUILDKIT_PROGRESS=plain "${COMPOSE[@]}" build "$service"
       fi

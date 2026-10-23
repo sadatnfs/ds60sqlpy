@@ -8,7 +8,7 @@ Intermediate; approximately 120 minutes. Direct prerequisites: `torch-020`. The 
 
 ## Learning objectives
 
-A padded sequence contains real positions and artificial storage positions. The central investigation is concrete: Use IDs2, 3, 0 and a fixed4x2table with zero padding row. The finish condition is embedding shape1, 3, 2; mask True, True, False. RuntimeError for invalid length. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+A padded sequence contains real positions and artificial storage positions. The central investigation is concrete: Use IDs2, 3, 0 and a fixed4 x2 table with zero padding row. The finish condition is embedding shape1, 3, 2; mask True, True, False. RuntimeError for invalid length. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -44,7 +44,7 @@ Run the three worked blocks in order in one scratch file; later blocks reuse the
 
 ## Syntax anatomy and reasoning sequence
 
-Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known4x2table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
+Use Embedding.from_pretrained with padding_idx0 and freeze=False for the known4 x2 table. Set batch_first=True on GRU so inputs are(batch, time, features). pack_padded_sequence receives CPU lengths and enforce_sorted=False for this tiny fixture. Compare the packed final state with an unpadded valid-prefix run. For loss, use an explicit boolean valid mask and reject an all-padding denominator.
 
 ## Worked example / walkthrough
 
@@ -75,7 +75,7 @@ assert torch.count_nonzero(embedding.weight.grad[0]).item()==0
 assert torch.count_nonzero(embedding.weight.grad[2:4]).item()>0
 ```
 
-**Expected:** padding row gradient zero; rows2and3nonzero.
+**Expected:** padding row gradient zero; rows2 and3 nonzero.
 
 ### Example C: Compare packed and valid-prefix GRU state
 
@@ -98,13 +98,13 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
 
 ## Exercises
 
-1. **Lookup and mark padding.** Use IDs2, 3, 0 and a fixed4x2table with zero padding row.
+1. **Lookup and mark padding.** Use IDs2, 3, 0 and a fixed4 x2 table with zero padding row.
    **Expected:** embedding shape1, 3, 2; mask True, True, False.
    **Verify:** Save the assertion results for exercise 1, including embedding shape1, 3, 2; mask True, True, False.
 
 2. **Verify padding-row gradient behavior.** Sum embedding outputs and backpropagate.
-   **Expected:** padding row gradient zero; rows2and3nonzero.
-   **Verify:** Save the assertion results for exercise 2, including padding row gradient zero; rows2and3nonzero.
+   **Expected:** padding row gradient zero; rows2 and3 nonzero.
+   **Verify:** Save the assertion results for exercise 2, including padding row gradient zero; rows2 and3 nonzero.
 
 3. **Compare packed and valid-prefix GRU state.** Use fixed GRU parameters.1 and length2; compare packed run with the unpadded first two embeddings.
    **Expected:** final states match within1e-6.
@@ -114,7 +114,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** final state differs from the valid-prefix state.
    **Verify:** Save the assertion results for exercise 4, including final state differs from the valid-prefix state.
 
-5. **Average only valid token losses.** Use losses log2, log2, 100with the valid mask.
+5. **Average only valid token losses.** Use losses log2, log2, 100 with the valid mask.
    **Expected:** mean log2, unchanged by the padding loss.
    **Verify:** Save the assertion results for exercise 5, including mean log2, unchanged by the padding loss.
 

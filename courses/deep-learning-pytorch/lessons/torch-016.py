@@ -13,7 +13,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: all four outputs0.
 
 # Exercise 3: Map the construction into Linear
-# Seta2-to-2bias-free Linear weight to W.T and apply ReLU.
+# Seta2-to-2 bias-free Linear weight to W.T and apply ReLU.
 # Expected: module features equal manual features.
 
 # Exercise 4: Inspect activation gradients

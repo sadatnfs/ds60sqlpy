@@ -14,7 +14,7 @@ A custom training loop can fail by disconnecting the graph, forgetting an update
 
 A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.
 
-Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4gradient vector so all observations have independent oracles.
+Gradient clipping limits a norm after backward and before the optimizer step. It does not repair invalid labels, nonfinite forward values or a data leak. The clip function returns the pre-clipping norm, which is useful for diagnostics. Repeatedly clipping large gradients may indicate an underlying objective or scale problem rather than a complete fix. This lesson uses exact scalar updates and a3, 4 gradient vector so all observations have independent oracles.
 
 ## Design decisions and when to use this method
 
@@ -100,7 +100,7 @@ For the supplied fixture, name the input unit, the intermediate state and the fi
    **Expected:** detached loss requires_grad False; backward raises RuntimeError.
    **Verify:** Save the assertion results for exercise 1, including detached loss requires_grad False; backward raises RuntimeError.
 
-2. **Repair two exact updates.** Usex1, 2, 3, y2x, w0 and two SGD.1 steps with gradient clearing.
+2. **Repair two exact updates.** Usex1, 2, 3, y2 x, w0 and two SGD.1 steps with gradient clearing.
    **Expected:** weights28/15 then448/225.
    **Verify:** Save the assertion results for exercise 2, including weights28/15 then448/225.
 

@@ -5,7 +5,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 """
 
 # Exercise 1: Compare local reductions
-# Pool patch1, 3; 2, 4 with a2x2window.
+# Pool patch1, 3; 2, 4 with a2 x2 window.
 # Expected: max4; average2.5.
 
 # Exercise 2: Inspect a horizontal flip
@@ -17,7 +17,7 @@ Copy to .learning before editing. Six independent attempts belong below.
 # Expected: exact original values.
 
 # Exercise 4: Expose discarded information
-# Change only the non maximum pixel1to0 and compare pool s.
+# Change only the non maximum pixel1 to0 and compare pool s.
 # Expected: max still4; average2.25.
 
 # Exercise 5: Keep evaluation transforms deterministic

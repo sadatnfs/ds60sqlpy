@@ -1,6 +1,6 @@
 """Owned, one-shot Kubernetes learning operations with no ambient cluster fallback.
 
-Learner YAML is data for a narrow Deployment/Service allowlist. It is never a
+Learner YAML is data for a narrow Deployment/Service/ConfigMap/finite-Job allowlist. It is never a
 shell program, kubeconfig, context selector, image command or host mount request.
 """
 
@@ -29,11 +29,13 @@ from typing import Any
 from ds60sqlpy.module_worker import WorkerHTTPServer, WorkerState
 from ds60sqlpy.worker_operations import OperationResult
 
-FIXTURE_IMAGE = "ds60sqlpy-k8s-fixture:0.1.0"
+FIXTURE_IMAGE = "ds60sqlpy-k8s-fixture:0.2.0"
 FIXTURE_VERSION = "ds60-fixture-v1"
 OWNER_LABEL = "learning.ds60sqlpy/owner"
 JOB_LABEL = "learning.ds60sqlpy/job"
 RESOURCE_NAME = "hello"
+CONFIG_NAME = "hello-config"
+TASK_NAME = "hello-task"
 KIND_VERSION = "v0.33.0"
 KUBECTL_VERSION = "v1.37.0"
 NODE_IMAGE = (
@@ -133,6 +135,157 @@ def _resource_limits(value: Any) -> None:
         raise KubernetesRefusal("Resource requests cannot exceed limits.")
 
 
+def _fixture_probe(value: Any, label: str, paths: set[str], maximum_failures: int = 3) -> None:
+    probe = _mapping(value, label)
+    _fields(
+        probe,
+        {"httpGet", "periodSeconds", "failureThreshold"},
+        {"httpGet", "periodSeconds", "failureThreshold"},
+        label,
+    )
+    http = _mapping(probe["httpGet"], label + " HTTP action")
+    if (
+        set(http) != {"path", "port"}
+        or not isinstance(http.get("path"), str)
+        or http.get("path") not in paths
+        or http.get("port") != "http"
+    ):
+        raise KubernetesRefusal(f"{label} must use its fixed fixture path and named http port.")
+    _integer(probe["periodSeconds"], 1, 5, label + " period")
+    _integer(probe["failureThreshold"], 1, maximum_failures, label + " failure threshold")
+
+
+def _fixture_template(value: Any, *, task: bool = False) -> bool:
+    template = _mapping(value, "Pod template")
+    _fields(template, {"metadata", "spec"}, {"metadata", "spec"}, "Pod template")
+    if template["metadata"] != {"labels": {"app": "hello"}}:
+        raise KubernetesRefusal("The Pod template must contain only the fixed app hello label.")
+    pod = _mapping(template["spec"], "Pod spec")
+    allowed = {
+        "automountServiceAccountToken",
+        "securityContext",
+        "containers",
+        "terminationGracePeriodSeconds",
+    }
+    required = {"automountServiceAccountToken", "securityContext", "containers"}
+    if task:
+        allowed.add("restartPolicy")
+        required.add("restartPolicy")
+    else:
+        allowed.add("volumes")
+    _fields(pod, allowed, required, "Pod spec")
+    if "terminationGracePeriodSeconds" in pod and (
+        type(pod["terminationGracePeriodSeconds"]) is not int
+        or pod["terminationGracePeriodSeconds"] != 1
+    ):
+        raise KubernetesRefusal("The synthetic workload uses a one-second termination grace.")
+    if task and pod["restartPolicy"] != "Never":
+        raise KubernetesRefusal("The finite task uses restartPolicy Never.")
+    if not isinstance(pod["containers"], list) or len(pod["containers"]) != 1:
+        raise KubernetesRefusal("Exactly one fixed fixture container is supported.")
+    container = _mapping(pod["containers"][0], "container")
+    common = {"name", "image", "imagePullPolicy", "command", "resources", "securityContext"}
+    allowed_container = set(common)
+    required_container = set(common)
+    if not task:
+        allowed_container |= {
+            "ports",
+            "readinessProbe",
+            "startupProbe",
+            "livenessProbe",
+            "env",
+            "volumeMounts",
+        }
+        required_container |= {"ports", "readinessProbe"}
+    _fields(container, allowed_container, required_container, "container")
+    if container["image"] != FIXTURE_IMAGE:
+        if container["image"] == "ds60sqlpy-k8s-fixture:0.1.0":
+            raise KubernetesRefusal(
+                "This saved source uses fixture 0.1.0. Prepare the current 0.2.0 fixture and a fresh owned lease, "
+                "then review and update your own image field. Saved learner source is not rewritten."
+            )
+        raise KubernetesRefusal("Use only the approved local fixture image " + FIXTURE_IMAGE + ".")
+    if container["imagePullPolicy"] != "Never":
+        raise KubernetesRefusal("The offline fixture requires imagePullPolicy Never.")
+    _security(pod, container)
+    _resource_limits(container["resources"])
+    if task:
+        if container["name"] != "task" or container["command"] not in (
+            ["python", "/fixture.py", "task", "--outcome", "success"],
+            ["python", "/fixture.py", "task", "--outcome", "failure"],
+        ):
+            raise KubernetesRefusal(
+                "Use only the fixed finite hello-task command and success/failure outcome."
+            )
+        return False
+    if container["name"] not in ("app", "hello") or container["command"] != [
+        "python",
+        "/fixture.py",
+        "server",
+    ]:
+        raise KubernetesRefusal("Only the fixed offline fixture server command is allowed.")
+    if container["ports"] != [{"name": "http", "containerPort": 8080}]:
+        raise KubernetesRefusal("The fixture exposes only the named http port 8080.")
+    _fixture_probe(container["readinessProbe"], "readinessProbe", {"/ready", "/missing"})
+    if "startupProbe" in container:
+        _fixture_probe(container["startupProbe"], "startupProbe", {"/startup", "/missing"}, 10)
+    if "livenessProbe" in container:
+        _fixture_probe(container["livenessProbe"], "livenessProbe", {"/live", "/missing"})
+    uses_config = False
+    if "env" in container:
+        environment = container["env"]
+        if not isinstance(environment, list) or not 1 <= len(environment) <= 2:
+            raise KubernetesRefusal(
+                "Use at most the fixed message and startup-delay environment entries."
+            )
+        names: set[str] = set()
+        for entry_value in environment:
+            entry = _mapping(entry_value, "environment entry")
+            name = entry.get("name")
+            if not isinstance(name, str) or name in names:
+                raise KubernetesRefusal("Environment names must be unique fixed strings.")
+            names.add(name)
+            if name == "DS60_MESSAGE":
+                if entry != {
+                    "name": "DS60_MESSAGE",
+                    "valueFrom": {"configMapKeyRef": {"name": CONFIG_NAME, "key": "message"}},
+                }:
+                    raise KubernetesRefusal("DS60_MESSAGE may reference only hello-config/message.")
+                uses_config = True
+            elif name == "DS60_STARTUP_DELAY_SECONDS":
+                if set(entry) != {"name", "value"} or entry["value"] not in ("0", "3"):
+                    raise KubernetesRefusal("The startup delay is the fixed string 0 or 3 seconds.")
+            else:
+                raise KubernetesRefusal(
+                    "Arbitrary workload environment variables are not supported."
+                )
+    has_volume = "volumes" in pod
+    has_mount = "volumeMounts" in container
+    if has_volume != has_mount:
+        raise KubernetesRefusal(
+            "The fixed ConfigMap volume and read-only mount must appear together."
+        )
+    if has_volume:
+        if pod["volumes"] != [
+            {
+                "name": "lesson-config",
+                "configMap": {
+                    "name": CONFIG_NAME,
+                    "items": [{"key": "message", "path": "message"}],
+                },
+            }
+        ]:
+            raise KubernetesRefusal("Only the fixed hello-config message volume is supported.")
+        if container["volumeMounts"] != [
+            {"name": "lesson-config", "mountPath": "/config", "readOnly": True}
+        ]:
+            raise KubernetesRefusal(
+                "Only the fixed read-only /config mount is supported; no host paths or subPath."
+            )
+        uses_config = True
+    return uses_config
+
+
 def parse_manifests(source: str) -> list[dict[str, Any]]:
     """Reject aliases, duplicate keys, unknown fields and arbitrary workload execution."""
     if not isinstance(source, str) or len(source.encode("utf-8")) > MAX_SOURCE_BYTES:
@@ -173,29 +326,45 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
         documents = list(yaml.load_all(source, Loader=StrictLoader))
     except yaml.YAMLError as exc:
         raise KubernetesRefusal("The lesson contains invalid YAML.") from exc
-    if not 1 <= len(documents) <= 2:
-        raise KubernetesRefusal("Supply one Deployment and at most one Service.")
+    if not 1 <= len(documents) <= 3:
+        raise KubernetesRefusal(
+            "Supply the fixed Deployment, optional Service/ConfigMap, or one finite task Job."
+        )
     kinds: set[str] = set()
+    uses_config = False
     for document in documents:
         doc = _mapping(document, "manifest")
-        _fields(
-            doc,
-            {"apiVersion", "kind", "metadata", "spec"},
-            {"apiVersion", "kind", "metadata", "spec"},
-            "manifest",
-        )
-        kind = doc["kind"]
-        if kind not in ("Deployment", "Service") or kind in kinds:
-            raise KubernetesRefusal(
-                "Only one hello Deployment and one hello Service are supported."
-            )
+        kind = doc.get("kind")
+        if kind not in ("Deployment", "Service", "ConfigMap", "Job") or kind in kinds:
+            raise KubernetesRefusal("Only one object of each fixed lesson kind is supported.")
         kinds.add(kind)
+        payload_field = "data" if kind == "ConfigMap" else "spec"
+        fields = {"apiVersion", "kind", "metadata", payload_field}
+        _fields(doc, fields, fields, "manifest")
         meta = _mapping(doc["metadata"], "metadata")
         _fields(meta, {"name", "labels"}, {"name"}, "metadata")
-        if meta["name"] != RESOURCE_NAME:
-            raise KubernetesRefusal("The operation owns only the fixed resource name hello.")
+        expected_name = (
+            CONFIG_NAME if kind == "ConfigMap" else TASK_NAME if kind == "Job" else RESOURCE_NAME
+        )
+        if meta["name"] != expected_name:
+            raise KubernetesRefusal(
+                "This operation owns only the fixed name "
+                + expected_name
+                + " for "
+                + str(kind)
+                + "."
+            )
         if "labels" in meta:
             _labels(meta["labels"], "metadata.labels", expected="hello")
+        if kind == "ConfigMap":
+            if doc["apiVersion"] != "v1" or doc["data"] not in (
+                {"message": "hello"},
+                {"message": "reviewer"},
+            ):
+                raise KubernetesRefusal(
+                    "hello-config contains only the synthetic message hello or reviewer."
+                )
+            continue
         spec = _mapping(doc["spec"], "spec")
         if kind == "Service":
             if doc["apiVersion"] != "v1":
@@ -203,103 +372,56 @@ def parse_manifests(source: str) -> list[dict[str, Any]]:
             _fields(spec, {"selector", "ports"}, {"selector", "ports"}, "Service spec")
             _labels(spec["selector"], "Service selector")
             if spec["ports"] != [{"name": "http", "port": 8080, "targetPort": "http"}]:
-                raise KubernetesRefusal("The Service must expose only its fixed8080 named port.")
-            continue
-        if doc["apiVersion"] != "apps/v1":
-            raise KubernetesRefusal("The Deployment API version must be apps/v1.")
-        _fields(
-            spec,
-            {"replicas", "selector", "template", "strategy"},
-            {"replicas", "selector", "template"},
-            "Deployment spec",
-        )
-        _integer(spec["replicas"], 1, 2, "replicas")
-        if spec.get("strategy", {"type": "RollingUpdate"}) not in (
-            {"type": "RollingUpdate"},
-            {"type": "Recreate"},
-        ):
-            raise KubernetesRefusal("The optional strategy must be RollingUpdate or Recreate.")
-        if spec["selector"] != {"matchLabels": {"app": "hello"}}:
-            raise KubernetesRefusal("The Deployment selector must match app hello.")
-        template = _mapping(spec["template"], "template")
-        _fields(template, {"metadata", "spec"}, {"metadata", "spec"}, "template")
-        if template["metadata"] != {"labels": {"app": "hello"}}:
-            raise KubernetesRefusal("The Pod template must contain only its fixed app label.")
-        pod = _mapping(template["spec"], "Pod spec")
-        _fields(
-            pod,
-            {
-                "automountServiceAccountToken",
-                "securityContext",
-                "containers",
-                "terminationGracePeriodSeconds",
-            },
-            {"automountServiceAccountToken", "securityContext", "containers"},
-            "Pod spec",
-        )
-        if "terminationGracePeriodSeconds" in pod and (
-            type(pod["terminationGracePeriodSeconds"]) is not int
-            or pod["terminationGracePeriodSeconds"] != 1
-        ):
-            raise KubernetesRefusal(
-                "The fixed synthetic workload uses a one-second termination grace."
+                raise KubernetesRefusal("The Service exposes only its fixed named port 8080.")
+        elif kind == "Job":
+            if doc["apiVersion"] != "batch/v1":
+                raise KubernetesRefusal("The finite task Job API version must be batch/v1.")
+            fields = {
+                "backoffLimit",
+                "activeDeadlineSeconds",
+                "completions",
+                "parallelism",
+                "template",
+            }
+            _fields(spec, fields, fields, "Job spec")
+            _integer(spec["backoffLimit"], 0, 1, "Job retry budget")
+            _integer(spec["activeDeadlineSeconds"], 5, 30, "Job active deadline")
+            _integer(spec["completions"], 1, 1, "Job completions")
+            _integer(spec["parallelism"], 1, 1, "Job parallelism")
+            _fixture_template(spec["template"], task=True)
+        else:
+            if doc["apiVersion"] != "apps/v1":
+                raise KubernetesRefusal("The Deployment API version must be apps/v1.")
+            _fields(
+                spec,
+                {"replicas", "selector", "template", "strategy"},
+                {"replicas", "selector", "template"},
+                "Deployment spec",
             )
-        if not isinstance(pod["containers"], list) or len(pod["containers"]) != 1:
-            raise KubernetesRefusal("Exactly one fixed fixture container is supported.")
-        container = _mapping(pod["containers"][0], "container")
-        _fields(
-            container,
-            {
-                "name",
-                "image",
-                "imagePullPolicy",
-                "command",
-                "ports",
-                "readinessProbe",
-                "resources",
-                "securityContext",
-            },
-            {
-                "name",
-                "image",
-                "imagePullPolicy",
-                "command",
-                "ports",
-                "readinessProbe",
-                "resources",
-                "securityContext",
-            },
-            "container",
+            _integer(spec["replicas"], 1, 2, "replicas")
+            if spec.get("strategy", {"type": "RollingUpdate"}) not in (
+                {"type": "RollingUpdate"},
+                {"type": "Recreate"},
+            ):
+                raise KubernetesRefusal("The strategy must be RollingUpdate or Recreate.")
+            if spec["selector"] != {"matchLabels": {"app": "hello"}}:
+                raise KubernetesRefusal("The Deployment selector must match app hello.")
+            uses_config = _fixture_template(spec["template"])
+    if "Job" in kinds:
+        if kinds != {"Job"}:
+            raise KubernetesRefusal(
+                "The finite hello-task Job runs alone, without other submitted resources."
+            )
+    elif "Deployment" not in kinds:
+        raise KubernetesRefusal(
+            "Include the fixed hello Deployment for a Service/ConfigMap operation."
         )
-        if container["name"] not in ("app", "hello") or container["image"] != FIXTURE_IMAGE:
-            raise KubernetesRefusal("Use the approved local hello fixture container.")
-        if container["imagePullPolicy"] != "Never" or container["command"] != [
-            "python",
-            "/fixture.py",
-            "server",
-        ]:
-            raise KubernetesRefusal("Only the fixed offline fixture server command is allowed.")
-        if container["ports"] != [{"name": "http", "containerPort": 8080}]:
-            raise KubernetesRefusal("The fixture declares only its named8080 container port.")
-        probe = _mapping(container["readinessProbe"], "readinessProbe")
-        _fields(
-            probe,
-            {"httpGet", "periodSeconds", "failureThreshold"},
-            {"httpGet", "periodSeconds", "failureThreshold"},
-            "readinessProbe",
+    if ("ConfigMap" in kinds) != uses_config:
+        raise KubernetesRefusal(
+            "A submitted hello-config and its fixed environment/volume reference must appear together."
         )
-        if probe["httpGet"] not in (
-            {"path": "/ready", "port": "http"},
-            {"path": "/missing", "port": "http"},
-        ):
-            raise KubernetesRefusal("The readiness probe may select only /ready or /missing.")
-        _integer(probe["periodSeconds"], 1, 5, "probe period")
-        _integer(probe["failureThreshold"], 1, 3, "probe failure threshold")
-        _security(pod, container)
-        _resource_limits(container["resources"])
-    if "Deployment" not in kinds:
-        raise KubernetesRefusal("Include the hello Deployment, not a Service alone.")
-    return documents
+    order = {"ConfigMap": 0, "Deployment": 1, "Service": 2, "Job": 3}
+    return sorted(documents, key=lambda doc: order[doc["kind"]])
 
 
 def _windows_private_acl(path: Path, *, establish: bool = False) -> bool:
@@ -758,9 +880,25 @@ class KubectlClient:
                 "Cleanup identity changed; refusing deletion of a replacement or unrelated object."
             )
         # UID preconditions make the comparison atomic at the API deletion boundary.
-        roots = {"deployment": "/apis/apps/v1", "service": "/api/v1", "job": "/apis/batch/v1"}
-        plurals = {"deployment": "deployments", "service": "services", "job": "jobs"}
-        if kind not in roots or name not in ("hello", "hello-check"):
+        roots = {
+            "deployment": "/apis/apps/v1",
+            "service": "/api/v1",
+            "job": "/apis/batch/v1",
+            "configmap": "/api/v1",
+        }
+        plurals = {
+            "deployment": "deployments",
+            "service": "services",
+            "job": "jobs",
+            "configmap": "configmaps",
+        }
+        allowed_names = {
+            "deployment": {RESOURCE_NAME},
+            "service": {RESOURCE_NAME},
+            "job": {"hello-check", TASK_NAME},
+            "configmap": {CONFIG_NAME},
+        }
+        if kind not in roots or name not in allowed_names[kind]:
             raise KubernetesRefusal("Unsupported owned cleanup resource.")
         uri = roots[kind] + "/namespaces/" + self.lease.namespace + "/" + plurals[kind] + "/" + name
         options = {
@@ -913,14 +1051,35 @@ def observe_ready(
     }
 
 
-def _client_job(owner: str) -> dict[str, Any]:
+def _client_job(
+    owner: str, *, expected_message: str | None = None, expected_file_message: str | None = None
+) -> dict[str, Any]:
+    command = [
+        "python",
+        "/fixture.py",
+        "client",
+        "--url",
+        "http://hello:8080/version",
+        "--expect",
+        FIXTURE_VERSION,
+    ]
+    for option, value in (
+        ("--expect-message", expected_message),
+        ("--expect-file-message", expected_file_message),
+    ):
+        if value is not None:
+            if value not in ("hello", "reviewer"):
+                raise KubernetesRefusal("The client accepts only the fixed synthetic messages.")
+            command.extend([option, value])
     return {
         "apiVersion": "batch/v1",
         "kind": "Job",
         "metadata": {"name": "hello-check", "labels": {OWNER_LABEL: owner}},
         "spec": {
             "backoffLimit": 0,
-            "activeDeadlineSeconds": 8,
+            "activeDeadlineSeconds": 16
+            if expected_message is not None or expected_file_message is not None
+            else 8,
             "template": {
                 "metadata": {"labels": {OWNER_LABEL: owner}},
                 "spec": {
@@ -937,15 +1096,7 @@ def _client_job(owner: str) -> dict[str, Any]:
                             "name": "check",
                             "image": FIXTURE_IMAGE,
                             "imagePullPolicy": "Never",
-                            "command": [
-                                "python",
-                                "/fixture.py",
-                                "client",
-                                "--url",
-                                "http://hello:8080/version",
-                                "--expect",
-                                FIXTURE_VERSION,
-                            ],
+                            "command": command,
                             "resources": {
                                 "requests": {"cpu": "10m", "memory": "16Mi"},
                                 "limits": {"cpu": "100m", "memory": "64Mi"},
@@ -960,6 +1111,94 @@ def _client_job(owner: str) -> dict[str, Any]:
                 },
             },
         },
+    }
+
+
+def observe_owned_job(
+    client: KubectlClient,
+    name: str,
+    uid: str,
+    job_nonce: str,
+    deadline: float,
+    cancel: threading.Event,
+) -> tuple[bool, dict[str, Any]]:
+    """Require Job identity plus controlled successful Pod termination, not a count alone."""
+    client.namespace(deadline, cancel)
+    job = client.call(["get", "job", name, "-o", "json"], deadline, cancel)
+    meta = _metadata(job, client.lease, name=name)
+    if meta["uid"] != uid or meta.get("labels", {}).get(JOB_LABEL) != job_nonce:
+        raise KubernetesRefusal("The owned Job identity or Run nonce changed.")
+    status = _optional_mapping(job.get("status"), "Job status")
+    conditions = _optional_records(status.get("conditions"), "Job conditions")
+    if any(item.get("type") == "Failed" and item.get("status") == "True" for item in conditions):
+        raise KubernetesRefusal(
+            "The bounded owned Job reached a Failed condition; inspect its finite outcome and retry/deadline policy."
+        )
+    completed = any(
+        item.get("type") == "Complete" and item.get("status") == "True" for item in conditions
+    )
+    if not completed or type(status.get("succeeded")) is not int or status["succeeded"] != 1:
+        return False, {"job_uid": uid, "complete": False}
+    selector = (
+        OWNER_LABEL
+        + "="
+        + client.lease.owner_id
+        + ","
+        + JOB_LABEL
+        + "="
+        + job_nonce
+        + ",batch.kubernetes.io/job-name="
+        + name
+    )
+    pods = client.call(["get", "pods", "-l", selector, "-o", "json"], deadline, cancel)
+    successful: list[str] = []
+    successful_names: list[str] = []
+    for pod in _optional_records(pods.get("items"), "Job Pods"):
+        metadata = _mapping(pod.get("metadata"), "Job Pod metadata")
+        labels = _mapping(metadata.get("labels"), "Job Pod labels")
+        references = _optional_records(metadata.get("ownerReferences"), "Job Pod owners")
+        controllers = [owner for owner in references if owner.get("controller") is True]
+        if (
+            metadata.get("namespace") != client.lease.namespace
+            or not isinstance(metadata.get("uid"), str)
+            or not metadata["uid"]
+            or not isinstance(metadata.get("name"), str)
+            or not NAME.fullmatch(metadata["name"])
+            or labels.get(OWNER_LABEL) != client.lease.owner_id
+            or labels.get(JOB_LABEL) != job_nonce
+            or len(controllers) != 1
+            or controllers[0].get("uid") != uid
+            or controllers[0].get("kind") != "Job"
+        ):
+            raise KubernetesRefusal(
+                "A Job Pod does not match the owned namespace, Job UID and Run nonce."
+            )
+        pod_status = _optional_mapping(pod.get("status"), "Job Pod status")
+        if pod_status.get("phase") != "Succeeded":
+            continue
+        containers = _optional_records(
+            pod_status.get("containerStatuses"), "Job container statuses"
+        )
+        expected_container = "task" if name == TASK_NAME else "check"
+        if len(containers) != 1 or containers[0].get("name") != expected_container:
+            raise KubernetesRefusal("The successful Job Pod has an unexpected container identity.")
+        state = _mapping(containers[0].get("state"), "Job container state")
+        terminated = _mapping(state.get("terminated"), "Job terminated state")
+        if type(terminated.get("exitCode")) is not int or terminated["exitCode"] != 0:
+            raise KubernetesRefusal("The owned Job container did not report a zero exit code.")
+        successful.append(metadata["uid"])
+        successful_names.append(metadata["name"])
+    if len(set(successful)) != 1:
+        return False, {
+            "job_uid": uid,
+            "complete": True,
+            "successful_pod_uids": sorted(set(successful)),
+        }
+    return True, {
+        "job_uid": uid,
+        "complete": True,
+        "successful_pod_uids": sorted(set(successful)),
+        "successful_pod_names": sorted(set(successful_names)),
     }
 
 
@@ -1022,16 +1261,21 @@ def kubernetes_executor(
                     "The lease must outlive the entire operation and cleanup reserve."
                 )
             documents = parse_manifests(source)
+            if documents[0]["kind"] == "Job" and verification_id is not None:
+                raise KubernetesRefusal(
+                    "The readiness verifier does not apply to a standalone finite Job."
+                )
             client = KubectlClient(
                 lease, directory, executable=executable, isolate_user=isolate_user, runner=runner
             )
             client.namespace(work_deadline, cancel)
             # Never adopt an old or manually created object by matching its name.
-            for kind, name in (
-                ("deployment", "hello"),
-                ("service", "hello"),
-                ("job", "hello-check"),
-            ):
+            fixed_targets = [("deployment", "hello"), ("service", "hello"), ("job", "hello-check")]
+            if any(document["kind"] == "ConfigMap" for document in documents):
+                fixed_targets.append(("configmap", CONFIG_NAME))
+            if documents[0]["kind"] == "Job":
+                fixed_targets.append(("job", TASK_NAME))
+            for kind, name in fixed_targets:
                 existing = client.call(
                     ["get", kind, name, "-o", "json"], work_deadline, cancel, missing_ok=True
                 )
@@ -1043,83 +1287,141 @@ def kubernetes_executor(
             on_status("running")
             deployment_uid = ""
             service_uid = None
+            task_uid = None
             desired = 0
+            config_message = None
+            environment_message = False
+            file_message = False
+            kind_names = {
+                "Deployment": "deployment",
+                "Service": "service",
+                "ConfigMap": "configmap",
+                "Job": "job",
+            }
             for document in documents:
+                name = document["metadata"]["name"]
                 labels = document["metadata"].setdefault("labels", {})
                 labels[OWNER_LABEL] = lease.owner_id
                 labels[JOB_LABEL] = job_nonce
-                kind = "deployment" if document["kind"] == "Deployment" else "service"
-                intended.append((kind, "hello"))
-                if document["kind"] == "Deployment":
-                    # The synthetic fixture has no data to flush. A short explicit
-                    # Pod grace keeps foreground controller cleanup within its budget.
-                    document["spec"]["template"]["spec"]["terminationGracePeriodSeconds"] = 1
-                    document["spec"]["template"]["metadata"]["labels"][OWNER_LABEL] = lease.owner_id
+                kind = kind_names[document["kind"]]
+                intended.append((kind, name))
+                if document["kind"] in ("Deployment", "Job"):
+                    template = document["spec"]["template"]
+                    template["spec"]["terminationGracePeriodSeconds"] = 1
+                    template["metadata"]["labels"][OWNER_LABEL] = lease.owner_id
+                    template["metadata"]["labels"][JOB_LABEL] = job_nonce
+                    if document["kind"] == "Deployment":
+                        container = template["spec"]["containers"][0]
+                        environment_message = any(
+                            entry["name"] == "DS60_MESSAGE" for entry in container.get("env", [])
+                        )
+                        file_message = bool(container.get("volumeMounts"))
+                if document["kind"] == "ConfigMap":
+                    config_message = document["data"]["message"]
                 created = client.apply(document, work_deadline, cancel)
-                metadata = _metadata(created, lease, name="hello")
-                kind = "deployment" if document["kind"] == "Deployment" else "service"
-                owned.append((kind, "hello", metadata["uid"]))
+                metadata = _metadata(created, lease, name=name)
+                if metadata.get("labels", {}).get(JOB_LABEL) != job_nonce:
+                    raise KubernetesRefusal("Created resource did not retain this Run's nonce.")
+                owned.append((kind, name, metadata["uid"]))
                 if kind == "deployment":
                     deployment_uid = metadata["uid"]
                     desired = document["spec"]["replicas"]
-                else:
+                elif kind == "service":
                     service_uid = metadata["uid"]
-            log("Submitted only the validated owned hello resources.")
+                elif kind == "job":
+                    task_uid = metadata["uid"]
+            log("Submitted only the validated fixed-name owned lesson resources.")
             on_status("verifying")
-            stable_since: float | None = None
-            snapshot: dict[str, Any] = {}
-            while True:
-                healthy, snapshot = observe_ready(
-                    client, deployment_uid, desired, service_uid, work_deadline, cancel
-                )
-                if healthy:
-                    if stable_since is None:
-                        stable_since = time.monotonic()
-                    if time.monotonic() - stable_since >= stable_seconds:
-                        break
-                else:
-                    stable_since = None
-                tick(work_deadline)
-            check("controller-and-pods", True, json.dumps(snapshot, sort_keys=True))
-            if service_uid is not None:
-                check(
-                    "ready-service-backends",
-                    True,
-                    "Unique ready EndpointSlice Pod UIDs match the owned Ready Pod UID set.",
-                )
-                job_document = _client_job(lease.owner_id)
-                job_document["metadata"]["labels"][JOB_LABEL] = job_nonce
-                intended.append(("job", "hello-check"))
-                job = client.apply(job_document, work_deadline, cancel)
-                metadata = _metadata(job, lease, name="hello-check")
-                owned.append(("job", "hello-check", metadata["uid"]))
+            if task_uid is not None:
+                if verification_id is not None:
+                    raise KubernetesRefusal("The readiness verifier is not a finite-task verifier.")
                 while True:
-                    observed = client.call(
-                        ["get", "job", "hello-check", "-o", "json"], work_deadline, cancel
+                    complete, snapshot = observe_owned_job(
+                        client, TASK_NAME, task_uid, job_nonce, work_deadline, cancel
                     )
-                    meta = _metadata(observed, lease, name="hello-check")
-                    if meta["uid"] != metadata["uid"]:
-                        raise KubernetesRefusal("The client Job identity changed.")
-                    status = _optional_mapping(observed.get("status"), "client Job status")
-                    failed = status.get("failed")
-                    if type(failed) is int and failed > 0:
-                        raise KubernetesRefusal("The bounded in-cluster version client failed.")
-                    if status.get("succeeded", 0) == 1:
+                    if complete:
                         break
                     tick(work_deadline)
+                pod_name = snapshot["successful_pod_names"][0]
+                output = client.call(
+                    ["logs", pod_name, "-c", "task", "--tail=1", "--limit-bytes=4096"],
+                    work_deadline,
+                    cancel,
+                )
+                if output != {"accepted": 3, "rejected": 2, "total": 35, "fixture_contract": 2}:
+                    raise KubernetesRefusal(
+                        "The finite owned task output does not match the independent fixed ledger."
+                    )
                 check(
-                    "in-cluster-version",
+                    "owned-finite-task",
                     True,
-                    (
-                        "The fixed client Job succeeded only after exact trimmed /version "
-                        "response matching."
-                    ),
+                    json.dumps({**snapshot, "output": output}, sort_keys=True),
                 )
-            elif verification_id == "k8s-readiness-v1":
-                raise KubernetesRefusal(
-                    "The readiness verifier requires both Deployment and Service for i"
-                    "ndependent routing proof."
-                )
+            else:
+                stable_since: float | None = None
+                snapshot = {}
+                while True:
+                    healthy, snapshot = observe_ready(
+                        client, deployment_uid, desired, service_uid, work_deadline, cancel
+                    )
+                    if healthy:
+                        if stable_since is None:
+                            stable_since = time.monotonic()
+                        if time.monotonic() - stable_since >= stable_seconds:
+                            break
+                    else:
+                        stable_since = None
+                    tick(work_deadline)
+                check("controller-and-pods", True, json.dumps(snapshot, sort_keys=True))
+                if service_uid is not None:
+                    check(
+                        "ready-service-backends",
+                        True,
+                        "Unique ready EndpointSlice Pod UIDs match the owned Ready Pod UID set.",
+                    )
+                    job_document = _client_job(
+                        lease.owner_id,
+                        expected_message=config_message if environment_message else None,
+                        expected_file_message=config_message if file_message else None,
+                    )
+                    job_document["metadata"]["labels"][JOB_LABEL] = job_nonce
+                    job_document["spec"]["template"]["metadata"]["labels"][JOB_LABEL] = job_nonce
+                    intended.append(("job", "hello-check"))
+                    job = client.apply(job_document, work_deadline, cancel)
+                    metadata = _metadata(job, lease, name="hello-check")
+                    owned.append(("job", "hello-check", metadata["uid"]))
+                    while True:
+                        complete, job_snapshot = observe_owned_job(
+                            client, "hello-check", metadata["uid"], job_nonce, work_deadline, cancel
+                        )
+                        if complete:
+                            break
+                        tick(work_deadline)
+                    check(
+                        "in-cluster-version",
+                        True,
+                        "The owned client Pod exited zero after exact /version response matching.",
+                    )
+                    if environment_message:
+                        check(
+                            "configmap-environment",
+                            True,
+                            "The fixed client verified the exact synthetic /message response.",
+                        )
+                    if file_message:
+                        check(
+                            "configmap-mounted-file",
+                            True,
+                            "The fixed client verified the exact synthetic /file-message response.",
+                        )
+                elif verification_id == "k8s-readiness-v1":
+                    raise KubernetesRefusal(
+                        "The readiness verifier requires both Deployment and Service for independent routing proof."
+                    )
+                elif config_message is not None:
+                    log(
+                        "ConfigMap creation and workload readiness were observed; no Service was supplied for application-value verification."
+                    )
             result_status = "succeeded"
             detail = (
                 (
@@ -1665,6 +1967,13 @@ def prepare_owned_session(
             {"apiGroups": ["apps"], "resources": ["replicasets"], "verbs": ["get", "list"]},
             {"apiGroups": [""], "resources": ["pods", "pods/log"], "verbs": ["get", "list"]},
             {"apiGroups": [""], "resources": ["services"], "verbs": ["create", "get", "delete"]},
+            {"apiGroups": [""], "resources": ["configmaps"], "verbs": ["create"]},
+            {
+                "apiGroups": [""],
+                "resources": ["configmaps"],
+                "resourceNames": [CONFIG_NAME],
+                "verbs": ["get", "delete"],
+            },
             {"apiGroups": ["batch"], "resources": ["jobs"], "verbs": ["create", "get", "delete"]},
             {
                 "apiGroups": ["discovery.k8s.io"],

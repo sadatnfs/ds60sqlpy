@@ -4,7 +4,7 @@ Compare these answers only after an attempt or an explicit solution reveal. They
 
 ## Mechanism review
 
-An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target2a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed100-step budget without using the holdout to choose settings.
+An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target2 a-b+c, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed100-step budget without using the holdout to choose settings.
 
 The capstone must report what it actually establishes. A small synthetic holdout can show that the implementation uses features in the intended way, but it cannot establish robustness or population accuracy. Keep the scalar arithmetic pilot from lesson008 as an independent mechanism check alongside the larger experiment. Hashing split IDs records identity; it does not prove the split design was appropriate.
 
@@ -20,7 +20,7 @@ Create X shaped(6, 3), targets shaped(6, 1), and nn.Linear(3, 1, bias=False) wit
 
 ## Exercise 1: Create the three-feature fixture
 
-The question is: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2a-b+c.
+The question is: Use rows zero, e1, e2, e3, [1, 1, 1], [2, 1, 1] and target2 a-b+c.
 
 The target formula is part of the fixture definition. The learner can inspect it without relying on an opaque downloaded dataset.
 
@@ -51,7 +51,7 @@ assert mean.item()==.5 and baseline.item()==7.25
 
 ## Exercise 3: Train a bounded linear model
 
-The question is: Initialize a bias-free3-to-1Linear layer at zero and run100SGD.1 updates.
+The question is: Initialize a bias-free3-to-1 Linear layer at zero and run100 SGD.1 updates.
 
 The fixed budget is decided before assessment. A successful decrease demonstrates fitting on exposed data, not generalization by itself.
 
@@ -80,9 +80,9 @@ with torch.no_grad(): train_error=((model(x[train])-y[train])**2).mean().item();
 assert np.isfinite([train_error,test_error]).all() and test_error<baseline.item()
 ```
 
-**Expected:** finite errors; holdout error below7.25on this fixture.
+**Expected:** finite errors; holdout error below7.25 on this fixture.
 
-**Verify:** Compare the computed values or written argument with finite errors; holdout error below7.25on this fixture.
+**Verify:** Compare the computed values or written argument with finite errors; holdout error below7.25 on this fixture.
 
 ## Exercise 5: Retain an independent pilot oracle
 
@@ -95,9 +95,9 @@ pilot=np.array([1.,2.,3.]); gradient=2*np.mean((-2*pilot)*pilot); updated=-.1*gr
 np.testing.assert_allclose([updated,np.mean((updated*pilot-2*pilot)**2)],[28/15,56/675],atol=1e-12,rtol=0)
 ```
 
-**Expected:** w28/15and loss56/675.
+**Expected:** w28/15 and loss56/675.
 
-**Verify:** Compare the computed values or written argument with w28/15and loss56/675.
+**Verify:** Compare the computed values or written argument with w28/15 and loss56/675.
 
 ## Exercise 6: Write the bounded evidence report
 
