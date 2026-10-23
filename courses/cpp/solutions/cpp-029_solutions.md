@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A thread executes a function concurrently with its caller. Joining waits for that function to finish before borrowed state is destroyed. Cancellation is a request that cooperative code checks, not a forced kill. C++20 jthread adds joining destruction and stop_token support, while std::thread requires explicit joining on every path.
 
+## Detailed reasoning
+
+Thread startup, cancellation request and completion are separate events. The promise reports startup, the atomic flag requests cancellation and join confirms completion. A fixed delay cannot replace any of these events because scheduling may be slower or faster than expected. A reference capture borrows a local variable, so scope must not end first. jthread adds automatic joining and stop support, but cooperative code still has to inspect its token.
+
 ## Worked example 1
 
 ```cpp

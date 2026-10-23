@@ -35,6 +35,8 @@ int main() {
     std::vector<int> values{2,4,6}; std::span<const int> view(values); assert(sum_view(view)==12); assert(sum_view(view.subspan(1,2))==10);
     assert(sum_view(std::span<const int>{})==0);
     std::string owned="alpha"; std::string_view prefix(owned.data(),2); assert(prefix=="al");
+    // Reference extension checks for the exercise changes.
+    auto slice_ok=[](std::size_t size,std::size_t offset,std::size_t count){return offset<=size && count<=size-offset;};assert(!slice_ok(3,2,2));assert(slice_ok(3,1,2));assert(slice_ok(0,0,0));
     std::cout << "cpp-018 examples passed\n";
     return 0;
 }

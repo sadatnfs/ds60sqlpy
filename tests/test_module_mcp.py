@@ -23,6 +23,7 @@ from ds60sqlpy.mcp_server import (  # noqa: E402
     MODULE_TOOLS,
     TutorAdapter,
 )
+from ds60sqlpy.modules import ModuleCatalog  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SECRET = "OFFICIAL MODULE SOLUTION 271828"
@@ -325,7 +326,10 @@ def test_real_stdio_discovers_modules_without_network_processes_or_progress(tmp_
             names = {tool.name for tool in (await session.list_tools()).tools}
             assert names >= MODULE_TOOLS and "course_lesson" in names
             subjects = await session.call_tool("module_subjects", {})
-            assert not subjects.is_error and len(subjects.structured_content["subjects"]) == 5
+            assert not subjects.is_error
+            assert {s["id"] for s in subjects.structured_content["subjects"]} == {
+                p["id"] for p in ModuleCatalog(ROOT).plans
+            }
             page = await session.call_tool("module_lessons", {"subject": "scala-spark"})
             assert not page.is_error and all(
                 item["status"] == "authored" for item in page.structured_content["lessons"]

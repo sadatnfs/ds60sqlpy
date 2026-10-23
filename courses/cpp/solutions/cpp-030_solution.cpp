@@ -35,6 +35,8 @@ int main() {
     std::mutex m;std::condition_variable cv;std::queue<int> q;bool closed=false;int total=0;
     std::thread consumer([&]{std::unique_lock<std::mutex> lock(m);for(;;){cv.wait(lock,[&]{return !q.empty()||closed;});if(q.empty()&&closed)break;total+=q.front();q.pop();}});
     {std::lock_guard<std::mutex> lock(m);q.push(2);q.push(3);closed=true;}cv.notify_all();consumer.join();assert(total==5);
+    // Reference extension checks for the exercise changes.
+    std::queue<int> empty_queue;bool empty_closed=true;assert(empty_queue.empty()&&empty_closed);
     std::cout << "cpp-030 examples passed\n";
     return 0;
 }

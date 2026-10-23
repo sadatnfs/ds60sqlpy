@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Composing generic interfaces means combining type constraints, ranges and ownership rules without hiding lifetime requirements. A range parameter can be traversable without being reusable. A returned owning vector is safer for long-lived results than a view over an unknown temporary. Concepts express admissible operations; prose still defines semantics.
 
+## Detailed reasoning
+
+A generic input_range may provide only one traversal. Counting it first can consume an iterator source, leaving no elements for the real operation. The implementation therefore filters and appends in one pass. An owning vector return makes temporary input safe and avoids a borrowed view escaping its owner. Type constraints should describe the weakest capability actually needed, while the written contract explains ordering, multiplicity and lifetime.
+
 ## Worked example 1
 
 ```cpp

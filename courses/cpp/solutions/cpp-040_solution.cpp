@@ -33,6 +33,8 @@
 bool safe_id(std::string_view s){if(s.empty()||s.size()>16)return false;for(unsigned char c:s)if(!((c>='a'&&c<='z')||(c>='0'&&c<='9')||c=='_'))return false;return true;}
 int main() {
     assert(safe_id("batch_7"));assert(!safe_id("../secret"));assert(!safe_id("a/b"));assert(!safe_id(""));assert(!safe_id(std::string(17,'a')));
+    // Reference extension checks for the exercise changes.
+    assert(safe_id("0"));assert(safe_id(std::string(16,'a')));assert(!safe_id("a\\b"));assert(!safe_id("Upper"));
     std::cout << "cpp-040 examples passed\n";
     return 0;
 }

@@ -38,6 +38,8 @@ int main() {
     assert(!parse_int("12x"));
     assert(!parse_int(""));
     assert(!parse_int("999999999999999999999"));
+    // Reference extension checks for the exercise changes.
+    int good_count=0,bad_count=0; for(std::string_view s:{"12","12x","","0"}) { if(parse_int(s)) ++good_count; else ++bad_count; } assert(good_count==2 && bad_count==2); assert(!parse_int(" 42 ")); assert(parse_int("42")==42);
     std::cout << "cpp-006 examples passed\n";
     return 0;
 }

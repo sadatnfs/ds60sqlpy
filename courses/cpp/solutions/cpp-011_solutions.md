@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A stream is an interface that moves characters between a program and a source or destination. RAII ties resource cleanup to scope exit. EOF means there is no more input, while a bad I/O state means a device operation failed. The loop must ask whether a read succeeded before using the buffer.
 
+## Detailed reasoning
+
+The getline expression reads before the body. With 10-newline-20-newline it succeeds twice; the next attempt discovers EOF and the body does not run. An eof-first loop asks yesterday's state and can reuse yesterday's buffer. For real files, opening failure, clean EOF and a bad device state are different observations. Record the resolved filename before diagnosing a missing file; changing main.cpp's location cannot change the process working directory.
+
 ## Worked example 1
 
 ```cpp

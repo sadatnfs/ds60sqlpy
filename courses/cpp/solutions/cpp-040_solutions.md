@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Hardening means enforcing explicit bounds before processing untrusted-shaped input. Path validation distinguishes a user-supplied identifier from a filesystem path. Resource limits cap input length, row count and execution work. A parser may be memory-safe yet still accept dangerous locations or consume unreasonable resources.
 
+## Detailed reasoning
+
+The allowed identifier grammar avoids interpreting input as a path at all. batch_7 is a name; ../secret and a/b contain characters that cannot enter this narrow namespace. This does not solve the general problem of safe filesystem containment with symlinks and races. Keep that limitation explicit. Row and byte limits bound work before parsing, and publication should occur only after the accepted/rejected accounting meets the declared policy.
+
 ## Worked example 1
 
 ```cpp

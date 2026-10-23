@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A view borrows a region owned elsewhere. span observes contiguous elements and string_view observes characters. An iterator can be invalidated when its container reallocates or erases elements. None of these lightweight handles extends the owner lifetime, and const views do not prevent the owner from changing through another path.
 
+## Detailed reasoning
+
+A span consists conceptually of an address and a count. Copying a span copies that description, not the elements. Vector growth can replace the allocation while leaving the copied descriptions unchanged. This is why even a const span may dangle after mutation through the owner. For subranges, first establish offset<=size, then count<=size-offset; subtracting only after the first check avoids unsigned underflow in the validation itself.
+
 ## Worked example 1
 
 ```cpp

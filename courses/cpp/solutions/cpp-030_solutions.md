@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A mutex serializes access to shared state. A condition variable lets a thread wait for a state predicate while releasing the mutex. A queue invariant describes valid states such as size at most capacity. Notifications are hints to recheck state because wakes can be spurious or another thread can consume the item first.
 
+## Detailed reasoning
+
+The queue and closed flag describe one state machine. Empty/open means wait, nonempty means consume, and empty/closed means terminate. All three decisions use the same mutex so the predicate corresponds to the protected data. The predicate overload handles spurious wakes by rechecking rather than assuming a notification means an item exists. A capacity limit adds another state condition: the producer can accept work only when there is room.
+
 ## Worked example 1
 
 ```cpp

@@ -13,7 +13,8 @@ readiness; a lesson ID or a source file does not install its dependencies.
 Start with [the orientation guide](guides/llm-001.md), save a prediction and
 work in your own copy. Continue through the authored foundation chain toward
 [the full pilot](guides/llm-009.md),
-and ask for one hint before opening a reference. Each companion guide contains
+and continue through [the final capstone](guides/llm-042.md).
+Ask for one hint before opening a reference. Each companion guide contains
 the definitions, two examples, six exercise contracts and retrieval questions.
 The executable reference checks provide comparison after an attempt; they are
 not a replacement for your explanation or a hidden certification test.
@@ -47,8 +48,9 @@ macOS/Linux uses the selected interpreter path for the requested profile:
 ```
 
 These variables represent paths printed by setup, not automatic installers.
-Choose the NumPy course interpreter for foundation files and the separately
-qualified TensorFlow interpreter for TensorFlow files. If the variable is unset
+Choose the NumPy course interpreter for core files and the separately
+qualified PyTorch interpreter for `llm-torch-cpu` files. The optional framework
+comparison is a reading worksheet and does not require TensorFlow. If the variable is unset
 or an import fails, retain the error and inspect runtime readiness first.
 
 ## Evidence and review
@@ -60,7 +62,7 @@ production quality, safety, fairness or privacy. Published expected numbers are
 learning aids; use new fixtures and a closed-reference explanation for transfer.
 
 The [implementation checkpoint](../../docs/implementation/ml-content-status.md)
-records authored IDs, validation and remaining work. The full design's later
-stages remain planned until their real teaching artifacts and runtime evidence
-are supplied. Runtime adapters and catalog registration belong to reviewed
+records authored IDs, validation and remaining work. All reviewed lesson IDs now have authored teaching artifacts. Heavy-runtime
+execution is a separate gate; consult the checkpoint for exactly which references
+have been executed. Runtime adapters and catalog registration belong to reviewed
 application code, never arbitrary commands in this metadata.

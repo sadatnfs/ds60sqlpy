@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A property describes a relation that should hold across many inputs. A golden fixture supplies independently chosen expected values. A corpus retains useful edge and failure cases. Bounded fuzzing explores a finite input budget and saves the exact failing case so a defect can be reproduced.
 
+## Detailed reasoning
+
+An implementation that returns its input unchanged satisfies double reversal, so that law alone cannot identify reversal. The literal [1,2,3] to [3,2,1] example supplies an independent semantic anchor. The 25 two-element cases then explore combinations systematically. When a test fails, retain the smallest relevant vector and observed result, not only a random seed. A limited corpus plus explicit budgets is reproducible evidence with a visible coverage boundary.
+
 ## Worked example 1
 
 ```cpp

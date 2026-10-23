@@ -38,6 +38,8 @@ int main() {
     assert(settled({8,200,Status::pending})==0);
     assert(settled({9,0,Status::paid})==0);
     bool failed=false;try{settled({10,-1,Status::paid});}catch(const std::invalid_argument&){failed=true;}assert(failed);
+    // Reference extension checks for the exercise changes.
+    assert(settled({1,200,Status::paid})+settled({2,200,Status::paid})==400); assert(settled({1,200,Status::paid})+settled({2,200,Status::pending})==200);
     std::cout << "cpp-010 examples passed\n";
     return 0;
 }

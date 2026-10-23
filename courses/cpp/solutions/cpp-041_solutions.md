@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A release packet connects source identity to a tested binary and a documented platform. Portability is demonstrated by execution on each claimed environment. Reproducibility records enough inputs to repeat a build, while performance evidence states workload, limits and measurements. A release checklist must keep untested platforms visible.
 
+## Detailed reasoning
+
+A release packet should let another reviewer connect source, build configuration, executable and test observations. Keep Debug/Release results separate because NDEBUG and optimization change behavior and observability. The same checksum must hold before comparing performance. An untested platform stays unqualified even when a build file mentions it. Rollback needs an identifiable compatible artifact and a check that shows the restored version still meets its input/output contract.
+
 ## Worked example 1
 
 ```cpp

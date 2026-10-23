@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A template describes a family of functions parameterized by types. Deduction selects a type from arguments. A concept is a compile-time requirement that determines which template candidates are valid. A constraint improves the interface boundary, but it does not automatically prove arithmetic safety.
 
+## Detailed reasoning
+
+Template deduction happens before any generated function runs. Equal int arguments select one specialization; int and long long arguments can produce conflicting deductions because this signature asks for one T. A concept rejects categories that lack the intended operations, often near the call site. It cannot make every admitted value safe. The overflow check in later lessons is still needed even though integral<int> is true.
+
 ## Worked example 1
 
 ```cpp

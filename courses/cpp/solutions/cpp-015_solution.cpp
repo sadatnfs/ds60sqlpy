@@ -34,6 +34,8 @@ struct Tracked { int* live; explicit Tracked(int& count):live(&count){++*live;} 
 int main() {
     int live=0; { auto owner=std::make_unique<Tracked>(live); assert(live==1); auto next=std::move(owner); assert(!owner && next); } assert(live==0);
     try { auto owner=std::make_unique<Tracked>(live); throw std::runtime_error("abort"); } catch(const std::runtime_error&) {} assert(live==0);
+    // Reference extension checks for the exercise changes.
+    {std::vector<std::unique_ptr<Tracked>> owners;for(int i=0;i<3;++i)owners.push_back(std::make_unique<Tracked>(live));assert(live==3);}assert(live==0);
     std::cout << "cpp-015 examples passed\n";
     return 0;
 }

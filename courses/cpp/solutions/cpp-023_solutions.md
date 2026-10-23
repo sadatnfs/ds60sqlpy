@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 An API is the source-level interface callers use. An ABI is the compiled calling, layout and symbol convention needed to link binaries. C++ standard library objects are risky across independently compiled boundaries. A narrow C interface uses fixed-width values, explicit ownership and status codes to reduce coupling.
 
+## Detailed reasoning
+
+The caller and library must agree on the function symbol and how its arguments/results cross the machine boundary. extern C reduces name-mangling ambiguity but does not specify all platform ABI details. The caller owns the output integer, while the function owns only the act of validating and assigning it. The overflow case returns before assignment, so the previous output value remains a useful check that failure did not publish a partial result.
+
 ## Worked example 1
 
 ```cpp

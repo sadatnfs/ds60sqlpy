@@ -4,6 +4,35 @@ Last updated: 22 October 2026. Starting commit: `19b2396`.
 Human-managed HEAD advanced to `650d8b1` during implementation; agent work
 continues directly on that checkout without staging, commits or pushes.
 
+## Active expansion beyond the previous checkpoint
+
+The user has requested a new implementation phase: complete all five planned
+tracks, expand Python/NumPy/pandas/algorithms and SQL, add Java and JavaScript /
+TypeScript, and build a detailed statistics/ML tutorial book from the supplied
+40-section, 1,005-method outline. The book has worked examples and explained
+interview answers, with no exams or problem sets. It requires deeper theory,
+assumptions, derivations and failure analysis throughout, not definition cards.
+
+Current ownership: statistics lead owns chapters 1-24, manifest, coverage and
+book tests. Systems author finishes and freezes C++ then owns book chapters
+25-40. ML author owns remaining TensorFlow/LLM bodies. Root owns new runtimes,
+shared catalog/UI/readers/MCP integration, Docker and final acceptance.
+Kubernetes/Scala-Spark remaining bodies, Java/JavaScript full authoring and the
+18 Python/SQL deeper lessons remain queued. Consult live agents before assigning.
+Use main checkout only. Human owns Git staging/commits. Preserve all learner
+volumes and unrelated containers. No image publication.
+
+Root added fixed Java21, Node24 and strictly compiled TypeScript5.9 worker
+profiles and Docker recipes, and `-pthread` for C++ compilation/linking. Their
+runtime acceptance is still in progress. New book integration uses tutorial
+mode and never turns reading into an exam or automatic mastery event.
+
+Bounded hourly continuation is configured as heartbeat
+`continue-ds60-overnight-implementation`. Inspect this checkpoint and active
+agents before resuming; disable it after the entire requested scope passes.
+The acceptance numbers below describe the prior checkpoint, not these new
+changes. Do not claim the expanded project is fully tested from those numbers.
+
 ## Scope and current result
 
 Work happens directly in `~/workspace/ds60sqlpy`. There are no additional

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A value copy has its own state. A reference is another name for an existing object and does not own its lifetime. `const` blocks mutation through that access path. A const reference can avoid copying a large vector, but it does not keep the vector alive after its owner is destroyed.
 
+## Detailed reasoning
+
+The copy operation duplicates values into another owning vector. The const reference parameter creates no second vector and must not escape the call beyond its owner. The returned vector is different: it owns the doubled elements, so the caller may keep it after a temporary argument is destroyed. Const describes permitted access through an expression, while lifetime describes whether the object still exists. Neither concept substitutes for the other.
+
 ## Worked example 1
 
 ```cpp

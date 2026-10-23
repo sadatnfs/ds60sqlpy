@@ -9,12 +9,12 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 if ($Interactive) {
-    Write-Host 'Choose prepared profiles: python-core, cpp20, tensorflow-cpu, scala-jvm, spark-local-scala, spark-local-python'
+    Write-Host 'Choose prepared profiles: python-core, cpp20, tensorflow-cpu, java21, javascript-node, typescript-node, scala-jvm, spark-local-scala, spark-local-python'
     $Answer = Read-Host 'Comma-separated profiles [python-core]'
     if ($Answer) { $Profiles = $Answer }
 }
 $Root = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
-$Names = @{'python-core'='python-core-worker'; 'cpp20'='cpp-worker'; 'tensorflow-cpu'='tensorflow-worker'; 'llm-torch-cpu'='llm-worker'; 'scala-jvm'='scala-worker'; 'spark-local-scala'='spark-scala-worker'; 'spark-local-python'='spark-python-worker'; 'k8s-kind'='kubernetes-worker'}
+$Names = @{'python-core'='python-core-worker'; 'cpp20'='cpp-worker'; 'java21'='java-worker'; 'javascript-node'='javascript-worker'; 'typescript-node'='typescript-worker'; 'tensorflow-cpu'='tensorflow-worker'; 'llm-torch-cpu'='llm-worker'; 'scala-jvm'='scala-worker'; 'spark-local-scala'='spark-scala-worker'; 'spark-local-python'='spark-python-worker'; 'k8s-kind'='kubernetes-worker'}
 $Selected = @($Profiles.Split(','))
 $K8s = $Selected -contains 'k8s-kind'
 $Services = @()

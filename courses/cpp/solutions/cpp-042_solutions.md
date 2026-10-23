@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 The bounded parallel analyzer combines parsing, ownership, concurrency and evidence. A serial oracle establishes the intended result independently of scheduling. A task budget controls worker count and input size. Failure accounting names rejected input and cancelled work rather than hiding them inside an apparently successful total.
 
+## Detailed reasoning
+
+The serial oracle supplies a simple independent answer, 21. The two workers read disjoint slices of one const vector and write separate subtotal variables, then the owner joins both before combining 6 and 15. The uneven five-row case exposes a partitioning bug that equal halves can hide. Extending this to parsed input adds another conservation rule: every original row is accepted or rejected, and every accepted task is completed or explicitly cancelled before a report is published.
+
 ## Worked example 1
 
 ```cpp

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A vector owns a contiguous sequence and knows its current size. An iterator identifies a position for a standard algorithm. Algorithms separate traversal from intent: sorting orders values, counting measures a predicate, and accumulation combines values. Sorting a copy preserves the original evidence.
 
+## Detailed reasoning
+
+A vector is a bag of ordered elements, not a set. The two threes in [3,1,3,0] occupy separate positions after sorting. Erasing duplicates is a new semantic decision. The common sort/unique/erase sequence has two phases after sorting: unique rearranges the retained prefix and returns a new logical end, while erase changes vector size. Inspect both the values and size so a stale tail cannot masquerade as a unique result.
+
 ## Worked example 1
 
 ```cpp

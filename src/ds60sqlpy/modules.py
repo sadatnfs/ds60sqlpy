@@ -12,8 +12,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.curriculum_framework import is_content_link, validate_content_path
 from ds60sqlpy.journey_design import load_designs
+from ds60sqlpy.module_extensions import load_extra_plans, validate_graph
 from ds60sqlpy.state_files import atomic_json_write, locked_update
 
 LANGUAGES = {
@@ -22,6 +24,9 @@ LANGUAGES = {
     "tensorflow-cpu": frozenset({"python"}),
     "llm-torch-cpu": frozenset({"python"}),
     "cpp20": frozenset({"cpp"}),
+    "java21": frozenset({"java"}),
+    "javascript-node": frozenset({"javascript"}),
+    "typescript-node": frozenset({"typescript"}),
     "scala-jvm": frozenset({"scala"}),
     "spark-local-scala": frozenset({"scala"}),
     "spark-local-python": frozenset({"python"}),
@@ -49,12 +54,15 @@ class ModuleLesson:
     source_path: str
     solution_paths: tuple[str, ...]
     verification_id: str | None
+    learning_mode: str = "practice"
 
 
 class ModuleCatalog:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
-        self.plans = load_designs(self.root)
+        extra, manifests = load_extra_plans(self.root, set(LANGUAGES))
+        self.plans = [*load_designs(self.root), *extra]
+        validate_graph(self.plans, {lesson.id for lesson in Catalog.load(self.root).lessons()})
         self.planned = {
             lesson["id"]: {**lesson, "track_id": plan["id"]}
             for plan in self.plans
@@ -66,12 +74,16 @@ class ModuleCatalog:
         for plan in self.plans:
             track = plan["id"]
             manifest = self.root / "courses" / track / "lessons.json"
-            if not manifest.exists():
-                continue
-            validate_content_path(
-                self.root, manifest.relative_to(self.root).as_posix(), "Module manifest"
-            )
-            payload = json.loads(manifest.read_text("utf-8"))
+            learning_mode = plan.get("learning_mode", "practice")
+            if track in manifests:
+                payload = manifests[track]
+            else:
+                if not manifest.exists():
+                    continue
+                validate_content_path(
+                    self.root, manifest.relative_to(self.root).as_posix(), "Module manifest"
+                )
+                payload = json.loads(manifest.read_text("utf-8"))
             if (
                 not isinstance(payload, dict)
                 or type(payload.get("schema_version")) is not int
@@ -93,6 +105,9 @@ class ModuleCatalog:
                     "scala": "Scala",
                     "python": "Python",
                     "cpp": "C++",
+                    "java": "Java",
+                    "javascript": "JavaScript",
+                    "typescript": "TypeScript",
                     "yaml": "YAML",
                     "markdown": "Reading",
                 }.get(str(raw.get("language")), "Source")
@@ -175,7 +190,9 @@ class ModuleCatalog:
                     not isinstance(verifier, str) or verifier not in VERIFIERS
                 ):
                     raise ValueError(f"Unknown verifier for {key}.")
-                if not isinstance(item["solution_paths"], list) or not item["solution_paths"]:
+                if not isinstance(item["solution_paths"], list) or (
+                    learning_mode != "tutorial" and not item["solution_paths"]
+                ):
                     raise ValueError(f"Missing explanatory solutions for {key}.")
                 paths = [
                     validate_content_path(self.root, item[field], f"{key}.{field}")
@@ -190,11 +207,12 @@ class ModuleCatalog:
                         raise ValueError(f"{key} must use its own authored course directory.")
                 if paths[0] == paths[1] or len({*paths, *solutions}) != len(paths) + len(solutions):
                     raise ValueError(f"{key} source, guide, and solutions must be separate.")
-                if Path(paths[0]).suffix != ".md" or not any(
-                    Path(p).suffix == ".md" for p in solutions
+                if Path(paths[0]).suffix != ".md" or (
+                    learning_mode != "tutorial"
+                    and not any(Path(p).suffix == ".md" for p in solutions)
                 ):
                     raise ValueError(f"{key} requires Markdown teaching and explanatory solutions.")
-                if profile != "reading" and len(solutions) < 2:
+                if learning_mode != "tutorial" and profile != "reading" and len(solutions) < 2:
                     raise ValueError(f"{key} needs executable and explanatory solutions.")
                 verifier_profiles = {
                     "tf-gradient-v1": {"tensorflow-cpu"},
@@ -210,6 +228,9 @@ class ModuleCatalog:
                     "python": {".py"},
                     "cpp": {".cpp", ".cc", ".cxx"},
                     "scala": {".scala"},
+                    "java": {".java"},
+                    "javascript": {".mjs", ".js"},
+                    "typescript": {".mts", ".ts"},
                     "yaml": {".yaml", ".yml"},
                     "markdown": {".md"},
                 }
@@ -219,7 +240,15 @@ class ModuleCatalog:
                 ):
                     raise ValueError(f"Invalid source format/size for {key}.")
                 self.lessons[key] = ModuleLesson(
-                    key, track, language, profile, paths[0], paths[1], solutions, verifier
+                    key,
+                    track,
+                    language,
+                    profile,
+                    paths[0],
+                    paths[1],
+                    solutions,
+                    verifier,
+                    learning_mode,
                 )
 
     def content_path(self, relative: str, maximum: int = 1_000_000) -> Path:
@@ -252,6 +281,7 @@ class ModuleCatalog:
                     {
                         **planned,
                         "status": "authored" if authored else "planned",
+                        "learning_mode": plan.get("learning_mode", "practice"),
                         "variants": self.variant_options.get(planned["id"], []),
                         "runtime_profile": authored.runtime_profile
                         if authored
@@ -273,7 +303,9 @@ class ModuleCatalog:
             "tracks": tracks,
             "authored_count": len(self.canonical_ids.intersection(self.lessons)),
             "planned_count": len(self.canonical_ids),
-            "publication": "Pilot labs; published legacy catalog remains separate.",
+            "publication": (
+                "Authored modules and tutorial books; published legacy catalog remains separate."
+            ),
         }
 
 

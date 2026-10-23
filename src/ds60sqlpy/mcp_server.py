@@ -15,7 +15,6 @@ from typing import Any
 from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.coaching import MAX_NOTE_CHARACTERS, PHASES, CoachingService
 from ds60sqlpy.curriculum_framework import validate_content_path
-from ds60sqlpy.journey_design import TRACK_IDS
 from ds60sqlpy.modules import MAX_SOURCE_BYTES, ModuleCatalog
 from ds60sqlpy.study_plan import learning_paths
 
@@ -158,7 +157,9 @@ class TutorAdapter:
                         "counts.",
                         _schema(
                             {
-                                "subject": {"enum": ["all", *TRACK_IDS]},
+                                "subject": {
+                                    "enum": ["all", *[p["id"] for p in self._modules().plans]]
+                                },
                                 "status": {"enum": ["authored", "planned", "all"]},
                                 "query": {"type": "string", "maxLength": 200},
                                 "limit": {"type": "integer", "minimum": 1, "maximum": 50},
@@ -342,6 +343,9 @@ class TutorAdapter:
             "lab": self._short(planned["lab"], 1024),
             "verification": self._short(planned["verification"], 768),
             "runtime_profile": authored.runtime_profile if authored else planned["runtime"],
+            "learning_mode": authored.learning_mode
+            if authored
+            else planned.get("learning_mode", "practice"),
             "runtime_status": "not_probed",
             "variants": catalog.variant_options.get(base_id, []),
         }
@@ -429,7 +433,15 @@ class TutorAdapter:
                     "path": lesson.source_path,
                     "text": self._module_text(lesson.source_path, MAX_SOURCE_BYTES),
                 },
-                "coaching": INSTRUCTIONS,
+                "coaching": (
+                    (
+                        "This is a tutorial book. Explain the theory, assumptions, worked "
+                        "examples and interview answers freely. Do not add exams, problem "
+                        "sets or a solution gate."
+                    )
+                    if lesson.learning_mode == "tutorial"
+                    else INSTRUCTIONS
+                ),
                 "boundary": "Checked-in content; no saved pad, runtime, job or mastery operation.",
             }
         )

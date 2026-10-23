@@ -28,6 +28,9 @@ for profile in "${SELECTED[@]}"; do
   case "$profile" in
     python-core) service=python-core-worker ;;
     cpp20) service=cpp-worker ;;
+    java21) service=java-worker ;;
+    javascript-node) service=javascript-worker ;;
+    typescript-node) service=typescript-worker ;;
     tensorflow-cpu) service=tensorflow-worker ;;
     llm-torch-cpu) service=llm-worker ;;
     scala-jvm) service=scala-worker ;;

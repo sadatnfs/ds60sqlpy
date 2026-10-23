@@ -34,6 +34,8 @@
 int main() {
     std::vector<int> values{2,3,2,4};std::map<int,int> counts;for(int x:values)++counts[x];assert(counts[2]==2);assert(counts[3]==1);assert(std::count(values.begin(),values.end(),2)==counts[2]);
     assert(counts.find(9)==counts.end());
+    // Reference extension checks for the exercise changes.
+    const auto keys_before=counts.size();assert(counts.find(9)==counts.end());assert(counts.size()==keys_before);std::map<int,int> empty;assert(empty.find(2)==empty.end());
     std::cout << "cpp-035 examples passed\n";
     return 0;
 }

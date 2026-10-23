@@ -34,6 +34,8 @@ int twice(int x) { return x*2; }
 int main() {
     if(twice(3)!=6 || twice(0)!=0) return 1;
     std::cout << "2 always-active checks\n";
+    // Reference extension checks for the exercise changes.
+    if(twice(7)!=14 || twice(-2)!=-4) return 1;
     std::cout << "cpp-013 examples passed\n";
     return 0;
 }

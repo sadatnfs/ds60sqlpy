@@ -36,6 +36,8 @@ int main() {
     assert((sorted==std::vector<int>{0,1,3,3})); assert(original[0]==3);
     assert(std::accumulate(sorted.begin(),sorted.end(),0LL)==7);
     assert(std::count(sorted.begin(),sorted.end(),3)==2);
+    // Reference extension checks for the exercise changes.
+    auto unique_values=sorted; unique_values.erase(std::unique(unique_values.begin(),unique_values.end()),unique_values.end()); assert((unique_values==std::vector<int>{0,1,3})); assert(std::count_if(sorted.begin(),sorted.end(),[](int x){return x>=3;})==2);
     std::cout << "cpp-007 examples passed\n";
     return 0;
 }

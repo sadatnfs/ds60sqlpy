@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A range combines an iterable start and end. A view can lazily filter or transform a range without owning a new collection. Laziness means the work happens during traversal, so later owner changes can affect what is seen. A projection selects a member for an algorithm without changing the record.
 
+## Detailed reasoning
+
+A lazy filter does not produce a new vector when it is declared. Iteration asks the source for successive values, applies the predicate and then transforms accepted values. The view therefore shares the source lifetime and may observe source changes. Materializing [0,6] makes a stable owned result. Sorting Score by a projection reorders whole records rather than sorting a detached points column, which preserves each ID-to-points relationship.
+
 ## Worked example 1
 
 ```cpp

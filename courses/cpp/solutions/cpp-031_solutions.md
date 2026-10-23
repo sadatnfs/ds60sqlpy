@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 An atomic operation accesses one object without a data race. Memory ordering describes which other operations become visible across threads. A happens-before relation provides the reasoning chain for shared non-atomic data. Relaxed atomics are useful for independent counters but do not automatically publish surrounding objects.
 
+## Detailed reasoning
+
+Atomicity prevents torn or lost updates to the counter itself. Publication asks a broader question: may a consumer safely read an earlier non-atomic payload write? The release store and matching acquire load form that ordering bridge. Relaxed is adequate for independent counting followed by join, but replacing the publication pair with relaxed accesses would remove the required argument for the payload. The lesson tests an actual shared-data relationship, not only a final number.
+
 ## Worked example 1
 
 ```cpp

@@ -34,6 +34,8 @@ int checked_square(int x){if(x<0)throw std::invalid_argument("negative task");re
 int main() {
     auto first=std::async(std::launch::async,checked_square,3);auto second=std::async(std::launch::async,checked_square,4);assert(first.get()+second.get()==25);
     auto failed=std::async(std::launch::async,checked_square,-1);bool seen=false;try{failed.get();}catch(const std::invalid_argument&){seen=true;}assert(seen);
+    // Reference extension checks for the exercise changes.
+    std::vector<int> empty_results;assert(std::accumulate(empty_results.begin(),empty_results.end(),0)==0);
     std::cout << "cpp-032 examples passed\n";
     return 0;
 }

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Reproducibility means another environment can reconstruct the same declared build inputs. Vendoring keeps an approved source dependency locally. A CMake target names include paths, features and link requirements so consumers inherit the right settings. A lock records exact dependency identities but still needs an actual offline build check.
 
+## Detailed reasoning
+
+Rebuilding from local inputs requires more than listing a dependency name. Record the exact source content, relevant build options, compiler and architecture, then attempt a fresh build without fetching anything. Target-scoped include directories and features help another consumer inherit the contract. The tiny vendored namespace in the single-file example illustrates identity and behavior checks; it does not prove that a dependency package or offline installation was actually built.
+
 ## Worked example 1
 
 ```cpp

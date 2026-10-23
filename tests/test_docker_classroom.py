@@ -369,6 +369,9 @@ def test_classroom_compose_has_named_only_state_and_private_workers() -> None:
     expected = {
         "python-core": "python-core-worker",
         "cpp20": "cpp-worker",
+        "java21": "java-worker",
+        "javascript-node": "javascript-worker",
+        "typescript-node": "typescript-worker",
         "tensorflow-cpu": "tensorflow-worker",
         "scala-jvm": "scala-worker",
         "spark-local-scala": "spark-scala-worker",

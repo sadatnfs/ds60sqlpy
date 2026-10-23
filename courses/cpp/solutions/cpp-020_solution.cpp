@@ -35,6 +35,8 @@ template<std::integral T> T identity_sum(T a,T b) { return a+b; }
 int main() {
     assert(identity_sum(2,3)==5); assert(identity_sum(2LL,3LL)==5LL);
     static_assert(std::integral<int>); static_assert(!std::integral<double>);
+    // Reference extension checks for the exercise changes.
+    assert(identity_sum(7,0)==7);assert(identity_sum(7LL,0LL)==7LL);assert(identity_sum(2LL,3LL)==5LL);
     std::cout << "cpp-020 examples passed\n";
     return 0;
 }

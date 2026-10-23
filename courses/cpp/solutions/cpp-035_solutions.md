@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Algorithmic complexity describes how work grows as input grows. A representation can change that work: repeated linear search differs from building an index once. A benchmark compares defined workloads under measured conditions. For tiny collections, index setup may outweigh faster lookup, so asymptotic reasoning and actual budgets both matter.
 
+## Detailed reasoning
+
+Index building has an upfront cost that can be repaid across repeated queries. A map count preserves both occurrences of key 2; a set would answer a different question. The seemingly read-like counts[9] inserts a missing key with zero, whereas find does not change the map. That behavioral difference can contaminate an experiment and the data contract. Report index construction separately from lookup work and keep the queried answers identical.
+
 ## Worked example 1
 
 ```cpp

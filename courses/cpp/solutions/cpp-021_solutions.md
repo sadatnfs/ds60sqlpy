@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A strong type wraps a representation in a domain name so unrelated values cannot be mixed accidentally. An explicit constructor blocks implicit conversions. A value API should obey simple laws, such as addition identity and equality symmetry. Domain restrictions must be enforced at construction or operation boundaries.
 
+## Detailed reasoning
+
+The wrapper's job is to stop accidental unit mixing before runtime. A count and an amount may both use long long storage, but only the domain-approved operations should exist. Equality and addition laws give clients predictable behavior. Those laws apply only within the declared numeric domain: overflowing signed arithmetic is not an exotic counterexample to the law, it is an operation outside the program contract. A checked addition API should preserve that distinction.
+
 ## Worked example 1
 
 ```cpp

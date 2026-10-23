@@ -118,6 +118,431 @@
         "courses/llm-theory/solutions/llm-009_solutions.md"
       ],
       "verification_id": "llm-causal-attention-v1"
+    },
+    {
+      "id": "llm-010",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-010.md",
+      "source_path": "courses/llm-theory/lessons/llm-010.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-010_solution.py",
+        "courses/llm-theory/solutions/llm-010_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-011",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-011.md",
+      "source_path": "courses/llm-theory/lessons/llm-011.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-011_solution.py",
+        "courses/llm-theory/solutions/llm-011_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-012",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-012.md",
+      "source_path": "courses/llm-theory/lessons/llm-012.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-012_solution.py",
+        "courses/llm-theory/solutions/llm-012_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-013",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-013.md",
+      "source_path": "courses/llm-theory/lessons/llm-013.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-013_solution.py",
+        "courses/llm-theory/solutions/llm-013_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-014",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-014.md",
+      "source_path": "courses/llm-theory/lessons/llm-014.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-014_solution.py",
+        "courses/llm-theory/solutions/llm-014_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-015",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-015.md",
+      "source_path": "courses/llm-theory/lessons/llm-015.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-015_solution.py",
+        "courses/llm-theory/solutions/llm-015_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-016",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-016.md",
+      "source_path": "courses/llm-theory/lessons/llm-016.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-016_solution.py",
+        "courses/llm-theory/solutions/llm-016_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-017",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-017.md",
+      "source_path": "courses/llm-theory/lessons/llm-017.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-017_solution.py",
+        "courses/llm-theory/solutions/llm-017_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-018",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-018.md",
+      "source_path": "courses/llm-theory/lessons/llm-018.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-018_solution.py",
+        "courses/llm-theory/solutions/llm-018_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-019",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-019.md",
+      "source_path": "courses/llm-theory/lessons/llm-019.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-019_solution.py",
+        "courses/llm-theory/solutions/llm-019_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-020",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-020.md",
+      "source_path": "courses/llm-theory/lessons/llm-020.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-020_solution.py",
+        "courses/llm-theory/solutions/llm-020_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-021",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-021.md",
+      "source_path": "courses/llm-theory/lessons/llm-021.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-021_solution.py",
+        "courses/llm-theory/solutions/llm-021_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-022",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-022.md",
+      "source_path": "courses/llm-theory/lessons/llm-022.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-022_solution.py",
+        "courses/llm-theory/solutions/llm-022_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-023",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-023.md",
+      "source_path": "courses/llm-theory/lessons/llm-023.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-023_solution.py",
+        "courses/llm-theory/solutions/llm-023_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-024",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-024.md",
+      "source_path": "courses/llm-theory/lessons/llm-024.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-024_solution.py",
+        "courses/llm-theory/solutions/llm-024_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-025",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-025.md",
+      "source_path": "courses/llm-theory/lessons/llm-025.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-025_solution.py",
+        "courses/llm-theory/solutions/llm-025_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-026",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-026.md",
+      "source_path": "courses/llm-theory/lessons/llm-026.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-026_solution.py",
+        "courses/llm-theory/solutions/llm-026_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-027",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-027.md",
+      "source_path": "courses/llm-theory/lessons/llm-027.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-027_solution.py",
+        "courses/llm-theory/solutions/llm-027_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-028",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-028.md",
+      "source_path": "courses/llm-theory/lessons/llm-028.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-028_solution.py",
+        "courses/llm-theory/solutions/llm-028_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-029",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/llm-theory/guides/llm-029.md",
+      "source_path": "courses/llm-theory/lessons/llm-029.md",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-029_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-030",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/llm-theory/guides/llm-030.md",
+      "source_path": "courses/llm-theory/lessons/llm-030.md",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-030_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-031",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-031.md",
+      "source_path": "courses/llm-theory/lessons/llm-031.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-031_solution.py",
+        "courses/llm-theory/solutions/llm-031_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-032",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-032.md",
+      "source_path": "courses/llm-theory/lessons/llm-032.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-032_solution.py",
+        "courses/llm-theory/solutions/llm-032_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-033",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-033.md",
+      "source_path": "courses/llm-theory/lessons/llm-033.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-033_solution.py",
+        "courses/llm-theory/solutions/llm-033_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-034",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-034.md",
+      "source_path": "courses/llm-theory/lessons/llm-034.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-034_solution.py",
+        "courses/llm-theory/solutions/llm-034_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-035",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-035.md",
+      "source_path": "courses/llm-theory/lessons/llm-035.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-035_solution.py",
+        "courses/llm-theory/solutions/llm-035_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-036",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-036.md",
+      "source_path": "courses/llm-theory/lessons/llm-036.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-036_solution.py",
+        "courses/llm-theory/solutions/llm-036_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-037",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-037.md",
+      "source_path": "courses/llm-theory/lessons/llm-037.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-037_solution.py",
+        "courses/llm-theory/solutions/llm-037_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-038",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-038.md",
+      "source_path": "courses/llm-theory/lessons/llm-038.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-038_solution.py",
+        "courses/llm-theory/solutions/llm-038_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-039",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/llm-theory/guides/llm-039.md",
+      "source_path": "courses/llm-theory/lessons/llm-039.md",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-039_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-040",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "python-core",
+      "guide_path": "courses/llm-theory/guides/llm-040.md",
+      "source_path": "courses/llm-theory/lessons/llm-040.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-040_solution.py",
+        "courses/llm-theory/solutions/llm-040_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-041",
+      "status": "authored",
+      "language": "markdown",
+      "runtime_profile": "reading",
+      "guide_path": "courses/llm-theory/guides/llm-041.md",
+      "source_path": "courses/llm-theory/lessons/llm-041.md",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-041_solutions.md"
+      ],
+      "verification_id": null
+    },
+    {
+      "id": "llm-042",
+      "status": "authored",
+      "language": "python",
+      "runtime_profile": "llm-torch-cpu",
+      "guide_path": "courses/llm-theory/guides/llm-042.md",
+      "source_path": "courses/llm-theory/lessons/llm-042.py",
+      "solution_paths": [
+        "courses/llm-theory/solutions/llm-042_solution.py",
+        "courses/llm-theory/solutions/llm-042_solutions.md"
+      ],
+      "verification_id": null
     }
   ]
 }

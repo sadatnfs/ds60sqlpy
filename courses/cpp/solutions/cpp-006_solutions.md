@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A string owns characters; string_view temporarily observes them. `from_chars` parses without locale-dependent whitespace skipping. Its error code reports invalid input or overflow, while its returned pointer identifies the first unconsumed character. Trustworthy input needs both successful conversion and full consumption.
 
+## Detailed reasoning
+
+For 12x, from_chars can store 12 and report no conversion error, yet its pointer stops at x. The parser therefore treats error-code success as only the first condition. The second condition compares the pointer with end. Empty input has no digits; huge input exceeds int range; whitespace is outside this deliberately strict grammar. Keep these reasons separate in a production ledger so a user can distinguish syntax, range and policy rejection.
+
 ## Worked example 1
 
 ```cpp

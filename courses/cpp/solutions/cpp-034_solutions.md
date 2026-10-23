@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Data layout determines which values are adjacent in memory. Array-of-structs stores complete records together; struct-of-arrays groups each field separately. Locality can reduce memory traffic when a calculation uses one field, while another workload may favor complete records. Allocation count is a separate cost from algorithmic work.
 
+## Detailed reasoning
+
+Physical grouping should follow the access pattern being measured. Summing only values may benefit from keeping those values together, while a routine consuming full records may prefer another layout. The reference proves that both forms still represent the same three values and sum to 60. reserve changes capacity, not size, so writing through index zero after reserve alone is invalid. Populate elements through push_back or resize before accessing them.
+
 ## Worked example 1
 
 ```cpp

@@ -43,6 +43,9 @@ PROFILES = {
     "llm-torch-cpu": WorkerProfile(
         "llm-torch-cpu", "python", "main.py", ("llm-causal-attention-v1",)
     ),
+    "java21": WorkerProfile("java21", "java", "Main.java"),
+    "javascript-node": WorkerProfile("javascript-node", "javascript", "main.mjs"),
+    "typescript-node": WorkerProfile("typescript-node", "typescript", "main.mts"),
     "cpp20": WorkerProfile("cpp20", "cpp", "main.cpp", ("cpp-ownership-v1",)),
     "k8s-kind": WorkerProfile("k8s-kind", "yaml", "lesson.yaml", ("k8s-readiness-v1",)),
     "scala-jvm": WorkerProfile("scala-jvm", "scala", "Main.scala"),
@@ -135,6 +138,7 @@ def child_environment(directory: Path, base: Mapping[str, str] | None = None) ->
         HF_DATASETS_OFFLINE="1",
         HF_HOME=str(directory / "huggingface"),
         TOKENIZERS_PARALLELISM="false",
+        UV_THREADPOOL_SIZE="2",
         CUDA_VISIBLE_DEVICES="",
         OMP_NUM_THREADS="2",
         OPENBLAS_NUM_THREADS="2",
@@ -530,6 +534,59 @@ def validate_operation(profile_id: str, language: str, verification_id: str | No
         raise ValueError("Verification operation is not registered for this profile.")
 
 
+def language_commands(profile_id: str, directory: Path) -> tuple[list[list[str]], list[str]]:
+    """Fixed single-file Java and Node toolchains; source cannot supply build flags."""
+    node = ["node", "--unhandled-rejections=strict", "--max-old-space-size=256"]
+    if profile_id == "java21":
+        (directory / "classes").mkdir(mode=0o755, exist_ok=True)
+        return (
+            [
+                [
+                    "javac",
+                    "-encoding",
+                    "UTF-8",
+                    "-Xlint:all",
+                    "--release",
+                    "21",
+                    "-d",
+                    "classes",
+                    "Main.java",
+                ]
+            ],
+            ["java", "-ea", "-Xmx512m", "-cp", "classes", "Main"],
+        )
+    if profile_id == "javascript-node":
+        return [], [*node, "main.mjs"]
+    if profile_id == "typescript-node":
+        (directory / "compiled").mkdir(mode=0o755, exist_ok=True)
+        return (
+            [
+                [
+                    "node",
+                    "/opt/typescript/node_modules/typescript/bin/tsc",
+                    "--target",
+                    "ES2022",
+                    "--module",
+                    "NodeNext",
+                    "--moduleResolution",
+                    "NodeNext",
+                    "--strict",
+                    "--noEmitOnError",
+                    "--skipLibCheck",
+                    "--types",
+                    "node",
+                    "--typeRoots",
+                    "/opt/typescript/node_modules/@types",
+                    "--outDir",
+                    "compiled",
+                    "main.mts",
+                ]
+            ],
+            [*node, "compiled/main.mjs"],
+        )
+    raise ValueError("No fixed Java or Node toolchain for this profile.")
+
+
 def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool, str]:
     """Execute one fixed startup smoke under a45-second total deadline.
 
@@ -554,9 +611,27 @@ def probe_profile(profile_id: str, *, isolate_user: bool = False) -> tuple[bool,
                 "std::span<int> s(a);return s[0]+s[1]==42?0:1;}\n"
             )
             commands = [
-                [compiler, "-std=c++20", "probe.cpp", "-o", "probe"],
+                [compiler, "-std=c++20", "-pthread", "probe.cpp", "-o", "probe"],
                 [str(directory / "probe")],
             ]
+        elif profile_id in {"java21", "javascript-node", "typescript-node"}:
+            smoke = {
+                "java21": (
+                    "public class Main { public static void main(String[] a) { assert "
+                    "20+22==42; System.out.println(42); } }\n"
+                ),
+                "javascript-node": (
+                    "import assert from 'node:assert/strict'; assert.equal(20+22,42); "
+                    "console.log(42);\n"
+                ),
+                "typescript-node": (
+                    "import assert from 'node:assert/strict'; const n: number = 20+22; "
+                    "assert.equal(n,42); console.log(n);\n"
+                ),
+            }[profile_id]
+            (directory / PROFILES[profile_id].filename).write_text(smoke, encoding="utf-8")
+            compiling, command = language_commands(profile_id, directory)
+            commands = [*compiling, command]
         elif profile_id == "scala-jvm":
             if not _scala_jars():
                 return False, "The matched Scala compiler/library jars are missing."
@@ -672,6 +747,7 @@ def execute_operation(
             [
                 compiler,
                 "-std=c++20",
+                "-pthread",
                 "-O0",
                 "-g",
                 "-Wall",
@@ -689,6 +765,7 @@ def execute_operation(
             flags = [
                 compiler,
                 "-std=c++20",
+                "-pthread",
                 "-O0",
                 "-g",
                 "-Wall",
@@ -699,8 +776,13 @@ def execute_operation(
             compiling = [
                 [*flags, "-Dmain=ds60_learner_main", "-c", "main.cpp", "-o", "learner.o"],
                 [*flags, "-c", str(harness), "-o", "verifier.o"],
-                [compiler, "learner.o", "verifier.o", "-o", "program"],
+                [compiler, "-pthread", "learner.o", "verifier.o", "-o", "program"],
             ]
+    elif profile_id in {"java21", "javascript-node", "typescript-node"}:
+        compiling, command = language_commands(profile_id, directory)
+        if isolate_user:
+            for child in directory.iterdir():
+                os.chown(child, 65534, 65534)
     elif profile_id in ("scala-jvm", "spark-local-scala"):
         (directory / "classes").mkdir(mode=0o755)
         if isolate_user:

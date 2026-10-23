@@ -36,6 +36,8 @@ int main() {
     assert(clamp_reading(-3,0,10)==0);
     assert(clamp_reading(5,0,10)==5);
     bool rejected=false; try { (void)clamp_reading(5,10,0); } catch(const std::invalid_argument&) { rejected=true; } assert(rejected);
+    // Reference extension checks for the exercise changes.
+    for(int x:std::vector<int>{2,3,4}) assert(clamp_reading(x,3,3)==3); assert(clamp_reading(1250,0,1000)==1000);
     std::cout << "cpp-005 examples passed\n";
     return 0;
 }

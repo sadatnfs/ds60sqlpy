@@ -23,6 +23,9 @@ from ds60sqlpy.state_files import atomic_json_write, locked_update
 SERVICES = {
     "python-core": "python-core-worker",
     "cpp20": "cpp-worker",
+    "java21": "java-worker",
+    "javascript-node": "javascript-worker",
+    "typescript-node": "typescript-worker",
     "tensorflow-cpu": "tensorflow-worker",
     "llm-torch-cpu": "llm-worker",
     "scala-jvm": "scala-worker",

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 RAII means acquiring a resource in an object and releasing it when that object leaves scope. unique_ptr owns one dynamically allocated object and cannot be copied. Its destructor releases the owned object even when an exception unwinds the scope. The owner must not be confused with a borrowed raw pointer.
 
+## Detailed reasoning
+
+At scope entry the unique_ptr becomes responsible for one allocation. Moving it hands that responsibility to another owner; the moved-from pointer no longer releases the object. During exception unwinding the current owner still runs its destructor, which reduces the live count. Count resources at scope boundaries rather than depending on an informal promise to call delete later. Resource lifetime and the lifetime of a borrowed pointer must be drawn separately.
+
 ## Worked example 1
 
 ```cpp

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A translation unit is a source file after its includes are expanded. A header shares declarations across translation units. A declaration states a name and type; a definition supplies storage or a function body. The linker connects references to definitions. The one-definition rule prevents incompatible or multiply defined entities.
 
+## Detailed reasoning
+
+The compiler checks each translation unit independently. main.cpp knows that add takes two ints because it includes math.hpp, but its object file can contain an unresolved reference. math.cpp contributes the matching definition. The linker combines both objects and resolves that reference. Removing math.o breaks the final phase without making main.cpp invalid C++. Defining the same ordinary function in both objects creates a different link defect. Keep these failures as two independent diagnostic cases.
+
 ## Worked example 1
 
 ```cpp

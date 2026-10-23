@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A C interface exposes stable-shaped calls to clients that may not share a C++ compiler. An opaque handle hides implementation details while preserving a documented owner. A loading boundary introduces version, symbol and cleanup responsibilities. Destroying an object in the wrong allocator or letting an exception cross the boundary can break the contract.
 
+## Detailed reasoning
+
+The opaque handle keeps C++ layout private, but its lifetime is still a public responsibility. A successful create must pair with the provider's destroy function, which can be wrapped by a unique_ptr custom deleter in a C++ client. A pointer that has already been destroyed is not made safe by a null check. The lesson checks null arguments and proper ownership; dynamic symbol loading, ABI version negotiation and foreign-language use require separate host receipts.
+
 ## Worked example 1
 
 ```cpp

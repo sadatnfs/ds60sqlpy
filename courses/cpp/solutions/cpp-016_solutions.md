@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Move semantics lets a value transfer expensive internal resources. An rvalue reference marks a candidate for transfer, while std::move is a cast that permits a move overload. The rule of zero means letting standard members manage their own copy, move and destruction behavior. A moved-from vector remains valid but its contents are unspecified.
 
+## Detailed reasoning
+
+std::move changes which overloads may be selected; it does not move bytes by itself. The type's move constructor performs the transfer. Standard library members let Batch use compiler-generated special members, so ownership behavior composes without custom cleanup code. After the transfer the receiver has the old value; the source remains an object that can be assigned a new value. Testing one implementation's empty moved-from vector would overstate the portable contract.
+
 ## Worked example 1
 
 ```cpp

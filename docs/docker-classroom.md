@@ -184,3 +184,67 @@ Command semantics checked against Docker's official [Compose profiles](https://d
 plus the [Compose merge requirements](https://docs.docker.com/reference/compose-file/merge/)
 on 22 October 2026. Runtime qualification is recorded in the
 [implementation checkpoint](implementation/CHECKPOINT.md).
+
+
+## Java, JavaScript and TypeScript workers
+
+These profiles use the same local progress volume as the other journeys. You
+need Docker with Linux containers and Compose; no host Java, Node, TypeScript
+or Python installation is needed. On Windows, use your engine's WSL 2 backend.
+Run these single-line commands from the repository folder in PowerShell,
+Command Prompt or a macOS/Linux terminal.
+
+Build the classroom and the three language profiles, showing every build step:
+
+```console
+docker compose --progress plain -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node --parallel 1 build
+```
+
+On a fresh engine, download the database image once, then start the classroom:
+
+```console
+docker compose -f compose.classroom.yaml pull postgres
+docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node up -d --no-build --pull never --wait
+```
+
+Open <http://localhost:8765/journeys>. Compose itself cannot open a host browser;
+the optional double-click launchers do so for their default Python classroom.
+You can add the `--profile python-core` flag to both commands above to run
+statistics and LLM examples alongside the language tracks. The `--wait` flag
+checks actual worker startup probes. Read the last error if a service fails to
+become healthy; do not repeatedly delete volumes to diagnose a build.
+
+Java uses a prepared Java21 compiler, saves the pad as `Main.java`, compiles to
+`classes/`, and runs `Main` with assertions enabled. Keep `public class Main`
+and omit a package declaration in this single-file pad. JavaScript uses Node24
+ES modules saved as `main.mjs`. TypeScript uses `main.mts`, strict TypeScript5.9
+checking and NodeNext module rules, then runs the emitted `compiled/main.mjs`.
+Compilation errors prevent execution. The pad's **How this code runs** panel
+explains the filename and lets you download the current source.
+
+Node is a JavaScript host with filesystem and server APIs. Browser `document`
+and `window` are different APIs. Browser DOM chapters disclose their separate
+browser workflow and are not executed as if those APIs existed in Node.
+External Java libraries and npm packages are not implicitly installed by a pad.
+Runtime files are temporary; the saved source, notes and job receipts persist.
+
+View running logs or stop the classroom while retaining progress:
+
+```console
+docker compose -f compose.classroom.yaml logs --follow lab java-worker javascript-worker typescript-worker
+docker compose -f compose.classroom.yaml --profile java21 --profile javascript-node --profile typescript-node stop
+```
+
+Press Ctrl+C to leave the log view. Stopping containers retains local named
+volumes. Do not use `down -v` unless you deliberately intend to erase their data.
+
+### Reproducible language toolchain inputs
+
+The Node and Java image recipes pin multi-architecture upstream manifest
+digests. The TypeScript toolchain uses a checked-in npm lock with integrity
+hashes for TypeScript5.9.3, Node24 types and their undici-types dependency.
+The lock uses the TLS-verified Yarn registry mirror for the same upstream
+package bytes. npm lifecycle scripts are disabled during installation. Network
+access is needed while building; examples run offline after those images exist.
+Java and Node run in separate private workers with the same bounded output,
+scratch, deadline and cancellation rules as the other language profiles.

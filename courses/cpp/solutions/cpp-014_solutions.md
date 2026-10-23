@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 An auditable CLI is a command-line program whose inputs, accepted values, rejected records and output can be reconciled. Parsing and business validation are separate steps. Integer cents avoid decimal rounding ambiguity. The ledger keeps every input accounted for instead of silently discarding bad text.
 
+## Detailed reasoning
+
+Reconciliation is a conservation rule: input_count equals accepted_count plus rejected_count. The total alone is too weak because losing a valid zero changes count without changing money. Keep one ledger row for every raw input before grouping. The malformed suffix 25x is a useful negative control because a convenient prefix parser produces an apparently reasonable but incorrect amount. The capstone succeeds only when another learner can repeat both the normal result and the rejected shortcut.
+
 ## Worked example 1
 
 ```cpp

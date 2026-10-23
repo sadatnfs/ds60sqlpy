@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A branch chooses one path using a Boolean condition. A loop repeats a body while its condition holds. An invariant is a fact that remains true before and after each iteration. A boundary is an input where a decision changes, such as zero for a nonnegative reading. Tracing the index, current value and running total makes hidden state visible.
 
+## Detailed reasoning
+
+Trace [4,-2,0,6] as four transitions. Starting total 0 becomes 4 after the first item, stays 4 for the rejected -2, stays 4 for the accepted zero and becomes 10 for 6. The zero step explains why comparing totals alone cannot detect >0 versus >=0: acceptance counts expose the difference. An index loop should state a half-open interval such as [0,size), so an empty input naturally executes zero iterations.
+
 ## Worked example 1
 
 ```cpp

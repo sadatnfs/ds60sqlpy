@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Undefined behavior is an operation outside the language contract, such as out-of-bounds access or signed overflow. Sanitizers instrument compiled code to detect selected violations at runtime. AddressSanitizer targets many memory errors, while UndefinedBehaviorSanitizer targets several undefined operations. A clean bounded run is evidence only for the paths exercised.
 
+## Detailed reasoning
+
+Checked access and sanitizer instrumentation are different mechanisms. vector::at checks its index as part of the library contract and throws out_of_range. AddressSanitizer observes selected illegal accesses in instrumented code and reports a runtime defect, often with a source stack. The ordinary safe example should never invoke undefined behavior merely to prove that it knows what a bug looks like. Compile and link the isolated fault with matching instrumentation before running it.
+
 ## Worked example 1
 
 ```cpp

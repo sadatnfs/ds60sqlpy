@@ -1,0 +1,704 @@
+{
+  "schema_version": 1,
+  "id": "java",
+  "title": "Java: from the first compile to reliable applications",
+  "summary": "36 sequenced lessons with explanations, worked examples, six inspectable exercises and separate reference solutions. Content becomes runnable only when its complete authored set is registered.",
+  "lessons": [
+    {
+      "id": "java-001",
+      "title": "From source file to running JVM",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "java21",
+      "concepts": [
+        "source",
+        "bytecode",
+        "entry point",
+        "compiler diagnostics"
+      ],
+      "outcome": "Explain and apply from source file to running jvm with explicit assumptions and failure handling.",
+      "lab": "Work through source examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-002",
+      "title": "Values, numeric types and conversion",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-001"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "primitives",
+        "overflow",
+        "casting",
+        "BigDecimal"
+      ],
+      "outcome": "Explain and apply values, numeric types and conversion with explicit assumptions and failure handling.",
+      "lab": "Work through primitives examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-003",
+      "title": "Decisions, loops and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-002"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "boolean",
+        "short circuit",
+        "loop invariant",
+        "boundary"
+      ],
+      "outcome": "Explain and apply decisions, loops and invariants with explicit assumptions and failure handling.",
+      "lab": "Work through boolean examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-004",
+      "title": "Methods and explicit contracts",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-003"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "parameters",
+        "return",
+        "overloading",
+        "pass by value"
+      ],
+      "outcome": "Explain and apply methods and explicit contracts with explicit assumptions and failure handling.",
+      "lab": "Work through parameters examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-005",
+      "title": "Arrays, strings and Unicode",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-004"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "array bounds",
+        "UTF-16",
+        "code points",
+        "immutability"
+      ],
+      "outcome": "Explain and apply arrays, strings and unicode with explicit assumptions and failure handling.",
+      "lab": "Work through array bounds examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-006",
+      "title": "Lists, sets and maps",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-005"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "ArrayList",
+        "HashMap",
+        "HashSet",
+        "iteration"
+      ],
+      "outcome": "Explain and apply lists, sets and maps with explicit assumptions and failure handling.",
+      "lab": "Work through ArrayList examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-007",
+      "title": "Classes and encapsulation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-006"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "object state",
+        "access modifiers",
+        "instance methods"
+      ],
+      "outcome": "Explain and apply classes and encapsulation with explicit assumptions and failure handling.",
+      "lab": "Work through object state examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-008",
+      "title": "Constructors, records and invariants",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-007"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "record",
+        "compact constructor",
+        "validation"
+      ],
+      "outcome": "Explain and apply constructors, records and invariants with explicit assumptions and failure handling.",
+      "lab": "Work through record examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-009",
+      "title": "Exceptions and resource lifetime",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-008"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "checked exception",
+        "try with resources",
+        "suppressed exception"
+      ],
+      "outcome": "Explain and apply exceptions and resource lifetime with explicit assumptions and failure handling.",
+      "lab": "Work through checked exception examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-010",
+      "title": "Interfaces and polymorphism",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-009"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "interface",
+        "substitution",
+        "composition",
+        "dispatch"
+      ],
+      "outcome": "Explain and apply interfaces and polymorphism with explicit assumptions and failure handling.",
+      "lab": "Work through interface examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-011",
+      "title": "Equality, hashing and ordering",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-010"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "equals",
+        "hashCode",
+        "Comparator",
+        "mutable keys"
+      ],
+      "outcome": "Explain and apply equality, hashing and ordering with explicit assumptions and failure handling.",
+      "lab": "Work through equals examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-012",
+      "title": "Generics and variance",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "java-011"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "type parameter",
+        "invariance",
+        "extends",
+        "super",
+        "type erasure"
+      ],
+      "outcome": "Explain and apply generics and variance with explicit assumptions and failure handling.",
+      "lab": "Work through type parameter examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-013",
+      "title": "Lambdas and functional interfaces",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-012"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "capture",
+        "effectively final",
+        "Predicate",
+        "Function"
+      ],
+      "outcome": "Explain and apply lambdas and functional interfaces with explicit assumptions and failure handling.",
+      "lab": "Work through capture examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-014",
+      "title": "Streams and collectors",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-013"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "lazy pipeline",
+        "reduce",
+        "groupingBy",
+        "parallel hazards"
+      ],
+      "outcome": "Explain and apply streams and collectors with explicit assumptions and failure handling.",
+      "lab": "Work through lazy pipeline examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-015",
+      "title": "Dates, time zones and formatting",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-014"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Instant",
+        "LocalDate",
+        "ZonedDateTime",
+        "DST"
+      ],
+      "outcome": "Explain and apply dates, time zones and formatting with explicit assumptions and failure handling.",
+      "lab": "Work through Instant examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-016",
+      "title": "Files, paths and character encoding",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-015"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Path",
+        "Files",
+        "UTF-8",
+        "atomic replacement"
+      ],
+      "outcome": "Explain and apply files, paths and character encoding with explicit assumptions and failure handling.",
+      "lab": "Work through Path examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-017",
+      "title": "Optional values and validation boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-016"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Optional",
+        "null",
+        "domain error",
+        "parse"
+      ],
+      "outcome": "Explain and apply optional values and validation boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through Optional examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-018",
+      "title": "Tests that detect broken behavior",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-017"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "assert",
+        "table driven tests",
+        "properties",
+        "mutation"
+      ],
+      "outcome": "Explain and apply tests that detect broken behavior with explicit assumptions and failure handling.",
+      "lab": "Work through assert examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-019",
+      "title": "Data structures and complexity",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-018"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "hash table",
+        "deque",
+        "heap",
+        "Big O"
+      ],
+      "outcome": "Explain and apply data structures and complexity with explicit assumptions and failure handling.",
+      "lab": "Work through hash table examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-020",
+      "title": "Search, sorting and dynamic programming",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-019"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "binary search",
+        "stable sort",
+        "memoization",
+        "DP"
+      ],
+      "outcome": "Explain and apply search, sorting and dynamic programming with explicit assumptions and failure handling.",
+      "lab": "Work through binary search examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-021",
+      "title": "Threads and the memory model",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-020"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "Thread",
+        "happens before",
+        "visibility",
+        "join"
+      ],
+      "outcome": "Explain and apply threads and the memory model with explicit assumptions and failure handling.",
+      "lab": "Work through Thread examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-022",
+      "title": "Executors, futures and cancellation",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-021"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "ExecutorService",
+        "Future",
+        "timeout",
+        "cancellation"
+      ],
+      "outcome": "Explain and apply executors, futures and cancellation with explicit assumptions and failure handling.",
+      "lab": "Work through ExecutorService examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-023",
+      "title": "Locks, atomics and concurrent collections",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-022"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "synchronized",
+        "AtomicInteger",
+        "ConcurrentHashMap",
+        "deadlock"
+      ],
+      "outcome": "Explain and apply locks, atomics and concurrent collections with explicit assumptions and failure handling.",
+      "lab": "Work through synchronized examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-024",
+      "title": "Virtual threads and blocking work",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "java-023"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "virtual thread",
+        "task lifetime",
+        "backpressure",
+        "pinning"
+      ],
+      "outcome": "Explain and apply virtual threads and blocking work with explicit assumptions and failure handling.",
+      "lab": "Work through virtual thread examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-025",
+      "title": "JVM memory, GC and allocation",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-024"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "heap",
+        "stack",
+        "reachability",
+        "GC",
+        "allocation"
+      ],
+      "outcome": "Explain and apply jvm memory, gc and allocation with explicit assumptions and failure handling.",
+      "lab": "Work through heap examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-026",
+      "title": "Packages, classpaths and modules",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-025"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "package",
+        "classpath",
+        "module path",
+        "exports",
+        "requires"
+      ],
+      "outcome": "Explain and apply packages, classpaths and modules with explicit assumptions and failure handling.",
+      "lab": "Work through package examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-027",
+      "title": "Builds and dependency reproducibility",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-026"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "javac",
+        "jar",
+        "Maven",
+        "Gradle",
+        "locked dependencies"
+      ],
+      "outcome": "Explain and apply builds and dependency reproducibility with explicit assumptions and failure handling.",
+      "lab": "Work through javac examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-028",
+      "title": "HTTP services and clients",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-027"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "HttpClient",
+        "HttpServer",
+        "status",
+        "timeout",
+        "resource closure"
+      ],
+      "outcome": "Explain and apply http services and clients with explicit assumptions and failure handling.",
+      "lab": "Work through HttpClient examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-029",
+      "title": "JDBC and transactions",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-028"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "prepared statement",
+        "connection",
+        "commit",
+        "rollback",
+        "isolation"
+      ],
+      "outcome": "Explain and apply jdbc and transactions with explicit assumptions and failure handling.",
+      "lab": "Work through prepared statement examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-030",
+      "title": "Serialization and schema evolution",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-029"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "data boundary",
+        "version",
+        "validation",
+        "deserialization"
+      ],
+      "outcome": "Explain and apply serialization and schema evolution with explicit assumptions and failure handling.",
+      "lab": "Work through data boundary examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-031",
+      "title": "Reflection, annotations and service loading",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-030"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "reflection",
+        "annotation",
+        "ServiceLoader",
+        "encapsulation"
+      ],
+      "outcome": "Explain and apply reflection, annotations and service loading with explicit assumptions and failure handling.",
+      "lab": "Work through reflection examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-032",
+      "title": "Profiling and benchmark reasoning",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-031"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "JFR",
+        "warmup",
+        "JIT",
+        "measurement bias"
+      ],
+      "outcome": "Explain and apply profiling and benchmark reasoning with explicit assumptions and failure handling.",
+      "lab": "Work through JFR examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-033",
+      "title": "Secure application boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-032"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "untrusted input",
+        "path traversal",
+        "resource limits",
+        "secrets"
+      ],
+      "outcome": "Explain and apply secure application boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through untrusted input examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-034",
+      "title": "Application design and dependency boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-033"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "dependency inversion",
+        "ports",
+        "adapters",
+        "pure core"
+      ],
+      "outcome": "Explain and apply application design and dependency boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through dependency inversion examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-035",
+      "title": "Build a tested local data service",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-034"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "domain model",
+        "storage",
+        "HTTP",
+        "contract tests"
+      ],
+      "outcome": "Explain and apply build a tested local data service with explicit assumptions and failure handling.",
+      "lab": "Work through domain model examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "java-036",
+      "title": "Package, diagnose and maintain a release",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "java-035"
+      ],
+      "runtime": "java21",
+      "concepts": [
+        "jar",
+        "jlink",
+        "observability",
+        "compatibility",
+        "release checklist"
+      ],
+      "outcome": "Explain and apply package, diagnose and maintain a release with explicit assumptions and failure handling.",
+      "lab": "Work through jar examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://dev.java/learn/",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://docs.oracle.com/en/java/javase/21/docs/api/index.html",
+      "checked": "2026-10-22"
+    }
+  ]
+}

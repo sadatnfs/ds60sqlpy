@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A debugger pauses a process so its call stack and local values can be inspected. A profile measures where work was spent. A hypothesis predicts an observation that can be checked. Debugging starts with the smallest reproducible discrepancy, while performance measurement needs a correctness check and a fixed workload.
 
+## Detailed reasoning
+
+Start with a wrong value you can reproduce, then predict which variable or call should explain it. A debugger stack connects the current function to its caller, while local inspection checks the immediate hypothesis. Timing answers a different question. The reference prints elapsed nanoseconds but asserts only the exact checksum and count, since timing depends on compiler, optimizer and machine activity. A faster incorrect program fails before any performance conclusion.
+
 ## Worked example 1
 
 ```cpp

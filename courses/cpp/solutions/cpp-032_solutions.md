@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Bounded parallel work limits simultaneous workers and queued items. Backpressure slows producers when the system has no capacity. Failure propagation carries a worker error to the owner instead of silently producing partial success. Cancellation and joining are part of the resource contract, not optional cleanup.
 
+## Detailed reasoning
+
+The two-task future example makes a fixed worker bound visible and propagates failure through get. It is deliberately smaller than a production executor. A real executor also needs a queue capacity, an admission policy and a rule for accepted work when one task fails. The owner must observe each result or exception and account for pending/cancelled work before publishing a total. Discarded exceptions and partial aggregates are not successful parallel execution.
+
 ## Worked example 1
 
 ```cpp

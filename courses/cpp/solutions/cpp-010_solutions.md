@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A struct groups related fields into one value. An enum class defines a closed vocabulary of named states and prevents accidental integer mixing. An invariant describes combinations that make sense, such as a settled payment carrying nonnegative cents. Domain names make invalid combinations visible at the boundary.
 
+## Detailed reasoning
+
+Data fields are useful only together with their meaning. An ID answers which payment this is, cents answers how much, and Status answers its business state. Two distinct IDs with the same amount are not automatically duplicates. A pending payment contributes no settled revenue but still exists in an audit ledger. A negative amount violates this lesson's model even if a branch would otherwise ignore it, so the invariant check happens before state-specific contribution.
+
 ## Worked example 1
 
 ```cpp

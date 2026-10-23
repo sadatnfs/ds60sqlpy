@@ -9,6 +9,38 @@ from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import render_artifact, rendered_targets
 from ds60sqlpy.module_jobs import ModuleJobs, profile_readiness
 from ds60sqlpy.modules import ModuleCatalog, ModuleState
+from ds60sqlpy.worker_operations import PROFILES
+
+RUNTIME_GUIDANCE = {
+    ("cpp20"): (
+        "The pad is saved as main.cpp in a fresh job folder. The worker "
+        "compiles with g++ -std=c++20 -pthread -O0 -g -Wall -Wextra "
+        "-Wconversion -Wpedantic main.cpp -o program, then runs ./program. A "
+        "failed compile stops before execution. Multi-file CMake projects "
+        "use the separate Docker instructions in the guide."
+    ),
+    ("java21"): (
+        "Use public class Main with public static void main(String[] args), "
+        "without a package declaration. The worker saves Main.java, runs "
+        "javac --release 21 -encoding UTF-8 -Xlint:all -d classes Main.java, "
+        "then java -ea -Xmx512m -cp classes Main. Extra helper classes may "
+        "share this source file. Java assertions are enabled."
+    ),
+    ("javascript-node"): (
+        "The pad is main.mjs, an ES module executed by Node 24. Built-in "
+        "node: modules are available offline. Browser document and window "
+        "APIs are not part of Node. Use the browser-specific examples and "
+        "instructions where those APIs are taught."
+    ),
+    ("typescript-node"): (
+        "The pad is main.mts. TypeScript checks strict types with NodeNext "
+        "module resolution before emitting compiled/main.mjs for Node 24. A "
+        "type error prevents execution. The fixed compiler and Node types "
+        "are included in the image; no npm install runs when you run a "
+        "lesson. Runtime JavaScript line numbers may differ from TypeScript "
+        "source lines."
+    ),
+}
 
 
 class ModuleService:
@@ -44,6 +76,17 @@ class ModuleService:
                 **planned,
                 "status": "authored",
                 "language": lesson.language,
+                "learning_mode": lesson.learning_mode,
+                "source_filename": PROFILES[lesson.runtime_profile].filename
+                if lesson.runtime_profile in PROFILES
+                else "notes.md",
+                "runtime_guidance": RUNTIME_GUIDANCE.get(
+                    lesson.runtime_profile,
+                    (
+                        "Run a complete example in a fresh job folder. Save your draft to "
+                        "retain it; temporary runtime files are discarded after execution."
+                    ),
+                ),
                 "runtime_profile": lesson.runtime_profile,
                 "verification_id": lesson.verification_id,
                 "guide_html": render_artifact(

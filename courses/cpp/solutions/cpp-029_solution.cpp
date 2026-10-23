@@ -34,6 +34,8 @@
 int main() {
     int result=0; std::thread worker([&result]{result=42;}); worker.join(); assert(result==42);
     std::atomic<bool> stop{false}; std::promise<void> ready; auto started=ready.get_future(); std::thread cancellable([&]{ready.set_value(); while(!stop.load()) std::this_thread::yield();}); started.get(); stop.store(true); cancellable.join(); assert(stop.load());
+    // Reference extension checks for the exercise changes.
+    int next_result=0;{auto task=std::async(std::launch::async,[]{return 7;});next_result=task.get();}assert(next_result==7);
     std::cout << "cpp-029 examples passed\n";
     return 0;
 }

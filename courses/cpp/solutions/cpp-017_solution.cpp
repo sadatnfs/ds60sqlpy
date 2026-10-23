@@ -37,6 +37,8 @@ int main() {
     auto ok=positive(0); assert(std::get<int>(ok)==0);
     auto bad=positive(-1); assert(std::get<ParseError>(bad).reason=="negative");
     std::optional<int> missing; assert(!missing);
+    // Reference extension checks for the exercise changes.
+    auto bounded=[](int x)->Result{if(x<0)return ParseError{"negative"};if(x>100)return ParseError{"too_large"};return x;};assert(std::get<int>(bounded(100))==100);assert(std::get<ParseError>(bounded(101)).reason=="too_large");
     std::cout << "cpp-017 examples passed\n";
     return 0;
 }

@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A function names a computation with parameters as inputs and a return value as its output. A precondition is a promise the caller must satisfy. A postcondition describes the result. Pure functions avoid hidden state, so the same inputs produce the same value and small boundary tests are meaningful.
 
+## Detailed reasoning
+
+A caller has three distinct questions: are the bounds valid, is the value below/inside/above them, and may the call alter its input? The supplied function rejects reversed bounds first. Only then does it compute min(value,high), followed by max(low,...). The three ordinary cases cover each position relative to the interval, while equal bounds test a degenerate but valid interval. A return value can differ from the argument without mutating the caller because parameters are copies.
+
 ## Worked example 1
 
 ```cpp

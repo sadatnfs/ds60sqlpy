@@ -35,6 +35,8 @@ consteval int fixed_limit(){return 16;}
 int main() {
     static_assert(square(4)==16);static_assert(fixed_limit()==16);
     int runtime=5;assert(square(runtime)==25);
+    // Reference extension checks for the exercise changes.
+    constexpr int squares[]{0,1,4,9,16};static_assert(squares[4]==16);static_assert(square(0)==0);
     std::cout << "cpp-036 examples passed\n";
     return 0;
 }

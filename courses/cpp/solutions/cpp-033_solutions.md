@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A concurrent test must check results across meaningful interleavings. A schedule is an ordering of thread operations. Stress repeats a scenario but does not enumerate all schedules. ThreadSanitizer can detect many data races in an instrumented host run; it is a different tool from AddressSanitizer and usually requires a separate build.
 
+## Detailed reasoning
+
+A concurrency test must know which state it is waiting for. The readiness future observes one explicit worker event; join observes termination. The test repeats a fixed 200-increment invariant twenty times, which is useful bounded stress but does not enumerate all schedules. A separate supervisor deadline turns deadlock into a finite failure. TSan evidence requires an instrumented supported host run and should remain distinct from normal execution results.
+
 ## Worked example 1
 
 ```cpp

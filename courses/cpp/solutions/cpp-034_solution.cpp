@@ -34,6 +34,8 @@ struct Sample { int id; int value; };
 int main() {
     std::vector<Sample> rows{{1,10},{2,20},{3,30}};std::vector<int> values;values.reserve(rows.size());for(const auto& r:rows)values.push_back(r.value);
     int aos=0;for(const auto& r:rows)aos+=r.value;int soa=std::accumulate(values.begin(),values.end(),0);assert(aos==60&&soa==60);assert(values.size()==3);
+    // Reference extension checks for the exercise changes.
+    std::vector<int> reserved;reserved.reserve(100);assert(reserved.size()==0&&reserved.capacity()>=100);
     std::cout << "cpp-034 examples passed\n";
     return 0;
 }

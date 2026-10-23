@@ -400,3 +400,103 @@ def test_embedding_rejects_wrap_and_returns_owned_rows() -> None:
     output[0, 0] = 999
     np.testing.assert_array_equal(output[2], [2, 2])
     np.testing.assert_array_equal(table, saved)
+
+
+def test_complete_ml_plans_have_no_missing_or_extra_authored_ids() -> None:
+    for track in TRACKS:
+        planned = json.loads((ROOT / 'docs/expansion/plans' / f'{track}.json').read_text())
+        authored = [entry for name, entry in _entries() if name == track]
+        assert {entry['id'] for entry in authored} == {item['id'] for item in planned['lessons']}
+        assert len(authored) == (36 if track == 'deep-learning-tensorflow' else 42)
+        specifications = {item['id']: item for item in planned['lessons']}
+        for entry in authored:
+            assert entry['runtime_profile'] == specifications[entry['id']]['runtime']
+
+
+def _completed_reference_cases(profile: str) -> list[tuple[str, str]]:
+    return [
+        (track, entry['id'])
+        for track, entry in _entries()
+        if entry['runtime_profile'] == profile
+        and int(entry['id'].rsplit('-', 1)[1]) > (8 if track == TRACKS[0] else 9)
+    ]
+
+
+@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('python-core'))
+def test_new_core_reference_exercises_execute(track: str, lesson_id: str) -> None:
+    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+
+
+@pytest.mark.skipif(
+    os.environ.get('DS60_TEST_TENSORFLOW') != '1',
+    reason='TensorFlow reference execution requires an explicitly prepared CPU runtime',
+)
+@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('tensorflow-cpu'))
+def test_completed_tensorflow_reference_exercises(track: str, lesson_id: str) -> None:
+    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+
+
+@pytest.mark.skipif(
+    os.environ.get('DS60_TEST_TORCH') != '1',
+    reason='PyTorch reference execution requires an explicitly prepared CPU runtime',
+)
+@pytest.mark.parametrize(('track', 'lesson_id'), _completed_reference_cases('llm-torch-cpu'))
+def test_completed_torch_reference_exercises(track: str, lesson_id: str) -> None:
+    assert _module(track, lesson_id).verify() == {'checks': 6, 'status': 'passed'}
+
+
+def test_tool_proposal_validation_copies_only_an_allowed_shape() -> None:
+    module = _module('llm-theory', 'llm-038')
+    original = {'tool': 'read_fixture', 'document_id': 'd2'}
+    accepted = module.validate(original)
+    accepted['document_id'] = 'd1'
+    assert original['document_id'] == 'd2'
+    for value in [None, ['read_fixture', 'd1'], 1]:
+        with pytest.raises(TypeError):
+            module.validate(value)
+    for value in [
+        {'tool': 'read_fixture', 'document_id': '/etc/passwd'},
+        {'tool': 'read_fixture', 'document_id': 'd1', 'args': {}},
+        {'tool': 'write_fixture', 'document_id': 'd1'},
+    ]:
+        with pytest.raises(ValueError):
+            module.validate(value)
+
+
+def test_local_retrieval_ranking_uses_content_and_deterministic_ties() -> None:
+    module = _module('llm-theory', 'llm-036')
+    documents = {'z': 'red square', 'a': 'blue square', 'b': 'red circle'}
+    assert module.rank('red square', documents, 1) == ['z']
+    assert module.rank('square', documents, 2) == ['a', 'z']
+    assert module.rank('absent', documents, 2) == ['a', 'b']
+    assert module.rank('red', documents, 0) == []
+
+
+def test_tokenwise_normalization_preserves_prefix_but_time_centering_does_not() -> None:
+    module = _module('llm-theory', 'llm-010')
+    values = np.array([[2., 6., 10.], [1., 3., 5.], [30., 40., 50.]])
+    full = module.layer_norm(values)
+    np.testing.assert_allclose(module.layer_norm(values[:1]), full[:1], atol=1e-12, rtol=0)
+    assert not np.allclose((values - values.mean(axis=0))[:1], values[:1] - values[:1].mean(axis=0))
+
+
+@pytest.mark.skipif(os.environ.get('DS60_TEST_TORCH') != '1', reason='Requires prepared PyTorch CPU runtime')
+def test_decoder_cache_has_nonuniform_prefix_and_context_limit_controls() -> None:
+    import torch
+
+    module = _module('llm-theory', 'llm-024')
+    torch.manual_seed(19)
+    model = module.TinyDecoder(vocab=12, width=8, heads=2, context=5).eval()
+    ids = torch.tensor([[1, 4, 2, 7, 3]])
+    with torch.no_grad():
+        full, _ = model(ids)
+        first, cache = model(ids[:, :2])
+        rest, cache = model(ids[:, 2:], cache)
+        torch.testing.assert_close(torch.cat([first, rest], 1), full, atol=1e-6, rtol=0)
+        with pytest.raises(ValueError, match='context'):
+            model(torch.tensor([[1]]), cache)
+        foreign_batch = {'k': cache['k'].repeat(2, 1, 1, 1), 'v': cache['v'].repeat(2, 1, 1, 1)}
+        # Use a shorter foreign cache so the ownership shape check is reached before the context limit.
+        foreign_batch = {name: value[:, :, :1] for name, value in foreign_batch.items()}
+        with pytest.raises(ValueError, match='batch'):
+            model(torch.tensor([[1]]), foreign_batch)

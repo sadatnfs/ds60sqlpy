@@ -1,0 +1,826 @@
+{
+  "schema_version": 1,
+  "id": "javascript-typescript",
+  "title": "JavaScript and TypeScript: language, browser and Node applications",
+  "summary": "42 sequenced lessons with explanations, worked examples, six inspectable exercises and separate reference solutions. Content becomes runnable only when its complete authored set is registered.",
+  "lessons": [
+    {
+      "id": "js-001",
+      "title": "JavaScript, Node and the browser",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [],
+      "runtime": "javascript-node",
+      "concepts": [
+        "ECMAScript",
+        "host",
+        "ES module",
+        "console"
+      ],
+      "outcome": "Explain and apply javascript, node and the browser with explicit assumptions and failure handling.",
+      "lab": "Work through ECMAScript examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-002",
+      "title": "Values, coercion and precise comparisons",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-001"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "number",
+        "string",
+        "boolean",
+        "null",
+        "undefined",
+        "strict equality"
+      ],
+      "outcome": "Explain and apply values, coercion and precise comparisons with explicit assumptions and failure handling.",
+      "lab": "Work through number examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-003",
+      "title": "Control flow and loop boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-002"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "truthiness",
+        "short circuit",
+        "loop",
+        "invariant"
+      ],
+      "outcome": "Explain and apply control flow and loop boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through truthiness examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-004",
+      "title": "Functions, scope and closures",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-003"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "function",
+        "lexical scope",
+        "closure",
+        "default parameter"
+      ],
+      "outcome": "Explain and apply functions, scope and closures with explicit assumptions and failure handling.",
+      "lab": "Work through function examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-005",
+      "title": "Arrays and immutable transformations",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-004"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "map",
+        "filter",
+        "reduce",
+        "sort",
+        "mutation"
+      ],
+      "outcome": "Explain and apply arrays and immutable transformations with explicit assumptions and failure handling.",
+      "lab": "Work through map examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-006",
+      "title": "Objects, properties and prototypes",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-005"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "own property",
+        "prototype",
+        "destructuring",
+        "spread"
+      ],
+      "outcome": "Explain and apply objects, properties and prototypes with explicit assumptions and failure handling.",
+      "lab": "Work through own property examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-007",
+      "title": "Maps, sets and collection identity",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-006"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Map",
+        "Set",
+        "reference identity",
+        "lookup"
+      ],
+      "outcome": "Explain and apply maps, sets and collection identity with explicit assumptions and failure handling.",
+      "lab": "Work through Map examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-008",
+      "title": "Strings, Unicode and regular expressions",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-007"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "code point",
+        "UTF-16",
+        "RegExp",
+        "escaping"
+      ],
+      "outcome": "Explain and apply strings, unicode and regular expressions with explicit assumptions and failure handling.",
+      "lab": "Work through code point examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-009",
+      "title": "Errors and explicit validation",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-008"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Error",
+        "throw",
+        "try catch",
+        "validation boundary"
+      ],
+      "outcome": "Explain and apply errors and explicit validation with explicit assumptions and failure handling.",
+      "lab": "Work through Error examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-010",
+      "title": "Modules and dependency boundaries",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-009"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "import",
+        "export",
+        "ESM",
+        "CommonJS",
+        "package"
+      ],
+      "outcome": "Explain and apply modules and dependency boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through import examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-011",
+      "title": "Iterators and generators",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-010"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Symbol.iterator",
+        "generator",
+        "lazy sequence",
+        "cleanup"
+      ],
+      "outcome": "Explain and apply iterators and generators with explicit assumptions and failure handling.",
+      "lab": "Work through Symbol.iterator examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-012",
+      "title": "Promises and the event loop",
+      "level": "beginner",
+      "minutes": 90,
+      "prerequisites": [
+        "js-011"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Promise",
+        "microtask",
+        "task",
+        "unhandled rejection"
+      ],
+      "outcome": "Explain and apply promises and the event loop with explicit assumptions and failure handling.",
+      "lab": "Work through Promise examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-013",
+      "title": "Async functions and cancellation",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-012"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "async",
+        "await",
+        "AbortController",
+        "timeout"
+      ],
+      "outcome": "Explain and apply async functions and cancellation with explicit assumptions and failure handling.",
+      "lab": "Work through async examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-014",
+      "title": "Collections, search and algorithmic complexity",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-013"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "binary search",
+        "hash index",
+        "heap",
+        "complexity"
+      ],
+      "outcome": "Explain and apply collections, search and algorithmic complexity with explicit assumptions and failure handling.",
+      "lab": "Work through binary search examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-015",
+      "title": "Testing with Node built-ins",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-014"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "node:test",
+        "assert",
+        "fixture",
+        "table driven",
+        "negative test"
+      ],
+      "outcome": "Explain and apply testing with node built-ins with explicit assumptions and failure handling.",
+      "lab": "Work through node:test examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-016",
+      "title": "Files, paths and streaming text",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-015"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "fs promises",
+        "Path",
+        "encoding",
+        "resource cleanup"
+      ],
+      "outcome": "Explain and apply files, paths and streaming text with explicit assumptions and failure handling.",
+      "lab": "Work through fs promises examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-017",
+      "title": "HTTP, URLs and JSON boundaries",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-016"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "fetch",
+        "URL",
+        "status",
+        "JSON",
+        "validation"
+      ],
+      "outcome": "Explain and apply http, urls and json boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through fetch examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-018",
+      "title": "A reliable command-line data tool",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-017"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "arguments",
+        "exit code",
+        "error contract",
+        "composition"
+      ],
+      "outcome": "Explain and apply a reliable command-line data tool with explicit assumptions and failure handling.",
+      "lab": "Work through arguments examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-019",
+      "title": "TypeScript values and compile-time types",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-018"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "annotation",
+        "inference",
+        "erasure",
+        "strict mode"
+      ],
+      "outcome": "Explain and apply typescript values and compile-time types with explicit assumptions and failure handling.",
+      "lab": "Work through annotation examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-020",
+      "title": "Unions, narrowing and exhaustiveness",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-019"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "union",
+        "type guard",
+        "never",
+        "discriminant"
+      ],
+      "outcome": "Explain and apply unions, narrowing and exhaustiveness with explicit assumptions and failure handling.",
+      "lab": "Work through union examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-021",
+      "title": "Object types and structural contracts",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-020"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "interface",
+        "type alias",
+        "readonly",
+        "optional"
+      ],
+      "outcome": "Explain and apply object types and structural contracts with explicit assumptions and failure handling.",
+      "lab": "Work through interface examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-022",
+      "title": "Generic functions and constraints",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-021"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "type parameter",
+        "keyof",
+        "constraint",
+        "inference"
+      ],
+      "outcome": "Explain and apply generic functions and constraints with explicit assumptions and failure handling.",
+      "lab": "Work through type parameter examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-023",
+      "title": "Mapped, conditional and utility types",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-022"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "mapped type",
+        "conditional type",
+        "Pick",
+        "ReturnType"
+      ],
+      "outcome": "Explain and apply mapped, conditional and utility types with explicit assumptions and failure handling.",
+      "lab": "Work through mapped type examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-024",
+      "title": "Runtime validation and unknown input",
+      "level": "intermediate",
+      "minutes": 90,
+      "prerequisites": [
+        "js-023"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "unknown",
+        "validation",
+        "assertion",
+        "trust boundary"
+      ],
+      "outcome": "Explain and apply runtime validation and unknown input with explicit assumptions and failure handling.",
+      "lab": "Work through unknown examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-025",
+      "title": "Typed modules and NodeNext resolution",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-024"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "mts",
+        "mjs",
+        "NodeNext",
+        "type only import"
+      ],
+      "outcome": "Explain and apply typed modules and nodenext resolution with explicit assumptions and failure handling.",
+      "lab": "Work through mts examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-026",
+      "title": "Classes, composition and private state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-025"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "class",
+        "private field",
+        "interface",
+        "composition"
+      ],
+      "outcome": "Explain and apply classes, composition and private state with explicit assumptions and failure handling.",
+      "lab": "Work through class examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-027",
+      "title": "Typed async workflows and errors",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-026"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "Result",
+        "Promise",
+        "cancellation",
+        "discriminated errors"
+      ],
+      "outcome": "Explain and apply typed async workflows and errors with explicit assumptions and failure handling.",
+      "lab": "Work through Result examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-028",
+      "title": "Data structures and dynamic programming",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-027"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "graph",
+        "BFS",
+        "memoization",
+        "state transition"
+      ],
+      "outcome": "Explain and apply data structures and dynamic programming with explicit assumptions and failure handling.",
+      "lab": "Work through graph examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-029",
+      "title": "The DOM, events and accessible interaction",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-028"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "document",
+        "event delegation",
+        "focus",
+        "accessibility"
+      ],
+      "outcome": "Explain and apply the dom, events and accessible interaction with explicit assumptions and failure handling.",
+      "lab": "Work through document examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-030",
+      "title": "Forms, browser storage and application state",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-029"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "form",
+        "validation",
+        "localStorage",
+        "state transition"
+      ],
+      "outcome": "Explain and apply forms, browser storage and application state with explicit assumptions and failure handling.",
+      "lab": "Work through form examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-031",
+      "title": "Safe browser rendering and security boundaries",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-030"
+      ],
+      "runtime": "reading",
+      "concepts": [
+        "textContent",
+        "innerHTML",
+        "CSP",
+        "same origin"
+      ],
+      "outcome": "Explain and apply safe browser rendering and security boundaries with explicit assumptions and failure handling.",
+      "lab": "Work through textContent examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-032",
+      "title": "Streams and backpressure",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-031"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Readable",
+        "Writable",
+        "pipeline",
+        "highWaterMark"
+      ],
+      "outcome": "Explain and apply streams and backpressure with explicit assumptions and failure handling.",
+      "lab": "Work through Readable examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-033",
+      "title": "Worker threads and CPU-bound work",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-032"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Worker",
+        "message passing",
+        "transfer",
+        "termination"
+      ],
+      "outcome": "Explain and apply worker threads and cpu-bound work with explicit assumptions and failure handling.",
+      "lab": "Work through Worker examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-034",
+      "title": "Memory, performance and profiling",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-033"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "retained object",
+        "heap",
+        "event loop delay",
+        "measurement"
+      ],
+      "outcome": "Explain and apply memory, performance and profiling with explicit assumptions and failure handling.",
+      "lab": "Work through retained object examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-035",
+      "title": "Dates, internationalization and time zones",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-034"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "Intl",
+        "Date",
+        "time zone",
+        "locale"
+      ],
+      "outcome": "Explain and apply dates, internationalization and time zones with explicit assumptions and failure handling.",
+      "lab": "Work through Intl examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-036",
+      "title": "Package design and reproducible toolchains",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-035"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "exports",
+        "semver",
+        "lockfile",
+        "supply chain"
+      ],
+      "outcome": "Explain and apply package design and reproducible toolchains with explicit assumptions and failure handling.",
+      "lab": "Work through exports examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-037",
+      "title": "Network retries, idempotency and bounded concurrency",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-036"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "retry budget",
+        "jitter",
+        "idempotency",
+        "queue"
+      ],
+      "outcome": "Explain and apply network retries, idempotency and bounded concurrency with explicit assumptions and failure handling.",
+      "lab": "Work through retry budget examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-038",
+      "title": "Typed API design and contract testing",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-037"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "schema",
+        "endpoint",
+        "error envelope",
+        "contract"
+      ],
+      "outcome": "Explain and apply typed api design and contract testing with explicit assumptions and failure handling.",
+      "lab": "Work through schema examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-039",
+      "title": "Functional core and state machines",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-038"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "pure function",
+        "effect",
+        "transition",
+        "invariant"
+      ],
+      "outcome": "Explain and apply functional core and state machines with explicit assumptions and failure handling.",
+      "lab": "Work through pure function examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-040",
+      "title": "A tested local JavaScript service",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-039"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "HTTP",
+        "validation",
+        "shutdown",
+        "integration test"
+      ],
+      "outcome": "Explain and apply a tested local javascript service with explicit assumptions and failure handling.",
+      "lab": "Work through HTTP examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-041",
+      "title": "A typed analytics pipeline",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-040"
+      ],
+      "runtime": "typescript-node",
+      "concepts": [
+        "parse",
+        "transform",
+        "aggregate",
+        "stream",
+        "diagnostics"
+      ],
+      "outcome": "Explain and apply a typed analytics pipeline with explicit assumptions and failure handling.",
+      "lab": "Work through parse examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    },
+    {
+      "id": "js-042",
+      "title": "Release, observability and maintenance",
+      "level": "advanced",
+      "minutes": 120,
+      "prerequisites": [
+        "js-041"
+      ],
+      "runtime": "javascript-node",
+      "concepts": [
+        "build",
+        "source map",
+        "logging",
+        "compatibility",
+        "operability"
+      ],
+      "outcome": "Explain and apply release, observability and maintenance with explicit assumptions and failure handling.",
+      "lab": "Work through build examples and compare normal, boundary and invalid cases.",
+      "verification": "Inspect the exact expected results and failure cases in the authored guide; process success alone is not mastery."
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://nodejs.org/docs/latest-v24.x/api/",
+      "checked": "2026-10-22"
+    },
+    {
+      "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+      "checked": "2026-10-22"
+    }
+  ]
+}

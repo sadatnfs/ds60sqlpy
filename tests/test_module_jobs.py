@@ -4,6 +4,7 @@ import json
 import threading
 import time
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -36,6 +37,9 @@ def authored(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> ModuleCatalog:
         ],
     }
     monkeypatch.setattr("ds60sqlpy.modules.load_designs", lambda root: [plan])
+    monkeypatch.setattr(
+        "ds60sqlpy.modules.Catalog.load", lambda root: SimpleNamespace(lessons=lambda: [])
+    )
     base = tmp_path / "courses/cpp"
     base.mkdir(parents=True)
     for name, text in {

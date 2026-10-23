@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A warning is compiler feedback about suspicious code even when compilation succeeds. A test is an executable check against a contract. CTest runs registered processes and reports their statuses. The NDEBUG macro disables standard assert expressions, so a Release test that only uses assert can accidentally check nothing.
 
+## Detailed reasoning
+
+A test has two jobs: perform a check and make failure observable. With NDEBUG, assert(expression) can remove expression entirely, including side effects accidentally placed inside it. An ordinary if condition and nonzero return stay active in Release. CTest adds process orchestration but cannot invent checks inside a program. Inspect the executed test count as well as the pass label, because a project with zero registered tests has not validated the intended behavior.
+
 ## Worked example 1
 
 ```cpp

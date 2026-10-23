@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Integer overflow and floating-point rounding are different correctness problems. Signed overflow is undefined; floating values approximate many decimal fractions. A tolerance defines acceptable numerical error for a specific scale. Stable algorithms reduce accumulated error, but exact money and identity arithmetic should use exact representations whenever possible.
 
+## Detailed reasoning
+
+The integer guard is arranged to avoid evaluating the dangerous sum. Because inputs are nonnegative, max-b is safe and can be compared with a before adding. Floating addition follows a different model: rounding can make different parenthesizations of [1e16,1,-1e16] produce different results. Use exact arithmetic for integer cents and justify approximate tolerances using scale and units. A loose tolerance must not conceal an incorrect algorithm.
+
 ## Worked example 1
 
 ```cpp

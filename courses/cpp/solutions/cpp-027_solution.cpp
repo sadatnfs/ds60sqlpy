@@ -33,6 +33,8 @@
 namespace vendored { constexpr int api_version=1; constexpr int add(int a,int b){return a+b;} }
 int main() {
     static_assert(vendored::api_version==1);assert(vendored::add(2,3)==5);
+    // Reference extension checks for the exercise changes.
+    assert(vendored::add(0,0)==0);assert(vendored::add(-2,2)==0);
     std::cout << "cpp-027 examples passed\n";
     return 0;
 }

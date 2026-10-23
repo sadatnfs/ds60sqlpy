@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 A reusable record library separates stable data contracts from user-interface code. Packaging declares headers and link targets. Compatibility tests protect callers from accidental changes. The capstone combines strict parsing, named errors, ownership and exact integer output with an auditable fixture ledger.
 
+## Detailed reasoning
+
+Keep the library core independent of terminal and filesystem effects so the record grammar can be tested directly. Each successful Record owns integer values, so it can outlive the string_view used during parsing. The four-row corpus distinguishes valid zero values from malformed suffixes and negative amounts. Package acceptance is a separate host boundary: compile a consumer against the public header and link the library target, then preserve the exact commands and statuses.
+
 ## Worked example 1
 
 ```cpp

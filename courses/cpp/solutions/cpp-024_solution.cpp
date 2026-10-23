@@ -35,6 +35,8 @@ int main() {
     assert((reversed({1,2,3})==std::vector<int>{3,2,1}));
     for(int a=-2;a<=2;++a)for(int b=-2;b<=2;++b){std::vector<int> xs{a,b};assert(reversed(reversed(xs))==xs);}
     assert(reversed({}).empty());
+    // Reference extension checks for the exercise changes.
+    for(const auto& xs:std::vector<std::vector<int>>{{},{7},{2,2}})assert(reversed(reversed(xs))==xs);assert((reversed({7})==std::vector<int>{7}));
     std::cout << "cpp-024 examples passed\n";
     return 0;
 }

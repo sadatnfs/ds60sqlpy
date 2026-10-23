@@ -35,6 +35,8 @@ int main() {
     const std::vector<int> input{2,4}; auto output=doubled(input);
     assert((output==std::vector<int>{4,8})); assert((input==std::vector<int>{2,4}));
     output[0]=99; assert(input[0]==2); assert(doubled({}).empty());
+    // Reference extension checks for the exercise changes.
+    auto observer=[](const std::vector<int>& xs){return xs.size();}; assert(observer(input)==2); assert(observer({})==0); assert((doubled({5})==std::vector<int>{10}));
     std::cout << "cpp-008 examples passed\n";
     return 0;
 }

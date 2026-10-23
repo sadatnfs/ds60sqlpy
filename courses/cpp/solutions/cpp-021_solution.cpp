@@ -35,6 +35,8 @@ Cents operator+(Cents a,Cents b){return Cents{a.value+b.value};}
 int main() {
     Cents a{125},zero{0}; assert((a+zero)==a); assert((Cents{25}+Cents{100})==a);
     assert(a==Cents{125});
+    // Reference extension checks for the exercise changes.
+    Cents b{125},c{125};assert(a==b&&b==a&&b==c&&a==c);
     std::cout << "cpp-021 examples passed\n";
     return 0;
 }

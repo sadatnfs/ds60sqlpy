@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 Portable serialization converts a value into a documented byte or text format. A filesystem path describes a location in the current platform, not a portable file format. Endianness is byte ordering in multi-byte values. A version marker lets a reader reject incompatible representations instead of silently misinterpreting them.
 
+## Detailed reasoning
+
+A serializer chooses a representation that survives a different compiler or machine. The text v1,7,125 has a version, field order and unit interpretation; a raw struct dump has unspecified padding and platform-specific layout. A decoder must validate the version, exact field count, complete integer syntax and value ranges separately. The executable reference separates a shape-only illustration from decode, which also checks both integer conversions, full consumption and nonnegative ranges. The malformed suffix case must fail the full decoder even though its field count looks correct.
+
 ## Worked example 1
 
 ```cpp

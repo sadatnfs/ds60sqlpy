@@ -61,6 +61,11 @@ _SOURCE_LANGUAGES = {
     ".h": "cpp",
     ".hpp": "cpp",
     ".scala": "scala",
+    ".java": "java",
+    ".js": "javascript",
+    ".mjs": "javascript",
+    ".ts": "typescript",
+    ".mts": "typescript",
     ".yaml": "yaml",
     ".yml": "yaml",
     ".json": "json",
@@ -280,6 +285,26 @@ def reference_source_paths(catalog: Catalog) -> tuple[Path, ...]:
                 for value in [variant.get("source_path"), *variant["solution_paths"]]:
                     relative = validate_content_path(repo_root, value, "Module variant reference")
                     add_reference(repo_root / relative)
+
+    # Book examples are worked demonstrations, so they have no solution gate.
+    from ds60sqlpy.module_extensions import load_book
+
+    book = load_book(repo_root)
+    if book is not None:
+        _, book_manifest = book
+        add_reference(repo_root / "courses/statistics-ml/manifest.json")
+        for row in book_manifest["lessons"]:
+            for value in [
+                row["guide_path"],
+                row["source_path"],
+                *[v["source_path"] for v in row.get("variants", [])],
+            ]:
+                relative = validate_content_path(repo_root, value, "Tutorial reference")
+                add_reference(repo_root / relative)
+        for name in ("README.md", "coverage.json", "source-outline.md"):
+            path = repo_root / "courses/statistics-ml" / name
+            if path.is_file():
+                add_reference(path)
 
     for relative_path in COURSE_GUIDE_REFERENCE_PATHS:
         add_reference(repo_root / relative_path)

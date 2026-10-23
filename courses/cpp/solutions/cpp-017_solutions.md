@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 optional represents either one value or absence. variant represents one of several named alternatives, useful for distinguishing error reasons. An exception transfers control to a matching catch boundary. Choose errors-as-values for expected input rejection and exceptions for exceptional failures that callers cannot usefully ignore.
 
+## Detailed reasoning
+
+Treat the result as a tagged choice. For 0, the active alternative is int and the numeric value happens to be zero. For -1, the active alternative is ParseError with a reason string. Asking get<int> of the second value is a programmer error, not expected input rejection. A checked visitor or get_if branch handles both alternatives. Exceptions are useful at a file or process boundary only when that boundary can preserve context and decide whether to stop or recover.
+
 ## Worked example 1
 
 ```cpp

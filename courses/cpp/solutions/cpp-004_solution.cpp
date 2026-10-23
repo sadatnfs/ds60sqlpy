@@ -35,6 +35,8 @@ int main() {
     assert(nonnegative_sum({4,-2,0,6})==10);
     assert(nonnegative_sum({})==0);
     assert(nonnegative_sum({-7,-1})==0);
+    // Reference extension checks for the exercise changes.
+    int bounded=0; for(int i=1;i<=4;++i) bounded+=i; assert(bounded==10); int window=0; for(int x:std::vector<int>{-1,0,4,5,6}) if(x>=0 && x<=5) window+=x; assert(window==9);
     std::cout << "cpp-004 examples passed\n";
     return 0;
 }

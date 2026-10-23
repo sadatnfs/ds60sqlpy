@@ -6,6 +6,10 @@ Attempt the learner tasks before opening this document. The executable reference
 
 constexpr permits a function or object to participate in constant evaluation when its inputs and operations allow it. consteval requires a call to be evaluated during compilation. Compile-time computation moves work into the build and can inflate build time or binary size. It is useful for bounded validation rather than unlimited metaprogramming.
 
+## Detailed reasoning
+
+Constant evaluation moves computation to a different phase rather than making it free. A static_assert cannot wait for user input, while an ordinary call to a constexpr function can use a runtime variable. consteval deliberately forbids that runtime choice. Large generated tables may increase compilation work and binary size even if runtime lookups become simple. Keep both the mathematical input range and the build resource budget explicit.
+
 ## Worked example 1
 
 ```cpp
